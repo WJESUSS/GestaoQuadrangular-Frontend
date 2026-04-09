@@ -1,35 +1,46 @@
 // auth/AuthContext.jsx
 import { createContext, useContext } from "react";
+import api from "../services/api"; // ajuste o caminho se necessário
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
 
   const login = async (email, senha) => {
-    const res = await fetch("http://localhost:8080/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, senha })
-    });
+    try {
+      const response = await api.post("/auth/login", {
+        email,
+        senha
+      });
 
-    if (!res.ok) throw new Error("Credenciais inválidas");
+      // 🔐 pega o token corretamente
+      const token = response.data.token;
 
-    const data = await res.json();
+      if (!token) {
+        throw new Error("Token não recebido do servidor");
+      }
 
-    // Salva o token no localStorage
-    localStorage.setItem("token", data.token);
+      // 💾 salva token
+      localStorage.setItem("token", token);
 
-    return data.token;
+      return token;
+
+    } catch (error) {
+      console.error("Erro no login:", error);
+      throw new Error("Credenciais inválidas ou erro de conexão");
+    }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout }}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={{ login, logout }}>
+        {children}
+      </AuthContext.Provider>
   );
 };
 
