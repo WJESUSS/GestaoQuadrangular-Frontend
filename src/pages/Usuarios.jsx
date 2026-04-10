@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import api from "../services/api.js";
 import { useAuth } from "../auth/AuthContext";
 
 export default function Usuarios() {

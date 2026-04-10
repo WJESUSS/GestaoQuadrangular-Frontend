@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 import { Trash2, UserPlus, Star, Users } from "lucide-react";
 
 export default function SecretariaCelulas() {

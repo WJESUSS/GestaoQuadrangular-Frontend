@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, Save } from "lucide-react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 
 export default function TesourariaLancamento() {
   const [membros, setMembros] = useState([]);

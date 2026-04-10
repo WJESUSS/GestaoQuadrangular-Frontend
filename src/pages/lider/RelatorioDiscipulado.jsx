@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 import { Check, Calendar, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 function obterSemanaAtual() {

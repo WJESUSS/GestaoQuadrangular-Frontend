@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 
 export default function Visitantes() {
   const [visitantes, setVisitantes] = useState([]);

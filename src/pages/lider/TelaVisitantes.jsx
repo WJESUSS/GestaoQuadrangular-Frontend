@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 import {
   Plus,
   User,

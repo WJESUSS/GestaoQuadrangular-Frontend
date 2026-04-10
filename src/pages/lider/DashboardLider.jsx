@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 import HistoricoRelatorios from "./HistoricoRelatorios";
 import TelaRelatorio from "./TelaRelatorio";
 import TelaVisitantes from "./TelaVisitantes";

@@ -6,7 +6,7 @@ import {
   RefreshCw,
   Calendar,
 } from "lucide-react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 
 export default function RankingCelulas() {
   const [ranking, setRanking] = useState([]);

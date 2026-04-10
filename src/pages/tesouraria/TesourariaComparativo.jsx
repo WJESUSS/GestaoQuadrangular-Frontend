@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -9,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+
 
 export default function TesourariaComparativo() {
   const [comparativo, setComparativo] = useState([]);

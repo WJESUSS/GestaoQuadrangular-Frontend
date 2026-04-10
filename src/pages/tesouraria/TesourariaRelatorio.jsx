@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FileDown, Filter, Calendar, Trophy, Medal, Award, Users, Loader2 } from "lucide-react";

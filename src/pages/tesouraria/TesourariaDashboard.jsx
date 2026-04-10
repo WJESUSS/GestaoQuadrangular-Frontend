@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../api/api";
+import api from "../../services/api.js";
 import { useNavigate } from "react-router-dom"; // Importar para navegação
 import {
   BarChart,
