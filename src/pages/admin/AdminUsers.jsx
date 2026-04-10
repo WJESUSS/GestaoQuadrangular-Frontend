@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../../services/api.js";
 
 const perfis = ["ADMIN", "PASTOR", "LIDER_CELULA", "SECRETARIO", "TESOUREIRO"];
 
@@ -10,23 +11,17 @@ export default function AdminUsers() {
   const [senha, setSenha] = useState("");
   const [perfil, setPerfil] = useState("LIDER_CELULA");
 
-  const token = localStorage.getItem("token")?.trim();
-
   const carregarUsuarios = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/usuarios", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.status === 401) {
+      const res = await api.get("usuarios");
+      setUsuarios(res.data);
+    } catch (err) {
+      if (err.response?.status === 401) {
         localStorage.clear();
         window.location.href = "/";
         return;
       }
-      if (!res.ok) throw new Error("Erro ao carregar usuários");
-      const data = await res.json();
-      setUsuarios(data);
-    } catch (err) {
-      setErro(err.message);
+      setErro("Erro ao carregar usuários");
     }
   };
 
@@ -34,46 +29,30 @@ export default function AdminUsers() {
     e.preventDefault();
     setErro("");
     try {
-      const res = await fetch("http://localhost:8080/api/usuarios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ nome, email, senha, perfil }),
-      });
-      if (!res.ok) throw new Error("Erro ao criar usuário");
+      await api.post("usuarios", { nome, email, senha, perfil });
       setNome(""); setEmail(""); setSenha(""); setPerfil("PASTOR");
       carregarUsuarios();
     } catch (err) {
-      setErro(err.message);
+      setErro("Erro ao criar usuário");
     }
   };
 
   const deletarUsuario = async (id) => {
     if (!window.confirm("Deseja realmente deletar este usuário?")) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/usuarios/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Erro ao deletar usuário");
+      await api.delete(`usuarios/${id}`);
       carregarUsuarios();
     } catch (err) {
-      setErro(err.message);
+      setErro("Erro ao deletar usuário");
     }
   };
 
   const alternarStatus = async (id) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/usuarios/${id}/status`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Erro ao alterar status");
+      await api.patch(`usuarios/${id}/status`);
       carregarUsuarios();
     } catch (err) {
-      setErro(err.message);
+      setErro("Erro ao alterar status");
     }
   };
 
@@ -87,37 +66,37 @@ export default function AdminUsers() {
   }, []);
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <h1 style={styles.title}>👑 Painel Administrativo</h1>
-        <button onClick={handleLogout} style={styles.logoutBtn}>Sair do Sistema</button>
-      </header>
+      <div style={styles.page}>
+        <header style={styles.header}>
+          <h1 style={styles.title}>👑 Painel Administrativo</h1>
+          <button onClick={handleLogout} style={styles.logoutBtn}>Sair do Sistema</button>
+        </header>
 
-      <main style={styles.container}>
-        {erro && <div style={styles.alert}>{erro}</div>}
+        <main style={styles.container}>
+          {erro && <div style={styles.alert}>{erro}</div>}
 
-        {/* FORMULÁRIO */}
-        <section style={styles.card}>
-          <h2 style={styles.cardTitle}>➕ Novo Usuário</h2>
-          <form onSubmit={adicionarUsuario} style={styles.formGrid}>
-            <input style={styles.input} placeholder="Nome Completo" value={nome} onChange={(e) => setNome(e.target.value)} required />
-            <input style={styles.input} placeholder="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <input style={styles.input} placeholder="Senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
-            <select style={styles.select} value={perfil} onChange={(e) => setPerfil(e.target.value)}>
-              {perfis.map((p) => (
-                <option key={p} value={p}>{p.replace("_", " ")}</option>
-              ))}
-            </select>
-            <button type="submit" style={styles.submitBtn}>Salvar Usuário</button>
-          </form>
-        </section>
+          {/* FORMULÁRIO */}
+          <section style={styles.card}>
+            <h2 style={styles.cardTitle}>➕ Novo Usuário</h2>
+            <form onSubmit={adicionarUsuario} style={styles.formGrid}>
+              <input style={styles.input} placeholder="Nome Completo" value={nome} onChange={(e) => setNome(e.target.value)} required />
+              <input style={styles.input} placeholder="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input style={styles.input} placeholder="Senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+              <select style={styles.select} value={perfil} onChange={(e) => setPerfil(e.target.value)}>
+                {perfis.map((p) => (
+                    <option key={p} value={p}>{p.replace("_", " ")}</option>
+                ))}
+              </select>
+              <button type="submit" style={styles.submitBtn}>Salvar Usuário</button>
+            </form>
+          </section>
 
-        {/* LISTAGEM */}
-        <section style={styles.card}>
-          <h2 style={styles.cardTitle}>📋 Gestão de Usuários</h2>
-          <div style={styles.tableWrapper}>
-            <table style={styles.table}>
-              <thead>
+          {/* LISTAGEM */}
+          <section style={styles.card}>
+            <h2 style={styles.cardTitle}>📋 Gestão de Usuários</h2>
+            <div style={styles.tableWrapper}>
+              <table style={styles.table}>
+                <thead>
                 <tr>
                   <th style={styles.th}>Nome</th>
                   <th style={styles.th}>Email</th>
@@ -125,32 +104,32 @@ export default function AdminUsers() {
                   <th style={styles.th}>Status</th>
                   <th style={styles.th}>Ações</th>
                 </tr>
-              </thead>
-              <tbody>
+                </thead>
+                <tbody>
                 {usuarios.map((u) => (
-                  <tr key={u.id} style={styles.tr}>
-                    <td style={styles.td}><strong>{u.nome}</strong></td>
-                    <td style={styles.td}>{u.email}</td>
-                    <td style={styles.td}><span style={styles.badge}>{u.perfil}</span></td>
-                    <td style={styles.td}>
+                    <tr key={u.id} style={styles.tr}>
+                      <td style={styles.td}><strong>{u.nome}</strong></td>
+                      <td style={styles.td}>{u.email}</td>
+                      <td style={styles.td}><span style={styles.badge}>{u.perfil}</span></td>
+                      <td style={styles.td}>
                       <span style={u.ativo ? styles.statusAtivo : styles.statusInativo}>
                         {u.ativo ? "● Ativo" : "● Inativo"}
                       </span>
-                    </td>
-                    <td style={styles.td}>
-                      <button style={styles.actionBtn(u.ativo ? "#f39c12" : "#27ae60")} onClick={() => alternarStatus(u.id)}>
-                        {u.ativo ? "Suspender" : "Ativar"}
-                      </button>
-                      <button style={styles.actionBtn("#e74c3c")} onClick={() => deletarUsuario(u.id)}>Excluir</button>
-                    </td>
-                  </tr>
+                      </td>
+                      <td style={styles.td}>
+                        <button style={styles.actionBtn(u.ativo ? "#f39c12" : "#27ae60")} onClick={() => alternarStatus(u.id)}>
+                          {u.ativo ? "Suspender" : "Ativar"}
+                        </button>
+                        <button style={styles.actionBtn("#e74c3c")} onClick={() => deletarUsuario(u.id)}>Excluir</button>
+                      </td>
+                    </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </main>
-    </div>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
   );
 }
 
