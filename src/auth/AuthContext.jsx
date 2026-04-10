@@ -1,5 +1,4 @@
 // auth/AuthContext.jsx
-
 import { createContext, useContext } from "react";
 import api from "../services/api"; // ajuste o caminho se necessário
 
