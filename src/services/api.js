@@ -1,12 +1,11 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL
-    ? import.meta.env.VITE_API_URL
-    : "http://localhost:8080";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
     baseURL: API_URL,
 });
+
 
 // 👇 REQUEST INTERCEPTOR (COM DEBUG)
 api.interceptors.request.use((config) => {
