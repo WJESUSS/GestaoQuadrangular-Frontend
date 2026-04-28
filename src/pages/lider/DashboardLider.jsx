@@ -404,7 +404,14 @@ function ModalBuscarMembro({ celulaId, onClose }) {
     const carregar = async () => {
       setLoading(true);
       try {
-        const res = await api.get("/membros/sem-celula");
+        const token = localStorage.getItem("token")?.replace(/["']/g, "").trim();
+
+        const res = await api.get("/membros/sem-celula", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
         setMembrosSemCelula(res.data || []);
       } catch (err) {
         console.error("Erro ao buscar membros sem célula:", err);
@@ -414,7 +421,6 @@ function ModalBuscarMembro({ celulaId, onClose }) {
     };
     carregar();
   }, []);
-
   const vincular = async (membroId) => {
     try {
       const token = localStorage.getItem("token")?.replace(/["']/g, "").trim();
