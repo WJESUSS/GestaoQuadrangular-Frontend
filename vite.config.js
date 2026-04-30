@@ -1,8 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'   // ← Adicionado aqui
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    tailwindcss(),        // ← Esta é a linha mais importante
+  ],
 
   server: {
     host: true,
@@ -12,11 +16,10 @@ export default defineConfig({
   },
 
   build: {
-    chunkSizeWarningLimit: 1000, // aumenta aviso (opcional, só pra não "poluir")
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // separa libs pesadas em chunks próprios
           if (id.includes('node_modules')) {
             if (id.includes('react')) return 'react-vendor'
             if (id.includes('react-router')) return 'router'

@@ -1,0 +1,72 @@
+/* =========================
+   BASE LIGHT THEME
+========================= */
+:root {
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --panel-2: #f1f5f9;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: rgba(0,0,0,0.08);
+    --primary: #7c3aed;
+    --secondary: #4f46e5;
+}
+
+/* =========================
+   DARK THEME
+========================= */
+.dark {
+    --bg: #070A12;
+    --panel: #0D1020;
+    --panel-2: #11162A;
+    --text: #E5E7EB;
+    --muted: #94A3B8;
+    --border: rgba(255,255,255,0.08);
+    --primary: #7c3aed;
+    --secondary: #4f46e5;
+}
+
+/* =========================
+   GLOBAL
+========================= */
+body {
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s ease, color 0.3s ease;
+    font-family: "Sora", sans-serif;
+}
+
+/* cards padrão */
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+/* efeito glass */
+.glass {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+}
+
+/* botão base */
+.btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* nav ativa */
+.nav-active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+}

@@ -1,10 +1,15 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Trophy,
   Loader2,
   AlertCircle,
   RefreshCw,
   Calendar,
+  Sun,
+  Moon,
+  Medal,
+  TrendingUp,
+  Award
 } from "lucide-react";
 import api from "../../services/api.js";
 
@@ -13,26 +18,31 @@ export default function RankingCelulas() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
+  const [tema, setTema] = useState(localStorage.getItem("theme") || "light");
 
-  // Mês atual como padrão
+  // Mês atual padrão
   const mesAtual = new Date().toISOString().slice(0, 7);
   const [mesSelecionado, setMesSelecionado] = useState(mesAtual);
+
+  // --- Gestão de Tema ---
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (tema === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+    localStorage.setItem("theme", tema);
+  }, [tema]);
+
+  const toggleTema = () => setTema(prev => (prev === "light" ? "dark" : "light"));
 
   const carregarRanking = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await api.get(`/api/ranking/celulas?mes=${mesSelecionado}`);
-      const dados = response.data || [];
-      setRanking(dados);
-      setUltimaAtualizacao(new Date().toLocaleString("pt-BR"));
+      setRanking(response.data || []);
+      setUltimaAtualizacao(new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' }));
     } catch (err) {
-      console.error("Erro ao carregar ranking:", err);
-      setError(
-        err.response?.data?.message ||
-        "Não foi possível carregar o ranking. Verifique o mês ou tente novamente."
-      );
+      setError("Não foi possível carregar o ranking. Verifique sua conexão.");
     } finally {
       setLoading(false);
     }
@@ -42,149 +52,157 @@ export default function RankingCelulas() {
     carregarRanking();
   }, [mesSelecionado]);
 
-  const voltarMesAtual = () => {
-    setMesSelecionado(mesAtual);
-  };
+  // Separação dos Top 3 para o Pódio
+  const top3 = useMemo(() => ranking.slice(0, 3), [ranking]);
+  const restante = useMemo(() => ranking.slice(3), [ranking]);
 
-  const getMedalha = (posicao) => {
-    if (posicao === 1) return "🥇";
-    if (posicao === 2) return "🥈";
-    if (posicao === 3) return "🥉";
-    return `${posicao}º`;
-  };
-
-  const getLinhaClasse = (posicao) => {
-    if (posicao === 1) return "bg-yellow-50 hover:bg-yellow-100 border-l-4 border-yellow-500 font-semibold";
-    if (posicao === 2) return "bg-gray-50 hover:bg-gray-100 border-l-4 border-gray-400 font-semibold";
-    if (posicao === 3) return "bg-orange-50 hover:bg-orange-100 border-l-4 border-orange-400 font-semibold";
-    return "hover:bg-gray-50";
-  };
+  if (loading && ranking.length === 0) {
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+          <p className="text-slate-500 dark:text-slate-400 font-bold animate-pulse">Calculando pontuações...</p>
+        </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-white rounded-2xl shadow-xl max-w-6xl mx-auto border border-gray-200">
-      {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
-        <div className="flex items-center gap-4">
-          <Trophy className="text-yellow-500 w-12 h-12" />
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 flex items-center gap-3">
-            Ranking de Células
-            <button
-              onClick={carregarRanking}
-              disabled={loading}
-              className="text-gray-500 hover:text-blue-600 transition"
-              title="Atualizar agora"
-            >
-              <RefreshCw size={24} className={loading ? "animate-spin" : ""} />
-            </button>
-          </h1>
-        </div>
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto p-4 md:p-10 space-y-8">
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <Calendar className="text-blue-600" size={20} />
-            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              Mês/Ano:
-            </label>
-            <input
-              type="month"
-              value={mesSelecionado}
-              onChange={(e) => setMesSelecionado(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            />
-          </div>
+          {/* Header Premium */}
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-[1.5rem] shadow-lg shadow-orange-500/20">
+                <Trophy size={32} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-black tracking-tight flex items-center gap-2">
+                  Hall da Fama
+                  <TrendingUp className="text-emerald-500 hidden sm:block" size={24} />
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 font-medium italic">
+                  {ultimaAtualizacao ? `Sincronizado às ${ultimaAtualizacao}` : "Acompanhe o desempenho das células"}
+                </p>
+              </div>
+            </div>
 
-          <button
-            onClick={voltarMesAtual}
-            disabled={mesSelecionado === mesAtual}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCw size={16} />
-            Mês atual
-          </button>
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <Calendar size={18} className="text-blue-500 ml-2" />
+                <input
+                    type="month"
+                    value={mesSelecionado}
+                    onChange={(e) => setMesSelecionado(e.target.value)}
+                    className="bg-transparent border-none outline-none font-bold text-sm dark:text-white"
+                />
+              </div>
+              <button onClick={toggleTema} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:scale-105 transition-all">
+                {tema === "light" ? <Moon size={20} className="text-indigo-600" /> : <Sun size={20} className="text-yellow-400" />}
+              </button>
+              <button onClick={carregarRanking} className="p-4 rounded-2xl bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 transition-all">
+                <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+              </button>
+            </div>
+          </header>
+
+          {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400">
+                <AlertCircle size={20} /> {error}
+              </div>
+          )}
+
+          {ranking.length > 0 ? (
+              <>
+                {/* Seção de Destaque (Pódio) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                  {top3.map((celula, index) => (
+                      <div
+                          key={celula.celulaId}
+                          className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 overflow-hidden group ${
+                              index === 0
+                                  ? "bg-gradient-to-b from-yellow-50 to-white dark:from-yellow-900/10 dark:to-slate-900 border-yellow-200 dark:border-yellow-700/50 md:scale-110 z-10 shadow-2xl shadow-yellow-500/10"
+                                  : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800"
+                          }`}
+                      >
+                        {/* Badge de Posição */}
+                        <div className={`absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-inner ${
+                            index === 0 ? "bg-yellow-400 text-white" : index === 1 ? "bg-slate-300 text-slate-600" : "bg-orange-400 text-white"
+                        }`}>
+                          {index === 0 ? <Award size={24} /> : index + 1}
+                        </div>
+
+                        <div className="flex flex-col items-center text-center">
+                          <div className={`w-20 h-20 rounded-full mb-4 flex items-center justify-center text-4xl shadow-lg border-4 ${
+                              index === 0 ? "border-yellow-200 bg-yellow-100" : "border-slate-100 bg-slate-50 dark:bg-slate-800"
+                          }`}>
+                            {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+                          </div>
+                          <h3 className="text-2xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">
+                            {celula.nomeCelula}
+                          </h3>
+                          <p className="text-slate-500 dark:text-slate-400 font-medium mb-4">Líder: {celula.lider || "Não informado"}</p>
+                          <div className={`px-6 py-2 rounded-full font-black text-lg ${
+                              index === 0 ? "bg-yellow-400 text-white shadow-lg shadow-yellow-500/40" : "bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400"
+                          }`}>
+                            {celula.pontuacao.toLocaleString()} pts
+                          </div>
+                        </div>
+                      </div>
+                  ))}
+                </div>
+
+                {/* Tabela dos demais rankings */}
+                <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                      <tr>
+                        <th className="px-8 py-6 text-center">Pos</th>
+                        <th className="px-8 py-6">Célula</th>
+                        <th className="px-8 py-6">Líder</th>
+                        <th className="px-8 py-6 text-right">Pontuação Total</th>
+                      </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                      {restante.map((celula, index) => (
+                          <tr key={celula.celulaId} className="hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all group">
+                            <td className="px-8 py-5 text-center">
+                          <span className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center mx-auto font-black text-sm group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            {index + 4}
+                          </span>
+                            </td>
+                            <td className="px-8 py-5">
+                              <div className="font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 transition-colors">
+                                {celula.nomeCelula}
+                              </div>
+                            </td>
+                            <td className="px-8 py-5 text-slate-500 dark:text-slate-400 font-medium">
+                              {celula.lider || "—"}
+                            </td>
+                            <td className="px-8 py-5 text-right">
+                          <span className="px-4 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-black text-sm border border-emerald-100 dark:border-emerald-500/20">
+                            {celula.pontuacao.toLocaleString()}
+                          </span>
+                            </td>
+                          </tr>
+                      ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+          ) : (
+              <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800 transition-all">
+                <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-full mb-6">
+                  <Medal size={64} className="text-slate-300" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100">Nenhum recorde ainda</h3>
+                <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-xs text-center font-medium">
+                  Não há dados processados para este mês. Selecione outro período no calendário acima.
+                </p>
+              </div>
+          )}
         </div>
       </div>
-
-      {ultimaAtualizacao && !loading && !error && (
-        <p className="text-sm text-gray-500 mb-4 text-right">
-          Última atualização: {ultimaAtualizacao}
-        </p>
-      )}
-
-      {/* Loading */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-24 text-gray-500">
-          <Loader2 className="w-20 h-20 animate-spin text-blue-600 mb-6" />
-          <p className="text-xl font-medium">Carregando ranking das células...</p>
-        </div>
-      )}
-
-      {/* Erro */}
-      {error && !loading && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-xl mb-8 flex flex-col md:flex-row items-start gap-4">
-          <AlertCircle className="text-red-500 w-10 h-10 flex-shrink-0 mt-1" />
-          <div className="flex-1">
-            <p className="text-red-700 font-medium text-lg mb-3">{error}</p>
-            <button
-              onClick={carregarRanking}
-              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium shadow-sm"
-            >
-              <RefreshCw size={18} />
-              Tentar novamente
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Conteúdo principal */}
-      {!loading && !error && (
-        <>
-          {ranking.length === 0 ? (
-            <div className="text-center py-24 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-              <Trophy className="w-20 h-20 mx-auto mb-6 text-gray-300" />
-              <p className="text-2xl font-medium mb-2">Nenhum dado neste mês</p>
-              <p className="text-gray-600">
-                Ainda não há relatórios de células para {mesSelecionado}.
-              </p>
-              <p className="text-sm mt-2 text-gray-500">
-                Verifique se as células enviaram os dados ou tente outro mês.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-              <table className="w-full min-w-[800px] border-collapse">
-                <thead>
-                  <tr className="bg-gradient-to-r from-blue-800 to-blue-900 text-white text-left">
-                    <th className="p-5 font-semibold text-center">Posição</th>
-                    <th className="p-5 font-semibold">Célula</th>
-                    <th className="p-5 font-semibold">Líder</th>
-                    <th className="p-5 font-semibold text-center">Pontuação</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ranking.map((c, index) => {
-                    const posicao = index + 1;
-                    return (
-                      <tr
-                        key={c.celulaId}
-                        className={`border-b last:border-b-0 ${getLinhaClasse(posicao)} transition-colors duration-200`}
-                      >
-                        <td className="p-5 font-bold text-xl text-center">
-                          {getMedalha(posicao)}
-                        </td>
-                        <td className="p-5 font-medium text-gray-800">{c.nomeCelula}</td>
-                        <td className="p-5 text-gray-700">{c.lider || "—"}</td>
-                        <td className="p-5 text-center font-bold text-green-700 text-2xl">
-                          {c.pontuacao.toLocaleString("pt-BR")} pts
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
-      )}
-    </div>
   );
 }
