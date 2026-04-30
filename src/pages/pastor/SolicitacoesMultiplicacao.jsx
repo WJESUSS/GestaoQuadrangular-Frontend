@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../../services/api.js";
 import {
   CheckCircle,
@@ -10,7 +10,6 @@ import {
   Moon,
   Users,
   Calendar,
-  AlertCircle,
   CheckCircle2,
   ChevronRight
 } from "lucide-react";
@@ -37,7 +36,8 @@ export default function SolicitacoesMultiplicacao() {
   const fetchSolicitacoes = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+      const tokenRaw = localStorage.getItem("token");
+      const token = tokenRaw ? tokenRaw.replace(/"/g, "").trim() : null;
 
       const res = await api.get("/celulas/solicitacoes-multiplicacao", {
         headers: { Authorization: `Bearer ${token}` }
@@ -56,19 +56,24 @@ export default function SolicitacoesMultiplicacao() {
   }, []);
 
   const decidirMultiplicacao = async (id, aprovado) => {
+    if (!window.confirm(`Deseja realmente ${aprovado ? 'APROVAR' : 'RECUSAR'} esta multiplicação?`)) return;
+
     try {
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+      const tokenRaw = localStorage.getItem("token");
+      const token = tokenRaw ? tokenRaw.replace(/"/g, "").trim() : null;
+
       await api.post(
           `/celulas/${id}/decidir-multiplicacao`,
           { aprovado },
           { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Feedback visual antes do refresh
-      fetchSolicitacoes();
+      // Atualiza a lista removendo o item processado
+      setSolicitacoes(prev => prev.filter(item => item.id !== id));
+      alert(aprovado ? "Multiplicação aprovada com sucesso!" : "Solicitação recusada.");
     } catch (err) {
       console.error("Erro na decisão:", err);
-      alert("Erro ao processar decisão. Verifique suas permissões.");
+      alert(err.response?.data?.message || "Erro ao processar decisão.");
     }
   };
 
@@ -87,7 +92,7 @@ export default function SolicitacoesMultiplicacao() {
   }
 
   return (
-      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-20">
         <div className="max-w-7xl mx-auto p-4 md:p-10 space-y-8">
 
           {/* Header Seção */}
@@ -135,7 +140,7 @@ export default function SolicitacoesMultiplicacao() {
 
                       <div className="p-8">
                         <div className="flex justify-between items-start mb-6">
-                          <div>
+                          <div className="flex-1">
                             <div className="flex items-center gap-2 mb-3">
                         <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest border border-amber-200/50">
                           Aguardando Pastor
@@ -145,10 +150,10 @@ export default function SolicitacoesMultiplicacao() {
                               {s.nome}
                             </h3>
                             <div className="flex items-center gap-2 mt-2 text-slate-500 dark:text-slate-400 font-bold">
-                              <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 text-xs">
+                              <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 text-xs font-black uppercase">
                                 {s.liderNome?.charAt(0) || "L"}
                               </div>
-                              Líder: <span className="text-indigo-600 dark:text-indigo-400">{s.liderNome || "Indefinido"}</span>
+                              <span className="text-sm">Líder: <span className="text-indigo-600 dark:text-indigo-400">{s.liderNome || "Não informado"}</span></span>
                             </div>
                           </div>
 
@@ -191,7 +196,7 @@ export default function SolicitacoesMultiplicacao() {
                             <Users size={14} /> Ativa
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar size={14} /> Solicitado recentemente
+                            <Calendar size={14} /> Solicitação pendente
                           </div>
                         </div>
                         <ChevronRight size={18} className="text-slate-300 dark:text-slate-600" />

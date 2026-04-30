@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { Loader2, Lock, Mail, ShieldCheck, Sun, Moon } from "lucide-react";
+import { Loader2, Lock, Mail, ShieldCheck, Sun, Moon, ArrowRight } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Login() {
@@ -34,122 +34,152 @@ export default function Login() {
 
       const perfil = decoded.perfil?.replace("ROLE_", "").toUpperCase();
 
-      switch (perfil) {
-        case "ADMIN": navigate("/admin"); break;
-        case "PASTOR": navigate("/pastor"); break;
-        case "LIDER_CELULA": navigate("/lider"); break;
-        case "TESOUREIRO": navigate("/tesouraria"); break;
-        case "SECRETARIO": navigate("/secretaria"); break;
-        default: setError("Perfil não reconhecido: " + perfil);
+      const rotas = {
+        ADMIN: "/admin",
+        PASTOR: "/pastor",
+        LIDER_CELULA: "/lider",
+        TESOUREIRO: "/tesouraria",
+        SECRETARIO: "/secretaria",
+      };
+
+      if (rotas[perfil]) {
+        navigate(rotas[perfil]);
+      } else {
+        setError("Perfil de acesso não reconhecido.");
       }
 
     } catch (err) {
-      setError("Credenciais inválidas ou erro de conexão.");
+      setError("Credenciais inválidas ou erro de servidor.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden transition-colors duration-500 bg-white dark:bg-black">
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#050505] transition-colors duration-700">
 
-      {/* Fundo animado */}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-indigo-200 via-white to-purple-200 dark:from-indigo-900 dark:via-black dark:to-purple-900 animate-gradient"></div>
-
-      {/* Glow */}
-      <div className="absolute w-[900px] h-[900px] pointer-events-none bg-indigo-600/20 rounded-full blur-[200px] animate-pulse"></div>
-
-      {/* Toggle Tema */}
-      <button
-        onClick={toggleTheme}
-        className="absolute top-6 right-6 z-50 p-3 rounded-full backdrop-blur-xl bg-white/20 dark:bg-white/10 border border-white/30 dark:border-white/20 text-black dark:text-white hover:scale-110 transition"
-      >
-        {theme === "dark" ? <Sun size={26} /> : <Moon size={26} />}
-      </button>
-
-      {/* Card */}
-      <div className="relative z-10 w-full max-w-lg p-12 rounded-3xl backdrop-blur-3xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 shadow-[0_0_60px_rgba(99,102,241,0.5)] transition-colors duration-500">
-
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="p-6 rounded-full bg-gradient-to-br from-red-600 via-yellow-500 to-blue-600 shadow-[0_0_50px_rgba(255,255,255,0.3)]">
-            <ShieldCheck size={70} className="text-white drop-shadow-[0_0_10px_white]" />
-          </div>
-
-          <h1 className="mt-6 text-5xl font-extrabold tracking-widest text-gray-900 dark:text-white">
-            IEQ GESTÃO
-          </h1>
-
-          <p className="mt-3 text-sm uppercase tracking-wider text-indigo-600 dark:text-indigo-300">
-            Plataforma Administrativa Eclesiástica
-          </p>
+        {/* Background Dinâmico Premium */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 dark:from-indigo-950/30 dark:via-black dark:to-purple-950/30 animate-gradient"></div>
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 text-center bg-red-600/20 border border-red-500/40 text-red-600 dark:text-red-300 rounded-xl">
-            {error}
-          </div>
-        )}
+        {/* Botão de Tema Flutuante */}
+        <button
+            onClick={toggleTheme}
+            className="absolute top-8 right-8 z-50 p-3 rounded-2xl backdrop-blur-md bg-white/40 dark:bg-white/5 border border-white/50 dark:border-white/10 text-slate-800 dark:text-slate-200 shadow-xl hover:scale-110 active:scale-95 transition-all duration-300"
+        >
+          {theme === "dark" ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} className="text-indigo-600" />}
+        </button>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Card Principal */}
+        <div className="relative z-10 w-full max-w-[480px] mx-4">
+          <div className="p-1 rounded-[2.5rem] bg-gradient-to-b from-white/60 to-white/20 dark:from-white/20 dark:to-transparent shadow-2xl">
+            <div className="p-8 md:p-12 rounded-[2.3rem] backdrop-blur-2xl bg-white/80 dark:bg-black/60 border border-white/20">
 
-          {/* Email */}
-          <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-300" />
-            <input
-              type="email"
-              placeholder="usuario@ieq.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              required
-              className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/70 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-            />
-          </div>
+              {/* Header */}
+              <div className="flex flex-col items-center mb-10 text-center">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 rounded-3xl blur-xl opacity-40 group-hover:opacity-70 transition duration-500"></div>
+                  <div className="relative p-5 rounded-3xl bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500 shadow-2xl">
+                    <ShieldCheck size={52} className="text-white" />
+                  </div>
+                </div>
 
-          {/* Senha */}
-          <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-300" />
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              required
-              className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/70 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-            />
-          </div>
-
-          {/* Botão */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 rounded-xl font-bold tracking-widest text-white bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 hover:brightness-125 transition-all shadow-[0_0_30px_rgba(255,255,255,0.4)]"
-          >
-            {loading ? (
-              <div className="flex justify-center gap-2">
-                <Loader2 className="animate-spin" />
-                AUTENTICANDO...
+                <h1 className="mt-8 text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
+                  IEQ <span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">GESTÃO</span>
+                </h1>
+                <p className="mt-2 text-xs font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 opacity-80">
+                  Administrative Intelligence
+                </p>
               </div>
-            ) : (
-              "ACESSAR SISTEMA"
-            )}
-          </button>
-        </form>
-      </div>
 
-      <style>{`
+              {error && (
+                  <div className="mb-6 p-4 text-sm font-medium text-center bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl animate-shake">
+                    {error}
+                  </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+
+                <div className="space-y-1">
+                  <label className="text-[10px] ml-4 font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">E-mail Corporativo</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                    <input
+                        type="email"
+                        placeholder="exemplo@ieq.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white border border-transparent focus:border-indigo-500/50 focus:bg-white dark:focus:bg-white/10 outline-none transition-all duration-300"
+                        required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] ml-4 font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Senha de Acesso</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                    <input
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white border border-transparent focus:border-indigo-500/50 focus:bg-white dark:focus:bg-white/10 outline-none transition-all duration-300"
+                        required
+                    />
+                  </div>
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="relative w-full mt-4 group overflow-hidden py-4 rounded-2xl font-bold tracking-widest text-white transition-all duration-500"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 group-hover:scale-105 transition-transform duration-500"></div>
+                  <div className="relative flex items-center justify-center gap-3">
+                    {loading ? (
+                        <Loader2 className="animate-spin" size={20} />
+                    ) : (
+                        <>
+                          <span>ENTRAR NO SISTEMA</span>
+                          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </>
+                    )}
+                  </div>
+                </button>
+              </form>
+
+              <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-500 font-medium">
+                &copy; 2026 Igreja do Evangelho Quadrangular <br/>
+                SGE - Sistema de Gestão Integrado
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Estilos Globais Customizados */}
+        <style>{`
         @keyframes gradient {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
         .animate-gradient {
-          background-size: 300% 300%;
-          animation: gradient 15s ease infinite;
+          background-size: 200% 200%;
+          animation: gradient 10s ease infinite;
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-4px); }
+          75% { transform: translateX(4px); }
+        }
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
         }
       `}</style>
-    </div>
+      </div>
   );
 }

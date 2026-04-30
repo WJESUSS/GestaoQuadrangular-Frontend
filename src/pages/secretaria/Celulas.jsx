@@ -1,17 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
+// Correto
 import {
-  Home,
-  Plus,
-  MapPin,
-  User,
-  Clock,
-  Calendar,
-  Search,
-  X,
-  Edit3,
-  ChevronRight,
-  Loader2
+  Home, Plus, MapPin, User, Clock, Search, X, ChevronRight, Loader2, Calendar, Moon, Sun
 } from "lucide-react";
 
 export default function Celulas() {
@@ -21,6 +12,21 @@ export default function Celulas() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
   const [filtro, setFiltro] = useState("");
+
+  // --- LÓGICA DE TEMA ---
+  const [tema, setTema] = useState(localStorage.getItem("theme") || "light");
+
+  useEffect(() => {
+    if (tema === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", tema);
+  }, [tema]);
+
+  const toggleTema = () => setTema(tema === "light" ? "dark" : "light");
+  // ----------------------
 
   const formInicial = {
     nome: "",
@@ -33,6 +39,19 @@ export default function Celulas() {
   };
 
   const [form, setForm] = useState(formInicial);
+
+  const traduzirDia = (dia) => {
+    const dias = {
+      MONDAY: "Segunda-feira",
+      TUESDAY: "Terça-feira",
+      WEDNESDAY: "Quarta-feira",
+      THURSDAY: "Quinta-feira",
+      FRIDAY: "Sexta-feira",
+      SATURDAY: "Sábado",
+      SUNDAY: "Domingo"
+    };
+    return dias[dia] || dia;
+  };
 
   const carregarDados = useCallback(async () => {
     try {
@@ -69,23 +88,30 @@ export default function Celulas() {
       endereco: c.endereco || "",
       bairro: c.bairro || "",
       diaSemana: c.diaSemana || "MONDAY",
-      horario: c.horario || ""
+      horario: c.horario || "19:30"
     });
     setIsModalOpen(true);
   };
 
   const salvar = async (e) => {
     e.preventDefault();
+    const dadosParaEnviar = {
+      ...form,
+      liderId: Number(form.liderId),
+      bairro: form.bairro.trim(),
+      nome: form.nome.trim()
+    };
+
     try {
       if (editandoId) {
-        await api.put(`/celulas/${editandoId}`, form);
+        await api.put(`/celulas/${editandoId}`, dadosParaEnviar);
       } else {
-        await api.post("/celulas", form);
+        await api.post("/celulas", dadosParaEnviar);
       }
       fecharModal();
       carregarDados();
     } catch (err) {
-      alert("Erro ao salvar. Verifique os campos obrigatórios.");
+      alert(err.response?.data?.message || "Erro ao salvar célula.");
     }
   };
 
@@ -95,210 +121,230 @@ export default function Celulas() {
     setEditandoId(null);
   };
 
-  const traduzirDia = (dia) => {
-    const dias = {
-      MONDAY: "Segunda", TUESDAY: "Terça", WEDNESDAY: "Quarta",
-      THURSDAY: "Quinta", FRIDAY: "Sexta", SATURDAY: "Sábado", SUNDAY: "Domingo"
-    };
-    return dias[dia] || dia;
-  };
-
   const celulasFiltradas = celulas.filter(c =>
       c.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
-      c.nomeLider?.toLowerCase().includes(filtro.toLowerCase())
+      c.nomeLider?.toLowerCase().includes(filtro.toLowerCase()) ||
+      c.bairro?.toLowerCase().includes(filtro.toLowerCase())
   );
 
   return (
-      <div className="p-6 space-y-6 animate-in fade-in duration-500">
-
-        {/* HEADER PREMIUM */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="p-6 min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300 space-y-8 font-sans">
+        {/* HEADER DASHBOARD STYLE */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
           <div>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
-              <div className="p-2 bg-emerald-500 rounded-xl text-white shadow-lg shadow-emerald-500/20">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-100">
                 <Home size={24} />
               </div>
-              Gestão de Células
-            </h3>
-            <p className="text-slate-500 text-sm mt-1">{celulas.length} comunidades ativas no sistema</p>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Gestão de Células
+              </h3>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium ml-1">
+              Visualize e administre as comunidades registradas
+            </p>
           </div>
 
           <div className="flex gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            {/* BOTÃO DE TEMA */}
+            <button
+                onClick={toggleTema}
+                className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+            >
+              {tema === "light" ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
+
+            <div className="relative flex-1 md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                   type="text"
-                  placeholder="Buscar célula..."
+                  placeholder="Pesquisar..."
                   value={filtro}
                   onChange={(e) => setFiltro(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-700 dark:text-slate-200"
               />
             </div>
+
             <button
                 onClick={abrirModalNovo}
-                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+                className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 active:scale-95"
             >
-              <Plus size={18} /> Nova Célula
+              <Plus size={18} /> Cadastrar Célula
             </button>
           </div>
         </div>
 
-        {/* LISTAGEM EM GRID */}
+        {/* GRID DE CÉLULAS */}
         {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4">
-              <Loader2 className="animate-spin text-emerald-500" size={40} />
-              <p className="text-slate-500 font-medium">Sincronizando células...</p>
+            <div className="flex flex-col items-center justify-center py-32 text-indigo-600">
+              <Loader2 className="animate-spin mb-4" size={40} />
+              <p className="text-slate-500 dark:text-slate-400 font-medium">Carregando informações...</p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {celulasFiltradas.map((c) => (
                   <div
                       key={c.id}
                       onClick={() => abrirModalEdicao(c)}
-                      className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-[2rem] hover:border-emerald-500 dark:hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-xl hover:shadow-emerald-500/5"
+                      className="group bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-xl transition-all cursor-pointer relative"
                   >
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="h-12 w-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-black text-xl">
-                        {c.nome?.charAt(0)}
+                    <div className="flex justify-between items-start mb-5">
+                      <div className="space-y-1">
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold uppercase tracking-wider">
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                          Ativa
+                        </div>
+                        <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">
+                          {c.nome}
+                        </h4>
                       </div>
-                      <div className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        {traduzirDia(c.diaSemana)}
+                      <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-all text-slate-400">
+                        <ChevronRight size={18} />
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      <h4 className="font-bold text-slate-800 dark:text-white text-lg group-hover:text-emerald-600 transition-colors">
-                        {c.nome}
-                      </h4>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
+                          <User size={16} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Líder Responsável</p>
+                          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{c.nomeLider || "Pendente"}</p>
+                        </div>
+                      </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                          <User size={14} className="text-emerald-500" />
-                          <span className="font-medium">Líder: {c.nomeLider || "Não definido"}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
+                          <MapPin size={16} />
                         </div>
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                          <MapPin size={14} className="text-emerald-500" />
-                          <span className="truncate">{c.bairro || "Endereço não informado"}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                          <Clock size={14} className="text-emerald-500" />
-                          <span>{c.horario}h</span>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Localização</p>
+                          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{c.bairro} • {c.anfitriao}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-emerald-600">
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Detalhes</span>
-                      <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={14} />
+                        <span className="text-xs font-semibold">{traduzirDia(c.diaSemana)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-slate-900 dark:bg-indigo-600 text-white px-3 py-1 rounded-lg">
+                        <Clock size={12} />
+                        <span className="text-xs font-bold">{c.horario}h</span>
+                      </div>
                     </div>
                   </div>
               ))}
             </div>
         )}
 
-        {/* MODAL PREMIUM */}
+        {/* MODAL DASHBOARD STYLE */}
         {isModalOpen && (
-            <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-              <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl border border-white dark:border-slate-800 animate-in zoom-in-95 duration-200">
-                <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
+                <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                   <div>
-                    <h3 className="text-xl font-black text-slate-800 dark:text-white">
-                      {editandoId ? "Editar Célula" : "Nova Célula"}
-                    </h3>
-                    <p className="text-slate-500 text-xs mt-1">Preencha as informações da comunidade</p>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                      {editandoId ? "Editar Informações" : "Nova Célula"}
+                    </h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs">Configure os detalhes da sua comunidade</p>
                   </div>
-                  <button
-                      onClick={fecharModal}
-                      className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400"
-                  >
+                  <button onClick={fecharModal} className="text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded-lg transition-all">
                     <X size={20} />
                   </button>
                 </div>
 
-                <form onSubmit={salvar} className="p-8 grid grid-cols-2 gap-4">
-                  <div className="col-span-2 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Nome da Célula</label>
-                    <input
-                        required
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-                        value={form.nome}
-                        onChange={e => setForm({ ...form, nome: e.target.value })}
-                    />
+                <form onSubmit={salvar} className="p-8">
+                  <div className="grid grid-cols-2 gap-5">
+                    {/* Exemplo de campo adaptado ao Dark Mode */}
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 block">Nome da Célula</label>
+                      <input
+                          required
+                          placeholder="Ex: Vida Nova"
+                          value={form.nome}
+                          onChange={e => setForm({ ...form, nome: e.target.value })}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 rounded-xl outline-none transition-all text-sm"
+                      />
+                    </div>
+
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 block">Líder</label>
+                      <select
+                          required
+                          value={form.liderId}
+                          onChange={e => setForm({ ...form, liderId: e.target.value })}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 p-3 rounded-xl outline-none transition-all text-sm appearance-none"
+                      >
+                        <option value="">Selecione...</option>
+                        {lideresDisponiveis.map(u => (
+                            <option key={u.id} value={u.id}>{u.nome}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 block">Bairro</label>
+                      <input
+                          required
+                          value={form.bairro}
+                          onChange={e => setForm({ ...form, bairro: e.target.value })}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 p-3 rounded-xl outline-none transition-all text-sm"
+                      />
+                    </div>
+
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 block">Anfitrião</label>
+                      <input
+                          value={form.anfitriao}
+                          onChange={e => setForm({ ...form, anfitriao: e.target.value })}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 p-3 rounded-xl outline-none transition-all text-sm"
+                      />
+                    </div>
+
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 block">Dia</label>
+                      <select
+                          value={form.diaSemana}
+                          onChange={e => setForm({ ...form, diaSemana: e.target.value })}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 p-3 rounded-xl outline-none transition-all text-sm"
+                      >
+                        <option value="MONDAY">Segunda-feira</option>
+                        <option value="TUESDAY">Terça-feira</option>
+                        <option value="WEDNESDAY">Quarta-feira</option>
+                        <option value="THURSDAY">Quinta-feira</option>
+                        <option value="FRIDAY">Sexta-feira</option>
+                        <option value="SATURDAY">Sábado</option>
+                        <option value="SUNDAY">Domingo</option>
+                      </select>
+                    </div>
+
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 block">Horário</label>
+                      <input
+                          type="time"
+                          value={form.horario}
+                          onChange={e => setForm({ ...form, horario: e.target.value })}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 p-3 rounded-xl outline-none transition-all text-sm"
+                      />
+                    </div>
                   </div>
 
-                  <div className="col-span-2 md:col-span-1 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Líder Responsável</label>
-                    <select
-                        required
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-                        value={form.liderId}
-                        onChange={e => setForm({ ...form, liderId: Number(e.target.value) })}
-                    >
-                      <option value="">Selecione...</option>
-                      {lideresDisponiveis.map(u => (
-                          <option key={u.id} value={u.id}>{u.nome}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Anfitrião</label>
-                    <input
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-                        value={form.anfitriao}
-                        onChange={e => setForm({ ...form, anfitriao: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="col-span-2 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Endereço Completo</label>
-                    <input
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-                        value={form.endereco}
-                        onChange={e => setForm({ ...form, endereco: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Dia da Semana</label>
-                    <select
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-                        value={form.diaSemana}
-                        onChange={e => setForm({ ...form, diaSemana: e.target.value })}
-                    >
-                      <option value="MONDAY">Segunda</option>
-                      <option value="TUESDAY">Terça</option>
-                      <option value="WEDNESDAY">Quarta</option>
-                      <option value="THURSDAY">Quinta</option>
-                      <option value="FRIDAY">Sexta</option>
-                      <option value="SATURDAY">Sábado</option>
-                      <option value="SUNDAY">Domingo</option>
-                    </select>
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Horário</label>
-                    <input
-                        type="time"
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-                        value={form.horario}
-                        onChange={e => setForm({ ...form, horario: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="col-span-2 flex gap-3 mt-6">
+                  <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex gap-3">
                     <button
                         type="button"
                         onClick={fecharModal}
-                        className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                        className="px-6 py-3 rounded-xl text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm border border-slate-200 dark:border-slate-700"
                     >
                       Cancelar
                     </button>
                     <button
                         type="submit"
-                        className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-2xl font-bold shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
+                        className="flex-1 bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-sm"
                     >
-                      {editandoId ? "Atualizar Célula" : "Criar Célula"}
+                      {editandoId ? "Salvar Alterações" : "Finalizar Cadastro"}
                     </button>
                   </div>
                 </form>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   LogOut,
   Users,
@@ -13,9 +13,7 @@ import {
   Sun,
   Moon,
   ChevronRight,
-  Bell,
-  Sparkles,
-  ExternalLink
+  Sparkles
 } from "lucide-react";
 import api from "../../services/api.js";
 
@@ -46,15 +44,20 @@ export default function PainelPastor() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token")?.replace(/"/g, "");
+
+      // Garantia de formato YYYY-MM para evitar erros de tradução no backend
+      const mesParaEnvio = mes.includes("-") ? mes : new Date().toISOString().slice(0, 7);
+
       const config = {
         headers: { Authorization: `Bearer ${token}` },
-        params: { mes }
+        params: { mes: mesParaEnvio }
       };
 
       const [resMetricas, resAlertas] = await Promise.all([
         api.get("/api/pastor/metricas", config),
         api.get("/discipulado/alertas", config),
       ]);
+
 
       setMetricas(resMetricas.data || { celulasAtivas: 0, totalMembros: 0, multiplicacoesMes: 0 });
       setAlertas(resAlertas.data || []);
@@ -89,20 +92,48 @@ export default function PainelPastor() {
   };
 
   const enviarWhatsApp = (membro, tipo = "geral") => {
-    const saudacao = tipo === "niver"
-        ? `Parabéns ${membro.nome}! 🎉 Que Deus te abençoe ricamente hoje!`
-        : `Olá ${membro.nome}, a paz do Senhor! Como você está?`;
+    // Limpeza do nome para evitar erros de caracteres
+    const nomeMembro = membro.nome || "irmão(ã)";
 
+    let saudacao = "";
+
+    if (tipo === "niver") {
+      saudacao =
+          `FELIZ ANIVERSÁRIO!
+
+Paz seja contigo, querido(a) ${nomeMembro}!
+
+Nesta data tão especial, celebramos a sua vida e o propósito de Deus em você. Desejamos que o Senhor derrame bênçãos sem medida, concedendo muita saúde, alegria e uma fé cada vez mais fortalecida.
+
+*"O Senhor te abençoe e te guarde; o Senhor faça resplandecer o seu rosto sobre ti..." (Números 6:24-25)*
+
+Receba o nosso carinho e o nosso abraço!
+
+Com amor,
+Pastor Renato e Jaci Soares`;
+    } else {
+      saudacao = `Olá, *${nomeMembro}*! Paz seja contigo.Passando para saber como você está! Que sua semana seja abençoada.`;
+    }
+
+    // Limpa o telefone: remove tudo que não for número
     const fone = membro.telefone?.replace(/\D/g, "");
-    window.open(`https://wa.me/55${fone}?text=${encodeURIComponent(saudacao)}`, "_blank");
-  };
 
+    if (!fone || fone.length < 10) {
+      alert("Telefone inválido ou não cadastrado.");
+      return;
+    }
+
+    // O encodeURIComponent é essencial para que o WhatsApp entenda as quebras de linha e emojis
+    const link = `https://wa.me/55${fone}?text=${encodeURIComponent(saudacao)}`;
+
+    window.open(link, "_blank");
+  };
   const marcarComoAcompanhado = async (id) => {
     try {
       await api.post("/discipulado/acompanhamento", { membroId: id, mesReferencia: mes });
       setAlertas(prev => prev.filter(a => a.id !== id));
     } catch (err) {
-      alert("Erro ao atualizar.");
+      alert("Erro ao atualizar acompanhamento.");
     }
   };
 
@@ -143,7 +174,7 @@ export default function PainelPastor() {
                     type="month"
                     value={mes}
                     onChange={(e) => setMes(e.target.value)}
-                    className="bg-transparent border-none outline-none font-bold text-sm dark:text-white"
+                    className="bg-transparent border-none outline-none font-bold text-sm dark:text-white cursor-pointer"
                 />
               </div>
               <button onClick={toggleTema} className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:scale-105 transition-all">
@@ -173,8 +204,8 @@ export default function PainelPastor() {
                     <h2 className="text-xl font-black uppercase tracking-tight">Alertas de Faltas</h2>
                   </div>
                   <span className="bg-red-100 dark:bg-red-900/30 text-red-600 px-4 py-1 rounded-full text-xs font-black">
-                  {alertas.length} CRÍTICOS
-                </span>
+                    {alertas.length} CRÍTICOS
+                  </span>
                 </div>
                 <div className="p-4 space-y-3">
                   {alertas.length === 0 ? (
@@ -215,9 +246,6 @@ export default function PainelPastor() {
                 <div className="p-3 bg-white/20 rounded-2xl">
                   <Gift size={28} />
                 </div>
-                <button className="bg-white/20 hover:bg-white text-white hover:text-pink-600 px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2">
-                  <Send size={14} /> ENVIAR TODOS
-                </button>
               </div>
 
               <h2 className="text-2xl font-black mb-1">Aniversariantes</h2>
