@@ -15,18 +15,5 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react')) return 'react-vendor'
-            if (id.includes('react-router')) return 'router'
-            if (id.includes('html2canvas')) return 'html2canvas'
-            if (id.includes('dompurify')) return 'purify'
-            return 'vendor'
-          }
-        }
-      }
-    }
   }
 })
