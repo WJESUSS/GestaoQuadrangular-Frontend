@@ -1,11 +1,9 @@
-// src/routes/ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export default function ProtectedRoute({ children, allowedProfiles }) {
   const token = localStorage.getItem("token");
 
-  // Não logado
   if (!token) {
     return <Navigate to="/" replace />;
   }
@@ -13,24 +11,28 @@ export default function ProtectedRoute({ children, allowedProfiles }) {
   try {
     const decoded = jwtDecode(token);
 
-    // Remove ROLE_ se existir e deixa maiúsculo
+    // Verifica expiração
+    const agora = Date.now() / 1000;
+    if (decoded.exp && decoded.exp < agora) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      return <Navigate to="/" replace />;
+    }
+
     const perfil = decoded?.perfil?.replace("ROLE_", "").toUpperCase();
 
-    // Token inválido ou sem perfil
     if (!perfil) {
       localStorage.removeItem("token");
       return <Navigate to="/" replace />;
     }
 
-    // Perfil não autorizado
     if (
-      Array.isArray(allowedProfiles) &&
-      !allowedProfiles.map(p => p.toUpperCase()).includes(perfil)
+        Array.isArray(allowedProfiles) &&
+        !allowedProfiles.map(p => p.toUpperCase()).includes(perfil)
     ) {
       return <Navigate to="/unauthorized" replace />;
     }
 
-    // Tudo OK
     return children;
   } catch (error) {
     console.error("Token inválido:", error);
