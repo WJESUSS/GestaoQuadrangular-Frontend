@@ -7,12 +7,8 @@ import {
   Users,
   Search,
   ChevronRight,
-  Info,
-  UserMinus,
   Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Building2 // Ícone adicional para Bairro
+  Building2
 } from "lucide-react";
 
 export default function SecretariaCelulas() {
@@ -26,7 +22,6 @@ export default function SecretariaCelulas() {
 
   const getToken = () => localStorage.getItem("token");
 
-  // Busca lista de todas as células
   const carregarCelulas = useCallback(async () => {
     const token = getToken();
     if (!token) return;
@@ -38,7 +33,6 @@ export default function SecretariaCelulas() {
     }
   }, []);
 
-  // Busca membros que não estão em nenhuma célula
   const carregarMembrosSemCelula = useCallback(async () => {
     const token = getToken();
     if (!token) return;
@@ -50,7 +44,6 @@ export default function SecretariaCelulas() {
     }
   }, []);
 
-  // Busca membros específicos da célula selecionada
   const carregarMembrosDaCelula = useCallback(async (celulaId) => {
     if (!celulaId) return;
     const token = getToken();
@@ -65,13 +58,11 @@ export default function SecretariaCelulas() {
     }
   }, []);
 
-  // Efeito Inicial
   useEffect(() => {
     carregarCelulas();
     carregarMembrosSemCelula();
   }, [carregarCelulas, carregarMembrosSemCelula]);
 
-  // Efeito ao trocar de célula no Select
   useEffect(() => {
     if (celulaSelecionada?.id) {
       carregarMembrosDaCelula(celulaSelecionada.id);
@@ -85,20 +76,13 @@ export default function SecretariaCelulas() {
     setLoadingAcao(true);
     const token = getToken();
     try {
-      // Nota: Corrigido para enviar um corpo vazio caso o backend exija
       await api.post(`/celulas/adicionar/${celulaSelecionada.id}/membros/${novoMembroId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
       setNovoMembroId("");
-      // Refresh nos dados
-      await Promise.all([
-        carregarMembrosDaCelula(celulaSelecionada.id),
-        carregarMembrosSemCelula()
-      ]);
+      await Promise.all([carregarMembrosDaCelula(celulaSelecionada.id), carregarMembrosSemCelula()]);
     } catch (err) {
-      const msg = err.response?.data?.message || "Erro ao vincular membro.";
-      alert(msg);
+      alert(err.response?.data?.message || "Erro ao vincular membro.");
     } finally {
       setLoadingAcao(false);
     }
@@ -112,11 +96,7 @@ export default function SecretariaCelulas() {
       await api.delete(`/celulas/${celulaSelecionada.id}/membros/${membroId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-      await Promise.all([
-        carregarMembrosDaCelula(celulaSelecionada.id),
-        carregarMembrosSemCelula()
-      ]);
+      await Promise.all([carregarMembrosDaCelula(celulaSelecionada.id), carregarMembrosSemCelula()]);
     } catch (err) {
       alert("Erro ao remover membro.");
     } finally {
@@ -125,10 +105,10 @@ export default function SecretariaCelulas() {
   };
 
   return (
-      <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
+      <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-700 font-sans">
 
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h3 className="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 italic tracking-tighter">
               <div className="p-2 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-500/20">
@@ -136,12 +116,14 @@ export default function SecretariaCelulas() {
               </div>
               GESTÃO DE CÉLULAS
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Controle de membresia e liderança estratégica.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium italic">
+              Controle de membresia e liderança estratégica.
+            </p>
           </div>
-        </div>
+        </header>
 
         {/* SELEÇÃO DE CÉLULA */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-[2.5rem] shadow-sm">
+        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-[2.5rem] shadow-sm transition-all hover:shadow-md">
           <label className="text-[10px] font-black uppercase text-indigo-500 tracking-[0.2em] mb-4 block ml-1">
             Unidade de Cuidado Selecionada
           </label>
@@ -165,13 +147,13 @@ export default function SecretariaCelulas() {
             </select>
             <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none rotate-90" size={20} />
           </div>
-        </div>
+        </section>
 
         {celulaSelecionada && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in slide-in-from-bottom-4 duration-500">
 
               {/* LADO ESQUERDO: INFOS */}
-              <div className="lg:col-span-4 space-y-6">
+              <aside className="lg:col-span-4 space-y-6">
                 <div className="bg-indigo-600 dark:bg-indigo-500 p-6 rounded-[2.5rem] text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
                   <Users className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-125 transition-transform duration-700" size={140} />
                   <div className="relative z-10">
@@ -184,8 +166,7 @@ export default function SecretariaCelulas() {
                       </p>
                       {celulaSelecionada.bairro && (
                           <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-100">
-                            <Building2 size={12} />
-                            Bairro: {celulaSelecionada.bairro}
+                            <Building2 size={12} /> Bairro: {celulaSelecionada.bairro}
                           </p>
                       )}
                     </div>
@@ -213,20 +194,23 @@ export default function SecretariaCelulas() {
                     <button
                         onClick={handleAdicionarMembro}
                         disabled={!novoMembroId || loadingAcao}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 active:scale-95"
                     >
                       {loadingAcao ? <Loader2 className="animate-spin" size={18} /> : "Efetivar Vínculo"}
                     </button>
                   </div>
                 </div>
-              </div>
+              </aside>
 
               {/* LADO DIREITO: LISTA */}
-              <div className="lg:col-span-8">
+              <main className="lg:col-span-8">
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] overflow-hidden shadow-sm">
                   <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
-                    <h3 className="font-black text-slate-800 dark:text-white uppercase tracking-widest text-xs flex items-center gap-2">
-                      Corpo de Membros <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md">{membros.length}</span>
+                    <h3 className="font-black text-slate-800 dark:text-white uppercase tracking-widest text-[10px] flex items-center gap-2">
+                      Corpo de Membros
+                      <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md text-[12px]">
+                    {membros.length}
+                  </span>
                     </h3>
                   </div>
 
@@ -236,7 +220,7 @@ export default function SecretariaCelulas() {
                       <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] bg-slate-50 dark:bg-slate-800/50">
                         <th className="px-8 py-4 text-left">Integrante</th>
                         <th className="px-6 py-4 text-left">Papel</th>
-                        <th className="px-8 py-4 text-right">Ações</th>
+                        <th className="px-8 py-4 text-right">Gestão</th>
                       </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -255,24 +239,37 @@ export default function SecretariaCelulas() {
                           </tr>
                       ) : (
                           membros.map((m) => (
-                              <tr key={m.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                              <tr key={m.id} className="group hover:bg-slate-50 dark:hover:bg-indigo-500/[0.02] transition-all duration-300">
                                 <td className="px-8 py-5 font-bold text-slate-700 dark:text-slate-200">
                                   {m.nome}
                                 </td>
                                 <td className="px-6 py-5">
                                   {Number(m.id) === Number(celulaSelecionada.liderId) ? (
-                                      <span className="bg-yellow-400/10 text-yellow-600 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-yellow-400/20">Líder</span>
+                                      <span className="bg-yellow-400/10 text-yellow-600 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-yellow-400/20 shadow-sm">Líder</span>
                                   ) : (
                                       <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Integrante</span>
                                   )}
                                 </td>
                                 <td className="px-8 py-5 text-right">
+                                  {/* BOTÃO REMOVER PREMIUM */}
                                   <button
                                       onClick={() => handleRemoverMembro(m.id)}
                                       disabled={loadingAcao}
-                                      className="text-slate-300 hover:text-rose-500 p-2 opacity-0 group-hover:opacity-100 transition-all"
+                                      className="relative group/btn inline-flex items-center justify-center p-2.5 rounded-xl transition-all duration-300
+                                         bg-transparent hover:bg-rose-50 dark:hover:bg-rose-500/10
+                                         active:scale-90 disabled:opacity-30
+                                         opacity-0 group-hover:opacity-100 sm:opacity-100"
                                   >
-                                    <Trash2 size={20} />
+                                    <Trash2
+                                        size={18}
+                                        className="text-slate-300 dark:text-slate-600
+                                           group-hover/btn:text-rose-500
+                                           group-hover/btn:rotate-12
+                                           transition-all duration-300"
+                                    />
+                                    <span className="absolute -top-10 right-0 bg-slate-900 text-white text-[9px] font-black px-2 py-1 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-all duration-300 uppercase tracking-tighter shadow-xl pointer-events-none border border-white/10">
+                                Desvincular
+                              </span>
                                   </button>
                                 </td>
                               </tr>
@@ -282,7 +279,7 @@ export default function SecretariaCelulas() {
                     </table>
                   </div>
                 </div>
-              </div>
+              </main>
             </div>
         )}
       </div>
