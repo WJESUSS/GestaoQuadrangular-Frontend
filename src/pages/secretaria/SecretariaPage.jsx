@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, UserPlus, Home, FileText, Building2, Sun, Moon, LogOut } from "lucide-react";
-// Se estiver usando rotas, importe o hook de navegação:
-// import { useNavigate } from "react-router-dom";
+import { Users, UserPlus, Home, FileText, Building2, Sun, Moon, LogOut, Menu, X } from "lucide-react";
 
 import Membros from "./Membros";
 import Celulas from "./Celulas";
@@ -12,7 +10,7 @@ import SecretariaCelulas from "./SecretariaCelulas";
 export default function SecretariaPage() {
   const [moduloAtivo, setModuloAtivo] = useState("MEMBROS");
   const [darkMode, setDarkMode] = useState(false);
-  // const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para o menu mobile
 
   useEffect(() => {
     if (darkMode) {
@@ -26,9 +24,8 @@ export default function SecretariaPage() {
 
   const handleLogout = () => {
     if (window.confirm("Deseja realmente sair do sistema?")) {
-      localStorage.removeItem("token"); // Limpa o token
-      window.location.href = "/"; // Redireciona para o login
-      // navigate("/"); // Ou use o navigate se estiver com Router
+      localStorage.removeItem("token");
+      window.location.href = "/";
     }
   };
 
@@ -36,8 +33,8 @@ export default function SecretariaPage() {
     { id: "MEMBROS", label: "Membros", icon: <Users size={20} />, color: "blue" },
     { id: "VISITANTES", label: "Visitantes", icon: <UserPlus size={20} />, color: "purple" },
     { id: "CELULAS", label: "Células", icon: <Home size={20} />, color: "emerald" },
-    { id: "FICHAS", label: "Fichas Encontro", icon: <FileText size={20} />, color: "orange" },
-    { id: "SECRETARIACELULAS", label: "Secretaria Células", icon: <Building2 size={20} />, color: "teal" },
+    { id: "FICHAS", label: "Fichas", icon: <FileText size={20} />, color: "orange" },
+    { id: "SECRETARIACELULAS", label: "Secretaria", icon: <Building2 size={20} />, color: "teal" },
   ];
 
   const getActiveColor = (color) => {
@@ -52,35 +49,53 @@ export default function SecretariaPage() {
   };
 
   return (
-      <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-500">
+      <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-500">
 
-        {/* SIDEBAR PREMIUM */}
-        <aside className="w-80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 p-8 flex flex-col shrink-0 transition-all z-20">
-          <div className="flex items-center justify-between mb-12">
+        {/* HEADER MOBILE */}
+        <header className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-50">
+          <h1 className="text-lg font-black text-slate-800 dark:text-white uppercase italic">
+            Secretaria<span className="text-blue-600">.</span>
+          </h1>
+          <div className="flex gap-2">
+            <button onClick={toggleTheme} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400">
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-xl bg-blue-600 text-white">
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </header>
+
+        {/* SIDEBAR / MOBILE OVERLAY */}
+        <aside className={`
+        fixed inset-0 z-40 transform transition-transform duration-300 md:relative md:translate-x-0 md:w-72 lg:w-80
+        ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}
+        bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col
+      `}>
+          <div className="hidden md:flex items-center justify-between mb-10">
             <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tighter uppercase italic">
               Secretaria<span className="text-blue-600">.</span>
             </h1>
-
-            <button
-                onClick={toggleTheme}
-                className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 hover:scale-110 active:scale-95 transition-all shadow-inner border border-transparent dark:border-slate-700"
-            >
+            <button onClick={toggleTheme} className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 hover:scale-110 transition-all">
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
 
-          <nav className="space-y-2.5 flex-1">
+          <nav className="space-y-1.5 flex-1 mt-12 md:mt-0">
             {modulos.map((m) => (
                 <button
                     key={m.id}
-                    onClick={() => setModuloAtivo(m.id)}
-                    className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm transition-all duration-300 group ${
+                    onClick={() => {
+                      setModuloAtivo(m.id);
+                      setIsMenuOpen(false); // Fecha o menu no mobile após clicar
+                    }}
+                    className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 ${
                         moduloAtivo === m.id
-                            ? `${getActiveColor(m.color)} text-white shadow-xl scale-[1.02]`
-                            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
+                            ? `${getActiveColor(m.color)} text-white shadow-lg`
+                            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50"
                     }`}
                 >
-              <span className={`${moduloAtivo === m.id ? "text-white" : "text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors"}`}>
+              <span className={moduloAtivo === m.id ? "text-white" : "text-slate-400"}>
                 {m.icon}
               </span>
                   {m.label}
@@ -88,50 +103,37 @@ export default function SecretariaPage() {
             ))}
           </nav>
 
-          {/* BOTÃO DE SAIR - ADICIONADO AQUI */}
-          <div className="mt-auto space-y-6">
-            <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 group"
-            >
-              <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
+          <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+            <button onClick={handleLogout} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all">
+              <LogOut size={20} />
               Sair do Sistema
             </button>
-
-            {/* Footer Sidebar */}
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
-                Gestão Eclesiástica v3.0
-              </p>
-            </div>
           </div>
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 p-12 overflow-y-auto bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-200/50 via-transparent to-transparent dark:from-blue-900/10">
-          {/* ... (resto do cabeçalho e conteúdo permanecem iguais) */}
-          <header className="mb-10 flex justify-between items-end">
+        <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-y-auto">
+          <header className="mb-6 md:mb-10 flex justify-between items-end">
             <div>
-              <p className="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-[0.3em] mb-2 ml-1">
+              <p className="text-blue-600 dark:text-blue-400 font-black text-[10px] uppercase tracking-[0.3em] mb-1">
                 Módulo Ativo
               </p>
-              <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+              <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
                 {modulos.find((m) => m.id === moduloAtivo)?.label}
               </h2>
             </div>
-
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-100 dark:border-emerald-500/20 text-xs font-bold">
+            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-100 dark:border-emerald-500/20 text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Sistema Online
+              Online
             </div>
           </header>
 
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-[3rem] blur opacity-10 dark:opacity-20 group-hover:opacity-30 transition duration-1000"></div>
-
-            <div className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white dark:border-slate-800 overflow-hidden transition-all duration-500">
-              <div className="min-h-[600px] transition-colors duration-500 p-2">
-                {/* O switch de conteúdo aqui */}
+          {/* CONTAINER DO CONTEÚDO */}
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-[2rem] blur-xl" />
+            <div className="relative bg-white dark:bg-slate-900 rounded-3xl md:rounded-[2.5rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="min-h-[500px] p-4 md:p-6">
+                {/* O switch de conteúdo */}
                 {moduloAtivo === "MEMBROS" && <Membros />}
                 {moduloAtivo === "VISITANTES" && <Visitantes />}
                 {moduloAtivo === "CELULAS" && <Celulas />}

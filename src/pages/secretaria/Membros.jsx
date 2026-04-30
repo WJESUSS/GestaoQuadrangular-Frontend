@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import {
-  Plus, X, User, Mail, Phone, MapPin, Trash2,
-  Loader2, Search, Calendar, CreditCard, Heart, ChevronRight
+  Plus, X, User, Mail, Phone, Trash2,
+  Loader2, Search, CreditCard, Heart, ChevronRight
 } from "lucide-react";
 
 export default function Membros() {
@@ -104,184 +104,153 @@ export default function Membros() {
   );
 
   return (
-      <div className="space-y-6 animate-in fade-in duration-700 p-2">
+      <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700 pb-20 md:pb-5">
 
-        {/* HEADER SUPERIOR */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h3 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3 italic">
-              <div className="p-2 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/30">
-                <User size={28} />
-              </div>
-              MEMBRESIA
-            </h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">
-              {membros.length} servos registrados na base
-            </p>
+        {/* HEADER SUPERIOR - Ajustado para empilhar no mobile */}
+        <div className="flex flex-col gap-4 mb-6 md:mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg">
+              <User size={24} className="md:w-7 md:h-7" />
+            </div>
+            <div>
+              <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white italic uppercase">
+                MEMBRESIA
+              </h3>
+              <p className="text-slate-500 text-[10px] md:text-sm font-medium">
+                {membros.length} registros ativos
+              </p>
+            </div>
           </div>
 
-          <div className="flex gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-72">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
                   type="text"
-                  placeholder="Buscar por nome ou CPF..."
+                  placeholder="Buscar..."
                   value={filtro}
                   onChange={(e) => setFiltro(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white shadow-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <button
                 onClick={abrirModalNovo}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-black text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95 uppercase tracking-wider"
+                className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm active:scale-95 transition-all"
             >
-              <Plus size={20} /> Novo
+              <Plus size={18} /> NOVO
             </button>
           </div>
         </div>
 
-        {/* ÁREA DE CONTEÚDO */}
+        {/* LISTA DE CARDS - Grid Responsivo */}
         {loading ? (
-            <div className="flex flex-col items-center justify-center py-32 space-y-4">
-              <Loader2 className="animate-spin text-blue-600" size={48} />
-              <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs">Sincronizando registros...</p>
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
+              <p className="text-slate-500 text-xs font-bold tracking-widest uppercase">Carregando...</p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {membrosFiltrados.map((m) => (
                   <div
                       key={m.id}
                       onClick={() => abrirModalEdicao(m)}
-                      className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-[2.5rem] hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 overflow-hidden"
+                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl hover:border-blue-500 transition-all active:scale-[0.98] cursor-pointer shadow-sm relative overflow-hidden"
                   >
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="h-16 w-16 rounded-[1.5rem] bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-600/20 text-blue-600 flex items-center justify-center font-black text-2xl group-hover:scale-110 transition-transform">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="h-12 w-12 shrink-0 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center font-black text-xl">
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
-                      <span className={`px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest ${corStatus(m.status)}`}>
-                  {m.status}
-                </span>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-black text-slate-800 dark:text-white text-lg uppercase leading-tight truncate">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-slate-800 dark:text-white text-sm uppercase truncate">
                           {m.nome}
                         </h4>
-                        <p className="text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center gap-1 mt-1">
-                          <CreditCard size={12} /> {m.cpf || "CPF NÃO INFORMADO"}
-                        </p>
+                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-md border text-[9px] font-black uppercase ${corStatus(m.status)}`}>
+                    {m.status}
+                  </span>
                       </div>
-
-                      <div className="grid grid-cols-1 gap-2 pt-2">
-                        <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-xs">
-                          <Mail size={14} className="text-slate-400" />
-                          <span className="truncate">{m.email || "Sem e-mail"}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-xs">
-                          <Phone size={14} className="text-slate-400" />
-                          <span>{m.telefone || "Sem telefone"}</span>
-                        </div>
-                      </div>
+                      <ChevronRight size={16} className="text-slate-300" />
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-blue-600">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Ver Perfil</span>
-                      <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <CreditCard size={14} className="shrink-0" />
+                        <span className="truncate">{m.cpf || "CPF não informado"}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <Phone size={14} className="shrink-0" />
+                        <span>{m.telefone || "Sem telefone"}</span>
+                      </div>
                     </div>
                   </div>
               ))}
             </div>
         )}
 
-        {/* MODAL DE CADASTRO/EDIÇÃO */}
+        {/* MODAL - Ajustado para ser "Fullscreen" ou Bottom Sheet no mobile */}
         {isModalOpen && (
-            <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-              <div className="bg-white dark:bg-slate-900 rounded-[3rem] w-full max-w-2xl overflow-hidden shadow-2xl border border-white dark:border-slate-800 animate-in zoom-in-95 duration-300">
+            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center z-[100]">
+              <div className="bg-white dark:bg-slate-900 w-full h-[90vh] md:h-auto md:max-w-2xl md:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300">
 
-                <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-600 rounded-2xl text-white">
-                      <User size={24} />
+                {/* Header Modal - Sticky */}
+                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-600 rounded-lg text-white">
+                      <User size={20} />
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-black text-slate-800 dark:text-white uppercase italic tracking-tight">
-                        {editandoId ? "Editar Perfil" : "Novo Membro"}
-                      </h3>
-                      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Informações Cadastrais</p>
-                    </div>
+                    <h3 className="font-black text-slate-800 dark:text-white uppercase text-sm">
+                      {editandoId ? "Editar Perfil" : "Novo Cadastro"}
+                    </h3>
                   </div>
-                  <button onClick={fecharModal} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400">
-                    <X size={28} />
+                  <button onClick={fecharModal} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
+                    <X size={20} />
                   </button>
                 </div>
 
-                <form onSubmit={salvar} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Form - Scrollable */}
+                <form onSubmit={salvar} className="p-6 overflow-y-auto flex-1 space-y-6 pb-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InputGroup label="Nome Completo" value={form.nome} onChange={v => setForm({...form, nome: v})} required />
                     <InputGroup label="CPF" value={form.cpf} onChange={v => setForm({...form, cpf: v})} placeholder="000.000.000-00" />
                     <InputGroup label="E-mail" type="email" value={form.email} onChange={v => setForm({...form, email: v})} />
-                    <InputGroup label="WhatsApp / Telefone" value={form.telefone} onChange={v => setForm({...form, telefone: v})} />
+                    <InputGroup label="WhatsApp" value={form.telefone} onChange={v => setForm({...form, telefone: v})} />
                   </div>
 
-                  <InputGroup label="Endereço Residencial" value={form.endereco} onChange={v => setForm({...form, endereco: v})} />
+                  <InputGroup label="Endereço" value={form.endereco} onChange={v => setForm({...form, endereco: v})} />
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <InputGroup label="Nascimento" type="date" value={form.dataNascimento} onChange={v => setForm({...form, dataNascimento: v})} />
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Estado Civil</label>
-                      <select
-                          className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-3.5 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all"
-                          value={form.estadoCivil}
-                          onChange={e => setForm({ ...form, estadoCivil: e.target.value })}
-                      >
-                        {estadoCivilOptions.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
-                      </select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status</label>
-                      <select
-                          className={`w-full border-none rounded-2xl p-3.5 text-sm font-black focus:ring-2 focus:ring-blue-500 transition-all ${corStatus(form.status)}`}
-                          value={form.status}
-                          onChange={e => setForm({ ...form, status: e.target.value })}
-                      >
-                        {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </div>
+                    <SelectGroup label="Estado Civil" value={form.estadoCivil} options={estadoCivilOptions} onChange={v => setForm({...form, estadoCivil: v})} />
+                    <SelectGroup label="Status" value={form.status} options={statusOptions.map(s => ({value: s, label: s}))} onChange={v => setForm({...form, status: v})} customStyle={corStatus(form.status)} />
                   </div>
 
-                  {/* SEÇÃO ECLESIÁSTICA */}
-                  <div className="p-6 bg-blue-50/50 dark:bg-blue-500/5 rounded-3xl border border-blue-100 dark:border-blue-500/10 space-y-4">
-                    <h4 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] flex items-center gap-2">
-                      <Heart size={14} /> Jornada Espiritual
+                  <div className="p-4 bg-blue-50 dark:bg-blue-500/5 rounded-2xl border border-blue-100 dark:border-blue-500/10 space-y-4">
+                    <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                      <Heart size={14} /> JORNADA ESPIRITUAL
                     </h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <InputGroup label="Data Conversão" type="date" value={form.dataConversao} onChange={v => setForm({...form, dataConversao: v})} />
                       <InputGroup label="Data Batismo" type="date" value={form.dataBatismo} onChange={v => setForm({...form, dataBatismo: v})} />
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-4 pt-4">
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-blue-500/30 transition-all active:scale-95">
-                      {editandoId ? "Atualizar Registro" : "Finalizar Cadastro"}
+                  <div className="flex flex-col gap-3 pt-4">
+                    <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg active:scale-[0.98] transition-all">
+                      {editandoId ? "Salvar Alterações" : "Confirmar Cadastro"}
                     </button>
 
                     {editandoId && (
                         <button
                             type="button"
                             onClick={async () => {
-                              if(window.confirm("Esta ação é irreversível. Deseja excluir?")) {
+                              if(window.confirm("Excluir permanentemente?")) {
                                 await api.delete(`/membros/${editandoId}`);
                                 fecharModal();
                                 listar();
                               }
                             }}
-                            className="flex items-center justify-center gap-2 text-rose-500 hover:text-rose-700 text-[10px] font-black tracking-widest uppercase transition-colors py-2"
+                            className="flex items-center justify-center gap-2 text-rose-500 text-[10px] font-black uppercase py-2"
                         >
-                          <Trash2 size={14} /> Excluir permanentemente
+                          <Trash2 size={14} /> Excluir Registro
                         </button>
                     )}
                   </div>
@@ -293,11 +262,11 @@ export default function Membros() {
   );
 }
 
-// Sub-componente Inner paraInputs (Premium Style)
+// Sub-componentes Refatorados para Mobile
 function InputGroup({ label, type = "text", value, onChange, placeholder, required = false }) {
   return (
-      <div className="space-y-1.5">
-        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
+      <div className="space-y-1.5 min-w-0">
+        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 italic">
           {label} {required && <span className="text-rose-500">*</span>}
         </label>
         <input
@@ -306,8 +275,23 @@ function InputGroup({ label, type = "text", value, onChange, placeholder, requir
             placeholder={placeholder}
             value={value}
             onChange={e => onChange(e.target.value)}
-            className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-3.5 text-sm font-bold text-slate-700 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-inner"
+            className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
         />
+      </div>
+  );
+}
+
+function SelectGroup({ label, value, options, onChange, customStyle = "" }) {
+  return (
+      <div className="space-y-1.5 min-w-0">
+        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 italic">{label}</label>
+        <select
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            className={`w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all ${customStyle}`}
+        >
+          {options.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
+        </select>
       </div>
   );
 }
