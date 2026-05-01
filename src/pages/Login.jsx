@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { Loader2, Lock, Mail, ShieldCheck, Sun, Moon, ArrowRight } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import api from "../services/api";
 
 export default function Login() {
   const { login } = useAuth();
@@ -16,29 +15,30 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Acorda o backend assim que a tela de login abre
-  useEffect(() => {
-    api.get("/actuator/health").catch(() => {});
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
+      // Faz o login. O login deve retornar o token.
       const token = await login(email, password);
-      if (!token) throw new Error("Token não recebido");
+
+      if (!token) {
+        throw new Error("E-mail ou senha incorretos.");
+      }
 
       const decoded = jwtDecode(token);
 
+      // Salva os dados básicos para uso rápido na UI
       localStorage.setItem("user", JSON.stringify({
         id: decoded.id,
         username: decoded.sub,
         perfil: decoded.perfil
       }));
 
-      const perfil = decoded.perfil?.replace("ROLE_", "").toUpperCase();
+      const perfilRaw = decoded.perfil || "";
+      const perfil = perfilRaw.replace("ROLE_", "").toUpperCase();
 
       const rotas = {
         ADMIN: "/admin",
@@ -51,12 +51,17 @@ export default function Login() {
       if (rotas[perfil]) {
         navigate(rotas[perfil]);
       } else {
-        setError("Perfil de acesso não reconhecido.");
+        setError("Seu perfil não tem permissão para acessar o sistema.");
       }
 
     } catch (err) {
-      setError("Credenciais inválidas ou erro de servidor.");
+      console.error("Erro ao autenticar:", err);
+      // Se for 401, a mensagem é de credenciais. Se for outro, erro de conexão.
+      setError(err.response?.status === 401
+          ? "E-mail ou senha inválidos."
+          : "Não foi possível conectar ao servidor.");
     } finally {
+      // PARA O LOADING SEMPRE (Evita o botão girando infinito)
       setLoading(false);
     }
   };
@@ -64,13 +69,16 @@ export default function Login() {
   return (
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#050505] transition-colors duration-700">
 
+        {/* Background Animado */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 dark:from-indigo-950/30 dark:via-black dark:to-purple-950/30 animate-gradient"></div>
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
+        {/* Botão de Tema */}
         <button
+            type="button"
             onClick={toggleTheme}
             className="absolute top-8 right-8 z-50 p-3 rounded-2xl backdrop-blur-md bg-white/40 dark:bg-white/5 border border-white/50 dark:border-white/10 text-slate-800 dark:text-slate-200 shadow-xl hover:scale-110 active:scale-95 transition-all duration-300"
         >
@@ -92,19 +100,18 @@ export default function Login() {
                 <h1 className="mt-8 text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
                   IEQ <span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">GESTÃO</span>
                 </h1>
-                <p className="mt-2 text-xs font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 opacity-80">
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 opacity-80">
                   Administrative Intelligence
                 </p>
               </div>
 
               {error && (
-                  <div className="mb-6 p-4 text-sm font-medium text-center bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl animate-shake">
+                  <div className="mb-6 p-4 text-sm font-bold text-center bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl animate-shake">
                     {error}
                   </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
-
                 <div className="space-y-1">
                   <label className="text-[10px] ml-4 font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">E-mail Corporativo</label>
                   <div className="relative group">
@@ -126,7 +133,7 @@ export default function Login() {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
                     <input
                         type="password"
-                        placeholder="????????"
+                        placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white border border-transparent focus:border-indigo-500/50 focus:bg-white dark:focus:bg-white/10 outline-none transition-all duration-300"
@@ -138,12 +145,15 @@ export default function Login() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="relative w-full mt-4 group overflow-hidden py-4 rounded-2xl font-bold tracking-widest text-white transition-all duration-500"
+                    className="relative w-full mt-4 group overflow-hidden py-4 rounded-2xl font-bold tracking-widest text-white transition-all duration-500 disabled:opacity-50"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 group-hover:scale-105 transition-transform duration-500"></div>
                   <div className="relative flex items-center justify-center gap-3">
                     {loading ? (
-                        <Loader2 className="animate-spin" size={20} />
+                        <>
+                          <Loader2 className="animate-spin" size={20} />
+                          <span className="text-xs">AUTENTICANDO...</span>
+                        </>
                     ) : (
                         <>
                           <span>ENTRAR NO SISTEMA</span>
@@ -154,7 +164,7 @@ export default function Login() {
                 </button>
               </form>
 
-              <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-500 font-medium">
+              <p className="mt-8 text-center text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-tighter">
                 &copy; 2026 Igreja do Evangelho Quadrangular <br/>
                 SGE - Sistema de Gestão Integrado
               </p>

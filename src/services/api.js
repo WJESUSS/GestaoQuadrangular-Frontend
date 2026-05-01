@@ -6,25 +6,23 @@ const api = axios.create({
     baseURL: API_URL,
 });
 
-// REQUEST INTERCEPTOR
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
-
     if (token && token.trim() !== "") {
         config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
 });
 
-// RESPONSE INTERCEPTOR
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.log("Erro:", error.response?.status, error.config?.url);
+        const url = error.config?.url || "";
+        const status = error.response?.status;
 
-        if (error.response?.status === 401) {
+        if (status === 401 && !url.includes("actuator") && !url.includes("auth/login")) {
             localStorage.removeItem("token");
+            localStorage.removeItem("user");
             window.location.href = "/";
         }
 
