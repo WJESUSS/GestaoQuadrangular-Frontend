@@ -1,182 +1,213 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api.js";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Cake,
   Send,
   CheckCircle2,
-  ExternalLink,
-  LogOut,
   ArrowLeft,
   Users,
   Search,
-  MessageCircle
+  MessageCircle,
+  Sparkles,
+  Gift,
+  ChevronRight
 } from "lucide-react";
 
+// Variantes de animação premium
 const containerVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, staggerChildren: 0.1 } }
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 }
+  }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0 }
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 100 }
+  }
 };
 
-export default function Aniversariantes() {
+export default function AniversariantesPremium() {
   const [lista, setLista] = useState([]);
   const [enviados, setEnviados] = useState(new Set());
   const [busca, setBusca] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const STORAGE_KEY = `aniversariantes_enviados_${new Date().toISOString().slice(0, 10)}`;
 
-  // --- FUNÇÃO DE GERAÇÃO DE LINK REVISADA ---
   const obterLinkPersonalizado = (membro) => {
     const saudacao = `A paz seja contigo, minha ovelhinha! 🐑✨\n\nFeliz aniversário! Que Deus abençoe grandemente sua vida, trazendo saúde e paz. 🎂🙌\n\nSão os votos do *Pastor Renato e Jaci Soares*. 🎈`;
-
-    // Remove tudo que não for número
     let numeroLimpo = membro.telefone.replace(/\D/g, "");
-
-    // Se o número já começar com 55, não adicionamos de novo para não duplicar
     const telefoneFinal = numeroLimpo.startsWith("55") ? numeroLimpo : `55${numeroLimpo}`;
-
     return `https://wa.me/${telefoneFinal}?text=${encodeURIComponent(saudacao)}`;
   };
 
   useEffect(() => {
     const enviadosSalvos = localStorage.getItem(STORAGE_KEY);
-    if (enviadosSalvos) {
-      setEnviados(new Set(JSON.parse(enviadosSalvos)));
-    }
+    if (enviadosSalvos) setEnviados(new Set(JSON.parse(enviadosSalvos)));
 
     api.get("/aniversariantes/hoje")
-        .then((res) => {
-          // Garantimos que estamos pegando a lista do backend
-          setLista(res.data || []);
-        })
-        .catch((err) => console.error("Erro ao buscar aniversariantes:", err));
+        .then((res) => setLista(res.data || []))
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...enviados]));
   }, [enviados]);
 
-  const marcarComoEnviado = (id) => {
-    setEnviados((prev) => new Set(prev).add(id));
-  };
-
-  const enviarTodos = () => {
-    const pendentes = lista.filter((item) => !enviados.has(item.id));
-    if (pendentes.length === 0) return alert("Nenhum pendente!");
-
-    pendentes.forEach((item) => {
-      const link = obterLinkPersonalizado(item);
-      window.open(link, "_blank", "noopener,noreferrer");
-      marcarComoEnviado(item.id);
-    });
-  };
+  const marcarComoEnviado = (id) => setEnviados((prev) => new Set(prev).add(id));
 
   const filtrados = lista.filter(m => m.nome?.toLowerCase().includes(busca.toLowerCase()));
-  const todosEnviados = lista.length > 0 && lista.every((item) => enviados.has(item.id));
+  const progresso = lista.length > 0 ? (enviados.size / lista.length) * 100 : 0;
 
   return (
-      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 pb-20">
-        <div className="max-w-7xl mx-auto px-4 pt-8">
+      <div className="min-h-screen bg-[#FDFCFD] text-slate-900 pb-24 font-sans selection:bg-pink-100">
+        {/* Background Decorativo - Premium Touch */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-[10%] -right-[10%] w-[50%] h-[50%] bg-pink-100/50 rounded-full blur-[120px]" />
+          <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-100/50 rounded-full blur-[100px]" />
+        </div>
 
-          {/* Header */}
-          <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-pink-200">
-                <Cake size={28} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-black text-slate-800">Aniversariantes</h1>
-                <p className="text-slate-500 font-medium">Igreja Unção e Poder</p>
-              </div>
+        <div className="relative max-w-lg mx-auto px-5 pt-8">
+          {/* Header Mobile Premium */}
+          <header className="flex items-center justify-between mb-8">
+            <button
+                onClick={() => window.history.back()}
+                className="w-12 h-12 flex items-center justify-center bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-600 active:scale-90 transition-transform"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div className="text-center">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-500">Igreja Unção e Poder</span>
+              <h1 className="text-xl font-black text-slate-800">Celebrações</h1>
             </div>
-            <div className="flex gap-3">
-              <button onClick={() => window.history.back()} className="px-5 py-2.5 bg-white border rounded-xl font-bold flex items-center gap-2 shadow-sm hover:bg-slate-50">
-                <ArrowLeft size={18} /> Voltar
-              </button>
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm">
+              <Sparkles size={20} className="text-amber-400" />
             </div>
           </header>
 
-          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8">
-
-            {/* Banner Principal */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-8 text-white relative overflow-hidden">
-                <h2 className="text-4xl font-black mb-4">{lista.length} Aniversariantes hoje</h2>
-                {!todosEnviados && lista.length > 0 && (
-                    <button
-                        onClick={enviarTodos}
-                        className="flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-2xl font-black shadow-xl hover:scale-105 transition-transform"
-                    >
-                      <Send size={20} /> ENVIAR TODAS AS MENSAGENS
-                    </button>
-                )}
+          {/* Card de Destaque - Hero Section */}
+          <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200 mb-8"
+          >
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <Gift size={18} className="text-pink-400" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Aniversariantes de Hoje</span>
               </div>
+              <h2 className="text-5xl font-black mb-6 italic">{lista.length}</h2>
 
-              <div className="bg-white rounded-[2rem] p-8 border flex flex-col items-center justify-center text-center shadow-sm">
-                <CheckCircle2 size={40} className={todosEnviados ? "text-emerald-500" : "text-slate-300"} />
-                <h3 className="text-2xl font-black mt-2">{enviados.size} / {lista.length}</h3>
-                <p className="text-slate-500">Concluídos</p>
-              </div>
-            </div>
-
-            {/* Lista de Membros */}
-            <div className="bg-white rounded-[2.5rem] border shadow-sm overflow-hidden">
-              <div className="p-8 border-b flex flex-col md:flex-row justify-between gap-4">
-                <h3 className="text-xl font-black flex items-center gap-2"><Users size={20} /> Lista de Ovelhas</h3>
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                      type="text"
-                      placeholder="Buscar irmão(ã)..."
-                      className="pl-12 pr-4 py-2 bg-slate-50 rounded-xl outline-none w-64 focus:ring-2 focus:ring-indigo-500"
-                      onChange={(e) => setBusca(e.target.value)}
+              {/* Barra de Progresso Customizada */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <span>Progresso de envios</span>
+                  <span>{Math.round(progresso)}%</span>
+                </div>
+                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progresso}%` }}
+                      className="h-full bg-gradient-to-r from-pink-500 to-indigo-500"
                   />
                 </div>
               </div>
-
-              <div className="p-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filtrados.map((m) => {
-                  const jaEnviado = enviados.has(m.id);
-                  return (
-                      <motion.div
-                          key={m.id}
-                          variants={itemVariants}
-                          className={`p-5 rounded-3xl border transition-all ${jaEnviado ? "bg-emerald-50 opacity-60" : "bg-slate-50 hover:bg-white hover:shadow-md"}`}
-                      >
-                        <div className="flex justify-between mb-4">
-                          <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-bold">
-                            {m.nome?.charAt(0)}
-                          </div>
-                          {jaEnviado && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg font-bold">ENVIADO</span>}
-                        </div>
-
-                        <div className="mb-4">
-                          <h4 className="font-bold text-slate-800">{m.nome}</h4>
-                          <p className="text-slate-500 text-xs">{m.telefone}</p>
-                        </div>
-
-                        <button
-                            onClick={() => {
-                              window.open(obterLinkPersonalizado(m), "_blank");
-                              marcarComoEnviado(m.id);
-                            }}
-                            className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 ${jaEnviado ? "bg-white border text-slate-400" : "bg-emerald-500 text-white hover:bg-emerald-600 shadow-md"}`}
-                        >
-                          <MessageCircle size={18} />
-                          {jaEnviado ? "Enviar de novo" : "Enviar Parabéns"}
-                        </button>
-                      </motion.div>
-                  );
-                })}
-              </div>
             </div>
+            {/* Círculos decorativos no card */}
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl" />
+          </motion.div>
+
+          {/* Busca Reestilizada */}
+          <div className="relative mb-8">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+                type="text"
+                placeholder="Procurar por nome..."
+                className="w-full pl-14 pr-6 py-5 bg-white border-none rounded-[2rem] shadow-xl shadow-slate-100/50 outline-none focus:ring-2 focus:ring-pink-200 transition-all text-slate-700 font-medium"
+                onChange={(e) => setBusca(e.target.value)}
+            />
+          </div>
+
+          {/* Lista de Membros - Scroll suave */}
+          <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-4"
+          >
+            <AnimatePresence>
+              {filtrados.map((m) => {
+                const jaEnviado = enviados.has(m.id);
+                return (
+                    <motion.div
+                        key={m.id}
+                        variants={itemVariants}
+                        layout
+                        className={`relative group p-4 rounded-[2rem] border transition-all flex items-center gap-4 ${
+                            jaEnviado
+                                ? "bg-slate-50/50 border-slate-100 opacity-70"
+                                : "bg-white border-white shadow-lg shadow-slate-100/50"
+                        }`}
+                    >
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg transition-colors ${
+                          jaEnviado ? "bg-slate-200 text-slate-500" : "bg-gradient-to-br from-pink-50 to-indigo-50 text-indigo-600"
+                      }`}>
+                        {m.nome?.charAt(0)}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-black text-slate-800 truncate">{m.nome}</h4>
+                        <p className="text-xs font-bold text-slate-400">{m.telefone}</p>
+                      </div>
+
+                      <button
+                          onClick={() => {
+                            window.open(obterLinkPersonalizado(m), "_blank");
+                            marcarComoEnviado(m.id);
+                          }}
+                          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 ${
+                              jaEnviado
+                                  ? "bg-emerald-50 text-emerald-500"
+                                  : "bg-slate-900 text-white shadow-lg shadow-slate-200"
+                          }`}
+                      >
+                        {jaEnviado ? <CheckCircle2 size={20} /> : <MessageCircle size={20} />}
+                      </button>
+                    </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </motion.div>
         </div>
+
+        {/* Botão Flutuante "Enviar Todos" (Somente se houver pendentes) */}
+        {!loading && progresso < 100 && (
+            <motion.div
+                initial={{ y: 100 }}
+                animate={{ y: 0 }}
+                className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xs px-5"
+            >
+              <button
+                  onClick={() => {
+                    const pendentes = lista.filter((item) => !enviados.has(item.id));
+                    pendentes.forEach(p => window.open(obterLinkPersonalizado(p), "_blank"));
+                    setEnviados(new Set(lista.map(l => l.id)));
+                  }}
+                  className="w-full py-5 bg-pink-500 text-white rounded-[2rem] font-black shadow-2xl shadow-pink-300 flex items-center justify-center gap-3 hover:bg-pink-600 transition-colors"
+              >
+                <Send size={20} />
+                ENVIAR PARA TODOS
+              </button>
+            </motion.div>
+        )}
       </div>
   );
 }

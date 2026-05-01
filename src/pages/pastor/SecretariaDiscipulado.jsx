@@ -5,13 +5,10 @@ import {
   Calendar,
   Download,
   X,
-  FileText,
   Users,
   Loader2,
   ChevronRight,
   RefreshCw,
-  Sun,
-  Moon,
   Filter,
   CheckCircle2,
   AlertCircle
@@ -34,20 +31,6 @@ export default function SecretariaDiscipulado() {
   const [dataInicioFiltro, setDataInicioFiltro] = useState("");
   const [dataFimFiltro, setDataFimFiltro] = useState("");
   const [relatorioSelecionado, setRelatorioSelecionado] = useState(null);
-  const [tema, setTema] = useState(localStorage.getItem("theme") || "light");
-
-  // --- Gestão de Tema ---
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (tema === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("theme", tema);
-  }, [tema]);
-
-  const toggleTema = () => setTema(prev => (prev === "light" ? "dark" : "light"));
 
   // --- Helpers de Data ---
   const formatarSemana = (inicio, fim) => {
@@ -83,7 +66,7 @@ export default function SecretariaDiscipulado() {
       });
       setRelatorios(res.data || []);
     } catch (error) {
-      console.error("Erro:", error);
+      console.error("Erro ao carregar relatórios:", error);
     } finally {
       setLoading(false);
     }
@@ -112,18 +95,79 @@ export default function SecretariaDiscipulado() {
     });
   }, [relatorios, termoBusca, dataInicioFiltro, dataFimFiltro]);
 
-  // --- Geração de PDF (Exemplo Otimizado) ---
+  // --- Geração de PDF ---
+  const gerarPDFIndividual = (rel) => {
+    const doc = new jsPDF();
+    const primaryColor = [79, 70, 229];
+    doc.setFontSize(18);
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.text(`Relatório: ${rel.nomeCelula}`, 14, 20);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Líder: ${rel.nomeLider}`, 14, 28);
+    doc.text(`Período: ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 14, 34);
+
+    const corpoTabela = rel.presencas?.map(p => [
+      p.nomeMembro,
+      p.escolaBiblica ? "Sim" : "Não",
+      p.quartaNoite ? "Sim" : "Não",
+      p.quintaNoite ? "Sim" : "Não",
+      p.domingoManha ? "Sim" : "Não",
+      p.domingoNoite ? "Sim" : "Não"
+    ]) || [];
+
+    autoTable(doc, {
+      startY: 40,
+      head: [["Membro", "EBD", "4ª Noite", "5ª Noite", "Dom. Manhã", "Dom. Noite"]],
+      body: corpoTabela,
+      headStyles: { fillColor: primaryColor },
+      theme: 'grid',
+      styles: { fontSize: 9 }
+    });
+    doc.save(`Relatorio_${rel.nomeCelula}_${rel.dataInicio}.pdf`);
+  };
+
   const gerarPDFGeral = () => {
     if (relatoriosFiltrados.length === 0) return;
-    const doc = new jsPDF();
-    doc.text("Relatório Geral de Discipulado", 10, 10);
-    // ... lógica de autoTable mantida conforme seu original
-    doc.save("Relatorio_Geral.pdf");
+    const doc = new jsPDF('l', 'mm', 'a4');
+    const primaryColor = [79, 70, 229];
+    doc.setFontSize(18);
+    doc.text("Relatório Geral de Discipulado", 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Filtrado de: ${dataInicioFiltro} até ${dataFimFiltro}`, 14, 22);
+
+    let currentY = 30;
+    relatoriosFiltrados.forEach((rel) => {
+      if (currentY > 170) { doc.addPage(); currentY = 20; }
+      doc.setFontSize(12);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text(`${rel.nomeCelula} | Líder: ${rel.nomeLider}`, 14, currentY);
+
+      const corpo = rel.presencas?.map(p => [
+        p.nomeMembro,
+        p.escolaBiblica ? "presente" : "falta",
+        p.quartaNoite ? "presente" : "falta",
+        p.quintaNoite ? "presente" : "falta",
+        p.domingoManha ? "presente" : "falta",
+        p.domingoNoite ? "presente" : "falta"
+      ]) || [];
+
+      autoTable(doc, {
+        startY: currentY + 5,
+        head: [["Membro", "EBD", "culto-4ª", "culto-5ª", "Dom.M", "Dom.N"]],
+        body: corpo,
+        headStyles: { fillColor: primaryColor },
+        styles: { fontSize: 8 },
+        margin: { left: 14 }
+      });
+      currentY = doc.lastAutoTable.finalY + 15;
+    });
+    doc.save("Relatorio_Geral_Discipulado.pdf");
   };
 
   if (loading) {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 transition-colors">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020617] transition-colors">
           <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
           <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Sincronizando dados secretaria...</p>
         </div>
@@ -134,7 +178,7 @@ export default function SecretariaDiscipulado() {
       <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300">
         <div className="max-w-7xl mx-auto p-4 md:p-10 space-y-8">
 
-          {/* Top Header */}
+          {/* Header */}
           <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -145,29 +189,17 @@ export default function SecretariaDiscipulado() {
             </div>
 
             <div className="flex items-center gap-3 w-full md:w-auto">
-              <button
-                  onClick={toggleTema}
-                  className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-              >
-                {tema === "light" ? <Moon size={20} className="text-indigo-600" /> : <Sun size={20} className="text-yellow-400" />}
-              </button>
-              <button
-                  onClick={carregarRelatorios}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold hover:border-indigo-500 dark:hover:border-indigo-400 transition-all"
-              >
+              <button onClick={carregarRelatorios} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm font-bold hover:border-indigo-500 transition-all">
                 <RefreshCw size={18} /> <span className="hidden sm:inline">Atualizar</span>
               </button>
-              <button
-                  onClick={gerarPDFGeral}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
-              >
-                <Download size={18} /> Exportar
+              <button onClick={gerarPDFGeral} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 transition-all">
+                <Download size={18} /> Exportar Tudo
               </button>
             </div>
           </header>
 
-          {/* Filtros Glassmorphism */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[2rem] border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
+          {/* Filtros */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[2rem] border border-white dark:border-slate-800 shadow-xl">
             <div className="lg:col-span-6 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
               <input
@@ -180,28 +212,12 @@ export default function SecretariaDiscipulado() {
 
             <div className="lg:col-span-4 flex items-center gap-2 bg-white dark:bg-slate-950 px-4 rounded-2xl border border-slate-100 dark:border-slate-800">
               <Calendar size={18} className="text-slate-400" />
-              <input
-                  type="date"
-                  value={dataInicioFiltro}
-                  onChange={(e) => setDataInicioFiltro(e.target.value)}
-                  className="bg-transparent py-4 text-sm font-bold outline-none"
-              />
-              <span className="text-slate-300 dark:text-slate-700">|</span>
-              <input
-                  type="date"
-                  value={dataFimFiltro}
-                  onChange={(e) => setDataFimFiltro(e.target.value)}
-                  className="bg-transparent py-4 text-sm font-bold outline-none"
-              />
+              <input type="date" value={dataInicioFiltro} onChange={(e) => setDataInicioFiltro(e.target.value)} className="bg-transparent py-4 text-sm font-bold outline-none dark:text-white" />
+              <span className="text-slate-300">|</span>
+              <input type="date" value={dataFimFiltro} onChange={(e) => setDataFimFiltro(e.target.value)} className="bg-transparent py-4 text-sm font-bold outline-none dark:text-white" />
             </div>
 
-            <button
-                onClick={() => {
-                  const s = obterSemanaAtual();
-                  setDataInicioFiltro(s.inicio); setDataFimFiltro(s.fim); setTermoBusca("");
-                }}
-                className="lg:col-span-2 flex items-center justify-center gap-2 bg-slate-900 dark:bg-indigo-600 text-white rounded-2xl font-bold hover:opacity-90 transition-all"
-            >
+            <button onClick={() => { const s = obterSemanaAtual(); setDataInicioFiltro(s.inicio); setDataFimFiltro(s.fim); setTermoBusca(""); }} className="lg:col-span-2 flex items-center justify-center gap-2 bg-slate-900 dark:bg-indigo-600 text-white rounded-2xl font-bold hover:opacity-90 transition-all">
               <Filter size={18} /> Atual
             </button>
           </section>
@@ -212,56 +228,42 @@ export default function SecretariaDiscipulado() {
                 <div
                     key={rel.id}
                     onClick={() => setRelatorioSelecionado(rel)}
-                    className="group relative bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+                    className="group relative bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
                 >
-                  {/* Decorativo de fundo */}
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/5 rounded-full group-hover:scale-150 transition-transform duration-700" />
-
                   <div className="flex justify-between items-start mb-4">
-                <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-100/50 dark:border-indigo-500/20">
-                  {rel.nomeCelula}
-                </span>
-                    <ChevronRight className="text-slate-300 group-hover:text-indigo-500 transition-colors" />
+                    <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                      {rel.nomeCelula}
+                    </span>
+                    <ChevronRight className="text-slate-300 group-hover:text-indigo-500" />
                   </div>
-
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {rel.nomeLider}
-                  </h3>
-
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{rel.nomeLider}</h3>
                   <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mb-6">
                     <Calendar size={14} className="text-indigo-500" />
                     {formatarSemana(rel.dataInicio, rel.dataFim)}
                   </div>
-
                   <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-slate-800">
                     <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
-                        <Users size={16} className="text-emerald-600" />
-                      </div>
-                      <span className="font-bold text-slate-700 dark:text-slate-300">
-                    {rel.presencas?.length || 0} <small className="font-medium text-slate-400">membros</small>
-                  </span>
+                      <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20"><Users size={16} className="text-emerald-600" /></div>
+                      <span className="font-bold dark:text-white">{rel.presencas?.length || 0} <small className="font-medium text-slate-400">membros</small></span>
                     </div>
                   </div>
                 </div>
             ))}
           </div>
 
-          {/* Modal de Detalhes Premium */}
+          {/* Modal */}
           {relatorioSelecionado && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
                 <div className="bg-white dark:bg-slate-900 w-full max-w-5xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-white/20 dark:border-slate-800">
 
-                  {/* Modal Header */}
                   <div className="px-8 py-6 flex justify-between items-center bg-indigo-600 text-white">
                     <div>
                       <h2 className="text-2xl font-black">{relatorioSelecionado.nomeCelula}</h2>
-                      <p className="text-indigo-100 text-sm font-medium flex items-center gap-2">
-                        Líder: {relatorioSelecionado.nomeLider} • {formatarSemana(relatorioSelecionado.dataInicio, relatorioSelecionado.dataFim)}
-                      </p>
+                      <p className="text-indigo-100 text-sm font-medium">Líder: {relatorioSelecionado.nomeLider} • {formatarSemana(relatorioSelecionado.dataInicio, relatorioSelecionado.dataFim)}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all">
+                      <button onClick={() => gerarPDFIndividual(relatorioSelecionado)} className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all">
                         <Download size={20} />
                       </button>
                       <button onClick={() => setRelatorioSelecionado(null)} className="p-3 bg-white/10 hover:bg-red-500 rounded-xl transition-all">
@@ -270,7 +272,6 @@ export default function SecretariaDiscipulado() {
                     </div>
                   </div>
 
-                  {/* Tabela de Presença */}
                   <div className="p-2 md:p-8 overflow-auto flex-1 dark:bg-slate-950">
                     <div className="rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900">
                       <table className="w-full text-left">
@@ -286,11 +287,7 @@ export default function SecretariaDiscipulado() {
                               <td className="px-6 py-4 font-bold text-slate-700 dark:text-slate-200">{p.nomeMembro}</td>
                               {COLUNAS.map(col => (
                                   <td key={col.campo} className="px-6 py-4 text-center">
-                                    {p[col.campo] ? (
-                                        <CheckCircle2 className="mx-auto text-emerald-500" size={20} />
-                                    ) : (
-                                        <X className="mx-auto text-slate-200 dark:text-slate-700" size={18} />
-                                    )}
+                                    {p[col.campo] ? <CheckCircle2 className="mx-auto text-emerald-500" size={20} /> : <X className="mx-auto text-slate-200 dark:text-slate-700" size={18} />}
                                   </td>
                               ))}
                             </tr>
@@ -306,8 +303,8 @@ export default function SecretariaDiscipulado() {
           {/* Empty State */}
           {relatoriosFiltrados.length === 0 && !loading && (
               <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-                <AlertCircle size={48} className="text-slate-300 mb-4" />
-                <p className="text-slate-500 font-bold">Nenhum relatório encontrado para este período.</p>
+                <AlertCircle size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
+                <p className="text-slate-500 dark:text-slate-400 font-bold">Nenhum relatório encontrado para este período.</p>
               </div>
           )}
         </div>
