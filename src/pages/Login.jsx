@@ -15,11 +15,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Ref para garantir que o 'wake-up' só aconteça uma vez (previne spam no Actuator)
   const hasWokenUp = useRef(false);
 
-  // 1. Acorda o backend de forma segura
   useEffect(() => {
     if (!hasWokenUp.current) {
       api.get("/actuator/health").catch(() => {});
@@ -31,128 +28,101 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      // 2. Autenticação
       const token = await login(email, password);
-
-      if (!token) {
-        throw new Error("Falha na autenticação. Verifique suas credenciais.");
-      }
-
-      // 3. Decodificação e Persistência
+      if (!token) throw new Error("Falha na autenticação.");
       const decoded = jwtDecode(token);
-
-      const userData = {
+      localStorage.setItem("user", JSON.stringify({
         id: decoded.id,
         username: decoded.sub,
         perfil: decoded.perfil
-      };
-
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      // 4. Lógica de Redirecionamento
-      const perfilRaw = decoded.perfil || "";
-      const perfil = perfilRaw.replace("ROLE_", "").toUpperCase();
-
-      const rotas = {
-        ADMIN: "/admin",
-        PASTOR: "/pastor",
-        LIDER_CELULA: "/lider",
-        TESOUREIRO: "/tesouraria",
-        SECRETARIO: "/secretaria",
-      };
-
-      if (rotas[perfil]) {
-        navigate(rotas[perfil]);
-      } else {
-        setError("Seu perfil (" + perfil + ") não possui permissão de acesso.");
-      }
-
+      }));
+      const perfil = (decoded.perfil || "").replace("ROLE_", "").toUpperCase();
+      const rotas = { ADMIN: "/admin", PASTOR: "/pastor", LIDER_CELULA: "/lider", TESOUREIRO: "/tesouraria", SECRETARIO: "/secretaria" };
+      if (rotas[perfil]) navigate(rotas[perfil]);
+      else setError("Acesso restrito a perfis autorizados.");
     } catch (err) {
-      // Diferencia erro de rede/servidor de erro de senha
-      if (err.message === "Token não recebido" || err.response?.status === 401) {
-        setError("E-mail ou senha incorretos.");
-      } else {
-        setError("Servidor indisponível no momento. Tente novamente em instantes.");
-      }
+      setError(err.response?.status === 401 ? "Credenciais inválidas." : "Erro de conexão com o servidor.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#050505] transition-colors duration-700">
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
 
-        {/* Background Dinâmico */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 dark:from-indigo-950/30 dark:via-black dark:to-purple-950/30 animate-gradient"></div>
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        {/* Background Decorativo Profissional */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[120px] animate-pulse" />
+          <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] dark:opacity-[0.05]" />
         </div>
 
-        {/* Botão de Tema */}
+        {/* Botão de Tema Flutuante */}
         <button
             onClick={toggleTheme}
-            type="button"
-            className="absolute top-8 right-8 z-50 p-3 rounded-2xl backdrop-blur-md bg-white/40 dark:bg-white/5 border border-white/50 dark:border-white/10 text-slate-800 dark:text-slate-200 shadow-xl hover:scale-110 active:scale-95 transition-all duration-300"
+            className="absolute top-6 right-6 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shadow-sm hover:shadow-indigo-500/20 transition-all duration-300"
         >
-          {theme === "dark" ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} className="text-indigo-600" />}
+          {theme === "dark" ? <Sun size={20} className="text-yellow-500" /> : <Moon size={20} className="text-slate-700" />}
         </button>
 
-        <div className="relative z-10 w-full max-w-[480px] mx-4">
-          <div className="p-1 rounded-[2.5rem] bg-gradient-to-b from-white/60 to-white/20 dark:from-white/20 dark:to-transparent shadow-2xl">
-            <div className="p-8 md:p-12 rounded-[2.3rem] backdrop-blur-2xl bg-white/80 dark:bg-black/60 border border-white/20">
+        <div className="relative z-10 w-full max-w-md">
+          {/* Card Principal */}
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/40 dark:border-slate-800 bg-white/70 dark:bg-slate-900/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
 
-              {/* Header */}
-              <div className="flex flex-col items-center mb-10 text-center">
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 rounded-3xl blur-xl opacity-40 group-hover:opacity-70 transition duration-500"></div>
-                  <div className="relative p-5 rounded-3xl bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500 shadow-2xl">
-                    <ShieldCheck size={52} className="text-white" />
-                  </div>
+            {/* Barra de progresso do gradiente IEQ no topo do card */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500" />
+
+            <div className="p-8 md:p-10">
+              {/* Logo e Título */}
+              <div className="text-center mb-10">
+                <div className="inline-flex p-4 rounded-2xl bg-slate-950 dark:bg-white shadow-xl mb-6">
+                  <ShieldCheck size={32} className="text-white dark:text-slate-950" />
                 </div>
-
-                <h1 className="mt-8 text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
-                  IEQ <span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">GESTÃO</span>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  IEQ <span className="text-indigo-600 dark:text-indigo-400">Portal</span>
                 </h1>
-                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 opacity-80">
-                  Administrative Intelligence
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">
+                  Gestão Administrativa Integrada
                 </p>
               </div>
 
               {error && (
-                  <div className="mb-6 p-4 text-sm font-bold text-center bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl animate-shake">
+                  <div className="mb-6 py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium animate-shake text-center">
                     {error}
                   </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-1">
-                  <label className="text-[10px] ml-4 font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">E-mail Corporativo</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 ml-1">E-mail</label>
                   <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                      <Mail size={18} />
+                    </div>
                     <input
                         type="email"
-                        placeholder="exemplo@ieq.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white border border-transparent focus:border-indigo-500/50 focus:bg-white dark:focus:bg-white/10 outline-none transition-all duration-300"
+                        placeholder="nome@exemplo.com"
+                        className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                         required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] ml-4 font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Senha de Acesso</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 ml-1">Senha</label>
                   <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                      <Lock size={18} />
+                    </div>
                     <input
                         type="password"
-                        placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white border border-transparent focus:border-indigo-500/50 focus:bg-white dark:focus:bg-white/10 outline-none transition-all duration-300"
+                        placeholder="••••••••"
+                        className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                         required
                     />
                   </div>
@@ -161,51 +131,35 @@ export default function Login() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="relative w-full mt-4 group overflow-hidden py-4 rounded-2xl font-bold tracking-widest text-white transition-all duration-500 disabled:opacity-70"
+                    className="w-full bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/10 active:scale-[0.98] disabled:opacity-70"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 group-hover:scale-105 transition-transform duration-500"></div>
-                  <div className="relative flex items-center justify-center gap-3">
-                    {loading ? (
-                        <>
-                          <Loader2 className="animate-spin" size={20} />
-                          <span>AUTENTICANDO...</span>
-                        </>
-                    ) : (
-                        <>
-                          <span>ENTRAR NO SISTEMA</span>
-                          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </>
-                    )}
-                  </div>
+                  {loading ? (
+                      <Loader2 className="animate-spin" size={20} />
+                  ) : (
+                      <>
+                        Acessar Painel
+                        <ArrowRight size={18} />
+                      </>
+                  )}
                 </button>
               </form>
 
-              <p className="mt-8 text-center text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-tighter">
-                &copy; 2026 Igreja do Evangelho Quadrangular <br/>
-                SGE - Sistema de Gestão Integrado
-              </p>
+              <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">
+                  Igreja do Evangelho Quadrangular
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         <style>{`
-        @keyframes gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 10s ease infinite;
-        }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
         }
-        .animate-shake {
-          animation: shake 0.4s ease-in-out;
-        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
       `}</style>
       </div>
   );

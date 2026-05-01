@@ -7,6 +7,10 @@ import "./index.css";
 import { AuthProvider } from "./auth/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
+// 🔥 IMPORTANTE: PWA
+import { registerSW } from 'virtual:pwa-register'
+registerSW()
+
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <ThemeProvider>
