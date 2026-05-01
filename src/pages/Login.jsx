@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { Loader2, Lock, Mail, ShieldCheck, Sun, Moon, ArrowRight } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 export default function Login() {
   const { login } = useAuth();
@@ -15,28 +16,42 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Ref para garantir que o 'wake-up' só aconteça uma vez (previne spam no Actuator)
+  const hasWokenUp = useRef(false);
+
+  // 1. Acorda o backend de forma segura
+  useEffect(() => {
+    if (!hasWokenUp.current) {
+      api.get("/actuator/health").catch(() => {});
+      hasWokenUp.current = true;
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // Faz o login. O login deve retornar o token.
+      // 2. Autenticação
       const token = await login(email, password);
 
       if (!token) {
-        throw new Error("E-mail ou senha incorretos.");
+        throw new Error("Falha na autenticação. Verifique suas credenciais.");
       }
 
+      // 3. Decodificação e Persistência
       const decoded = jwtDecode(token);
 
-      // Salva os dados básicos para uso rápido na UI
-      localStorage.setItem("user", JSON.stringify({
+      const userData = {
         id: decoded.id,
         username: decoded.sub,
         perfil: decoded.perfil
-      }));
+      };
 
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // 4. Lógica de Redirecionamento
       const perfilRaw = decoded.perfil || "";
       const perfil = perfilRaw.replace("ROLE_", "").toUpperCase();
 
@@ -51,17 +66,17 @@ export default function Login() {
       if (rotas[perfil]) {
         navigate(rotas[perfil]);
       } else {
-        setError("Seu perfil não tem permissão para acessar o sistema.");
+        setError("Seu perfil (" + perfil + ") não possui permissão de acesso.");
       }
 
     } catch (err) {
-      console.error("Erro ao autenticar:", err);
-      // Se for 401, a mensagem é de credenciais. Se for outro, erro de conexão.
-      setError(err.response?.status === 401
-          ? "E-mail ou senha inválidos."
-          : "Não foi possível conectar ao servidor.");
+      // Diferencia erro de rede/servidor de erro de senha
+      if (err.message === "Token não recebido" || err.response?.status === 401) {
+        setError("E-mail ou senha incorretos.");
+      } else {
+        setError("Servidor indisponível no momento. Tente novamente em instantes.");
+      }
     } finally {
-      // PARA O LOADING SEMPRE (Evita o botão girando infinito)
       setLoading(false);
     }
   };
@@ -69,7 +84,7 @@ export default function Login() {
   return (
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#050505] transition-colors duration-700">
 
-        {/* Background Animado */}
+        {/* Background Dinâmico */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 dark:from-indigo-950/30 dark:via-black dark:to-purple-950/30 animate-gradient"></div>
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
@@ -78,8 +93,8 @@ export default function Login() {
 
         {/* Botão de Tema */}
         <button
-            type="button"
             onClick={toggleTheme}
+            type="button"
             className="absolute top-8 right-8 z-50 p-3 rounded-2xl backdrop-blur-md bg-white/40 dark:bg-white/5 border border-white/50 dark:border-white/10 text-slate-800 dark:text-slate-200 shadow-xl hover:scale-110 active:scale-95 transition-all duration-300"
         >
           {theme === "dark" ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} className="text-indigo-600" />}
@@ -89,6 +104,7 @@ export default function Login() {
           <div className="p-1 rounded-[2.5rem] bg-gradient-to-b from-white/60 to-white/20 dark:from-white/20 dark:to-transparent shadow-2xl">
             <div className="p-8 md:p-12 rounded-[2.3rem] backdrop-blur-2xl bg-white/80 dark:bg-black/60 border border-white/20">
 
+              {/* Header */}
               <div className="flex flex-col items-center mb-10 text-center">
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 rounded-3xl blur-xl opacity-40 group-hover:opacity-70 transition duration-500"></div>
@@ -145,14 +161,14 @@ export default function Login() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="relative w-full mt-4 group overflow-hidden py-4 rounded-2xl font-bold tracking-widest text-white transition-all duration-500 disabled:opacity-50"
+                    className="relative w-full mt-4 group overflow-hidden py-4 rounded-2xl font-bold tracking-widest text-white transition-all duration-500 disabled:opacity-70"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-blue-600 group-hover:scale-105 transition-transform duration-500"></div>
                   <div className="relative flex items-center justify-center gap-3">
                     {loading ? (
                         <>
                           <Loader2 className="animate-spin" size={20} />
-                          <span className="text-xs">AUTENTICANDO...</span>
+                          <span>AUTENTICANDO...</span>
                         </>
                     ) : (
                         <>
