@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import api from "../../services/api.js";
 import {
   Loader2, Save, User, Calendar,
   Wallet, Trophy, AlertCircle, CheckCircle2
 } from "lucide-react";
 
-/* Spinner keyframes inline — evita depender do Tailwind animate-in */
+/* Spinner keyframes inline */
 const SPIN_CSS = `@keyframes tlSpin { to { transform: rotate(360deg); } }`;
 
 export default function TesourariaLancamento() {
@@ -13,10 +13,6 @@ export default function TesourariaLancamento() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState(null);
   const [sucesso, setSucesso] = useState(false);
-
-  /* Controla overlay suave sem desmontar o DOM */
-  const [showOverlay, setShowOverlay] = useState(false);
-  const overlayTimer = useRef(null);
 
   const [form, setForm] = useState({
     membroNome: "",
@@ -28,26 +24,28 @@ export default function TesourariaLancamento() {
 
   const limparValor = (str) => {
     if (!str) return 0;
+    // Substitui vírgula por ponto e remove espaços
     const limpo = str.toString().replace(",", ".").trim();
     const numero = Number(limpo);
     return isNaN(numero) ? 0 : numero;
   };
 
+  // Carregamento inicial de membros
   useEffect(() => {
+    let isMounted = true;
     const carregarMembros = async () => {
       try {
         setLoading(true);
         const res = await api.get("/tesouraria/select-nome");
-        setMembros(res.data || []);
+        if (isMounted) setMembros(res.data || []);
       } catch (err) {
-        setErro("Erro ao carregar lista de membros.");
+        if (isMounted) setErro("Erro ao carregar lista de membros.");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     carregarMembros();
-
-    return () => clearTimeout(overlayTimer.current);
+    return () => { isMounted = false; };
   }, []);
 
   const handleSalvar = async () => {
@@ -68,7 +66,6 @@ export default function TesourariaLancamento() {
     }
 
     setLoading(true);
-    setShowOverlay(true); // overlay suave durante o POST
 
     try {
       const payload = {
@@ -80,8 +77,8 @@ export default function TesourariaLancamento() {
       };
 
       await api.post("/tesouraria/lancar", payload);
-      setSucesso(true);
 
+      setSucesso(true);
       setForm({
         membroNome: "",
         valorDizimo: "",
@@ -90,48 +87,27 @@ export default function TesourariaLancamento() {
         dataLancamento: new Date().toISOString().split("T")[0],
       });
 
+      // Feedback de sucesso some após 4 segundos
       setTimeout(() => setSucesso(false), 4000);
     } catch (err) {
       setErro("Erro ao registrar lançamento no servidor.");
     } finally {
+      // Finalização imediata para evitar travamento no mobile
       setLoading(false);
-      // Remove overlay com leve atraso para evitar flash
-      overlayTimer.current = setTimeout(() => setShowOverlay(false), 200);
     }
   };
 
   return (
-      <>
+      <div className="select-none touch-manipulation">
         <style>{SPIN_CSS}</style>
 
-        {/* Overlay suave — não desmonta o formulário */}
-        {showOverlay && (
-            <div style={{
-              position: "fixed", inset: 0, zIndex: 50,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: "rgba(255,255,255,0.55)",
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
-              pointerEvents: "none",
-            }}>
-              <div style={{
-                width: 40, height: 40,
-                border: "3px solid #e0e7ff",
-                borderTop: "3px solid #6366f1",
-                borderRadius: "50%",
-                animation: "tlSpin 0.7s linear infinite",
-              }} />
-            </div>
-        )}
-
-        {/* Container SEM animate-in para não piscar no re-render */}
         <div className="max-w-4xl mx-auto p-4 sm:p-10">
 
           {/* Header */}
           <div className="text-center mb-10">
-          <span className="text-indigo-500 font-black uppercase tracking-[0.35em] text-[10px] mb-2 block">
-            Registro de Entrada
-          </span>
+            <span className="text-indigo-500 font-black uppercase tracking-[0.35em] text-[10px] mb-2 block">
+              Registro de Entrada
+            </span>
             <h2 className="text-4xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none">
               Lançamento<span className="text-indigo-500">.</span>
             </h2>
@@ -139,18 +115,16 @@ export default function TesourariaLancamento() {
 
           <div className="bg-white dark:bg-slate-900/60 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none space-y-8">
 
-            {/* Feedback — usa transição CSS simples, sem animate-in */}
+            {/* Feedback Mensagens */}
             {erro && (
-                <div style={{ transition: "opacity 0.25s" }}
-                     className="flex items-center gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 text-red-700 dark:text-red-400 rounded-2xl">
+                <div className="flex items-center gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 text-red-700 dark:text-red-400 rounded-2xl animate-in fade-in zoom-in duration-200">
                   <AlertCircle size={18} className="shrink-0" />
                   <p className="text-sm font-bold">{erro}</p>
                 </div>
             )}
 
             {sucesso && (
-                <div style={{ transition: "opacity 0.25s" }}
-                     className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 text-emerald-700 dark:text-emerald-400 rounded-2xl">
+                <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 text-emerald-700 dark:text-emerald-400 rounded-2xl animate-in fade-in zoom-in duration-200">
                   <CheckCircle2 size={18} className="shrink-0" />
                   <p className="text-sm font-bold">Lançamento registrado com sucesso!</p>
                 </div>
@@ -164,8 +138,9 @@ export default function TesourariaLancamento() {
                   <User size={13} /> Membro Responsável
                 </label>
                 <select
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all appearance-none dark:text-white text-sm font-medium cursor-pointer"
+                    className="w-full p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all dark:text-white text-sm font-medium cursor-pointer"
                     value={form.membroNome}
+                    disabled={loading}
                     onChange={(e) => setForm({ ...form, membroNome: e.target.value })}
                 >
                   <option value="">Selecione na lista...</option>
@@ -182,6 +157,7 @@ export default function TesourariaLancamento() {
                 </label>
                 <input
                     type="date"
+                    disabled={loading}
                     className="w-full p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white text-sm"
                     value={form.dataLancamento}
                     onChange={(e) => setForm({ ...form, dataLancamento: e.target.value })}
@@ -198,6 +174,7 @@ export default function TesourariaLancamento() {
                   <input
                       type="text"
                       inputMode="decimal"
+                      disabled={loading}
                       className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300 text-sm"
                       value={form.valorDizimo}
                       onChange={(e) => setForm({ ...form, valorDizimo: e.target.value })}
@@ -216,6 +193,7 @@ export default function TesourariaLancamento() {
                   <input
                       type="text"
                       inputMode="decimal"
+                      disabled={loading}
                       className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300 text-sm"
                       value={form.valorOferta}
                       onChange={(e) => setForm({ ...form, valorOferta: e.target.value })}
@@ -234,6 +212,7 @@ export default function TesourariaLancamento() {
                       <button
                           key={tipo}
                           type="button"
+                          disabled={loading}
                           onClick={() => setForm({ ...form, tipoOferta: tipo })}
                           className={`flex-1 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all duration-200 ${
                               form.tipoOferta === tipo
@@ -255,7 +234,7 @@ export default function TesourariaLancamento() {
                 className={`group w-full relative overflow-hidden py-5 px-6 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 transition-all duration-300 ${
                     loading
                         ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
-                        : "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:-translate-y-0.5 active:scale-[0.98]"
+                        : "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 active:scale-[0.98]"
                 }`}
             >
               {loading ? (
@@ -268,12 +247,9 @@ export default function TesourariaLancamento() {
                   }} />
               ) : (
                   <>
-                    <Save size={17} className="group-hover:rotate-12 transition-transform duration-300" />
+                    <Save size={17} className="transition-transform duration-300" />
                     Confirmar Lançamento
                   </>
-              )}
-              {!loading && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               )}
             </button>
           </div>
@@ -282,6 +258,6 @@ export default function TesourariaLancamento() {
             Todos os dados são criptografados e auditáveis
           </p>
         </div>
-      </>
+      </div>
   );
 }
