@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../../services/api.js";
 import {
-  Loader2, Save, User, Calendar,
+  Save, User, Calendar,
   Wallet, Trophy, AlertCircle, CheckCircle2
 } from "lucide-react";
 
-/* Spinner keyframes inline */
 const SPIN_CSS = `@keyframes tlSpin { to { transform: rotate(360deg); } }`;
 
 export default function TesourariaLancamento() {
@@ -24,24 +23,19 @@ export default function TesourariaLancamento() {
 
   const limparValor = (str) => {
     if (!str) return 0;
-    // Substitui vírgula por ponto e remove espaços
     const limpo = str.toString().replace(",", ".").trim();
     const numero = Number(limpo);
     return isNaN(numero) ? 0 : numero;
   };
 
-  // Carregamento inicial de membros
   useEffect(() => {
     let isMounted = true;
     const carregarMembros = async () => {
       try {
-        setLoading(true);
         const res = await api.get("/tesouraria/select-nome");
         if (isMounted) setMembros(res.data || []);
       } catch (err) {
         if (isMounted) setErro("Erro ao carregar lista de membros.");
-      } finally {
-        if (isMounted) setLoading(false);
       }
     };
     carregarMembros();
@@ -49,6 +43,8 @@ export default function TesourariaLancamento() {
   }, []);
 
   const handleSalvar = async () => {
+    if (loading) return; // Proteção contra múltiplos cliques
+
     setErro(null);
     setSucesso(false);
 
@@ -61,7 +57,7 @@ export default function TesourariaLancamento() {
     const vOferta = limparValor(form.valorOferta);
 
     if (vDizimo <= 0 && vOferta <= 0) {
-      setErro("Informe pelo menos um valor de Dízimo ou Oferta.");
+      setErro("Informe pelo menos um valor.");
       return;
     }
 
@@ -78,7 +74,7 @@ export default function TesourariaLancamento() {
 
       await api.post("/tesouraria/lancar", payload);
 
-      setSucesso(true);
+      // SUCESSO: Limpar formulário antes de mudar o estado visual
       setForm({
         membroNome: "",
         valorDizimo: "",
@@ -87,176 +83,140 @@ export default function TesourariaLancamento() {
         dataLancamento: new Date().toISOString().split("T")[0],
       });
 
-      // Feedback de sucesso some após 4 segundos
-      setTimeout(() => setSucesso(false), 4000);
+      setSucesso(true);
+
+      // Força o navegador a redesenhar a tela subindo o scroll
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      setTimeout(() => setSucesso(false), 3000);
     } catch (err) {
-      setErro("Erro ao registrar lançamento no servidor.");
+      setErro("Erro ao registrar no servidor.");
     } finally {
-      // Finalização imediata para evitar travamento no mobile
       setLoading(false);
     }
   };
 
   return (
-      <div className="select-none touch-manipulation">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-10">
         <style>{SPIN_CSS}</style>
 
-        <div className="max-w-4xl mx-auto p-4 sm:p-10">
-
-          {/* Header */}
-          <div className="text-center mb-10">
-            <span className="text-indigo-500 font-black uppercase tracking-[0.35em] text-[10px] mb-2 block">
-              Registro de Entrada
-            </span>
-            <h2 className="text-4xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+          <span className="text-indigo-500 font-black uppercase tracking-widest text-[10px] mb-2 block">
+            Gestão Financeira
+          </span>
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
               Lançamento<span className="text-indigo-500">.</span>
             </h2>
           </div>
 
-          <div className="bg-white dark:bg-slate-900/60 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none space-y-8">
+          {/* Removido backdrop-blur e simplificado o fundo para evitar lag gráfico */}
+          <div className="bg-white dark:bg-slate-900 p-6 sm:p-10 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
 
-            {/* Feedback Mensagens */}
             {erro && (
-                <div className="flex items-center gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 text-red-700 dark:text-red-400 rounded-2xl animate-in fade-in zoom-in duration-200">
-                  <AlertCircle size={18} className="shrink-0" />
+                <div className="flex items-center gap-3 bg-red-50 border border-red-200 p-4 text-red-700 rounded-xl">
+                  <AlertCircle size={18} />
                   <p className="text-sm font-bold">{erro}</p>
                 </div>
             )}
 
             {sucesso && (
-                <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 text-emerald-700 dark:text-emerald-400 rounded-2xl animate-in fade-in zoom-in duration-200">
-                  <CheckCircle2 size={18} className="shrink-0" />
-                  <p className="text-sm font-bold">Lançamento registrado com sucesso!</p>
+                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 p-4 text-emerald-700 rounded-xl">
+                  <CheckCircle2 size={18} />
+                  <p className="text-sm font-bold">Lançado com sucesso!</p>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-
-              {/* Seleção de Membro */}
-              <div className="md:col-span-2 group">
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-                  <User size={13} /> Membro Responsável
-                </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-black uppercase mb-2 text-slate-500">Membro</label>
                 <select
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all dark:text-white text-sm font-medium cursor-pointer"
+                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white"
                     value={form.membroNome}
                     disabled={loading}
                     onChange={(e) => setForm({ ...form, membroNome: e.target.value })}
                 >
-                  <option value="">Selecione na lista...</option>
-                  {membros.map((m, index) => (
-                      <option key={index} value={m.nome}>{m.nome}</option>
+                  <option value="">Selecione...</option>
+                  {membros.map((m, i) => (
+                      <option key={i} value={m.nome}>{m.nome}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Data */}
               <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  <Calendar size={13} /> Data do Evento
-                </label>
+                <label className="block text-[10px] font-black uppercase mb-2 text-slate-500">Data</label>
                 <input
                     type="date"
                     disabled={loading}
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white text-sm"
+                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white"
                     value={form.dataLancamento}
                     onChange={(e) => setForm({ ...form, dataLancamento: e.target.value })}
                 />
               </div>
 
-              {/* Dízimo */}
               <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  <Wallet size={13} /> Valor Dízimo
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">R$</span>
-                  <input
-                      type="text"
-                      inputMode="decimal"
-                      disabled={loading}
-                      className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300 text-sm"
-                      value={form.valorDizimo}
-                      onChange={(e) => setForm({ ...form, valorDizimo: e.target.value })}
-                      placeholder="0,00"
-                  />
-                </div>
+                <label className="block text-[10px] font-black uppercase mb-2 text-slate-500">Dízimo (R$)</label>
+                <input
+                    type="text"
+                    inputMode="decimal"
+                    disabled={loading}
+                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white"
+                    value={form.valorDizimo}
+                    onChange={(e) => setForm({ ...form, valorDizimo: e.target.value })}
+                    placeholder="0,00"
+                />
               </div>
 
-              {/* Oferta */}
               <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  <Trophy size={13} /> Valor Oferta
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">R$</span>
-                  <input
-                      type="text"
-                      inputMode="decimal"
-                      disabled={loading}
-                      className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300 text-sm"
-                      value={form.valorOferta}
-                      onChange={(e) => setForm({ ...form, valorOferta: e.target.value })}
-                      placeholder="0,00"
-                  />
-                </div>
+                <label className="block text-[10px] font-black uppercase mb-2 text-slate-500">Oferta (R$)</label>
+                <input
+                    type="text"
+                    inputMode="decimal"
+                    disabled={loading}
+                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white"
+                    value={form.valorOferta}
+                    onChange={(e) => setForm({ ...form, valorOferta: e.target.value })}
+                    placeholder="0,00"
+                />
               </div>
 
-              {/* Tipo de Oferta */}
               <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  Categoria Especial
-                </label>
-                <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-[1.2rem] border border-slate-200 dark:border-slate-700">
-                  {["BRONZE", "PRATA", "OURO"].map((tipo) => (
+                <label className="block text-[10px] font-black uppercase mb-2 text-slate-500">Categoria</label>
+                <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                  {["BRONZE", "PRATA", "OURO"].map((t) => (
                       <button
-                          key={tipo}
+                          key={t}
                           type="button"
                           disabled={loading}
-                          onClick={() => setForm({ ...form, tipoOferta: tipo })}
-                          className={`flex-1 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all duration-200 ${
-                              form.tipoOferta === tipo
-                                  ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm"
-                                  : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                          onClick={() => setForm({ ...form, tipoOferta: t })}
+                          className={`flex-1 py-2 rounded-lg text-[10px] font-bold transition-all ${
+                              form.tipoOferta === t ? "bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-white" : "text-slate-400"
                           }`}
                       >
-                        {tipo}
+                        {t}
                       </button>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Botão Salvar */}
             <button
                 onClick={handleSalvar}
                 disabled={loading}
-                className={`group w-full relative overflow-hidden py-5 px-6 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 transition-all duration-300 ${
-                    loading
-                        ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
-                        : "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 active:scale-[0.98]"
+                className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 transition-all ${
+                    loading ? "bg-slate-200 text-slate-400" : "bg-indigo-600 text-white shadow-lg active:scale-95"
                 }`}
             >
               {loading ? (
-                  <div style={{
-                    width: 18, height: 18,
-                    border: "2px solid #c7d2fe",
-                    borderTop: "2px solid #6366f1",
-                    borderRadius: "50%",
-                    animation: "tlSpin 0.7s linear infinite",
-                  }} />
+                  <div style={{ width: 20, height: 20, border: "3px solid #c7d2fe", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "tlSpin 0.8s linear infinite" }} />
               ) : (
                   <>
-                    <Save size={17} className="transition-transform duration-300" />
+                    <Save size={18} />
                     Confirmar Lançamento
                   </>
               )}
             </button>
           </div>
-
-          <p className="mt-8 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            Todos os dados são criptografados e auditáveis
-          </p>
         </div>
       </div>
   );
