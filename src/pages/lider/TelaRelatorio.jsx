@@ -1,23 +1,44 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import {
-  CheckCircle2,
-  BookOpen,
-  Calendar,
-  Loader2,
-  ChevronDown,
-  UserCheck,
-  ClipboardCheck,
-  Trophy,
-  Users2,
-  Sparkles
+  Calendar, BookOpen, Loader2, ChevronDown,
+  UserCheck, ClipboardCheck, Trophy, Users2, Sparkles, CheckCircle2,
 } from "lucide-react";
 
-export default function TelaRelatorio() {
-  const [celula, setCelula] = useState(null);
-  const [pessoas, setPessoas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [enviando, setEnviando] = useState(false);
+/* ─── Cores Oficiais IEQ ─── */
+const IEQ = {
+  red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
+  yellow: "#FDB813", yellowDark: "#C48C00",
+  blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
+  white: "#FFFFFF", offWhite: "#F5F0E8",
+  dark: "#0A0608", darkCard: "#110A0D",
+};
+
+function QuadrangularCross({ size = 32 }) {
+  return (
+      <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+        <defs>
+          <linearGradient id="gVR" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={IEQ.redLight} /><stop offset="100%" stopColor={IEQ.redDark} />
+          </linearGradient>
+          <linearGradient id="gHR" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={IEQ.blueDark} /><stop offset="50%" stopColor={IEQ.blueLight} /><stop offset="100%" stopColor={IEQ.blueDark} />
+          </linearGradient>
+          <filter id="glowR"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect x="38" y="4" width="24" height="92" rx="3" fill="url(#gVR)" filter="url(#glowR)" />
+        <rect x="4" y="38" width="92" height="24" rx="3" fill="url(#gHR)" filter="url(#glowR)" />
+        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowR)" />
+        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
+      </svg>
+  );
+}
+
+export default function TelaRelatorio({ isDark = false }) {
+  const [celula,        setCelula]        = useState(null);
+  const [pessoas,       setPessoas]       = useState([]);
+  const [loading,       setLoading]       = useState(true);
+  const [enviando,      setEnviando]      = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
 
   const [form, setForm] = useState({
@@ -33,258 +54,271 @@ export default function TelaRelatorio() {
       setLoading(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const headers = { Authorization: `Bearer ${token}` };
-
       const resCelula = await api.get("/celulas/minha-celula", { headers });
       const dadosCelula = resCelula.data;
-
       setCelula(dadosCelula);
-      setForm((prev) => ({ ...prev, celulaId: dadosCelula.id }));
-
+      setForm(prev => ({ ...prev, celulaId: dadosCelula.id }));
       const [resMembros, resVisitantes] = await Promise.all([
         api.get(`/celulas/${dadosCelula.id}/membros`, { headers }),
         api.get(`/visitantes/celula/${dadosCelula.id}/ativos`, { headers }),
       ]);
-
-      const membros = (resMembros.data || []).map((m) => ({
-        id: m.id, nome: m.nome, tipo: "MEMBRO", uKey: `MEMBRO-${m.id}`,
-      }));
-
-      const visitantes = (resVisitantes.data || []).map((v) => ({
-        id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}`,
-      }));
-
-      setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
-    } catch (err) {
-      console.error("Erro ao carregar dados:", err);
-    } finally {
-      setLoading(false);
-    }
+      const membros   = (resMembros.data   || []).map(m => ({ id:m.id, nome:m.nome, tipo:"MEMBRO",    uKey:`MEMBRO-${m.id}` }));
+      const visitantes= (resVisitantes.data|| []).map(v => ({ id:v.id, nome:v.nome, tipo:"VISITANTE", uKey:`VISITANTE-${v.id}` }));
+      setPessoas([...membros, ...visitantes].sort((a,b) => a.nome.localeCompare(b.nome)));
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
 
   const alternarPresenca = (uKey) => {
     const isMarcado = form.selecionadosKeys.includes(uKey);
-    setProcessingIds((prev) => new Set(prev).add(uKey));
-
-    setForm((prev) => {
-      const novasKeys = isMarcado
-          ? prev.selecionadosKeys.filter((k) => k !== uKey)
-          : [...prev.selecionadosKeys, uKey];
-
+    setProcessingIds(prev => new Set(prev).add(uKey));
+    setForm(prev => {
+      const novasKeys = isMarcado ? prev.selecionadosKeys.filter(k=>k!==uKey) : [...prev.selecionadosKeys, uKey];
       const novasDecisoes = { ...prev.decisoes };
       if (isMarcado) delete novasDecisoes[uKey];
-
       return { ...prev, selecionadosKeys: novasKeys, decisoes: novasDecisoes };
     });
-
-    setTimeout(() => {
-      setProcessingIds((prev) => {
-        const novo = new Set(prev);
-        novo.delete(uKey);
-        return novo;
-      });
-    }, 200);
+    setTimeout(() => setProcessingIds(prev => { const n=new Set(prev); n.delete(uKey); return n; }), 200);
   };
 
-  const membrosPresentes = form.selecionadosKeys.filter((k) => k.startsWith("MEMBRO-")).length;
-  const visitantesPresentes = form.selecionadosKeys.filter((k) => k.startsWith("VISITANTE-")).length;
-  const total = membrosPresentes + visitantesPresentes;
+  const membrosPresentes   = form.selecionadosKeys.filter(k=>k.startsWith("MEMBRO-")).length;
+  const visitantesPresentes= form.selecionadosKeys.filter(k=>k.startsWith("VISITANTE-")).length;
+  const total              = membrosPresentes + visitantesPresentes;
 
   const handleSubmit = async () => {
-    if (!form.estudo.trim()) return alert("Por favor, informe o tema do estudo.");
-
+    if (!form.estudo.trim()) return alert("Informe o tema do estudo.");
     try {
       setEnviando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-
       const payload = {
         celulaId: Number(form.celulaId),
         dataReuniao: form.dataReuniao,
         estudo: form.estudo.trim(),
-        membrosPresentesIds: form.selecionadosKeys
-            .filter(k => k.startsWith("MEMBRO-"))
-            .map(k => Number(k.replace("MEMBRO-", ""))),
-        visitantesPresentes: form.selecionadosKeys
-            .filter(k => k.startsWith("VISITANTE-"))
-            .map(k => ({
-              id: Number(k.replace("VISITANTE-", "")),
-              decisaoEspiritual: form.decisoes[k] || "NENHUMA"
-            }))
+        membrosPresentesIds: form.selecionadosKeys.filter(k=>k.startsWith("MEMBRO-")).map(k=>Number(k.replace("MEMBRO-",""))),
+        visitantesPresentes: form.selecionadosKeys.filter(k=>k.startsWith("VISITANTE-")).map(k=>({ id:Number(k.replace("VISITANTE-","")), decisaoEspiritual:form.decisoes[k]||"NENHUMA" })),
       };
-
-      await api.post("/relatorios", payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      alert("Relatório enviado com sucesso! 🛡️");
-      setForm(f => ({ ...f, estudo: "", selecionadosKeys: [], decisoes: {} }));
+      await api.post("/relatorios", payload, { headers:{ Authorization:`Bearer ${token}` } });
+      alert("Relatório enviado com sucesso!");
+      setForm(f => ({ ...f, estudo:"", selecionadosKeys:[], decisoes:{} }));
     } catch (err) {
-      const msg = err.response?.data?.message || "Erro ao enviar relatório.";
-      alert(msg);
-    } finally {
-      setEnviando(false);
-    }
+      alert(err.response?.data?.message || "Erro ao enviar relatório.");
+    } finally { setEnviando(false); }
   };
 
+  const nomeCelula     = celula?.nome             || "Carregando...";
   const nomeUsuarioLider = celula?.lider?.nome || celula?.usuario?.nome || "Líder";
-  const nomeCelula = celula?.nome || "Carregando...";
+  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
+  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
-  if (loading) {
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0a0f]">
-          <Loader2 className="animate-spin text-indigo-500" size={48} />
+  const globalStyles = `
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+    * { box-sizing:border-box; }
+    @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+    @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
+    @keyframes spin   { to{transform:rotate(360deg)} }
+
+    .ieq-bg-stripe {
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:repeating-linear-gradient(-55deg,
+        ${isDark?"rgba(200,16,46,.04)":"rgba(200,16,46,.05)"} 0 10px,transparent 10px 20px,
+        ${isDark?"rgba(253,184,19,.03)":"rgba(253,184,19,.04)"} 20px 30px,transparent 30px 40px);
+      background-size:60px 60px; animation:stripe 8s linear infinite;
+    }
+
+    .ieq-card {
+      background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
+      border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};
+      border-radius:14px; backdrop-filter:blur(24px);
+    }
+
+    .ieq-input {
+      width:100%;
+      background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
+      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
+      color:${tp}; padding:12px 16px; border-radius:8px; outline:none;
+      font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
+    }
+    .ieq-input:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
+    .ieq-input::placeholder { color:${ts}; }
+
+    .ieq-select {
+      width:100%;
+      background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
+      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
+      color:${tp}; padding:12px 16px; border-radius:8px; outline:none;
+      font-family:'EB Garamond',serif; font-size:15px; cursor:pointer; transition:all .25s; appearance:none;
+    }
+    .ieq-select:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
+
+    .ieq-label {
+      display:block; margin-bottom:6px;
+      font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.18em; color:${IEQ.red};
+    }
+
+    .ieq-person-row {
+      border-bottom:1px solid ${isDark?"rgba(200,16,46,.08)":"rgba(200,16,46,.07)"};
+      transition:background .2s;
+    }
+    .ieq-person-row:last-child { border-bottom:none; }
+
+    .ieq-kpi {
+      background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
+      border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};
+      border-radius:12px; padding:20px; text-align:center;
+    }
+
+    .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
+    .spin-icon  { animation:spin 1s linear infinite; }
+    .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark?"rgba(200,16,46,.25)":"rgba(200,16,46,.2)"},transparent); }
+  `;
+
+  if (loading) return (
+      <div style={{ minHeight:"60vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap'); @keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <div style={{ textAlign:"center" }}>
+          <QuadrangularCross size={40} />
+          <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".2em", color:IEQ.red, marginTop:14 }}>CARREGANDO...</p>
         </div>
-    );
-  }
+      </div>
+  );
 
   return (
-      <div className="min-h-screen transition-colors duration-500 bg-slate-50 dark:bg-[#0a0a0f] font-sans">
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-          .custom-scrollbar::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
-          .card-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        `}</style>
+      <div style={{ minHeight:"100vh", position:"relative", paddingBottom:120 }}>
+        <style>{globalStyles}</style>
+        <div className="ieq-bg-stripe" />
 
-        {/* Hero Header */}
-        <div className="relative bg-indigo-600 pt-24 pb-44 px-6 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-500 rounded-full blur-[120px] opacity-50"></div>
-            <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] bg-indigo-400 rounded-full blur-[100px] opacity-30"></div>
+        <div style={{ position:"relative", zIndex:1, maxWidth:720, margin:"0 auto", padding:"0 16px" }}>
+
+          {/* Hero */}
+          <div style={{
+            padding:"40px 40px 36px",
+            marginBottom:24,
+            background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`,
+            borderRadius:14, position:"relative", overflow:"hidden",
+          }}>
+            <div style={{ position:"absolute", inset:0, backgroundImage:`repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)`, backgroundSize:"40px 40px" }} />
+            <div style={{ position:"relative", zIndex:1 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
+                <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+                  <div className="pulse-ring" style={{ width:64, height:64 }} />
+                  <div style={{ width:48, height:48, borderRadius:"50%", background:"rgba(255,255,255,.1)", border:"1px solid rgba(255,255,255,.2)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    <QuadrangularCross size={28} />
+                  </div>
+                </div>
+                <div>
+                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".22em", color:"rgba(255,255,255,.5)", margin:0 }}>RELATÓRIO SEMANAL</p>
+                  <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:22, fontWeight:700, color:"#fff", margin:"4px 0 0", letterSpacing:".1em" }}>
+                    {nomeCelula.toUpperCase()}
+                  </h1>
+                </div>
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:38, height:38, borderRadius:8, background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.2)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <UserCheck size={18} style={{ color:"#fff" }} />
+                </div>
+                <div>
+                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".18em", color:"rgba(255,255,255,.5)", margin:0 }}>LÍDER RESPONSÁVEL</p>
+                  <p style={{ fontFamily:"'EB Garamond',serif", fontSize:16, fontWeight:600, color:"#fff", margin:0 }}>{nomeUsuarioLider}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="max-w-2xl mx-auto relative z-10 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 mb-6">
-              <Sparkles size={14} className="text-indigo-200" />
-              <span className="text-[10px] font-black tracking-[0.2em] uppercase text-white">Relatório Semanal</span>
-            </div>
-
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
-              {nomeCelula}
-            </h1>
-
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md shadow-lg">
-                <UserCheck size={24} className="text-white" />
+          {/* Dados da reunião */}
+          <div className="ieq-card" style={{ padding:"26px 28px", marginBottom:16 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+              <div>
+                <label className="ieq-label"><Calendar size={11} style={{ display:"inline", marginRight:6 }} />DATA DA REUNIÃO</label>
+                <input className="ieq-input" type="date" value={form.dataReuniao} onChange={e => setForm({...form, dataReuniao:e.target.value})} />
               </div>
-              <div className="text-left">
-                <p className="text-indigo-200 text-[10px] font-black uppercase tracking-[0.2em] leading-none mb-1">Líder Responsável</p>
-                <p className="text-white font-bold text-xl tracking-tight">{nomeUsuarioLider}</p>
+              <div>
+                <label className="ieq-label"><BookOpen size={11} style={{ display:"inline", marginRight:6 }} />TEMA DO ESTUDO</label>
+                <input className="ieq-input" placeholder="Qual foi o estudo de hoje?" value={form.estudo} onChange={e => setForm({...form, estudo:e.target.value})} />
               </div>
             </div>
           </div>
-        </div>
 
-        <main className="max-w-2xl mx-auto px-4 -mt-28 pb-40 relative z-20 space-y-6">
-
-          {/* Card de Informações */}
-          <section className="card-blur rounded-[2.5rem] p-8 shadow-2xl border transition-all bg-white border-slate-200 dark:bg-[#16161f]/80 dark:border-white/10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ml-1 text-indigo-600 dark:text-indigo-400">
-                  <Calendar size={14} /> Data da Reunião
-                </label>
-                <input
-                    type="date"
-                    value={form.dataReuniao}
-                    onChange={(e) => setForm({ ...form, dataReuniao: e.target.value })}
-                    className="w-full rounded-2xl p-4 outline-none border transition-all font-bold bg-slate-100 border-slate-200 text-slate-800 focus:border-indigo-500 dark:bg-white/5 dark:border-white/10 dark:text-white dark:focus:border-indigo-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ml-1 text-indigo-600 dark:text-indigo-400">
-                  <BookOpen size={14} /> Tema do Estudo
-                </label>
-                <input
-                    placeholder="Qual foi o estudo de hoje?"
-                    value={form.estudo}
-                    onChange={(e) => setForm({ ...form, estudo: e.target.value })}
-                    className="w-full rounded-2xl p-4 outline-none border transition-all font-bold bg-slate-100 border-slate-200 text-slate-800 focus:border-indigo-500 dark:bg-white/5 dark:border-white/10 dark:text-white dark:focus:border-indigo-500"
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* Dashboard de Presença */}
-          <div className="grid grid-cols-3 gap-4">
+          {/* KPIs */}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:16 }}>
             {[
-              { label: 'Membros', val: membrosPresentes, color: 'text-indigo-500', bg: 'bg-white dark:bg-[#16161f]' },
-              { label: 'Visitantes', val: visitantesPresentes, color: 'text-amber-500', bg: 'bg-white dark:bg-[#16161f]' },
-              { label: 'Total', val: total, color: 'text-white', bg: 'bg-indigo-600' }
-            ].map((item, i) => (
-                <div key={i} className={`rounded-[2rem] p-5 text-center shadow-xl border border-slate-200 dark:border-white/5 ${item.bg}`}>
-                  <p className={`text-[10px] font-black uppercase tracking-tighter mb-1 ${item.color === 'text-white' ? 'text-indigo-100' : 'text-slate-500 dark:text-slate-400'}`}>{item.label}</p>
-                  <p className={`text-4xl font-black ${item.color}`}>{item.val}</p>
+              { label:"MEMBROS",    val:membrosPresentes,    color:IEQ.red },
+              { label:"VISITANTES", val:visitantesPresentes, color:IEQ.blue },
+              { label:"TOTAL",      val:total,               color:IEQ.yellow, highlight:true },
+            ].map(({ label, val, color, highlight }) => (
+                <div key={label} className="ieq-kpi" style={ highlight ? { background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border:"none" } : {} }>
+                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".18em", color: highlight?"rgba(255,255,255,.6)":ts, margin:"0 0 6px" }}>{label}</p>
+                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:38, fontWeight:700, color: highlight?"#fff":color, margin:0, lineHeight:1 }}>{val}</p>
                 </div>
             ))}
           </div>
 
-          {/* Lista de Chamada */}
-          <section className="card-blur rounded-[2.5rem] overflow-hidden shadow-2xl border transition-all bg-white border-slate-200 dark:bg-[#16161f]/80 dark:border-white/10">
-            <div className="px-8 py-6 border-b flex justify-between items-center border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-white/[0.02]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
-                  <Users2 size={22} />
-                </div>
-                <h2 className="text-xl font-extrabold text-slate-800 dark:text-white">Chamada</h2>
-              </div>
+          {/* Lista de chamada */}
+          <div className="ieq-card" style={{ overflow:"hidden", marginBottom:16 }}>
+            <div style={{ padding:"20px 24px", borderBottom:`1px solid ${isDark?"rgba(200,16,46,.1)":"rgba(200,16,46,.08)"}`, display:"flex", alignItems:"center", gap:10 }}>
+              <Users2 size={18} style={{ color:IEQ.red }} />
+              <span style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".16em", color:tp }}>CHAMADA</span>
+              <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color:ts, marginLeft:"auto" }}>{pessoas.length} PESSOAS</span>
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div style={{ maxHeight:"55vh", overflowY:"auto" }}>
               {pessoas.map((pessoa) => {
-                const marcado = form.selecionadosKeys.includes(pessoa.uKey);
+                const marcado     = form.selecionadosKeys.includes(pessoa.uKey);
                 const isVisitante = pessoa.tipo === "VISITANTE";
-                const processing = processingIds.has(pessoa.uKey);
+                const processing  = processingIds.has(pessoa.uKey);
 
                 return (
-                    <div key={pessoa.uKey} className={`group transition-all ${marcado ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''}`}>
+                    <div key={pessoa.uKey} className="ieq-person-row" style={{ background: marcado ? (isDark?"rgba(200,16,46,.07)":"rgba(200,16,46,.05)") : "transparent" }}>
                       <button
                           onClick={() => alternarPresenca(pessoa.uKey)}
                           disabled={processing}
-                          className="w-full flex items-center justify-between px-8 py-5 text-left active:scale-[0.98] transition-transform"
+                          style={{ width:"100%", background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"16px 24px", transition:"all .2s" }}
                       >
-                        <div className="flex items-center gap-5">
-                          <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all duration-500 shadow-sm
-                        ${marcado ? 'bg-indigo-600 text-white scale-110' : 'bg-slate-200 text-slate-500 dark:bg-white/5 dark:text-slate-600'}`}>
-                            {processing ? <Loader2 size={20} className="animate-spin" /> : pessoa.nome.charAt(0)}
+                        <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                          <div style={{
+                            width:44, height:44, borderRadius:8,
+                            background: marcado ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark?"rgba(255,255,255,.06)":"rgba(200,16,46,.08)"),
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            color: marcado?"#fff":(isDark?IEQ.offWhite:"#1A0A0D"),
+                            fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:16,
+                            transition:"all .3s", transform: marcado?"scale(1.05)":"scale(1)",
+                          }}>
+                            {processing ? <Loader2 size={18} className="spin-icon" /> : pessoa.nome.charAt(0)}
                           </div>
-                          <div>
-                            <p className={`text-base font-bold transition-colors ${marcado ? 'text-indigo-800 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-                              {pessoa.nome}
-                            </p>
-                            <span className={`text-[10px] font-black tracking-[0.15em] uppercase ${isVisitante ? 'text-amber-500' : 'text-indigo-500'}`}>
-                              {pessoa.tipo}
-                            </span>
+                          <div style={{ textAlign:"left" }}>
+                            <p style={{ fontFamily:"'EB Garamond',serif", fontSize:16, fontWeight: marcado?600:400, color: marcado?tp:ts, margin:0 }}>{pessoa.nome}</p>
+                            <span style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".15em", color: isVisitante?IEQ.yellow:IEQ.red }}>{pessoa.tipo}</span>
                           </div>
                         </div>
-
-                        <div className={`w-7 h-7 rounded-xl border-2 flex items-center justify-center transition-all duration-300
-                      ${marcado ? 'bg-indigo-500 border-indigo-500 shadow-lg shadow-indigo-500/40' : 'border-slate-300 dark:border-white/10'}`}>
-                          {marcado && <CheckCircle2 size={16} className="text-white" />}
+                        <div style={{
+                          width:26, height:26, borderRadius:6,
+                          border: `2px solid ${marcado?IEQ.red:(isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)")}`,
+                          background: marcado?IEQ.red:"transparent",
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          transition:"all .3s",
+                        }}>
+                          {marcado && <CheckCircle2 size={14} style={{ color:"#fff" }} />}
                         </div>
                       </button>
 
                       {marcado && isVisitante && (
-                          <div className="px-8 pb-6 pl-[5.5rem] animate-in slide-in-from-top-2 duration-300">
-                            <div className="rounded-3xl p-5 border bg-white border-slate-200 shadow-sm dark:bg-black/40 dark:border-white/5">
-                              <label className="flex items-center gap-2 text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-3">
-                                <Trophy size={14} /> Decisão Espiritual
+                          <div style={{ padding:"0 24px 18px 82px" }}>
+                            <div className="ieq-card" style={{ padding:"16px 18px" }}>
+                              <label className="ieq-label" style={{ display:"flex", alignItems:"center", gap:6 }}>
+                                <Trophy size={11} /> DECISÃO ESPIRITUAL
                               </label>
-                              <div className="relative">
+                              <div style={{ position:"relative" }}>
                                 <select
+                                    className="ieq-select"
                                     value={form.decisoes[pessoa.uKey] || "NENHUMA"}
-                                    onChange={(e) => setForm(prev => ({
-                                      ...prev, decisoes: { ...prev.decisoes, [pessoa.uKey]: e.target.value }
-                                    }))}
-                                    className="w-full appearance-none outline-none border rounded-2xl py-4 px-5 text-xs font-black transition-all bg-slate-50 border-slate-200 text-slate-800 focus:border-indigo-500 dark:bg-[#1a1a24] dark:border-white/10 dark:text-white dark:focus:border-indigo-500"
+                                    onChange={e => setForm(prev => ({ ...prev, decisoes:{ ...prev.decisoes, [pessoa.uKey]:e.target.value } }))}
                                 >
                                   <option value="NENHUMA">Só visita</option>
                                   <option value="ACEITOU_JESUS">Aceitou Jesus</option>
                                   <option value="RECONCILIOU">Reconciliou</option>
                                   <option value="BATISMO_AGUAS">Deseja Batismo</option>
                                 </select>
-                                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                                <ChevronDown size={14} style={{ position:"absolute", right:14, top:"50%", transform:"translateY(-50%)", color:ts, pointerEvents:"none" }} />
                               </div>
                             </div>
                           </div>
@@ -293,22 +327,24 @@ export default function TelaRelatorio() {
                 );
               })}
             </div>
-          </section>
-        </main>
+          </div>
+        </div>
 
-        <div className="fixed bottom-0 left-0 w-full p-8 z-50 pointer-events-none">
-          <div className="absolute inset-0 h-40 bottom-0 pointer-events-none bg-gradient-to-t from-slate-50 to-transparent dark:from-[#0a0a0f]"></div>
-          <div className="max-w-2xl mx-auto relative pointer-events-auto">
+        {/* Botão fixo */}
+        <div style={{ position:"fixed", bottom:0, left:0, width:"100%", padding:"16px 24px", zIndex:50, background: isDark?"linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)":"linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)" }}>
+          <div style={{ maxWidth:720, margin:"0 auto" }}>
             <button
                 onClick={handleSubmit}
                 disabled={enviando || !form.estudo.trim()}
-                className={`w-full py-6 rounded-[2.5rem] font-black text-sm tracking-[0.3em] uppercase shadow-2xl flex items-center justify-center gap-4 transition-all active:scale-95
-              ${enviando || !form.estudo.trim()
-                    ? "bg-slate-400 text-slate-100 cursor-not-allowed"
-                    : "bg-indigo-600 text-white dark:bg-white dark:text-indigo-900"}`}
+                style={{
+                  width:"100%", padding:"17px 0", borderRadius:10, border:"none",
+                  background: (enviando||!form.estudo.trim()) ? "rgba(200,16,46,.3)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
+                  color:"#fff", cursor: (enviando||!form.estudo.trim()) ? "not-allowed":"pointer",
+                  fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".22em",
+                  display:"flex", alignItems:"center", justifyContent:"center", gap:10, transition:"all .25s",
+                }}
             >
-              {enviando ? <Loader2 className="animate-spin" size={24} /> : <ClipboardCheck size={24} />}
-              {enviando ? "Enviando..." : `Finalizar (${total})`}
+              {enviando ? <><Loader2 size={17} className="spin-icon" /> ENVIANDO...</> : <><ClipboardCheck size={17} /> FINALIZAR RELATÓRIO ({total})</>}
             </button>
           </div>
         </div>

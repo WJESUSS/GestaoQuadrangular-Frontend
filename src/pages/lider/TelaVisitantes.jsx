@@ -2,37 +2,61 @@ import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import {
   Plus, Phone, Calendar, X, Search,
-  Loader2, UserCheck, Mail, ExternalLink, Sparkles
+  Loader2, UserCheck, Mail, ExternalLink,
 } from "lucide-react";
 
-export default function TelaVisitantes({ celulaId }) {
-  const [loading, setLoading] = useState(false);
-  const [visitantes, setVisitantes] = useState([]);
-  const [busca, setBusca] = useState("");
-  const [modalAberto, setModalAberto] = useState(false);
-  const [editando, setEditando] = useState(false);
+/* ─── Cores Oficiais IEQ ─── */
+const IEQ = {
+  red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
+  yellow: "#FDB813", yellowDark: "#C48C00",
+  blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
+  white: "#FFFFFF", offWhite: "#F5F0E8",
+  dark: "#0A0608", darkCard: "#110A0D",
+};
+
+function QuadrangularCross({ size = 28 }) {
+  return (
+      <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+        <defs>
+          <linearGradient id="gVV" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={IEQ.redLight} /><stop offset="100%" stopColor={IEQ.redDark} />
+          </linearGradient>
+          <linearGradient id="gHV" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={IEQ.blueDark} /><stop offset="50%" stopColor={IEQ.blueLight} /><stop offset="100%" stopColor={IEQ.blueDark} />
+          </linearGradient>
+          <filter id="glowV"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect x="38" y="4" width="24" height="92" rx="3" fill="url(#gVV)" filter="url(#glowV)" />
+        <rect x="4" y="38" width="92" height="24" rx="3" fill="url(#gHV)" filter="url(#glowV)" />
+        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowV)" />
+        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
+      </svg>
+  );
+}
+
+const listaOrigens = [
+  { id:"CONVITE",      label:"Convite",    emoji:"✉️" },
+  { id:"CASA_DE_PAZ",  label:"Casa de Paz",emoji:"🏠" },
+  { id:"EVENTO",       label:"Evento",     emoji:"🎟️" },
+  { id:"MISSSAO_70",   label:"Missão 70",  emoji:"👣" },
+  { id:"REDES_SOCIAIS",label:"Social",     emoji:"📱" },
+  { id:"CELULA",       label:"Célula",     emoji:"👥" },
+];
+
+export default function TelaVisitantes({ celulaId, isDark = false }) {
+  const [loading,              setLoading]              = useState(false);
+  const [visitantes,           setVisitantes]           = useState([]);
+  const [busca,                setBusca]                = useState("");
+  const [modalAberto,          setModalAberto]          = useState(false);
+  const [editando,             setEditando]             = useState(false);
   const [visitanteSelecionado, setVisitanteSelecionado] = useState(null);
 
   const estadoInicial = {
-    nome: "",
-    telefone: "",
-    email: "",
+    nome: "", telefone: "", email: "",
     dataPrimeiraVisita: new Date().toISOString().split("T")[0],
-    origem: "CONVITE",
-    responsavelAcompanhamento: "",
-    ativo: true,
+    origem: "CONVITE", responsavelAcompanhamento: "", ativo: true,
   };
-
   const [formVisitante, setFormVisitante] = useState(estadoInicial);
-
-  const listaOrigens = [
-    { id: 'CONVITE', label: 'Convite', emoji: '✉️' },
-    { id: 'CASA_DE_PAZ', label: 'Casa de Paz', emoji: '🏠' },
-    { id: 'EVENTO', label: 'Evento', emoji: '🎟️' },
-    { id: 'MISSSAO_70', label: 'Missão 70', emoji: '👣' },
-    { id: 'REDES_SOCIAIS', label: 'Social', emoji: '📱' },
-    { id: 'CELULA', label: 'Célula', emoji: '👥' },
-  ];
 
   const getHeaders = () => {
     const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
@@ -45,18 +69,12 @@ export default function TelaVisitantes({ celulaId }) {
       setLoading(true);
       const res = await api.get(`/visitantes/celula/${celulaId}/ativos`, { headers: getHeaders() });
       setVisitantes(res.data || []);
-    } catch (err) {
-      console.error("Erro ao carregar visitantes:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   }, [celulaId]);
 
-  useEffect(() => {
-    carregarVisitantes();
-  }, [carregarVisitantes]);
+  useEffect(() => { carregarVisitantes(); }, [carregarVisitantes]);
 
-  const handleSalvarVisitante = async (e) => {
+  const handleSalvar = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
@@ -68,128 +86,187 @@ export default function TelaVisitantes({ celulaId }) {
       }
       fecharModal();
       carregarVisitantes();
-    } catch (err) {
-      alert("Erro ao salvar dados.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { alert("Erro ao salvar dados."); } finally { setLoading(false); }
   };
 
   const abrirModal = (v = null) => {
-    if (v) {
-      setEditando(true);
-      setVisitanteSelecionado(v);
-      setFormVisitante({ ...v });
-    } else {
-      setEditando(false);
-      setFormVisitante(estadoInicial);
-    }
+    if (v) { setEditando(true); setVisitanteSelecionado(v); setFormVisitante({ ...v }); }
+    else   { setEditando(false); setFormVisitante(estadoInicial); }
     setModalAberto(true);
   };
+  const fecharModal = () => { setModalAberto(false); setFormVisitante(estadoInicial); };
 
-  const fecharModal = () => {
-    setModalAberto(false);
-    setFormVisitante(estadoInicial);
-  };
+  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
+  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+
+  const globalStyles = `
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+    * { box-sizing:border-box; }
+    @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+    @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
+    @keyframes spin   { to{transform:rotate(360deg)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+    .ieq-bg-stripe {
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:repeating-linear-gradient(-55deg,
+        ${isDark?"rgba(200,16,46,.04)":"rgba(200,16,46,.05)"} 0 10px,transparent 10px 20px,
+        ${isDark?"rgba(253,184,19,.03)":"rgba(253,184,19,.04)"} 20px 30px,transparent 30px 40px);
+      background-size:60px 60px; animation:stripe 8s linear infinite;
+    }
+
+    .ieq-card {
+      background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
+      border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};
+      border-radius:14px; backdrop-filter:blur(24px);
+    }
+
+    .ieq-visitor-card {
+      background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
+      border:1px solid ${isDark?"rgba(200,16,46,.12)":"rgba(200,16,46,.1)"};
+      border-radius:12px; padding:22px; transition:all .3s;
+      animation:fadeIn .5s ease both;
+    }
+    .ieq-visitor-card:hover { transform:translateY(-5px); border-color:${IEQ.red}; box-shadow:0 16px 40px rgba(200,16,46,.12); }
+
+    .ieq-input {
+      width:100%;
+      background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
+      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
+      color:${tp}; padding:12px 16px; border-radius:8px; outline:none;
+      font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
+    }
+    .ieq-input:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
+    .ieq-input::placeholder { color:${ts}; }
+
+    .ieq-label {
+      display:block; margin-bottom:6px;
+      font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.18em; color:${IEQ.red};
+    }
+
+    .ieq-btn-primary {
+      background:linear-gradient(135deg,${IEQ.redDark},${IEQ.red}); color:#fff;
+      border:none; border-radius:8px; padding:13px 24px; cursor:pointer;
+      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
+      display:flex; align-items:center; gap:8px; transition:all .25s;
+    }
+    .ieq-btn-primary:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
+    .ieq-btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+    .ieq-btn-primary.full { width:100%; justify-content:center; }
+
+    .ieq-origin-btn {
+      padding:8px 14px; border-radius:8px; cursor:pointer;
+      font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.12em;
+      border:1px solid; transition:all .2s;
+    }
+
+    .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
+    .spin-icon  { animation:spin 1s linear infinite; }
+    .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark?"rgba(200,16,46,.25)":"rgba(200,16,46,.2)"},transparent); margin:6px 0; }
+  `;
+
+  const filtrados = visitantes.filter(v => v.nome.toLowerCase().includes(busca.toLowerCase()));
 
   return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0f] text-slate-900 dark:text-slate-50 font-sans p-5 transition-colors duration-400">
-        <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
-        .card-blur { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
-      `}</style>
+      <div style={{ minHeight:"100vh", position:"relative", paddingBottom:48 }}>
+        <style>{globalStyles}</style>
+        <div className="ieq-bg-stripe" />
 
-        <div className="max-w-6xl mx-auto">
-          {/* HEADER */}
-          <header className="bg-white dark:bg-[#171721]/70 card-blur border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl">
-            <div className="text-center md:text-left">
-              <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-3">
-                <Sparkles size={14} /> GESTÃO DE NOVOS
+        <div style={{ position:"relative", zIndex:1, maxWidth:1100, margin:"0 auto", padding:"0 16px" }}>
+
+          {/* Header */}
+          <div className="ieq-card" style={{ padding:"28px 36px", marginBottom:24, display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:16 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:18 }}>
+              <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+                <div className="pulse-ring" style={{ width:64, height:64 }} />
+                <div style={{ width:48, height:48, borderRadius:"50%", background: isDark?"#1A0A0D":"#fff", border:"1px solid rgba(200,16,46,.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <QuadrangularCross size={28} />
+                </div>
               </div>
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Visitantes</h1>
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Acompanhamento e Consolidação</p>
+              <div>
+                <div style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"4px 12px", borderRadius:99, background:"rgba(200,16,46,.1)", border:"1px solid rgba(200,16,46,.2)", marginBottom:8 }}>
+                  <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".18em", color:IEQ.red }}>GESTÃO DE NOVOS</span>
+                </div>
+                <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:20, fontWeight:700, letterSpacing:".14em", color:tp, margin:0 }}>VISITANTES</h1>
+                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:ts, margin:"2px 0 0" }}>Acompanhamento e Consolidação</p>
+              </div>
             </div>
-            <button
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 transition-all active:scale-95 shadow-lg shadow-indigo-500/25"
-                onClick={() => abrirModal()}
-            >
-              <Plus size={20} strokeWidth={3} />
-              NOVO VISITANTE
+            <button className="ieq-btn-primary" onClick={() => abrirModal()}>
+              <Plus size={16} strokeWidth={3} /> NOVO VISITANTE
             </button>
-          </header>
-
-          {/* SEARCH */}
-          <div className="relative mb-10">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
-            <input
-                type="text"
-                placeholder="Pesquisar por nome do visitante..."
-                className="w-full bg-white dark:bg-[#171721]/70 border border-slate-200 dark:border-white/10 rounded-3xl py-5 pl-16 pr-6 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all text-lg"
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-            />
           </div>
 
-          {/* GRID */}
+          {/* Busca */}
+          <div style={{ position:"relative", marginBottom:24 }}>
+            <Search size={18} style={{ position:"absolute", left:18, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }} />
+            <input className="ieq-input" style={{ paddingLeft:48, borderRadius:10, fontSize:15 }}
+                   placeholder="Pesquisar por nome do visitante..."
+                   value={busca} onChange={e => setBusca(e.target.value)} />
+          </div>
+
+          {/* Grid */}
           {loading && visitantes.length === 0 ? (
-              <div className="flex flex-col items-center py-24 opacity-50">
-                <Loader2 className="animate-spin text-indigo-500 mb-4" size={48} />
-                <p className="font-bold tracking-widest text-xs uppercase">Sincronizando base de dados...</p>
+              <div style={{ textAlign:"center", padding:"60px 0", color:ts }}>
+                <Loader2 size={40} style={{ color:IEQ.red, animation:"spin 1s linear infinite", margin:"0 auto 12px" }} />
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em" }}>CARREGANDO VISITANTES...</p>
               </div>
           ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {visitantes.filter(v => v.nome.toLowerCase().includes(busca.toLowerCase())).map((v) => (
-                    <div key={v.id} className="bg-white dark:bg-[#171721]/70 border border-slate-200 dark:border-white/10 rounded-[2rem] p-6 hover:translate-y-[-8px] hover:border-indigo-500/50 transition-all duration-300 shadow-lg group">
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg">
-                          {v.nome.charAt(0)}
-                        </div>
-                        <div className="text-right">
-                    <span className="text-[10px] font-black bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-lg uppercase">
-                      {v.origem?.replace('_', ' ')}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:16 }}>
+                {filtrados.map((v) => (
+                    <div key={v.id} className="ieq-visitor-card">
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18 }}>
+                        <div style={{
+                          width:48, height:48, borderRadius:10,
+                          background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`,
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          color:"#fff", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:20,
+                        }}>{v.nome.charAt(0)}</div>
+                        <div style={{ textAlign:"right" }}>
+                    <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".12em", color:IEQ.red, background:"rgba(200,16,46,.1)", padding:"3px 10px", borderRadius:4 }}>
+                      {v.origem?.replace("_", " ")}
                     </span>
-                          <p className="text-[11px] text-slate-400 mt-2 font-bold">
-                            {new Date(v.dataPrimeiraVisita).toLocaleDateString('pt-BR')}
+                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".1em", color:ts, marginTop:6 }}>
+                            {new Date(v.dataPrimeiraVisita).toLocaleDateString("pt-BR")}
                           </p>
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <h3 className="text-xl font-extrabold tracking-tight group-hover:text-indigo-500 transition-colors">{v.nome}</h3>
+                      <h3 style={{ fontFamily:"'EB Garamond',serif", fontSize:18, fontWeight:600, color:tp, margin:"0 0 12px" }}>{v.nome}</h3>
 
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-3 text-sm font-medium text-slate-500 dark:text-slate-400">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-                              <Phone size={14} />
-                            </div>
-                            {v.telefone}
+                      <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:16 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                          <div style={{ width:30, height:30, borderRadius:6, background:"rgba(200,16,46,.08)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                            <Phone size={13} style={{ color:IEQ.red }} />
                           </div>
-                          {v.email && (
-                              <div className="flex items-center gap-3 text-sm font-medium text-slate-500 dark:text-slate-400">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-                                  <Mail size={14} />
-                                </div>
-                                <span className="truncate">{v.email}</span>
+                          <span style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:ts }}>{v.telefone}</span>
+                        </div>
+                        {v.email && (
+                            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                              <div style={{ width:30, height:30, borderRadius:6, background:"rgba(200,16,46,.08)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                <Mail size={13} style={{ color:IEQ.red }} />
                               </div>
-                          )}
-                        </div>
+                              <span style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:ts, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{v.email}</span>
+                            </div>
+                        )}
+                      </div>
 
-                        <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex justify-between items-center">
-                          <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Acompanhamento</p>
-                            <p className="text-sm font-bold text-indigo-500">
-                              {v.responsavelAcompanhamento || "Pendente"}
-                            </p>
-                          </div>
-                          <button
-                              onClick={() => abrirModal(v)}
-                              className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center"
-                          >
-                            <ExternalLink size={18} />
-                          </button>
+                      <div className="divider" />
+
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:10 }}>
+                        <div>
+                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".12em", color:ts, margin:"0 0 2px" }}>ACOMPANHAMENTO</p>
+                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:IEQ.red, fontWeight:600, margin:0 }}>{v.responsavelAcompanhamento || "Pendente"}</p>
                         </div>
+                        <button onClick={() => abrirModal(v)} style={{
+                          width:36, height:36, borderRadius:8,
+                          background:"rgba(200,16,46,.08)", border:`1px solid rgba(200,16,46,.2)`,
+                          color:IEQ.red, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
+                          transition:"all .2s",
+                        }}
+                                onMouseEnter={e => { e.currentTarget.style.background=IEQ.red; e.currentTarget.style.color="#fff"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background="rgba(200,16,46,.08)"; e.currentTarget.style.color=IEQ.red; }}>
+                          <ExternalLink size={16} />
+                        </button>
                       </div>
                     </div>
                 ))}
@@ -197,91 +274,69 @@ export default function TelaVisitantes({ celulaId }) {
           )}
         </div>
 
-        {/* MODAL */}
+        {/* Modal */}
         {modalAberto && (
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-              <div className="bg-white dark:bg-[#0a0a0f] border border-slate-200 dark:border-white/10 w-full max-w-[550px] rounded-[2.5rem] p-8 md:p-10 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar relative">
-                <div className="flex justify-between items-start mb-8">
+            <div style={{ position:"fixed", inset:0, zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)" }}>
+              <div className="ieq-card" style={{ width:"100%", maxWidth:520, padding:"40px 36px", maxHeight:"90vh", overflowY:"auto", position:"relative", animation:"fadeIn .3s ease" }}>
+
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:28 }}>
                   <div>
-                    <h2 className="text-2xl font-black tracking-tight">{editando ? 'Editar Perfil' : 'Cadastrar Visita'}</h2>
-                    <p className="text-sm text-slate-500 font-medium">Insira os dados para o discipulado.</p>
+                    <QuadrangularCross size={28} />
+                    <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".15em", color:tp, margin:"12px 0 4px" }}>
+                      {editando ? "EDITAR PERFIL" : "CADASTRAR VISITA"}
+                    </h2>
+                    <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:ts, margin:0 }}>Insira os dados para o discipulado.</p>
                   </div>
-                  <button onClick={fecharModal} className="p-2 hover:bg-red-500/10 text-slate-400 hover:text-red-500 rounded-xl transition-all">
-                    <X size={24} />
+                  <button onClick={fecharModal} style={{ background:"none", border:"none", cursor:"pointer", color:ts, padding:6, borderRadius:6 }}>
+                    <X size={22} />
                   </button>
                 </div>
 
-                <form onSubmit={handleSalvarVisitante} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Nome Completo</label>
-                    <input
-                        required
-                        className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 outline-none focus:border-indigo-500 transition-all font-bold"
-                        value={formVisitante.nome}
-                        onChange={(e) => setFormVisitante({ ...formVisitante, nome: e.target.value })}
-                    />
-                  </div>
+                <div className="divider" style={{ marginBottom:24 }} />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black text-slate-400 uppercase ml-1">WhatsApp</label>
-                      <input
-                          className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 outline-none focus:border-indigo-500 transition-all font-bold"
-                          placeholder="(00) 00000-0000"
-                          value={formVisitante.telefone}
-                          onChange={(e) => setFormVisitante({ ...formVisitante, telefone: e.target.value })}
-                      />
+                <form onSubmit={handleSalvar} style={{ display:"flex", flexDirection:"column", gap:16 }}>
+                  <div>
+                    <label className="ieq-label">NOME COMPLETO</label>
+                    <input className="ieq-input" required value={formVisitante.nome} onChange={e => setFormVisitante({...formVisitante, nome:e.target.value})} placeholder="Nome completo" />
+                  </div>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+                    <div>
+                      <label className="ieq-label">WHATSAPP</label>
+                      <input className="ieq-input" value={formVisitante.telefone} onChange={e => setFormVisitante({...formVisitante, telefone:e.target.value})} placeholder="(00) 00000-0000" />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Data da Visita</label>
-                      <input
-                          type="date"
-                          className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 outline-none focus:border-indigo-500 transition-all font-bold"
-                          value={formVisitante.dataPrimeiraVisita}
-                          onChange={(e) => setFormVisitante({ ...formVisitante, dataPrimeiraVisita: e.target.value })}
-                      />
+                    <div>
+                      <label className="ieq-label">DATA DA VISITA</label>
+                      <input className="ieq-input" type="date" value={formVisitante.dataPrimeiraVisita} onChange={e => setFormVisitante({...formVisitante, dataPrimeiraVisita:e.target.value})} />
                     </div>
                   </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Quem irá consolidar?</label>
-                    <div className="relative">
-                      <UserCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500" size={18} />
-                      <input
-                          placeholder="Nome do líder ou obreiro"
-                          className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 pl-12 outline-none focus:border-indigo-500 transition-all font-bold"
-                          value={formVisitante.responsavelAcompanhamento}
-                          onChange={(e) => setFormVisitante({ ...formVisitante, responsavelAcompanhamento: e.target.value })}
-                      />
+                  <div>
+                    <label className="ieq-label">QUEM IRÁ CONSOLIDAR?</label>
+                    <div style={{ position:"relative" }}>
+                      <UserCheck size={16} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red }} />
+                      <input className="ieq-input" style={{ paddingLeft:42 }} value={formVisitante.responsavelAcompanhamento} onChange={e => setFormVisitante({...formVisitante, responsavelAcompanhamento:e.target.value})} placeholder="Nome do líder ou obreiro" />
                     </div>
                   </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Origem da Visita</label>
-                    <div className="flex flex-wrap gap-2">
-                      {listaOrigens.map((item) => (
-                          <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => setFormVisitante({ ...formVisitante, origem: item.id })}
-                              className={`py-2.5 px-4 rounded-xl text-[10px] font-black uppercase transition-all border ${
-                                  formVisitante.origem === item.id
-                                      ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                                      : "bg-slate-100 dark:bg-white/5 border-transparent text-slate-500 dark:text-slate-400 hover:border-indigo-500"
-                              }`}
-                          >
-                            {item.emoji} {item.label}
+                  <div>
+                    <label className="ieq-label">ORIGEM DA VISITA</label>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:4 }}>
+                      {listaOrigens.map(item => (
+                          <button key={item.id} type="button" className="ieq-origin-btn"
+                                  onClick={() => setFormVisitante({...formVisitante, origem:item.id})}
+                                  style={{
+                                    background: formVisitante.origem===item.id ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : "rgba(200,16,46,.06)",
+                                    borderColor: formVisitante.origem===item.id ? IEQ.red : "rgba(200,16,46,.2)",
+                                    color: formVisitante.origem===item.id ? "#fff" : ts,
+                                  }}>
+                            {item.emoji} {item.label.toUpperCase()}
                           </button>
                       ))}
                     </div>
                   </div>
 
-                  <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-2xl font-black text-xs tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-indigo-500/25 flex items-center justify-center gap-3"
-                  >
-                    {loading ? <Loader2 className="animate-spin" /> : (editando ? 'ATUALIZAR DADOS' : 'FINALIZAR CADASTRO')}
+                  <div className="divider" />
+
+                  <button type="submit" className="ieq-btn-primary full" disabled={loading}>
+                    {loading ? <><Loader2 size={16} className="spin-icon" /> SALVANDO...</> : (editando ? "ATUALIZAR DADOS" : "FINALIZAR CADASTRO")}
                   </button>
                 </form>
               </div>
