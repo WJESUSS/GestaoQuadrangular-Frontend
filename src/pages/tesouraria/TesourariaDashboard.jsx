@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import api from "../../services/api.js";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,7 +17,6 @@ const MESES = [
 
 const spinKeyframes = `@keyframes dashSpin { to { transform: rotate(360deg); } }`;
 
-/* Detecta dispositivo touch — roda uma vez, fora do componente */
 const isTouchDevice = () =>
     typeof window !== "undefined" &&
     ("ontouchstart" in window || navigator.maxTouchPoints > 0);
@@ -27,30 +26,41 @@ export default function TesourariaDashboard() {
   const hoje = new Date();
 
   const [modo, setModo] = useState("mensal");
-  const [mes, setMes] = useState(hoje.getMonth() + 1);
-  const [ano, setAno] = useState(hoje.getFullYear());
+  const [mes, setMes]   = useState(hoje.getMonth() + 1);
+  const [ano, setAno]   = useState(hoje.getFullYear());
 
   const [resumo, setResumo] = useState({ DIZIMO: 0, BRONZE: 0, PRATA: 0, OURO: 0 });
   const [loading, setLoading] = useState(true);
   const [showOverlay, setShowOverlay] = useState(false);
-  const overlayTimer = useRef(null);
-  const isTouch = useRef(isTouchDevice());
 
-  const carregarResumo = useCallback(async () => {
+  // Refs para sempre ter o valor atual sem re-criar carregarResumo
+  const modoRef = useRef(modo);
+  const mesRef  = useRef(mes);
+  const anoRef  = useRef(ano);
+  const timerRef = useRef(null);
+  const isTouch  = useRef(isTouchDevice());
+
+  // Sincroniza refs com estado
+  modoRef.current = modo;
+  mesRef.current  = mes;
+  anoRef.current  = ano;
+
+  // Função estável — não está no useCallback, não recria nunca
+  const carregarResumo = async () => {
     try {
       setLoading(true);
-      if (isTouch.current) setShowOverlay(true); // overlay só no mobile/touch
+      if (isTouch.current) setShowOverlay(true);
 
       let dados = [];
 
-      if (modo === "mensal") {
+      if (modoRef.current === "mensal") {
         const res = await api.get("/tesouraria/relatorio-tesouraria", {
-          params: { mes, ano },
+          params: { mes: mesRef.current, ano: anoRef.current },
         });
         dados = res.data.registros || [];
       } else {
         const res = await api.get("/tesouraria/listar", {
-          params: { ano },
+          params: { ano: anoRef.current },
         });
         dados = res.data || [];
       }
@@ -67,23 +77,25 @@ export default function TesourariaDashboard() {
     } catch (err) {
       console.error("Erro ao carregar resumo:", err);
     } finally {
-      overlayTimer.current = setTimeout(() => {
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
         setLoading(false);
         setShowOverlay(false);
       }, 600);
     }
-  }, [modo, mes, ano]);
+  };
 
+  // Dispara quando modo/mes/ano mudam — sem useCallback no meio
   useEffect(() => {
     carregarResumo();
-    return () => clearTimeout(overlayTimer.current);
-  }, [carregarResumo]);
+    return () => clearTimeout(timerRef.current);
+  }, [modo, mes, ano]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const navegarParaFiltro = (categoria) => {
     navigate("/tesouraria/relatorio", { state: { filtroInicial: categoria } });
   };
 
-  const totalGeral = resumo.DIZIMO + resumo.BRONZE + resumo.PRATA + resumo.OURO;
+  const totalGeral   = resumo.DIZIMO + resumo.BRONZE + resumo.PRATA + resumo.OURO;
   const totalOfertas = resumo.BRONZE + resumo.PRATA + resumo.OURO;
 
   const dadosGrafico = [
@@ -101,14 +113,13 @@ export default function TesourariaDashboard() {
       <>
         <style>{spinKeyframes}</style>
 
-        {/* Overlay suave — apenas em dispositivos touch/mobile */}
         {showOverlay && (
             <div style={{
               position: "fixed", inset: 0, zIndex: 50,
               display: "flex", alignItems: "center", justifyContent: "center",
-              background: "rgba(255,255,255,0.55)",
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
+              background: "rgba(255,255,255,0.6)",
+              backdropFilter: "blur(3px)",
+              WebkitBackdropFilter: "blur(3px)",
               pointerEvents: "none",
             }}>
               <div style={{
