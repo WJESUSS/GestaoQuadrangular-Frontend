@@ -276,6 +276,20 @@ export default function DashboardLider() {
       background: linear-gradient(90deg, transparent, ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"}, transparent);
       margin: 8px 0;
     }
+
+    /* ── CORREÇÃO: modais nunca cortam em telas pequenas ── */
+    .ieq-modal-wrapper {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      padding: 12px;
+      overflow-y: auto;
+    }
+    .ieq-modal-inner {
+      position: relative; z-index: 10;
+      width: 100%;
+      max-height: calc(100vh - 24px);
+      display: flex; flex-direction: column;
+    }
   `;
 
   const bg = isDark ? IEQ.dark : "#F0EAE8";
@@ -490,26 +504,38 @@ export default function DashboardLider() {
         {/* ── MODAL: Adicionar Membro ── */}
         <AnimatePresence>
           {showModalAddMembro && (
-              <div style={{ position:"fixed", inset:0, zIndex:50, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
+              /* ── CORREÇÃO: usa ieq-modal-wrapper para garantir scroll e sem corte ── */
+              <div className="ieq-modal-wrapper">
                 <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
                             onClick={() => setShowModalAddMembro(false)}
-                            style={{ position:"absolute", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)" }} />
-                <motion.div initial={{ scale:.92, opacity:0 }} animate={{ scale:1, opacity:1 }} exit={{ scale:.92, opacity:0 }}
-                            className="ieq-card" style={{ position:"relative", zIndex:10, width:"100%", maxWidth:520, padding:0 }}>
-                  <ModalBuscarMembro celulaId={celula?.id} isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}
-                                     onClose={() => { setShowModalAddMembro(false); carregarDados(); }} />
+                            style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }} />
+                <motion.div
+                    initial={{ scale:.92, opacity:0 }} animate={{ scale:1, opacity:1 }} exit={{ scale:.92, opacity:0 }}
+                    className="ieq-card ieq-modal-inner"
+                    style={{ maxWidth:520, overflow:"hidden" }}
+                >
+                  <ModalBuscarMembro
+                      celulaId={celula?.id}
+                      isDark={isDark}
+                      textPrimary={textPrimary}
+                      textSecondary={textSecondary}
+                      onClose={() => { setShowModalAddMembro(false); carregarDados(); }}
+                  />
                 </motion.div>
               </div>
           )}
 
           {/* ── MODAL: Solicitação Multiplicação ── */}
           {showModalMultiplicacao && (
-              <div style={{ position:"fixed", inset:0, zIndex:50, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
+              /* ── CORREÇÃO: usa ieq-modal-wrapper para garantir scroll e sem corte ── */
+              <div className="ieq-modal-wrapper">
                 <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                            style={{ position:"absolute", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)" }} />
-                <motion.div initial={{ y:40, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:40, opacity:0 }}
-                            className="ieq-card" style={{ position:"relative", zIndex:10, width:"100%", maxWidth:460, padding:"44px 40px" }}>
-
+                            style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }} />
+                <motion.div
+                    initial={{ y:40, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:40, opacity:0 }}
+                    className="ieq-card ieq-modal-inner"
+                    style={{ maxWidth:460, padding:"44px 40px", overflowY:"auto" }}
+                >
                   <div style={{ textAlign:"center", marginBottom:28 }}>
                     <QuadrangularCross size={36} />
                     <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"16px 0 6px" }}>
@@ -568,8 +594,13 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
   const filtrados = membrosSem.filter(m => m.nome?.toLowerCase().includes(busca.toLowerCase()));
 
   return (
-      <div style={{ padding:36, display:"flex", flexDirection:"column", height:520 }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+      /*
+       * CORREÇÃO: removido height:520 fixo.
+       * O modal agora cresce até max-height definido pelo ieq-modal-inner (100vh - 24px)
+       * e a lista de membros rola internamente via flex:1 + overflowY:auto.
+       */
+      <div style={{ padding:36, display:"flex", flexDirection:"column", minHeight:0, flex:1 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24, flexShrink:0 }}>
           <div>
             <QuadrangularCross size={28} />
             <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"10px 0 2px" }}>
@@ -582,12 +613,13 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
         </div>
 
         {/* Busca */}
-        <div style={{ position:"relative", marginBottom:18 }}>
+        <div style={{ position:"relative", marginBottom:18, flexShrink:0 }}>
           <Search size={16} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }} />
           <input className="ieq-input-field" style={{ paddingLeft:42 }} placeholder="Buscar por nome..." value={busca} onChange={e => setBusca(e.target.value)} />
         </div>
 
-        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:10 }}>
+        {/* Lista rolável */}
+        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:10, minHeight:0 }}>
           {loading ? (
               <div style={{ textAlign:"center", paddingTop:40 }}>
                 <Loader2 size={28} style={{ animation:"spin 1s linear infinite", color:IEQ.red }} />
@@ -599,6 +631,7 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
                 background: isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.04)",
                 border:`1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`,
                 borderRadius:8,
+                flexShrink:0,
               }}>
                 <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                   <div style={{
