@@ -1,11 +1,9 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../../services/api.js";
 import {
-  Save, User, Calendar,
+  Loader2, Save, User, Calendar,
   Wallet, Trophy, AlertCircle, CheckCircle2
 } from "lucide-react";
-
-const SPIN_CSS = `@keyframes tlSpin { to { transform: rotate(360deg); } }`;
 
 export default function TesourariaLancamento() {
   const [membros, setMembros] = useState([]);
@@ -29,25 +27,21 @@ export default function TesourariaLancamento() {
   };
 
   useEffect(() => {
-    let isMounted = true;
     const carregarMembros = async () => {
       try {
         setLoading(true);
         const res = await api.get("/tesouraria/select-nome");
-        if (isMounted) setMembros(res.data || []);
+        setMembros(res.data || []);
       } catch (err) {
-        if (isMounted) setErro("Erro ao carregar lista de membros.");
+        setErro("Erro ao carregar lista de membros.");
       } finally {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       }
     };
     carregarMembros();
-    return () => { isMounted = false; };
   }, []);
 
   const handleSalvar = async () => {
-    if (loading) return; // Evita cliques duplos que travam o mobile
-
     setErro(null);
     setSucesso(false);
 
@@ -60,12 +54,11 @@ export default function TesourariaLancamento() {
     const vOferta = limparValor(form.valorOferta);
 
     if (vDizimo <= 0 && vOferta <= 0) {
-      setErro("Informe pelo menos um valor.");
+      setErro("Informe pelo menos um valor de Dízimo ou Oferta.");
       return;
     }
 
     setLoading(true);
-
     try {
       const payload = {
         membroNome: form.membroNome,
@@ -76,10 +69,8 @@ export default function TesourariaLancamento() {
       };
 
       await api.post("/tesouraria/lancar", payload);
-
       setSucesso(true);
 
-      // Resetar o formulário usando o estado funcional para garantir limpeza
       setForm({
         membroNome: "",
         valorDizimo: "",
@@ -88,7 +79,6 @@ export default function TesourariaLancamento() {
         dataLancamento: new Date().toISOString().split("T")[0],
       });
 
-      // Feedback visual
       setTimeout(() => setSucesso(false), 4000);
     } catch (err) {
       setErro("Erro ao registrar lançamento no servidor.");
@@ -98,165 +88,153 @@ export default function TesourariaLancamento() {
   };
 
   return (
-      <div className="select-none touch-manipulation min-h-screen">
-        <style>{SPIN_CSS}</style>
+      <div className="max-w-4xl mx-auto p-4 sm:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-        <div className="max-w-4xl mx-auto p-4 sm:p-10">
-          {/* Header */}
-          <div className="text-center mb-10">
-          <span className="text-indigo-500 font-black uppercase tracking-[0.35em] text-[10px] mb-2 block">
-            Registro de Entrada
-          </span>
-            <h2 className="text-4xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none">
-              Lançamento<span className="text-indigo-500">.</span>
-            </h2>
-          </div>
+        {/* Header Premium */}
+        <div className="text-center mb-10">
+        <span className="text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.3em] text-[10px] mb-2 block">
+          Registro de Entrada
+        </span>
+          <h2 className="text-4xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">
+            Lançamento<span className="text-indigo-600">.</span>
+          </h2>
+        </div>
 
-          {/* Card Principal - Otimizado para não travar */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-10 rounded-[2.5rem] shadow-2xl space-y-8">
+        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none space-y-8">
 
-            {/* Mensagens de Feedback */}
-            {erro && (
-                <div className="flex items-center gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 text-red-700 dark:text-red-400 rounded-2xl">
-                  <AlertCircle size={18} className="shrink-0" />
-                  <p className="text-sm font-bold">{erro}</p>
-                </div>
-            )}
-
-            {sucesso && (
-                <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 text-emerald-700 dark:text-emerald-400 rounded-2xl">
-                  <CheckCircle2 size={18} className="shrink-0" />
-                  <p className="text-sm font-bold">Lançamento realizado!</p>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-              {/* Membro */}
-              <div className="md:col-span-2 group">
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  <User size={13} /> Membro Responsável
-                </label>
-                <select
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl focus:border-indigo-500 outline-none dark:text-white text-sm font-medium"
-                    value={form.membroNome}
-                    disabled={loading}
-                    onChange={(e) => setForm(prev => ({ ...prev, membroNome: e.target.value }))}
-                >
-                  <option value="">Selecione na lista...</option>
-                  {membros.map((m, index) => (
-                      <option key={index} value={m.nome}>{m.nome}</option>
-                  ))}
-                </select>
+          {/* Feedback Messages */}
+          {erro && (
+              <div className="flex items-center gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 text-red-700 dark:text-red-400 rounded-2xl animate-in zoom-in duration-300">
+                <AlertCircle size={20} />
+                <p className="text-sm font-bold">{erro}</p>
               </div>
+          )}
 
-              {/* Data */}
-              <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  <Calendar size={13} /> Data do Evento
-                </label>
+          {sucesso && (
+              <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 text-emerald-700 dark:text-emerald-400 rounded-2xl animate-in zoom-in duration-300">
+                <CheckCircle2 size={20} />
+                <p className="text-sm font-bold">Lançamento registrado com sucesso!</p>
+              </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            {/* Seleção de Membro */}
+            <div className="md:col-span-2 group">
+              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                <User size={14} /> Membro Responsável
+              </label>
+              <select
+                  className="w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all appearance-none dark:text-white"
+                  value={form.membroNome}
+                  onChange={(e) => setForm({ ...form, membroNome: e.target.value })}
+              >
+                <option value="">Selecione na lista...</option>
+                {membros.map((m, index) => (
+                    <option key={index} value={m.nome}>{m.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Data */}
+            <div>
+              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <Calendar size={14} /> Data do Evento
+              </label>
+              <input
+                  type="date"
+                  className="w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white dark:color-scheme-dark"
+                  value={form.dataLancamento}
+                  onChange={(e) => setForm({ ...form, dataLancamento: e.target.value })}
+              />
+            </div>
+
+            {/* Dízimo */}
+            <div className="relative">
+              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <Wallet size={14} /> Valor Dízimo
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
                 <input
-                    type="date"
-                    disabled={loading}
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none dark:text-white text-sm"
-                    value={form.dataLancamento}
-                    onChange={(e) => setForm(prev => ({ ...prev, dataLancamento: e.target.value }))}
+                    type="text"
+                    className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300"
+                    value={form.valorDizimo}
+                    onChange={(e) => setForm({ ...form, valorDizimo: e.target.value })}
+                    placeholder="0,00"
                 />
-              </div>
-
-              {/* Dízimo */}
-              <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  <Wallet size={13} /> Valor Dízimo
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span>
-                  <input
-                      type="text"
-                      inputMode="decimal"
-                      disabled={loading}
-                      className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none dark:text-white text-sm"
-                      value={form.valorDizimo}
-                      placeholder="0,00"
-                      onChange={(e) => setForm(prev => ({ ...prev, valorDizimo: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              {/* Oferta */}
-              <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  <Trophy size={13} /> Valor Oferta
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span>
-                  <input
-                      type="text"
-                      inputMode="decimal"
-                      disabled={loading}
-                      className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none dark:text-white text-sm"
-                      value={form.valorOferta}
-                      placeholder="0,00"
-                      onChange={(e) => setForm(prev => ({ ...prev, valorOferta: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              {/* Categoria */}
-              <div>
-                <label className="flex items-center gap-2 mb-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  Categoria Especial
-                </label>
-                <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-[1.2rem] border border-slate-200 dark:border-slate-700">
-                  {["BRONZE", "PRATA", "OURO"].map((tipo) => (
-                      <button
-                          key={tipo}
-                          type="button"
-                          disabled={loading}
-                          onClick={() => setForm(prev => ({ ...prev, tipoOferta: tipo }))}
-                          className={`flex-1 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all duration-200 ${
-                              form.tipoOferta === tipo
-                                  ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm"
-                                  : "text-slate-400"
-                          }`}
-                      >
-                        {tipo}
-                      </button>
-                  ))}
-                </div>
               </div>
             </div>
 
-            {/* Botão Salvar */}
-            <button
-                onClick={handleSalvar}
-                disabled={loading}
-                className={`w-full py-5 px-6 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 transition-all ${
-                    loading
-                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                        : "bg-indigo-600 text-white shadow-xl active:scale-95"
-                }`}
-            >
-              {loading ? (
-                  <div style={{
-                    width: 18, height: 18,
-                    border: "2px solid #c7d2fe",
-                    borderTop: "2px solid #6366f1",
-                    borderRadius: "50%",
-                    animation: "tlSpin 0.7s linear infinite",
-                  }} />
-              ) : (
-                  <>
-                    <Save size={17} />
-                    Confirmar Lançamento
-                  </>
-              )}
-            </button>
+            {/* Oferta */}
+            <div>
+              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <Trophy size={14} /> Valor Oferta
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
+                <input
+                    type="text"
+                    className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300"
+                    value={form.valorOferta}
+                    onChange={(e) => setForm({ ...form, valorOferta: e.target.value })}
+                    placeholder="0,00"
+                />
+              </div>
+            </div>
+
+            {/* Tipo de Oferta com visual Premium */}
+            <div>
+              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                Categoria Especial
+              </label>
+              <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-[1.2rem]">
+                {["BRONZE", "PRATA", "OURO"].map((tipo) => (
+                    <button
+                        key={tipo}
+                        type="button"
+                        onClick={() => setForm({ ...form, tipoOferta: tipo })}
+                        className={`flex-1 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all ${
+                            form.tipoOferta === tipo
+                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm scale-100"
+                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        }`}
+                    >
+                      {tipo}
+                    </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <p className="mt-8 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            Todos os dados são criptografados e auditáveis
-          </p>
+          {/* Botão Salvar Ultra Premium */}
+          <button
+              onClick={handleSalvar}
+              disabled={loading}
+              className={`group w-full relative overflow-hidden py-5 px-6 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 transition-all duration-500 ${
+                  loading
+                      ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+                      : "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-1 active:scale-95"
+              }`}
+          >
+            {loading ? (
+                <Loader2 className="animate-spin" />
+            ) : (
+                <>
+                  <Save size={18} className="group-hover:rotate-12 transition-transform" />
+                  Confirmar Lançamento
+                </>
+            )}
+            {/* Efeito de brilho no hover */}
+            {!loading && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            )}
+          </button>
         </div>
+
+        <p className="mt-8 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          Todos os dados são criptografados e auditáveis
+        </p>
       </div>
   );
 }
