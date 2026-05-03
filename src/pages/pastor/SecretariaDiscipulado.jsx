@@ -59,6 +59,7 @@ export default function SecretariaDiscipulado({ isDark = false }) {
   const [dataFimFiltro,       setDataFimFiltro]       = useState("");
   const [relatorioSelecionado,setRelatorioSelecionado]= useState(null);
   const [showFilters,         setShowFilters]         = useState(false);
+  const [erroDetalhado,       setErroDetalhado]       = useState(null); // 👈 NOVO
 
   const bg            = isDark ? IEQ.dark    : "#F0EAE8";
   const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
@@ -175,13 +176,30 @@ export default function SecretariaDiscipulado({ isDark = false }) {
     return { inicio: segunda.toISOString().split("T")[0], fim: domingo.toISOString().split("T")[0] };
   }
 
+  // 👇 FUNÇÃO CORRIGIDA COM DIAGNÓSTICO
   const carregarRelatorios = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/discipulado/todos-relatorios"); // 👈 sem headers manuais
+      setErroDetalhado(null);
+      const res = await api.get("/discipulado/todos-relatorios");
       setRelatorios(res.data || []);
     } catch (e) {
-      console.error("Erro ao carregar relatórios:", e.response?.status, e.response?.data);
+      const tokenBruto = localStorage.getItem("token");
+      const info = {
+        status:        e.response?.status,
+        mensagem:      JSON.stringify(e.response?.data),
+        url:           e.config?.url,
+        baseURL:       e.config?.baseURL,
+        headerEnviado: e.config?.headers?.Authorization
+            ? e.config.headers.Authorization.substring(0, 40) + "..."
+            : "❌ NENHUM — token não foi enviado",
+        tokenNoStorage: tokenBruto
+            ? tokenBruto.substring(0, 40) + "..."
+            : "❌ VAZIO — não existe no localStorage",
+        tokenTemAspas: tokenBruto?.startsWith('"') ? "⚠️ SIM — token com aspas!" : "✅ Não",
+      };
+      setErroDetalhado(info);
+      console.error("🔴 ERRO DETALHADO:", info);
     } finally {
       setLoading(false);
     }
@@ -294,6 +312,25 @@ export default function SecretariaDiscipulado({ isDark = false }) {
 
           <div className="divider-d" style={{ marginBottom:24 }} />
 
+          {/* 👇 PAINEL DE DIAGNÓSTICO — aparece só se houver erro */}
+          {erroDetalhado && (
+              <div style={{
+                background: "#1a0000", border: "2px solid #C8102E", borderRadius: 12,
+                padding: 24, marginBottom: 24, fontFamily: "monospace", fontSize: 12,
+                color: "#fff", wordBreak: "break-all"
+              }}>
+                <p style={{ color: "#ff6666", fontWeight: "bold", margin: "0 0 16px", fontSize: 14 }}>
+                  ❌ ERRO CAPTURADO — MANDE ESSE PRINT PARA O SUPORTE
+                </p>
+                <p style={{ margin: "6px 0" }}>🔴 <b>Status HTTP:</b> {erroDetalhado.status}</p>
+                <p style={{ margin: "6px 0" }}>📋 <b>Resposta do servidor:</b> {erroDetalhado.mensagem}</p>
+                <p style={{ margin: "6px 0" }}>🌐 <b>URL chamada:</b> {erroDetalhado.baseURL}{erroDetalhado.url}</p>
+                <p style={{ margin: "6px 0" }}>🔑 <b>Header Authorization enviado:</b> {erroDetalhado.headerEnviado}</p>
+                <p style={{ margin: "6px 0" }}>💾 <b>Token no localStorage:</b> {erroDetalhado.tokenNoStorage}</p>
+                <p style={{ margin: "6px 0" }}>⚠️ <b>Token tem aspas extras:</b> {erroDetalhado.tokenTemAspas}</p>
+              </div>
+          )}
+
           {/* Filtros */}
           <AnimatePresence>
             {showFilters && (
@@ -354,7 +391,7 @@ export default function SecretariaDiscipulado({ isDark = false }) {
           </div>
 
           {/* Empty State */}
-          {relatoriosFiltrados.length === 0 && !loading && (
+          {relatoriosFiltrados.length === 0 && !loading && !erroDetalhado && (
               <div style={{ textAlign:"center", padding:"64px 32px", background:isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)", borderRadius:20, border:`1px dashed ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"}`, marginTop:16 }}>
                 <AlertCircle size={40} style={{ color:isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.25)", margin:"0 auto 16px" }} />
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".12em", color:textSecondary, margin:0 }}>
@@ -371,7 +408,6 @@ export default function SecretariaDiscipulado({ isDark = false }) {
                           className="modal-overlay" onClick={() => setRelatorioSelecionado(null)}>
                 <motion.div initial={{ scale:.9, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:.9, y:20 }}
                             className="modal-box" onClick={e => e.stopPropagation()}>
-                  {/* Header modal */}
                   <div style={{ padding:"24px 28px", background:`linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red})`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                     <div>
                       <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".14em", color:"#fff", margin:"0 0 4px" }}>
@@ -392,7 +428,6 @@ export default function SecretariaDiscipulado({ isDark = false }) {
                       </button>
                     </div>
                   </div>
-                  {/* Tabela */}
                   <div style={{ overflowY:"auto", flex:1, padding:"4px" }}>
                     <div style={{ overflowX:"auto" }}>
                       <table className="presence-table">
