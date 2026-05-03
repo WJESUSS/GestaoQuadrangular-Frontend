@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import PainelPastor from "./PainelPastor";
 import RelatorioCelula from "./RelatorioCelula";
-import SecretariaDiscipulado from "./SecretariaDiscipulado";
 import SolicitacoesMultiplicacao from "./SolicitacoesMultiplicacao";
 import RankingCelulas from "./RankingCelulas";
 import PainelAlertas from "./PainelAlertas";
