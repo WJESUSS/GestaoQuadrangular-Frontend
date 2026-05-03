@@ -23,6 +23,11 @@ const COLUNAS = [
   { campo: "domingoNoite",  label: "Dom. Noite" },
 ];
 
+// ✅ Pega o token limpo sempre que precisar
+function getToken() {
+  return localStorage.getItem("token")?.replace(/"/g, "").trim() || "";
+}
+
 function QuadrangularCross({ size = 28 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -149,6 +154,7 @@ export default function Discipulado({ isDark = false }) {
       padding:24px; margin-bottom:24px; font-family:monospace; font-size:12px;
       color:#fff; word-break:break-all;
     }
+    .sd-erro-row { margin: 6px 0; line-height:1.6; }
     @media (max-width:640px) {
       .sd-grid { grid-template-columns: 1fr !important; }
       .sd-filters-row { flex-direction: column !important; }
@@ -173,16 +179,23 @@ export default function Discipulado({ isDark = false }) {
     try {
       setLoading(true);
       setErro(null);
-      const res = await api.get("/discipulado/todos-relatorios");
+
+      // ✅ Token passado manualmente igual ao PastorPage — garante funcionamento
+      const token = getToken();
+      const res = await api.get("/discipulado/todos-relatorios", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setRelatorios(res.data || []);
     } catch (e) {
+      const token = getToken();
       setErro({
-        status:  e.response?.status,
-        msg:     JSON.stringify(e.response?.data),
-        url:     (e.config?.baseURL || "") + (e.config?.url || ""),
-        header:  e.config?.headers?.Authorization
+        status:   e.response?.status,
+        msg:      JSON.stringify(e.response?.data),
+        url:      (e.config?.baseURL || "") + (e.config?.url || ""),
+        header:   e.config?.headers?.Authorization
             ? e.config.headers.Authorization.substring(0, 40) + "..."
             : "❌ NENHUM",
+        temToken: token ? "✅ Sim (" + token.substring(0, 20) + "...)" : "❌ Não — localStorage vazio!",
       });
     } finally {
       setLoading(false);
@@ -304,16 +317,17 @@ export default function Discipulado({ isDark = false }) {
 
           <div className="sd-divider" style={{ marginBottom:24 }} />
 
-          {/* Painel de erro */}
+          {/* Painel de erro — agora mostra se o token estava presente */}
           {erro && (
               <div className="sd-erro">
                 <p style={{ color:"#ff6666", fontWeight:"bold", margin:"0 0 12px", fontSize:14 }}>
-                  ❌ ERRO AO CARREGAR — VERIFIQUE O BACKEND
+                  ❌ ERRO AO CARREGAR — MANDE ESSE PRINT PARA O SUPORTE
                 </p>
-                <p>🔴 <b>Status:</b> {erro.status}</p>
-                <p>📋 <b>Resposta:</b> {erro.msg}</p>
-                <p>🌐 <b>URL:</b> {erro.url}</p>
-                <p>🔑 <b>Token enviado:</b> {erro.header}</p>
+                <p className="sd-erro-row">🔴 <b>Status HTTP:</b> {erro.status}</p>
+                <p className="sd-erro-row">📋 <b>Resposta do servidor:</b> {erro.msg}</p>
+                <p className="sd-erro-row">🌐 <b>URL chamada:</b> {erro.url}</p>
+                <p className="sd-erro-row">🔑 <b>Header Authorization enviado:</b> {erro.header}</p>
+                <p className="sd-erro-row">🗝️ <b>Token no localStorage:</b> {erro.temToken}</p>
               </div>
           )}
 
