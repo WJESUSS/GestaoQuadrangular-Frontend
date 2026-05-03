@@ -179,7 +179,14 @@ export default function SecretariaDiscipulado({ isDark = false }) {
   const carregarRelatorios = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+      const rawToken = localStorage.getItem("token");
+
+      if (!rawToken) {
+        console.warn("Token não encontrado");
+        return;
+      }
+
+      const token = rawToken.replace(/"/g, "").trim();
       const res = await api.get("/discipulado/todos-relatorios", {
         headers: { Authorization: `Bearer ${token}` },
       });
