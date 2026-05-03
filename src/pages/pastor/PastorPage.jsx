@@ -98,12 +98,16 @@ export default function PastorPage() {
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/";
+      return;
+    }
+
     (async () => {
-      const token = localStorage.getItem("token")?.replace(/"/g, "");
       try {
-        const res = await api.get("/celulas", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/celulas");
         setCelulas(res.data || []);
       } catch (err) {
         console.error("Erro ao carregar células:", err);
