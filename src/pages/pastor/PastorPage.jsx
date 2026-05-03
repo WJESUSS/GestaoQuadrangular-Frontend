@@ -532,7 +532,7 @@ export default function PastorPage() {
                 <Routes location={location}>
                   <Route index                    element={<PainelPastor />} />
                   <Route path="relatorio-celulas" element={<RelatorioCelula />} />
-                  <Route path="discipulado"       element={<SecretariaDiscipulado />} />
+                  <Route path="discipulado"       element={<SecretariaDiscipulado isDark={isDark} />} />
                   <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao />} />
                   <Route path="ranking-celulas"   element={<RankingCelulas />} />
                   <Route path="alertas"           element={<PainelAlertas />} />
