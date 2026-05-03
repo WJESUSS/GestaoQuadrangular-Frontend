@@ -178,13 +178,10 @@ export default function SecretariaDiscipulado({ isDark = false }) {
   const carregarRelatorios = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const res = await api.get("/discipulado/todos-relatorios", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("/discipulado/todos-relatorios"); // 👈 sem headers manuais
       setRelatorios(res.data || []);
     } catch (e) {
-      console.error(e);
+      console.error("Erro ao carregar relatórios:", e.response?.status, e.response?.data);
     } finally {
       setLoading(false);
     }
