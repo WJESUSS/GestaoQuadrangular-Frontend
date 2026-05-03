@@ -4,7 +4,7 @@ const api = axios.create({
     baseURL: API_URL,
 });
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+    const token = localStorage.getItem("token")?.replace(/"/g, "").trim(); // 👈 corrigido aqui
     if (token && token.trim() !== "") {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -15,14 +15,11 @@ api.interceptors.response.use(
     (error) => {
         const url = error.config?.url || "";
         const status = error.response?.status;
-
-        // 👇 COMENTADO TEMPORARIAMENTE PARA VER O ERRO
-        // if (status === 401 && !url.includes("actuator") && !url.includes("auth/login")) {
-        //     localStorage.removeItem("token");
-        //     localStorage.removeItem("user");
-        //     window.location.href = "/";
-        // }
-
+        if (status === 401 && !url.includes("actuator") && !url.includes("auth/login")) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "/";
+        }
         return Promise.reject(error);
     }
 );
