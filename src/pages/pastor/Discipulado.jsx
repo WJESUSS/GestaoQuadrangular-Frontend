@@ -180,22 +180,14 @@ export default function Discipulado({ isDark = false }) {
       setLoading(true);
       setErro(null);
 
-      // ✅ Token passado manualmente igual ao PastorPage — garante funcionamento
-      const token = getToken();
-      const res = await api.get("/discipulado/todos-relatorios", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("/discipulado/todos-relatorios");
+
       setRelatorios(res.data || []);
     } catch (e) {
-      const token = getToken();
       setErro({
-        status:   e.response?.status,
-        msg:      JSON.stringify(e.response?.data),
-        url:      (e.config?.baseURL || "") + (e.config?.url || ""),
-        header:   e.config?.headers?.Authorization
-            ? e.config.headers.Authorization.substring(0, 40) + "..."
-            : "❌ NENHUM",
-        temToken: token ? "✅ Sim (" + token.substring(0, 20) + "...)" : "❌ Não — localStorage vazio!",
+        status: e.response?.status,
+        msg: JSON.stringify(e.response?.data),
+        url: (e.config?.baseURL || "") + (e.config?.url || ""),
       });
     } finally {
       setLoading(false);
