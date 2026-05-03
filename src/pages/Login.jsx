@@ -89,7 +89,12 @@ export default function Login() {
       const token = await login(email, password);
       if (!token) throw new Error("Token não recebido");
 
+      // 1. SALVE O TOKEN (Isso resolve o problema da ProtectedRoute)
+      localStorage.setItem("token", token);
+
       const decoded = jwtDecode(token);
+
+      // 2. Salve os dados do usuário
       localStorage.setItem("user", JSON.stringify({
         id:       decoded.id,
         username: decoded.sub,
@@ -97,15 +102,17 @@ export default function Login() {
       }));
 
       const perfil = decoded.perfil?.replace("ROLE_", "").toUpperCase();
+
+      // 3. Redirecionamento
       switch (perfil) {
-        case "ADMIN":        navigate("/admin");      break;
-        case "PASTOR":       navigate("/pastor");     break;
-        case "LIDER_CELULA": navigate("/lider");      break;
-        case "TESOUREIRO":   navigate("/tesouraria"); break;
-        case "SECRETARIO":   navigate("/secretaria"); break;
+        case "ADMIN":         navigate("/admin");      break;
+        case "PASTOR":        navigate("/pastor");     break;
+        case "LIDER_CELULA":  navigate("/lider");      break;
+        case "TESOUREIRO":    navigate("/tesouraria"); break;
+        case "SECRETARIO":    navigate("/secretaria"); break;
         default: setError("Perfil não reconhecido: " + perfil);
       }
-    } catch {
+    } catch (err) {
       setError("Credenciais inválidas ou erro de conexão.");
     } finally {
       setLoading(false);
