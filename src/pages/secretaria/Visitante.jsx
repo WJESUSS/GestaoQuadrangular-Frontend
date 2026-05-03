@@ -1,327 +1,309 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
-  UserPlus,
-  Search,
-  Mail,
-  Phone,
-  Calendar,
-  ShieldCheck,
-  Plus,
-  X,
-  ChevronRight,
-  Loader2,
-  Heart,
-  Users
+  UserPlus, Search, Phone, Calendar, ShieldCheck, Plus, X, ChevronRight, Loader2, Heart, Users
 } from "lucide-react";
 
-export default function Visitantes() {
-  const [visitantes, setVisitantes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editandoId, setEditandoId] = useState(null);
-  const [filtro, setFiltro] = useState("");
+/* ─── Design Tokens IEQ ─── */
+const IEQ = {
+  red:"#C8102E", redDark:"#8B0B1F", redLight:"#E8294A",
+  yellow:"#FDB813", blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+  offWhite:"#F5F0E8", dark:"#0A0608",
+};
+const purple = "#7C3AED";
+const purpleDark = "#5B21B6";
 
-  const formInicial = {
-    nome: "", email: "", telefone: "",
-    dataPrimeiraVisita: new Date().toISOString().split('T')[0], // Já inicia com a data de hoje
-    origem: "CONVITE",
-    responsavelAcompanhamento: "", convertido: false
-  };
-  const [form, setForm] = useState(formInicial);
+const ORIGENS = {
+  CONVITE:"Convite", REDES_SOCIAIS:"Redes Sociais",
+  ESPONTANEO:"Espontâneo", OUTRO:"Outro",
+};
+
+const formInicial = {
+  nome:"", email:"", telefone:"",
+  dataPrimeiraVisita: new Date().toISOString().split("T")[0],
+  origem:"CONVITE", responsavelAcompanhamento:"", convertido:false,
+};
+
+export default function Visitantes({ isDark = false }) {
+  const [visitantes,  setVisitantes]  = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editandoId,  setEditandoId]  = useState(null);
+  const [filtro,      setFiltro]      = useState("");
+  const [form,        setForm]        = useState(formInicial);
+
+  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
+  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
+  const border      = isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)";
+  const inputBg     = isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)";
+
+  const styles = `
+    @keyframes spin{to{transform:rotate(360deg)}} .spin-icon{animation:spin 1s linear infinite;}
+    .ieq-field{width:100%;background:${inputBg};border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
+      color:${textPrimary};padding:11px 14px;border-radius:8px;outline:none;
+      font-family:'EB Garamond',serif;font-size:15px;transition:all .25s;}
+    .ieq-field:focus{border-color:${IEQ.red};box-shadow:0 0 0 3px rgba(200,16,46,.12);}
+    .ieq-field::placeholder{color:${isDark?"rgba(245,240,232,.25)":"rgba(26,10,13,.3)"};}
+    .ieq-label{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.2em;color:${textSec};text-transform:uppercase;display:block;margin-bottom:6px;}
+    .ieq-visit-card{background:${cardBg};border:1px solid ${border};border-radius:12px;padding:18px;cursor:pointer;transition:all .3s;backdrop-filter:blur(24px);position:relative;overflow:hidden;}
+    .ieq-visit-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(124,58,237,.12);border-color:${purple};}
+    .ieq-grid-v{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:560px){.ieq-grid-v{grid-template-columns:repeat(2,1fr);}}
+    @media(min-width:900px){.ieq-grid-v{grid-template-columns:repeat(3,1fr);}}
+    .ieq-form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media(max-width:400px){.ieq-form-grid2{grid-template-columns:1fr;}}
+    .ieq-modal-backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;}
+    @media(min-width:520px){.ieq-modal-backdrop{align-items:center;padding:12px;}}
+    .ieq-modal-box{position:relative;z-index:10;width:100%;max-height:90vh;display:flex;flex-direction:column;border-radius:16px 16px 0 0;overflow:hidden;}
+    @media(min-width:520px){.ieq-modal-box{border-radius:14px;max-height:calc(100vh - 24px);max-width:520px;}}
+  `;
 
   const listar = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get("/visitantes");
       setVisitantes(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error("Erro ao listar visitantes:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error("Erro ao listar visitantes:", err); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { listar(); }, [listar]);
 
-  const abrirModalNovo = () => {
-    setEditandoId(null);
-    setForm(formInicial);
-    setIsModalOpen(true);
-  };
-
+  const abrirModalNovo   = () => { setEditandoId(null); setForm(formInicial); setIsModalOpen(true); };
   const abrirModalEdicao = (v) => {
     setEditandoId(v.id);
-    setForm({
-      nome: v.nome || "",
-      email: v.email || "",
-      telefone: v.telefone || "",
+    setForm({ nome:v.nome||"", email:v.email||"", telefone:v.telefone||"",
       dataPrimeiraVisita: v.dataPrimeiraVisita ? v.dataPrimeiraVisita.split("T")[0] : "",
-      origem: v.origem || "CONVITE",
-      responsavelAcompanhamento: v.responsavelAcompanhamento || "",
-      convertido: !!v.convertido
-    });
+      origem:v.origem||"CONVITE", responsavelAcompanhamento:v.responsavelAcompanhamento||"",
+      convertido:!!v.convertido });
     setIsModalOpen(true);
   };
 
   const salvar = async (e) => {
     e.preventDefault();
     try {
-      if (editandoId) {
-        await api.put(`/visitantes/${editandoId}`, form);
-      } else {
-        await api.post("/visitantes", form);
-      }
-      fecharModal();
-      listar();
-    } catch (err) {
-      alert("Erro ao salvar visitante.");
-    }
+      if (editandoId) await api.put(`/visitantes/${editandoId}`, form);
+      else            await api.post("/visitantes", form);
+      fecharModal(); listar();
+    } catch { alert("Erro ao salvar visitante."); }
   };
 
-  const fecharModal = () => {
-    setIsModalOpen(false);
-    setForm(formInicial);
-    setEditandoId(null);
-  };
+  const fecharModal = () => { setIsModalOpen(false); setForm(formInicial); setEditandoId(null); };
+  const f = v => setForm(p => ({...p,...v}));
 
   const visitantesFiltrados = visitantes.filter(v =>
       v.nome?.toLowerCase().includes(filtro.toLowerCase())
   );
 
   return (
-      <div className="min-h-screen pb-20 md:pb-10 bg-slate-50 dark:bg-slate-950 p-4 md:p-8 animate-in fade-in duration-700">
+      <div style={{ padding:"24px 20px", fontFamily:"'EB Garamond',serif", color:textPrimary }}>
+        <style>{styles}</style>
 
-        {/* HEADER DINÂMICO */}
-        <div className="flex flex-col gap-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-600 rounded-2xl text-white shadow-xl shadow-purple-500/30">
-                <UserPlus size={28} />
+        {/* Header */}
+        <div style={{ display:"flex", flexDirection:"column", gap:14, marginBottom:24 }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+              <div style={{ width:42, height:42, borderRadius:10, background:`${purple}22`, display:"flex", alignItems:"center", justifyContent:"center", color:purple }}>
+                <UserPlus size={20}/>
               </div>
               <div>
-                <h3 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white leading-tight">
-                  Visitantes
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">
-                  {visitantes.length} Pessoas alcançadas
-                </p>
+                <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>VISITANTES</h3>
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSec, margin:0 }}>{visitantes.length} PESSOAS ALCANÇADAS</p>
               </div>
             </div>
+            <button onClick={abrirModalNovo}
+                    style={{ display:"flex", alignItems:"center", gap:8, padding:"11px 20px", borderRadius:8, border:"none", cursor:"pointer",
+                      background:`linear-gradient(135deg,${purpleDark},${purple})`, color:"#fff",
+                      fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em" }}>
+              <Plus size={15}/> NOVO CADASTRO
+            </button>
           </div>
 
-          {/* BUSCA E AÇÃO */}
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1 group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-500 transition-colors" size={20} />
-              <input
-                  type="text"
-                  placeholder="Quem você está procurando?"
-                  value={filtro}
-                  onChange={(e) => setFiltro(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border-none rounded-3xl text-sm font-medium shadow-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all dark:text-white"
-              />
-            </div>
-            <button
-                onClick={abrirModalNovo}
-                className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-3xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 active:scale-95"
-            >
-              <Plus size={20} /> Novo Cadastro
-            </button>
+          <div style={{ position:"relative" }}>
+            <Search size={15} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }}/>
+            <input className="ieq-field" style={{ paddingLeft:42 }}
+                   placeholder="Buscar visitante..."
+                   value={filtro} onChange={e=>setFiltro(e.target.value)} />
           </div>
         </div>
 
-        {/* GRID DE CARDS */}
+        {/* Lista */}
         {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4">
-              <Loader2 className="animate-spin text-purple-500" size={48} />
-              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Carregando lista...</p>
+            <div style={{ textAlign:"center", padding:"48px 0" }}>
+              <Loader2 size={30} className="spin-icon" style={{ color:purple, display:"inline-block" }}/>
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSec, marginTop:12 }}>CARREGANDO...</p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {visitantesFiltrados.map((v) => (
-                  <div
-                      key={v.id}
-                      onClick={() => abrirModalEdicao(v)}
-                      className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-[2.5rem] hover:ring-2 hover:ring-purple-500 transition-all cursor-pointer shadow-sm relative overflow-hidden active:scale-[0.98]"
-                  >
+            <motion.div className="ieq-grid-v" initial="hidden" animate="visible"
+                        variants={{ hidden:{}, visible:{ transition:{staggerChildren:.06} } }}>
+              {visitantesFiltrados.map(v => (
+                  <motion.div key={v.id} className="ieq-visit-card"
+                              variants={{ hidden:{opacity:0,y:14}, visible:{opacity:1,y:0} }}
+                              onClick={() => abrirModalEdicao(v)}>
+
                     {v.convertido && (
-                        <div className="absolute top-0 right-0 bg-emerald-500 text-white px-5 py-1.5 rounded-bl-2xl text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1 shadow-sm">
-                          <Heart size={10} fill="white" /> Decidido
+                        <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,#059669,#065f46)`,
+                          color:"#fff", padding:"4px 14px", borderRadius:"0 12px 0 12px",
+                          fontFamily:"'Cinzel',serif", fontSize:8, fontWeight:700, letterSpacing:".14em",
+                          display:"flex", alignItems:"center", gap:4 }}>
+                          <Heart size={9} fill="#fff"/> DECIDIDO
                         </div>
                     )}
 
-                    <div className="flex items-center gap-4 mb-5">
-                      <div className="h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/20 dark:to-slate-800 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black text-2xl group-hover:rotate-3 transition-transform">
+                    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+                      <div style={{ width:46, height:46, borderRadius:10, flexShrink:0,
+                        background:`linear-gradient(135deg,${purpleDark}33,${purple}22)`,
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        color:purple, fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:18,
+                        border:`1px solid ${purple}33`, transition:"transform .3s" }}>
                         {v.nome?.charAt(0).toUpperCase()}
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-slate-800 dark:text-white text-lg leading-tight truncate">
+                      <div style={{ minWidth:0, flex:1 }}>
+                        <h4 style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".1em",
+                          color:textPrimary, margin:"0 0 5px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                           {v.nome}
                         </h4>
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-500 dark:text-slate-400 rounded-lg uppercase tracking-tighter">
-                    {v.origem?.replace("_", " ")}
+                        <span style={{ display:"inline-block", padding:"2px 10px", borderRadius:99,
+                          background:isDark?"rgba(124,58,237,.15)":"rgba(124,58,237,.08)",
+                          color:purple, border:`1px solid ${purple}33`,
+                          fontFamily:"'Cinzel',serif", fontSize:8, fontWeight:700, letterSpacing:".12em" }}>
+                    {ORIGENS[v.origem] || v.origem}
                   </span>
                       </div>
                     </div>
 
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-sm font-medium">
-                        <div className="p-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                          <Phone size={14} className="text-purple-500" />
-                        </div>
-                        {v.telefone || "Sem telefone"}
+                    <div style={{ borderTop:`1px solid ${border}`, paddingTop:12, display:"flex", flexDirection:"column", gap:8 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <Phone size={13} style={{ color:textSec, flexShrink:0 }}/>
+                        <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSec }}>{v.telefone || "Sem telefone"}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-sm font-medium">
-                        <div className="p-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                          <Calendar size={14} className="text-purple-500" />
-                        </div>
-                        {v.dataPrimeiraVisita ? new Date(v.dataPrimeiraVisita).toLocaleDateString() : "Data não registrada"}
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-slate-50 dark:border-slate-800 flex justify-between items-center">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Acompanhamento</span>
-                        <span className="text-sm font-bold text-purple-600 dark:text-purple-400 italic">
-                    {v.responsavelAcompanhamento || "A definir"}
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <Calendar size={13} style={{ color:textSec, flexShrink:0 }}/>
+                        <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSec }}>
+                    {v.dataPrimeiraVisita ? new Date(v.dataPrimeiraVisita+"T12:00:00").toLocaleDateString("pt-BR") : "Data não registrada"}
                   </span>
                       </div>
-                      <div className="h-10 w-10 rounded-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 group-hover:bg-purple-600 group-hover:text-white transition-all">
-                        <ChevronRight size={20} />
+
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+                        background:isDark?"rgba(255,255,255,.03)":"rgba(124,58,237,.04)",
+                        padding:"9px 12px", borderRadius:8, border:`1px solid ${purple}22`, marginTop:2 }}>
+                        <div>
+                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".14em", color:textSec, margin:"0 0 2px" }}>ACOMPANHAMENTO</p>
+                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:purple, margin:0, fontStyle:"italic" }}>
+                            {v.responsavelAcompanhamento || "A definir"}
+                          </p>
+                        </div>
+                        <ChevronRight size={15} style={{ color:textSec }}/>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
               ))}
-            </div>
+            </motion.div>
         )}
 
-        {/* MODAL - DESIGN MOBILE-FIRST (BOTTOM SHEET NO MOBILE) */}
-        {isModalOpen && (
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center z-[100] p-0 md:p-4 transition-all">
-              <div className="bg-white dark:bg-slate-900 rounded-t-[3rem] md:rounded-[3rem] w-full max-w-xl max-h-[95vh] overflow-y-auto shadow-2xl border-t md:border border-white/10 animate-in slide-in-from-bottom md:zoom-in-95 duration-300">
+        {/* MODAL */}
+        <AnimatePresence>
+          {isModalOpen && (
+              <div className="ieq-modal-backdrop">
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                            onClick={fecharModal}
+                            style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }}/>
+                <motion.div initial={{y:80,opacity:0}} animate={{y:0,opacity:1}} exit={{y:80,opacity:0}}
+                            className="ieq-modal-box"
+                            style={{ background:cardBg, border:`1px solid ${border}`, backdropFilter:"blur(24px)" }}>
 
-                <div className="sticky top-0 z-10 p-6 md:p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
-                  <div>
-                    <h3 className="text-2xl font-black text-slate-800 dark:text-white uppercase italic tracking-tighter leading-none">
-                      {editandoId ? "Atualizar Perfil" : "Novo Amigo"}
-                    </h3>
-                    <p className="text-[10px] font-bold text-purple-600 uppercase mt-1 tracking-[0.2em]">Ficha de Integração</p>
-                  </div>
-                  <button onClick={fecharModal} className="h-12 w-12 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full transition-colors text-slate-500 hover:bg-rose-100 hover:text-rose-600">
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <form onSubmit={salvar} className="p-6 md:p-8 space-y-6">
-                  {/* Nome */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 ml-1 tracking-widest">Nome do Visitante</label>
-                    <input
-                        required
-                        placeholder="Nome completo"
-                        className="w-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent rounded-2xl p-4 text-sm font-bold focus:border-purple-500 focus:bg-white dark:focus:bg-slate-900 outline-none dark:text-white transition-all shadow-inner"
-                        value={form.nome}
-                        onChange={e => setForm({...form, nome: e.target.value})}
-                    />
+                  <div style={{ padding:"20px 22px 14px", borderBottom:`1px solid ${border}`, flexShrink:0,
+                    display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                    <div>
+                      <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>
+                        {editandoId ? "ATUALIZAR PERFIL" : "NOVO VISITANTE"}
+                      </h2>
+                      <div style={{ height:2, width:36, background:`linear-gradient(90deg,${purple},${IEQ.red})`, borderRadius:99, marginTop:6 }}/>
+                    </div>
+                    <button onClick={fecharModal} style={{ background:"none", border:"none", cursor:"pointer", color:textSec }}>
+                      <X size={20}/>
+                    </button>
                   </div>
 
-                  {/* Contatos */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 ml-1 tracking-widest">WhatsApp</label>
-                      <input
-                          placeholder="(00) 00000-0000"
-                          className="w-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent rounded-2xl p-4 text-sm font-bold focus:border-purple-500 dark:text-white outline-none shadow-inner"
-                          value={form.telefone}
-                          onChange={e => setForm({...form, telefone: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 ml-1 tracking-widest">E-mail</label>
-                      <input
-                          type="email"
-                          placeholder="E-mail opcional"
-                          className="w-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent rounded-2xl p-4 text-sm font-bold focus:border-purple-500 dark:text-white outline-none shadow-inner"
-                          value={form.email}
-                          onChange={e => setForm({...form, email: e.target.value})}
-                      />
-                    </div>
-                  </div>
+                  <form onSubmit={salvar} style={{ overflowY:"auto", flex:1, padding:"20px 22px 24px", display:"flex", flexDirection:"column", gap:14 }}>
 
-                  {/* Data e Origem */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 ml-1 tracking-widest">Data da Visita</label>
-                      <input
-                          type="date"
-                          className="w-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent rounded-2xl p-4 text-sm font-bold focus:border-purple-500 dark:text-white outline-none shadow-inner"
-                          value={form.dataPrimeiraVisita}
-                          onChange={e => setForm({...form, dataPrimeiraVisita: e.target.value})}
-                      />
+                    <div>
+                      <label className="ieq-label">NOME DO VISITANTE *</label>
+                      <input required className="ieq-field" placeholder="Nome completo"
+                             value={form.nome} onChange={e=>f({nome:e.target.value})}/>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 ml-1 tracking-widest">Como chegou?</label>
-                      <select
-                          className="w-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent rounded-2xl p-4 text-sm font-bold focus:border-purple-500 dark:text-white outline-none shadow-inner appearance-none"
-                          value={form.origem}
-                          onChange={e => setForm({...form, origem: e.target.value})}
-                      >
-                        <option value="CONVITE">Pelo Convite</option>
-                        <option value="REDES_SOCIAIS">Redes Sociais</option>
-                        <option value="ESPONTANEO">Foi por conta própria</option>
-                        <option value="OUTRO">Outro motivo</option>
-                      </select>
-                    </div>
-                  </div>
 
-                  {/* Acompanhamento */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 ml-1 tracking-widest text-center block">Quem vai cuidar dele(a)?</label>
-                    <div className="relative">
-                      <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input
-                          placeholder="Nome do líder responsável"
-                          className="w-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent rounded-2xl p-4 pl-12 text-sm font-bold focus:border-purple-500 dark:text-white outline-none shadow-inner"
-                          value={form.responsavelAcompanhamento}
-                          onChange={e => setForm({...form, responsavelAcompanhamento: e.target.value})}
-                      />
+                    <div className="ieq-form-grid2">
+                      <div>
+                        <label className="ieq-label">WHATSAPP</label>
+                        <input className="ieq-field" placeholder="(00) 00000-0000"
+                               value={form.telefone} onChange={e=>f({telefone:e.target.value})}/>
+                      </div>
+                      <div>
+                        <label className="ieq-label">E-MAIL</label>
+                        <input type="email" className="ieq-field" placeholder="Opcional"
+                               value={form.email} onChange={e=>f({email:e.target.value})}/>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Checkbox Convertido Estilizado */}
-                  <label
-                      className={`flex items-center justify-between p-5 rounded-3xl cursor-pointer transition-all border-2 shadow-sm ${
-                          form.convertido
-                              ? 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-transparent'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <ShieldCheck size={24} className={form.convertido ? 'text-white' : 'text-slate-400'} />
-                      <span className="text-sm font-black uppercase tracking-tight">Já aceitou Jesus?</span>
+                    <div className="ieq-form-grid2">
+                      <div>
+                        <label className="ieq-label">DATA DA VISITA</label>
+                        <input type="date" className="ieq-field"
+                               value={form.dataPrimeiraVisita} onChange={e=>f({dataPrimeiraVisita:e.target.value})}/>
+                      </div>
+                      <div>
+                        <label className="ieq-label">COMO CHEGOU?</label>
+                        <select className="ieq-field" value={form.origem} onChange={e=>f({origem:e.target.value})}>
+                          {Object.entries(ORIGENS).map(([v,l])=><option key={v} value={v}>{l}</option>)}
+                        </select>
+                      </div>
                     </div>
-                    <input
-                        type="checkbox"
-                        className="hidden"
-                        checked={form.convertido}
-                        onChange={e => setForm({...form, convertido: e.target.checked})}
-                    />
-                    <div className={`h-6 w-11 rounded-full relative transition-colors ${form.convertido ? 'bg-white/30' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                      <div className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${form.convertido ? 'right-1' : 'left-1'}`} />
-                    </div>
-                  </label>
 
-                  <button
-                      type="submit"
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl shadow-purple-500/40 transition-all active:scale-95 text-sm"
-                  >
-                    {editandoId ? "Salvar Alterações" : "Confirmar Cadastro"}
-                  </button>
-                </form>
+                    <div>
+                      <label className="ieq-label">RESPONSÁVEL PELO ACOMPANHAMENTO</label>
+                      <div style={{ position:"relative" }}>
+                        <Users size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:textSec }}/>
+                        <input className="ieq-field" style={{ paddingLeft:40 }}
+                               placeholder="Nome do líder responsável"
+                               value={form.responsavelAcompanhamento} onChange={e=>f({responsavelAcompanhamento:e.target.value})}/>
+                      </div>
+                    </div>
+
+                    {/* Toggle Convertido */}
+                    <label style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+                      padding:"14px 16px", borderRadius:10, cursor:"pointer", transition:"all .3s",
+                      background: form.convertido ? "rgba(5,150,105,.15)" : isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)",
+                      border:`1px solid ${form.convertido ? "rgba(5,150,105,.4)" : border}` }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                        <ShieldCheck size={20} style={{ color: form.convertido ? "#059669" : textSec }}/>
+                        <span style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".12em",
+                          color: form.convertido ? "#059669" : textPrimary }}>
+                      JÁ ACEITOU JESUS?
+                    </span>
+                      </div>
+                      <input type="checkbox" style={{ display:"none" }}
+                             checked={form.convertido} onChange={e=>f({convertido:e.target.checked})}/>
+                      <div style={{ width:44, height:24, borderRadius:99, position:"relative", transition:"all .3s",
+                        background: form.convertido ? "#059669" : isDark?"rgba(255,255,255,.15)":"rgba(0,0,0,.15)" }}>
+                        <div style={{ position:"absolute", top:3, width:18, height:18, borderRadius:"50%", background:"#fff",
+                          transition:"all .3s", left: form.convertido ? 23 : 3, boxShadow:"0 1px 4px rgba(0,0,0,.2)" }}/>
+                      </div>
+                    </label>
+
+                    <button type="submit"
+                            style={{ padding:"14px 0", borderRadius:8, border:"none", cursor:"pointer",
+                              background:`linear-gradient(135deg,${purpleDark},${purple})`, color:"#fff",
+                              fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em" }}>
+                      {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
+                    </button>
+                  </form>
+                </motion.div>
               </div>
-            </div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
   );
 }

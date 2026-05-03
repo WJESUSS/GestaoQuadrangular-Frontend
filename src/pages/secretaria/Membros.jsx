@@ -1,34 +1,76 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
-  Plus, X, User, Mail, Phone, Trash2,
-  Loader2, Search, CreditCard, Heart, ChevronRight
+  Plus, X, User, Phone, Trash2, Loader2, Search, CreditCard, Heart, ChevronRight, Mail
 } from "lucide-react";
 
-export default function Membros() {
-  const [membros, setMembros] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editandoId, setEditandoId] = useState(null);
-  const [statusOriginal, setStatusOriginal] = useState(null);
-  const [filtro, setFiltro] = useState("");
+/* ─── Design Tokens IEQ ─── */
+const IEQ = {
+  red:"#C8102E", redDark:"#8B0B1F", redLight:"#E8294A",
+  yellow:"#FDB813", blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+  offWhite:"#F5F0E8", dark:"#0A0608",
+};
 
-  const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"];
-  const estadoCivilOptions = [
-    { value: "SOLTEIRO", label: "Solteiro(a)" },
-    { value: "CASADO", label: "Casado(a)" },
-    { value: "DIVORCIADO", label: "Divorciado(a)" },
-    { value: "VIUVO", label: "Viúvo(a)" },
-    { value: "UNIAO_ESTAVEL", label: "União Estável" }
-  ];
+const STATUS_COLORS = {
+  ATIVO:       { bg:"rgba(5,150,105,.12)",  text:"#059669", border:"rgba(5,150,105,.3)"   },
+  INATIVO:     { bg:"rgba(200,16,46,.1)",   text:IEQ.red,   border:"rgba(200,16,46,.3)"   },
+  AFASTADO:    { bg:"rgba(253,184,19,.12)", text:"#C48C00", border:"rgba(253,184,19,.35)" },
+  TRANSFERIDO: { bg:"rgba(0,61,165,.1)",    text:IEQ.blue,  border:"rgba(0,61,165,.3)"    },
+  FALECIDO:    { bg:"rgba(100,100,100,.1)", text:"#666",    border:"rgba(100,100,100,.3)" },
+};
 
-  const formInicial = {
-    nome: "", email: "", telefone: "", endereco: "", cpf: "",
-    estadoCivil: "SOLTEIRO", dataNascimento: "", dataConversao: "",
-    dataBatismo: "", status: "ATIVO"
-  };
+const estadoCivilOptions = [
+  {value:"SOLTEIRO",label:"Solteiro(a)"},{value:"CASADO",label:"Casado(a)"},
+  {value:"DIVORCIADO",label:"Divorciado(a)"},{value:"VIUVO",label:"Viúvo(a)"},
+  {value:"UNIAO_ESTAVEL",label:"União Estável"},
+];
+const statusOptions = ["ATIVO","INATIVO","AFASTADO","TRANSFERIDO","FALECIDO"];
 
-  const [form, setForm] = useState(formInicial);
+const formInicial = {
+  nome:"", email:"", telefone:"", endereco:"", cpf:"",
+  estadoCivil:"SOLTEIRO", dataNascimento:"", dataConversao:"",
+  dataBatismo:"", status:"ATIVO",
+};
+
+export default function Membros({ isDark = false }) {
+  const [membros,       setMembros]       = useState([]);
+  const [loading,       setLoading]       = useState(true);
+  const [isModalOpen,   setIsModalOpen]   = useState(false);
+  const [editandoId,    setEditandoId]    = useState(null);
+  const [statusOriginal,setStatusOriginal]= useState(null);
+  const [filtro,        setFiltro]        = useState("");
+  const [form,          setForm]          = useState(formInicial);
+
+  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
+  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
+  const border      = isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)";
+  const inputBg     = isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)";
+
+  const styles = `
+    @keyframes spin{to{transform:rotate(360deg)}} .spin-icon{animation:spin 1s linear infinite;}
+    .ieq-field {
+      width:100%; background:${inputBg};
+      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
+      color:${textPrimary}; padding:11px 14px; border-radius:8px; outline:none;
+      font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
+    }
+    .ieq-field:focus{border-color:${IEQ.red};box-shadow:0 0 0 3px rgba(200,16,46,.12);}
+    .ieq-field::placeholder{color:${isDark?"rgba(245,240,232,.25)":"rgba(26,10,13,.3)"};}
+    .ieq-label{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.2em;color:${textSec};text-transform:uppercase;display:block;margin-bottom:6px;}
+    .ieq-member-card{background:${cardBg};border:1px solid ${border};border-radius:12px;padding:18px;cursor:pointer;transition:all .3s;backdrop-filter:blur(24px);}
+    .ieq-member-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(200,16,46,.12);border-color:${IEQ.red};}
+    .ieq-grid-m{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:560px){.ieq-grid-m{grid-template-columns:repeat(2,1fr);}}
+    @media(min-width:900px){.ieq-grid-m{grid-template-columns:repeat(3,1fr);}}
+    .ieq-form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media(max-width:400px){.ieq-form-grid2{grid-template-columns:1fr;}}
+    .ieq-modal-backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;}
+    @media(min-width:520px){.ieq-modal-backdrop{align-items:center;padding:12px;}}
+    .ieq-modal-box{position:relative;z-index:10;width:100%;max-height:90vh;display:flex;flex-direction:column;border-radius:16px 16px 0 0;overflow:hidden;}
+    @media(min-width:520px){.ieq-modal-box{border-radius:14px;max-height:calc(100vh - 24px);max-width:560px;}}
+  `;
 
   const listar = useCallback(async () => {
     setLoading(true);
@@ -36,31 +78,19 @@ export default function Membros() {
       const res = await api.get("/membros");
       const data = Array.isArray(res.data) ? res.data : res.data.content || [];
       setMembros(data);
-    } catch (err) {
-      console.error("Erro ao listar membros:", err);
-      setMembros([]);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error("Erro ao listar membros:", err); setMembros([]); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { listar(); }, [listar]);
 
-  const abrirModalNovo = () => {
-    setEditandoId(null);
-    setStatusOriginal(null);
-    setForm(formInicial);
-    setIsModalOpen(true);
-  };
-
+  const abrirModalNovo = () => { setEditandoId(null); setStatusOriginal(null); setForm(formInicial); setIsModalOpen(true); };
   const abrirModalEdicao = (m) => {
-    setEditandoId(m.id);
-    setStatusOriginal(m.status);
-    setForm({
-      ...m,
-      dataNascimento: m.dataNascimento?.split("T")[0] || "",
-      dataConversao: m.dataConversao?.split("T")[0] || "",
-      dataBatismo: m.dataBatismo?.split("T")[0] || ""
+    setEditandoId(m.id); setStatusOriginal(m.status);
+    setForm({ ...m,
+      dataNascimento:m.dataNascimento?.split("T")[0]||"",
+      dataConversao: m.dataConversao?.split("T")[0]||"",
+      dataBatismo:   m.dataBatismo?.split("T")[0]||"",
     });
     setIsModalOpen(true);
   };
@@ -71,227 +101,223 @@ export default function Membros() {
       if (editandoId) {
         if (form.status !== statusOriginal) {
           if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) return;
-          await api.put(`/membros/${editandoId}/status`, null, { params: { status: form.status } });
+          await api.put(`/membros/${editandoId}/status`, null, { params:{ status:form.status } });
         }
         await api.put(`/membros/${editandoId}`, form);
       } else {
         await api.post("/membros", form);
       }
-      fecharModal();
-      listar();
-    } catch (err) { alert("Erro ao salvar dados."); }
+      fecharModal(); listar();
+    } catch { alert("Erro ao salvar dados."); }
   };
 
-  const fecharModal = () => {
-    setIsModalOpen(false);
-    setEditandoId(null);
-  };
-
-  const corStatus = (status) => {
-    const cores = {
-      ATIVO: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-      INATIVO: "bg-rose-500/10 text-rose-600 border-rose-500/20",
-      AFASTADO: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-      TRANSFERIDO: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-      FALECIDO: "bg-slate-500/10 text-slate-600 border-slate-500/20",
-    };
-    return cores[status] || "bg-gray-500/10 text-gray-600";
+  const fecharModal = () => { setIsModalOpen(false); setEditandoId(null); };
+  const excluir = async () => {
+    if (!window.confirm("Excluir permanentemente?")) return;
+    await api.delete(`/membros/${editandoId}`);
+    fecharModal(); listar();
   };
 
   const membrosFiltrados = membros.filter(m =>
-      m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
-      m.cpf?.includes(filtro)
+      m.nome?.toLowerCase().includes(filtro.toLowerCase()) || m.cpf?.includes(filtro)
   );
 
-  return (
-      <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700 pb-20 md:pb-5">
+  const f = v => setForm(p => ({...p, ...v}));
 
-        {/* HEADER SUPERIOR - Ajustado para empilhar no mobile */}
-        <div className="flex flex-col gap-4 mb-6 md:mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg">
-              <User size={24} className="md:w-7 md:h-7" />
+  return (
+      <div style={{ padding:"24px 20px", fontFamily:"'EB Garamond',serif", color:textPrimary }}>
+        <style>{styles}</style>
+
+        {/* Header */}
+        <div style={{ display:"flex", flexDirection:"column", gap:14, marginBottom:24 }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+              <div style={{ width:42, height:42, borderRadius:10, background:`${IEQ.blue}22`, display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.blue }}>
+                <User size={20}/>
+              </div>
+              <div>
+                <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>MEMBRESIA</h3>
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSec, margin:0 }}>{membros.length} REGISTROS</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white italic uppercase">
-                MEMBRESIA
-              </h3>
-              <p className="text-slate-500 text-[10px] md:text-sm font-medium">
-                {membros.length} registros ativos
-              </p>
-            </div>
+            <button onClick={abrirModalNovo}
+                    style={{ display:"flex", alignItems:"center", gap:8, padding:"11px 20px", borderRadius:8, border:"none", cursor:"pointer",
+                      background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`, color:"#fff",
+                      fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em" }}>
+              <Plus size={15}/> NOVO MEMBRO
+            </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                  type="text"
-                  placeholder="Buscar..."
-                  value={filtro}
-                  onChange={(e) => setFiltro(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <button
-                onClick={abrirModalNovo}
-                className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm active:scale-95 transition-all"
-            >
-              <Plus size={18} /> NOVO
-            </button>
+          {/* Busca */}
+          <div style={{ position:"relative" }}>
+            <Search size={15} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }} />
+            <input className="ieq-field" style={{ paddingLeft:42 }}
+                   placeholder="Buscar por nome ou CPF..."
+                   value={filtro} onChange={e=>setFiltro(e.target.value)} />
           </div>
         </div>
 
-        {/* LISTA DE CARDS - Grid Responsivo */}
+        {/* Lista */}
         {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-              <p className="text-slate-500 text-xs font-bold tracking-widest uppercase">Carregando...</p>
+            <div style={{ textAlign:"center", padding:"48px 0" }}>
+              <Loader2 size={30} className="spin-icon" style={{ color:IEQ.blue, display:"inline-block" }} />
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSec, marginTop:12 }}>CARREGANDO...</p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {membrosFiltrados.map((m) => (
-                  <div
-                      key={m.id}
-                      onClick={() => abrirModalEdicao(m)}
-                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl hover:border-blue-500 transition-all active:scale-[0.98] cursor-pointer shadow-sm relative overflow-hidden"
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="h-12 w-12 shrink-0 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center font-black text-xl">
-                        {m.nome?.charAt(0).toUpperCase()}
+            <motion.div className="ieq-grid-m" initial="hidden" animate="visible"
+                        variants={{ hidden:{}, visible:{ transition:{staggerChildren:.05} } }}>
+              {membrosFiltrados.map(m => {
+                const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
+                return (
+                    <motion.div key={m.id} className="ieq-member-card"
+                                variants={{ hidden:{opacity:0,y:14}, visible:{opacity:1,y:0} }}
+                                onClick={() => abrirModalEdicao(m)}>
+                      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+                        <div style={{ width:44, height:44, borderRadius:10, flexShrink:0,
+                          background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          color:"#fff", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:16 }}>
+                          {m.nome?.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ minWidth:0, flex:1 }}>
+                          <h4 style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".1em",
+                            color:textPrimary, margin:"0 0 5px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                            {m.nome?.toUpperCase()}
+                          </h4>
+                          <span style={{ display:"inline-flex", alignItems:"center", padding:"2px 10px", borderRadius:99,
+                            background:sc.bg, color:sc.text, border:`1px solid ${sc.border}`,
+                            fontFamily:"'Cinzel',serif", fontSize:8, fontWeight:700, letterSpacing:".14em" }}>
+                      {m.status}
+                    </span>
+                        </div>
+                        <ChevronRight size={15} style={{ color:textSec, flexShrink:0 }} />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-slate-800 dark:text-white text-sm uppercase truncate">
-                          {m.nome}
-                        </h4>
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-md border text-[9px] font-black uppercase ${corStatus(m.status)}`}>
-                    {m.status}
-                  </span>
+                      <div style={{ borderTop:`1px solid ${border}`, paddingTop:12, display:"flex", flexDirection:"column", gap:6 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                          <CreditCard size={13} style={{ color:textSec, flexShrink:0 }} />
+                          <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSec, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {m.cpf || "CPF não informado"}
+                    </span>
+                        </div>
+                        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                          <Phone size={13} style={{ color:textSec, flexShrink:0 }} />
+                          <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSec }}>{m.telefone || "Sem telefone"}</span>
+                        </div>
                       </div>
-                      <ChevronRight size={16} className="text-slate-300" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <CreditCard size={14} className="shrink-0" />
-                        <span className="truncate">{m.cpf || "CPF não informado"}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Phone size={14} className="shrink-0" />
-                        <span>{m.telefone || "Sem telefone"}</span>
-                      </div>
-                    </div>
-                  </div>
-              ))}
-            </div>
+                    </motion.div>
+                );
+              })}
+            </motion.div>
         )}
 
-        {/* MODAL - Ajustado para ser "Fullscreen" ou Bottom Sheet no mobile */}
-        {isModalOpen && (
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center z-[100]">
-              <div className="bg-white dark:bg-slate-900 w-full h-[90vh] md:h-auto md:max-w-2xl md:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300">
+        {/* MODAL */}
+        <AnimatePresence>
+          {isModalOpen && (
+              <div className="ieq-modal-backdrop">
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                            onClick={fecharModal}
+                            style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }} />
+                <motion.div initial={{y:80,opacity:0}} animate={{y:0,opacity:1}} exit={{y:80,opacity:0}}
+                            className="ieq-modal-box"
+                            style={{ background:cardBg, border:`1px solid ${border}`, backdropFilter:"blur(24px)" }}>
 
-                {/* Header Modal - Sticky */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-600 rounded-lg text-white">
-                      <User size={20} />
+                  {/* Modal header sticky */}
+                  <div style={{ padding:"20px 22px 14px", borderBottom:`1px solid ${border}`, flexShrink:0,
+                    display:"flex", justifyContent:"space-between", alignItems:"center",
+                    background:cardBg }}>
+                    <div>
+                      <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>
+                        {editandoId ? "EDITAR PERFIL" : "NOVO CADASTRO"}
+                      </h2>
+                      <div style={{ height:2, width:36, background:`linear-gradient(90deg,${IEQ.blue},${IEQ.yellow})`, borderRadius:99, marginTop:6 }} />
                     </div>
-                    <h3 className="font-black text-slate-800 dark:text-white uppercase text-sm">
-                      {editandoId ? "Editar Perfil" : "Novo Cadastro"}
-                    </h3>
-                  </div>
-                  <button onClick={fecharModal} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
-                    <X size={20} />
-                  </button>
-                </div>
-
-                {/* Form - Scrollable */}
-                <form onSubmit={salvar} className="p-6 overflow-y-auto flex-1 space-y-6 pb-10">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputGroup label="Nome Completo" value={form.nome} onChange={v => setForm({...form, nome: v})} required />
-                    <InputGroup label="CPF" value={form.cpf} onChange={v => setForm({...form, cpf: v})} placeholder="000.000.000-00" />
-                    <InputGroup label="E-mail" type="email" value={form.email} onChange={v => setForm({...form, email: v})} />
-                    <InputGroup label="WhatsApp" value={form.telefone} onChange={v => setForm({...form, telefone: v})} />
-                  </div>
-
-                  <InputGroup label="Endereço" value={form.endereco} onChange={v => setForm({...form, endereco: v})} />
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <InputGroup label="Nascimento" type="date" value={form.dataNascimento} onChange={v => setForm({...form, dataNascimento: v})} />
-                    <SelectGroup label="Estado Civil" value={form.estadoCivil} options={estadoCivilOptions} onChange={v => setForm({...form, estadoCivil: v})} />
-                    <SelectGroup label="Status" value={form.status} options={statusOptions.map(s => ({value: s, label: s}))} onChange={v => setForm({...form, status: v})} customStyle={corStatus(form.status)} />
-                  </div>
-
-                  <div className="p-4 bg-blue-50 dark:bg-blue-500/5 rounded-2xl border border-blue-100 dark:border-blue-500/10 space-y-4">
-                    <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
-                      <Heart size={14} /> JORNADA ESPIRITUAL
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <InputGroup label="Data Conversão" type="date" value={form.dataConversao} onChange={v => setForm({...form, dataConversao: v})} />
-                      <InputGroup label="Data Batismo" type="date" value={form.dataBatismo} onChange={v => setForm({...form, dataBatismo: v})} />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 pt-4">
-                    <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg active:scale-[0.98] transition-all">
-                      {editandoId ? "Salvar Alterações" : "Confirmar Cadastro"}
+                    <button onClick={fecharModal} style={{ background:"none", border:"none", cursor:"pointer", color:textSec }}>
+                      <X size={20}/>
                     </button>
-
-                    {editandoId && (
-                        <button
-                            type="button"
-                            onClick={async () => {
-                              if(window.confirm("Excluir permanentemente?")) {
-                                await api.delete(`/membros/${editandoId}`);
-                                fecharModal();
-                                listar();
-                              }
-                            }}
-                            className="flex items-center justify-center gap-2 text-rose-500 text-[10px] font-black uppercase py-2"
-                        >
-                          <Trash2 size={14} /> Excluir Registro
-                        </button>
-                    )}
                   </div>
-                </form>
+
+                  {/* Scrollable form */}
+                  <form onSubmit={salvar} style={{ overflowY:"auto", flex:1, padding:"20px 22px 24px", display:"flex", flexDirection:"column", gap:14 }}>
+
+                    <div className="ieq-form-grid2">
+                      <div style={{ gridColumn:"1/-1" }}>
+                        <label className="ieq-label">NOME COMPLETO *</label>
+                        <input required className="ieq-field" value={form.nome} onChange={e=>f({nome:e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="ieq-label">CPF</label>
+                        <input className="ieq-field" placeholder="000.000.000-00" value={form.cpf} onChange={e=>f({cpf:e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="ieq-label">WHATSAPP</label>
+                        <input className="ieq-field" value={form.telefone} onChange={e=>f({telefone:e.target.value})} />
+                      </div>
+                      <div style={{ gridColumn:"1/-1" }}>
+                        <label className="ieq-label">E-MAIL</label>
+                        <input type="email" className="ieq-field" value={form.email} onChange={e=>f({email:e.target.value})} />
+                      </div>
+                      <div style={{ gridColumn:"1/-1" }}>
+                        <label className="ieq-label">ENDEREÇO</label>
+                        <input className="ieq-field" value={form.endereco} onChange={e=>f({endereco:e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="ieq-label">NASCIMENTO</label>
+                        <input type="date" className="ieq-field" value={form.dataNascimento} onChange={e=>f({dataNascimento:e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="ieq-label">ESTADO CIVIL</label>
+                        <select className="ieq-field" value={form.estadoCivil} onChange={e=>f({estadoCivil:e.target.value})}>
+                          {estadoCivilOptions.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                      </div>
+                      <div style={{ gridColumn:"1/-1" }}>
+                        <label className="ieq-label">STATUS</label>
+                        <select className="ieq-field" value={form.status} onChange={e=>f({status:e.target.value})}>
+                          {statusOptions.map(s=><option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Jornada espiritual */}
+                    <div style={{ padding:"16px 14px", borderRadius:10,
+                      background:isDark?"rgba(0,61,165,.08)":"rgba(0,61,165,.05)",
+                      border:`1px solid ${isDark?"rgba(0,61,165,.2)":"rgba(0,61,165,.12)"}` }}>
+                      <p style={{ display:"flex", alignItems:"center", gap:6, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:IEQ.blue, margin:"0 0 12px" }}>
+                        <Heart size={13}/> JORNADA ESPIRITUAL
+                      </p>
+                      <div className="ieq-form-grid2">
+                        <div>
+                          <label className="ieq-label">DATA CONVERSÃO</label>
+                          <input type="date" className="ieq-field" value={form.dataConversao} onChange={e=>f({dataConversao:e.target.value})} />
+                        </div>
+                        <div>
+                          <label className="ieq-label">DATA BATISMO</label>
+                          <input type="date" className="ieq-field" value={form.dataBatismo} onChange={e=>f({dataBatismo:e.target.value})} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display:"flex", flexDirection:"column", gap:10, paddingTop:4 }}>
+                      <button type="submit"
+                              style={{ padding:"14px 0", borderRadius:8, border:"none", cursor:"pointer",
+                                background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`, color:"#fff",
+                                fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em" }}>
+                        {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
+                      </button>
+                      {editandoId && (
+                          <button type="button" onClick={excluir}
+                                  style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+                                    padding:"10px 0", border:"none", cursor:"pointer", background:"none",
+                                    color:IEQ.red, fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".14em" }}>
+                            <Trash2 size={13}/> EXCLUIR REGISTRO
+                          </button>
+                      )}
+                    </div>
+                  </form>
+                </motion.div>
               </div>
-            </div>
-        )}
-      </div>
-  );
-}
-
-// Sub-componentes Refatorados para Mobile
-function InputGroup({ label, type = "text", value, onChange, placeholder, required = false }) {
-  return (
-      <div className="space-y-1.5 min-w-0">
-        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 italic">
-          {label} {required && <span className="text-rose-500">*</span>}
-        </label>
-        <input
-            type={type}
-            required={required}
-            placeholder={placeholder}
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
-        />
-      </div>
-  );
-}
-
-function SelectGroup({ label, value, options, onChange, customStyle = "" }) {
-  return (
-      <div className="space-y-1.5 min-w-0">
-        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 italic">{label}</label>
-        <select
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            className={`w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all ${customStyle}`}
-        >
-          {options.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
-        </select>
+          )}
+        </AnimatePresence>
       </div>
   );
 }

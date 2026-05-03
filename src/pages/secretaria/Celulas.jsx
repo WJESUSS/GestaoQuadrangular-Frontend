@@ -1,27 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
-  Home, Plus, User, Clock, Search, X, ChevronRight, Loader2, Building2, Calendar, MapPin
+  Home, Plus, User, Clock, Search, X, ChevronRight, Loader2,
+  Calendar, MapPin, Building2
 } from "lucide-react";
 
-export default function Celulas() {
-  const [celulas, setCelulas] = useState([]);
+/* ─── Design Tokens IEQ ─── */
+const IEQ = {
+  red:"#C8102E", redDark:"#8B0B1F", redLight:"#E8294A",
+  yellow:"#FDB813", yellowDark:"#C48C00",
+  blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+  offWhite:"#F5F0E8", dark:"#0A0608",
+};
+const green = "#059669";
+
+const DIAS = {
+  MONDAY:"Segunda", TUESDAY:"Terça", WEDNESDAY:"Quarta",
+  THURSDAY:"Quinta", FRIDAY:"Sexta", SATURDAY:"Sábado", SUNDAY:"Domingo",
+};
+
+export default function Celulas({ isDark = false }) {
+  const [celulas,            setCelulas]            = useState([]);
   const [lideresDisponiveis, setLideresDisponiveis] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editandoId, setEditandoId] = useState(null);
-  const [filtro, setFiltro] = useState("");
+  const [loading,            setLoading]            = useState(true);
+  const [isModalOpen,        setIsModalOpen]        = useState(false);
+  const [editandoId,         setEditandoId]         = useState(null);
+  const [filtro,             setFiltro]             = useState("");
 
-  const formInicial = {
-    nome: "",
-    liderId: "",
-    anfitriao: "",
-    endereco: "",
-    bairro: "",
-    diaSemana: "MONDAY",
-    horario: "19:30"
-  };
-
+  const formInicial = { nome:"", liderId:"", anfitriao:"", endereco:"", bairro:"", diaSemana:"MONDAY", horario:"19:30" };
   const [form, setForm] = useState(formInicial);
 
   const carregarDados = useCallback(async () => {
@@ -29,69 +36,35 @@ export default function Celulas() {
       setLoading(true);
       const [resCelulas, resUsuarios] = await Promise.all([
         api.get("/celulas"),
-        api.get("/usuarios")
+        api.get("/usuarios"),
       ]);
       setCelulas(Array.isArray(resCelulas.data) ? resCelulas.data : []);
       setLideresDisponiveis(Array.isArray(resUsuarios.data) ? resUsuarios.data : []);
-    } catch (err) {
-      console.error("Erro ao carregar dados:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error("Erro ao carregar dados:", err); }
+    finally { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    carregarDados();
-  }, [carregarDados]);
+  useEffect(() => { carregarDados(); }, [carregarDados]);
 
-  const abrirModalNovo = () => {
-    setEditandoId(null);
-    setForm(formInicial);
-    setIsModalOpen(true);
-  };
-
+  const abrirModalNovo = () => { setEditandoId(null); setForm(formInicial); setIsModalOpen(true); };
   const abrirModalEdicao = (c) => {
     setEditandoId(c.id);
-    setForm({
-      nome: c.nome || "",
-      liderId: c.liderId || "",
-      anfitriao: c.anfitriao || "",
-      endereco: c.endereco || "",
-      bairro: c.bairro || "",
-      diaSemana: c.diaSemana || "MONDAY",
-      horario: c.horario || "19:30"
-    });
+    setForm({ nome:c.nome||"", liderId:c.liderId||"", anfitriao:c.anfitriao||"",
+      endereco:c.endereco||"", bairro:c.bairro||"", diaSemana:c.diaSemana||"MONDAY", horario:c.horario||"19:30" });
     setIsModalOpen(true);
   };
 
   const salvar = async (e) => {
     e.preventDefault();
-    const dadosParaEnviar = {
-      ...form,
-      liderId: Number(form.liderId),
-      bairro: form.bairro.trim(),
-      nome: form.nome.trim()
-    };
-
+    const dadosParaEnviar = { ...form, liderId:Number(form.liderId), bairro:form.bairro.trim(), nome:form.nome.trim() };
     try {
-      if (editandoId) {
-        await api.put(`/celulas/${editandoId}`, dadosParaEnviar);
-      } else {
-        await api.post("/celulas", dadosParaEnviar);
-      }
-      fecharModal();
-      carregarDados();
-    } catch (err) {
-      const msg = err.response?.data?.message || "Erro ao salvar.";
-      alert(msg);
-    }
+      if (editandoId) await api.put(`/celulas/${editandoId}`, dadosParaEnviar);
+      else            await api.post("/celulas", dadosParaEnviar);
+      fecharModal(); carregarDados();
+    } catch (err) { alert(err.response?.data?.message || "Erro ao salvar."); }
   };
 
-  const fecharModal = () => {
-    setIsModalOpen(false);
-    setForm(formInicial);
-    setEditandoId(null);
-  };
+  const fecharModal = () => { setIsModalOpen(false); setForm(formInicial); setEditandoId(null); };
 
   const celulasFiltradas = celulas.filter(c =>
       c.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
@@ -99,239 +72,241 @@ export default function Celulas() {
       c.bairro?.toLowerCase().includes(filtro.toLowerCase())
   );
 
+  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
+  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
+  const border      = isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)";
+  const inputBg     = isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)";
+
+  const styles = `
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .spin-icon { animation:spin 1s linear infinite; }
+    .ieq-field {
+      width:100%; background:${inputBg};
+      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
+      color:${textPrimary}; padding:12px 14px; border-radius:8px; outline:none;
+      font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
+    }
+    .ieq-field:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
+    .ieq-field::placeholder { color:${isDark?"rgba(245,240,232,.25)":"rgba(26,10,13,.3)"}; }
+    .ieq-celula-card {
+      background:${cardBg}; border:1px solid ${border}; border-radius:12px;
+      padding:20px; cursor:pointer; transition:all .3s;
+      backdrop-filter:blur(24px);
+    }
+    .ieq-celula-card:hover { transform:translateY(-4px); box-shadow:0 14px 36px rgba(200,16,46,.15); border-color:${IEQ.red}; }
+    .ieq-label { font-family:'Cinzel',serif; font-size:8.5px; letter-spacing:.2em; color:${textSec}; text-transform:uppercase; display:block; margin-bottom:6px; }
+    .ieq-modal-backdrop { position:fixed; inset:0; z-index:50; display:flex; align-items:flex-end; justify-content:center; }
+    @media(min-width:520px){ .ieq-modal-backdrop{align-items:center; padding:12px;} }
+    .ieq-modal-box { position:relative; z-index:10; width:100%; max-height:90vh; display:flex; flex-direction:column; border-radius:16px 16px 0 0; overflow:hidden; }
+    @media(min-width:520px){ .ieq-modal-box{border-radius:14px; max-height:calc(100vh - 24px);} }
+    .ieq-grid-celulas { display:grid; grid-template-columns:1fr; gap:14px; }
+    @media(min-width:560px){ .ieq-grid-celulas{grid-template-columns:repeat(2,1fr);} }
+    @media(min-width:900px){ .ieq-grid-celulas{grid-template-columns:repeat(3,1fr);} }
+    .ieq-form-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:400px){ .ieq-form-grid2{grid-template-columns:1fr;} }
+  `;
+
   return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-6 transition-colors duration-300">
-        <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <div style={{ padding:"24px 20px", fontFamily:"'EB Garamond',serif", color:textPrimary, position:"relative" }}>
+        <style>{styles}</style>
 
-          {/* HEADER PREMIUM */}
-          <header className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-emerald-600 rounded-2xl text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20">
-                  <Home size={22} />
-                </div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-none tracking-tighter">Células</h3>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] font-bold mt-1">
-                    {celulas.length} Comunidades
-                  </p>
-                </div>
-              </div>
+        {/* Header */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24, flexWrap:"wrap", gap:12 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ width:42, height:42, borderRadius:10, background:`${green}22`, display:"flex", alignItems:"center", justifyContent:"center", color:green }}>
+              <Building2 size={20} />
             </div>
-
-            {/* BUSCA E FILTRO */}
-            <div className="flex flex-col gap-3">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
-                <input
-                    type="text"
-                    placeholder="Buscar célula, líder ou bairro..."
-                    value={filtro}
-                    onChange={(e) => setFiltro(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-900 border-none rounded-2xl shadow-sm text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-slate-200 transition-all placeholder:text-slate-400 font-medium"
-                />
-              </div>
+            <div>
+              <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>CÉLULAS</h3>
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSec, margin:0 }}>{celulas.length} COMUNIDADES</p>
             </div>
-          </header>
-
-          {/* LISTA */}
-          {loading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="animate-spin text-emerald-500" size={32} />
-                <span className="text-slate-400 dark:text-slate-600 text-xs font-bold mt-4 uppercase tracking-widest">Sincronizando...</span>
-              </div>
-          ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {celulasFiltradas.map((c) => (
-                    <div
-                        key={c.id}
-                        onClick={() => abrirModalEdicao(c)}
-                        className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-transparent dark:border-slate-800/50 hover:border-emerald-100 dark:hover:border-emerald-500/30 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all active:scale-[0.98] cursor-pointer group"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="space-y-1">
-                    <span className="px-2 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-black rounded-lg uppercase tracking-wider">
-                      {c.diaSemana === 'MONDAY' ? 'Segunda' : 'Ativa'}
-                    </span>
-                          <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100 block uppercase tracking-tight leading-tight">
-                            {c.nome}
-                          </h4>
-                        </div>
-                        <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-full group-hover:bg-emerald-500 group-hover:text-white dark:text-slate-400 transition-colors">
-                          <ChevronRight size={18} />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-3 border-t border-slate-50 dark:border-slate-800/50 pt-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                            <User size={14} />
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase leading-none">Líder</p>
-                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{c.nomeLider || "Pendente"}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                            <MapPin size={14} />
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase leading-none">Bairro</p>
-                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{c.bairro || "Não informado"}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl mt-2">
-                          <div className="flex items-center gap-2">
-                            <Clock size={14} className="text-emerald-600 dark:text-emerald-400" />
-                            <span className="text-sm font-black text-slate-700 dark:text-slate-200">{c.horario}h</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar size={14} className="text-emerald-600 dark:text-emerald-400" />
-                            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">Semanal</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                ))}
-              </div>
-          )}
-
-          {/* BOTÃO FLUTUANTE */}
-          <button
-              onClick={abrirModalNovo}
-              className="fixed bottom-6 right-6 md:bottom-10 md:right-10 bg-emerald-600 text-white w-14 h-14 md:w-auto md:h-auto md:px-6 md:py-4 rounded-full md:rounded-2xl shadow-2xl shadow-emerald-500/40 flex items-center justify-center gap-3 hover:bg-emerald-700 transition-all active:scale-90 z-40"
-          >
-            <Plus size={24} />
-            <span className="hidden md:block font-bold text-sm uppercase tracking-widest">Nova Célula</span>
+          </div>
+          <button onClick={abrirModalNovo}
+                  style={{ display:"flex", alignItems:"center", gap:8, padding:"11px 20px", borderRadius:8, border:"none", cursor:"pointer",
+                    background:`linear-gradient(135deg,${green},#065f46)`, color:"#fff",
+                    fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em", transition:"all .25s" }}
+                  onMouseEnter={e=>e.currentTarget.style.filter="brightness(1.1)"}
+                  onMouseLeave={e=>e.currentTarget.style.filter="brightness(1)"}>
+            <Plus size={15}/> NOVA CÉLULA
           </button>
+        </div>
 
-          {/* MODAL DARK MODE READY */}
-          {isModalOpen && (
-              <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-md flex items-end md:items-center justify-center z-50 p-0 md:p-4">
-                <div className="bg-white dark:bg-slate-900 w-full max-w-xl md:rounded-[32px] rounded-t-[32px] p-6 md:p-8 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[95vh] overflow-y-auto border border-transparent dark:border-slate-800">
+        {/* Busca */}
+        <div style={{ position:"relative", marginBottom:20 }}>
+          <Search size={15} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }} />
+          <input className="ieq-field" style={{ paddingLeft:42 }}
+                 placeholder="Buscar célula, líder ou bairro..."
+                 value={filtro} onChange={e => setFiltro(e.target.value)} />
+        </div>
 
-                  <div className="flex justify-between items-center mb-8 sticky top-0 bg-white dark:bg-slate-900 pb-2 z-10 transition-colors">
-                    <div>
-                      <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
-                        {editandoId ? "Editar Célula" : "Nova Célula"}
-                      </h2>
-                      <div className="h-1 w-12 bg-emerald-500 rounded-full mt-1"></div>
+        {/* Lista */}
+        {loading ? (
+            <div style={{ textAlign:"center", padding:"48px 0" }}>
+              <Loader2 size={30} className="spin-icon" style={{ color:IEQ.red, display:"inline-block" }} />
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSec, marginTop:12 }}>CARREGANDO...</p>
+            </div>
+        ) : (
+            <motion.div className="ieq-grid-celulas" initial="hidden" animate="visible"
+                        variants={{ hidden:{}, visible:{ transition:{staggerChildren:.06} } }}>
+              {celulasFiltradas.map(c => (
+                  <motion.div key={c.id} className="ieq-celula-card"
+                              variants={{ hidden:{opacity:0,y:16}, visible:{opacity:1,y:0} }}
+                              onClick={() => abrirModalEdicao(c)}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
+                      <div>
+                  <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 10px", borderRadius:99,
+                    background:`${green}18`, color:green, border:`1px solid ${green}44`,
+                    fontFamily:"'Cinzel',serif", fontSize:8.5, fontWeight:700, letterSpacing:".14em", marginBottom:6 }}>
+                    {DIAS[c.diaSemana] || c.diaSemana}
+                  </span>
+                        <h4 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".12em", color:textPrimary, margin:0 }}>
+                          {c.nome?.toUpperCase()}
+                        </h4>
+                      </div>
+                      <div style={{ width:30, height:30, borderRadius:"50%", background:isDark?"rgba(255,255,255,.05)":"rgba(200,16,46,.06)",
+                        display:"flex", alignItems:"center", justifyContent:"center", color:textSec, transition:"all .25s",
+                        border:`1px solid ${border}` }}>
+                        <ChevronRight size={15} />
+                      </div>
                     </div>
-                    <button onClick={fecharModal} className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:text-rose-500 transition-colors">
-                      <X size={20} />
-                    </button>
-                  </div>
 
-                  <form onSubmit={salvar} className="space-y-5">
-                    <div className="space-y-4">
-                      <div className="group">
-                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-widest">Identificação</label>
-                        <input
-                            required
-                            placeholder="Nome da Célula"
-                            value={form.nome}
-                            onChange={e => setForm({ ...form, nome: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-2xl mt-1 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-200 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                        />
+                    <div style={{ borderTop:`1px solid ${border}`, paddingTop:14, display:"flex", flexDirection:"column", gap:8 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <div style={{ width:28, height:28, borderRadius:6, background:isDark?"rgba(255,255,255,.04)":"rgba(200,16,46,.06)",
+                          display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.red, opacity:.7 }}>
+                          <User size={13} />
+                        </div>
+                        <div>
+                          <span className="ieq-label" style={{ marginBottom:1 }}>LÍDER</span>
+                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, fontWeight:500, color:textPrimary, margin:0 }}>{c.nomeLider || "Pendente"}</p>
+                        </div>
+                      </div>
+
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <div style={{ width:28, height:28, borderRadius:6, background:isDark?"rgba(255,255,255,.04)":"rgba(200,16,46,.06)",
+                          display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.red, opacity:.7 }}>
+                          <MapPin size={13} />
+                        </div>
+                        <div>
+                          <span className="ieq-label" style={{ marginBottom:1 }}>BAIRRO</span>
+                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, fontWeight:500, color:textPrimary, margin:0 }}>{c.bairro || "Não informado"}</p>
+                        </div>
+                      </div>
+
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+                        background:isDark?"rgba(255,255,255,.03)":"rgba(200,16,46,.04)", padding:"10px 12px",
+                        borderRadius:8, border:`1px solid ${border}`, marginTop:4 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                          <Clock size={13} style={{ color:green }} />
+                          <span style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, color:textPrimary }}>{c.horario}h</span>
+                        </div>
+                        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                          <Calendar size={13} style={{ color:green }} />
+                          <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color:textSec }}>SEMANAL</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+              ))}
+            </motion.div>
+        )}
+
+        {/* MODAL */}
+        <AnimatePresence>
+          {isModalOpen && (
+              <div className="ieq-modal-backdrop">
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                            onClick={fecharModal}
+                            style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }} />
+                <motion.div initial={{y:80,opacity:0}} animate={{y:0,opacity:1}} exit={{y:80,opacity:0}}
+                            className="ieq-modal-box"
+                            style={{ maxWidth:480, background:cardBg, border:`1px solid ${border}`, backdropFilter:"blur(24px)" }}>
+                  <div style={{ padding:"22px 22px 0", overflowY:"auto", flex:1 }}>
+
+                    {/* Modal header */}
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
+                      <div>
+                        <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>
+                          {editandoId ? "EDITAR CÉLULA" : "NOVA CÉLULA"}
+                        </h2>
+                        <div style={{ height:2, width:40, background:`linear-gradient(90deg,${IEQ.red},${IEQ.yellow})`, borderRadius:99, marginTop:6 }} />
+                      </div>
+                      <button onClick={fecharModal} style={{ background:"none", border:"none", cursor:"pointer", color:textSec, padding:4 }}>
+                        <X size={20}/>
+                      </button>
+                    </div>
+
+                    <form onSubmit={salvar} style={{ display:"flex", flexDirection:"column", gap:14, paddingBottom:24 }}>
+
+                      <div>
+                        <label className="ieq-label">IDENTIFICAÇÃO</label>
+                        <input required className="ieq-field" placeholder="Nome da célula"
+                               value={form.nome} onChange={e=>setForm({...form,nome:e.target.value})} />
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-widest">Liderança</label>
-                        <select
-                            required
-                            value={form.liderId}
-                            onChange={e => setForm({ ...form, liderId: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-2xl mt-1 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-200 appearance-none"
-                        >
-                          <option value="">Selecionar Líder</option>
-                          {lideresDisponiveis.map(u => (
-                              <option key={u.id} value={u.id}>{u.nome}</option>
-                          ))}
+                        <label className="ieq-label">LIDERANÇA</label>
+                        <select required className="ieq-field"
+                                value={form.liderId} onChange={e=>setForm({...form,liderId:e.target.value})}>
+                          <option value="">Selecionar líder</option>
+                          {lideresDisponiveis.map(u => <option key={u.id} value={u.id}>{u.nome}</option>)}
                         </select>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-1">
-                          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-widest">Bairro</label>
-                          <input
-                              required
-                              value={form.bairro}
-                              onChange={e => setForm({ ...form, bairro: e.target.value })}
-                              className="w-full bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-2xl mt-1 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-200"
-                          />
+                      <div className="ieq-form-grid2">
+                        <div>
+                          <label className="ieq-label">BAIRRO</label>
+                          <input required className="ieq-field" value={form.bairro}
+                                 onChange={e=>setForm({...form,bairro:e.target.value})} />
                         </div>
-                        <div className="col-span-1">
-                          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-widest">Horário</label>
-                          <input
-                              type="time"
-                              value={form.horario}
-                              onChange={e => setForm({ ...form, horario: e.target.value })}
-                              className="w-full bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-2xl mt-1 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-200"
-                          />
+                        <div>
+                          <label className="ieq-label">HORÁRIO</label>
+                          <input type="time" className="ieq-field" value={form.horario}
+                                 onChange={e=>setForm({...form,horario:e.target.value})} />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-1">
-                          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-widest">Anfitrião</label>
-                          <input
-                              value={form.anfitriao}
-                              onChange={e => setForm({ ...form, anfitriao: e.target.value })}
-                              className="w-full bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-2xl mt-1 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-200"
-                          />
+                      <div className="ieq-form-grid2">
+                        <div>
+                          <label className="ieq-label">ANFITRIÃO</label>
+                          <input className="ieq-field" value={form.anfitriao}
+                                 onChange={e=>setForm({...form,anfitriao:e.target.value})} />
                         </div>
-                        <div className="col-span-1">
-                          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-widest">Dia</label>
-                          <select
-                              value={form.diaSemana}
-                              onChange={e => setForm({ ...form, diaSemana: e.target.value })}
-                              className="w-full bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-2xl mt-1 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-200 appearance-none"
-                          >
-                            <option value="MONDAY">Segunda</option>
-                            <option value="TUESDAY">Terça</option>
-                            <option value="WEDNESDAY">Quarta</option>
-                            <option value="THURSDAY">Quinta</option>
-                            <option value="FRIDAY">Sexta</option>
-                            <option value="SATURDAY">Sábado</option>
-                            <option value="SUNDAY">Domingo</option>
+                        <div>
+                          <label className="ieq-label">DIA DA SEMANA</label>
+                          <select className="ieq-field" value={form.diaSemana}
+                                  onChange={e=>setForm({...form,diaSemana:e.target.value})}>
+                            {Object.entries(DIAS).map(([v,l])=><option key={v} value={v}>{l}</option>)}
                           </select>
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-widest">Localização</label>
-                        <input
-                            placeholder="Rua, número, etc..."
-                            value={form.endereco}
-                            onChange={e => setForm({ ...form, endereco: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-2xl mt-1 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-200 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                        />
+                        <label className="ieq-label">LOCALIZAÇÃO</label>
+                        <input className="ieq-field" placeholder="Rua, número, etc..."
+                               value={form.endereco} onChange={e=>setForm({...form,endereco:e.target.value})} />
                       </div>
-                    </div>
 
-                    <div className="flex flex-col md:flex-row gap-3 pt-4 pb-4 md:pb-0">
-                      <button
-                          type="submit"
-                          className="w-full bg-emerald-600 text-white font-black p-5 rounded-2xl hover:bg-emerald-700 shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20 transition-all active:scale-95 uppercase text-xs tracking-[0.2em]"
-                      >
-                        {editandoId ? "Salvar Alterações" : "Confirmar Cadastro"}
-                      </button>
-                      <button
-                          type="button"
-                          onClick={fecharModal}
-                          className="w-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold p-5 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all uppercase text-xs tracking-widest"
-                      >
-                        Voltar
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                      <div style={{ display:"flex", gap:10, paddingTop:4 }}>
+                        <button type="button" onClick={fecharModal}
+                                style={{ flex:1, padding:"13px 0", borderRadius:8, border:`1px solid ${border}`, cursor:"pointer",
+                                  background:"transparent", color:textSec, fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".14em" }}>
+                          CANCELAR
+                        </button>
+                        <button type="submit"
+                                style={{ flex:2, padding:"13px 0", borderRadius:8, border:"none", cursor:"pointer",
+                                  background:`linear-gradient(135deg,${green},#065f46)`, color:"#fff",
+                                  fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".14em" }}>
+                          {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </motion.div>
               </div>
           )}
-        </div>
+        </AnimatePresence>
       </div>
   );
 }

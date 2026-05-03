@@ -1,28 +1,50 @@
 import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import api from "../../services/api.js";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
-  FileText,
-  Download,
-  Calendar,
-  Search,
-  Filter,
-  User,
-  Phone,
-  ShieldAlert,
-  ChevronRight,
-  Loader2
+  FileText, Download, Calendar, Search, Phone, ShieldAlert, ChevronRight, Loader2, User
 } from "lucide-react";
 
-export default function FichasEncontro() {
-  const [fichas, setFichas] = useState([]);
-  const [loading, setLoading] = useState(true);
+/* ─── Design Tokens IEQ ─── */
+const IEQ = {
+  red:"#C8102E", redDark:"#8B0B1F", yellow:"#FDB813",
+  blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+  offWhite:"#F5F0E8", dark:"#0A0608",
+};
+const orange = "#D97706";
+
+export default function FichasEncontro({ isDark = false }) {
+  const [fichas,     setFichas]     = useState([]);
+  const [loading,    setLoading]    = useState(true);
   const [dataInicio, setDataInicio] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0];
   });
   const [dataFim, setDataFim] = useState(new Date().toISOString().split("T")[0]);
+
+  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
+  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
+  const border      = isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)";
+  const inputBg     = isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)";
+
+  const styles = `
+    @keyframes spin{to{transform:rotate(360deg)}} .spin-icon{animation:spin 1s linear infinite;}
+    .ieq-field{width:100%;background:${inputBg};border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
+      color:${textPrimary};padding:10px 14px;border-radius:8px;outline:none;
+      font-family:'EB Garamond',serif;font-size:14px;transition:all .25s;}
+    .ieq-field:focus{border-color:${IEQ.red};box-shadow:0 0 0 3px rgba(200,16,46,.12);}
+    .ieq-label{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.2em;color:${textSec};text-transform:uppercase;display:block;margin-bottom:6px;}
+    .ieq-ficha-card{background:${cardBg};border:1px solid ${border};border-radius:12px;padding:18px;transition:all .3s;backdrop-filter:blur(24px);}
+    .ieq-ficha-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(217,119,6,.1);border-color:${orange};}
+    .ieq-grid-f{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:560px){.ieq-grid-f{grid-template-columns:repeat(2,1fr);}}
+    @media(min-width:900px){.ieq-grid-f{grid-template-columns:repeat(3,1fr);}}
+    .ieq-filter-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:520px){.ieq-filter-grid{grid-template-columns:1fr 1fr auto;}}
+  `;
 
   const carregarFichas = useCallback(async () => {
     try {
@@ -31,177 +53,190 @@ export default function FichasEncontro() {
         alert("A data fim não pode ser menor que a data início");
         return;
       }
-      const params = { inicio: dataInicio, fim: dataFim };
-      const res = await api.get("/relatorios/encontro/periodo", { params });
+      const res = await api.get("/relatorios/encontro/periodo", { params:{ inicio:dataInicio, fim:dataFim } });
       setFichas(res.data || []);
-    } catch (err) {
-      console.error("Erro ao carregar fichas", err);
-      setFichas([]);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error("Erro ao carregar fichas", err); setFichas([]); }
+    finally { setLoading(false); }
   }, [dataInicio, dataFim]);
 
-  useEffect(() => {
-    carregarFichas();
-  }, [carregarFichas]);
-
-  // --- Lógica de PDF mantida (mas você pode estilizar mais se desejar) ---
-  const gerarPDFCompleto = () => {
-    const doc = new jsPDF("p", "mm", "a4");
-    doc.setFillColor(5, 150, 105);
-    doc.rect(0, 0, 210, 30, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.text("RELATÓRIO DE ENCONTRISTAS", 14, 18);
-    // ... restante da sua lógica de jsPDF ...
-    doc.save(`Relatorio_Encontristas.pdf`);
-  };
+  useEffect(() => { carregarFichas(); }, [carregarFichas]);
 
   const calcularIdade = (dataNasc) => {
     if (!dataNasc) return "?";
-    const hoje = new Date();
-    const nasc = new Date(dataNasc);
+    const hoje = new Date(), nasc = new Date(dataNasc);
     let idade = hoje.getFullYear() - nasc.getFullYear();
     if (hoje.getMonth() < nasc.getMonth() || (hoje.getMonth() === nasc.getMonth() && hoje.getDate() < nasc.getDate())) idade--;
     return idade;
   };
 
+  const gerarPDFCompleto = () => {
+    const doc = new jsPDF("p", "mm", "a4");
+    doc.setFillColor(139, 11, 31);
+    doc.rect(0, 0, 210, 30, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text("RELATÓRIO DE ENCONTRISTAS", 14, 18);
+    doc.setFontSize(10);
+    doc.text(`Período: ${dataInicio} a ${dataFim}`, 14, 25);
+    autoTable(doc, {
+      startY: 35,
+      head: [["Nome", "Idade", "Telefone", "Líder Responsável"]],
+      body: fichas.map(f => [
+        f.nomeConvidado || f.nome || "",
+        calcularIdade(f.dataNascimento) + " anos",
+        f.telefone || "Não informado",
+        f.liderResponsavel || f.nomeLiderCelula || "Pendente",
+      ]),
+      headStyles: { fillColor:[139,11,31], textColor:255, fontStyle:"bold" },
+      alternateRowStyles: { fillColor:[245,240,232] },
+    });
+    doc.save(`Relatorio_Encontristas.pdf`);
+  };
+
   return (
-      <div className="p-6 space-y-8 animate-in fade-in duration-700">
+      <div style={{ padding:"24px 20px", fontFamily:"'EB Garamond',serif", color:textPrimary }}>
+        <style>{styles}</style>
 
-        {/* HEADER DO MÓDULO */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
-              <div className="p-2 bg-emerald-500 rounded-lg text-white">
-                <FileText size={24} />
+        {/* Header */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:12 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ width:42, height:42, borderRadius:10, background:`${orange}22`, display:"flex", alignItems:"center", justifyContent:"center", color:orange }}>
+              <FileText size={20}/>
+            </div>
+            <div>
+              <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>FICHAS DE ENCONTRO</h3>
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSec, margin:0 }}>GESTÃO DE ENCONTRISTAS</p>
+            </div>
+          </div>
+
+          <div style={{ display:"flex", gap:8 }}>
+            <button onClick={gerarPDFCompleto} disabled={fichas.length===0}
+                    style={{ display:"flex", alignItems:"center", gap:6, padding:"10px 16px", borderRadius:8,
+                      border:`1px solid ${border}`, cursor:fichas.length===0?"not-allowed":"pointer",
+                      background:isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.04)", color:textPrimary,
+                      fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".14em",
+                      opacity:fichas.length===0?.5:1, transition:"all .2s" }}>
+              <Download size={14}/> RELATÓRIO PDF
+            </button>
+          </div>
+        </div>
+
+        {/* Filtros */}
+        <div style={{ background:cardBg, border:`1px solid ${border}`, borderRadius:10, padding:16, marginBottom:22, backdropFilter:"blur(24px)" }}>
+          <div className="ieq-filter-grid">
+            <div>
+              <label className="ieq-label">DATA INÍCIO</label>
+              <div style={{ position:"relative" }}>
+                <Calendar size={13} style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:textSec }}/>
+                <input type="date" className="ieq-field" style={{ paddingLeft:36 }}
+                       value={dataInicio} onChange={e=>setDataInicio(e.target.value)}/>
               </div>
-              Gestão de Encontristas
-            </h3>
-            <p className="text-slate-500 text-sm mt-1">Gerencie e exporte dados dos participantes de encontros.</p>
-          </div>
-
-          <div className="flex gap-3 w-full md:w-auto">
-            <button
-                onClick={gerarPDFCompleto}
-                disabled={fichas.length === 0}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
-            >
-              <Download size={18} /> Relatório
-            </button>
-            <button
-                onClick={() => {/* Lógica para fichas individuais */}}
-                disabled={fichas.length === 0}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50"
-            >
-              <FileText size={18} /> Imprimir Fichas
-            </button>
+            </div>
+            <div>
+              <label className="ieq-label">DATA FIM</label>
+              <div style={{ position:"relative" }}>
+                <Calendar size={13} style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:textSec }}/>
+                <input type="date" className="ieq-field" style={{ paddingLeft:36 }}
+                       value={dataFim} onChange={e=>setDataFim(e.target.value)}/>
+              </div>
+            </div>
+            <div style={{ display:"flex", alignItems:"flex-end" }}>
+              <button onClick={carregarFichas}
+                      style={{ padding:"10px 20px", borderRadius:8, border:"none", cursor:"pointer",
+                        background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`, color:"#fff",
+                        fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".14em",
+                        width:"100%", transition:"all .25s" }}
+                      onMouseEnter={e=>e.currentTarget.style.filter="brightness(1.1)"}
+                      onMouseLeave={e=>e.currentTarget.style.filter="brightness(1)"}>
+                FILTRAR
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* ÁREA DE FILTROS */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[200px] space-y-1.5">
-            <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Data Início</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                  type="date"
-                  value={dataInicio}
-                  onChange={(e) => setDataInicio(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 min-w-[200px] space-y-1.5">
-            <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Data Fim</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                  type="date"
-                  value={dataFim}
-                  onChange={(e) => setDataFim(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white"
-              />
-            </div>
-          </div>
-
-          <button
-              onClick={carregarFichas}
-              className="bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-2.5 rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all"
-          >
-            Filtrar Dados
-          </button>
-        </div>
-
-        {/* CONTEÚDO PRINCIPAL */}
+        {/* Conteúdo */}
         {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4">
-              <Loader2 className="animate-spin text-emerald-500" size={40} />
-              <p className="text-slate-500 font-medium animate-pulse">Buscando encontristas...</p>
+            <div style={{ textAlign:"center", padding:"48px 0" }}>
+              <Loader2 size={30} className="spin-icon" style={{ color:orange, display:"inline-block" }}/>
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSec, marginTop:12 }}>BUSCANDO FICHAS...</p>
             </div>
         ) : fichas.length === 0 ? (
-            <div className="bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] py-20 text-center">
-              <ShieldAlert className="mx-auto text-slate-300 mb-4" size={48} />
-              <h4 className="text-slate-800 dark:text-slate-200 font-bold text-xl">Nenhum registro encontrado</h4>
-              <p className="text-slate-500 max-w-xs mx-auto text-sm">Tente ajustar o período das datas para encontrar o que procura.</p>
+            <div style={{ textAlign:"center", padding:"48px 24px", borderRadius:12,
+              border:`2px dashed ${border}`, background:isDark?"rgba(255,255,255,.02)":"rgba(200,16,46,.02)" }}>
+              <ShieldAlert size={40} style={{ color:textSec, display:"block", margin:"0 auto 14px" }}/>
+              <h4 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".12em", color:textPrimary, margin:"0 0 8px" }}>
+                NENHUM REGISTRO ENCONTRADO
+              </h4>
+              <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:textSec, margin:0 }}>
+                Ajuste o período de datas e tente novamente.
+              </p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {fichas.map((f) => (
-                  <div
-                      key={f.id}
-                      className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl hover:border-emerald-500 dark:hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-xl hover:shadow-emerald-500/10"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
-                        {(f.nomeConvidado || f.nome || "?")[0]}
+            <>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+            <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSec }}>
+              {fichas.length} PARTICIPANTES ENCONTRADOS
+            </span>
+              </div>
+              <motion.div className="ieq-grid-f" initial="hidden" animate="visible"
+                          variants={{ hidden:{}, visible:{ transition:{staggerChildren:.05} } }}>
+                {fichas.map(f => (
+                    <motion.div key={f.id} className="ieq-ficha-card"
+                                variants={{ hidden:{opacity:0,y:14}, visible:{opacity:1,y:0} }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
+                        <div style={{ width:44, height:44, borderRadius:10, flexShrink:0,
+                          background:`${orange}22`, display:"flex", alignItems:"center", justifyContent:"center",
+                          color:orange, fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:18 }}>
+                          {(f.nomeConvidado||f.nome||"?")[0].toUpperCase()}
+                        </div>
+                        <div style={{ textAlign:"right" }}>
+                          <span className="ieq-label" style={{ marginBottom:2 }}>IDADE</span>
+                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, color:textPrimary, margin:0 }}>
+                            {calcularIdade(f.dataNascimento)} anos
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">Idade</span>
-                        <span className="text-sm font-black text-slate-700 dark:text-slate-200">
-                    {calcularIdade(f.dataNascimento)} anos
+
+                      <h4 style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".1em",
+                        color:textPrimary, margin:"0 0 8px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        {(f.nomeConvidado||f.nome||"").toUpperCase()}
+                      </h4>
+
+                      <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:12 }}>
+                        <Phone size={12} style={{ color:textSec }}/>
+                        <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSec }}>
+                    {f.telefone || "Não informado"}
                   </span>
                       </div>
-                    </div>
 
-                    <div className="space-y-1 mb-4">
-                      <h4 className="font-bold text-slate-800 dark:text-white truncate uppercase tracking-tight">
-                        {f.nomeConvidado || f.nome}
-                      </h4>
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
-                        <Phone size={12} /> {f.telefone || "Não informado"}
+                      <div style={{ borderTop:`1px solid ${border}`, paddingTop:12, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                        <div>
+                          <span className="ieq-label" style={{ marginBottom:2 }}>LÍDER RESPONSÁVEL</span>
+                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:orange, margin:0, fontStyle:"italic" }}>
+                            {f.liderResponsavel || f.nomeLiderCelula || "Pendente"}
+                          </p>
+                        </div>
+                        <ChevronRight size={15} style={{ color:textSec }}/>
                       </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Líder Resp.</p>
-                        <p className="text-xs font-bold text-emerald-600 truncate max-w-[120px]">
-                          {f.liderResponsavel || f.nomeLiderCelula || "Pendente"}
-                        </p>
-                      </div>
-                      <button className="p-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 hover:text-emerald-500 transition-colors">
-                        <ChevronRight size={20} />
-                      </button>
-                    </div>
-                  </div>
-              ))}
-            </div>
+                    </motion.div>
+                ))}
+              </motion.div>
+            </>
         )}
 
-        {/* BADGE DE CONTAGEM FLUTUANTE */}
-        <div className="fixed bottom-8 right-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 dark:border-slate-200 z-50">
-          <Users size={18} />
-          <span className="font-black text-sm">{fichas.length} Participantes</span>
-        </div>
+        {/* Badge flutuante */}
+        {fichas.length > 0 && (
+            <div style={{ position:"fixed", bottom:24, right:24, zIndex:50,
+              background:isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.95)",
+              border:`1px solid ${border}`, borderRadius:99, padding:"10px 18px",
+              display:"flex", alignItems:"center", gap:8, backdropFilter:"blur(16px)",
+              boxShadow:"0 8px 24px rgba(0,0,0,.15)" }}>
+              <User size={15} style={{ color:IEQ.red }}/>
+              <span style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".14em", color:textPrimary }}>
+            {fichas.length} PARTICIPANTES
+          </span>
+            </div>
+        )}
       </div>
   );
-}
-
-// Sub-componente para os ícones
-function Users({ size }) {
-  return <User size={size} />;
 }
