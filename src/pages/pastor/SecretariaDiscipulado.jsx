@@ -174,40 +174,53 @@ export default function SecretariaDiscipulado({ isDark = false }) {
     const domingo = new Date(segunda); domingo.setDate(segunda.getDate() + 6);
     return { inicio: segunda.toISOString().split("T")[0], fim: domingo.toISOString().split("T")[0] };
   }
-
+// 1. Função carregarRelatorios com tratamento de erro real
   const carregarRelatorios = async () => {
     try {
       setLoading(true);
-
       const rawToken = localStorage.getItem("token");
 
-      if (!rawToken) {
-        console.warn("Token não encontrado");
+      // Verificação de segurança: se não houver token, para aqui.
+      if (!rawToken || rawToken === "undefined" || rawToken === "null") {
+        console.warn("Aguardando token válido...");
+        setLoading(false);
         return;
       }
 
+      // Limpeza segura do token
       const token = rawToken.replace(/"/g, "").trim();
 
       const res = await api.get("/discipulado/todos-relatorios", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache" // Evita que a Vercel cacheie uma resposta vazia
+        },
       });
 
       setRelatorios(res.data || []);
-
     } catch (e) {
-      console.error("ERRO COMPLETO:", e);
-      console.error("STATUS:", e?.response?.status);
-      console.error("DATA:", e?.response?.data);
-
+      console.error("ERRO NA REQUISIÇÃO:", e.response?.status || e.message);
+      // Se o erro for 401 ou 403, o token expirou ou é inválido
+      if (e.response?.status === 401 || e.response?.status === 403) {
+        console.error("Sessão inválida em produção");
+      }
     } finally {
       setLoading(false);
     }
   };
+
+// 2. useEffect com "Double Check"
   useEffect(() => {
     const sem = obterSemanaAtual();
     setDataInicioFiltro(sem.inicio);
     setDataFimFiltro(sem.fim);
-    carregarRelatorios();
+
+    // Pequeno delay de 100ms apenas em produção para garantir leitura do Storage
+    const timer = setTimeout(() => {
+      carregarRelatorios();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const relatoriosFiltrados = useMemo(() => relatorios.filter(rel => {
