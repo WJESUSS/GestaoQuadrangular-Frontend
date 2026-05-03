@@ -15,6 +15,7 @@ import {
   AlertTriangle, ChevronRight, Activity, Settings,
   ShieldCheck, Bell, Menu, X, LogOut, Sun, Moon,
 } from "lucide-react";
+import Discipulado from "./Discipulado.jsx";
 
 /* ═══════════════════════════════════════════════
    🎨 Cores Oficiais Igreja do Evangelho Quadrangular
@@ -45,7 +46,7 @@ const NAV_ITEMS = [
 const PAGE_TITLES = {
   "pastor":            "Dashboard Geral",
   "relatorio-celulas": "Relatórios de Células",
-  "discipulado":       "Secretaria de Discipulado",
+  "discipulado":       "Secretaria de Discipulado",   // ✅ CORRIGIDO: removido ".jsx"
   "multiplicacoes":    "Solicitações de Multiplicação",
   "ranking-celulas":   "Ranking de Células",
   "alertas":           "Painel de Alertas",
@@ -493,7 +494,7 @@ export default function PastorPage() {
             </div>
 
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              {/* Stats resumo — oculto em telas muito pequenas */}
+              {/* Stats resumo */}
               <div className="ieq-stat-mini" style={{ marginRight:6, display:"flex" }}>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".15em", color:"rgba(200,16,46,.55)" }}>TOTAL</span>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, color:textPrimary, lineHeight:1 }}>
@@ -532,7 +533,8 @@ export default function PastorPage() {
                 <Routes location={location}>
                   <Route index                    element={<PainelPastor />} />
                   <Route path="relatorio-celulas" element={<RelatorioCelula />} />
-                  <Route path="discipulado"       element={<SecretariaDiscipulado />} />
+                  {/* ✅ CORRIGIDO: path em minúsculo, rota duplicada removida */}
+                  <Route path="discipulado"       element={<Discipulado />} />
                   <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao />} />
                   <Route path="ranking-celulas"   element={<RankingCelulas />} />
                   <Route path="alertas"           element={<PainelAlertas />} />

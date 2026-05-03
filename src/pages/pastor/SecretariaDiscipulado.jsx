@@ -244,7 +244,7 @@ export default function SecretariaDiscipulado({ isDark = false }) {
     if (relatoriosFiltrados.length === 0) return;
     const doc = new jsPDF("l","mm","a4");
     doc.setFontSize(16); doc.setTextColor(0,36,112);
-    doc.text("Relatório Geral de Discipulado", 14, 15);
+    doc.text("Relatório Geral de Discipulado.jsx", 14, 15);
     doc.setFontSize(9); doc.setTextColor(100);
     doc.text(`Filtrado de: ${dataInicioFiltro} até ${dataFimFiltro}`, 14, 22);
     let y = 30;
