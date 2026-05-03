@@ -2,7 +2,9 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 export default function ProtectedRoute({ children, allowedProfiles }) {
-  const token = localStorage.getItem("token");
+  // ✅ Remove aspas extras que podem vir do localStorage
+  const raw = localStorage.getItem("token");
+  const token = raw?.replace(/^"|"$/g, "");
 
   if (!token) {
     return <Navigate to="/" replace />;
@@ -11,7 +13,7 @@ export default function ProtectedRoute({ children, allowedProfiles }) {
   try {
     const decoded = jwtDecode(token);
 
-    // Verifica expiração
+    // ✅ Verifica expiração
     const agora = Date.now() / 1000;
     if (decoded.exp && decoded.exp < agora) {
       localStorage.removeItem("token");
@@ -34,6 +36,7 @@ export default function ProtectedRoute({ children, allowedProfiles }) {
     }
 
     return children;
+
   } catch (error) {
     console.error("Token inválido:", error);
     localStorage.removeItem("token");
