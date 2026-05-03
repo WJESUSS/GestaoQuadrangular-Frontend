@@ -175,10 +175,10 @@ export default function SecretariaDiscipulado({ isDark = false }) {
     return { inicio: segunda.toISOString().split("T")[0], fim: domingo.toISOString().split("T")[0] };
   }
 
-
   const carregarRelatorios = async () => {
     try {
       setLoading(true);
+
       const rawToken = localStorage.getItem("token");
 
       if (!rawToken) {
@@ -187,18 +187,22 @@ export default function SecretariaDiscipulado({ isDark = false }) {
       }
 
       const token = rawToken.replace(/"/g, "").trim();
+
       const res = await api.get("/discipulado/todos-relatorios", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setRelatorios(res.data || []);
+
     } catch (e) {
-      console.error(e);
-      console.error("ERRO COMPLETO:", e.response);
+      console.error("ERRO COMPLETO:", e);
+      console.error("STATUS:", e?.response?.status);
+      console.error("DATA:", e?.response?.data);
+
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     const sem = obterSemanaAtual();
     setDataInicioFiltro(sem.inicio);
