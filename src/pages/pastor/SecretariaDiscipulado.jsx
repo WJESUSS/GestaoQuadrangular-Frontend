@@ -175,6 +175,7 @@ export default function SecretariaDiscipulado({ isDark = false }) {
     return { inicio: segunda.toISOString().split("T")[0], fim: domingo.toISOString().split("T")[0] };
   }
 
+
   const carregarRelatorios = async () => {
     try {
       setLoading(true);
@@ -185,6 +186,7 @@ export default function SecretariaDiscipulado({ isDark = false }) {
       setRelatorios(res.data || []);
     } catch (e) {
       console.error(e);
+      console.error("ERRO COMPLETO:", e.response);
     } finally {
       setLoading(false);
     }
