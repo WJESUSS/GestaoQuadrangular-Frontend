@@ -8,276 +8,317 @@ import {
   PieChart, DownloadCloud
 } from "lucide-react";
 
+const C = {
+  red:"#C8102E", redDark:"#8B0B1F", yellow:"#FDB813", yellowDark:"#C48C00",
+  blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+};
+
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  * { box-sizing: border-box; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin   { to { transform:rotate(360deg); } }
+  @keyframes shine  { from {transform:translateX(-100%)} to {transform:translateX(100%)} }
+
+  .tr-root { animation: fadeUp .5s ease; }
+
+  .tr-ieq-card {
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(200,16,46,.12);
+    border-radius: 14px; backdrop-filter: blur(24px);
+    padding: 24px 20px; position:relative; overflow:hidden;
+    transition: all .25s;
+  }
+  .tr-ieq-card:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(200,16,46,.1); }
+  .tr-ieq-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: var(--accent, #C8102E);
+  }
+
+  .tr-filter-bar {
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(200,16,46,.12);
+    border-radius: 14px; backdrop-filter: blur(24px);
+    padding: 18px 20px; margin-bottom: 20px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+
+  .tr-ieq-select {
+    background: rgba(200,16,46,.04); border: 1px solid rgba(200,16,46,.16);
+    color: #1A0A0D; padding:11px 14px; border-radius:8px; outline:none;
+    font-family:'EB Garamond',serif; font-size:14px; transition:all .25s;
+    cursor:pointer; appearance:none; -webkit-appearance:none;
+  }
+  .tr-ieq-select:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.1); }
+
+  .tr-ieq-number {
+    background: rgba(200,16,46,.04); border: 1px solid rgba(200,16,46,.16);
+    color: #1A0A0D; padding:11px 14px; border-radius:8px; outline:none;
+    font-family:'Cinzel',serif; font-size:13px; font-weight:700;
+    width:88px; text-align:center; -moz-appearance:textfield;
+    transition:all .25s;
+  }
+  .tr-ieq-number::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .tr-ieq-number:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.1); }
+
+  .tr-btn-filter {
+    background: linear-gradient(135deg, #002470, #003DA5);
+    color:#fff; border:none; border-radius:8px; padding:11px 14px;
+    cursor:pointer; transition:all .25s; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tr-btn-filter:hover { filter:brightness(1.1); }
+  .tr-btn-filter:disabled { opacity:.5; cursor:not-allowed; }
+
+  .tr-btn-pdf {
+    background: linear-gradient(135deg, #8B0B1F, #C8102E);
+    color:#fff; border:none; border-radius:10px;
+    font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.18em;
+    cursor:pointer; transition:all .3s; padding:14px 22px;
+    display:flex; align-items:center; gap:10px; position:relative; overflow:hidden;
+  }
+  .tr-btn-pdf:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
+  .tr-btn-pdf:disabled { opacity:.3; cursor:not-allowed; }
+  .tr-btn-pdf .shine2 {
+    position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    animation: shine 2.5s ease infinite;
+  }
+
+  .tr-tab-bar {
+    display:flex; background:rgba(200,16,46,.06); padding:5px; border-radius:10px;
+    border:1px solid rgba(200,16,46,.12); overflow-x:auto; gap:4px;
+    scrollbar-width:none;
+  }
+  .tr-tab-bar::-webkit-scrollbar { display:none; }
+  .tr-tab-btn {
+    padding:9px 18px; border-radius:8px; border:none;
+    font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.16em;
+    text-transform:uppercase; cursor:pointer; transition:all .25s; white-space:nowrap; flex-shrink:0;
+  }
+  .tr-tab-btn.active  { background:linear-gradient(135deg,#8B0B1F,#C8102E); color:#fff; box-shadow:0 4px 12px rgba(200,16,46,.25); }
+  .tr-tab-btn.inactive{ background:transparent; color:rgba(26,10,13,.4); }
+  .tr-tab-btn.inactive:hover{ background:rgba(200,16,46,.1); color:#8B0B1F; }
+
+  /* Stat cards */
+  .tr-stats-grid { display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:20px; }
+  @media (min-width:480px) { .tr-stats-grid { grid-template-columns:repeat(3,1fr); } }
+
+  /* Table */
+  .tr-table-wrap {
+    background: rgba(255,255,255,.92); border: 1px solid rgba(200,16,46,.12);
+    border-radius: 14px; overflow:hidden; backdrop-filter:blur(24px);
+  }
+  .tr-table { width:100%; border-collapse:collapse; min-width:480px; }
+  .tr-table thead tr { background: rgba(200,16,46,.04); }
+  .tr-table th {
+    padding:14px 16px; font-family:'Cinzel',serif;
+    font-size:9px; font-weight:700; letter-spacing:.18em;
+    text-transform:uppercase; color:rgba(26,10,13,.4); text-align:left; white-space:nowrap;
+  }
+  .tr-table th:last-child { text-align:right; }
+  .tr-table td { padding:13px 16px; border-top:1px solid rgba(200,16,46,.07); }
+  @media (min-width:640px) { .tr-table th, .tr-table td { padding:16px 22px; } }
+  .tr-table tbody tr { transition:background .15s; }
+  .tr-table tbody tr:hover { background:rgba(200,16,46,.04); }
+
+  .tr-badge {
+    padding:4px 12px; border-radius:99px; border:1px solid;
+    font-family:'Cinzel',serif; font-size:8.5px; font-weight:700;
+    letter-spacing:.18em; text-transform:uppercase; white-space:nowrap;
+  }
+
+  .spin-tr { animation: spin 1s linear infinite; }
+
+  /* header row */
+  .tr-header-row {
+    display:flex; flex-direction:column; gap:16px; margin-bottom:24px;
+  }
+  @media (min-width:520px) {
+    .tr-header-row { flex-direction:row; align-items:flex-end; justify-content:space-between; }
+  }
+
+  /* filter row */
+  .tr-filter-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+`;
+
+const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+  "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
 export default function TesourariaRelatorio() {
   const [registros, setRegistros] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [mes, setMes] = useState(new Date().getMonth() + 1);
-  const [ano, setAno] = useState(new Date().getFullYear());
-  const [categoriaAtiva, setCategoriaAtiva] = useState("TODOS");
+  const [loading, setLoading]     = useState(true);
+  const [mes, setMes]             = useState(new Date().getMonth() + 1);
+  const [ano, setAno]             = useState(new Date().getFullYear());
+  const [cat, setCat]             = useState("TODOS");
 
-  const meses = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
-
-  const carregarRelatorio = async () => {
+  const carregar = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/tesouraria/relatorio-tesouraria", {
-        params: { mes, ano },
-      });
-      const data = res.data || {};
-      setRegistros(data.registros || []);
-    } catch (err) {
-      console.error("Erro ao carregar relatório:", err);
-      setRegistros([]);
-    } finally {
-      setTimeout(() => setLoading(false), 500);
-    }
+      const res = await api.get("/tesouraria/relatorio-tesouraria", { params:{ mes, ano } });
+      setRegistros((res.data || {}).registros || []);
+    } catch { setRegistros([]); }
+    finally { setTimeout(() => setLoading(false), 500); }
   };
 
-  useEffect(() => { carregarRelatorio(); }, []);
+  useEffect(() => { carregar(); }, []);
 
-  const registrosFiltrados = registros.filter(r => {
-    if (categoriaAtiva === "TODOS") return true;
-    return r.tipoOferta?.toUpperCase() === categoriaAtiva;
-  });
+  const filtrados   = registros.filter(r => cat === "TODOS" || r.tipoOferta?.toUpperCase() === cat);
+  const totalDizimo = filtrados.reduce((a, r) => a + (r.valorDizimo ?? 0), 0);
+  const totalOferta = filtrados.reduce((a, r) => a + (r.valorOferta  ?? 0), 0);
+  const total       = totalDizimo + totalOferta;
 
-  const totalDizimo  = registrosFiltrados.reduce((acc, r) => acc + (r.valorDizimo ?? 0), 0);
-  const totalOferta  = registrosFiltrados.reduce((acc, r) => acc + (r.valorOferta  ?? 0), 0);
-  const totalPeriodo = totalDizimo + totalOferta;
+  const fmt = (v) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits:2 });
 
   const exportarPDF = () => {
     const doc = new jsPDF();
-    const tituloRelatorio = categoriaAtiva === "TODOS" ? "Geral" : `Categoria ${categoriaAtiva}`;
-
-    doc.setFontSize(20);
-    doc.setTextColor(30, 41, 59);
+    const titulo = cat === "TODOS" ? "Geral" : `Categoria ${cat}`;
+    doc.setFontSize(18); doc.setTextColor(26,10,13);
     doc.text("IEQ – RELATÓRIO FINANCEIRO", 14, 20);
-
-    doc.setFontSize(9);
-    doc.setTextColor(100, 116, 139);
-    doc.text(`${tituloRelatorio.toUpperCase()} | EMITIDO EM: ${new Date().toLocaleDateString('pt-BR')}`, 14, 28);
-
+    doc.setFontSize(9); doc.setTextColor(100,100,100);
+    doc.text(`${titulo.toUpperCase()} | EMITIDO EM: ${new Date().toLocaleDateString("pt-BR")}`, 14, 28);
     autoTable(doc, {
-      head: [["Membro", "Nível", "Dízimo (R$)", "Oferta (R$)", "Data"]],
-      body: registrosFiltrados.map(r => [
-        r.membroNome,
-        r.tipoOferta || "Padrão",
-        (r.valorDizimo ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
-        (r.valorOferta  ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
-        r.dataLancamento ? new Date(r.dataLancamento).toLocaleDateString('pt-BR') : "-"
+      head:[["Membro","Nível","Dízimo (R$)","Oferta (R$)","Data"]],
+      body: filtrados.map(r => [
+        r.membroNome, r.tipoOferta || "Padrão",
+        fmt(r.valorDizimo), fmt(r.valorOferta),
+        r.dataLancamento ? new Date(r.dataLancamento).toLocaleDateString("pt-BR") : "-"
       ]),
-      startY: 36,
-      styles: { font: "helvetica", fontSize: 9, cellPadding: 5 },
-      headStyles: { fillColor: [79, 70, 229], fontStyle: 'bold', fontSize: 9 },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
+      startY:36,
+      styles:{ font:"helvetica", fontSize:9, cellPadding:5 },
+      headStyles:{ fillColor:[139,11,31], fontStyle:"bold", fontSize:9 },
+      alternateRowStyles:{ fillColor:[250,248,248] },
     });
-
-    const finalY = doc.lastAutoTable.finalY + 14;
-    doc.setFontSize(11);
-    doc.setTextColor(30, 41, 59);
-    doc.text(`TOTAL DO PERÍODO: R$ ${totalPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, finalY);
-
-    doc.save(`IEQ_Relatorio_${categoriaAtiva}_${meses[mes - 1]}.pdf`);
+    const fY = doc.lastAutoTable.finalY + 14;
+    doc.setFontSize(11); doc.setTextColor(26,10,13);
+    doc.text(`TOTAL DO PERÍODO: R$ ${fmt(total)}`, 14, fY);
+    doc.save(`IEQ_Relatorio_${cat}_${MESES[mes-1]}.pdf`);
   };
 
   return (
-      <div className="max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-10 animate-in fade-in duration-700">
+      <>
+        <style>{CSS}</style>
+        <div className="tr-root" style={{ maxWidth:1100, margin:"0 auto", padding:"16px 4px" }}>
 
-        {/* ── Header ─────────────────────────────────────────── */}
-        <div className="flex flex-col gap-5 mb-8 md:mb-12 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-indigo-500 font-black uppercase tracking-[0.3em] text-[10px] mb-3">
-              <PieChart size={13} /> Inteligência Financeira
+          {/* HEADER */}
+          <div className="tr-header-row">
+            <div>
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".22em", textTransform:"uppercase", color:C.red, fontWeight:700, marginBottom:6 }}>
+                INTELIGÊNCIA FINANCEIRA
+              </p>
+              <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, color:"#1A0A0D", margin:"0 0 4px", lineHeight:1.1 }}>
+                Análise
+              </h2>
+              <p style={{ fontFamily:"'EB Garamond',serif", fontSize:15, color:"rgba(26,10,13,.5)", margin:0 }}>
+                Detalhamento de dízimos e ofertas por categoria.
+              </p>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none">
-              Análise<span className="text-indigo-500">.</span>
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 font-medium mt-2 text-sm">
-              Detalhamento de dízimos e ofertas por categoria.
-            </p>
-          </div>
-
-          <button
-              onClick={exportarPDF}
-              disabled={loading || registrosFiltrados.length === 0}
-              className="group relative flex items-center justify-center gap-3 bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-700 text-white px-6 py-4 rounded-2xl transition-all shadow-xl shadow-slate-900/10 dark:shadow-indigo-500/20 disabled:opacity-30 active:scale-95 overflow-hidden w-full md:w-auto"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            <DownloadCloud size={18} className="group-hover:-translate-y-0.5 transition-transform shrink-0" />
-            <span className="font-black uppercase tracking-widest text-[11px]">Exportar PDF Executivo</span>
-          </button>
-        </div>
-
-        {/* ── Filter Bar ─────────────────────────────────────── */}
-        <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-4 rounded-3xl border border-slate-200 dark:border-slate-800 mb-8 flex flex-col gap-4 shadow-sm">
-
-          {/* Row 1: Mês + Ano + Botão */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 flex-1 min-w-0">
-              <Calendar size={15} className="text-indigo-500 shrink-0" />
-              <select
-                  className="bg-transparent outline-none font-bold text-slate-700 dark:text-slate-200 cursor-pointer text-sm uppercase w-full min-w-0"
-                  value={mes}
-                  onChange={(e) => setMes(Number(e.target.value))}
-              >
-                {meses.map((nome, idx) => (
-                    <option key={idx} value={idx + 1} className="dark:bg-slate-900">{nome}</option>
-                ))}
-              </select>
-            </div>
-
-            <input
-                type="number"
-                className="bg-slate-100 dark:bg-slate-800 px-4 py-3 rounded-2xl outline-none w-24 font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-sm shrink-0"
-                value={ano}
-                onChange={(e) => setAno(Number(e.target.value))}
-                style={{ MozAppearance: "textfield" }}
-            />
-
-            <button
-                onClick={carregarRelatorio}
-                disabled={loading}
-                className="p-3.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/25 transition-all active:scale-90 shrink-0"
-            >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <Filter size={18} />}
+            <button className="tr-btn-pdf" onClick={exportarPDF} disabled={loading || filtrados.length === 0}>
+              <span className="shine2" />
+              <DownloadCloud size={16}/> EXPORTAR PDF EXECUTIVO
             </button>
           </div>
 
-          {/* Row 2: Category tabs — scrollable on mobile */}
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-[1.5rem] border border-slate-200 dark:border-slate-700 overflow-x-auto gap-1 scrollbar-none">
-            <TabBtn label="Geral"  active={categoriaAtiva === "TODOS"}  onClick={() => setCategoriaAtiva("TODOS")} />
-            <TabBtn label="Ouro"   active={categoriaAtiva === "OURO"}   color="text-amber-500"  onClick={() => setCategoriaAtiva("OURO")} />
-            <TabBtn label="Prata"  active={categoriaAtiva === "PRATA"}  color="text-slate-400"  onClick={() => setCategoriaAtiva("PRATA")} />
-            <TabBtn label="Bronze" active={categoriaAtiva === "BRONZE"} color="text-orange-500" onClick={() => setCategoriaAtiva("BRONZE")} />
+          {/* FILTER BAR */}
+          <div className="tr-filter-bar">
+            <div className="tr-filter-row">
+              <select className="tr-ieq-select" style={{ flex:1, minWidth:120 }} value={mes} onChange={e => setMes(Number(e.target.value))}>
+                {MESES.map((n,i) => <option key={i} value={i+1}>{n}</option>)}
+              </select>
+              <input type="number" className="tr-ieq-number" value={ano} onChange={e => setAno(Number(e.target.value))} style={{ MozAppearance:"textfield" }} />
+              <button className="tr-btn-filter" onClick={carregar} disabled={loading}>
+                {loading ? <Loader2 size={17} className="spin-tr"/> : <Filter size={17}/>}
+              </button>
+            </div>
+            <div className="tr-tab-bar">
+              {[["Geral","TODOS"],["Ouro","OURO"],["Prata","PRATA"],["Bronze","BRONZE"]].map(([label,val]) => (
+                  <button key={val} className={`tr-tab-btn ${cat===val?"active":"inactive"}`} onClick={() => setCat(val)}>{label}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* STATS */}
+          <div className="tr-stats-grid">
+            <StatCard title="Dízimos"      valor={totalDizimo} accent={C.blue}       icon={<Users size={16}/>}  trend="+12%" />
+            <StatCard title="Ofertas"      valor={totalOferta} accent={C.yellowDark} icon={<Trophy size={16}/>} trend="+5%" />
+            <StatCard title="Volume Total" valor={total}       accent={C.red}        icon={<Award size={16}/>}  trend="Consolidado" />
+          </div>
+
+          {/* TABLE */}
+          <div className="tr-table-wrap">
+            <div style={{ overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
+              <table className="tr-table">
+                <thead>
+                <tr>
+                  <th>Membro</th><th>Nível</th><th>Dízimo</th><th>Oferta</th><th>Data</th>
+                </tr>
+                </thead>
+                <tbody>
+                {loading ? (
+                    <tr><td colSpan={5} style={{ padding:"60px 0", textAlign:"center" }}>
+                      <Loader2 size={28} className="spin-tr" style={{ color:C.red, margin:"0 auto 12px", display:"block" }}/>
+                      <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(26,10,13,.35)" }}>SINCRONIZANDO DADOS...</p>
+                    </td></tr>
+                ) : filtrados.length === 0 ? (
+                    <tr><td colSpan={5} style={{ padding:"60px 0", textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(26,10,13,.35)" }}>
+                      Nenhum registro para {MESES[mes-1]}
+                    </td></tr>
+                ) : filtrados.map((r,i) => (
+                    <tr key={i}>
+                      <td style={{ fontFamily:"'EB Garamond',serif", fontSize:15, color:"#1A0A0D", fontWeight:500 }}>{r.membroNome}</td>
+                      <td><TrBadge tipo={r.tipoOferta}/></td>
+                      <td style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, color:C.blue, whiteSpace:"nowrap" }}>
+                        R$ {fmt(r.valorDizimo)}
+                      </td>
+                      <td style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, color:C.yellowDark, whiteSpace:"nowrap" }}>
+                        R$ {fmt(r.valorOferta)}
+                      </td>
+                      <td style={{ textAlign:"right" }}>
+                      <span style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".1em", color:"rgba(26,10,13,.4)" }}>
+                        {r.dataLancamento ? new Date(r.dataLancamento).toLocaleDateString("pt-BR") : "–"}
+                      </span>
+                      </td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </>
+  );
+}
 
-        {/* ── Stats Grid ─────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 md:mb-12">
-          <CardStatus title="Dízimos"      valor={totalDizimo}  color="indigo"  icon={<Users />}  trend="+12%" />
-          <CardStatus title="Ofertas"      valor={totalOferta}  color="emerald" icon={<Trophy />} trend="+5%" />
-          <CardStatus title="Volume Total" valor={totalPeriodo} color="slate"   icon={<Award />}  trend="Consolidado" />
-        </div>
-
-        {/* ── Data Table ─────────────────────────────────────── */}
-        <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none">
-          <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
-            <table className="w-full text-left border-collapse" style={{ minWidth: 520 }}>
-              <thead>
-              <tr className="bg-slate-50/70 dark:bg-slate-800/30">
-                <th className="px-5 py-5 md:px-8 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Membro</th>
-                <th className="px-5 py-5 md:px-8 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Nível</th>
-                <th className="px-5 py-5 md:px-8 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Dízimo</th>
-                <th className="px-5 py-5 md:px-8 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Oferta</th>
-                <th className="px-5 py-5 md:px-8 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] text-right">Data</th>
-              </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {loading ? (
-                  <tr>
-                    <td colSpan={5} className="py-20 text-center">
-                      <Loader2 className="animate-spin mx-auto text-indigo-500 mb-4" size={32} />
-                      <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Sincronizando dados...</p>
-                    </td>
-                  </tr>
-              ) : registrosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-20 text-center text-slate-400 font-bold uppercase text-[10px] tracking-widest">
-                      Nenhum registro para {meses[mes - 1]}
-                    </td>
-                  </tr>
-              ) : (
-                  registrosFiltrados.map((r, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-indigo-500/[0.04] transition-all group">
-                        <td className="px-5 py-4 md:px-8 md:py-6">
-                          <div className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors text-sm">
-                            {r.membroNome}
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 md:px-8 md:py-6">
-                          <Badge tipo={r.tipoOferta} />
-                        </td>
-                        <td className="px-5 py-4 md:px-8 md:py-6">
-                      <span className="text-emerald-600 dark:text-emerald-400 font-black font-mono text-xs md:text-sm whitespace-nowrap">
-                        R$ {(r.valorDizimo ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                        </td>
-                        <td className="px-5 py-4 md:px-8 md:py-6">
-                      <span className="text-indigo-600 dark:text-indigo-400 font-black font-mono text-xs md:text-sm whitespace-nowrap">
-                        R$ {(r.valorOferta ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                        </td>
-                        <td className="px-5 py-4 md:px-8 md:py-6 text-right">
-                          <div className="flex items-center justify-end gap-1.5 text-slate-400 dark:text-slate-500 font-bold text-xs whitespace-nowrap">
-                            {r.dataLancamento ? new Date(r.dataLancamento).toLocaleDateString('pt-BR') : "–"}
-                            <ChevronRight size={12} className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all" />
-                          </div>
-                        </td>
-                      </tr>
-                  ))
-              )}
-              </tbody>
-            </table>
+function StatCard({ title, valor, accent, icon, trend }) {
+  const fmt = v => Number(v??0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+  return (
+      <div className="tr-ieq-card" style={{ "--accent":accent }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
+          <div style={{ width:34, height:34, borderRadius:8, background:`${accent}15`, display:"flex", alignItems:"center", justifyContent:"center", color:accent }}>
+            {icon}
           </div>
+          <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", fontWeight:700, padding:"4px 10px", background:"rgba(200,16,46,.07)", borderRadius:99, color:"rgba(26,10,13,.4)" }}>
+          {trend}
+        </span>
         </div>
+        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:"rgba(26,10,13,.4)", margin:"0 0 6px" }}>{title}</p>
+        <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1rem,2.8vw,1.35rem)", fontWeight:700, color:"#1A0A0D", margin:0, wordBreak:"break-word" }}>
+          {fmt(valor)}
+        </h3>
       </div>
   );
 }
 
-/* ─── CardStatus ─────────────────────────────────────────── */
-function CardStatus({ title, valor, color, icon, trend }) {
-  const themes = {
-    indigo:  "border-indigo-500  text-indigo-600  dark:bg-indigo-500/5",
-    emerald: "border-emerald-500 text-emerald-600 dark:bg-emerald-500/5",
-    slate:   "border-slate-900 dark:border-white text-slate-900 dark:text-white dark:bg-white/5",
+function TrBadge({ tipo }) {
+  const map = {
+    OURO:   { color:C.yellowDark, bg:"rgba(196,140,0,.1)",  border:"rgba(196,140,0,.3)"  },
+    PRATA:  { color:"#64748b",    bg:"rgba(100,116,139,.1)", border:"rgba(100,116,139,.3)" },
+    BRONZE: { color:"#c2410c",    bg:"rgba(194,65,12,.1)",  border:"rgba(194,65,12,.3)"  },
   };
-
+  const s = map[(tipo||"").toUpperCase()] || { color:"rgba(26,10,13,.4)", bg:"rgba(26,10,13,.05)", border:"rgba(26,10,13,.15)" };
   return (
-      <div className={`bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border-l-[5px] ${themes[color]} shadow-sm relative overflow-hidden group hover:shadow-lg transition-all duration-500`}>
-        <div className="z-10 relative">
-          <div className="flex justify-between items-start mb-4">
-            <div className={`p-2.5 rounded-2xl bg-current/5 ${themes[color]}`}>{icon}</div>
-            <span className="text-[10px] font-black px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-400 uppercase tracking-wide">{trend}</span>
-          </div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">{title}</p>
-          <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter break-words">
-            {Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          </h3>
-        </div>
-        <TrendingUp size={90} className="absolute -right-3 -bottom-5 text-slate-50 dark:text-slate-800/30 group-hover:scale-110 transition-transform duration-700" />
-      </div>
-  );
-}
-
-/* ─── Badge ──────────────────────────────────────────────── */
-function Badge({ tipo }) {
-  const styles = {
-    OURO:   "bg-amber-50  text-amber-600  border-amber-200  dark:bg-amber-500/10  dark:border-amber-500/20",
-    PRATA:  "bg-slate-50  text-slate-500  border-slate-200  dark:bg-slate-500/10  dark:border-slate-500/20",
-    BRONZE: "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:border-orange-500/20",
-  };
-  const current = tipo?.toUpperCase() || "PADRÃO";
-  return (
-      <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black border uppercase tracking-widest whitespace-nowrap ${styles[current] || "bg-gray-50 text-gray-400"}`}>
-      {current}
+      <span className="tr-badge" style={{ color:s.color, background:s.bg, borderColor:s.border }}>
+      {(tipo || "PADRÃO").toUpperCase()}
     </span>
-  );
-}
-
-/* ─── TabBtn ─────────────────────────────────────────────── */
-function TabBtn({ label, active, onClick, color = "text-indigo-600" }) {
-  return (
-      <button
-          onClick={onClick}
-          className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${
-              active
-                  ? `bg-white dark:bg-slate-700 shadow-md ${color} scale-[1.03]`
-                  : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-          }`}
-      >
-        {label}
-      </button>
   );
 }

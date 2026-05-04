@@ -1,240 +1,239 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api.js";
-import {
-  Loader2, Save, User, Calendar,
-  Wallet, Trophy, AlertCircle, CheckCircle2
-} from "lucide-react";
+import { Loader2, Save, User, Calendar, Wallet, Trophy, AlertCircle, CheckCircle2 } from "lucide-react";
+
+const C = {
+  red:"#C8102E", redDark:"#8B0B1F", yellow:"#FDB813", yellowDark:"#C48C00",
+  blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+};
+
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  * { box-sizing: border-box; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes zoomIn { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+
+  .tl-root { animation: fadeUp .5s ease; }
+
+  .tl-card {
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(200,16,46,.12);
+    border-radius: 14px;
+    backdrop-filter: blur(24px);
+    padding: 28px 22px;
+  }
+  @media (min-width: 600px) { .tl-card { padding: 36px 32px; } }
+
+  .tl-label {
+    display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    font-family:'Cinzel',serif; font-size:9px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.22em; color:rgba(26,10,13,.45);
+  }
+
+  .tl-input {
+    width:100%;
+    background: rgba(200,16,46,.03);
+    border: 1px solid rgba(200,16,46,.16);
+    color: #1A0A0D;
+    padding: 13px 16px; border-radius:8px; outline:none;
+    font-family:'EB Garamond',serif; font-size:15px;
+    transition: all .25s;
+    appearance: none; -webkit-appearance: none;
+  }
+  .tl-input:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.1); }
+  .tl-input::placeholder { color:rgba(26,10,13,.3); }
+
+  .tl-btn-save {
+    width:100%; background: linear-gradient(135deg, #8B0B1F, #C8102E);
+    color:#fff; border:none; border-radius:10px;
+    font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.2em;
+    cursor:pointer; transition: all .3s; padding:16px 24px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    position:relative; overflow:hidden;
+  }
+  .tl-btn-save:not(:disabled):hover { transform:translateY(-2px); filter:brightness(1.1); }
+  .tl-btn-save:disabled { background: rgba(200,16,46,.18); cursor:not-allowed; color:rgba(26,10,13,.35); }
+  .tl-btn-save .shine {
+    position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    transform:translateX(-100%); transition: transform 1s;
+  }
+  .tl-btn-save:hover .shine { transform:translateX(100%); }
+
+  .tl-tipo-btn {
+    flex:1; padding:11px 8px; border-radius:8px;
+    font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.18em;
+    text-transform:uppercase; cursor:pointer; border:none; transition:all .25s;
+  }
+  .tl-tipo-btn.active {
+    background: linear-gradient(135deg, #8B0B1F, #C8102E);
+    color:#fff; box-shadow: 0 4px 14px rgba(200,16,46,.28);
+  }
+  .tl-tipo-btn.inactive {
+    background: rgba(200,16,46,.06);
+    color: rgba(26,10,13,.45);
+  }
+  .tl-tipo-btn.inactive:hover { background: rgba(200,16,46,.1); color:#8B0B1F; }
+
+  .tl-alert {
+    display:flex; align-items:center; gap:10px;
+    padding:14px 16px; border-radius:10px;
+    font-family:'EB Garamond',serif; font-size:14px; font-weight:500;
+    animation: zoomIn .3s ease;
+  }
+  .tl-alert.error  { background:rgba(200,16,46,.07); border:1px solid rgba(200,16,46,.2); color:#8B0B1F; }
+  .tl-alert.success{ background:rgba(0,61,165,.07);  border:1px solid rgba(0,61,165,.2);  color:#002470; }
+
+  /* grid 2 colunas em desktop */
+  .tl-form-grid {
+    display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:24px;
+  }
+  @media (min-width:520px) {
+    .tl-form-grid { grid-template-columns:repeat(2,1fr); }
+    .tl-full { grid-column: 1 / -1; }
+  }
+
+  .tl-prefix {
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:rgba(26,10,13,.4);
+    pointer-events:none;
+  }
+  .tl-input-prefix { padding-left: 38px !important; }
+
+  .spin-tl { animation: spin 1s linear infinite; }
+`;
 
 export default function TesourariaLancamento() {
-  const [membros, setMembros] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [erro, setErro] = useState(null);
-  const [sucesso, setSucesso] = useState(false);
+  const [membros,  setMembros]  = useState([]);
+  const [loading,  setLoading]  = useState(false);
+  const [erro,     setErro]     = useState(null);
+  const [sucesso,  setSucesso]  = useState(false);
 
   const [form, setForm] = useState({
-    membroNome: "",
-    valorDizimo: "",
-    valorOferta: "",
-    tipoOferta: "BRONZE",
-    dataLancamento: new Date().toISOString().split("T")[0],
+    membroNome: "", valorDizimo: "", valorOferta: "",
+    tipoOferta: "BRONZE", dataLancamento: new Date().toISOString().split("T")[0],
   });
 
-  const limparValor = (str) => {
-    if (!str) return 0;
-    const limpo = str.toString().replace(",", ".").trim();
-    const numero = Number(limpo);
-    return isNaN(numero) ? 0 : numero;
+  const limparValor = (s) => {
+    const n = Number((s || "").toString().replace(",", ".").trim());
+    return isNaN(n) ? 0 : n;
   };
 
   useEffect(() => {
-    const carregarMembros = async () => {
+    (async () => {
       try {
         setLoading(true);
         const res = await api.get("/tesouraria/select-nome");
         setMembros(res.data || []);
-      } catch (err) {
-        setErro("Erro ao carregar lista de membros.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    carregarMembros();
+      } catch { setErro("Erro ao carregar lista de membros."); }
+      finally { setLoading(false); }
+    })();
   }, []);
 
   const handleSalvar = async () => {
-    setErro(null);
-    setSucesso(false);
-
-    if (!form.membroNome) {
-      setErro("Selecione um membro para continuar.");
-      return;
-    }
-
-    const vDizimo = limparValor(form.valorDizimo);
-    const vOferta = limparValor(form.valorOferta);
-
-    if (vDizimo <= 0 && vOferta <= 0) {
-      setErro("Informe pelo menos um valor de Dízimo ou Oferta.");
-      return;
-    }
-
+    setErro(null); setSucesso(false);
+    if (!form.membroNome) return setErro("Selecione um membro para continuar.");
+    const vD = limparValor(form.valorDizimo), vO = limparValor(form.valorOferta);
+    if (vD <= 0 && vO <= 0) return setErro("Informe pelo menos um valor de Dízimo ou Oferta.");
     setLoading(true);
     try {
-      const payload = {
+      await api.post("/tesouraria/lancar", {
         membroNome: form.membroNome,
-        valorDizimo: vDizimo > 0 ? vDizimo : null,
-        valorOferta: vOferta > 0 ? vOferta : null,
-        tipoOferta: vOferta > 0 ? form.tipoOferta : null,
+        valorDizimo: vD > 0 ? vD : null,
+        valorOferta: vO > 0 ? vO : null,
+        tipoOferta: vO > 0 ? form.tipoOferta : null,
         dataLancamento: form.dataLancamento,
-      };
-
-      await api.post("/tesouraria/lancar", payload);
-      setSucesso(true);
-
-      setForm({
-        membroNome: "",
-        valorDizimo: "",
-        valorOferta: "",
-        tipoOferta: "BRONZE",
-        dataLancamento: new Date().toISOString().split("T")[0],
       });
-
+      setSucesso(true);
+      setForm({ membroNome:"", valorDizimo:"", valorOferta:"", tipoOferta:"BRONZE", dataLancamento: new Date().toISOString().split("T")[0] });
       setTimeout(() => setSucesso(false), 4000);
-    } catch (err) {
-      setErro("Erro ao registrar lançamento no servidor.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setErro("Erro ao registrar lançamento no servidor."); }
+    finally { setLoading(false); }
   };
 
   return (
-      <div className="max-w-4xl mx-auto p-4 sm:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <>
+        <style>{CSS}</style>
+        <div className="tl-root" style={{ maxWidth:720, margin:"0 auto", padding:"16px 4px" }}>
 
-        {/* Header Premium */}
-        <div className="text-center mb-10">
-        <span className="text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.3em] text-[10px] mb-2 block">
-          Registro de Entrada
-        </span>
-          <h2 className="text-4xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">
-            Lançamento<span className="text-indigo-600">.</span>
-          </h2>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none space-y-8">
-
-          {/* Feedback Messages */}
-          {erro && (
-              <div className="flex items-center gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 text-red-700 dark:text-red-400 rounded-2xl animate-in zoom-in duration-300">
-                <AlertCircle size={20} />
-                <p className="text-sm font-bold">{erro}</p>
-              </div>
-          )}
-
-          {sucesso && (
-              <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 text-emerald-700 dark:text-emerald-400 rounded-2xl animate-in zoom-in duration-300">
-                <CheckCircle2 size={20} />
-                <p className="text-sm font-bold">Lançamento registrado com sucesso!</p>
-              </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-            {/* Seleção de Membro */}
-            <div className="md:col-span-2 group">
-              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-focus-within:text-indigo-600 transition-colors">
-                <User size={14} /> Membro Responsável
-              </label>
-              <select
-                  className="w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all appearance-none dark:text-white"
-                  value={form.membroNome}
-                  onChange={(e) => setForm({ ...form, membroNome: e.target.value })}
-              >
-                <option value="">Selecione na lista...</option>
-                {membros.map((m, index) => (
-                    <option key={index} value={m.nome}>{m.nome}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Data */}
-            <div>
-              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                <Calendar size={14} /> Data do Evento
-              </label>
-              <input
-                  type="date"
-                  className="w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white dark:color-scheme-dark"
-                  value={form.dataLancamento}
-                  onChange={(e) => setForm({ ...form, dataLancamento: e.target.value })}
-              />
-            </div>
-
-            {/* Dízimo */}
-            <div className="relative">
-              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                <Wallet size={14} /> Valor Dízimo
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
-                <input
-                    type="text"
-                    className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300"
-                    value={form.valorDizimo}
-                    onChange={(e) => setForm({ ...form, valorDizimo: e.target.value })}
-                    placeholder="0,00"
-                />
-              </div>
-            </div>
-
-            {/* Oferta */}
-            <div>
-              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                <Trophy size={14} /> Valor Oferta
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
-                <input
-                    type="text"
-                    className="w-full p-4 pl-12 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all dark:text-white placeholder:text-slate-300"
-                    value={form.valorOferta}
-                    onChange={(e) => setForm({ ...form, valorOferta: e.target.value })}
-                    placeholder="0,00"
-                />
-              </div>
-            </div>
-
-            {/* Tipo de Oferta com visual Premium */}
-            <div>
-              <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                Categoria Especial
-              </label>
-              <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-[1.2rem]">
-                {["BRONZE", "PRATA", "OURO"].map((tipo) => (
-                    <button
-                        key={tipo}
-                        type="button"
-                        onClick={() => setForm({ ...form, tipoOferta: tipo })}
-                        className={`flex-1 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all ${
-                            form.tipoOferta === tipo
-                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm scale-100"
-                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                        }`}
-                    >
-                      {tipo}
-                    </button>
-                ))}
-              </div>
-            </div>
+          {/* ── HEADER ── */}
+          <div style={{ textAlign:"center", marginBottom:28 }}>
+            <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".25em", textTransform:"uppercase", color:C.red, fontWeight:700, marginBottom:8 }}>
+              REGISTRO DE ENTRADA
+            </p>
+            <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, letterSpacing:".06em", color:"#1A0A0D", margin:0, lineHeight:1.1 }}>
+              Lançamento
+            </h2>
           </div>
 
-          {/* Botão Salvar Ultra Premium */}
-          <button
-              onClick={handleSalvar}
-              disabled={loading}
-              className={`group w-full relative overflow-hidden py-5 px-6 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 transition-all duration-500 ${
-                  loading
-                      ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
-                      : "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-1 active:scale-95"
-              }`}
-          >
-            {loading ? (
-                <Loader2 className="animate-spin" />
-            ) : (
-                <>
-                  <Save size={18} className="group-hover:rotate-12 transition-transform" />
-                  Confirmar Lançamento
-                </>
-            )}
-            {/* Efeito de brilho no hover */}
-            {!loading && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            )}
-          </button>
-        </div>
+          <div className="tl-card">
+            {/* Feedbacks */}
+            {erro    && <div className="tl-alert error"  style={{ marginBottom:20 }}><AlertCircle  size={18}/>{erro}</div>}
+            {sucesso && <div className="tl-alert success" style={{ marginBottom:20 }}><CheckCircle2 size={18}/>Lançamento registrado com sucesso!</div>}
 
-        <p className="mt-8 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          Todos os dados são criptografados e auditáveis
-        </p>
-      </div>
+            <div className="tl-form-grid">
+              {/* Membro */}
+              <div className="tl-full">
+                <label className="tl-label"><User size={12}/> Membro Responsável</label>
+                <select className="tl-input" value={form.membroNome} onChange={e => setForm({...form, membroNome:e.target.value})}>
+                  <option value="">Selecione na lista...</option>
+                  {membros.map((m,i) => <option key={i} value={m.nome}>{m.nome}</option>)}
+                </select>
+              </div>
+
+              {/* Data */}
+              <div>
+                <label className="tl-label"><Calendar size={12}/> Data do Evento</label>
+                <input type="date" className="tl-input" value={form.dataLancamento} onChange={e => setForm({...form, dataLancamento:e.target.value})} />
+              </div>
+
+              {/* Dízimo */}
+              <div>
+                <label className="tl-label"><Wallet size={12}/> Valor Dízimo</label>
+                <div style={{ position:"relative" }}>
+                  <span className="tl-prefix">R$</span>
+                  <input type="text" className="tl-input tl-input-prefix" placeholder="0,00" value={form.valorDizimo} onChange={e => setForm({...form, valorDizimo:e.target.value})} />
+                </div>
+              </div>
+
+              {/* Oferta */}
+              <div>
+                <label className="tl-label"><Trophy size={12}/> Valor Oferta</label>
+                <div style={{ position:"relative" }}>
+                  <span className="tl-prefix">R$</span>
+                  <input type="text" className="tl-input tl-input-prefix" placeholder="0,00" value={form.valorOferta} onChange={e => setForm({...form, valorOferta:e.target.value})} />
+                </div>
+              </div>
+
+              {/* Tipo */}
+              <div className="tl-full">
+                <label className="tl-label">Categoria Especial</label>
+                <div style={{ display:"flex", gap:8, background:"rgba(200,16,46,.06)", padding:6, borderRadius:10, border:"1px solid rgba(200,16,46,.12)" }}>
+                  {["BRONZE","PRATA","OURO"].map(tipo => (
+                      <button key={tipo} className={`tl-tipo-btn ${form.tipoOferta === tipo ? "active" : "inactive"}`}
+                              onClick={() => setForm({...form, tipoOferta:tipo})}>
+                        {tipo}
+                      </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Botão */}
+            <button className="tl-btn-save" onClick={handleSalvar} disabled={loading}>
+              <span className="shine" />
+              {loading
+                  ? <Loader2 size={18} className="spin-tl" />
+                  : <><Save size={16}/> CONFIRMAR LANÇAMENTO</>
+              }
+            </button>
+          </div>
+
+          <p style={{ textAlign:"center", marginTop:20, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(26,10,13,.3)", textTransform:"uppercase" }}>
+            Todos os dados são criptografados e auditáveis
+          </p>
+        </div>
+      </>
   );
 }

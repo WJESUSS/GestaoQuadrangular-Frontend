@@ -7,20 +7,19 @@ import {
 
 const perfis = ["ADMIN", "PASTOR", "LIDER_CELULA", "SECRETARIO", "TESOUREIRO"];
 
-// ─── fora do componente: referência estável, nunca recriada ───────────────────
 function handleLogout() {
   localStorage.clear();
   window.location.href = "/";
 }
 
 export default function AdminUsers() {
-  const [usuarios, setUsuarios] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [erro, setErro] = useState("");
+  const [usuarios, setUsuarios]         = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [sending, setSending]           = useState(false);
+  const [erro, setErro]                 = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editandoId, setEditandoId] = useState(null);
-  const [form, setForm] = useState({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" });
+  const [editandoId, setEditandoId]     = useState(null);
+  const [form, setForm]                 = useState({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" });
 
   const carregarUsuarios = useCallback(async () => {
     setLoading(true);
@@ -29,16 +28,12 @@ export default function AdminUsers() {
       const res = await api.get("usuarios");
       setUsuarios(res.data);
     } catch (err) {
-      // CORREÇÃO: só redireciona em 401 — outros erros mostram mensagem, não logout
-      if (err.response?.status === 401) {
-        handleLogout();
-        return;
-      }
+      if (err.response?.status === 401) { handleLogout(); return; }
       setErro("Não foi possível sincronizar os usuários.");
     } finally {
       setLoading(false);
     }
-  }, []); // dependências vazias: handleLogout está fora do componente
+  }, []);
 
   useEffect(() => { carregarUsuarios(); }, [carregarUsuarios]);
 
@@ -103,174 +98,271 @@ export default function AdminUsers() {
   };
 
   return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8 animate-in fade-in duration-700">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8 pb-10 select-none touch-manipulation">
 
-        {/* HEADER */}
-        <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+        {/* ── HEADER ── */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic flex items-center gap-3">
-              <div className="p-2 bg-rose-600 rounded-2xl shadow-lg shadow-rose-500/30">
-                <ShieldCheck size={32} className="text-white" />
-              </div>
-              SISTEMA <span className="text-rose-600">ROOT</span>
-            </h1>
-            <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 ml-1">Controle de Privilégios e Acessos</p>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2">
+            <ShieldCheck size={11} />
+            Controle de Acessos
+          </span>
+            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic uppercase leading-none">
+              Sistema<span className="text-indigo-500">.</span>
+            </h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mt-1">
+              Privilégios &amp; Usuários
+            </p>
           </div>
-          <button onClick={handleLogout} className="group flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
-            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-            Encerrar Sessão
-          </button>
-        </header>
 
-        <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-          {/* FORMULÁRIO */}
-          <section className="lg:col-span-4">
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none sticky top-8">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
-                  <UserPlus size={20} />
-                </div>
-                <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Novo Acesso</h2>
+          {/* stat + logout */}
+          <div className="flex items-center gap-3">
+            <div className="bg-white dark:bg-slate-800/60 px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center gap-3 shadow-sm">
+              <Users size={18} className="text-indigo-500" />
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Usuários</p>
+                <p className="text-lg font-black text-slate-800 dark:text-white leading-none">
+                  {loading ? <span className="inline-block w-6 h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse align-middle" /> : usuarios.length}
+                </p>
               </div>
-              <form onSubmit={adicionarUsuario} className="space-y-5">
-                <div className="space-y-4">
-                  <InputIcon icon={<User size={18}/>} placeholder="Nome do Usuário" value={form.nome} onChange={v => setForm({...form, nome: v})} />
-                  <InputIcon icon={<Mail size={18}/>} type="email" placeholder="E-mail Institucional" value={form.email} onChange={v => setForm({...form, email: v})} />
-                  <InputIcon icon={<Key size={18}/>} type="password" placeholder="Senha de Acesso" value={form.senha} onChange={v => setForm({...form, senha: v})} />
-                  <div className="relative group">
-                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <select
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 transition-all appearance-none cursor-pointer"
-                        value={form.perfil}
-                        onChange={e => setForm({...form, perfil: e.target.value})}
-                    >
-                      {perfis.map(p => <option key={p} value={p}>{p.replace("_", " ")}</option>)}
-                    </select>
-                  </div>
+            </div>
+            <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:border-red-400 hover:text-red-500 transition-all shadow-sm active:scale-95"
+            >
+              <LogOut size={15} />
+              <span className="hidden sm:inline">Sair</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── CONTEÚDO ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          {/* ── FORMULÁRIO ── */}
+          <section className="lg:col-span-4">
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-6 shadow-sm sticky top-8">
+
+              {/* título do form */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-indigo-600 text-white rounded-2xl">
+                  <UserPlus size={16} />
                 </div>
-                <button type="submit" disabled={sending} className="w-full bg-slate-900 dark:bg-rose-600 hover:bg-black dark:hover:bg-rose-700 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-xs transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3">
-                  {sending ? <Loader2 className="animate-spin" /> : "Liberar Acesso"}
+                <h3 className="font-black text-sm uppercase italic tracking-tighter dark:text-white">
+                  Novo Acesso
+                </h3>
+              </div>
+
+              <form onSubmit={adicionarUsuario} className="space-y-3">
+                <CampoIcone icon={<User size={16} />} placeholder="Nome do usuário" value={form.nome} onChange={v => setForm({ ...form, nome: v })} />
+                <CampoIcone icon={<Mail size={16} />} type="email" placeholder="E-mail institucional" value={form.email} onChange={v => setForm({ ...form, email: v })} />
+                <CampoIcone icon={<Key size={16} />} type="password" placeholder="Senha de acesso" value={form.senha} onChange={v => setForm({ ...form, senha: v })} />
+
+                <div className="relative">
+                  <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <select
+                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-black text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all appearance-none cursor-pointer"
+                      value={form.perfil}
+                      onChange={e => setForm({ ...form, perfil: e.target.value })}
+                  >
+                    {perfis.map(p => <option key={p} value={p}>{p.replace(/_/g, " ")}</option>)}
+                  </select>
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={sending}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-[1.25rem] font-black uppercase tracking-[0.15em] text-[11px] transition-all shadow-md shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2 mt-2"
+                >
+                  {sending ? <Loader2 size={16} className="animate-spin" /> : "Liberar Acesso"}
                 </button>
               </form>
             </div>
           </section>
 
-          {/* LISTAGEM */}
+          {/* ── LISTAGEM ── */}
           <section className="lg:col-span-8">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] shadow-sm overflow-hidden">
-              <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2rem] overflow-hidden shadow-sm">
+
+              {/* cabeçalho da lista */}
+              <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Users className="text-rose-600" size={24} />
-                  <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-widest">Base de Usuários</h2>
+                  <div className="p-2 bg-indigo-600 text-white rounded-2xl">
+                    <Users size={14} />
+                  </div>
+                  <h3 className="font-black text-sm uppercase italic tracking-tighter dark:text-white">
+                    Base de Usuários
+                  </h3>
                 </div>
-                <button onClick={carregarUsuarios} className="text-slate-400 hover:text-rose-600 transition-colors">
-                  <RefreshCcw size={20} className={loading ? "animate-spin" : ""} />
+                <button
+                    onClick={carregarUsuarios}
+                    className="p-2.5 bg-indigo-600 text-white rounded-xl active:scale-95 transition-transform"
+                >
+                  <RefreshCcw size={14} className={loading ? "animate-spin" : ""} />
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                  <tr className="bg-slate-50/50 dark:bg-slate-800/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <th className="px-8 py-5 text-left">Identidade</th>
-                    <th className="px-6 py-5 text-left">Nível</th>
-                    <th className="px-6 py-5 text-left">Estado</th>
-                    <th className="px-8 py-5 text-right">Controles</th>
-                  </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {loading && usuarios.length === 0 ? (
-                      <tr><td colSpan="4" className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-rose-600" size={40} /></td></tr>
-                  ) : (
-                      usuarios.map((u) => (
-                          <tr key={u.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                            <td className="px-8 py-6">
-                              <div className="flex items-center gap-4">
-                                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center font-black text-slate-500">
-                                  {u.nome?.charAt(0)}
-                                </div>
-                                <div>
-                                  <p className="font-black text-slate-800 dark:text-slate-100 text-sm">{u.nome}</p>
-                                  <p className="text-xs text-slate-400 font-medium">{u.email}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-6">
-                          <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-black rounded-lg uppercase tracking-tighter">
-                            {u.perfil}
-                          </span>
-                            </td>
-                            <td className="px-6 py-6">
-                              <div className={`flex items-center gap-2 text-xs font-bold ${u.ativo ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                <div className={`w-2 h-2 rounded-full ${u.ativo ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
-                                {u.ativo ? "ATIVO" : "SUSPENSO"}
-                              </div>
-                            </td>
-                            <td className="px-8 py-6 text-right space-x-1">
-                              <button onClick={() => abrirEdicao(u)} className="p-2 rounded-xl text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all" title="Editar Usuário">
-                                <Pencil size={18} />
-                              </button>
-                              <button
-                                  onClick={() => alternarStatus(u.id)}
-                                  className={`p-2 rounded-xl transition-all ${u.ativo ? 'text-amber-500 hover:bg-amber-50' : 'text-emerald-500 hover:bg-emerald-50'}`}
-                                  title="Alternar Status"
-                              >
-                                <Power size={18} />
-                              </button>
-                              <button
-                                  onClick={() => deletarUsuario(u.id)}
-                                  className="p-2 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100"
-                                  title="Excluir Permanentemente"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </td>
-                          </tr>
-                      ))
-                  )}
-                  </tbody>
-                </table>
+              {/* stats rápidos */}
+              <div className="grid grid-cols-2 gap-3 p-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="h-9 w-9 bg-emerald-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Power size={16} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Ativos</p>
+                    <p className="text-xl font-black text-slate-800 dark:text-white tracking-tighter">
+                      {loading ? "—" : usuarios.filter(u => u.ativo).length}
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="h-9 w-9 bg-slate-400/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Power size={16} className="text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Suspensos</p>
+                    <p className="text-xl font-black text-slate-800 dark:text-white tracking-tighter">
+                      {loading ? "—" : usuarios.filter(u => !u.ativo).length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* lista de usuários */}
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {loading && usuarios.length === 0 ? (
+                    <div className="py-20 flex justify-center">
+                      <Loader2 size={36} className="animate-spin text-indigo-500" />
+                    </div>
+                ) : usuarios.map(u => (
+                    <div
+                        key={u.id}
+                        className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                    >
+                      {/* identidade */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 ${
+                            u.ativo
+                                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                        }`}>
+                          {u.nome?.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-black text-slate-800 dark:text-slate-100 truncate">{u.nome}</p>
+                          <p className="text-[11px] text-slate-400 font-medium truncate">{u.email}</p>
+                        </div>
+                      </div>
+
+                      {/* badges + controles */}
+                      <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                        {/* perfil */}
+                        <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9px] font-black rounded-lg uppercase tracking-tighter">
+                      {u.perfil?.replace(/_/g, " ")}
+                    </span>
+
+                        {/* status */}
+                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter flex items-center gap-1 ${
+                            u.ativo
+                                ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                        }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${u.ativo ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`} />
+                          {u.ativo ? "Ativo" : "Suspenso"}
+                    </span>
+
+                        {/* editar */}
+                        <button
+                            onClick={() => abrirEdicao(u)}
+                            className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+                            title="Editar"
+                        >
+                          <Pencil size={15} />
+                        </button>
+
+                        {/* alternar status */}
+                        <button
+                            onClick={() => alternarStatus(u.id)}
+                            className={`p-2 rounded-xl transition-all ${
+                                u.ativo
+                                    ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                                    : "text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                            }`}
+                            title="Alternar status"
+                        >
+                          <Power size={15} />
+                        </button>
+
+                        {/* deletar — visível só no hover (desktop) */}
+                        <button
+                            onClick={() => deletarUsuario(u.id)}
+                            className="p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all sm:opacity-0 sm:group-hover:opacity-100"
+                            title="Excluir"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                ))}
               </div>
             </div>
           </section>
-        </main>
+        </div>
 
-        {/* MODAL DE EDIÇÃO */}
+        {/* ── MODAL DE EDIÇÃO ── */}
         {isEditModalOpen && (
-            <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-              <div className="bg-white dark:bg-slate-900 rounded-[3rem] w-full max-w-lg p-10 shadow-2xl border border-white/20 animate-in zoom-in-95 duration-300">
-                <div className="flex justify-between items-center mb-10">
+            <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-4">
+              <div className="bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-md p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+
+                {/* topo do modal */}
+                <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-2xl font-black text-slate-800 dark:text-white uppercase italic tracking-tighter">
-                      Atualizar <span className="text-blue-600">Acesso</span>
-                    </h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID do Registro: {editandoId}</p>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest mb-1">
+                  <Pencil size={10} /> Editando
+                </span>
+                    <h3 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-none">
+                      Atualizar<span className="text-indigo-500">.</span>
+                    </h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">ID: {editandoId}</p>
                   </div>
-                  <button onClick={() => setIsEditModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 transition-colors">
-                    <X size={24} />
+                  <button
+                      onClick={() => setIsEditModalOpen(false)}
+                      className="h-9 w-9 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    <X size={18} />
                   </button>
                 </div>
-                <form onSubmit={salvarEdicao} className="space-y-4">
-                  <InputIcon icon={<User size={18}/>} placeholder="Nome" value={form.nome} onChange={v => setForm({...form, nome: v})} />
-                  <InputIcon icon={<Mail size={18}/>} type="email" placeholder="E-mail" value={form.email} onChange={v => setForm({...form, email: v})} />
-                  <InputIcon icon={<Key size={18}/>} type="password" placeholder="Nova Senha (deixe vazio para manter)" value={form.senha} onChange={v => setForm({...form, senha: v})} />
+
+                <form onSubmit={salvarEdicao} className="space-y-3">
+                  <CampoIcone icon={<User size={16} />} placeholder="Nome" value={form.nome} onChange={v => setForm({ ...form, nome: v })} />
+                  <CampoIcone icon={<Mail size={16} />} type="email" placeholder="E-mail" value={form.email} onChange={v => setForm({ ...form, email: v })} />
+                  <CampoIcone icon={<Key size={16} />} type="password" placeholder="Nova senha (deixe vazio para manter)" value={form.senha} onChange={v => setForm({ ...form, senha: v })} />
+
                   <div className="relative">
-                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <select
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl font-bold dark:text-white outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+                        className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-black text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all appearance-none cursor-pointer"
                         value={form.perfil}
-                        onChange={e => setForm({...form, perfil: e.target.value})}
+                        onChange={e => setForm({ ...form, perfil: e.target.value })}
                     >
-                      {perfis.map(p => <option key={p} value={p}>{p}</option>)}
+                      {perfis.map(p => <option key={p} value={p}>{p.replace(/_/g, " ")}</option>)}
                     </select>
                   </div>
-                  <div className="pt-4 flex gap-3">
-                    <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-500 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                        type="button"
+                        onClick={() => setIsEditModalOpen(false)}
+                        className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-500 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
+                    >
                       Cancelar
                     </button>
-                    <button type="submit" disabled={sending} className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
-                      {sending ? <Loader2 className="animate-spin" size={18} /> : "Salvar Alterações"}
+                    <button
+                        type="submit"
+                        disabled={sending}
+                        className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      {sending ? <Loader2 size={15} className="animate-spin" /> : "Salvar Alterações"}
                     </button>
                   </div>
                 </form>
@@ -278,27 +370,31 @@ export default function AdminUsers() {
             </div>
         )}
 
-        {/* TOAST DE ERRO */}
+        {/* ── TOAST DE ERRO ── */}
         {erro && !isEditModalOpen && (
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-rose-600 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl animate-bounce flex items-center gap-3 z-50">
-              <Power size={20} /> {erro}
-              <button onClick={() => setErro("")} className="ml-4 opacity-50 hover:opacity-100"><X size={16}/></button>
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl flex items-center gap-3 z-50 max-w-[90vw]">
+              <Power size={15} />
+              <span className="truncate">{erro}</span>
+              <button onClick={() => setErro("")} className="ml-2 opacity-60 hover:opacity-100 flex-shrink-0">
+                <X size={14} />
+              </button>
             </div>
         )}
       </div>
   );
 }
 
-function InputIcon({ icon, ...props }) {
+/* ── INPUT REUTILIZÁVEL ── */
+function CampoIcone({ icon, ...props }) {
   return (
-      <div className="relative group">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors">
+      <div className="relative">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
           {icon}
         </div>
         <input
             {...props}
             onChange={e => props.onChange(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl text-sm font-bold text-slate-700 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-rose-500 transition-all shadow-inner"
+            className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-bold text-slate-700 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
         />
       </div>
   );

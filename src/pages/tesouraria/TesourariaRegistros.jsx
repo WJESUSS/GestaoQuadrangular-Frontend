@@ -1,220 +1,290 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "../../services/api.js";
 import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCcw,
-  Search,
-  FileSpreadsheet,
-  Coins,
-  Database
+  CalendarDays, ChevronLeft, ChevronRight,
+  RefreshCcw, Search, FileSpreadsheet, Coins, Database
 } from "lucide-react";
+
+const C = {
+  red:"#C8102E", redDark:"#8B0B1F", yellow:"#FDB813", yellowDark:"#C48C00",
+  blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+};
+
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  * { box-sizing: border-box; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:.45} }
+  @keyframes spin   { to { transform:rotate(360deg); } }
+
+  .rm-root { animation: fadeUp .5s ease; }
+
+  .rm-ieq-card {
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(200,16,46,.12);
+    border-radius: 14px; backdrop-filter: blur(24px);
+    overflow: hidden;
+  }
+
+  .rm-controls {
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(200,16,46,.12);
+    border-radius: 14px; backdrop-filter: blur(24px);
+    padding: 14px 18px; margin-bottom: 18px;
+    display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+  }
+
+  .rm-month-pill {
+    display:flex; align-items:center; gap:4px;
+    background:rgba(200,16,46,.06); border:1px solid rgba(200,16,46,.14);
+    border-radius:8px; padding:6px 6px; flex-shrink:0;
+  }
+  .rm-month-btn {
+    background:none; border:none; cursor:pointer; padding:6px;
+    border-radius:6px; color:rgba(26,10,13,.45); transition:all .2s;
+    display:flex; align-items:center;
+  }
+  .rm-month-btn:hover { background:rgba(200,16,46,.1); color:#C8102E; }
+  .rm-month-label {
+    font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.16em;
+    text-transform:uppercase; color:#1A0A0D; min-width:110px; text-align:center;
+  }
+
+  .rm-year-select {
+    background:rgba(200,16,46,.04); border:1px solid rgba(200,16,46,.14);
+    color:#1A0A0D; padding:10px 14px; border-radius:8px; outline:none;
+    font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.12em;
+    cursor:pointer; appearance:none; -webkit-appearance:none; flex-shrink:0;
+  }
+  .rm-year-select:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.1); }
+
+  .rm-search-wrap { position:relative; flex:1; min-width:200px; }
+  .rm-search-icon {
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    color:rgba(200,16,46,.5); pointer-events:none;
+  }
+  .rm-search {
+    width:100%;
+    background:rgba(200,16,46,.03); border:1px solid rgba(200,16,46,.14);
+    color:#1A0A0D; padding:10px 14px 10px 38px; border-radius:8px; outline:none;
+    font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
+  }
+  .rm-search:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.1); }
+  .rm-search::placeholder { color:rgba(26,10,13,.3); }
+
+  .rm-refresh-btn {
+    background:rgba(200,16,46,.06); border:1px solid rgba(200,16,46,.14);
+    color:rgba(26,10,13,.5); border-radius:8px; padding:10px;
+    cursor:pointer; transition:all .3s; display:flex; flex-shrink:0;
+  }
+  .rm-refresh-btn:hover { background:linear-gradient(135deg,#8B0B1F,#C8102E); color:#fff; border-color:transparent; }
+  .rm-refresh-btn.spinning { animation: spin .5s linear infinite; }
+
+  /* Table */
+  .rm-table { width:100%; border-collapse:collapse; min-width:540px; }
+  .rm-table thead tr { background: rgba(200,16,46,.04); }
+  .rm-table th {
+    padding:14px 16px; font-family:'Cinzel',serif;
+    font-size:9px; font-weight:700; letter-spacing:.18em;
+    text-transform:uppercase; color:rgba(26,10,13,.4); text-align:left; white-space:nowrap;
+  }
+  .rm-table th:last-child { text-align:right; }
+  .rm-table td { padding:13px 16px; border-top:1px solid rgba(200,16,46,.07); }
+  @media (min-width:640px) { .rm-table th, .rm-table td { padding:16px 22px; } }
+  .rm-table tbody tr { transition:background .15s; }
+  .rm-table tbody tr:hover { background:rgba(200,16,46,.04); }
+
+  .rm-avatar {
+    width:32px; height:32px; border-radius:7px; flex-shrink:0;
+    background:linear-gradient(135deg,#8B0B1F,#003DA5);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Cinzel',serif; font-weight:700; font-size:12px;
+  }
+
+  .rm-badge {
+    padding:4px 12px; border-radius:99px; border:1px solid;
+    font-family:'Cinzel',serif; font-size:8.5px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase; white-space:nowrap;
+  }
+
+  .rm-date-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 10px; border-radius:7px;
+    background:rgba(200,16,46,.06); border:1px solid rgba(200,16,46,.1);
+    font-family:'Cinzel',serif; font-size:9px; letter-spacing:.1em; color:rgba(26,10,13,.5);
+  }
+
+  .rm-error {
+    background:rgba(200,16,46,.06); border:1px solid rgba(200,16,46,.18);
+    color:#8B0B1F; padding:14px 16px; border-radius:10px;
+    font-family:'EB Garamond',serif; font-size:14px; margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+
+  /* header row */
+  .rm-header-row {
+    display:flex; flex-direction:column; gap:14px; margin-bottom:22px;
+  }
+  @media (min-width:520px) {
+    .rm-header-row { flex-direction:row; align-items:flex-end; justify-content:space-between; }
+  }
+
+  .rm-skel { animation: pulse 1.5s ease infinite; }
+  .rm-skel-block { background:rgba(200,16,46,.08); border-radius:10px; }
+`;
+
+const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+  "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 export default function TesourariaRegistrosMensal() {
   const hoje = new Date();
-  const [mes, setMes] = useState(hoje.getMonth() + 1);
-  const [ano, setAno] = useState(hoje.getFullYear());
+  const [mes,       setMes]       = useState(hoje.getMonth() + 1);
+  const [ano,       setAno]       = useState(hoje.getFullYear());
   const [registros, setRegistros] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(null);
-  const [filtroNome, setFiltroNome] = useState("");
+  const [loading,   setLoading]   = useState(true);
+  const [erro,      setErro]      = useState(null);
+  const [filtro,    setFiltro]    = useState("");
+  const [spinning,  setSpinning]  = useState(false);
 
-  const carregarRegistros = useCallback(async () => {
+  const anos = Array.from({ length:5 }, (_, i) => hoje.getFullYear() - i);
+
+  const carregar = useCallback(async () => {
     try {
-      setLoading(true);
-      setErro(null);
-      const res = await api.get("/tesouraria/relatorio-tesouraria", {
-        params: { mes, ano },
-      });
-      setRegistros(res.data.registros || []);
-    } catch (err) {
-      setErro("Falha na sincronização com o servidor.");
-    } finally {
-      setTimeout(() => setLoading(false), 600);
-    }
+      setLoading(true); setErro(null); setSpinning(true);
+      const res = await api.get("/tesouraria/relatorio-tesouraria", { params:{ mes, ano } });
+      setRegistros((res.data || {}).registros || []);
+    } catch { setErro("Falha na sincronização com o servidor."); }
+    finally { setTimeout(() => { setLoading(false); setSpinning(false); }, 600); }
   }, [mes, ano]);
 
-  useEffect(() => {
-    carregarRegistros();
-  }, [carregarRegistros]);
+  useEffect(() => { carregar(); }, [carregar]);
 
-  const meses = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
-  const anos = Array.from({ length: 5 }, (_, i) => hoje.getFullYear() - i);
+  const filtrados = registros.filter(r => r.membroNome?.toLowerCase().includes(filtro.toLowerCase()));
+  const fmt = v => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits:2 });
 
-  const registrosFiltrados = registros.filter(r =>
-      r.membroNome?.toLowerCase().includes(filtroNome.toLowerCase())
+  if (loading) return (
+      <>
+        <style>{CSS}</style>
+        <div className="rm-skel" style={{ padding:20 }}>
+          <div className="rm-skel-block" style={{ height:48, width:"45%", marginBottom:22 }}/>
+          <div className="rm-skel-block" style={{ height:64, borderRadius:14, marginBottom:16 }}/>
+          <div className="rm-skel-block" style={{ height:400, borderRadius:14 }}/>
+        </div>
+      </>
   );
 
-  if (loading) return <SkeletonTable />;
-
   return (
-      <div className="max-w-7xl mx-auto p-4 md:p-10 animate-in fade-in slide-in-from-top-4 duration-700">
+      <>
+        <style>{CSS}</style>
+        <div className="rm-root" style={{ maxWidth:1100, margin:"0 auto", padding:"16px 4px" }}>
 
-        {/* HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-6">
-          <div>
-            <div className="flex items-center gap-2 text-indigo-500 font-black uppercase tracking-[0.3em] text-[10px] mb-3">
-              <Database size={13} /> Histórico de Lançamentos
+          {/* HEADER */}
+          <div className="rm-header-row">
+            <div>
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".22em", textTransform:"uppercase", color:C.red, fontWeight:700, marginBottom:6, display:"flex", alignItems:"center", gap:6 }}>
+                <Database size={11}/> HISTÓRICO DE LANÇAMENTOS
+              </p>
+              <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, color:"#1A0A0D", margin:0, lineHeight:1.1 }}>
+                Registros
+              </h2>
             </div>
-            <h2 className="text-5xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none">
-              Registros<span className="text-indigo-500">.</span>
-            </h2>
+            <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+              <div className="rm-search-wrap">
+                <Search size={15} className="rm-search-icon"/>
+                <input type="text" className="rm-search" placeholder="Filtrar por nome..." value={filtro} onChange={e => setFiltro(e.target.value)}/>
+              </div>
+              <button className={`rm-refresh-btn ${spinning ? "spinning" : ""}`} onClick={carregar}>
+                <RefreshCcw size={17}/>
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
-              <input
-                  type="text"
-                  placeholder="Filtrar por nome..."
-                  className="pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white text-sm min-w-[260px]"
-                  value={filtroNome}
-                  onChange={(e) => setFiltroNome(e.target.value)}
-              />
+          {/* CONTROLS */}
+          <div className="rm-controls">
+            <div className="rm-month-pill">
+              <button className="rm-month-btn" onClick={() => setMes(p => p === 1 ? 12 : p-1)}><ChevronLeft size={16}/></button>
+              <span className="rm-month-label">{MESES[mes-1]}</span>
+              <button className="rm-month-btn" onClick={() => setMes(p => p === 12 ? 1 : p+1)}><ChevronRight size={16}/></button>
             </div>
 
-            <button
-                onClick={carregarRegistros}
-                className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all active:rotate-180 duration-500"
-            >
-              <RefreshCcw size={18} />
-            </button>
-          </div>
-        </div>
+            <select className="rm-year-select" value={ano} onChange={e => setAno(Number(e.target.value))}>
+              {anos.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
 
-        {/* CONTROLS */}
-        <div className="bg-white/60 dark:bg-slate-900/50 backdrop-blur-md p-4 rounded-[2rem] border border-slate-200 dark:border-slate-800 mb-8 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-100 dark:border-slate-700 w-full sm:w-auto">
-            <button
-                onClick={() => setMes(prev => prev === 1 ? 12 : prev - 1)}
-                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500"
-            >
-              <ChevronLeft size={17} />
-            </button>
-            <span className="px-4 font-black text-[11px] uppercase tracking-widest text-slate-700 dark:text-slate-200 min-w-[120px] text-center">
-            {meses[mes - 1]}
-          </span>
-            <button
-                onClick={() => setMes(prev => prev === 12 ? 1 : prev + 1)}
-                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500"
-            >
-              <ChevronRight size={17} />
-            </button>
-          </div>
-
-          <select
-              className="p-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl font-bold text-[11px] uppercase tracking-widest text-slate-700 dark:text-slate-200 outline-none w-full sm:w-auto cursor-pointer"
-              value={ano}
-              onChange={(e) => setAno(Number(e.target.value))}
-          >
-            {anos.map((a) => <option key={a} value={a}>{a}</option>)}
-          </select>
-
-          <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1" />
-
-          <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-auto">
-            <FileSpreadsheet size={13} /> {registrosFiltrados.length} Registros Encontrados
-          </div>
-        </div>
-
-        {erro && (
-            <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center gap-3 font-bold text-sm">
-              <RefreshCcw size={16} /> {erro}
+            <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".16em", textTransform:"uppercase", color:"rgba(26,10,13,.4)" }}>
+              <FileSpreadsheet size={12}/> {filtrados.length} Registros
             </div>
-        )}
+          </div>
 
-        {/* DATA TABLE */}
-        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-              <tr className="bg-slate-50/70 dark:bg-slate-800/30">
-                <th className="p-6 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Ref. ID</th>
-                <th className="p-6 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Membro Contribuinte</th>
-                <th className="p-6 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Dízimo</th>
-                <th className="p-6 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Oferta</th>
-                <th className="p-6 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Categoria</th>
-                <th className="p-6 font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] text-right">Data</th>
-              </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {registrosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-28 text-center">
-                      <Coins size={44} className="mx-auto text-slate-200 dark:text-slate-800 mb-4" />
-                      <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum registro no período</p>
-                    </td>
-                  </tr>
-              ) : (
-                  registrosFiltrados.map((r) => (
-                      <tr key={r.id} className="group hover:bg-slate-50/80 dark:hover:bg-indigo-500/[0.04] transition-all">
-                        <td className="p-6">
-                          <span className="font-mono text-xs text-slate-400 font-bold">#{r.id.toString().padStart(4, '0')}</span>
-                        </td>
-                        <td className="p-6">
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-[11px] shrink-0">
-                              {r.membroNome?.charAt(0) || "?"}
-                            </div>
-                            <span className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors uppercase text-xs">
+          {erro && <div className="rm-error"><RefreshCcw size={15}/> {erro}</div>}
+
+          {/* TABLE */}
+          <div className="rm-ieq-card">
+            <div style={{ overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
+              <table className="rm-table">
+                <thead>
+                <tr>
+                  <th>Ref. ID</th>
+                  <th>Membro Contribuinte</th>
+                  <th>Dízimo</th>
+                  <th>Oferta</th>
+                  <th>Categoria</th>
+                  <th>Data</th>
+                </tr>
+                </thead>
+                <tbody>
+                {filtrados.length === 0 ? (
+                    <tr><td colSpan={6} style={{ padding:"56px 0", textAlign:"center" }}>
+                      <Coins size={40} style={{ color:"rgba(200,16,46,.15)", margin:"0 auto 12px", display:"block" }}/>
+                      <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(26,10,13,.3)", textTransform:"uppercase" }}>Nenhum registro no período</p>
+                    </td></tr>
+                ) : filtrados.map(r => (
+                    <tr key={r.id}>
+                      <td style={{ fontFamily:"'Cinzel',serif", fontSize:10, color:"rgba(26,10,13,.4)", letterSpacing:".08em" }}>
+                        #{r.id.toString().padStart(4,"0")}
+                      </td>
+                      <td>
+                        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                          <div className="rm-avatar">{r.membroNome?.charAt(0) || "?"}</div>
+                          <span style={{ fontFamily:"'EB Garamond',serif", fontSize:15, color:"#1A0A0D", fontWeight:500 }}>
                           {r.membroNome || "Anônimo"}
                         </span>
-                          </div>
-                        </td>
-                        <td className="p-6">
-                      <span className="text-emerald-600 dark:text-emerald-400 font-black font-mono text-sm">
-                        {r.valorDizimo ? `R$ ${r.valorDizimo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : <span className="text-slate-300 dark:text-slate-700 font-bold">—</span>}
+                        </div>
+                      </td>
+                      <td style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, color:C.blue, whiteSpace:"nowrap" }}>
+                        {r.valorDizimo ? `R$ ${fmt(r.valorDizimo)}` : <span style={{ color:"rgba(26,10,13,.2)" }}>—</span>}
+                      </td>
+                      <td style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, color:C.yellowDark, whiteSpace:"nowrap" }}>
+                        {r.valorOferta ? `R$ ${fmt(r.valorOferta)}` : <span style={{ color:"rgba(26,10,13,.2)" }}>—</span>}
+                      </td>
+                      <td><RmBadge tipo={r.tipoOferta}/></td>
+                      <td style={{ textAlign:"right" }}>
+                      <span className="rm-date-pill">
+                        <CalendarDays size={10}/>
+                        {new Date(r.dataLancamento).toLocaleDateString("pt-BR")}
                       </span>
-                        </td>
-                        <td className="p-6">
-                      <span className="text-indigo-600 dark:text-indigo-400 font-black font-mono text-sm">
-                        {r.valorOferta ? `R$ ${r.valorOferta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : <span className="text-slate-300 dark:text-slate-700 font-bold">—</span>}
-                      </span>
-                        </td>
-                        <td className="p-6">
-                          <Badge tipo={r.tipoOferta} />
-                        </td>
-                        <td className="p-6 text-right">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-500 font-bold text-[10px] uppercase tracking-wide">
-                            <CalendarDays size={11} />
-                            {new Date(r.dataLancamento).toLocaleDateString('pt-BR')}
-                          </div>
-                        </td>
-                      </tr>
-                  ))
-              )}
-              </tbody>
-            </table>
+                      </td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
+      </>
   );
 }
 
-function Badge({ tipo }) {
-  const styles = {
-    OURO:   "bg-amber-50  text-amber-600  border-amber-200  dark:bg-amber-500/10  dark:border-amber-500/20",
-    PRATA:  "bg-slate-50  text-slate-500  border-slate-200  dark:bg-slate-500/10  dark:border-slate-500/20",
-    BRONZE: "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:border-orange-500/20",
+function RmBadge({ tipo }) {
+  const map = {
+    OURO:   { color:C.yellowDark, bg:"rgba(196,140,0,.1)",  border:"rgba(196,140,0,.3)"  },
+    PRATA:  { color:"#64748b",    bg:"rgba(100,116,139,.1)", border:"rgba(100,116,139,.3)" },
+    BRONZE: { color:"#c2410c",    bg:"rgba(194,65,12,.1)",  border:"rgba(194,65,12,.3)"  },
   };
-  const current = tipo?.toUpperCase() || "PADRÃO";
+  const s = map[(tipo||"").toUpperCase()] || { color:"rgba(26,10,13,.4)", bg:"rgba(26,10,13,.05)", border:"rgba(26,10,13,.1)" };
   return (
-      <span className={`px-3 py-1 rounded-lg text-[9px] font-black border uppercase tracking-widest ${styles[current] || "bg-gray-50 text-gray-400 border-gray-100"}`}>
-      {current}
+      <span className="rm-badge" style={{ color:s.color, background:s.bg, borderColor:s.border }}>
+      {(tipo || "PADRÃO").toUpperCase()}
     </span>
-  );
-}
-
-function SkeletonTable() {
-  return (
-      <div className="max-w-7xl mx-auto p-10 animate-pulse">
-        <div className="h-12 w-1/4 bg-slate-200 dark:bg-slate-800 rounded-xl mb-12" />
-        <div className="h-20 bg-slate-100 dark:bg-slate-800 rounded-[2rem] mb-8" />
-        <div className="h-[500px] bg-slate-100 dark:bg-slate-800 rounded-[2.5rem]" />
-      </div>
   );
 }
