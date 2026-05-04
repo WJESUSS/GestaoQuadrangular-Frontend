@@ -8,17 +8,16 @@ import RelatorioCelula from "./RelatorioCelula";
 import SolicitacoesMultiplicacao from "./SolicitacoesMultiplicacao";
 import RankingCelulas from "./RankingCelulas";
 import PainelAlertas from "./PainelAlertas";
+import Discipulado from "./Discipulado.jsx";
+import TelaPendencias from "./TelaPendencias.jsx"; // ✅ NOVO
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, ChevronRight, Activity, Settings,
   ShieldCheck, Bell, Menu, X, LogOut, Sun, Moon,
+  ClipboardList, // ✅ NOVO ícone para pendências
 } from "lucide-react";
-import Discipulado from "./Discipulado.jsx";
 
-/* ═══════════════════════════════════════════════
-   🎨 Cores Oficiais Igreja do Evangelho Quadrangular
-═══════════════════════════════════════════════ */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#8B0B1F",
@@ -35,25 +34,24 @@ const IEQ = {
 };
 
 const NAV_ITEMS = [
-  { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",     badge: null, end: true },
-  { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",    badge: null },
-  { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria",    badge: null },
-  { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Multiplicações",badge: null },
-  { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking",       badge: null },
+  { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",      end: true },
+  { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios"              },
+  { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria"              },
+  { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Multiplicações"          },
+  { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking"                 },
+  { to: "/pastor/pendencias",        icon: ClipboardList,   label: "Pendências"              }, // ✅ NOVO
 ];
 
 const PAGE_TITLES = {
   "pastor":            "Dashboard Geral",
   "relatorio-celulas": "Relatórios de Células",
-  "discipulado":       "Secretaria de Discipulado",   // ✅ CORRIGIDO: removido ".jsx"
+  "discipulado":       "Secretaria de Discipulado",
   "multiplicacoes":    "Solicitações de Multiplicação",
   "ranking-celulas":   "Ranking de Células",
   "alertas":           "Painel de Alertas",
+  "pendencias":        "Pendências da Semana",              // ✅ NOVO
 };
 
-/* ╔══════════════════════════════╗
-   ║   ✝ Cruz Quadrangular SVG    ║
-   ╚══════════════════════════════╝ */
 function QuadrangularCross({ size = 32 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -80,30 +78,21 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
-/* ╔══════════════════════════════╗
-   ║        COMPONENTE PRINCIPAL  ║
-   ╚══════════════════════════════╝ */
 export default function PastorPage() {
-  const [celulas,       setCelulas]       = useState([]);
-  const [loading,       setLoading]       = useState(true);
-  const [sidebarOpen,   setSidebarOpen]   = useState(false);
-  const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
+  const [celulas,     setCelulas]     = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDark,      setIsDark]      = useState(() => localStorage.getItem("theme") === "dark");
   const location = useLocation();
 
-  useEffect(() => {
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  }, [isDark]);
-
-  // Fecha sidebar ao trocar de rota no mobile
+  useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     (async () => {
       const token = localStorage.getItem("token")?.replace(/"/g, "");
       try {
-        const res = await api.get("/celulas", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/celulas", { headers: { Authorization: `Bearer ${token}` } });
         setCelulas(res.data || []);
       } catch (err) {
         console.error("Erro ao carregar células:", err);
@@ -121,12 +110,11 @@ export default function PastorPage() {
     return PAGE_TITLES[seg] || PAGE_TITLES["pastor"];
   };
 
-  const bg          = isDark ? IEQ.dark    : "#F0EAE8";
+  const bg        = isDark ? IEQ.dark     : "#F0EAE8";
   const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
-  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const sidebarBg   = isDark ? "#110A0D" : "#1A0608";
+  const textSec   = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const sidebarBg = isDark ? "#110A0D" : "#1A0608";
 
-  /* ─── CSS Global ─── */
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -140,12 +128,7 @@ export default function PastorPage() {
       50%      { transform: scale(1.12); opacity: .1; }
     }
     @keyframes spin  { to { transform: rotate(360deg); } }
-    @keyframes glow-in {
-      from { opacity:0; transform: translateX(-16px); }
-      to   { opacity:1; transform: translateX(0);     }
-    }
 
-    /* Fundo animado IEQ */
     .ieq-bg {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background: repeating-linear-gradient(
@@ -159,7 +142,6 @@ export default function PastorPage() {
       animation: stripe 8s linear infinite;
     }
 
-    /* Título gradiente IEQ */
     .ieq-title {
       font-family: 'Cinzel', serif;
       background: linear-gradient(90deg, ${IEQ.redDark}, ${IEQ.red}, ${IEQ.yellow}, ${IEQ.blue});
@@ -167,7 +149,6 @@ export default function PastorPage() {
       background-clip: text;
     }
 
-    /* Card padrão */
     .ieq-card {
       background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
       border: 1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
@@ -175,7 +156,6 @@ export default function PastorPage() {
       backdrop-filter: blur(24px);
     }
 
-    /* Botões */
     .ieq-btn-primary {
       background: linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red});
       color: #fff; border: none; border-radius: 8px;
@@ -195,7 +175,6 @@ export default function PastorPage() {
     }
     .ieq-btn-ghost:hover { border-color: ${IEQ.red}; background: rgba(200,16,46,.1); }
 
-    /* Badge */
     .ieq-badge {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 5px 14px; border-radius: 99px;
@@ -203,7 +182,6 @@ export default function PastorPage() {
       letter-spacing: .18em; border: 1px solid;
     }
 
-    /* Divisor */
     .divider {
       height: 1px;
       background: linear-gradient(90deg, transparent,
@@ -211,20 +189,17 @@ export default function PastorPage() {
       margin: 8px 0;
     }
 
-    /* Progress track */
     .ieq-progress-track {
       height: 6px; border-radius: 99px; overflow: hidden;
       background: rgba(255,255,255,.12);
     }
 
-    /* Pulse ring */
     .pulse-ring {
       position: absolute; border-radius: 50%;
       border: 1px solid rgba(200,16,46,.35);
       animation: pulse-ring 3s ease-in-out infinite;
     }
 
-    /* ── SIDEBAR ── */
     .pastor-sidebar {
       position: fixed; inset-y: 0; left: 0; z-index: 50;
       width: 260px;
@@ -239,7 +214,6 @@ export default function PastorPage() {
       .pastor-sidebar { position: relative; transform: translateX(0) !important; }
     }
 
-    /* Nav link */
     .ieq-nav-link {
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 14px; border-radius: 10px; gap: 12px;
@@ -264,7 +238,17 @@ export default function PastorPage() {
       border-color: rgba(200,16,46,.25);
     }
 
-    /* Layout principal */
+    /* ✅ destaque especial para Pendências */
+    .ieq-nav-link.nav-pendencias {
+      color: ${IEQ.yellow};
+    }
+    .ieq-nav-link.nav-pendencias:hover,
+    .ieq-nav-link.nav-pendencias.active {
+      color: ${IEQ.yellowDark};
+      background: rgba(253,184,19,.1);
+      border-color: rgba(253,184,19,.25);
+    }
+
     .pastor-layout {
       display: flex; height: 100vh; overflow: hidden;
       background: ${bg};
@@ -273,12 +257,10 @@ export default function PastorPage() {
       position: relative;
     }
 
-    /* Main content */
     .pastor-main {
       flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
     }
 
-    /* Header */
     .pastor-header {
       height: 62px; flex-shrink: 0;
       background: ${isDark ? "rgba(17,10,13,.95)" : "rgba(255,255,255,.92)"};
@@ -289,7 +271,6 @@ export default function PastorPage() {
       position: relative; z-index: 10;
     }
 
-    /* Content area */
     .pastor-content {
       flex: 1; overflow-y: auto;
       padding: 28px 24px;
@@ -300,13 +281,11 @@ export default function PastorPage() {
       .pastor-content { padding: 36px 40px; }
     }
 
-    /* Overlay mobile */
     .sidebar-overlay {
       position: fixed; inset: 0; background: rgba(10,6,8,.82);
       backdrop-filter: blur(10px); z-index: 40;
     }
 
-    /* Icon button */
     .ieq-icon-btn {
       width: 36px; height: 36px; border-radius: 8px; border: none;
       display: inline-flex; align-items: center; justify-content: center;
@@ -320,13 +299,11 @@ export default function PastorPage() {
       border-color: rgba(200,16,46,.3);
     }
 
-    /* Stat mini */
     .ieq-stat-mini {
       display: flex; flex-direction: column; align-items: flex-end;
     }
   `;
 
-  /* ─── Loading ─── */
   if (loading) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? IEQ.dark : "#F0EAE8" }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');`}</style>
@@ -342,21 +319,16 @@ export default function PastorPage() {
         <style>{globalStyles}</style>
         <div className="ieq-bg" />
 
-        {/* ── OVERLAY MOBILE ── */}
+        {/* Overlay mobile */}
         <AnimatePresence>
           {sidebarOpen && (
-              <motion.div
-                  key="overlay"
-                  className="sidebar-overlay"
-                  initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                  onClick={() => setSidebarOpen(false)}
-              />
+              <motion.div key="overlay" className="sidebar-overlay"
+                          initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                          onClick={() => setSidebarOpen(false)} />
           )}
         </AnimatePresence>
 
-        {/* ════════════════════════════════
-          SIDEBAR
-      ════════════════════════════════ */}
+        {/* ── SIDEBAR ── */}
         <aside className={`pastor-sidebar ${sidebarOpen ? "open" : "closed"}`}>
 
           {/* Logo */}
@@ -374,22 +346,17 @@ export default function PastorPage() {
                   <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".2em", color:"rgba(245,240,232,.35)", marginTop:2 }}>GESTÃO PASTORAL</p>
                 </div>
               </div>
-              {/* Fechar no mobile */}
-              <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="ieq-icon-btn"
-                  style={{ display:"flex" }}
-              >
+              <button onClick={() => setSidebarOpen(false)} className="ieq-icon-btn">
                 <X size={16} />
               </button>
             </div>
           </div>
 
-          {/* Indicador rede de células */}
+          {/* Indicador rede */}
           <div style={{ margin:"16px 16px 8px", padding:"18px 16px", background:"rgba(200,16,46,.06)", border:`1px solid rgba(200,16,46,.12)`, borderRadius:12 }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
               <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:"rgba(245,240,232,.4)" }}>REDE DE CÉLULAS</span>
-              <Activity size={12} style={{ color:IEQ.yellow, animation:"pulse-ring 2s infinite" }} />
+              <Activity size={12} style={{ color:IEQ.yellow }} />
             </div>
             <div style={{ display:"flex", alignItems:"baseline", gap:6, marginBottom:12 }}>
               <span style={{ fontFamily:"'Cinzel',serif", fontSize:28, fontWeight:700, color:IEQ.offWhite, lineHeight:1 }}>{totalAtivas}</span>
@@ -397,8 +364,7 @@ export default function PastorPage() {
             </div>
             <div className="ieq-progress-track">
               <motion.div
-                  initial={{ width:0 }}
-                  animate={{ width:`${porcentagem}%` }}
+                  initial={{ width:0 }} animate={{ width:`${porcentagem}%` }}
                   transition={{ duration:1.2, ease:"easeOut" }}
                   style={{ height:"100%", borderRadius:99, background:`linear-gradient(90deg,${IEQ.red},${IEQ.yellow})` }}
               />
@@ -409,7 +375,7 @@ export default function PastorPage() {
             </div>
           </div>
 
-          {/* Navegação principal */}
+          {/* Nav */}
           <nav style={{ flex:1, overflowY:"auto", padding:"8px 12px" }}>
             <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".2em", color:"rgba(245,240,232,.25)", padding:"10px 4px 8px" }}>MENU PRINCIPAL</p>
 
@@ -418,7 +384,9 @@ export default function PastorPage() {
                     key={to}
                     to={to}
                     end={end}
-                    className={({ isActive }) => `ieq-nav-link${isActive ? " active" : ""}`}
+                    className={({ isActive }) =>
+                        `ieq-nav-link${isActive ? " active" : ""}${to.includes("pendencias") ? " nav-pendencias" : ""}`
+                    }
                     style={{ marginBottom:4 }}
                 >
                   <div style={{ display:"flex", alignItems:"center", gap:11 }}>
@@ -452,40 +420,24 @@ export default function PastorPage() {
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".12em", color:IEQ.offWhite, margin:0 }}>PASTOR</p>
                 <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:"rgba(245,240,232,.4)", margin:0 }}>Administrador</p>
               </div>
-              <button
-                  onClick={() => { localStorage.clear(); window.location.href = "/"; }}
-                  className="ieq-icon-btn"
-                  title="Sair"
-                  style={{ flexShrink:0 }}
-              >
+              <button onClick={() => { localStorage.clear(); window.location.href = "/"; }} className="ieq-icon-btn" title="Sair">
                 <LogOut size={14} />
               </button>
             </div>
           </div>
         </aside>
 
-        {/* ════════════════════════════════
-          CONTEÚDO PRINCIPAL
-      ════════════════════════════════ */}
+        {/* ── CONTEÚDO PRINCIPAL ── */}
         <main className="pastor-main">
 
-          {/* HEADER */}
+          {/* Header */}
           <header className="pastor-header">
             <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-              {/* Hambúrguer mobile */}
-              <button
-                  className="ieq-icon-btn"
-                  onClick={() => setSidebarOpen(true)}
-                  style={{ display:"flex" }}
-              >
+              <button className="ieq-icon-btn" onClick={() => setSidebarOpen(true)} style={{ display:"flex" }}>
                 <Menu size={17} />
               </button>
-
-              {/* Breadcrumb / título da página */}
               <div>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(200,16,46,.6)", margin:0 }}>
-                  IEQ PITUAÇU
-                </p>
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(200,16,46,.6)", margin:0 }}>IEQ PITUAÇU</p>
                 <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".14em", color:textPrimary, margin:0, lineHeight:1.2 }}>
                   {getPageTitle()}
                 </h1>
@@ -493,55 +445,41 @@ export default function PastorPage() {
             </div>
 
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              {/* Stats resumo */}
               <div className="ieq-stat-mini" style={{ marginRight:6, display:"flex" }}>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".15em", color:"rgba(200,16,46,.55)" }}>TOTAL</span>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, color:textPrimary, lineHeight:1 }}>
                 {celulas.length} <span style={{ fontSize:9, color:"rgba(26,10,13,.4)", fontWeight:400 }}>CÉL.</span>
               </span>
               </div>
-
-              {/* Dark mode */}
               <button className="ieq-icon-btn" onClick={() => setIsDark(!isDark)}>
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
               </button>
-
-              {/* Bell */}
-              <button className="ieq-icon-btn">
-                <Bell size={15} />
-              </button>
-
-              {/* Settings */}
-              <button className="ieq-icon-btn">
-                <Settings size={15} />
-              </button>
+              <button className="ieq-icon-btn"><Bell size={15} /></button>
+              <button className="ieq-icon-btn"><Settings size={15} /></button>
             </div>
           </header>
 
-          {/* ÁREA DE RENDERIZAÇÃO */}
+          {/* Área de conteúdo */}
           <section className="pastor-content">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                   key={location.pathname}
-                  initial={{ opacity:0, y:8 }}
-                  animate={{ opacity:1, y:0 }}
-                  exit={{ opacity:0, y:-8 }}
+                  initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }}
                   transition={{ duration:.2, ease:"easeOut" }}
                   style={{ height:"100%" }}
               >
                 <Routes location={location}>
                   <Route index                    element={<PainelPastor />} />
                   <Route path="relatorio-celulas" element={<RelatorioCelula />} />
-                  {/* ✅ CORRIGIDO: path em minúsculo, rota duplicada removida */}
                   <Route path="discipulado"       element={<Discipulado />} />
                   <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao />} />
                   <Route path="ranking-celulas"   element={<RankingCelulas />} />
                   <Route path="alertas"           element={<PainelAlertas />} />
+                  <Route path="pendencias"        element={<TelaPendencias isDark={isDark} />} /> {/* ✅ NOVO */}
                 </Routes>
               </motion.div>
             </AnimatePresence>
 
-            {/* Rodapé */}
             <div className="divider" style={{ marginTop:40 }} />
             <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSec, padding:"8px 0 4px" }}>
               © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
