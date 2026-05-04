@@ -180,7 +180,7 @@ export default function Discipulado({ isDark = false }) {
       setLoading(true);
       setErro(null);
 
-      const res = await api.get("/discipulado/todos-relatorios");
+      const res = await api.get("/relatorios/todos-relatorios");
 
       setRelatorios(res.data || []);
     } catch (e) {
