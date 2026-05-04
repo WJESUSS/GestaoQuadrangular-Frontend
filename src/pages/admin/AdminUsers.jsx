@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   UserPlus, Users, ShieldCheck, Power, Trash2, LogOut,
   Mail, Key, User, Shield, Loader2, RefreshCcw, Pencil, X,
-  Sun, Moon
+  Sun, Moon, Eye, EyeOff
 } from "lucide-react";
 
 /* ─── Cores Oficiais Igreja do Evangelho Quadrangular ─── */
@@ -57,15 +57,54 @@ function handleLogout() {
   window.location.href = "/";
 }
 
-const containerVariants = {
-  hidden:  { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, staggerChildren: 0.08 } },
-};
+/* ── Input reutilizável IEQ com suporte a mostrar/ocultar senha ── */
+function InputIEQ({ icon, isDark, onChange, type, ...props }) {
+  const [showPwd, setShowPwd] = useState(false);
+  const isPassword = type === "password";
+  const inputType  = isPassword && showPwd ? "text" : type;
 
-const itemVariants = {
-  hidden:  { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0 },
-};
+  const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+
+  return (
+      <div style={{ position: "relative" }}>
+        {/* ícone esquerdo */}
+        <div style={{
+          position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)",
+          color: IEQ.red, opacity: .7, pointerEvents: "none", zIndex: 1,
+        }}>
+          {icon}
+        </div>
+
+        <input
+            {...props}
+            type={inputType}
+            onChange={e => onChange(e.target.value)}
+            className="ieq-input-field"
+            style={{ paddingLeft: 44, paddingRight: isPassword ? 44 : 16 }}
+        />
+
+        {/* botão mostrar/ocultar */}
+        {isPassword && (
+            <button
+                type="button"
+                onClick={() => setShowPwd(v => !v)}
+                style={{
+                  position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", cursor: "pointer",
+                  color: textSecondary, padding: 4, display: "flex", alignItems: "center",
+                  transition: "color .2s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = IEQ.red}
+                onMouseLeave={e => e.currentTarget.style.color = textSecondary}
+                tabIndex={-1}
+                title={showPwd ? "Ocultar senha" : "Mostrar senha"}
+            >
+              {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+        )}
+      </div>
+  );
+}
 
 export default function AdminUsers() {
   const [usuarios,        setUsuarios]        = useState([]);
@@ -155,22 +194,18 @@ export default function AdminUsers() {
     }
   };
 
-  /* ── cores contextuais ── */
-  const bg            = isDark ? IEQ.dark       : "#F0EAE8";
-  const textPrimary   = isDark ? IEQ.offWhite   : "#1A0A0D";
+  const bg            = isDark ? IEQ.dark     : "#F0EAE8";
+  const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     * { box-sizing: border-box; }
 
-    @keyframes stripe {
-      0%   { background-position:0 0; }
-      100% { background-position:60px 60px; }
-    }
-    @keyframes pulse { 0%,100% { transform:scale(1); opacity:.45; } 50% { transform:scale(1.12); opacity:.12; } }
-    @keyframes spin  { to { transform: rotate(360deg); } }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes stripe  { 0%   { background-position:0 0; } 100% { background-position:60px 60px; } }
+    @keyframes pulse   { 0%,100% { transform:scale(1); opacity:.45; } 50% { transform:scale(1.12); opacity:.12; } }
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
     .ieq-bg {
       position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -257,15 +292,53 @@ export default function AdminUsers() {
       border:1px solid;
     }
 
+    /* ── MEMBER ROW — responsivo ── */
     .ieq-member-row {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 18px;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px;
       background:${isDark ? "rgba(255,255,255,.02)" : "rgba(200,16,46,.03)"};
       border-bottom:1px solid ${isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.07)"};
-      transition:all .2s; gap:12px;
+      transition: all .2s;
+      gap: 10px;
     }
     .ieq-member-row:hover { background:${isDark ? "rgba(200,16,46,.06)" : "rgba(200,16,46,.06)"}; }
     .ieq-member-row:last-child { border-bottom:none; }
+
+    /* desktop: volta a ser linha */
+    @media (min-width: 600px) {
+      .ieq-member-row {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        gap: 12px;
+      }
+    }
+
+    .ieq-member-identity {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .ieq-member-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      /* no mobile, alinha badges + ações à esquerda debaixo do nome */
+      padding-left: 52px; /* avatar 40px + gap 12px */
+    }
+    @media (min-width: 600px) {
+      .ieq-member-actions {
+        flex-wrap: nowrap;
+        padding-left: 0;
+        flex-shrink: 0;
+      }
+    }
 
     .ieq-avatar {
       width:40px; height:40px; border-radius:8px; flex-shrink:0;
@@ -276,6 +349,22 @@ export default function AdminUsers() {
 
     .ieq-avatar-inactive {
       background: ${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"} !important;
+    }
+
+    /* nome com quebra */
+    .ieq-member-name {
+      font-family:'Cinzel',serif; font-size:12px; font-weight:700;
+      letter-spacing:.1em; margin:0;
+      /* quebra elegante sem truncar */
+      overflow-wrap: break-word;
+      word-break: break-word;
+      white-space: normal;
+      line-height: 1.35;
+    }
+    .ieq-member-email {
+      font-family:'EB Garamond',serif; font-size:13px; margin:0;
+      overflow-wrap: break-word; word-break: break-all;
+      white-space: normal; line-height: 1.3;
     }
 
     .pulse-ring {
@@ -334,23 +423,23 @@ export default function AdminUsers() {
     .ieq-perfil-badge {
       display:inline-flex; align-items:center;
       padding:4px 10px; border-radius:99px;
-      font-family:'Cinzel',serif; font-size:8.5px; font-weight:700; letter-spacing:.14em;
+      font-family:'Cinzel',serif; font-size:8px; font-weight:700; letter-spacing:.12em;
       border:1px solid;
+      white-space: nowrap;
     }
 
     /* stat kpi */
     .ieq-stat-box {
       background:${isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.04)"};
       border:1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"};
-      border-radius:10px; padding:18px 20px;
-      display:flex; align-items:center; gap:14px;
+      border-radius:10px; padding:14px 16px;
+      display:flex; align-items:center; gap:12px;
     }
   `;
 
   const ativos    = usuarios.filter(u => u.ativo).length;
   const suspensos = usuarios.filter(u => !u.ativo).length;
 
-  /* ── Loading Screen ── */
   if (loading && usuarios.length === 0) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? IEQ.dark : "#F0EAE8" }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');`}</style>
@@ -366,33 +455,33 @@ export default function AdminUsers() {
         <style>{globalStyles}</style>
         <div className="ieq-bg" />
 
-        <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 24px 0" }}>
+        <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"24px 16px 0" }}>
 
           {/* ── HEADER ── */}
           <motion.header
               initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
-              style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:40, flexWrap:"wrap", gap:16 }}
+              style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:28, flexWrap:"wrap", gap:14 }}
           >
-            <div style={{ display:"flex", alignItems:"center", gap:18 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
               <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
-                <div className="pulse-ring" style={{ width:72, height:72 }} />
-                <div style={{ width:52, height:52, borderRadius:"50%", background: isDark ? "#1A0A0D" : "#fff", border:`1px solid rgba(200,16,46,.3)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                  <QuadrangularCross size={32} />
+                <div className="pulse-ring" style={{ width:68, height:68 }} />
+                <div style={{ width:48, height:48, borderRadius:"50%", background: isDark ? "#1A0A0D" : "#fff", border:`1px solid rgba(200,16,46,.3)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <QuadrangularCross size={28} />
                 </div>
               </div>
               <div>
-                <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
+                <h1 className="ieq-title" style={{ fontSize:"clamp(16px, 4vw, 22px)", fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, margin:0 }}>
                   ADMINISTRAÇÃO · CONTROLE DE ACESSOS
                 </p>
               </div>
             </div>
 
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <button className="ieq-btn-ghost" onClick={() => setIsDark(!isDark)} style={{ padding:"10px 14px" }}>
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              <button className="ieq-btn-ghost" onClick={() => setIsDark(!isDark)} style={{ padding:"10px 12px" }}>
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <button className="ieq-btn-primary" onClick={handleLogout} style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <button className="ieq-btn-primary" onClick={handleLogout} style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 16px" }}>
                 <LogOut size={14} /> SAIR
               </button>
             </div>
@@ -401,20 +490,20 @@ export default function AdminUsers() {
           {/* ── KPI strip ── */}
           <motion.div
               initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:.1 }}
-              style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:14, marginBottom:28 }}
+              style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:24 }}
           >
             {[
-              { icon:<Users size={20}/>,   label:"TOTAL",     value: usuarios.length, color: IEQ.blue   },
-              { icon:<Power size={20}/>,   label:"ATIVOS",    value: ativos,          color: "#12A060"   },
-              { icon:<Shield size={20}/>,  label:"SUSPENSOS", value: suspensos,       color: IEQ.redDark },
+              { icon:<Users size={18}/>,  label:"TOTAL",     value: usuarios.length, color: IEQ.blue   },
+              { icon:<Power size={18}/>,  label:"ATIVOS",    value: ativos,          color: "#12A060"   },
+              { icon:<Shield size={18}/>, label:"SUSPENSOS", value: suspensos,       color: IEQ.redDark },
             ].map(({ icon, label, value, color }) => (
                 <div key={label} className="ieq-stat-box">
-                  <div style={{ width:42, height:42, borderRadius:10, background:`${color}18`, display:"flex", alignItems:"center", justifyContent:"center", color, flexShrink:0 }}>
+                  <div style={{ width:36, height:36, borderRadius:8, background:`${color}18`, display:"flex", alignItems:"center", justifyContent:"center", color, flexShrink:0 }}>
                     {icon}
                   </div>
-                  <div>
-                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSecondary, margin:0 }}>{label}</p>
-                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:28, fontWeight:700, color:textPrimary, margin:0, lineHeight:1.1 }}>{loading ? "—" : value}</p>
+                  <div style={{ minWidth:0 }}>
+                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".2em", color:textSecondary, margin:0 }}>{label}</p>
+                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(20px,5vw,28px)", fontWeight:700, color:textPrimary, margin:0, lineHeight:1.1 }}>{loading ? "—" : value}</p>
                   </div>
                 </div>
             ))}
@@ -425,20 +514,19 @@ export default function AdminUsers() {
 
             {/* ── FORMULÁRIO ── */}
             <motion.div initial={{ opacity:0, x:-20 }} animate={{ opacity:1, x:0 }} transition={{ delay:.15 }}>
-              <div className="ieq-card" style={{ padding:"28px 24px", position:"sticky", top:24 }}>
+              <div className="ieq-card" style={{ padding:"24px 20px" }}>
 
-                {/* título */}
-                <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:22 }}>
-                  <div style={{ width:40, height:40, borderRadius:8, background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff" }}>
-                    <UserPlus size={18} />
+                <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:20 }}>
+                  <div style={{ width:38, height:38, borderRadius:8, background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", flexShrink:0 }}>
+                    <UserPlus size={16} />
                   </div>
                   <div>
-                    <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>NOVO ACESSO</h3>
+                    <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>NOVO ACESSO</h3>
                     <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:0 }}>Liberar usuário no sistema</p>
                   </div>
                 </div>
 
-                <div className="divider" style={{ marginBottom:20 }} />
+                <div className="divider" style={{ marginBottom:18 }} />
 
                 <form onSubmit={adicionarUsuario} style={{ display:"flex", flexDirection:"column", gap:12 }}>
                   <InputIEQ icon={<User size={15} />}   type="text"     placeholder="Nome do usuário"      value={form.nome}   onChange={v => setForm({...form, nome: v})}   isDark={isDark} />
@@ -454,7 +542,7 @@ export default function AdminUsers() {
                     </select>
                   </div>
 
-                  <button type="submit" disabled={sending} className="ieq-btn-primary" style={{ marginTop:6, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+                  <button type="submit" disabled={sending} className="ieq-btn-primary" style={{ marginTop:4, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
                     {sending ? <Loader2 size={15} className="spin-icon" /> : <><UserPlus size={14}/> LIBERAR ACESSO</>}
                   </button>
                 </form>
@@ -466,22 +554,22 @@ export default function AdminUsers() {
               <div className="ieq-card" style={{ overflow:"hidden" }}>
 
                 {/* cabeçalho */}
-                <div style={{ padding:"22px 24px", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                    <div style={{ width:38, height:38, borderRadius:8, background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff" }}>
-                      <Users size={16} />
+                <div style={{ padding:"18px 20px", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                    <div style={{ width:36, height:36, borderRadius:8, background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff" }}>
+                      <Users size={15} />
                     </div>
                     <div>
-                      <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>BASE DE USUÁRIOS</h3>
+                      <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>BASE DE USUÁRIOS</h3>
                       <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:0 }}>{usuarios.length} registros</p>
                     </div>
                   </div>
                   <button
                       className="ieq-btn-ghost"
-                      style={{ padding:"9px 14px", display:"flex", alignItems:"center", gap:8 }}
+                      style={{ padding:"8px 12px", display:"flex", alignItems:"center", gap:6 }}
                       onClick={carregarUsuarios}
                   >
-                    <RefreshCcw size={14} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
+                    <RefreshCcw size={13} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
                     ATUALIZAR
                   </button>
                 </div>
@@ -504,19 +592,21 @@ export default function AdminUsers() {
                                 className="ieq-member-row"
                             >
                               {/* identidade */}
-                              <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0, flex:1 }}>
-                                <div className={`ieq-avatar${u.ativo ? "" : " ieq-avatar-inactive"}`}
-                                     style={u.ativo ? {} : { background:`${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"}` }}>
+                              <div className="ieq-member-identity">
+                                <div
+                                    className={`ieq-avatar${u.ativo ? "" : " ieq-avatar-inactive"}`}
+                                    style={u.ativo ? {} : { background:`${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"}` }}
+                                >
                                   {u.nome?.charAt(0).toUpperCase()}
                                 </div>
-                                <div style={{ minWidth:0 }}>
-                                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.nome}</p>
-                                  <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.email}</p>
+                                <div style={{ minWidth:0, flex:1 }}>
+                                  <p className="ieq-member-name" style={{ color:textPrimary }}>{u.nome}</p>
+                                  <p className="ieq-member-email" style={{ color:textSecondary }}>{u.email}</p>
                                 </div>
                               </div>
 
                               {/* badges + ações */}
-                              <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0, flexWrap:"wrap" }}>
+                              <div className="ieq-member-actions">
                                 {/* perfil */}
                                 <span className="ieq-perfil-badge" style={{
                                   color: IEQ.blue,
@@ -528,12 +618,18 @@ export default function AdminUsers() {
 
                                 {/* status */}
                                 <span className="ieq-perfil-badge" style={{
-                                  color:        u.ativo ? "#12A060" : textSecondary,
-                                  borderColor:  u.ativo ? "#12A06030" : `${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                                  background:   u.ativo ? "#12A06010" : `${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)"}`,
+                                  color:       u.ativo ? "#12A060" : textSecondary,
+                                  borderColor: u.ativo ? "#12A06030" : `${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                                  background:  u.ativo ? "#12A06010" : `${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)"}`,
                                   display:"flex", alignItems:"center", gap:5,
                                 }}>
-                            <span style={{ width:6, height:6, borderRadius:"50%", background: u.ativo ? "#12A060" : (isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)"), display:"inline-block", animation: u.ativo ? "pulse 2s ease-in-out infinite" : "none" }} />
+                            <span style={{
+                              width:6, height:6, borderRadius:"50%",
+                              background: u.ativo ? "#12A060" : (isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)"),
+                              display:"inline-block",
+                              animation: u.ativo ? "pulse 2s ease-in-out infinite" : "none",
+                              flexShrink: 0,
+                            }} />
                                   {u.ativo ? "ATIVO" : "SUSPENSO"}
                           </span>
 
@@ -583,7 +679,7 @@ export default function AdminUsers() {
           </div>
 
           {/* rodapé */}
-          <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, padding:"32px 0 0" }}>
+          <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, padding:"28px 0 0" }}>
             © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
           </p>
         </div>
@@ -602,14 +698,13 @@ export default function AdminUsers() {
                     className="ieq-card ieq-modal-box"
                     style={{ maxWidth:440 }}
                 >
-                  <div style={{ padding:"28px 24px", overflowY:"auto", flex:1 }}>
+                  <div style={{ padding:"24px 20px", overflowY:"auto", flex:1 }}>
 
-                    {/* topo do modal */}
-                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-                      <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                        <QuadrangularCross size={28} />
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                        <QuadrangularCross size={26} />
                         <div>
-                          <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:0 }}>EDITAR USUÁRIO</h2>
+                          <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:0 }}>EDITAR USUÁRIO</h2>
                           <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:textSecondary, margin:0 }}>ID: {editandoId}</p>
                         </div>
                       </div>
@@ -623,12 +718,12 @@ export default function AdminUsers() {
                       </button>
                     </div>
 
-                    <div className="divider" style={{ marginBottom:18 }} />
+                    <div className="divider" style={{ marginBottom:16 }} />
 
                     <form onSubmit={salvarEdicao} style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                      <InputIEQ icon={<User size={15} />}   type="text"     placeholder="Nome"                          value={form.nome}   onChange={v => setForm({...form, nome: v})}   isDark={isDark} />
-                      <InputIEQ icon={<Mail size={15} />}   type="email"    placeholder="E-mail"                        value={form.email}  onChange={v => setForm({...form, email: v})}  isDark={isDark} />
-                      <InputIEQ icon={<Key size={15} />}    type="password" placeholder="Nova senha (vazio = manter)"   value={form.senha}  onChange={v => setForm({...form, senha: v})}  isDark={isDark} />
+                      <InputIEQ icon={<User size={15} />}   type="text"     placeholder="Nome"                        value={form.nome}   onChange={v => setForm({...form, nome: v})}   isDark={isDark} />
+                      <InputIEQ icon={<Mail size={15} />}   type="email"    placeholder="E-mail"                      value={form.email}  onChange={v => setForm({...form, email: v})}  isDark={isDark} />
+                      <InputIEQ icon={<Key size={15} />}    type="password" placeholder="Nova senha (vazio = manter)" value={form.senha}  onChange={v => setForm({...form, senha: v})}  isDark={isDark} />
 
                       <div style={{ position:"relative" }}>
                         <div style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.7, pointerEvents:"none" }}>
@@ -639,9 +734,9 @@ export default function AdminUsers() {
                         </select>
                       </div>
 
-                      <div style={{ display:"flex", gap:10, marginTop:8 }}>
+                      <div style={{ display:"flex", gap:10, marginTop:6 }}>
                         <button type="button" className="ieq-btn-ghost" style={{ flex:1 }} onClick={() => setIsEditModalOpen(false)}>CANCELAR</button>
-                        <button type="submit"  className="ieq-btn-blue"  style={{ flex:2, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }} disabled={sending}>
+                        <button type="submit" className="ieq-btn-blue" style={{ flex:2, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }} disabled={sending}>
                           {sending ? <Loader2 size={15} className="spin-icon" /> : "SALVAR ALTERAÇÕES"}
                         </button>
                       </div>
@@ -657,7 +752,7 @@ export default function AdminUsers() {
           {erro && (
               <motion.div
                   initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }}
-                  style={{ position:"fixed", bottom:28, left:"50%", transform:"translateX(-50%)", background:IEQ.red, color:"#fff", padding:"14px 22px", borderRadius:10, fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".15em", display:"flex", alignItems:"center", gap:12, zIndex:200, maxWidth:"90vw", boxShadow:"0 8px 32px rgba(200,16,46,.35)" }}
+                  style={{ position:"fixed", bottom:28, left:"50%", transform:"translateX(-50%)", background:IEQ.red, color:"#fff", padding:"14px 20px", borderRadius:10, fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".15em", display:"flex", alignItems:"center", gap:12, zIndex:200, maxWidth:"90vw", boxShadow:"0 8px 32px rgba(200,16,46,.35)" }}
               >
                 <Power size={14} />
                 <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{erro}</span>
@@ -667,23 +762,6 @@ export default function AdminUsers() {
               </motion.div>
           )}
         </AnimatePresence>
-      </div>
-  );
-}
-
-/* ── Input reutilizável IEQ ── */
-function InputIEQ({ icon, isDark, onChange, ...props }) {
-  return (
-      <div style={{ position:"relative" }}>
-        <div style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.7, pointerEvents:"none" }}>
-          {icon}
-        </div>
-        <input
-            {...props}
-            onChange={e => onChange(e.target.value)}
-            className="ieq-input-field"
-            style={{ paddingLeft:44 }}
-        />
       </div>
   );
 }
