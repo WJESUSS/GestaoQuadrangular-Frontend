@@ -9,13 +9,14 @@ import SolicitacoesMultiplicacao from "./SolicitacoesMultiplicacao";
 import RankingCelulas from "./RankingCelulas";
 import PainelAlertas from "./PainelAlertas";
 import Discipulado from "./Discipulado.jsx";
-import TelaPendencias from "./TelaPendencias.jsx"; // ✅ NOVO
+import TelaPendencias from "./TelaPendencias.jsx";
+import RelatorioCasasDePaz from "./RelatorioCasasDePaz.jsx"; // ✅ NOVO
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, ChevronRight, Activity, Settings,
   ShieldCheck, Bell, Menu, X, LogOut, Sun, Moon,
-  ClipboardList, // ✅ NOVO ícone para pendências
+  ClipboardList, Home, // ✅ Home para Casas de Paz
 } from "lucide-react";
 
 const IEQ = {
@@ -34,12 +35,13 @@ const IEQ = {
 };
 
 const NAV_ITEMS = [
-  { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",      end: true },
-  { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios"              },
-  { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria"              },
-  { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Multiplicações"          },
-  { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking"                 },
-  { to: "/pastor/pendencias",        icon: ClipboardList,   label: "Pendências"              }, // ✅ NOVO
+  { to: "/pastor",                    icon: LayoutDashboard, label: "Dashboard",      end: true },
+  { to: "/pastor/relatorio-celulas",  icon: FileText,        label: "Relatórios"               },
+  { to: "/pastor/discipulado",        icon: Users,           label: "Secretaria"               },
+  { to: "/pastor/multiplicacoes",     icon: Share2,          label: "Multiplicações"           },
+  { to: "/pastor/ranking-celulas",    icon: Trophy,          label: "Ranking"                  },
+  { to: "/pastor/casas-de-paz",       icon: Home,            label: "Casas de Paz"             }, // ✅ NOVO
+  { to: "/pastor/pendencias",         icon: ClipboardList,   label: "Pendências"               },
 ];
 
 const PAGE_TITLES = {
@@ -49,7 +51,8 @@ const PAGE_TITLES = {
   "multiplicacoes":    "Solicitações de Multiplicação",
   "ranking-celulas":   "Ranking de Células",
   "alertas":           "Painel de Alertas",
-  "pendencias":        "Pendências da Semana",              // ✅ NOVO
+  "pendencias":        "Pendências da Semana",
+  "casas-de-paz":      "Relatórios — Casas de Paz", // ✅ NOVO
 };
 
 function QuadrangularCross({ size = 32 }) {
@@ -110,10 +113,10 @@ export default function PastorPage() {
     return PAGE_TITLES[seg] || PAGE_TITLES["pastor"];
   };
 
-  const bg        = isDark ? IEQ.dark     : "#F0EAE8";
+  const bg          = isDark ? IEQ.dark     : "#F0EAE8";
   const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
-  const textSec   = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const sidebarBg = isDark ? "#110A0D" : "#1A0608";
+  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const sidebarBg   = isDark ? "#110A0D" : "#1A0608";
 
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
@@ -238,7 +241,6 @@ export default function PastorPage() {
       border-color: rgba(200,16,46,.25);
     }
 
-    /* ✅ destaque especial para Pendências */
     .ieq-nav-link.nav-pendencias {
       color: ${IEQ.yellow};
     }
@@ -247,6 +249,17 @@ export default function PastorPage() {
       color: ${IEQ.yellowDark};
       background: rgba(253,184,19,.1);
       border-color: rgba(253,184,19,.25);
+    }
+
+    /* ✅ destaque especial para Casas de Paz */
+    .ieq-nav-link.nav-casas {
+      color: #5DCAA5;
+    }
+    .ieq-nav-link.nav-casas:hover,
+    .ieq-nav-link.nav-casas.active {
+      color: #3aaa82;
+      background: rgba(93,202,165,.08);
+      border-color: rgba(93,202,165,.22);
     }
 
     .pastor-layout {
@@ -385,7 +398,9 @@ export default function PastorPage() {
                     to={to}
                     end={end}
                     className={({ isActive }) =>
-                        `ieq-nav-link${isActive ? " active" : ""}${to.includes("pendencias") ? " nav-pendencias" : ""}`
+                        `ieq-nav-link${isActive ? " active" : ""}` +
+                        `${to.includes("pendencias") ? " nav-pendencias" : ""}` +
+                        `${to.includes("casas-de-paz") ? " nav-casas" : ""}`
                     }
                     style={{ marginBottom:4 }}
                 >
@@ -448,8 +463,8 @@ export default function PastorPage() {
               <div className="ieq-stat-mini" style={{ marginRight:6, display:"flex" }}>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".15em", color:"rgba(200,16,46,.55)" }}>TOTAL</span>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, color:textPrimary, lineHeight:1 }}>
-                {celulas.length} <span style={{ fontSize:9, color:"rgba(26,10,13,.4)", fontWeight:400 }}>CÉL.</span>
-              </span>
+                  {celulas.length} <span style={{ fontSize:9, color:"rgba(26,10,13,.4)", fontWeight:400 }}>CÉL.</span>
+                </span>
               </div>
               <button className="ieq-icon-btn" onClick={() => setIsDark(!isDark)}>
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
@@ -475,7 +490,8 @@ export default function PastorPage() {
                   <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao />} />
                   <Route path="ranking-celulas"   element={<RankingCelulas />} />
                   <Route path="alertas"           element={<PainelAlertas />} />
-                  <Route path="pendencias"        element={<TelaPendencias isDark={isDark} />} /> {/* ✅ NOVO */}
+                  <Route path="pendencias"        element={<TelaPendencias isDark={isDark} />} />
+                  <Route path="casas-de-paz"      element={<RelatorioCasasDePaz isDark={isDark} />} /> {/* ✅ NOVO */}
                 </Routes>
               </motion.div>
             </AnimatePresence>

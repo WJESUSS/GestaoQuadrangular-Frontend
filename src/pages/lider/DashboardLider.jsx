@@ -6,10 +6,11 @@ import TelaRelatorio from "./TelaRelatorio";
 import TelaVisitantes from "./TelaVisitantes";
 import TelaFichas from "./TelaFichas";
 import RelatorioDiscipulado from "./RelatorioDiscipulado";
+import CasasDePazLider from "./CasasDePazLider";
 import {
   Trash2, Loader2, Users, Plus, Search, X, ArrowLeft,
   TrendingUp, Target, Sparkles, LayoutDashboard, LogOut,
-  Sun, Moon, CheckCircle2
+  Sun, Moon, CheckCircle2, Home,
 } from "lucide-react";
 
 /* ─── Cores Oficiais Igreja do Evangelho Quadrangular ─── */
@@ -61,15 +62,15 @@ const containerVariants = {
 };
 
 export default function DashboardLider() {
-  const [abaAtiva,              setAbaAtiva]              = useState("home");
-  const [celula,                setCelula]                = useState(null);
-  const [membros,               setMembros]               = useState([]);
-  const [loading,               setLoading]               = useState(true);
-  const [showModalAddMembro,    setShowModalAddMembro]    = useState(false);
-  const [showModalMultiplicacao,setShowModalMultiplicacao]= useState(false);
-  const [motivoMultiplicacao,   setMotivoMultiplicacao]   = useState("");
-  const [solicitandoMulti,      setSolicitandoMulti]      = useState(false);
-  const [isDark,                setIsDark]                = useState(() => localStorage.getItem("theme") === "dark");
+  const [abaAtiva,               setAbaAtiva]               = useState("home");
+  const [celula,                 setCelula]                 = useState(null);
+  const [membros,                setMembros]                = useState([]);
+  const [loading,                setLoading]                = useState(true);
+  const [showModalAddMembro,     setShowModalAddMembro]     = useState(false);
+  const [showModalMultiplicacao, setShowModalMultiplicacao] = useState(false);
+  const [motivoMultiplicacao,    setMotivoMultiplicacao]    = useState("");
+  const [solicitandoMulti,       setSolicitandoMulti]       = useState(false);
+  const [isDark,                 setIsDark]                 = useState(() => localStorage.getItem("theme") === "dark");
 
   useEffect(() => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
@@ -226,16 +227,25 @@ export default function DashboardLider() {
     .ieq-input-field:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
     .ieq-input-field::placeholder { color:${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.3)"}; }
 
-    /* ── Menu: 2 colunas no mobile, 4 no desktop ── */
+    /* Menu: 2 colunas no mobile, 5 no desktop */
     .ieq-menu-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
     @media (min-width: 600px) {
-      .ieq-menu-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .ieq-menu-grid { grid-template-columns: repeat(5, 1fr); gap: 16px; }
     }
 
+    /* Casas de Paz: ocupa linha inteira no mobile, coluna normal no desktop */
+    .ieq-menu-card-full {
+      grid-column: 1 / -1;
+    }
+    @media (min-width: 600px) {
+      .ieq-menu-card-full { grid-column: auto; }
+    }
+
+    /* ✅ Todos os cards com mesmo visual: ícone em cima, texto embaixo */
     .ieq-menu-card {
       background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.9)"};
       border: 1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
@@ -295,7 +305,6 @@ export default function DashboardLider() {
       margin: 8px 0;
     }
 
-    /* ── Modais: sobem da base no celular, centralizados no desktop ── */
     .ieq-modal-backdrop {
       position: fixed; inset: 0; z-index: 50;
       display: flex; align-items: flex-end; justify-content: center;
@@ -380,9 +389,9 @@ export default function DashboardLider() {
                     <div className="ieq-card" style={{ padding:"36px 40px", background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, border:"none", position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", inset:0, backgroundImage:`repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)`, backgroundSize:"40px 40px" }} />
                       <div style={{ position:"relative", zIndex:1 }}>
-                        <span className="ieq-badge" style={{ color:IEQ.yellow, borderColor:"rgba(253,184,19,.35)", background:"rgba(253,184,19,.1)", marginBottom:20 }}>
-                          <TrendingUp size={10} /> INDICADORES DE CRESCIMENTO
-                        </span>
+                    <span className="ieq-badge" style={{ color:IEQ.yellow, borderColor:"rgba(253,184,19,.35)", background:"rgba(253,184,19,.1)", marginBottom:20 }}>
+                      <TrendingUp size={10} /> INDICADORES DE CRESCIMENTO
+                    </span>
                         <div style={{ display:"flex", flexWrap:"wrap", justifyContent:"space-between", alignItems:"flex-end", gap:24 }}>
                           <div>
                             <p style={{ fontFamily:"'Cinzel',serif", fontSize:52, fontWeight:700, color:"#fff", margin:0, lineHeight:1 }}>{qtdMembros}</p>
@@ -436,13 +445,7 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/*
-                   * ── Menu de navegação ──
-                   * Layout 2×2 no celular, 4 colunas no desktop.
-                   * Ordem das linhas conforme solicitado:
-                   *   Linha 1 → DISCIPULADO | FREQUÊNCIA
-                   *   Linha 2 → FICHAS      | VISITANTES
-                   */}
+                  {/* ── Menu de navegação ── */}
                   <div className="ieq-menu-grid">
                     {[
                       { icon:<Target size={20}/>,     title:"DISCIPULADO", desc:"Acompanhar",  aba:"discipulado", color:IEQ.blue    },
@@ -460,6 +463,22 @@ export default function DashboardLider() {
                           </div>
                         </motion.div>
                     ))}
+
+                    {/* ✅ Casas de Paz — mesmo visual dos outros: ícone em cima, texto embaixo */}
+                    <motion.div
+                        className="ieq-menu-card ieq-menu-card-full"
+                        whileHover={{ y:-4 }}
+                        whileTap={{ scale:.97 }}
+                        onClick={() => setAbaAtiva("casas")}
+                    >
+                      <div style={{ width:42, height:42, borderRadius:10, background:`${IEQ.blue}18`, display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.blue }}>
+                        <Home size={20} />
+                      </div>
+                      <div>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>CASAS DE PAZ</p>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:textSecondary, margin:0 }}>Evangelismo</p>
+                      </div>
+                    </motion.div>
                   </div>
 
                   {/* ── Lista de membros ── */}
@@ -506,6 +525,7 @@ export default function DashboardLider() {
                   {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros} />}
                   {abaAtiva === "visitantes"  && <TelaVisitantes celulaId={celula?.id} />}
                   {abaAtiva === "fichas"      && <TelaFichas celula={celula} />}
+                  {abaAtiva === "casas"       && <CasasDePazLider celulaId={celula?.id} isDark={isDark} />}
                 </motion.div>
             )}
           </AnimatePresence>
@@ -602,13 +622,7 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
   const filtrados = membrosSem.filter(m => m.nome?.toLowerCase().includes(busca.toLowerCase()));
 
   return (
-      /*
-       * height:520 removido — o modal cresce com o conteúdo até o max-height
-       * definido pelo ieq-modal-box (90vh). A lista rola internamente.
-       */
       <div style={{ padding:"20px 18px", display:"flex", flexDirection:"column", flex:1, minHeight:0 }}>
-
-        {/* Cabeçalho compacto */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, flexShrink:0 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <QuadrangularCross size={22} />
@@ -621,7 +635,6 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
           </button>
         </div>
 
-        {/* Campo de busca */}
         <div style={{ position:"relative", marginBottom:12, flexShrink:0 }}>
           <Search size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }} />
           <input
@@ -633,7 +646,6 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
           />
         </div>
 
-        {/* Lista rolável — ocupa todo o espaço restante sem estourar */}
         <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:8, minHeight:0 }}>
           {loading ? (
               <div style={{ textAlign:"center", paddingTop:28 }}>
