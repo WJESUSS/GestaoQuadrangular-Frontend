@@ -144,7 +144,7 @@ export default function MenuTesouraria() {
 
   return (
       <div style={{ minHeight:"100vh", background:"#F0EAE8", color:"#1A0A0D", fontFamily:"'EB Garamond',serif", position:"relative", paddingBottom:60 }}>
-        <style>{CSS}</style>
+        <style key={isDark ? "dark" : "light"}>{getCSS(isDark)}</style>
         <div className="mt-bg" />
 
         <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 20px 0" }}>

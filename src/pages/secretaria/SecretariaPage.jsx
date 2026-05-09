@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Users, UserPlus, Home, FileText, Building2, Sun, Moon, LogOut, Menu, X } from "lucide-react";
+import { Users, UserPlus, Home, FileText, Building2, Sun, Moon, LogOut, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import Membros          from "./Membros";
-import Celulas          from "./Celulas";
-import Visitantes       from "./Visitante";
-import FichasEncontro   from "./FichasEncontro";
+import Membros           from "./Membros";
+import Celulas           from "./Celulas";
+import Visitantes        from "./Visitante";
+import FichasEncontro    from "./FichasEncontro";
 import SecretariaCelulas from "./SecretariaCelulas";
 
 /* ─── Cores Oficiais IEQ ─── */
@@ -21,12 +21,18 @@ function QuadrangularCross({ size = 28 }) {
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
         <defs>
           <linearGradient id="gVS" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={IEQ.redLight} /><stop offset="100%" stopColor={IEQ.redDark} />
+            <stop offset="0%" stopColor={IEQ.redLight} />
+            <stop offset="100%" stopColor={IEQ.redDark} />
           </linearGradient>
           <linearGradient id="gHS" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={IEQ.blueDark} /><stop offset="50%" stopColor={IEQ.blueLight} /><stop offset="100%" stopColor={IEQ.blueDark} />
+            <stop offset="0%" stopColor={IEQ.blueDark} />
+            <stop offset="50%" stopColor={IEQ.blueLight} />
+            <stop offset="100%" stopColor={IEQ.blueDark} />
           </linearGradient>
-          <filter id="glowS"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="glowS">
+            <feGaussianBlur stdDeviation="2" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
         </defs>
         <rect x="38" y="4"  width="24" height="92" rx="3" fill="url(#gVS)" filter="url(#glowS)" />
         <rect x="4"  y="38" width="92" height="24" rx="3" fill="url(#gHS)" filter="url(#glowS)" />
@@ -37,10 +43,10 @@ function QuadrangularCross({ size = 28 }) {
 }
 
 const modulos = [
-  { id: "MEMBROS",           label: "Membros",    icon: <Users size={18}/>,     color: IEQ.blue    },
-  { id: "VISITANTES",        label: "Visitantes", icon: <UserPlus size={18}/>,  color: IEQ.red     },
-  { id: "CELULAS",           label: "Células",    icon: <Home size={18}/>,      color: "#059669"   },
-  { id: "FICHAS",            label: "Fichas",     icon: <FileText size={18}/>,  color: IEQ.yellow  },
+  { id: "MEMBROS",           label: "Membros",    icon: <Users size={18}/>,     color: IEQ.blue      },
+  { id: "VISITANTES",        label: "Visitantes", icon: <UserPlus size={18}/>,  color: IEQ.red       },
+  { id: "CELULAS",           label: "Células",    icon: <Home size={18}/>,      color: "#059669"     },
+  { id: "FICHAS",            label: "Fichas",     icon: <FileText size={18}/>,  color: IEQ.yellow    },
   { id: "SECRETARIACELULAS", label: "Secretaria", icon: <Building2 size={18}/>, color: IEQ.blueLight },
 ];
 
@@ -90,7 +96,7 @@ export default function SecretariaPage() {
     .spin-icon  { animation:spin 1s linear infinite; }
     .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark?"rgba(200,16,46,.25)":"rgba(200,16,46,.2)"},transparent); margin:8px 0; }
 
-    /* ── Sidebar ── */
+    /* Sidebar */
     .ieq-sidebar {
       position:fixed; inset:0; z-index:40;
       transform:translateX(-100%); transition:transform .3s ease;
@@ -131,6 +137,7 @@ export default function SecretariaPage() {
 
     .ieq-overlay { position:fixed; inset:0; z-index:39; background:rgba(10,6,8,.7); backdrop-filter:blur(4px); }
     @media(min-width:768px) { .ieq-overlay { display:none; } }
+    @media(min-width:768px) { .desk-subheader { display:block !important; } header.mobile-header { display:none !important; } }
   `;
 
   const moduloInfo = modulos.find(m => m.id === moduloAtivo);
@@ -140,10 +147,10 @@ export default function SecretariaPage() {
         <style>{globalStyles}</style>
         <div className="ieq-bg" />
 
-        {/* ── Overlay mobile ── */}
+        {/* Overlay mobile */}
         {menuOpen && <div className="ieq-overlay" onClick={() => setMenuOpen(false)} />}
 
-        {/* ── SIDEBAR ── */}
+        {/* SIDEBAR */}
         <aside className={`ieq-sidebar${menuOpen ? " open" : ""}`}>
           {/* Logo */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:36 }}>
@@ -165,9 +172,9 @@ export default function SecretariaPage() {
           <nav style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
             <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".22em", color:textSec, margin:"0 0 10px 6px" }}>MÓDULOS</p>
             {modulos.map(m => (
-                <button key={m.id} className={`ieq-nav-btn${moduloAtivo===m.id?" active":""}`}
+                <button key={m.id} className={`ieq-nav-btn${moduloAtivo === m.id ? " active" : ""}`}
                         onClick={() => { setModuloAtivo(m.id); setMenuOpen(false); }}>
-                  <span style={{ color: moduloAtivo===m.id ? "#fff" : m.color }}>{m.icon}</span>
+                  <span style={{ color: moduloAtivo === m.id ? "#fff" : m.color }}>{m.icon}</span>
                   {m.label}
                 </button>
             ))}
@@ -181,8 +188,8 @@ export default function SecretariaPage() {
             fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".14em", width:"100%",
             transition:"all .2s",
           }}
-                  onMouseEnter={e=>e.currentTarget.style.background="rgba(200,16,46,.18)"}
-                  onMouseLeave={e=>e.currentTarget.style.background="rgba(200,16,46,.08)"}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(200,16,46,.18)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(200,16,46,.08)"}
           >
             <LogOut size={16} /> SAIR DO SISTEMA
           </button>
@@ -192,11 +199,11 @@ export default function SecretariaPage() {
           </p>
         </aside>
 
-        {/* ── MAIN ── */}
+        {/* MAIN */}
         <div style={{ flex:1, display:"flex", flexDirection:"column", position:"relative", zIndex:1, minWidth:0 }}>
 
           {/* Mobile header */}
-          <header style={{
+          <header className="mobile-header" style={{
             display:"flex", alignItems:"center", justifyContent:"space-between",
             padding:"14px 20px", borderBottom:`1px solid ${border}`,
             background:cardBg, backdropFilter:"blur(24px)",
@@ -205,11 +212,9 @@ export default function SecretariaPage() {
             <button className="ieq-btn-ghost" style={{ padding:"9px 12px" }} onClick={() => setMenuOpen(true)}>
               <Menu size={18} />
             </button>
-            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
             <span className="ieq-badge" style={{ color:moduloInfo?.color||IEQ.red, borderColor:`${moduloInfo?.color||IEQ.red}44`, background:`${moduloInfo?.color||IEQ.red}11` }}>
-              {moduloInfo?.icon} {moduloInfo?.label?.toUpperCase()}
-            </span>
-            </div>
+            {moduloInfo?.icon} {moduloInfo?.label?.toUpperCase()}
+          </span>
             <button className="ieq-btn-ghost" style={{ padding:"9px 12px" }} onClick={() => setIsDark(!isDark)}>
               {isDark ? <Sun size={16}/> : <Moon size={16}/>}
             </button>
@@ -217,7 +222,7 @@ export default function SecretariaPage() {
 
           {/* Desktop subheader */}
           <div style={{ padding:"28px 32px 0", display:"none" }} className="desk-subheader">
-            <motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}}
+            <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }}
                         style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:28 }}>
               <div>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".22em", color:textSec, margin:"0 0 4px" }}>MÓDULO ATIVO</p>
@@ -226,9 +231,11 @@ export default function SecretariaPage() {
                 </h2>
               </div>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <span style={{ display:"flex", alignItems:"center", gap:6, padding:"6px 14px", borderRadius:99,
+              <span style={{
+                display:"flex", alignItems:"center", gap:6, padding:"6px 14px", borderRadius:99,
                 background:"rgba(5,150,105,.12)", color:"#059669", border:"1px solid rgba(5,150,105,.2)",
-                fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".14em" }}>
+                fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".14em",
+              }}>
                 <span style={{ width:6, height:6, borderRadius:"50%", background:"#059669", display:"inline-block" }} />
                 ONLINE
               </span>
@@ -241,21 +248,20 @@ export default function SecretariaPage() {
 
           {/* Content */}
           <main style={{ flex:1, padding:"24px 20px", overflowY:"auto" }}>
-            <style>{`@media(min-width:768px){.desk-subheader{display:block!important} header{display:none!important}}`}</style>
             <AnimatePresence mode="wait">
               <motion.div key={moduloAtivo}
-                          initial={{opacity:0, y:16}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-16}}
-                          transition={{duration:.3}}
+                          initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-16 }}
+                          transition={{ duration:.3 }}
                           style={{
                             background:cardBg, border:`1px solid ${border}`,
                             borderRadius:16, backdropFilter:"blur(24px)",
                             minHeight:500, overflow:"hidden",
                           }}>
-                {moduloAtivo === "MEMBROS"           && <Membros />}
-                {moduloAtivo === "VISITANTES"         && <Visitantes />}
-                {moduloAtivo === "CELULAS"            && <Celulas />}
-                {moduloAtivo === "FICHAS"             && <FichasEncontro />}
-                {moduloAtivo === "SECRETARIACELULAS"  && <SecretariaCelulas />}
+                {moduloAtivo === "MEMBROS"           && <Membros isDark={isDark} />}
+                {moduloAtivo === "VISITANTES"         && <Visitantes isDark={isDark} />}
+                {moduloAtivo === "CELULAS"            && <Celulas isDark={isDark} />}
+                {moduloAtivo === "FICHAS"             && <FichasEncontro isDark={isDark} />}
+                {moduloAtivo === "SECRETARIACELULAS"  && <SecretariaCelulas isDark={isDark} />}
               </motion.div>
             </AnimatePresence>
           </main>

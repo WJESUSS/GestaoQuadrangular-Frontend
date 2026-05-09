@@ -21,7 +21,7 @@ const MESES = [
   "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
 ];
 
-const CSS = `
+const getCSS = (isDark) => `
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
   * { box-sizing: border-box; }
 
@@ -29,33 +29,31 @@ const CSS = `
   @keyframes spin    { to { transform:rotate(360deg); } }
   @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.45} }
   @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-  @keyframes stripe  {
-    0%   { background-position:0 0; }
-    100% { background-position:60px 60px; }
-  }
+  @keyframes stripe  { 0%{background-position:0 0} 100%{background-position:60px 60px} }
 
   .td-root { animation: fadeUp .5s ease; }
 
-  /* Skeleton shimmer */
   .td-skel {
-    background: linear-gradient(90deg, rgba(200,16,46,.07) 25%, rgba(200,16,46,.14) 50%, rgba(200,16,46,.07) 75%);
+    background: linear-gradient(90deg,
+      ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.07)"} 25%,
+      ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.14)"} 50%,
+      ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.07)"} 75%
+    );
     background-size: 400px 100%;
     animation: shimmer 1.4s infinite;
     border-radius: 8px;
   }
 
-  /* Panel base */
   .td-panel {
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(200,16,46,.12);
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.12)"};
     border-radius: 14px;
     backdrop-filter: blur(24px);
   }
 
-  /* KPI Cards */
   .td-kpi {
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(200,16,46,.12);
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.12)"};
     border-radius: 14px;
     backdrop-filter: blur(24px);
     padding: 20px 18px;
@@ -65,8 +63,8 @@ const CSS = `
     transition: all .3s; cursor: pointer;
     border-bottom: 3px solid var(--kpi-accent, #C8102E);
   }
-  .td-kpi:hover   { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(200,16,46,.12); }
-  .td-kpi:active  { transform: scale(.97); }
+  .td-kpi:hover  { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(200,16,46,.14); }
+  .td-kpi:active { transform: scale(.97); }
 
   .td-kpi-icon {
     width: 36px; height: 36px; border-radius: 8px;
@@ -75,11 +73,10 @@ const CSS = `
     color: var(--kpi-accent, #C8102E);
   }
 
-  /* Modo tabs */
   .td-mode-bar {
     display: flex;
-    background: rgba(200,16,46,.06);
-    border: 1px solid rgba(200,16,46,.12);
+    background: ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.06)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.12)"};
     padding: 5px; border-radius: 10px;
     gap: 4px; flex-shrink: 0;
   }
@@ -89,30 +86,29 @@ const CSS = `
     letter-spacing: .18em; text-transform: uppercase; cursor: pointer; transition: all .25s;
   }
   .td-mode-btn.active   { background: linear-gradient(135deg,#8B0B1F,#C8102E); color: #fff; box-shadow: 0 3px 10px rgba(200,16,46,.25); }
-  .td-mode-btn.inactive { background: transparent; color: rgba(26,10,13,.4); }
-  .td-mode-btn.inactive:hover { background: rgba(200,16,46,.1); color: #8B0B1F; }
+  .td-mode-btn.inactive { background: transparent; color: ${isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.4)"}; }
+  .td-mode-btn.inactive:hover { background: rgba(200,16,46,.12); color: ${isDark ? "#E8294A" : "#8B0B1F"}; }
 
-  /* Nav pills (mês / ano) */
   .td-nav-pill {
     display: flex; align-items: center;
-    background: rgba(200,16,46,.04);
-    border: 1px solid rgba(200,16,46,.14);
+    background: ${isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.04)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.22)" : "rgba(200,16,46,.14)"};
     border-radius: 8px; padding: 4px;
   }
   .td-nav-btn {
     background: none; border: none; cursor: pointer; padding: 7px;
-    border-radius: 6px; color: rgba(26,10,13,.45); transition: all .2s;
+    border-radius: 6px; color: ${isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.45)"}; transition: all .2s;
     display: flex; align-items: center;
   }
-  .td-nav-btn:hover { background: rgba(200,16,46,.1); color: #C8102E; }
+  .td-nav-btn:hover { background: rgba(200,16,46,.12); color: #C8102E; }
   .td-nav-label {
     font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;
-    letter-spacing: .14em; text-transform: uppercase; color: #1A0A0D;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: ${isDark ? "#F5F0E8" : "#1A0A0D"};
     min-width: 100px; text-align: center;
   }
   .td-nav-label.ano { min-width: 58px; }
 
-  /* Refresh btn */
   .td-refresh-btn {
     background: linear-gradient(135deg,#002470,#003DA5);
     color: #fff; border: none; border-radius: 8px; padding: 10px;
@@ -121,24 +117,22 @@ const CSS = `
   .td-refresh-btn:hover { filter: brightness(1.12); }
   .td-spin { animation: spin 1s linear infinite; }
 
-  /* Chart panel */
   .td-chart-panel {
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(200,16,46,.12);
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.12)"};
     border-radius: 14px; backdrop-filter: blur(24px);
     padding: 24px 20px;
   }
   .td-chart-header {
     display: flex; align-items: center; gap:12px; margin-bottom: 22px;
-    padding-bottom: 14px; border-bottom: 1px solid rgba(200,16,46,.09);
+    padding-bottom: 14px; border-bottom: 1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.09)"};
   }
   .td-chart-icon {
     width: 34px; height: 34px; border-radius: 8px;
-    background: rgba(200,16,46,.09); display: flex; align-items: center;
+    background: rgba(200,16,46,.1); display: flex; align-items: center;
     justify-content: center; color: #C8102E;
   }
 
-  /* Summary side panel */
   .td-summary {
     background: linear-gradient(135deg, #8B0B1F, #003DA5);
     border-radius: 14px; padding: 28px 22px;
@@ -169,11 +163,11 @@ const CSS = `
   }
   .td-btn-relatorio:hover { background: rgba(255,255,255,.25); transform: translateY(-2px); }
 
-  /* Live badge */
   .td-live-badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 5px 12px; border-radius: 99px;
-    background: rgba(200,16,46,.09); border: 1px solid rgba(200,16,46,.2);
+    background: ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.09)"};
+    border: 1px solid rgba(200,16,46,.2);
     font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700;
     letter-spacing: .18em; text-transform: uppercase; color: #C8102E;
     margin-bottom: 10px;
@@ -183,15 +177,13 @@ const CSS = `
     background: #C8102E; animation: pulse 1.5s ease infinite;
   }
 
-  /* Total hero */
   .td-total-box {
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(200,16,46,.12);
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.12)"};
     border-radius: 12px; padding: 16px 20px;
     display: flex; align-items: center; justify-content: space-between; gap:16px;
   }
 
-  /* KPI grid */
   .td-kpi-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;
   }
@@ -199,7 +191,6 @@ const CSS = `
     .td-kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
   }
 
-  /* Chart + summary layout */
   .td-bottom-grid {
     display: grid; grid-template-columns: 1fr; gap: 16px;
   }
@@ -207,10 +198,9 @@ const CSS = `
     .td-bottom-grid { grid-template-columns: 2fr 1fr; }
   }
 
-  /* Filter bar */
   .td-filter-bar {
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(200,16,46,.12);
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.12)"};
     border-radius: 14px; backdrop-filter: blur(24px);
     padding: 14px 18px; margin-bottom: 20px;
     display: flex; flex-direction: column; gap: 10px;
@@ -219,7 +209,6 @@ const CSS = `
     .td-filter-bar { flex-direction: row; align-items: center; flex-wrap: wrap; }
   }
 
-  /* header row */
   .td-header-row {
     display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px;
   }
@@ -228,7 +217,7 @@ const CSS = `
   }
 `;
 
-export default function TesourariaDashboard() {
+export default function TesourariaDashboard({ isDark = false }) {
   const navigate = useNavigate();
   const hoje     = new Date();
 
@@ -237,6 +226,11 @@ export default function TesourariaDashboard() {
   const [ano,     setAno]     = useState(hoje.getFullYear());
   const [resumo,  setResumo]  = useState({ DIZIMO:0, BRONZE:0, PRATA:0, OURO:0 });
   const [loading, setLoading] = useState(true);
+
+  const textPrimary   = isDark ? "#F5F0E8" : "#1A0A0D";
+  const textSecondary = isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.4)";
+  const tooltipBg     = isDark ? "#1A0A0D" : "#fff";
+  const tooltipBorder = isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)";
 
   const carregar = useCallback(async () => {
     try {
@@ -279,24 +273,24 @@ export default function TesourariaDashboard() {
 
   return (
       <>
-        <style>{CSS}</style>
+        <style key={isDark ? "dark" : "light"}>{getCSS(isDark)}</style>
         <div className="td-root" style={{ maxWidth:1100, margin:"0 auto", padding:"16px 4px", userSelect:"none" }}>
 
-          {/* ── HEADER ── */}
+          {/* HEADER */}
           <div className="td-header-row">
             <div>
               <div className="td-live-badge">
                 <div className="td-live-dot" /> LIVE DATA
               </div>
-              <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, color:"#1A0A0D", margin:0, lineHeight:1.1 }}>
+              <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, color:textPrimary, margin:0, lineHeight:1.1 }}>
                 Dashboard
               </h2>
             </div>
 
             <div className="td-total-box">
               <div style={{ textAlign:"right" }}>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:"rgba(26,10,13,.4)", margin:"0 0 4px" }}>
-                  TOTAL · {periodoLabel}
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:textSecondary, margin:"0 0 4px" }}>
+                  TOTAL — {periodoLabel}
                 </p>
                 {loading
                     ? <div className="td-skel" style={{ height:26, width:140, display:"inline-block" }} />
@@ -305,13 +299,13 @@ export default function TesourariaDashboard() {
                     </p>
                 }
               </div>
-              <div style={{ width:42, height:42, borderRadius:10, background:"rgba(0,61,165,.1)", display:"flex", alignItems:"center", justifyContent:"center", color:C.blue }}>
+              <div style={{ width:42, height:42, borderRadius:10, background:"rgba(0,61,165,.12)", display:"flex", alignItems:"center", justifyContent:"center", color:C.blue }}>
                 <Zap size={20} />
               </div>
             </div>
           </div>
 
-          {/* ── FILTER BAR ── */}
+          {/* FILTER BAR */}
           <div className="td-filter-bar">
             <div className="td-mode-bar">
               {["mensal","anual"].map(m => (
@@ -329,35 +323,33 @@ export default function TesourariaDashboard() {
                     <button className="td-nav-btn" onClick={() => setMes(p => p===12?1:p+1)}><ChevronRight size={16}/></button>
                   </div>
               )}
-
               <div className="td-nav-pill">
                 <button className="td-nav-btn" onClick={() => setAno(p => p-1)}><ChevronLeft size={16}/></button>
                 <span className="td-nav-label ano">{ano}</span>
                 <button className="td-nav-btn" onClick={() => setAno(p => p+1)}><ChevronRight size={16}/></button>
               </div>
-
               <button className="td-refresh-btn" onClick={carregar}>
                 <RefreshCcw size={16} className={loading ? "td-spin" : ""} />
               </button>
             </div>
           </div>
 
-          {/* ── KPI CARDS ── */}
+          {/* KPI CARDS */}
           <div className="td-kpi-grid">
-            <KpiCard titulo="Dízimos" valor={resumo.DIZIMO} icon={<Wallet size={18}/>} accent={C.blue}       bg="rgba(0,61,165,.1)"     loading={loading} onClick={() => irParaFiltro("TODOS")}  />
-            <KpiCard titulo="Ouro"    valor={resumo.OURO}   icon={<Award  size={18}/>} accent={C.yellowDark} bg="rgba(196,140,0,.1)"    loading={loading} onClick={() => irParaFiltro("OURO")}   />
-            <KpiCard titulo="Prata"   valor={resumo.PRATA}  icon={<Award  size={18}/>} accent="#64748b"       bg="rgba(100,116,139,.1)"  loading={loading} onClick={() => irParaFiltro("PRATA")}  />
-            <KpiCard titulo="Bronze"  valor={resumo.BRONZE} icon={<Award  size={18}/>} accent="#c2410c"       bg="rgba(194,65,12,.1)"    loading={loading} onClick={() => irParaFiltro("BRONZE")} />
+            <KpiCard isDark={isDark} titulo="Dízimos" valor={resumo.DIZIMO} icon={<Wallet size={18}/>} accent={C.blue}       bg="rgba(0,61,165,.12)"    loading={loading} onClick={() => irParaFiltro("TODOS")}  />
+            <KpiCard isDark={isDark} titulo="Ouro"    valor={resumo.OURO}   icon={<Award  size={18}/>} accent={C.yellowDark} bg="rgba(196,140,0,.12)"   loading={loading} onClick={() => irParaFiltro("OURO")}   />
+            <KpiCard isDark={isDark} titulo="Prata"   valor={resumo.PRATA}  icon={<Award  size={18}/>} accent="#64748b"       bg="rgba(100,116,139,.12)" loading={loading} onClick={() => irParaFiltro("PRATA")}  />
+            <KpiCard isDark={isDark} titulo="Bronze"  valor={resumo.BRONZE} icon={<Award  size={18}/>} accent="#c2410c"       bg="rgba(194,65,12,.12)"   loading={loading} onClick={() => irParaFiltro("BRONZE")} />
           </div>
 
-          {/* ── CHART + SUMMARY ── */}
+          {/* CHART + SUMMARY */}
           <div className="td-bottom-grid">
 
             {/* Gráfico */}
             <div className="td-chart-panel">
               <div className="td-chart-header">
                 <div className="td-chart-icon"><TrendingUp size={15}/></div>
-                <span style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".14em", textTransform:"uppercase", color:"#1A0A0D" }}>
+                <span style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".14em", textTransform:"uppercase", color:textPrimary }}>
                 Fluxo por Categoria
               </span>
               </div>
@@ -367,14 +359,15 @@ export default function TesourariaDashboard() {
                 ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={dadosGrafico} margin={{ top:8, right:4, left:-16, bottom:0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(200,16,46,.08)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.07)"} />
                         <XAxis dataKey="tipo" axisLine={false} tickLine={false}
-                               tick={{ fill:"rgba(26,10,13,.4)", fontFamily:"Cinzel", fontWeight:700, fontSize:9, letterSpacing:".06em" }}
+                               tick={{ fill:textSecondary, fontFamily:"Cinzel", fontWeight:700, fontSize:9, letterSpacing:".06em" }}
                         />
                         <YAxis hide />
                         <Tooltip
-                            cursor={{ fill:"rgba(200,16,46,.04)", rx:8 }}
-                            contentStyle={{ borderRadius:10, border:"1px solid rgba(200,16,46,.15)", background:"#fff", fontFamily:"EB Garamond", padding:"10px 16px" }}
+                            cursor={{ fill: isDark ? "rgba(200,16,46,.07)" : "rgba(200,16,46,.04)", rx:8 }}
+                            contentStyle={{ borderRadius:10, border:`1px solid ${tooltipBorder}`, background:tooltipBg, fontFamily:"EB Garamond", padding:"10px 16px" }}
+                            labelStyle={{ color: textPrimary }}
                             formatter={v => [`R$ ${fmt(v)}`]}
                         />
                         <Bar dataKey="valor" radius={[8,8,3,3]} maxBarSize={44}>
@@ -386,7 +379,7 @@ export default function TesourariaDashboard() {
               </div>
             </div>
 
-            {/* Summary */}
+            {/* Summary — mantém gradiente próprio, não muda com tema */}
             <div className="td-summary">
               <div style={{ position:"relative", zIndex:1 }}>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:"rgba(255,255,255,.6)", margin:"0 0 4px" }}>
@@ -397,9 +390,9 @@ export default function TesourariaDashboard() {
                 </h4>
 
                 {[
-                  { label:"Dízimos", valor:resumo.DIZIMO  },
-                  { label:"Ofertas", valor:totalOfertas   },
-                  { label:"Total",   valor:totalGeral     },
+                  { label:"Dízimos", valor:resumo.DIZIMO },
+                  { label:"Ofertas", valor:totalOfertas  },
+                  { label:"Total",   valor:totalGeral    },
                 ].map(item => (
                     <div key={item.label} className="td-summary-row">
                   <span style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".14em", textTransform:"uppercase", color:"rgba(255,255,255,.7)" }}>
@@ -423,18 +416,20 @@ export default function TesourariaDashboard() {
   );
 }
 
-/* ── KPI Card ── */
-function KpiCard({ titulo, valor, icon, accent, bg, loading, onClick }) {
+function KpiCard({ isDark, titulo, valor, icon, accent, bg, loading, onClick }) {
+  const textPrimary   = isDark ? "#F5F0E8" : "#1A0A0D";
+  const textSecondary = isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.4)";
+
   return (
       <div className="td-kpi" style={{ "--kpi-accent":accent, "--kpi-bg":bg }} onClick={onClick}>
         <div className="td-kpi-icon">{icon}</div>
         <div>
-          <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", textTransform:"uppercase", color:"rgba(26,10,13,.4)", margin:"0 0 5px" }}>
+          <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", textTransform:"uppercase", color:textSecondary, margin:"0 0 5px" }}>
             {titulo}
           </p>
           {loading
-              ? <div style={{ height:22, width:110, background:"rgba(200,16,46,.1)", borderRadius:6, animation:"pulse 1.4s ease infinite" }} />
-              : <p style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(.88rem,2.5vw,1.15rem)", fontWeight:700, color:"#1A0A0D", margin:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+              ? <div style={{ height:22, width:110, background: isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.1)", borderRadius:6, animation:"pulse 1.4s ease infinite" }} />
+              : <p style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(.88rem,2.5vw,1.15rem)", fontWeight:700, color:textPrimary, margin:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
                 R$ {Number(valor).toLocaleString("pt-BR", { minimumFractionDigits:2 })}
               </p>
           }

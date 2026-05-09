@@ -183,7 +183,7 @@ export default function TesourariaPage() {
 
   return (
       <div style={{ minHeight:"100vh", background:bg, color:textPrimary, fontFamily:"'EB Garamond',serif", position:"relative", transition:"background .5s", paddingBottom:60 }}>
-        <style>{getCSS(isDark)}</style>
+        <style key={isDark ? "dark" : "light"}>{getCSS(isDark)}</style>
         <div className="tp-bg" />
 
         <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 20px 0" }}>
@@ -270,11 +270,11 @@ export default function TesourariaPage() {
           ) : (
               <div className="tp-content" style={{ padding:"24px 20px" }}>
                 <Routes>
-                  <Route path="dashboard"   element={<TesourariaDashboard />} />
-                  <Route path="lancamento"  element={<TesourariaLancamento />} />
-                  <Route path="relatorio"   element={<TesourariaRelatorio />} />
-                  <Route path="dizimistas"  element={<TesourariaDizimistas />} />
-                  <Route path="comparativo" element={<TesourariaComparativo />} />
+                  <Route path="dashboard"   element={<TesourariaDashboard  isDark={isDark} />} />
+                  <Route path="lancamento"  element={<TesourariaLancamento isDark={isDark} />} />
+                  <Route path="relatorio"   element={<TesourariaRelatorio  isDark={isDark} />} />
+                  <Route path="dizimistas"  element={<TesourariaDizimistas isDark={isDark} />} />
+                  <Route path="comparativo" element={<TesourariaComparativo isDark={isDark} />} />
                 </Routes>
               </div>
           )}

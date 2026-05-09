@@ -49,7 +49,8 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
-export default function SecretariaCelulas() {
+/* ─── isDark agora vem via prop do pai (SecretariaPage) ─── */
+export default function SecretariaCelulas({ isDark = false }) {
   const [celulas,           setCelulas]           = useState([]);
   const [celulaSelecionada, setCelulaSelecionada] = useState(null);
   const [membros,           setMembros]           = useState([]);
@@ -57,9 +58,6 @@ export default function SecretariaCelulas() {
   const [novoMembroId,      setNovoMembroId]      = useState("");
   const [loading,           setLoading]           = useState(false);
   const [loadingAcao,       setLoadingAcao]       = useState(false);
-  const [isDark,            setIsDark]            = useState(() => localStorage.getItem("theme") === "dark");
-
-  useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
 
   const getToken = () => localStorage.getItem("token");
 
@@ -129,7 +127,7 @@ export default function SecretariaCelulas() {
     finally { setLoadingAcao(false); }
   };
 
-  /* ── cores contextuais ── */
+  /* ─── cores contextuais ─── */
   const bg            = isDark ? IEQ.dark     : "#F0EAE8";
   const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
@@ -200,7 +198,7 @@ export default function SecretariaCelulas() {
       color:${isDark ? IEQ.offWhite : "#1A0A0D"};
       padding:13px 40px 13px 44px; border-radius:8px; outline:none;
       font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.12em;
-      transition:all .25s; appearance:none; cursor:pointer; width:100%;
+      transition:all .25s; appearance:none; cursor:pointer;
     }
     .ieq-select-field:focus{border-color:${IEQ.red};box-shadow:0 0 0 3px rgba(200,16,46,.12);}
     .ieq-select-field option{background:${isDark ? "#110A0D" : "#fff"};color:${isDark ? IEQ.offWhite : "#1A0A0D"};}
@@ -235,7 +233,6 @@ export default function SecretariaCelulas() {
 
     .spin-icon{animation:spin 1s linear infinite;}
 
-    /* grid lateral */
     .ieq-sec-grid {
       display:grid;
       grid-template-columns:1fr;
@@ -262,7 +259,7 @@ export default function SecretariaCelulas() {
 
         <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 24px 0" }}>
 
-          {/* ── HEADER ── */}
+          {/* HEADER */}
           <motion.header
               initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
               style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:36, flexWrap:"wrap", gap:16 }}
@@ -283,7 +280,7 @@ export default function SecretariaCelulas() {
             </div>
           </motion.header>
 
-          {/* ── SELEÇÃO DE CÉLULA ── */}
+          {/* SELEÇÃO DE CÉLULA */}
           <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:.1 }}>
             <div className="ieq-card" style={{ padding:"24px 28px", marginBottom:24 }}>
               <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".22em", color:IEQ.red, margin:"0 0 12px", fontWeight:700 }}>
@@ -315,7 +312,7 @@ export default function SecretariaCelulas() {
             </div>
           </motion.div>
 
-          {/* ── CONTEÚDO DA CÉLULA ── */}
+          {/* CONTEÚDO DA CÉLULA */}
           <AnimatePresence mode="wait">
             {celulaSelecionada && (
                 <motion.div
@@ -324,7 +321,7 @@ export default function SecretariaCelulas() {
                     transition={{ duration:.35 }}
                     className="ieq-sec-grid"
                 >
-                  {/* ── COLUNA ESQUERDA ── */}
+                  {/* COLUNA ESQUERDA */}
                   <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
 
                     {/* Card hero da célula */}
@@ -333,7 +330,6 @@ export default function SecretariaCelulas() {
                       background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
                       padding:"28px 24px", color:"#fff",
                     }}>
-                      {/* Watermark */}
                       <div style={{ position:"absolute", right:-20, bottom:-20, opacity:.08 }}>
                         <Users size={130} />
                       </div>
@@ -413,13 +409,13 @@ export default function SecretariaCelulas() {
                       <div>
                         <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSecondary, margin:0 }}>CORPO DE MEMBROS</p>
                         <p style={{ fontFamily:"'Cinzel',serif", fontSize:30, fontWeight:700, color:textPrimary, margin:0, lineHeight:1.1 }}>
-                          {loading ? "—" : membros.length}
+                          {loading ? "…" : membros.length}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* ── COLUNA DIREITA: tabela de membros ── */}
+                  {/* COLUNA DIREITA: tabela de membros */}
                   <div className="ieq-card" style={{ overflow:"hidden" }}>
 
                     {/* cabeçalho da tabela */}

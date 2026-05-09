@@ -7,7 +7,7 @@ const C = {
   blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
 };
 
-const CSS = `
+const getCSS = (isDark) => `
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
   * { box-sizing: border-box; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
@@ -17,8 +17,8 @@ const CSS = `
   .tl-root { animation: fadeUp .5s ease; }
 
   .tl-card {
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(200,16,46,.12);
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.12)"};
     border-radius: 14px;
     backdrop-filter: blur(24px);
     padding: 28px 22px;
@@ -28,21 +28,26 @@ const CSS = `
   .tl-label {
     display:flex; align-items:center; gap:8px; margin-bottom:8px;
     font-family:'Cinzel',serif; font-size:9px; font-weight:700;
-    text-transform:uppercase; letter-spacing:.22em; color:rgba(26,10,13,.45);
+    text-transform:uppercase; letter-spacing:.22em;
+    color:${isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)"};
   }
 
   .tl-input {
     width:100%;
-    background: rgba(200,16,46,.03);
-    border: 1px solid rgba(200,16,46,.16);
-    color: #1A0A0D;
+    background: ${isDark ? "rgba(200,16,46,.07)" : "rgba(200,16,46,.03)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.16)"};
+    color: ${isDark ? "#F5F0E8" : "#1A0A0D"};
     padding: 13px 16px; border-radius:8px; outline:none;
     font-family:'EB Garamond',serif; font-size:15px;
     transition: all .25s;
     appearance: none; -webkit-appearance: none;
   }
-  .tl-input:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.1); }
-  .tl-input::placeholder { color:rgba(26,10,13,.3); }
+  .tl-input option { background: ${isDark ? "#1A0A0D" : "#fff"}; color: ${isDark ? "#F5F0E8" : "#1A0A0D"}; }
+  .tl-input:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.15); }
+  .tl-input::placeholder { color:${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.3)"}; }
+  .tl-input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: ${isDark ? "invert(1) opacity(.4)" : "opacity(.4)"};
+  }
 
   .tl-btn-save {
     width:100%; background: linear-gradient(135deg, #8B0B1F, #C8102E);
@@ -53,7 +58,11 @@ const CSS = `
     position:relative; overflow:hidden;
   }
   .tl-btn-save:not(:disabled):hover { transform:translateY(-2px); filter:brightness(1.1); }
-  .tl-btn-save:disabled { background: rgba(200,16,46,.18); cursor:not-allowed; color:rgba(26,10,13,.35); }
+  .tl-btn-save:disabled {
+    background: ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.18)"};
+    cursor:not-allowed;
+    color:${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.35)"};
+  }
   .tl-btn-save .shine {
     position:absolute; inset:0;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
@@ -71,10 +80,13 @@ const CSS = `
     color:#fff; box-shadow: 0 4px 14px rgba(200,16,46,.28);
   }
   .tl-tipo-btn.inactive {
-    background: rgba(200,16,46,.06);
-    color: rgba(26,10,13,.45);
+    background: ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.06)"};
+    color: ${isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)"};
   }
-  .tl-tipo-btn.inactive:hover { background: rgba(200,16,46,.1); color:#8B0B1F; }
+  .tl-tipo-btn.inactive:hover {
+    background: rgba(200,16,46,.15);
+    color: ${isDark ? "#E8294A" : "#8B0B1F"};
+  }
 
   .tl-alert {
     display:flex; align-items:center; gap:10px;
@@ -82,10 +94,9 @@ const CSS = `
     font-family:'EB Garamond',serif; font-size:14px; font-weight:500;
     animation: zoomIn .3s ease;
   }
-  .tl-alert.error  { background:rgba(200,16,46,.07); border:1px solid rgba(200,16,46,.2); color:#8B0B1F; }
-  .tl-alert.success{ background:rgba(0,61,165,.07);  border:1px solid rgba(0,61,165,.2);  color:#002470; }
+  .tl-alert.error   { background:rgba(200,16,46,.08); border:1px solid rgba(200,16,46,.22); color:${isDark ? "#E8294A" : "#8B0B1F"}; }
+  .tl-alert.success { background:rgba(0,61,165,.08);  border:1px solid rgba(0,61,165,.22);  color:${isDark ? "#6B9FFF" : "#002470"}; }
 
-  /* grid 2 colunas em desktop */
   .tl-form-grid {
     display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:24px;
   }
@@ -96,24 +107,35 @@ const CSS = `
 
   .tl-prefix {
     position:absolute; left:14px; top:50%; transform:translateY(-50%);
-    font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:rgba(26,10,13,.4);
+    font-family:'Cinzel',serif; font-size:11px; font-weight:700;
+    color:${isDark ? "rgba(245,240,232,.35)" : "rgba(26,10,13,.4)"};
     pointer-events:none;
   }
   .tl-input-prefix { padding-left: 38px !important; }
 
+  .tl-tipo-bar {
+    display:flex; gap:8px;
+    background:${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.06)"};
+    padding:6px; border-radius:10px;
+    border:1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.12)"};
+  }
+
   .spin-tl { animation: spin 1s linear infinite; }
 `;
 
-export default function TesourariaLancamento() {
-  const [membros,  setMembros]  = useState([]);
-  const [loading,  setLoading]  = useState(false);
-  const [erro,     setErro]     = useState(null);
-  const [sucesso,  setSucesso]  = useState(false);
+export default function TesourariaLancamento({ isDark = false }) {
+  const [membros, setMembros] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [erro,    setErro]    = useState(null);
+  const [sucesso, setSucesso] = useState(false);
 
   const [form, setForm] = useState({
     membroNome: "", valorDizimo: "", valorOferta: "",
     tipoOferta: "BRONZE", dataLancamento: new Date().toISOString().split("T")[0],
   });
+
+  const textPrimary   = isDark ? "#F5F0E8" : "#1A0A0D";
+  const textSecondary = isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)";
 
   const limparValor = (s) => {
     const n = Number((s || "").toString().replace(",", ".").trim());
@@ -154,25 +176,27 @@ export default function TesourariaLancamento() {
 
   return (
       <>
-        <style>{CSS}</style>
+        <style key={isDark ? "dark" : "light"}>{getCSS(isDark)}</style>
+
         <div className="tl-root" style={{ maxWidth:720, margin:"0 auto", padding:"16px 4px" }}>
 
-          {/* ── HEADER ── */}
+          {/* HEADER */}
           <div style={{ textAlign:"center", marginBottom:28 }}>
             <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".25em", textTransform:"uppercase", color:C.red, fontWeight:700, marginBottom:8 }}>
               REGISTRO DE ENTRADA
             </p>
-            <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, letterSpacing:".06em", color:"#1A0A0D", margin:0, lineHeight:1.1 }}>
+            <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, letterSpacing:".06em", color:textPrimary, margin:0, lineHeight:1.1 }}>
               Lançamento
             </h2>
           </div>
 
           <div className="tl-card">
             {/* Feedbacks */}
-            {erro    && <div className="tl-alert error"  style={{ marginBottom:20 }}><AlertCircle  size={18}/>{erro}</div>}
+            {erro    && <div className="tl-alert error"   style={{ marginBottom:20 }}><AlertCircle  size={18}/>{erro}</div>}
             {sucesso && <div className="tl-alert success" style={{ marginBottom:20 }}><CheckCircle2 size={18}/>Lançamento registrado com sucesso!</div>}
 
             <div className="tl-form-grid">
+
               {/* Membro */}
               <div className="tl-full">
                 <label className="tl-label"><User size={12}/> Membro Responsável</label>
@@ -209,7 +233,7 @@ export default function TesourariaLancamento() {
               {/* Tipo */}
               <div className="tl-full">
                 <label className="tl-label">Categoria Especial</label>
-                <div style={{ display:"flex", gap:8, background:"rgba(200,16,46,.06)", padding:6, borderRadius:10, border:"1px solid rgba(200,16,46,.12)" }}>
+                <div className="tl-tipo-bar">
                   {["BRONZE","PRATA","OURO"].map(tipo => (
                       <button key={tipo} className={`tl-tipo-btn ${form.tipoOferta === tipo ? "active" : "inactive"}`}
                               onClick={() => setForm({...form, tipoOferta:tipo})}>
@@ -230,7 +254,7 @@ export default function TesourariaLancamento() {
             </button>
           </div>
 
-          <p style={{ textAlign:"center", marginTop:20, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(26,10,13,.3)", textTransform:"uppercase" }}>
+          <p style={{ textAlign:"center", marginTop:20, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSecondary, textTransform:"uppercase" }}>
             Todos os dados são criptografados e auditáveis
           </p>
         </div>

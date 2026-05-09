@@ -3,22 +3,22 @@ import { Routes, Route, NavLink, useLocation } from "react-router-dom";
 import api from "../../services/api.js";
 import { motion, AnimatePresence } from "framer-motion";
 
-import PainelPastor from "./PainelPastor";
-import RelatorioCelula from "./RelatorioCelula";
-import SolicitacoesMultiplicacao from "./SolicitacoesMultiplicacao";
-import RankingCelulas from "./RankingCelulas";
-import PainelAlertas from "./PainelAlertas";
-import Discipulado from "./Discipulado.jsx";
-import TelaPendencias from "./TelaPendencias.jsx";
-import RelatorioCasasDePaz from "./RelatorioCasasDePaz.jsx"; // ✅ NOVO
+import PainelPastor               from "./PainelPastor";
+import RelatorioCelula            from "./RelatorioCelula";
+import SolicitacoesMultiplicacao  from "./SolicitacoesMultiplicacao";
+import RankingCelulas             from "./RankingCelulas";
+import PainelAlertas              from "./PainelAlertas";
+import Discipulado                from "./Discipulado.jsx";
+import TelaPendencias             from "./TelaPendencias.jsx";
+import RelatorioCasasDePaz        from "./RelatorioCasasDePaz.jsx";
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, ChevronRight, Activity, Settings,
-  ShieldCheck, Bell, Menu, X, LogOut, Sun, Moon,
-  ClipboardList, Home, // ✅ Home para Casas de Paz
+  Bell, Menu, X, LogOut, Sun, Moon, ClipboardList, Home,
 } from "lucide-react";
 
+/* ─── Paleta IEQ ─── */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#8B0B1F",
@@ -28,20 +28,20 @@ const IEQ = {
   blue:       "#003DA5",
   blueDark:   "#002470",
   blueLight:  "#1A56C4",
-  white:      "#FFFFFF",
   offWhite:   "#F5F0E8",
   dark:       "#0A0608",
   darkCard:   "#110A0D",
 };
 
+/* ─── Itens de navegação com cor individual ─── */
 const NAV_ITEMS = [
-  { to: "/pastor",                    icon: LayoutDashboard, label: "Dashboard",      end: true },
-  { to: "/pastor/relatorio-celulas",  icon: FileText,        label: "Relatórios"               },
-  { to: "/pastor/discipulado",        icon: Users,           label: "Secretaria"               },
-  { to: "/pastor/multiplicacoes",     icon: Share2,          label: "Multiplicações"           },
-  { to: "/pastor/ranking-celulas",    icon: Trophy,          label: "Ranking"                  },
-  { to: "/pastor/casas-de-paz",       icon: Home,            label: "Casas de Paz"             }, // ✅ NOVO
-  { to: "/pastor/pendencias",         icon: ClipboardList,   label: "Pendências"               },
+  { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",      color: IEQ.blueLight, end: true },
+  { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",     color: IEQ.red                 },
+  { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria",     color: "#8B5CF6"                },
+  { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Multiplicações", color: "#059669"                },
+  { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking",        color: IEQ.yellow               },
+  { to: "/pastor/casas-de-paz",      icon: Home,            label: "Casas de Paz",   color: "#5DCAA5"                },
+  { to: "/pastor/pendencias",        icon: ClipboardList,   label: "Pendências",     color: "#F97316"                },
 ];
 
 const PAGE_TITLES = {
@@ -52,7 +52,7 @@ const PAGE_TITLES = {
   "ranking-celulas":   "Ranking de Células",
   "alertas":           "Painel de Alertas",
   "pendencias":        "Pendências da Semana",
-  "casas-de-paz":      "Relatórios — Casas de Paz", // ✅ NOVO
+  "casas-de-paz":      "Relatórios · Casas de Paz",
 };
 
 function QuadrangularCross({ size = 32 }) {
@@ -81,6 +81,196 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
+/* ─────────────────────────────────────────────
+   CSS ESTÁTICO — usa custom properties CSS.
+   O tema muda apenas adicionando/removendo
+   a classe "dark" no wrapper, sem recriar DOM.
+───────────────────────────────────────────── */
+const STATIC_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+  @keyframes stripe     { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+  @keyframes pulse-ring { 0%,100%{transform:scale(1);opacity:.4} 50%{transform:scale(1.12);opacity:.1} }
+  @keyframes spin       { to{transform:rotate(360deg)} }
+
+  /* tokens claros (padrão) */
+  .pastor-root {
+    --bg:          #F0EAE8;
+    --text:        #1A0A0D;
+    --text-sec:    rgba(26,10,13,.45);
+    --card-bg:     rgba(255,255,255,.92);
+    --card-bdr:    rgba(200,16,46,.12);
+    --header-bg:   rgba(255,255,255,.92);
+    --header-bdr:  rgba(200,16,46,.1);
+    --sidebar-bg:  #1A0608;
+    --icon-bg:     rgba(200,16,46,.06);
+    --icon-color:  #8B0B1F;
+    --icon-bdr:    rgba(200,16,46,.18);
+    --stripe-a:    rgba(200,16,46,.06);
+    --stripe-b:    rgba(253,184,19,.05);
+    --divider-c:   rgba(200,16,46,.2);
+  }
+  /* tokens escuros */
+  .pastor-root.dark {
+    --bg:          #0A0608;
+    --text:        #F5F0E8;
+    --text-sec:    rgba(245,240,232,.45);
+    --card-bg:     rgba(17,10,13,.97);
+    --card-bdr:    rgba(200,16,46,.15);
+    --header-bg:   rgba(17,10,13,.95);
+    --header-bdr:  rgba(200,16,46,.12);
+    --sidebar-bg:  #110A0D;
+    --icon-bg:     rgba(255,255,255,.04);
+    --icon-color:  #F5F0E8;
+    --icon-bdr:    rgba(200,16,46,.2);
+    --stripe-a:    rgba(200,16,46,.04);
+    --stripe-b:    rgba(253,184,19,.03);
+    --divider-c:   rgba(200,16,46,.25);
+  }
+
+  .pastor-layout {
+    display:flex; height:100vh; overflow:hidden;
+    background:var(--bg); color:var(--text);
+    font-family:'EB Garamond',serif; position:relative;
+    transition:background .35s, color .35s;
+  }
+
+  .ieq-bg {
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:repeating-linear-gradient(
+      -55deg,
+      var(--stripe-a) 0 10px, transparent 10px 20px,
+      var(--stripe-b) 20px 30px, transparent 30px 40px
+    );
+    background-size:60px 60px;
+    animation:stripe 8s linear infinite;
+    transition:background .35s;
+  }
+
+  .ieq-title {
+    font-family:'Cinzel',serif;
+    background:linear-gradient(90deg,${IEQ.redDark},${IEQ.red},${IEQ.yellow},${IEQ.blue});
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+
+  .ieq-card {
+    background:var(--card-bg);
+    border:1px solid var(--card-bdr);
+    border-radius:14px; backdrop-filter:blur(24px);
+    transition:background .35s, border-color .35s;
+  }
+
+  .divider {
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--divider-c),transparent);
+    margin:8px 0; transition:background .35s;
+  }
+
+  .ieq-progress-track {
+    height:6px; border-radius:99px; overflow:hidden;
+    background:rgba(255,255,255,.12);
+  }
+
+  .pulse-ring {
+    position:absolute; border-radius:50%;
+    border:1px solid rgba(200,16,46,.35);
+    animation:pulse-ring 3s ease-in-out infinite;
+  }
+
+  /* ── SIDEBAR ── */
+  .pastor-sidebar {
+    position:fixed; inset-y:0; left:0; z-index:50; width:260px;
+    background:var(--sidebar-bg);
+    display:flex; flex-direction:column;
+    transition:transform .3s ease, background .35s;
+    box-shadow:4px 0 32px rgba(0,0,0,.45);
+  }
+  .pastor-sidebar.closed { transform:translateX(-100%); }
+  .pastor-sidebar.open   { transform:translateX(0);     }
+  @media(min-width:1024px){
+    .pastor-sidebar { position:relative; transform:translateX(0) !important; }
+  }
+
+  /* ── NAV LINKS ── */
+  .ieq-nav-link {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; border-radius:10px; gap:12px; margin-bottom:4px;
+    font-family:'Cinzel',serif; font-size:10.5px; font-weight:700;
+    letter-spacing:.14em; text-decoration:none;
+    color:rgba(245,240,232,.38);
+    border:1px solid transparent;
+    transition:all .2s;
+  }
+  .ieq-nav-link:hover,
+  .ieq-nav-link.active {
+    color:rgba(245,240,232,.92);
+    background:rgba(255,255,255,.07);
+    border-color:rgba(255,255,255,.1);
+  }
+  /* ícone e label assumem --nav-color no hover/active */
+  .ieq-nav-link:hover .nav-icon,
+  .ieq-nav-link.active .nav-icon { color:var(--nav-color) !important; }
+  .ieq-nav-link:hover .nav-label,
+  .ieq-nav-link.active .nav-label { color:var(--nav-color) !important; }
+
+  .ieq-nav-alert {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; border-radius:10px; gap:12px; margin-bottom:4px;
+    font-family:'Cinzel',serif; font-size:10.5px; font-weight:700;
+    letter-spacing:.14em; text-decoration:none;
+    color:${IEQ.redLight};
+    background:rgba(200,16,46,.1);
+    border:1px solid rgba(200,16,46,.25);
+    transition:all .2s;
+  }
+  .ieq-nav-alert:hover,
+  .ieq-nav-alert.active {
+    background:rgba(200,16,46,.2);
+    border-color:rgba(200,16,46,.4);
+  }
+
+  /* ── MAIN / HEADER / CONTENT ── */
+  .pastor-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
+
+  .pastor-header {
+    height:62px; flex-shrink:0;
+    background:var(--header-bg);
+    border-bottom:1px solid var(--header-bdr);
+    backdrop-filter:blur(20px);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 24px; gap:16px; position:relative; z-index:10;
+    transition:background .35s, border-color .35s;
+  }
+
+  .pastor-content {
+    flex:1; overflow-y:auto; padding:28px 24px;
+    background:var(--bg); position:relative; z-index:1;
+    transition:background .35s;
+  }
+  @media(min-width:768px){ .pastor-content { padding:36px 40px; } }
+
+  .sidebar-overlay {
+    position:fixed; inset:0; background:rgba(10,6,8,.82);
+    backdrop-filter:blur(10px); z-index:40;
+  }
+
+  /* ── ICON BTN ── */
+  .ieq-icon-btn {
+    width:36px; height:36px; border-radius:8px;
+    display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s;
+    background:var(--icon-bg); color:var(--icon-color);
+    border:1px solid var(--icon-bdr);
+  }
+  .ieq-icon-btn:hover {
+    color:${IEQ.red}; background:rgba(200,16,46,.1);
+    border-color:rgba(200,16,46,.3);
+  }
+
+  .ieq-stat-mini { display:flex; flex-direction:column; align-items:flex-end; }
+`;
+
 export default function PastorPage() {
   const [celulas,     setCelulas]     = useState([]);
   const [loading,     setLoading]     = useState(true);
@@ -88,7 +278,10 @@ export default function PastorPage() {
   const [isDark,      setIsDark]      = useState(() => localStorage.getItem("theme") === "dark");
   const location = useLocation();
 
-  useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
+  useEffect(() => {
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }, [isDark]);
+
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   useEffect(() => {
@@ -97,15 +290,12 @@ export default function PastorPage() {
       try {
         const res = await api.get("/celulas", { headers: { Authorization: `Bearer ${token}` } });
         setCelulas(res.data || []);
-      } catch (err) {
-        console.error("Erro ao carregar células:", err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error("Erro ao carregar células:", err); }
+      finally { setLoading(false); }
     })();
   }, []);
 
-  const totalAtivas = celulas.filter((c) => c.ativa === true).length;
+  const totalAtivas = celulas.filter(c => c.ativa === true).length;
   const porcentagem = celulas.length > 0 ? Math.round((totalAtivas / celulas.length) * 100) : 0;
 
   const getPageTitle = () => {
@@ -113,213 +303,13 @@ export default function PastorPage() {
     return PAGE_TITLES[seg] || PAGE_TITLES["pastor"];
   };
 
-  const bg          = isDark ? IEQ.dark     : "#F0EAE8";
+  /* Ainda usados em style inline nos elementos do header */
   const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const sidebarBg   = isDark ? "#110A0D" : "#1A0608";
-
-  const globalStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    @keyframes stripe {
-      0%   { background-position: 0 0; }
-      100% { background-position: 60px 60px; }
-    }
-    @keyframes pulse-ring {
-      0%,100% { transform: scale(1);    opacity: .4; }
-      50%      { transform: scale(1.12); opacity: .1; }
-    }
-    @keyframes spin  { to { transform: rotate(360deg); } }
-
-    .ieq-bg {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background: repeating-linear-gradient(
-        -55deg,
-        ${isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.06)"} 0 10px,
-        transparent 10px 20px,
-        ${isDark ? "rgba(253,184,19,.03)" : "rgba(253,184,19,.05)"} 20px 30px,
-        transparent 30px 40px
-      );
-      background-size: 60px 60px;
-      animation: stripe 8s linear infinite;
-    }
-
-    .ieq-title {
-      font-family: 'Cinzel', serif;
-      background: linear-gradient(90deg, ${IEQ.redDark}, ${IEQ.red}, ${IEQ.yellow}, ${IEQ.blue});
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .ieq-card {
-      background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
-      border: 1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
-      border-radius: 14px;
-      backdrop-filter: blur(24px);
-    }
-
-    .ieq-btn-primary {
-      background: linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red});
-      color: #fff; border: none; border-radius: 8px;
-      font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700;
-      letter-spacing: .18em; cursor: pointer; transition: all .25s;
-      padding: 11px 20px; display: inline-flex; align-items: center; gap: 7px;
-    }
-    .ieq-btn-primary:hover { transform: translateY(-2px); filter: brightness(1.12); }
-
-    .ieq-btn-ghost {
-      background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.06)"};
-      color: ${isDark ? IEQ.offWhite : IEQ.redDark};
-      border: 1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"};
-      border-radius: 8px; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;
-      letter-spacing: .15em; cursor: pointer; transition: all .25s;
-      padding: 10px 18px; display: inline-flex; align-items: center; gap: 7px;
-    }
-    .ieq-btn-ghost:hover { border-color: ${IEQ.red}; background: rgba(200,16,46,.1); }
-
-    .ieq-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 5px 14px; border-radius: 99px;
-      font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700;
-      letter-spacing: .18em; border: 1px solid;
-    }
-
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent,
-        ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"}, transparent);
-      margin: 8px 0;
-    }
-
-    .ieq-progress-track {
-      height: 6px; border-radius: 99px; overflow: hidden;
-      background: rgba(255,255,255,.12);
-    }
-
-    .pulse-ring {
-      position: absolute; border-radius: 50%;
-      border: 1px solid rgba(200,16,46,.35);
-      animation: pulse-ring 3s ease-in-out infinite;
-    }
-
-    .pastor-sidebar {
-      position: fixed; inset-y: 0; left: 0; z-index: 50;
-      width: 260px;
-      background: ${sidebarBg};
-      display: flex; flex-direction: column;
-      transition: transform .3s ease;
-      box-shadow: 4px 0 32px rgba(0,0,0,.45);
-    }
-    .pastor-sidebar.closed { transform: translateX(-100%); }
-    .pastor-sidebar.open   { transform: translateX(0);     }
-    @media (min-width: 1024px) {
-      .pastor-sidebar { position: relative; transform: translateX(0) !important; }
-    }
-
-    .ieq-nav-link {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 14px; border-radius: 10px; gap: 12px;
-      font-family: 'Cinzel', serif; font-size: 10.5px; font-weight: 700;
-      letter-spacing: .14em; cursor: pointer; transition: all .2s;
-      color: rgba(245,240,232,.45);
-      text-decoration: none; border: 1px solid transparent;
-    }
-    .ieq-nav-link:hover {
-      color: ${IEQ.offWhite};
-      background: rgba(200,16,46,.08);
-      border-color: rgba(200,16,46,.12);
-    }
-    .ieq-nav-link.active {
-      color: ${IEQ.offWhite};
-      background: linear-gradient(135deg, rgba(200,16,46,.18), rgba(139,11,31,.25));
-      border-color: rgba(200,16,46,.3);
-    }
-    .ieq-nav-link.active-alert {
-      color: ${IEQ.redLight};
-      background: rgba(200,16,46,.1);
-      border-color: rgba(200,16,46,.25);
-    }
-
-    .ieq-nav-link.nav-pendencias {
-      color: ${IEQ.yellow};
-    }
-    .ieq-nav-link.nav-pendencias:hover,
-    .ieq-nav-link.nav-pendencias.active {
-      color: ${IEQ.yellowDark};
-      background: rgba(253,184,19,.1);
-      border-color: rgba(253,184,19,.25);
-    }
-
-    /* ✅ destaque especial para Casas de Paz */
-    .ieq-nav-link.nav-casas {
-      color: #5DCAA5;
-    }
-    .ieq-nav-link.nav-casas:hover,
-    .ieq-nav-link.nav-casas.active {
-      color: #3aaa82;
-      background: rgba(93,202,165,.08);
-      border-color: rgba(93,202,165,.22);
-    }
-
-    .pastor-layout {
-      display: flex; height: 100vh; overflow: hidden;
-      background: ${bg};
-      color: ${textPrimary};
-      font-family: 'EB Garamond', serif;
-      position: relative;
-    }
-
-    .pastor-main {
-      flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
-    }
-
-    .pastor-header {
-      height: 62px; flex-shrink: 0;
-      background: ${isDark ? "rgba(17,10,13,.95)" : "rgba(255,255,255,.92)"};
-      border-bottom: 1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"};
-      backdrop-filter: blur(20px);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px; gap: 16px;
-      position: relative; z-index: 10;
-    }
-
-    .pastor-content {
-      flex: 1; overflow-y: auto;
-      padding: 28px 24px;
-      background: ${bg};
-      position: relative; z-index: 1;
-    }
-    @media (min-width: 768px) {
-      .pastor-content { padding: 36px 40px; }
-    }
-
-    .sidebar-overlay {
-      position: fixed; inset: 0; background: rgba(10,6,8,.82);
-      backdrop-filter: blur(10px); z-index: 40;
-    }
-
-    .ieq-icon-btn {
-      width: 36px; height: 36px; border-radius: 8px; border: none;
-      display: inline-flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all .2s;
-      background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.06)"};
-      color: ${isDark ? "rgba(245,240,232,.5)" : "rgba(26,10,13,.5)"};
-      border: 1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
-    }
-    .ieq-icon-btn:hover {
-      color: ${IEQ.red}; background: rgba(200,16,46,.1);
-      border-color: rgba(200,16,46,.3);
-    }
-
-    .ieq-stat-mini {
-      display: flex; flex-direction: column; align-items: flex-end;
-    }
-  `;
 
   if (loading) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? IEQ.dark : "#F0EAE8" }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');`}</style>
+        <style>{STATIC_CSS}</style>
         <div style={{ textAlign:"center" }}>
           <QuadrangularCross size={48} />
           <p style={{ fontFamily:"'Cinzel',serif", color: isDark ? IEQ.offWhite : IEQ.redDark, marginTop:16, letterSpacing:".2em", fontSize:11 }}>CARREGANDO...</p>
@@ -328,8 +318,9 @@ export default function PastorPage() {
   );
 
   return (
-      <div className="pastor-layout">
-        <style>{globalStyles}</style>
+      /* Tema via classe CSS — sem recriar o DOM, sem flash */
+      <div className={`pastor-root pastor-layout${isDark ? " dark" : ""}`}>
+        <style>{STATIC_CSS}</style>
         <div className="ieq-bg" />
 
         {/* Overlay mobile */}
@@ -345,12 +336,12 @@ export default function PastorPage() {
         <aside className={`pastor-sidebar ${sidebarOpen ? "open" : "closed"}`}>
 
           {/* Logo */}
-          <div style={{ padding:"28px 20px 22px", borderBottom:`1px solid rgba(200,16,46,.12)` }}>
+          <div style={{ padding:"28px 20px 22px", borderBottom:"1px solid rgba(200,16,46,.12)" }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
               <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                 <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
                   <div className="pulse-ring" style={{ width:52, height:52 }} />
-                  <div style={{ width:38, height:38, borderRadius:"50%", background:"rgba(200,16,46,.08)", border:`1px solid rgba(200,16,46,.25)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <div style={{ width:38, height:38, borderRadius:"50%", background:"rgba(200,16,46,.08)", border:"1px solid rgba(200,16,46,.25)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                     <QuadrangularCross size={24} />
                   </div>
                 </div>
@@ -366,7 +357,7 @@ export default function PastorPage() {
           </div>
 
           {/* Indicador rede */}
-          <div style={{ margin:"16px 16px 8px", padding:"18px 16px", background:"rgba(200,16,46,.06)", border:`1px solid rgba(200,16,46,.12)`, borderRadius:12 }}>
+          <div style={{ margin:"16px 16px 8px", padding:"18px 16px", background:"rgba(200,16,46,.06)", border:"1px solid rgba(200,16,46,.12)", borderRadius:12 }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
               <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:"rgba(245,240,232,.4)" }}>REDE DE CÉLULAS</span>
               <Activity size={12} style={{ color:IEQ.yellow }} />
@@ -390,25 +381,25 @@ export default function PastorPage() {
 
           {/* Nav */}
           <nav style={{ flex:1, overflowY:"auto", padding:"8px 12px" }}>
-            <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".2em", color:"rgba(245,240,232,.25)", padding:"10px 4px 8px" }}>MENU PRINCIPAL</p>
+            <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".2em", color:"rgba(245,240,232,.25)", padding:"10px 4px 8px" }}>
+              MENU PRINCIPAL
+            </p>
 
-            {NAV_ITEMS.map(({ to, icon: Icon, label, end }) => (
+            {NAV_ITEMS.map(({ to, icon: Icon, label, color, end }) => (
                 <NavLink
                     key={to}
                     to={to}
                     end={end}
-                    className={({ isActive }) =>
-                        `ieq-nav-link${isActive ? " active" : ""}` +
-                        `${to.includes("pendencias") ? " nav-pendencias" : ""}` +
-                        `${to.includes("casas-de-paz") ? " nav-casas" : ""}`
-                    }
-                    style={{ marginBottom:4 }}
+                    className={({ isActive }) => `ieq-nav-link${isActive ? " active" : ""}`}
+                    style={{ "--nav-color": color }}
                 >
                   <div style={{ display:"flex", alignItems:"center", gap:11 }}>
-                    <Icon size={16} />
-                    <span>{label}</span>
+                    {/* ícone sempre colorido */}
+                    <Icon size={16} className="nav-icon" style={{ color, flexShrink:0, transition:"color .2s" }} />
+                    {/* label colorido no hover/active, neutro no repouso */}
+                    <span className="nav-label" style={{ transition:"color .2s" }}>{label}</span>
                   </div>
-                  <ChevronRight size={12} style={{ opacity:.35 }} />
+                  <ChevronRight size={12} style={{ opacity:.3, flexShrink:0 }} />
                 </NavLink>
             ))}
 
@@ -417,19 +408,19 @@ export default function PastorPage() {
 
             <NavLink
                 to="/pastor/alertas"
-                className={({ isActive }) => `ieq-nav-link${isActive ? " active" : " active-alert"}`}
+                className={({ isActive }) => `ieq-nav-alert${isActive ? " active" : ""}`}
             >
               <div style={{ display:"flex", alignItems:"center", gap:11 }}>
-                <AlertTriangle size={16} style={{ animation:"pulse-ring 2s infinite" }} />
+                <AlertTriangle size={16} />
                 <span>Painel de Alertas</span>
               </div>
               <ChevronRight size={12} style={{ opacity:.6 }} />
             </NavLink>
           </nav>
 
-          {/* Rodapé sidebar */}
-          <div style={{ padding:"14px 16px", borderTop:`1px solid rgba(200,16,46,.1)` }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"rgba(200,16,46,.06)", border:`1px solid rgba(200,16,46,.1)`, borderRadius:10 }}>
+          {/* Rodapé */}
+          <div style={{ padding:"14px 16px", borderTop:"1px solid rgba(200,16,46,.1)" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"rgba(200,16,46,.06)", border:"1px solid rgba(200,16,46,.1)", borderRadius:10 }}>
               <div style={{ width:34, height:34, borderRadius:8, background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:12, flexShrink:0 }}>PS</div>
               <div style={{ flex:1, minWidth:0 }}>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".12em", color:IEQ.offWhite, margin:0 }}>PASTOR</p>
@@ -448,7 +439,7 @@ export default function PastorPage() {
           {/* Header */}
           <header className="pastor-header">
             <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-              <button className="ieq-icon-btn" onClick={() => setSidebarOpen(true)} style={{ display:"flex" }}>
+              <button className="ieq-icon-btn" onClick={() => setSidebarOpen(true)}>
                 <Menu size={17} />
               </button>
               <div>
@@ -460,15 +451,30 @@ export default function PastorPage() {
             </div>
 
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <div className="ieq-stat-mini" style={{ marginRight:6, display:"flex" }}>
+              <div className="ieq-stat-mini" style={{ marginRight:6 }}>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".15em", color:"rgba(200,16,46,.55)" }}>TOTAL</span>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, color:textPrimary, lineHeight:1 }}>
-                  {celulas.length} <span style={{ fontSize:9, color:"rgba(26,10,13,.4)", fontWeight:400 }}>CÉL.</span>
-                </span>
+                {celulas.length}{" "}
+                  <span style={{ fontSize:9, color:textSec, fontWeight:400 }}>CÉL.</span>
+              </span>
               </div>
-              <button className="ieq-icon-btn" onClick={() => setIsDark(!isDark)}>
-                {isDark ? <Sun size={15} /> : <Moon size={15} />}
+
+              {/* Botão tema — ícone com animação */}
+              <button className="ieq-icon-btn" onClick={() => setIsDark(d => !d)} title={isDark ? "Modo Claro" : "Modo Escuro"}
+                      style={{ position:"relative", overflow:"hidden" }}>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span key={isDark ? "sun" : "moon"}
+                               initial={{ opacity:0, rotate:-90, scale:.5 }}
+                               animate={{ opacity:1, rotate:0,   scale:1   }}
+                               exit={{    opacity:0, rotate: 90, scale:.5  }}
+                               transition={{ duration:.22 }}
+                               style={{ display:"inline-flex", position:"absolute" }}
+                  >
+                    {isDark ? <Sun size={15} /> : <Moon size={15} />}
+                  </motion.span>
+                </AnimatePresence>
               </button>
+
               <button className="ieq-icon-btn"><Bell size={15} /></button>
               <button className="ieq-icon-btn"><Settings size={15} /></button>
             </div>
@@ -484,14 +490,14 @@ export default function PastorPage() {
                   style={{ height:"100%" }}
               >
                 <Routes location={location}>
-                  <Route index                    element={<PainelPastor />} />
-                  <Route path="relatorio-celulas" element={<RelatorioCelula />} />
-                  <Route path="discipulado"       element={<Discipulado />} />
-                  <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao />} />
-                  <Route path="ranking-celulas"   element={<RankingCelulas />} />
-                  <Route path="alertas"           element={<PainelAlertas />} />
-                  <Route path="pendencias"        element={<TelaPendencias isDark={isDark} />} />
-                  <Route path="casas-de-paz"      element={<RelatorioCasasDePaz isDark={isDark} />} /> {/* ✅ NOVO */}
+                  <Route index                    element={<PainelPastor              isDark={isDark} />} />
+                  <Route path="relatorio-celulas" element={<RelatorioCelula           isDark={isDark} />} />
+                  <Route path="discipulado"       element={<Discipulado               isDark={isDark} />} />
+                  <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao isDark={isDark} />} />
+                  <Route path="ranking-celulas"   element={<RankingCelulas            isDark={isDark} />} />
+                  <Route path="alertas"           element={<PainelAlertas             isDark={isDark} />} />
+                  <Route path="pendencias"        element={<TelaPendencias            isDark={isDark} />} />
+                  <Route path="casas-de-paz"      element={<RelatorioCasasDePaz       isDark={isDark} />} />
                 </Routes>
               </motion.div>
             </AnimatePresence>

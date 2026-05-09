@@ -139,7 +139,7 @@ export default function DashboardLider() {
   const podeSolicitar   = atingiuMeta && !isAnalise;
   const porcentagemMeta = Math.min((qtdMembros / 8) * 100, 100);
 
-  /* ── Loading Screen ── */
+  /* ─── Loading Screen ─── */
   if (loading) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? IEQ.dark : "#F0EAE8" }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');`}</style>
@@ -150,18 +150,15 @@ export default function DashboardLider() {
       </div>
   );
 
-  /* ── Estilos globais IEQ ── */
+  /* ─── Estilos globais IEQ ─── */
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     * { box-sizing: border-box; }
 
     @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes stripe {
-      0%   { background-position:0 0; }
-      100% { background-position:60px 60px; }
-    }
-    @keyframes pulse { 0%,100% { transform:scale(1); opacity:.45; } 50% { transform:scale(1.12); opacity:.12; } }
-    @keyframes spin  { to { transform: rotate(360deg); } }
+    @keyframes stripe { 0% { background-position:0 0; } 100% { background-position:60px 60px; } }
+    @keyframes pulse  { 0%,100% { transform:scale(1); opacity:.45; } 50% { transform:scale(1.12); opacity:.12; } }
+    @keyframes spin   { to { transform: rotate(360deg); } }
 
     .ieq-bg {
       position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -213,7 +210,7 @@ export default function DashboardLider() {
       border-radius:8px; font-family:'Cinzel',serif; font-size:10px; font-weight:700;
       letter-spacing:.15em; cursor:pointer; transition: all .25s; padding:11px 20px;
     }
-    .ieq-btn-ghost:hover { border-color:${IEQ.red}; background:${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.1)"}; }
+    .ieq-btn-ghost:hover { border-color:${IEQ.red}; background:rgba(200,16,46,.1); }
 
     .ieq-input-field {
       width:100%;
@@ -227,7 +224,6 @@ export default function DashboardLider() {
     .ieq-input-field:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
     .ieq-input-field::placeholder { color:${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.3)"}; }
 
-    /* Menu: 2 colunas no mobile, 5 no desktop */
     .ieq-menu-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -237,15 +233,11 @@ export default function DashboardLider() {
       .ieq-menu-grid { grid-template-columns: repeat(5, 1fr); gap: 16px; }
     }
 
-    /* Casas de Paz: ocupa linha inteira no mobile, coluna normal no desktop */
-    .ieq-menu-card-full {
-      grid-column: 1 / -1;
-    }
+    .ieq-menu-card-full { grid-column: 1 / -1; }
     @media (min-width: 600px) {
       .ieq-menu-card-full { grid-column: auto; }
     }
 
-    /* ✅ Todos os cards com mesmo visual: ícone em cima, texto embaixo */
     .ieq-menu-card {
       background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.9)"};
       border: 1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
@@ -275,9 +267,7 @@ export default function DashboardLider() {
       font-family:'EB Garamond',serif; font-size:15px; font-weight:500;
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
-    @media (max-width:420px) {
-      .ieq-member-name { font-size:13px; }
-    }
+    @media (max-width:420px) { .ieq-member-name { font-size:13px; } }
 
     .ieq-progress-track {
       height:8px; border-radius:99px; overflow:hidden;
@@ -315,11 +305,9 @@ export default function DashboardLider() {
 
     .ieq-modal-box {
       position: relative; z-index: 10;
-      width: 100%;
-      max-height: 90vh;
+      width: 100%; max-height: 90vh;
       display: flex; flex-direction: column;
-      border-radius: 16px 16px 0 0;
-      overflow: hidden;
+      border-radius: 16px 16px 0 0; overflow: hidden;
     }
     @media (min-width: 520px) {
       .ieq-modal-box { border-radius: 14px; max-height: calc(100vh - 24px); }
@@ -332,7 +320,8 @@ export default function DashboardLider() {
 
   return (
       <div style={{ minHeight:"100vh", background:bg, color:textPrimary, fontFamily:"'EB Garamond',serif", position:"relative", transition:"background .5s", paddingBottom:60 }}>
-        <style>{globalStyles}</style>
+        {/* key={isDark} garante que o CSS seja recriado ao trocar tema */}
+        <style key={isDark ? "dark" : "light"}>{globalStyles}</style>
         <div className="ieq-bg" />
 
         {/* ── HEADER ── */}
@@ -343,14 +332,14 @@ export default function DashboardLider() {
             <div style={{ display:"flex", alignItems:"center", gap:18 }}>
               <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
                 <div className="pulse-ring" style={{ width:72, height:72 }} />
-                <div style={{ width:52, height:52, borderRadius:"50%", background: isDark ? "#1A0A0D" : "#fff", border:`1px solid rgba(200,16,46,.3)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ width:52, height:52, borderRadius:"50%", background: isDark ? "#1A0A0D" : "#fff", border:"1px solid rgba(200,16,46,.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                   <QuadrangularCross size={32} />
                 </div>
               </div>
               <div>
                 <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
-                  CÉLULA {celula?.nome?.toUpperCase() || "—"} · PAINEL DO LÍDER
+                  CÉLULA {celula?.nome?.toUpperCase() || "?"} · PAINEL DO LÍDER
                 </p>
               </div>
             </div>
@@ -429,7 +418,7 @@ export default function DashboardLider() {
                       </div>
                       <div style={{ marginTop:20 }}>
                         {isAnalise ? (
-                            <div style={{ padding:"13px 0", textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".15em", color:IEQ.yellowDark, background:"rgba(253,184,19,.1)", border:`1px solid rgba(253,184,19,.3)`, borderRadius:8 }}>
+                            <div style={{ padding:"13px 0", textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".15em", color:IEQ.yellowDark, background:"rgba(253,184,19,.1)", border:"1px solid rgba(253,184,19,.3)", borderRadius:8 }}>
                               CONSULTANDO PASTOR...
                             </div>
                         ) : podeSolicitar ? (
@@ -464,13 +453,7 @@ export default function DashboardLider() {
                         </motion.div>
                     ))}
 
-                    {/* ✅ Casas de Paz — mesmo visual dos outros: ícone em cima, texto embaixo */}
-                    <motion.div
-                        className="ieq-menu-card ieq-menu-card-full"
-                        whileHover={{ y:-4 }}
-                        whileTap={{ scale:.97 }}
-                        onClick={() => setAbaAtiva("casas")}
-                    >
+                    <motion.div className="ieq-menu-card ieq-menu-card-full" whileHover={{ y:-4 }} whileTap={{ scale:.97 }} onClick={() => setAbaAtiva("casas")}>
                       <div style={{ width:42, height:42, borderRadius:10, background:`${IEQ.blue}18`, display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.blue }}>
                         <Home size={20} />
                       </div>
@@ -501,8 +484,8 @@ export default function DashboardLider() {
                             </div>
                             <button onClick={() => removerMembro(m.id, m.nome)}
                                     style={{ background:"none", border:"none", cursor:"pointer", color:textSecondary, padding:6, borderRadius:6, transition:"color .2s", flexShrink:0 }}
-                                    onMouseEnter={e => e.currentTarget.style.color=IEQ.red}
-                                    onMouseLeave={e => e.currentTarget.style.color=textSecondary}>
+                                    onMouseEnter={e => e.currentTarget.style.color = IEQ.red}
+                                    onMouseLeave={e => e.currentTarget.style.color = textSecondary}>
                               <Trash2 size={15} />
                             </button>
                           </div>
@@ -521,11 +504,12 @@ export default function DashboardLider() {
 
             ) : (
                 <motion.div key="content" initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-20 }}>
-                  {abaAtiva === "relatorio"   && <TelaRelatorio celula={celula} />}
-                  {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros} />}
-                  {abaAtiva === "visitantes"  && <TelaVisitantes celulaId={celula?.id} />}
-                  {abaAtiva === "fichas"      && <TelaFichas celula={celula} />}
-                  {abaAtiva === "casas"       && <CasasDePazLider celulaId={celula?.id} isDark={isDark} />}
+                  {abaAtiva === "relatorio"   && <TelaRelatorio   celula={celula} isDark={isDark} />}
+                  {/* ✅ CORREÇÃO: isDark agora é passado para RelatorioDiscipulado */}
+                  {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros} isDark={isDark} />}
+                  {abaAtiva === "visitantes"  && <TelaVisitantes  celulaId={celula?.id} isDark={isDark} />}
+                  {abaAtiva === "fichas"      && <TelaFichas      celula={celula}        isDark={isDark} />}
+                  {abaAtiva === "casas"       && <CasasDePazLider celulaId={celula?.id}  isDark={isDark} />}
                 </motion.div>
             )}
           </AnimatePresence>
@@ -596,7 +580,7 @@ export default function DashboardLider() {
   );
 }
 
-/* ── Modal Buscar Membro ── */
+/* ─── Modal Buscar Membro ─── */
 function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSecondary }) {
   const [busca,      setBusca]      = useState("");
   const [membrosSem, setMembrosSem] = useState([]);
@@ -625,7 +609,6 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
       <div style={{ padding:"20px 18px", display:"flex", flexDirection:"column", flex:1, minHeight:0 }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, flexShrink:0 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <QuadrangularCross size={22} />
             <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".14em", color:textPrimary, margin:0 }}>
               VINCULAR MEMBRO
             </h2>

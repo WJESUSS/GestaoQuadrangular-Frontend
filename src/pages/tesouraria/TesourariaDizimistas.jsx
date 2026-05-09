@@ -5,18 +5,150 @@ import {
     UserCheck, UserX, Fingerprint
 } from "lucide-react";
 
-// ─── ABA DIZIMISTAS ────────────────────────────────────────────────────────────
+const getCSS = (isDark) => `
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  * { box-sizing: border-box; }
+  @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.45} }
+  @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+
+  .dz-root { animation: fadeUp .5s ease; }
+
+  .dz-skel {
+    background: linear-gradient(90deg,
+      ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.07)"} 25%,
+      ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.14)"} 50%,
+      ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.07)"} 75%
+    );
+    background-size: 400px 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 8px;
+  }
+
+  /* Stats cards */
+  .dz-stat-card {
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.1)"};
+    border-radius: 14px; backdrop-filter: blur(24px);
+    padding: 20px; display:flex; align-items:center; gap:16px;
+  }
+
+  /* Coluna section */
+  .dz-col-header {
+    display:flex; align-items:center; gap:10px;
+    padding-bottom:14px;
+    border-bottom: 1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"};
+    margin-bottom:14px;
+  }
+  .dz-col-title {
+    font-family:'Cinzel',serif; font-size:11px; font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase;
+    color:${isDark ? "#F5F0E8" : "#1A0A0D"};
+  }
+
+  /* Membro row */
+  .dz-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; border-radius:10px;
+    background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.08)"};
+    transition: border-color .2s;
+    margin-bottom:8px;
+  }
+  .dz-row:hover {
+    border-color: ${isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.22)"};
+  }
+
+  /* Search */
+  .dz-search-wrap { position:relative; width:100%; }
+  @media (min-width:640px) { .dz-search-wrap { width:300px; } }
+  .dz-search-icon {
+    position:absolute; left:13px; top:50%; transform:translateY(-50%);
+    color:${isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)"}; pointer-events:none;
+  }
+  .dz-search {
+    width:100%;
+    background: ${isDark ? "rgba(200,16,46,.06)" : "rgba(200,16,46,.03)"};
+    border: 1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.14)"};
+    color: ${isDark ? "#F5F0E8" : "#1A0A0D"};
+    padding: 11px 14px 11px 38px; border-radius:10px; outline:none;
+    font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
+  }
+  .dz-search:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
+  .dz-search::placeholder { color:${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.3)"}; }
+
+  /* Live badge */
+  .dz-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 12px; border-radius:99px;
+    background: ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.08)"};
+    border: 1px solid rgba(200,16,46,.2);
+    font-family:'Cinzel',serif; font-size:9px; font-weight:700;
+    letter-spacing:.18em; text-transform:uppercase; color:#C8102E;
+    margin-bottom:10px;
+  }
+  .dz-live-dot {
+    width:6px; height:6px; border-radius:50%;
+    background:#C8102E; animation: pulse 1.5s ease infinite;
+  }
+
+  /* Empty state */
+  .dz-empty {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:40px 0; border-radius:12px;
+    border: 1px dashed ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"};
+  }
+
+  /* Header row */
+  .dz-header-row {
+    display:flex; flex-direction:column; gap:14px; margin-bottom:24px;
+  }
+  @media (min-width:640px) {
+    .dz-header-row { flex-direction:row; align-items:flex-end; justify-content:space-between; }
+  }
+
+  /* Stats grid */
+  .dz-stats-grid {
+    display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px;
+  }
+
+  /* Colunas grid */
+  .dz-cols-grid {
+    display:grid; grid-template-columns:1fr; gap:20px;
+  }
+  @media (min-width:800px) {
+    .dz-cols-grid { grid-template-columns:repeat(2,1fr); }
+  }
+
+  .dz-list {
+    max-height:460px; overflow-y:auto; padding-right:2px;
+    scrollbar-width:thin;
+    scrollbar-color: ${isDark ? "rgba(200,16,46,.2) transparent" : "rgba(200,16,46,.15) transparent"};
+  }
+  .dz-list::-webkit-scrollbar { width:4px; }
+  .dz-list::-webkit-scrollbar-track { background:transparent; }
+  .dz-list::-webkit-scrollbar-thumb {
+    background: ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"};
+    border-radius:99px;
+  }
+`;
+
 let _cacheDiz = null;
 
-function Dizimistas() {
+export default function TesourariaDizimistas({ isDark = false }) {
     const [fieis,   setFieis]   = useState(_cacheDiz?.fieis   || []);
     const [infieis, setInfieis] = useState(_cacheDiz?.infieis || []);
     const [loading, setLoading] = useState(!_cacheDiz);
     const [busca,   setBusca]   = useState("");
     const abortRef = useRef(null);
 
+    const textPrimary   = isDark ? "#F5F0E8" : "#1A0A0D";
+    const textSecondary = isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.4)";
+
     useEffect(() => {
-        if (_cacheDiz) { setFieis(_cacheDiz.fieis); setInfieis(_cacheDiz.infieis); setLoading(false); }
+        if (_cacheDiz) {
+            setFieis(_cacheDiz.fieis); setInfieis(_cacheDiz.infieis); setLoading(false);
+        }
         abortRef.current?.abort();
         abortRef.current = new AbortController();
         api.get("/tesouraria/fieis-infieis-mes", { signal: abortRef.current.signal })
@@ -34,119 +166,172 @@ function Dizimistas() {
     const filtrar = lista => lista.filter(m => m.nome.toLowerCase().includes(busca.toLowerCase()));
 
     if (loading) return (
-        <div className="flex flex-col gap-6">
-            <div className="h-8 w-48 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"/>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {[0,1].map(col => (
-                    <div key={col} className="flex flex-col gap-3">
-                        {[1,2,3,4].map(i => (
-                            <div key={i} className="h-16 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse"/>
-                        ))}
-                    </div>
-                ))}
+        <>
+            <style key={isDark ? "dark" : "light"}>{getCSS(isDark)}</style>
+            <div style={{ padding:20 }}>
+                <div className="dz-skel" style={{ height:40, width:"45%", marginBottom:24 }} />
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:12, marginBottom:20 }}>
+                    <div className="dz-skel" style={{ height:80, borderRadius:14 }} />
+                    <div className="dz-skel" style={{ height:80, borderRadius:14 }} />
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
+                    {[0,1].map(col => (
+                        <div key={col} style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                            {[1,2,3,4].map(i => (
+                                <div key={i} className="dz-skel" style={{ height:64, borderRadius:10 }} />
+                            ))}
+                        </div>
+                    ))}
+                </div>
             </div>
-        </div>
+        </>
     );
 
     return (
-        <div>
-            {/* HEADER */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-5">
-                <div>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2">
-                        <span className="h-1.5 w-1.5 bg-indigo-500 rounded-full animate-pulse"/>
-                        Monitoramento Mensal
-                    </span>
-                    <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic uppercase leading-none">
-                        Dizimistas<span className="text-indigo-500">.</span>
-                    </h2>
-                </div>
-                <div className="relative w-full md:w-80">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
-                    <input type="text" placeholder="Buscar por nome..."
-                           className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"
-                           value={busca} onChange={e => setBusca(e.target.value)}/>
-                </div>
-            </div>
+        <>
+            <style key={isDark ? "dark" : "light"}>{getCSS(isDark)}</style>
+            <div className="dz-root" style={{ maxWidth:1100, margin:"0 auto", padding:"16px 4px" }}>
 
-            {/* STATS */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 rounded-[1.5rem] p-5 flex items-center gap-4">
-                    <div className="h-12 w-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                        <UserCheck size={22} className="text-emerald-600"/>
-                    </div>
+                {/* HEADER */}
+                <div className="dz-header-row">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Contribuintes</p>
-                        <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{fieis.length}</p>
+                        <div className="dz-badge">
+                            <div className="dz-live-dot" /> MONITORAMENTO MENSAL
+                        </div>
+                        <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(1.6rem,4vw,2.4rem)", fontWeight:700, color:textPrimary, margin:0, lineHeight:1.1 }}>
+                            Dizimistas
+                        </h2>
+                    </div>
+                    <div className="dz-search-wrap">
+                        <Search size={15} className="dz-search-icon" />
+                        <input
+                            type="text"
+                            className="dz-search"
+                            placeholder="Buscar por nome..."
+                            value={busca}
+                            onChange={e => setBusca(e.target.value)}
+                        />
                     </div>
                 </div>
-                <div className="bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 rounded-[1.5rem] p-5 flex items-center gap-4">
-                    <div className="h-12 w-12 bg-red-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                        <UserX size={22} className="text-red-500"/>
+
+                {/* STATS */}
+                <div className="dz-stats-grid">
+                    <div className="dz-stat-card">
+                        <div style={{ width:44, height:44, borderRadius:10, background:"rgba(16,185,129,.12)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                            <UserCheck size={20} style={{ color:"#059669" }} />
+                        </div>
+                        <div>
+                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:textSecondary, margin:"0 0 4px" }}>
+                                Contribuintes
+                            </p>
+                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:24, fontWeight:700, color:textPrimary, margin:0 }}>
+                                {fieis.length}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pendentes</p>
-                        <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{infieis.length}</p>
+
+                    <div className="dz-stat-card">
+                        <div style={{ width:44, height:44, borderRadius:10, background:"rgba(200,16,46,.1)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                            <UserX size={20} style={{ color:"#C8102E" }} />
+                        </div>
+                        <div>
+                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:textSecondary, margin:"0 0 4px" }}>
+                                Pendentes
+                            </p>
+                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:24, fontWeight:700, color:textPrimary, margin:0 }}>
+                                {infieis.length}
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* LISTAS */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ColunaDizimistas titulo="Contribuintes" lista={filtrar(fieis)} tipo="fiel"
-                                  icon={<UserCheck size={16} className="text-emerald-600"/>} bgIcon="bg-emerald-500/10"
-                                  countBg="bg-emerald-100 dark:bg-emerald-900/30" countColor="text-emerald-700 dark:text-emerald-400"/>
-
-                <ColunaDizimistas titulo="Pendentes" lista={filtrar(infieis)} tipo="pendente"
-                                  icon={<UserX size={16} className="text-red-500"/>} bgIcon="bg-red-500/10"
-                                  countBg="bg-red-100 dark:bg-red-900/30" countColor="text-red-700 dark:text-red-400"/>
+                {/* COLUNAS */}
+                <div className="dz-cols-grid">
+                    <Coluna
+                        isDark={isDark}
+                        titulo="Contribuintes"
+                        lista={filtrar(fieis)}
+                        tipo="fiel"
+                        icon={<UserCheck size={15} style={{ color:"#059669" }} />}
+                        iconBg="rgba(16,185,129,.12)"
+                        countColor="#059669"
+                        countBg={isDark ? "rgba(16,185,129,.12)" : "rgba(16,185,129,.1)"}
+                    />
+                    <Coluna
+                        isDark={isDark}
+                        titulo="Pendentes"
+                        lista={filtrar(infieis)}
+                        tipo="pendente"
+                        icon={<UserX size={15} style={{ color:"#C8102E" }} />}
+                        iconBg="rgba(200,16,46,.1)"
+                        countColor="#C8102E"
+                        countBg={isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.08)"}
+                    />
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 
-function ColunaDizimistas({ titulo, lista, tipo, icon, bgIcon, countBg, countColor }) {
+function Coluna({ isDark, titulo, lista, tipo, icon, iconBg, countColor, countBg }) {
+    const textPrimary   = isDark ? "#F5F0E8" : "#1A0A0D";
+    const textSecondary = isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.4)";
+    const isFiel = tipo === "fiel";
+
     return (
         <section>
-            <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
-                <div className={`h-8 w-8 rounded-xl flex items-center justify-center flex-shrink-0 ${bgIcon}`}>{icon}</div>
-                <span className="font-black text-sm text-slate-800 dark:text-slate-100 tracking-tight">{titulo}</span>
-                <span className={`ml-auto px-3 py-0.5 rounded-full text-[11px] font-black ${countBg} ${countColor}`}>{lista.length}</span>
+            <div className="dz-col-header">
+                <div style={{ width:32, height:32, borderRadius:8, background:iconBg, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    {icon}
+                </div>
+                <span className="dz-col-title">{titulo}</span>
+                <span style={{
+                    marginLeft:"auto", padding:"3px 12px", borderRadius:99,
+                    fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700,
+                    color:countColor, background:countBg
+                }}>
+          {lista.length}
+        </span>
             </div>
-            <div className="flex flex-col gap-2 max-h-[480px] overflow-y-auto pr-1">
+
+            <div className="dz-list">
                 {lista.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-                        <Users size={20} className="text-slate-300 dark:text-slate-700 mb-2"/>
-                        <p className="text-xs font-medium text-slate-400">Nenhum registro encontrado</p>
+                    <div className="dz-empty">
+                        <Users size={22} style={{ color: isDark ? "rgba(245,240,232,.15)" : "rgba(26,10,13,.15)", marginBottom:10 }} />
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", textTransform:"uppercase", color:textSecondary }}>
+                            Nenhum registro encontrado
+                        </p>
                     </div>
                 ) : lista.map(m => (
-                    <div key={m.id} className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                        <div className="flex items-center gap-3">
-                            <div className={`h-9 w-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 ${
-                                tipo === "fiel" ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600" : "bg-red-50 dark:bg-red-900/20 text-red-500"
-                            }`}>{m.nome.charAt(0)}</div>
+                    <div key={m.id} className="dz-row">
+                        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                            <div style={{
+                                width:36, height:36, borderRadius:9, flexShrink:0,
+                                background: isFiel
+                                    ? (isDark ? "rgba(16,185,129,.15)" : "rgba(16,185,129,.1)")
+                                    : (isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.08)"),
+                                display:"flex", alignItems:"center", justifyContent:"center",
+                                fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:14,
+                                color: isFiel ? "#059669" : "#C8102E"
+                            }}>
+                                {m.nome.charAt(0)}
+                            </div>
                             <div>
-                                <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">{m.nome}</p>
-                                <p className={`text-[11px] font-medium flex items-center gap-1 mt-0.5 ${tipo === "fiel" ? "text-emerald-600" : "text-red-500"}`}>
-                                    {tipo === "fiel"
-                                        ? <><CheckCircle2 size={10}/> Dízimo em dia</>
-                                        : <><AlertCircle  size={10}/> Aguardando contribuição</>}
+                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:15, fontWeight:600, color:textPrimary, margin:"0 0 2px" }}>
+                                    {m.nome}
+                                </p>
+                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".1em", color: isFiel ? "#059669" : "#C8102E", margin:0, display:"flex", alignItems:"center", gap:4 }}>
+                                    {isFiel
+                                        ? <><CheckCircle2 size={10}/> DÍZIMO EM DIA</>
+                                        : <><AlertCircle  size={10}/> AGUARDANDO CONTRIBUIÇÃO</>
+                                    }
                                 </p>
                             </div>
                         </div>
-                        <Fingerprint size={15} className="text-slate-200 dark:text-slate-700 flex-shrink-0"/>
+                        <Fingerprint size={15} style={{ color: isDark ? "rgba(245,240,232,.12)" : "rgba(26,10,13,.12)", flexShrink:0 }} />
                     </div>
                 ))}
             </div>
         </section>
-    );
-}
-
-// ─── LAYOUT PRINCIPAL ──────────────────────────────────────────────────────────
-export default function TesourariaLayout() {
-    return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
-            <Dizimistas/>
-        </div>
     );
 }
