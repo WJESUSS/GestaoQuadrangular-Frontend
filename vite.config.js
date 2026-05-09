@@ -3,10 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   server: {
     host: true,
     port: 5173,
@@ -14,6 +11,17 @@ export default defineConfig({
     cors: true,
   },
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'motion':       ['framer-motion'],
+          'charts':       ['recharts'],
+          'pdf':          ['jspdf', 'jspdf-autotable'],
+          'icons':        ['lucide-react'],
+        }
+      }
+    }
   }
 })
