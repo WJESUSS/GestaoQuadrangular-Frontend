@@ -91,11 +91,9 @@ export default function Home() {
                         gap: 30,
                         marginTop: 40
                     }}>
-
                         <Card icon={<Users />} title="Gestão de Membros" desc="Controle completo dos membros da igreja." />
                         <Card icon={<BarChart3 />} title="Relatórios" desc="Acompanhe crescimento e desempenho." />
                         <Card icon={<ShieldCheck />} title="Segurança" desc="Sistema protegido e confiável." />
-
                     </div>
                 </section>
 
@@ -126,14 +124,25 @@ export default function Home() {
 
                 {/* FOOTER */}
                 <footer style={{
-                    padding: 20,
+                    padding: "24px 20px",
                     textAlign: "center",
                     fontSize: 12,
                     background: "#111",
-                    color: "#aaa"
+                    color: "#aaa",
+                    lineHeight: 2
                 }}>
-                    © {new Date().getFullYear()} IEQ Gestão • Sistema Eclesiástico
+                    <p>© {new Date().getFullYear()} IEQ Gestão — Sistema Eclesiástico</p>
+                    <p>
+                        Em caso de dúvidas, entre em contato com o administrador:{" "}
+                        <a
+                            href="mailto:washquesia@gmail.com"
+                            style={{ color: "#C8102E", textDecoration: "none" }}
+                        >
+                            washquesia@gmail.com
+                        </a>
+                    </p>
                 </footer>
+
             </div>
         </>
     );
