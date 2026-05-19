@@ -11,14 +11,15 @@ import PainelAlertas              from "./PainelAlertas";
 import Discipulado                from "./Discipulado.jsx";
 import TelaPendencias             from "./TelaPendencias.jsx";
 import RelatorioCasasDePaz        from "./RelatorioCasasDePaz.jsx";
+import RelatorioMissao70Pastor    from "./RelatorioMissao70Pastor.jsx";
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, ChevronRight, Activity, Settings,
-  Bell, Menu, X, LogOut, Sun, Moon, ClipboardList, Home,
+  Bell, Menu, X, LogOut, Sun, Moon, ClipboardList, Home, Flame,
 } from "lucide-react";
 
-/* ─── Paleta IEQ ─── */
+/* ── Paleta IEQ ── */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#8B0B1F",
@@ -33,15 +34,16 @@ const IEQ = {
   darkCard:   "#110A0D",
 };
 
-/* ─── Itens de navegação com cor individual ─── */
+/* ── Itens de navegação com cor individual ── */
 const NAV_ITEMS = [
   { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",      color: IEQ.blueLight, end: true },
   { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",     color: IEQ.red                 },
-  { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria",     color: "#8B5CF6"                },
-  { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Multiplicações", color: "#059669"                },
-  { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking",        color: IEQ.yellow               },
-  { to: "/pastor/casas-de-paz",      icon: Home,            label: "Casas de Paz",   color: "#5DCAA5"                },
-  { to: "/pastor/pendencias",        icon: ClipboardList,   label: "Pendências",     color: "#F97316"                },
+  { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria",     color: "#8B5CF6"               },
+  { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Multiplicações", color: "#059669"               },
+  { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking",        color: IEQ.yellow              },
+  { to: "/pastor/casas-de-paz",      icon: Home,            label: "Casas de Paz",   color: "#5DCAA5"               },
+  { to: "/pastor/missao70",          icon: Flame,           label: "Missão 70",      color: IEQ.yellow              },
+  { to: "/pastor/pendencias",        icon: ClipboardList,   label: "Pendências",     color: "#F97316"               },
 ];
 
 const PAGE_TITLES = {
@@ -52,7 +54,8 @@ const PAGE_TITLES = {
   "ranking-celulas":   "Ranking de Células",
   "alertas":           "Painel de Alertas",
   "pendencias":        "Pendências da Semana",
-  "casas-de-paz":      "Relatórios · Casas de Paz",
+  "casas-de-paz":      "Relatórios — Casas de Paz",
+  "missao70":          "Missão 70 — Evangelismo",
 };
 
 function QuadrangularCross({ size = 32 }) {
@@ -81,11 +84,6 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   CSS ESTÁTICO — usa custom properties CSS.
-   O tema muda apenas adicionando/removendo
-   a classe "dark" no wrapper, sem recriar DOM.
-───────────────────────────────────────────── */
 const STATIC_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
@@ -208,7 +206,6 @@ const STATIC_CSS = `
     background:rgba(255,255,255,.07);
     border-color:rgba(255,255,255,.1);
   }
-  /* ícone e label assumem --nav-color no hover/active */
   .ieq-nav-link:hover .nav-icon,
   .ieq-nav-link.active .nav-icon { color:var(--nav-color) !important; }
   .ieq-nav-link:hover .nav-label,
@@ -303,7 +300,6 @@ export default function PastorPage() {
     return PAGE_TITLES[seg] || PAGE_TITLES["pastor"];
   };
 
-  /* Ainda usados em style inline nos elementos do header */
   const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
@@ -318,7 +314,6 @@ export default function PastorPage() {
   );
 
   return (
-      /* Tema via classe CSS — sem recriar o DOM, sem flash */
       <div className={`pastor-root pastor-layout${isDark ? " dark" : ""}`}>
         <style>{STATIC_CSS}</style>
         <div className="ieq-bg" />
@@ -394,9 +389,7 @@ export default function PastorPage() {
                     style={{ "--nav-color": color }}
                 >
                   <div style={{ display:"flex", alignItems:"center", gap:11 }}>
-                    {/* ícone sempre colorido */}
                     <Icon size={16} className="nav-icon" style={{ color, flexShrink:0, transition:"color .2s" }} />
-                    {/* label colorido no hover/active, neutro no repouso */}
                     <span className="nav-label" style={{ transition:"color .2s" }}>{label}</span>
                   </div>
                   <ChevronRight size={12} style={{ opacity:.3, flexShrink:0 }} />
@@ -459,7 +452,6 @@ export default function PastorPage() {
               </span>
               </div>
 
-              {/* Botão tema — ícone com animação */}
               <button className="ieq-icon-btn" onClick={() => setIsDark(d => !d)} title={isDark ? "Modo Claro" : "Modo Escuro"}
                       style={{ position:"relative", overflow:"hidden" }}>
                 <AnimatePresence mode="wait" initial={false}>
@@ -498,6 +490,7 @@ export default function PastorPage() {
                   <Route path="alertas"           element={<PainelAlertas             isDark={isDark} />} />
                   <Route path="pendencias"        element={<TelaPendencias            isDark={isDark} />} />
                   <Route path="casas-de-paz"      element={<RelatorioCasasDePaz       isDark={isDark} />} />
+                  <Route path="missao70"          element={<RelatorioMissao70Pastor   isDark={isDark} />} />
                 </Routes>
               </motion.div>
             </AnimatePresence>

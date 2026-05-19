@@ -7,13 +7,14 @@ import TelaVisitantes from "./TelaVisitantes";
 import TelaFichas from "./TelaFichas";
 import RelatorioDiscipulado from "./RelatorioDiscipulado";
 import CasasDePazLider from "./CasasDePazLider";
+import Missao70Lider from "./Missao70Lider";
 import {
   Trash2, Loader2, Users, Plus, Search, X, ArrowLeft,
   TrendingUp, Target, Sparkles, LayoutDashboard, LogOut,
-  Sun, Moon, CheckCircle2, Home,
+  Sun, Moon, CheckCircle2, Home, Flame,
 } from "lucide-react";
 
-/* ─── Cores Oficiais Igreja do Evangelho Quadrangular ─── */
+/* ═══ Cores Oficiais Igreja do Evangelho Quadrangular ═══ */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#8B0B1F",
@@ -29,7 +30,7 @@ const IEQ = {
   darkCard:   "#110A0D",
 };
 
-/* ─── Cruz Quadrangular SVG ─── */
+/* ═══ Cruz Quadrangular SVG ═══ */
 function QuadrangularCross({ size = 32 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -139,7 +140,7 @@ export default function DashboardLider() {
   const podeSolicitar   = atingiuMeta && !isAnalise;
   const porcentagemMeta = Math.min((qtdMembros / 8) * 100, 100);
 
-  /* ─── Loading Screen ─── */
+  /* ═══ Loading Screen ═══ */
   if (loading) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? IEQ.dark : "#F0EAE8" }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');`}</style>
@@ -150,7 +151,7 @@ export default function DashboardLider() {
       </div>
   );
 
-  /* ─── Estilos globais IEQ ─── */
+  /* ═══ Estilos globais IEQ ═══ */
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     * { box-sizing: border-box; }
@@ -230,7 +231,7 @@ export default function DashboardLider() {
       gap: 12px;
     }
     @media (min-width: 600px) {
-      .ieq-menu-grid { grid-template-columns: repeat(5, 1fr); gap: 16px; }
+      .ieq-menu-grid { grid-template-columns: repeat(6, 1fr); gap: 16px; }
     }
 
     .ieq-menu-card-full { grid-column: 1 / -1; }
@@ -320,11 +321,10 @@ export default function DashboardLider() {
 
   return (
       <div style={{ minHeight:"100vh", background:bg, color:textPrimary, fontFamily:"'EB Garamond',serif", position:"relative", transition:"background .5s", paddingBottom:60 }}>
-        {/* key={isDark} garante que o CSS seja recriado ao trocar tema */}
         <style key={isDark ? "dark" : "light"}>{globalStyles}</style>
         <div className="ieq-bg" />
 
-        {/* ── HEADER ── */}
+        {/* ═══ HEADER ═══ */}
         <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 24px 0" }}>
           <motion.header initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:40, flexWrap:"wrap", gap:16 }}>
@@ -339,7 +339,7 @@ export default function DashboardLider() {
               <div>
                 <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
-                  CÉLULA {celula?.nome?.toUpperCase() || "?"} · PAINEL DO LÍDER
+                  CÉLULA {celula?.nome?.toUpperCase() || "?"} — PAINEL DO LÍDER
                 </p>
               </div>
             </div>
@@ -357,7 +357,7 @@ export default function DashboardLider() {
             </div>
           </motion.header>
 
-          {/* ── Banner aprovação ── */}
+          {/* Banner aprovação multiplicação */}
           <AnimatePresence>
             {isAprovado && (
                 <motion.div initial={{ opacity:0, y:-16 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
@@ -368,12 +368,12 @@ export default function DashboardLider() {
             )}
           </AnimatePresence>
 
-          {/* ── CONTEÚDO ── */}
+          {/* ═══ CONTEÚDO ═══ */}
           <AnimatePresence mode="wait">
             {abaAtiva === "home" ? (
                 <motion.div key="home" variants={containerVariants} initial="hidden" animate="visible" exit={{ opacity:0, x:-20 }} style={{ display:"flex", flexDirection:"column", gap:24 }}>
 
-                  {/* ── KPI Hero ── */}
+                  {/* KPI Hero */}
                   <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:20 }}>
                     <div className="ieq-card" style={{ padding:"36px 40px", background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, border:"none", position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", inset:0, backgroundImage:`repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)`, backgroundSize:"40px 40px" }} />
@@ -386,7 +386,7 @@ export default function DashboardLider() {
                             <p style={{ fontFamily:"'Cinzel',serif", fontSize:52, fontWeight:700, color:"#fff", margin:0, lineHeight:1 }}>{qtdMembros}</p>
                             <p style={{ fontFamily:"'Cinzel',serif", fontSize:11, letterSpacing:".2em", color:"rgba(255,255,255,.6)", marginTop:6 }}>MEMBROS ATIVOS</p>
                             <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:"rgba(255,255,255,.5)", marginTop:10, maxWidth:260 }}>
-                              {!atingiuMeta ? `Faltam ${8-qtdMembros} membros para a meta de multiplicação.`
+                              {!atingiuMeta ? `Faltam ${8 - qtdMembros} membros para a meta de multiplicação.`
                                   : isAnalise  ? "Aguardando parecer do seu pastor..."
                                       : isAprovado ? "Sua célula está autorizada a multiplicar."
                                           : "Meta de 8 membros atingida! Solicite a multiplicação."}
@@ -434,7 +434,7 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* ── Menu de navegação ── */}
+                  {/* ═══ Menu de navegação ═══ */}
                   <div className="ieq-menu-grid">
                     {[
                       { icon:<Target size={20}/>,     title:"DISCIPULADO", desc:"Acompanhar",  aba:"discipulado", color:IEQ.blue    },
@@ -453,7 +453,8 @@ export default function DashboardLider() {
                         </motion.div>
                     ))}
 
-                    <motion.div className="ieq-menu-card ieq-menu-card-full" whileHover={{ y:-4 }} whileTap={{ scale:.97 }} onClick={() => setAbaAtiva("casas")}>
+                    {/* Card Casas de Paz */}
+                    <motion.div className="ieq-menu-card" whileHover={{ y:-4 }} whileTap={{ scale:.97 }} onClick={() => setAbaAtiva("casas")}>
                       <div style={{ width:42, height:42, borderRadius:10, background:`${IEQ.blue}18`, display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.blue }}>
                         <Home size={20} />
                       </div>
@@ -462,9 +463,20 @@ export default function DashboardLider() {
                         <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:textSecondary, margin:0 }}>Evangelismo</p>
                       </div>
                     </motion.div>
+
+                    {/* Card Missão 70 */}
+                    <motion.div className="ieq-menu-card" whileHover={{ y:-4 }} whileTap={{ scale:.97 }} onClick={() => setAbaAtiva("missao70")}>
+                      <div style={{ width:42, height:42, borderRadius:10, background:"rgba(253,184,19,.12)", display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.yellow }}>
+                        <Flame size={20} />
+                      </div>
+                      <div>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>MISSÃO 70</p>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:textSecondary, margin:0 }}>Evangelismo</p>
+                      </div>
+                    </motion.div>
                   </div>
 
-                  {/* ── Lista de membros ── */}
+                  {/* ═══ Lista de membros ═══ */}
                   <div className="ieq-card" style={{ overflow:"hidden" }}>
                     <div style={{ padding:"24px 28px", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
                       <div>
@@ -493,29 +505,29 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* ── Histórico ── */}
+                  {/* Histórico */}
                   <HistoricoRelatorios celulaId={celula?.id} />
 
                   <div className="divider" />
                   <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, padding:"0 0 8px" }}>
-                    © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
+                    © IEQ PITUAÇU — SISTEMA SEGURO — {new Date().getFullYear()}
                   </p>
                 </motion.div>
 
             ) : (
                 <motion.div key="content" initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-20 }}>
-                  {abaAtiva === "relatorio"   && <TelaRelatorio   celula={celula} isDark={isDark} />}
-                  {/* ✅ CORREÇÃO: isDark agora é passado para RelatorioDiscipulado */}
-                  {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros} isDark={isDark} />}
-                  {abaAtiva === "visitantes"  && <TelaVisitantes  celulaId={celula?.id} isDark={isDark} />}
-                  {abaAtiva === "fichas"      && <TelaFichas      celula={celula}        isDark={isDark} />}
-                  {abaAtiva === "casas"       && <CasasDePazLider celulaId={celula?.id}  isDark={isDark} />}
+                  {abaAtiva === "relatorio"   && <TelaRelatorio        celula={celula}        isDark={isDark} />}
+                  {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}       isDark={isDark} />}
+                  {abaAtiva === "visitantes"  && <TelaVisitantes       celulaId={celula?.id}   isDark={isDark} />}
+                  {abaAtiva === "fichas"      && <TelaFichas           celula={celula}         isDark={isDark} />}
+                  {abaAtiva === "casas"       && <CasasDePazLider      celulaId={celula?.id}   isDark={isDark} />}
+                  {abaAtiva === "missao70"    && <Missao70Lider         celulaId={celula?.id}   isDark={isDark} />}
                 </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* ── MODAL: Adicionar Membro ── */}
+        {/* ═══ MODAL: Adicionar Membro ═══ */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="ieq-modal-backdrop">
@@ -538,7 +550,7 @@ export default function DashboardLider() {
               </div>
           )}
 
-          {/* ── MODAL: Solicitação Multiplicação ── */}
+          {/* MODAL: Solicitação Multiplicação */}
           {showModalMultiplicacao && (
               <div className="ieq-modal-backdrop">
                 <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
@@ -580,7 +592,7 @@ export default function DashboardLider() {
   );
 }
 
-/* ─── Modal Buscar Membro ─── */
+/* ═══ Modal Buscar Membro ═══ */
 function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSecondary }) {
   const [busca,      setBusca]      = useState("");
   const [membrosSem, setMembrosSem] = useState([]);
@@ -608,11 +620,9 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
   return (
       <div style={{ padding:"20px 18px", display:"flex", flexDirection:"column", flex:1, minHeight:0 }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, flexShrink:0 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".14em", color:textPrimary, margin:0 }}>
-              VINCULAR MEMBRO
-            </h2>
-          </div>
+          <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".14em", color:textPrimary, margin:0 }}>
+            VINCULAR MEMBRO
+          </h2>
           <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:textSecondary, padding:4 }}>
             <X size={20} />
           </button>
