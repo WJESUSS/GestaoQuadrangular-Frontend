@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../services/api.js";
 import {
   Calendar, BookOpen, Loader2, ChevronDown,
-  UserCheck, ClipboardCheck, Trophy, Users2, Sparkles, CheckCircle2,
+  UserCheck, ClipboardCheck, Trophy, Users2, CheckCircle2,
 } from "lucide-react";
 
 /* ─── Cores Oficiais IEQ ─── */
@@ -13,6 +13,8 @@ const IEQ = {
   white: "#FFFFFF", offWhite: "#F5F0E8",
   dark: "#0A0608", darkCard: "#110A0D",
 };
+
+const draftKey = (celulaId) => `ieq_relatorio_draft_${celulaId}`;
 
 function QuadrangularCross({ size = 32 }) {
   return (
@@ -40,6 +42,9 @@ export default function TelaRelatorio({ isDark = false }) {
   const [loading,       setLoading]       = useState(true);
   const [enviando,      setEnviando]      = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
+  const [rascunhoCarregado, setRascunhoCarregado] = useState(false);
+
+  const prontoParaSalvar = useRef(false);
 
   const [form, setForm] = useState({
     celulaId: null,
@@ -49,23 +54,70 @@ export default function TelaRelatorio({ isDark = false }) {
     decisoes: {},
   });
 
+  useEffect(() => {
+    if (!prontoParaSalvar.current || !form.celulaId) return;
+    try {
+      const draft = {
+        dataReuniao:      form.dataReuniao,
+        estudo:           form.estudo,
+        selecionadosKeys: form.selecionadosKeys,
+        decisoes:         form.decisoes,
+        salvoEm:          new Date().toISOString(),
+      };
+      localStorage.setItem(draftKey(form.celulaId), JSON.stringify(draft));
+    } catch (err) {
+      console.warn("Não foi possível salvar rascunho:", err);
+    }
+  }, [form]);
+
   const carregarDados = useCallback(async () => {
     try {
+      prontoParaSalvar.current = false;
       setLoading(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const headers = { Authorization: `Bearer ${token}` };
       const resCelula = await api.get("/celulas/minha-celula", { headers });
       const dadosCelula = resCelula.data;
       setCelula(dadosCelula);
-      setForm(prev => ({ ...prev, celulaId: dadosCelula.id }));
+
       const [resMembros, resVisitantes] = await Promise.all([
         api.get(`/celulas/${dadosCelula.id}/membros`, { headers }),
         api.get(`/visitantes/celula/${dadosCelula.id}/ativos`, { headers }),
       ]);
-      const membros   = (resMembros.data   || []).map(m => ({ id:m.id, nome:m.nome, tipo:"MEMBRO",    uKey:`MEMBRO-${m.id}` }));
-      const visitantes= (resVisitantes.data|| []).map(v => ({ id:v.id, nome:v.nome, tipo:"VISITANTE", uKey:`VISITANTE-${v.id}` }));
+      const membros    = (resMembros.data    || []).map(m => ({ id:m.id, nome:m.nome, tipo:"MEMBRO",    uKey:`MEMBRO-${m.id}` }));
+      const visitantes = (resVisitantes.data || []).map(v => ({ id:v.id, nome:v.nome, tipo:"VISITANTE", uKey:`VISITANTE-${v.id}` }));
       setPessoas([...membros, ...visitantes].sort((a,b) => a.nome.localeCompare(b.nome)));
-    } catch (err) { console.error(err); } finally { setLoading(false); }
+
+      let restaurou = false;
+      try {
+        const raw = localStorage.getItem(draftKey(dadosCelula.id));
+        if (raw) {
+          const draft = JSON.parse(raw);
+          setForm({
+            celulaId:         dadosCelula.id,
+            dataReuniao:      draft.dataReuniao      || new Date().toISOString().split("T")[0],
+            estudo:           draft.estudo           || "",
+            selecionadosKeys: draft.selecionadosKeys || [],
+            decisoes:         draft.decisoes         || {},
+          });
+          restaurou = true;
+          setRascunhoCarregado(true);
+          setTimeout(() => setRascunhoCarregado(false), 4000);
+        }
+      } catch (err) {
+        console.warn("Erro ao ler rascunho:", err);
+      }
+
+      if (!restaurou) {
+        setForm(prev => ({ ...prev, celulaId: dadosCelula.id }));
+      }
+
+      setTimeout(() => { prontoParaSalvar.current = true; }, 0);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
@@ -82,9 +134,9 @@ export default function TelaRelatorio({ isDark = false }) {
     setTimeout(() => setProcessingIds(prev => { const n=new Set(prev); n.delete(uKey); return n; }), 200);
   };
 
-  const membrosPresentes   = form.selecionadosKeys.filter(k=>k.startsWith("MEMBRO-")).length;
-  const visitantesPresentes= form.selecionadosKeys.filter(k=>k.startsWith("VISITANTE-")).length;
-  const total              = membrosPresentes + visitantesPresentes;
+  const membrosPresentes    = form.selecionadosKeys.filter(k=>k.startsWith("MEMBRO-")).length;
+  const visitantesPresentes = form.selecionadosKeys.filter(k=>k.startsWith("VISITANTE-")).length;
+  const total               = membrosPresentes + visitantesPresentes;
 
   const handleSubmit = async () => {
     if (!form.estudo.trim()) return alert("Informe o tema do estudo.");
@@ -99,17 +151,23 @@ export default function TelaRelatorio({ isDark = false }) {
         visitantesPresentes: form.selecionadosKeys.filter(k=>k.startsWith("VISITANTE-")).map(k=>({ id:Number(k.replace("VISITANTE-","")), decisaoEspiritual:form.decisoes[k]||"NENHUMA" })),
       };
       await api.post("/relatorios", payload, { headers:{ Authorization:`Bearer ${token}` } });
-      alert("Relatório enviado com sucesso!");
+
+      try { localStorage.removeItem(draftKey(form.celulaId)); } catch (_) {}
+      prontoParaSalvar.current = false;
       setForm(f => ({ ...f, estudo:"", selecionadosKeys:[], decisoes:{} }));
+      setTimeout(() => { prontoParaSalvar.current = true; }, 0);
+
+      alert("Relatório enviado com sucesso!");
     } catch (err) {
       alert(err.response?.data?.message || "Erro ao enviar relatório.");
     } finally { setEnviando(false); }
   };
 
-  const nomeCelula     = celula?.nome             || "Carregando...";
-  const nomeUsuarioLider = celula?.lider?.nome || celula?.usuario?.nome || "Líder";
+  const nomeCelula       = celula?.nome                           || "Carregando...";
+  const nomeUsuarioLider = celula?.nomeLider || celula?.lider?.nome || celula?.usuario?.nome || "Líder";
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const selectBg = isDark ? "#1a0a0d" : "#ffffff"; // ← cor sólida para dropdown nativo
 
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
@@ -117,6 +175,7 @@ export default function TelaRelatorio({ isDark = false }) {
     @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
     @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
     @keyframes spin   { to{transform:rotate(360deg)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
 
     .ieq-bg-stripe {
       position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -125,13 +184,11 @@ export default function TelaRelatorio({ isDark = false }) {
         ${isDark?"rgba(253,184,19,.03)":"rgba(253,184,19,.04)"} 20px 30px,transparent 30px 40px);
       background-size:60px 60px; animation:stripe 8s linear infinite;
     }
-
     .ieq-card {
       background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
       border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};
       border-radius:14px; backdrop-filter:blur(24px);
     }
-
     .ieq-input {
       width:100%;
       background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
@@ -141,33 +198,41 @@ export default function TelaRelatorio({ isDark = false }) {
     }
     .ieq-input:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
     .ieq-input::placeholder { color:${ts}; }
-
     .ieq-select {
       width:100%;
-      background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
+      background:${selectBg};
       border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
       color:${tp}; padding:12px 16px; border-radius:8px; outline:none;
-      font-family:'EB Garamond',serif; font-size:15px; cursor:pointer; transition:all .25s; appearance:none;
+      font-family:'EB Garamond',serif; font-size:15px; cursor:pointer; transition:all .25s;
+      -webkit-appearance:none; appearance:none;
     }
     .ieq-select:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
-
+    .ieq-select option {
+      background:${selectBg};
+      color:${tp};
+    }
     .ieq-label {
       display:block; margin-bottom:6px;
       font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.18em; color:${IEQ.red};
     }
-
     .ieq-person-row {
       border-bottom:1px solid ${isDark?"rgba(200,16,46,.08)":"rgba(200,16,46,.07)"};
       transition:background .2s;
     }
     .ieq-person-row:last-child { border-bottom:none; }
-
     .ieq-kpi {
       background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
       border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};
       border-radius:12px; padding:20px; text-align:center;
     }
-
+    .ieq-toast {
+      animation: fadeIn .35s ease;
+      background: linear-gradient(135deg, ${IEQ.blue}, ${IEQ.blueDark});
+      border-radius: 10px; padding: 12px 18px;
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Cinzel', serif; font-size: 9.5px; letter-spacing: .16em; color: #fff;
+      box-shadow: 0 4px 20px rgba(0,61,165,.35);
+    }
     .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
     .spin-icon  { animation:spin 1s linear infinite; }
     .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark?"rgba(200,16,46,.25)":"rgba(200,16,46,.2)"},transparent); }
@@ -190,9 +255,18 @@ export default function TelaRelatorio({ isDark = false }) {
 
         <div style={{ position:"relative", zIndex:1, maxWidth:720, margin:"0 auto", padding:"0 16px" }}>
 
-          {/* Hero */}
+          {rascunhoCarregado && (
+              <div style={{ paddingTop:16 }}>
+                <div className="ieq-toast">
+                  <CheckCircle2 size={15} />
+                  RASCUNHO RESTAURADO — suas marcações anteriores foram recuperadas
+                </div>
+              </div>
+          )}
+
           <div style={{
             padding:"40px 40px 36px",
+            marginTop: rascunhoCarregado ? 12 : 0,
             marginBottom:24,
             background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`,
             borderRadius:14, position:"relative", overflow:"hidden",
@@ -225,7 +299,6 @@ export default function TelaRelatorio({ isDark = false }) {
             </div>
           </div>
 
-          {/* Dados da reunião */}
           <div className="ieq-card" style={{ padding:"26px 28px", marginBottom:16 }}>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
               <div>
@@ -239,7 +312,6 @@ export default function TelaRelatorio({ isDark = false }) {
             </div>
           </div>
 
-          {/* KPIs */}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:16 }}>
             {[
               { label:"MEMBROS",    val:membrosPresentes,    color:IEQ.red },
@@ -253,7 +325,6 @@ export default function TelaRelatorio({ isDark = false }) {
             ))}
           </div>
 
-          {/* Lista de chamada */}
           <div className="ieq-card" style={{ overflow:"hidden", marginBottom:16 }}>
             <div style={{ padding:"20px 24px", borderBottom:`1px solid ${isDark?"rgba(200,16,46,.1)":"rgba(200,16,46,.08)"}`, display:"flex", alignItems:"center", gap:10 }}>
               <Users2 size={18} style={{ color:IEQ.red }} />
@@ -266,7 +337,6 @@ export default function TelaRelatorio({ isDark = false }) {
                 const marcado     = form.selecionadosKeys.includes(pessoa.uKey);
                 const isVisitante = pessoa.tipo === "VISITANTE";
                 const processing  = processingIds.has(pessoa.uKey);
-
                 return (
                     <div key={pessoa.uKey} className="ieq-person-row" style={{ background: marcado ? (isDark?"rgba(200,16,46,.07)":"rgba(200,16,46,.05)") : "transparent" }}>
                       <button
@@ -330,7 +400,6 @@ export default function TelaRelatorio({ isDark = false }) {
           </div>
         </div>
 
-        {/* Botão fixo */}
         <div style={{ position:"fixed", bottom:0, left:0, width:"100%", padding:"16px 24px", zIndex:50, background: isDark?"linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)":"linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)" }}>
           <div style={{ maxWidth:720, margin:"0 auto" }}>
             <button

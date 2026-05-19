@@ -77,6 +77,7 @@ export default function Celulas({ isDark = false }) {
   const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
   const border      = isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)";
   const inputBg     = isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)";
+  const selectBg    = isDark ? "#1a0a0d" : "#ffffff"; // ← cor sólida para o dropdown nativo
 
   const styles = `
     @keyframes spin { to{transform:rotate(360deg)} }
@@ -86,9 +87,14 @@ export default function Celulas({ isDark = false }) {
       border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
       color:${textPrimary}; padding:12px 14px; border-radius:8px; outline:none;
       font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
+      -webkit-appearance:none; appearance:none;
     }
     .ieq-field:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
     .ieq-field::placeholder { color:${isDark?"rgba(245,240,232,.25)":"rgba(26,10,13,.3)"}; }
+    .ieq-field option {
+      background:${selectBg};
+      color:${textPrimary};
+    }
     .ieq-celula-card {
       background:${cardBg}; border:1px solid ${border}; border-radius:12px;
       padding:20px; cursor:pointer; transition:all .3s;
