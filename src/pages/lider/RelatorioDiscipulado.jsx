@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import api from "../../services/api.js";
-import { Loader2, CheckCircle2, Calendar, UserCheck } from "lucide-react";
+import { Loader2, CheckCircle2, Calendar, UserCheck, Save } from "lucide-react";
 
-/* ─── Cores Oficiais IEQ ─── */
 const IEQ = {
   red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
   yellow: "#FDB813", yellowDark: "#C48C00",
@@ -46,176 +45,234 @@ function obterSemanaAtual() {
 }
 
 const COLUNAS = [
-  { campo: "escolaBiblica", label: "EBD",       emoji: "📖" },
+  { campo: "escolaBiblica", label: "EBD",        emoji: "📖" },
   { campo: "quartaNoite",   label: "4ª Noite",   emoji: "🌙" },
   { campo: "quintaNoite",   label: "5ª Noite",   emoji: "⭐" },
   { campo: "domingoManha",  label: "Dom. Manhã", emoji: "☀️" },
   { campo: "domingoNoite",  label: "Dom. Noite", emoji: "🌟" },
 ];
 
-export default function RelatorioDiscipulado({ isDark = false }) {
-  const [celula,           setCelula]           = useState(null);
-  const [membros,          setMembros]          = useState([]);
-  const [presencas,        setPresencas]        = useState([]);
-  const [inicio,           setInicio]           = useState("");
-  const [fim,              setFim]              = useState("");
-  const [loading,          setLoading]          = useState(true);
-  const [enviando,         setEnviando]         = useState(false);
-  const [erro,             setErro]             = useState("");
-  const [sucesso,          setSucesso]          = useState("");
-  const [rascunhoCarregado,setRascunhoCarregado]= useState(false);
+// ─── Helpers localStorage ───────────────────────────────────────
+function lsDraftSave(key, presencas, fim) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ presencas, fim, salvoEm: new Date().toISOString() }));
+  } catch (e) {
+    console.warn("localStorage indisponível:", e);
+  }
+}
 
-  /* ─── Impede auto-save durante o carregamento inicial ─── */
-  const prontoParaSalvar = useRef(false);
-  const celulaIdRef      = useRef(null);
-  const inicioRef        = useRef("");
+function lsDraftLoad(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function lsDraftRemove(key) {
+  try { localStorage.removeItem(key); } catch { /* ignore */ }
+}
+
+export default function RelatorioDiscipulado({ isDark = false }) {
+  const [celula,            setCelula]            = useState(null);
+  const [membros,           setMembros]           = useState([]);
+  const [presencas,         setPresencas]         = useState([]);
+  const [inicio,            setInicio]            = useState("");
+  const [fim,               setFim]               = useState("");
+  const [loading,           setLoading]           = useState(true);
+  const [enviando,          setEnviando]          = useState(false);
+  const [erro,              setErro]              = useState("");
+  const [sucesso,           setSucesso]           = useState("");
+  const [rascunhoCarregado, setRascunhoCarregado] = useState(false);
+  const [salvouAgora,       setSalvouAgora]       = useState(false);
+
+  // Refs que guardam os valores atuais sem precisar de closure
+  const celulaIdRef = useRef(null);
+  const inicioRef   = useRef("");
+  const fimRef      = useRef("");
+  // Flag: true somente depois que os dados iniciais foram carregados
+  const carregouRef = useRef(false);
+  // Timer de debounce para auto-save
+  const saveTimer   = useRef(null);
 
   const inicializarPresencas = useCallback((lista) =>
       lista.map((m) => ({
         membroId: m.id, nomeMembro: m.nome,
-        escolaBiblica:false, quartaNoite:false, quintaNoite:false, domingoManha:false, domingoNoite:false,
+        escolaBiblica: false, quartaNoite: false,
+        quintaNoite: false, domingoManha: false, domingoNoite: false,
       })), []);
 
-  /* ─── Auto-save: só dispara após carregamento concluído ─── */
-  useEffect(() => {
-    if (!prontoParaSalvar.current || !celulaIdRef.current || !inicioRef.current || presencas.length === 0) return;
-    try {
-      const draft = { presencas, fim, salvoEm: new Date().toISOString() };
-      localStorage.setItem(draftKey(celulaIdRef.current, inicioRef.current), JSON.stringify(draft));
-    } catch (err) {
-      console.warn("Não foi possível salvar rascunho:", err);
-    }
-  }, [presencas, fim]);
+  // ─── Salva com debounce de 800ms ────────────────────────────
+  // Recebe os valores diretamente — sem depender de closure stale
+  const agendarSave = useCallback((novasPresencas, novoFim) => {
+    if (!carregouRef.current) return;
+    const key = draftKey(celulaIdRef.current, inicioRef.current);
+    if (!key || !celulaIdRef.current || !inicioRef.current) return;
 
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      lsDraftSave(key, novasPresencas, novoFim);
+      setSalvouAgora(true);
+      setTimeout(() => setSalvouAgora(false), 2000);
+    }, 800);
+  }, []);
+
+  // ─── Carrega dados da API ────────────────────────────────────
   const carregarDados = useCallback(async () => {
-    prontoParaSalvar.current = false; // bloqueia auto-save durante carga
-    setLoading(true); setErro("");
+    carregouRef.current = false;
+    setLoading(true);
+    setErro("");
     try {
       const res = await api.get("/celulas/minha-celula");
       if (!res.data) { setErro("Célula não vinculada."); return; }
-      setCelula(res.data);
-      celulaIdRef.current = res.data.id;
-      const lista = res.data.membros || [];
+
+      const celData = res.data;
+      setCelula(celData);
+      celulaIdRef.current = celData.id;
+
+      const lista = celData.membros || [];
       setMembros(lista);
 
       const semana = obterSemanaAtual();
       inicioRef.current = semana.inicio;
+      fimRef.current    = semana.fim;
 
-      /* ─── Tenta restaurar rascunho ─── */
-      let restaurou = false;
-      try {
-        const raw = localStorage.getItem(draftKey(res.data.id, semana.inicio));
-        if (raw) {
-          const draft = JSON.parse(raw);
-          // Adiciona membros novos que não estavam no rascunho
-          const idsNoRascunho = new Set(draft.presencas.map(p => p.membroId));
-          const novosMembros = lista
-              .filter(m => !idsNoRascunho.has(m.id))
-              .map(m => ({
-                membroId: m.id, nomeMembro: m.nome,
-                escolaBiblica:false, quartaNoite:false, quintaNoite:false, domingoManha:false, domingoNoite:false,
-              }));
-          setPresencas([...draft.presencas, ...novosMembros]);
-          setInicio(semana.inicio);
-          setFim(draft.fim || semana.fim);
-          restaurou = true;
-          setRascunhoCarregado(true);
-          setTimeout(() => setRascunhoCarregado(false), 4000);
-        }
-      } catch (err) {
-        console.warn("Erro ao ler rascunho:", err);
-      }
+      const draft = lsDraftLoad(draftKey(celData.id, semana.inicio));
+      if (draft?.presencas) {
+        // Sincroniza membros: remove saídos, adiciona novos
+        const idsAtuais    = new Set(lista.map(m => m.id));
+        const idsRascunho  = new Set(draft.presencas.map(p => p.membroId));
+        const filtradas    = draft.presencas.filter(p => idsAtuais.has(p.membroId));
+        const novos        = lista
+            .filter(m => !idsRascunho.has(m.id))
+            .map(m => ({
+              membroId: m.id, nomeMembro: m.nome,
+              escolaBiblica: false, quartaNoite: false,
+              quintaNoite: false, domingoManha: false, domingoNoite: false,
+            }));
 
-      if (!restaurou) {
+        setPresencas([...filtradas, ...novos]);
+        setInicio(semana.inicio);
+        const fimSalvo = draft.fim || semana.fim;
+        setFim(fimSalvo);
+        fimRef.current = fimSalvo;
+        setRascunhoCarregado(true);
+        setTimeout(() => setRascunhoCarregado(false), 5000);
+      } else {
         setPresencas(inicializarPresencas(lista));
         setInicio(semana.inicio);
         setFim(semana.fim);
       }
-
-      /* ─── Libera auto-save após tudo definido ─── */
-      setTimeout(() => { prontoParaSalvar.current = true; }, 0);
-    } catch { setErro("Erro ao carregar dados."); }
-    finally { setLoading(false); }
+    } catch {
+      setErro("Erro ao carregar dados.");
+    } finally {
+      setLoading(false);
+      // Libera o auto-save somente depois de tudo definido
+      carregouRef.current = true;
+    }
   }, [inicializarPresencas]);
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
 
-  /* ─── Troca de período: tenta carregar rascunho da semana escolhida ─── */
-  const handleInicioChange = (novoInicio) => {
-    prontoParaSalvar.current = false;
+  // ─── Troca de semana ─────────────────────────────────────────
+  const handleInicioChange = useCallback((novoInicio) => {
+    carregouRef.current = false;
     setInicio(novoInicio);
     inicioRef.current = novoInicio;
-    try {
-      const raw = celulaIdRef.current
-          ? localStorage.getItem(draftKey(celulaIdRef.current, novoInicio))
-          : null;
-      if (raw) {
-        const draft = JSON.parse(raw);
-        setPresencas(draft.presencas);
-        setFim(draft.fim || fim);
-        setRascunhoCarregado(true);
-        setTimeout(() => setRascunhoCarregado(false), 4000);
-      } else {
-        setPresencas(inicializarPresencas(membros));
-      }
-    } catch (err) {
-      console.warn("Erro ao ler rascunho:", err);
-      setPresencas(inicializarPresencas(membros));
-    }
-    setTimeout(() => { prontoParaSalvar.current = true; }, 0);
-  };
 
-  const alterarPresenca = (index, campo) => {
+    const draft = lsDraftLoad(draftKey(celulaIdRef.current, novoInicio));
+    if (draft?.presencas) {
+      setPresencas(draft.presencas);
+      const f = draft.fim || fimRef.current;
+      setFim(f);
+      fimRef.current = f;
+      setRascunhoCarregado(true);
+      setTimeout(() => setRascunhoCarregado(false), 5000);
+    } else {
+      setMembros(prev => {
+        const novas = inicializarPresencas(prev);
+        setPresencas(novas);
+        return prev;
+      });
+    }
+    carregouRef.current = true;
+  }, [inicializarPresencas]);
+
+  // ─── Marcar/desmarcar presença ───────────────────────────────
+  const alterarPresenca = useCallback((index, campo) => {
     setPresencas(prev => {
       const novo = [...prev];
-      if (novo[index]) novo[index] = { ...novo[index], [campo]: !novo[index][campo] };
+      if (!novo[index]) return prev;
+      novo[index] = { ...novo[index], [campo]: !novo[index][campo] };
+      // Passa o array novo e o fim atual direto — sem closure stale
+      agendarSave(novo, fimRef.current);
       return novo;
     });
-  };
+  }, [agendarSave]);
 
-  const totalPresencasMembro = (index) => {
-    const p = presencas[index];
-    return p ? COLUNAS.filter(c => p[c.campo]).length : 0;
-  };
+  // ─── Alterar fim ─────────────────────────────────────────────
+  const handleFimChange = useCallback((novoFim) => {
+    setFim(novoFim);
+    fimRef.current = novoFim;
+    setPresencas(prev => {
+      agendarSave(prev, novoFim);
+      return prev;
+    });
+  }, [agendarSave]);
 
+  // ─── Stats ───────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const totalGeral    = presencas.reduce((acc, _, i) => acc + totalPresencasMembro(i), 0);
+    const totalGeral    = presencas.reduce((acc, p) => acc + COLUNAS.filter(c => p[c.campo]).length, 0);
     const totalPossivel = presencas.length * COLUNAS.length;
     const porcentagem   = totalPossivel > 0 ? Math.round((totalGeral / totalPossivel) * 100) : 0;
     return { totalGeral, porcentagem };
   }, [presencas]);
 
+  // ─── Enviar ──────────────────────────────────────────────────
   const enviarRelatorio = async () => {
     setErro(""); setSucesso("");
-    if (!inicio || !fim || !celula?.id || presencas.length === 0) return setErro("Verifique os dados.");
+    if (!inicio || !fim || !celula?.id || presencas.length === 0)
+      return setErro("Verifique os dados.");
     setEnviando(true);
     try {
-      const payload = presencas.map(({ nomeMembro, membroId, ...rest }) => ({ membroId: Number(membroId), ...rest }));
+      const payload = presencas.map(({ nomeMembro, membroId, ...rest }) => ({
+        membroId: Number(membroId), ...rest,
+      }));
       await api.post(`/discipulado/relatorio-semanal?inicio=${inicio}&fim=${fim}`, payload);
 
-      /* ─── Limpa rascunho e reseta presenças ─── */
-      try { localStorage.removeItem(draftKey(celula.id, inicio)); } catch (_) {}
-      prontoParaSalvar.current = false;
-      setPresencas(inicializarPresencas(membros));
-      setTimeout(() => { prontoParaSalvar.current = true; }, 0);
+      // Limpa rascunho e zera presenças
+      lsDraftRemove(draftKey(celula.id, inicio));
+      carregouRef.current = false;
+      setMembros(prev => {
+        const zeradas = inicializarPresencas(prev);
+        setPresencas(zeradas);
+        return prev;
+      });
+      carregouRef.current = true;
 
-      setSucesso("Relatório enviado com sucesso!");
-      setTimeout(() => setSucesso(""), 4000);
-    } catch (e) { setErro(e?.response?.data?.message || "Erro no envio."); }
-    finally { setEnviando(false); }
+      setSucesso("Relatório enviado com sucesso! ✅");
+      setTimeout(() => setSucesso(""), 5000);
+    } catch (e) {
+      setErro(e?.response?.data?.message || "Erro no envio.");
+    } finally {
+      setEnviando(false);
+    }
   };
 
+  // ─── Estilos ─────────────────────────────────────────────────
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     * { box-sizing:border-box; }
-    @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-    @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
-    @keyframes spin   { to{transform:rotate(360deg)} }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes stripe   { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+    @keyframes pulse    { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
+    @keyframes spin     { to{transform:rotate(360deg)} }
+    @keyframes fadeIn   { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideDown{ from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:.35} }
 
     .ieq-bg-stripe {
       position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -271,12 +328,16 @@ export default function RelatorioDiscipulado({ isDark = false }) {
       animation:slideDown .3s ease;
     }
     .ieq-toast {
-      animation: slideDown .35s ease;
-      background: linear-gradient(135deg, ${IEQ.blue}, ${IEQ.blueDark});
-      border-radius: 10px; padding: 12px 18px;
-      display: flex; align-items: center; gap: 10px;
-      font-family: 'Cinzel', serif; font-size: 9.5px; letter-spacing: .16em; color: #fff;
-      box-shadow: 0 4px 20px rgba(0,61,165,.35);
+      animation:slideDown .35s ease;
+      border-radius:10px; padding:12px 18px;
+      display:flex; align-items:center; gap:10px;
+      font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.16em;
+      box-shadow:0 4px 20px rgba(0,61,165,.35);
+    }
+    .ieq-saved-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      font-family:'Cinzel',serif; font-size:8.5px; letter-spacing:.14em;
+      color:${IEQ.yellow}; animation:blink 1.2s ease 2;
     }
     .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
     .spin-icon  { animation:spin 1s linear infinite; }
@@ -298,14 +359,15 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
         <div style={{ position:"relative", zIndex:1, maxWidth:800, margin:"0 auto", padding:"0 16px", display:"flex", flexDirection:"column", gap:16 }}>
 
+          {/* Toast: rascunho restaurado */}
           {rascunhoCarregado && (
-              <div className="ieq-toast">
-                <CheckCircle2 size={15} />
-                RASCUNHO RESTAURADO — suas marcações anteriores foram recuperadas
+              <div className="ieq-toast" style={{ background:`linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, color:"#fff" }}>
+                <Save size={15} />
+                RASCUNHO RESTAURADO — suas marcações anteriores foram recuperadas automaticamente
               </div>
           )}
 
-          {/* ── Header ── */}
+          {/* Header */}
           <div className="ieq-card" style={{ padding:"28px 32px" }}>
             <div style={{ display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:16 }}>
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
@@ -323,8 +385,16 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                   <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:18, fontWeight:700, letterSpacing:".12em", color:tp, margin:0 }}>
                     {celula?.nome?.toUpperCase() || "CÉLULA"}
                   </h2>
+                  <div style={{ marginTop:6, height:18 }}>
+                    {salvouAgora && (
+                        <span className="ieq-saved-badge">
+                      <Save size={10} /> RASCUNHO SALVO
+                    </span>
+                    )}
+                  </div>
                 </div>
               </div>
+
               <div style={{
                 display:"flex", alignItems:"center", gap:10,
                 padding:"10px 18px", borderRadius:8,
@@ -333,20 +403,20 @@ export default function RelatorioDiscipulado({ isDark = false }) {
               }}>
                 <Calendar size={14} style={{ color:IEQ.red }} />
                 <input type="date" className="ieq-input-date" value={inicio} onChange={e => handleInicioChange(e.target.value)} />
-                <span style={{ color:ts, fontFamily:"'Cinzel',serif", fontSize:10 }}>—</span>
-                <input type="date" className="ieq-input-date" value={fim} onChange={e => setFim(e.target.value)} />
+                <span style={{ color:ts, fontFamily:"'Cinzel',serif", fontSize:10 }}>→</span>
+                <input type="date" className="ieq-input-date" value={fim} onChange={e => handleFimChange(e.target.value)} />
               </div>
             </div>
           </div>
 
-          {/* ── KPIs ── */}
+          {/* KPIs */}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
             {[
-              { label:"MEMBROS",   val:membros.length,   color:IEQ.red },
-              { label:"PRESENÇAS", val:stats.totalGeral, color:IEQ.blue },
+              { label:"MEMBROS",    val:membros.length,   color:IEQ.red },
+              { label:"PRESENÇAS",  val:stats.totalGeral, color:IEQ.blue },
               { label:"FREQUÊNCIA", val:`${stats.porcentagem}%`, color: stats.porcentagem > 60 ? IEQ.yellow : IEQ.red, highlight: stats.porcentagem > 60 },
             ].map(({ label, val, color, highlight }) => (
-                <div key={label} className="ieq-kpi" style={ highlight ? { background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border:"none" } : {} }>
+                <div key={label} className="ieq-kpi" style={highlight ? { background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border:"none" } : {}}>
                   <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".18em", color:highlight?"rgba(255,255,255,.55)":ts, margin:"0 0 6px" }}>{label}</p>
                   <p style={{ fontFamily:"'Cinzel',serif", fontSize:36, fontWeight:700, color:highlight?"#fff":color, margin:0, lineHeight:1 }}>{val}</p>
                 </div>
@@ -364,7 +434,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
               </div>
           )}
 
-          {/* ── Lista de membros ── */}
+          {/* Lista de membros */}
           <div className="ieq-card" style={{ overflow:"hidden" }}>
             <div style={{
               display:"grid", gridTemplateColumns:"1fr repeat(5,60px)",
@@ -383,7 +453,8 @@ export default function RelatorioDiscipulado({ isDark = false }) {
             </div>
 
             {membros.map((m, i) => {
-              const total = totalPresencasMembro(i);
+              const p     = presencas[i];
+              const total = p ? COLUNAS.filter(c => p[c.campo]).length : 0;
               const pct   = Math.round((total / COLUNAS.length) * 100);
               return (
                   <div key={m.id} className="ieq-member-block">
@@ -402,9 +473,9 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                         background: total===COLUNAS.length ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark?"rgba(255,255,255,.05)":"rgba(200,16,46,.06)"),
                         border:`1px solid ${total===COLUNAS.length?IEQ.red:(isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.15)")}`,
                       }}>
-                        <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:total===COLUNAS.length?"#fff":ts }}>
-                          {total}/{COLUNAS.length}
-                        </span>
+                    <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:total===COLUNAS.length?"#fff":ts }}>
+                      {total}/{COLUNAS.length}
+                    </span>
                       </div>
                     </div>
 
@@ -418,7 +489,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
                     <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8 }}>
                       {COLUNAS.map(({ campo, label, emoji }) => {
-                        const marcado = presencas[i]?.[campo];
+                        const marcado = p?.[campo];
                         return (
                             <button
                                 key={campo}
@@ -432,12 +503,12 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                                   transform: marcado ? "scale(1.04)" : "scale(1)",
                                 }}
                             >
-                              <span style={{ fontSize:18, filter: marcado ? "none" : "grayscale(1)", opacity: marcado ? 1 : 0.4, transition:"all .2s" }}>
-                                {marcado ? "✅" : emoji}
-                              </span>
-                              <span style={{ fontFamily:"'Cinzel',serif", fontSize:7.5, letterSpacing:".1em", color: marcado ? IEQ.red : ts, fontWeight:700 }}>
-                                {label.toUpperCase()}
-                              </span>
+                        <span style={{ fontSize:18, filter:marcado?"none":"grayscale(1)", opacity:marcado?1:0.4, transition:"all .2s" }}>
+                          {marcado ? "✅" : emoji}
+                        </span>
+                              <span style={{ fontFamily:"'Cinzel',serif", fontSize:7.5, letterSpacing:".1em", color:marcado?IEQ.red:ts, fontWeight:700 }}>
+                          {label.toUpperCase()}
+                        </span>
                             </button>
                         );
                       })}
@@ -459,7 +530,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
           <div className="divider" />
           <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".15em", color:ts }}>
-            © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
+            © IEQ PITAUÇU · SISTEMA SEGURO · {new Date().getFullYear()}
           </p>
         </div>
       </div>
