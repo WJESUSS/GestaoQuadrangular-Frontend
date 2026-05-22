@@ -3,75 +3,70 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
-  Plus, X, User, Phone, Trash2, Loader2, Search, CreditCard, Heart, ChevronRight,
+  Plus, X, User, Phone, Trash2, Loader2, Search,
+  CreditCard, Heart, ChevronRight, Users,
 } from "lucide-react";
 
 /* ─── Tokens ─── */
 const IEQ = {
-  red:"#C8102E", redDark:"#8B0B1F",
-  yellow:"#FDB813", blue:"#003DA5", blueDark:"#002470",
-  offWhite:"#F5F0E8",
+  red: "#C8102E", redDark: "#8B0B1F",
+  yellow: "#FDB813", blue: "#003DA5", blueDark: "#002470",
+  offWhite: "#F5F0E8",
 };
 
 const STATUS_COLORS = {
-  ATIVO:       { bg:"rgba(5,150,105,.12)",  text:"#059669", border:"rgba(5,150,105,.3)"   },
-  INATIVO:     { bg:"rgba(200,16,46,.1)",   text:IEQ.red,   border:"rgba(200,16,46,.3)"   },
-  AFASTADO:    { bg:"rgba(253,184,19,.12)", text:"#C48C00", border:"rgba(253,184,19,.35)" },
-  TRANSFERIDO: { bg:"rgba(0,61,165,.1)",    text:IEQ.blue,  border:"rgba(0,61,165,.3)"    },
-  FALECIDO:    { bg:"rgba(100,100,100,.1)", text:"#666",    border:"rgba(100,100,100,.3)" },
+  ATIVO:       { bg: "rgba(5,150,105,.12)",  text: "#059669", border: "rgba(5,150,105,.3)"   },
+  INATIVO:     { bg: "rgba(200,16,46,.1)",   text: IEQ.red,   border: "rgba(200,16,46,.3)"   },
+  AFASTADO:    { bg: "rgba(253,184,19,.12)", text: "#C48C00", border: "rgba(253,184,19,.35)" },
+  TRANSFERIDO: { bg: "rgba(0,61,165,.1)",    text: IEQ.blue,  border: "rgba(0,61,165,.3)"    },
+  FALECIDO:    { bg: "rgba(100,100,100,.1)", text: "#666",    border: "rgba(100,100,100,.3)" },
 };
 
 const estadoCivilOptions = [
-  { value:"SOLTEIRO",     label:"Solteiro(a)"   },
-  { value:"CASADO",       label:"Casado(a)"     },
-  { value:"DIVORCIADO",   label:"Divorciado(a)" },
-  { value:"VIUVO",        label:"Viúvo(a)"      },
-  { value:"UNIAO_ESTAVEL",label:"União Estável" },
+  { value: "SOLTEIRO",      label: "Solteiro(a)"   },
+  { value: "CASADO",        label: "Casado(a)"     },
+  { value: "DIVORCIADO",    label: "Divorciado(a)" },
+  { value: "VIUVO",         label: "Viúvo(a)"      },
+  { value: "UNIAO_ESTAVEL", label: "União Estável" },
 ];
-const statusOptions = ["ATIVO","INATIVO","AFASTADO","TRANSFERIDO","FALECIDO"];
+const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"];
 
 const formInicial = {
-  nome:"", email:"", telefone:"", endereco:"", cpf:"",
-  estadoCivil:"SOLTEIRO", dataNascimento:"", dataConversao:"",
-  dataBatismo:"", status:"ATIVO",
+  nome: "", email: "", telefone: "", endereco: "", cpf: "",
+  estadoCivil: "SOLTEIRO", dataNascimento: "", dataConversao: "",
+  dataBatismo: "", status: "ATIVO",
 };
 
 /* ══════════════════════════════════════════
-   MODAL — componente separado para não
-   herdar nenhum contexto de stacking do pai
+   MODAL
 ══════════════════════════════════════════ */
 function MembroModal({
                        isDark, editandoId, form, setForm,
                        onSalvar, onExcluir, onFechar,
-                       estadoCivilOptions, statusOptions,
+                       nomeCelula, nomeLider,
                      }) {
-  const textPrimary = isDark ? IEQ.offWhite      : "#1A0A0D";
+  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const bg          = isDark ? "#0f0a0c"         : "#ffffff";
+  const bg          = isDark ? "#0f0a0c" : "#ffffff";
   const border      = isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.14)";
   const inputBg     = isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)";
 
   const f = v => setForm(p => ({ ...p, ...v }));
 
-  const modalStyles = `
+  const css = `
+    @keyframes spin { to { transform: rotate(360deg) } }
     .mf-wrap {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; flex-direction: column;
-      background: ${bg};
-      font-family: 'EB Garamond', serif;
-      color: ${textPrimary};
+      background: ${bg}; font-family: 'EB Garamond', serif; color: ${textPrimary};
     }
     .mf-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid ${border};
-      flex-shrink: 0;
-      background: ${bg};
+      padding: 16px 20px; border-bottom: 1px solid ${border};
+      flex-shrink: 0; background: ${bg};
     }
     .mf-body {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       padding: 20px 20px max(20px, env(safe-area-inset-bottom, 20px));
       display: flex; flex-direction: column; gap: 14px;
@@ -80,29 +75,23 @@ function MembroModal({
       width: 100%; box-sizing: border-box;
       background: ${inputBg};
       border: 1px solid ${isDark ? "rgba(200,16,46,.22)" : "rgba(200,16,46,.18)"};
-      color: ${textPrimary};
-      padding: 11px 14px; border-radius: 8px;
+      color: ${textPrimary}; padding: 11px 14px; border-radius: 8px;
       outline: none; font-family: 'EB Garamond', serif; font-size: 15px;
       transition: border-color .2s, box-shadow .2s;
       -webkit-appearance: none; appearance: none;
     }
-    .mf-field:focus {
-      border-color: ${IEQ.red};
-      box-shadow: 0 0 0 3px rgba(200,16,46,.1);
-    }
+    .mf-field:focus { border-color: ${IEQ.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.1); }
     .mf-field::placeholder { color: ${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.28)"}; }
     .mf-label {
       font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: .2em;
-      text-transform: uppercase; color: ${textSec};
-      display: block; margin-bottom: 5px;
+      text-transform: uppercase; color: ${textSec}; display: block; margin-bottom: 5px;
     }
     .mf-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media(max-width:380px) { .mf-grid2 { grid-template-columns: 1fr; } }
     .mf-btn-save {
       width: 100%; padding: 14px; border-radius: 8px; border: none; cursor: pointer;
       background: linear-gradient(135deg, ${IEQ.blueDark}, ${IEQ.blue});
-      color: #fff; font-family: 'Cinzel', serif;
-      font-size: 10px; font-weight: 700; letter-spacing: .16em;
+      color: #fff; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: .16em;
     }
     .mf-btn-del {
       width: 100%; padding: 10px; border: none; cursor: pointer; background: none;
@@ -115,11 +104,92 @@ function MembroModal({
       background: ${isDark ? "rgba(0,61,165,.08)" : "rgba(0,61,165,.05)"};
       border: 1px solid ${isDark ? "rgba(0,61,165,.2)" : "rgba(0,61,165,.12)"};
     }
+    .mf-celula-badge {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 10px;
+      background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(253,184,19,.08)"};
+      border: 1px solid ${isDark ? "rgba(253,184,19,.25)" : "rgba(253,184,19,.3)"};
+    }
+    .mf-celula-badge-empty {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 10px;
+      background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)"};
+      border: 1px solid ${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"};
+    }
   `;
+
+  /* Badge de célula — usa nomeCelula e nomeLider direto do membro */
+  const renderCelulaBadge = () => {
+    if (!editandoId) return null;
+
+    if (nomeCelula) {
+      return (
+          <div className="mf-celula-badge">
+            <div style={{
+              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+              background: `linear-gradient(135deg, ${IEQ.yellow}55, ${IEQ.yellow}22)`,
+              border: `1px solid ${IEQ.yellow}88`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Users size={15} style={{ color: "#C48C00" }} />
+            </div>
+            <div>
+              <p style={{
+                fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em",
+                color: "#C48C00", margin: "0 0 2px", textTransform: "uppercase",
+              }}>
+                CÉLULA VINCULADA
+              </p>
+              <p style={{
+                fontFamily: "'EB Garamond',serif", fontSize: 15, fontWeight: 600,
+                color: textPrimary, margin: "0 0 2px",
+              }}>
+                {nomeCelula}
+              </p>
+              {nomeLider && (
+                  <p style={{
+                    fontFamily: "'EB Garamond',serif", fontSize: 12,
+                    color: textSec, margin: 0,
+                  }}>
+                    Líder: {nomeLider}
+                  </p>
+              )}
+            </div>
+          </div>
+      );
+    }
+
+    return (
+        <div className="mf-celula-badge-empty">
+          <div style={{
+            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+            background: isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)",
+            border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Users size={15} style={{ color: textSec }} />
+          </div>
+          <div>
+            <p style={{
+              fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em",
+              color: textSec, margin: "0 0 2px", textTransform: "uppercase",
+            }}>
+              CÉLULA VINCULADA
+            </p>
+            <p style={{
+              fontFamily: "'EB Garamond',serif", fontSize: 14, fontStyle: "italic",
+              color: textSec, margin: 0,
+            }}>
+              Nenhuma célula cadastrada
+            </p>
+          </div>
+        </div>
+    );
+  };
 
   const content = (
       <>
-        <style>{modalStyles}</style>
+        <style>{css}</style>
         <motion.div
             className="mf-wrap"
             initial={{ x: "100%" }}
@@ -131,24 +201,34 @@ function MembroModal({
           <div className="mf-header">
             <button
                 onClick={onFechar}
-                style={{ background:"none", border:"none", cursor:"pointer",
-                  color:textSec, display:"flex", alignItems:"center", gap:6,
-                  fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em" }}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  color: textSec, display: "flex", alignItems: "center", gap: 6,
+                  fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em",
+                }}
             >
-              <X size={18}/> VOLTAR
+              <X size={18} /> VOLTAR
             </button>
-            <div style={{ textAlign:"right" }}>
-              <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700,
-                letterSpacing:".14em", color:textPrimary, margin:0 }}>
+            <div style={{ textAlign: "right" }}>
+              <h2 style={{
+                fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700,
+                letterSpacing: ".14em", color: textPrimary, margin: 0,
+              }}>
                 {editandoId ? "EDITAR PERFIL" : "NOVO CADASTRO"}
               </h2>
-              <div style={{ height:2, width:32, background:`linear-gradient(90deg,${IEQ.blue},${IEQ.yellow})`,
-                borderRadius:99, marginTop:5, marginLeft:"auto" }} />
+              <div style={{
+                height: 2, width: 32,
+                background: `linear-gradient(90deg,${IEQ.blue},${IEQ.yellow})`,
+                borderRadius: 99, marginTop: 5, marginLeft: "auto",
+              }} />
             </div>
           </div>
 
-          {/* Body com scroll */}
+          {/* Body */}
           <form className="mf-body" onSubmit={onSalvar}>
+
+            {/* Badge de célula */}
+            {renderCelulaBadge()}
 
             {/* Nome */}
             <div>
@@ -213,10 +293,12 @@ function MembroModal({
 
             {/* Jornada espiritual */}
             <div className="mf-spiritual">
-              <p style={{ display:"flex", alignItems:"center", gap:6,
-                fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".16em",
-                color:IEQ.blue, margin:"0 0 12px" }}>
-                <Heart size={12}/> JORNADA ESPIRITUAL
+              <p style={{
+                display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".16em",
+                color: IEQ.blue, margin: "0 0 12px",
+              }}>
+                <Heart size={12} /> JORNADA ESPIRITUAL
               </p>
               <div className="mf-grid2">
                 <div>
@@ -233,13 +315,13 @@ function MembroModal({
             </div>
 
             {/* Ações */}
-            <div style={{ display:"flex", flexDirection:"column", gap:8, paddingTop:4 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 4 }}>
               <button type="submit" className="mf-btn-save">
                 {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
               </button>
               {editandoId && (
                   <button type="button" className="mf-btn-del" onClick={onExcluir}>
-                    <Trash2 size={13}/> EXCLUIR REGISTRO
+                    <Trash2 size={13} /> EXCLUIR REGISTRO
                   </button>
               )}
             </div>
@@ -264,6 +346,10 @@ export default function Membros({ isDark = false }) {
   const [filtro,         setFiltro]         = useState("");
   const [form,           setForm]           = useState(formInicial);
 
+  // Dados de célula vindos direto do membro selecionado
+  const [nomeCelula, setNomeCelula] = useState(null);
+  const [nomeLider,  setNomeLider]  = useState(null);
+
   const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
   const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
@@ -282,10 +368,6 @@ export default function Membros({ isDark = false }) {
     }
     .ieq-field:focus { border-color: ${IEQ.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.12); }
     .ieq-field::placeholder { color: ${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.3)"}; }
-    .ieq-label {
-      font-family: 'Cinzel', serif; font-size: 8.5px; letter-spacing: .2em;
-      color: ${textSec}; text-transform: uppercase; display: block; margin-bottom: 6px;
-    }
     .ieq-member-card {
       background: ${cardBg}; border: 1px solid ${border}; border-radius: 12px;
       padding: 18px; cursor: pointer; transition: all .3s; backdrop-filter: blur(24px);
@@ -320,6 +402,8 @@ export default function Membros({ isDark = false }) {
   const abrirNovo = () => {
     setEditandoId(null);
     setStatusOriginal(null);
+    setNomeCelula(null);
+    setNomeLider(null);
     setForm(formInicial);
     setIsModalOpen(true);
   };
@@ -327,7 +411,9 @@ export default function Membros({ isDark = false }) {
   const abrirEdicao = (m) => {
     setEditandoId(m.id);
     setStatusOriginal(m.status);
-    // Garante que nenhum campo seja null — null em input controlado gera warning
+    // Pega célula e líder direto do objeto — sem chamada extra à API
+    setNomeCelula(m.nomeCelula ?? null);
+    setNomeLider(m.nomeLider  ?? null);
     setForm({
       nome:           m.nome           ?? "",
       email:          m.email          ?? "",
@@ -343,7 +429,12 @@ export default function Membros({ isDark = false }) {
     setIsModalOpen(true);
   };
 
-  const fecharModal = () => { setIsModalOpen(false); setEditandoId(null); };
+  const fecharModal = () => {
+    setIsModalOpen(false);
+    setEditandoId(null);
+    setNomeCelula(null);
+    setNomeLider(null);
+  };
 
   const salvar = async (e) => {
     e.preventDefault();
@@ -378,98 +469,144 @@ export default function Membros({ isDark = false }) {
   };
 
   const membrosFiltrados = membros.filter(m =>
-      m.nome?.toLowerCase().includes(filtro.toLowerCase()) || m.cpf?.includes(filtro)
+      m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
+      m.cpf?.includes(filtro) ||
+      m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
   );
 
   return (
-      <div style={{ padding:"24px 20px", fontFamily:"'EB Garamond',serif", color:textPrimary }}>
+      <div style={{ padding: "24px 20px", fontFamily: "'EB Garamond',serif", color: textPrimary }}>
         <style>{baseStyles}</style>
 
         {/* Header */}
-        <div style={{ display:"flex", flexDirection:"column", gap:14, marginBottom:24 }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-              <div style={{ width:42, height:42, borderRadius:10, background:`${IEQ.blue}22`,
-                display:"flex", alignItems:"center", justifyContent:"center", color:IEQ.blue }}>
-                <User size={20}/>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: 10, background: `${IEQ.blue}22`,
+                display: "flex", alignItems: "center", justifyContent: "center", color: IEQ.blue,
+              }}>
+                <User size={20} />
               </div>
               <div>
-                <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700,
-                  letterSpacing:".16em", color:textPrimary, margin:0 }}>MEMBRESIA</h3>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9,
-                  letterSpacing:".18em", color:textSec, margin:0 }}>{membros.length} REGISTROS</p>
+                <h3 style={{
+                  fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700,
+                  letterSpacing: ".16em", color: textPrimary, margin: 0,
+                }}>MEMBRESIA</h3>
+                <p style={{
+                  fontFamily: "'Cinzel',serif", fontSize: 9,
+                  letterSpacing: ".18em", color: textSec, margin: 0,
+                }}>{membros.length} REGISTROS</p>
               </div>
             </div>
             <button onClick={abrirNovo} style={{
-              display:"flex", alignItems:"center", gap:8, padding:"11px 20px",
-              borderRadius:8, border:"none", cursor:"pointer",
-              background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
-              color:"#fff", fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em",
+              display: "flex", alignItems: "center", gap: 8, padding: "11px 20px",
+              borderRadius: 8, border: "none", cursor: "pointer",
+              background: `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
+              color: "#fff", fontFamily: "'Cinzel',serif", fontSize: 10, fontWeight: 700, letterSpacing: ".16em",
             }}>
-              <Plus size={15}/> NOVO MEMBRO
+              <Plus size={15} /> NOVO MEMBRO
             </button>
           </div>
 
-          {/* Busca */}
-          <div style={{ position:"relative" }}>
-            <Search size={15} style={{ position:"absolute", left:14, top:"50%",
-              transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }}/>
-            <input className="ieq-field" style={{ paddingLeft:42 }}
-                   placeholder="Buscar por nome ou CPF..."
-                   value={filtro} onChange={e => setFiltro(e.target.value)}/>
+          {/* Busca — também filtra por célula */}
+          <div style={{ position: "relative" }}>
+            <Search size={15} style={{
+              position: "absolute", left: 14, top: "50%",
+              transform: "translateY(-50%)", color: IEQ.red, opacity: .6,
+            }} />
+            <input
+                className="ieq-field"
+                style={{ paddingLeft: 42 }}
+                placeholder="Buscar por nome, CPF ou célula..."
+                value={filtro}
+                onChange={e => setFiltro(e.target.value)}
+            />
           </div>
         </div>
 
         {/* Lista */}
         {loading ? (
-            <div style={{ textAlign:"center", padding:"48px 0" }}>
-              <Loader2 size={30} className="spin-icon" style={{ color:IEQ.blue, display:"inline-block" }}/>
-              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9,
-                letterSpacing:".2em", color:textSec, marginTop:12 }}>CARREGANDO...</p>
+            <div style={{ textAlign: "center", padding: "48px 0" }}>
+              <Loader2 size={30} className="spin-icon" style={{ color: IEQ.blue, display: "inline-block" }} />
+              <p style={{
+                fontFamily: "'Cinzel',serif", fontSize: 9,
+                letterSpacing: ".2em", color: textSec, marginTop: 12,
+              }}>CARREGANDO...</p>
             </div>
         ) : (
-            <motion.div className="ieq-grid-m" initial="hidden" animate="visible"
-                        variants={{ hidden:{}, visible:{ transition:{ staggerChildren:.05 } } }}>
+            <motion.div
+                className="ieq-grid-m"
+                initial="hidden"
+                animate="visible"
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: .05 } } }}
+            >
               {membrosFiltrados.map(m => {
                 const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
                 return (
-                    <motion.div key={m.id} className="ieq-member-card"
-                                variants={{ hidden:{ opacity:0, y:14 }, visible:{ opacity:1, y:0 } }}
-                                onClick={() => abrirEdicao(m)}>
-                      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
-                        <div style={{ width:44, height:44, borderRadius:10, flexShrink:0,
-                          background:`linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
-                          display:"flex", alignItems:"center", justifyContent:"center",
-                          color:"#fff", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:16 }}>
+                    <motion.div
+                        key={m.id}
+                        className="ieq-member-card"
+                        variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
+                        onClick={() => abrirEdicao(m)}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                        <div style={{
+                          width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                          background: `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "#fff", fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 16,
+                        }}>
                           {m.nome?.charAt(0).toUpperCase()}
                         </div>
-                        <div style={{ minWidth:0, flex:1 }}>
-                          <h4 style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700,
-                            letterSpacing:".1em", color:textPrimary, margin:"0 0 5px",
-                            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <h4 style={{
+                            fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700,
+                            letterSpacing: ".1em", color: textPrimary, margin: "0 0 5px",
+                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>
                             {m.nome?.toUpperCase()}
                           </h4>
-                          <span style={{ display:"inline-flex", alignItems:"center",
-                            padding:"2px 10px", borderRadius:99,
-                            background:sc.bg, color:sc.text, border:`1px solid ${sc.border}`,
-                            fontFamily:"'Cinzel',serif", fontSize:8, fontWeight:700, letterSpacing:".14em" }}>
+                          <span style={{
+                            display: "inline-flex", alignItems: "center",
+                            padding: "2px 10px", borderRadius: 99,
+                            background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`,
+                            fontFamily: "'Cinzel',serif", fontSize: 8, fontWeight: 700, letterSpacing: ".14em",
+                          }}>
                       {m.status}
                     </span>
                         </div>
-                        <ChevronRight size={15} style={{ color:textSec, flexShrink:0 }}/>
+                        <ChevronRight size={15} style={{ color: textSec, flexShrink: 0 }} />
                       </div>
-                      <div style={{ borderTop:`1px solid ${border}`, paddingTop:12,
-                        display:"flex", flexDirection:"column", gap:6 }}>
-                        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                          <CreditCard size={13} style={{ color:textSec, flexShrink:0 }}/>
-                          <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSec,
-                            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+
+                      <div style={{
+                        borderTop: `1px solid ${border}`, paddingTop: 12,
+                        display: "flex", flexDirection: "column", gap: 6,
+                      }}>
+                        {/* Célula */}
+                        {m.nomeCelula && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <Users size={13} style={{ color: "#C48C00", flexShrink: 0 }} />
+                              <span style={{
+                                fontFamily: "'EB Garamond',serif", fontSize: 13, color: "#C48C00",
+                                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                              }}>
+                        {m.nomeCelula}
+                      </span>
+                            </div>
+                        )}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <CreditCard size={13} style={{ color: textSec, flexShrink: 0 }} />
+                          <span style={{
+                            fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec,
+                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>
                       {m.cpf || "CPF não informado"}
                     </span>
                         </div>
-                        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                          <Phone size={13} style={{ color:textSec, flexShrink:0 }}/>
-                          <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSec }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <Phone size={13} style={{ color: textSec, flexShrink: 0 }} />
+                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec }}>
                       {m.telefone || "Sem telefone"}
                     </span>
                         </div>
@@ -480,7 +617,7 @@ export default function Membros({ isDark = false }) {
             </motion.div>
         )}
 
-        {/* Modal — componente separado via Portal */}
+        {/* Modal */}
         <AnimatePresence>
           {isModalOpen && (
               <MembroModal
@@ -493,6 +630,8 @@ export default function Membros({ isDark = false }) {
                   onFechar={fecharModal}
                   estadoCivilOptions={estadoCivilOptions}
                   statusOptions={statusOptions}
+                  nomeCelula={nomeCelula}
+                  nomeLider={nomeLider}
               />
           )}
         </AnimatePresence>
