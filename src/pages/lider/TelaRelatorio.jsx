@@ -48,7 +48,7 @@ export default function TelaRelatorio({ isDark = false }) {
 
   const [form, setForm] = useState({
     celulaId: null,
-    dataReuniao: new Date().toISOString().split("T")[0],
+    dataReuniao: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })(),
     estudo: "",
     selecionadosKeys: [],
     decisoes: {},
@@ -95,7 +95,7 @@ export default function TelaRelatorio({ isDark = false }) {
           const draft = JSON.parse(raw);
           setForm({
             celulaId:         dadosCelula.id,
-            dataReuniao:      draft.dataReuniao      || new Date().toISOString().split("T")[0],
+            dataReuniao:      draft.dataReuniao      || (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })(),
             estudo:           draft.estudo           || "",
             selecionadosKeys: draft.selecionadosKeys || [],
             decisoes:         draft.decisoes         || {},

@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   UserPlus, Users, ShieldCheck, Power, Trash2, LogOut,
   Mail, Key, User, Shield, Loader2, RefreshCcw, Pencil, X,
-  Sun, Moon, Eye, EyeOff
+  Sun, Moon, Eye, EyeOff, CheckCircle, XCircle, Clock
 } from "lucide-react";
 
-/* ─── Cores Oficiais Igreja do Evangelho Quadrangular ─── */
+/* ═══ Cores Oficiais Igreja do Evangelho Quadrangular ═══ */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#8B0B1F",
@@ -25,7 +25,7 @@ const IEQ = {
 
 const perfis = ["ADMIN", "PASTOR", "LIDER_CELULA", "SECRETARIO", "TESOUREIRO"];
 
-/* ─── Cruz Quadrangular SVG ─── */
+/* ═══ Cruz Quadrangular SVG ═══ */
 function QuadrangularCross({ size = 32 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -62,19 +62,16 @@ function InputIEQ({ icon, isDark, onChange, type, ...props }) {
   const [showPwd, setShowPwd] = useState(false);
   const isPassword = type === "password";
   const inputType  = isPassword && showPwd ? "text" : type;
-
   const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
   return (
       <div style={{ position: "relative" }}>
-        {/* ícone esquerdo */}
         <div style={{
           position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)",
           color: IEQ.red, opacity: .7, pointerEvents: "none", zIndex: 1,
         }}>
           {icon}
         </div>
-
         <input
             {...props}
             type={inputType}
@@ -82,8 +79,6 @@ function InputIEQ({ icon, isDark, onChange, type, ...props }) {
             className="ieq-input-field"
             style={{ paddingLeft: 44, paddingRight: isPassword ? 44 : 16 }}
         />
-
-        {/* botão mostrar/ocultar */}
         {isPassword && (
             <button
                 type="button"
@@ -108,9 +103,12 @@ function InputIEQ({ icon, isDark, onChange, type, ...props }) {
 
 export default function AdminUsers() {
   const [usuarios,        setUsuarios]        = useState([]);
+  const [pendentes,       setPendentes]       = useState(new Set()); // IDs com alteração pendente
   const [loading,         setLoading]         = useState(true);
   const [sending,         setSending]         = useState(false);
+  const [aprovando,       setAprovando]       = useState(null); // ID sendo aprovado/rejeitado
   const [erro,            setErro]            = useState("");
+  const [sucesso,         setSucesso]         = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editandoId,      setEditandoId]      = useState(null);
   const [form,            setForm]            = useState({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" });
@@ -118,12 +116,17 @@ export default function AdminUsers() {
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
 
+  /* Carrega lista principal + IDs com alteração pendente em paralelo */
   const carregarUsuarios = useCallback(async () => {
     setLoading(true);
     setErro("");
     try {
-      const res = await api.get("usuarios");
-      setUsuarios(res.data);
+      const [resUsuarios, resPendentes] = await Promise.all([
+        api.get("usuarios"),
+        api.get("usuarios/com-alteracao-pendente"),
+      ]);
+      setUsuarios(resUsuarios.data);
+      setPendentes(new Set(resPendentes.data.map(u => u.id)));
     } catch (err) {
       if (err.response?.status === 401) { handleLogout(); return; }
       setErro("Não foi possível sincronizar os usuários.");
@@ -134,6 +137,13 @@ export default function AdminUsers() {
 
   useEffect(() => { carregarUsuarios(); }, [carregarUsuarios]);
 
+  /* ── Mostrar mensagem de sucesso temporária ── */
+  const mostrarSucesso = (msg) => {
+    setSucesso(msg);
+    setTimeout(() => setSucesso(""), 3500);
+  };
+
+  /* ── CRUD existente ── */
   const adicionarUsuario = async (e) => {
     e.preventDefault();
     setSending(true);
@@ -142,6 +152,7 @@ export default function AdminUsers() {
       await api.post("usuarios", form);
       setForm({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" });
       carregarUsuarios();
+      mostrarSucesso("Acesso liberado com sucesso.");
     } catch (err) {
       if (err.response?.status === 401) { handleLogout(); return; }
       setErro("Falha ao criar novo acesso.");
@@ -194,6 +205,37 @@ export default function AdminUsers() {
     }
   };
 
+  /* ── NOVOS: aprovar / rejeitar alteração pendente ── */
+  const aprovarAlteracao = async (id, nome) => {
+    if (!window.confirm(`Aprovar a solicitação de alteração de "${nome}"?`)) return;
+    setAprovando(id);
+    try {
+      await api.patch(`usuarios/${id}/aprovar-alteracao`);
+      mostrarSucesso(`Alteração de ${nome} aprovada com sucesso.`);
+      carregarUsuarios();
+    } catch (err) {
+      if (err.response?.status === 401) { handleLogout(); return; }
+      setErro("Erro ao aprovar alteração.");
+    } finally {
+      setAprovando(null);
+    }
+  };
+
+  const rejeitarAlteracao = async (id, nome) => {
+    if (!window.confirm(`Rejeitar a solicitação de alteração de "${nome}"? Esta ação descartará os dados pendentes.`)) return;
+    setAprovando(id);
+    try {
+      await api.patch(`usuarios/${id}/rejeitar-alteracao`);
+      mostrarSucesso(`Alteração de ${nome} rejeitada.`);
+      carregarUsuarios();
+    } catch (err) {
+      if (err.response?.status === 401) { handleLogout(); return; }
+      setErro("Erro ao rejeitar alteração.");
+    } finally {
+      setAprovando(null);
+    }
+  };
+
   const bg            = isDark ? IEQ.dark     : "#F0EAE8";
   const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
@@ -206,6 +248,7 @@ export default function AdminUsers() {
     @keyframes pulse   { 0%,100% { transform:scale(1); opacity:.45; } 50% { transform:scale(1.12); opacity:.12; } }
     @keyframes spin    { to { transform: rotate(360deg); } }
     @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pendentePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(253,184,19,.45); } 50% { box-shadow: 0 0 0 5px rgba(253,184,19,0); } }
 
     .ieq-bg {
       position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -285,14 +328,7 @@ export default function AdminUsers() {
     .ieq-select-field:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
     .ieq-select-field option { background:${isDark ? "#110A0D" : "#fff"}; color:${isDark ? IEQ.offWhite : "#1A0A0D"}; }
 
-    .ieq-badge {
-      display:inline-flex; align-items:center; gap:6px;
-      padding:5px 14px; border-radius:99px;
-      font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.18em;
-      border:1px solid;
-    }
-
-    /* ── MEMBER ROW — responsivo ── */
+    /* MEMBER ROW */
     .ieq-member-row {
       display: flex;
       flex-direction: column;
@@ -305,7 +341,13 @@ export default function AdminUsers() {
     .ieq-member-row:hover { background:${isDark ? "rgba(200,16,46,.06)" : "rgba(200,16,46,.06)"}; }
     .ieq-member-row:last-child { border-bottom:none; }
 
-    /* desktop: volta a ser linha */
+    /* linha com pendência — borda amarela sutil */
+    .ieq-member-row.tem-pendencia {
+      background: ${isDark ? "rgba(253,184,19,.04)" : "rgba(253,184,19,.06)"};
+      border-left: 3px solid ${IEQ.yellow};
+    }
+    .ieq-member-row.tem-pendencia:hover { background:${isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.1)"}; }
+
     @media (min-width: 600px) {
       .ieq-member-row {
         flex-direction: row;
@@ -329,8 +371,7 @@ export default function AdminUsers() {
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      /* no mobile, alinha badges + ações à esquerda debaixo do nome */
-      padding-left: 52px; /* avatar 40px + gap 12px */
+      padding-left: 52px;
     }
     @media (min-width: 600px) {
       .ieq-member-actions {
@@ -346,20 +387,20 @@ export default function AdminUsers() {
       display:flex; align-items:center; justify-content:center;
       color:#fff; font-family:'Cinzel',serif; font-weight:700; font-size:14px;
     }
-
     .ieq-avatar-inactive {
       background: ${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"} !important;
     }
+    /* avatar com pendência pulsa em amarelo */
+    .ieq-avatar-pendente {
+      animation: pendentePulse 2s ease-in-out infinite;
+      border: 2px solid ${IEQ.yellow};
+    }
 
-    /* nome com quebra */
     .ieq-member-name {
       font-family:'Cinzel',serif; font-size:12px; font-weight:700;
       letter-spacing:.1em; margin:0;
-      /* quebra elegante sem truncar */
-      overflow-wrap: break-word;
-      word-break: break-word;
-      white-space: normal;
-      line-height: 1.35;
+      overflow-wrap: break-word; word-break: break-word;
+      white-space: normal; line-height: 1.35;
     }
     .ieq-member-email {
       font-family:'EB Garamond',serif; font-size:13px; margin:0;
@@ -389,7 +430,6 @@ export default function AdminUsers() {
     @media (min-width:520px) {
       .ieq-modal-backdrop { align-items:center; padding:12px; }
     }
-
     .ieq-modal-box {
       position:relative; z-index:10;
       width:100%; max-height:90vh;
@@ -401,7 +441,6 @@ export default function AdminUsers() {
       .ieq-modal-box { border-radius:14px; max-height:calc(100vh - 24px); }
     }
 
-    /* grid 1col mobile, 2col desktop */
     .ieq-admin-grid {
       display:grid;
       grid-template-columns:1fr;
@@ -411,34 +450,67 @@ export default function AdminUsers() {
       .ieq-admin-grid { grid-template-columns:380px 1fr; }
     }
 
-    /* Action icon btn */
     .ieq-icon-btn {
       background:none; border:none; cursor:pointer;
       width:32px; height:32px; border-radius:6px;
       display:flex; align-items:center; justify-content:center;
       transition:all .2s; flex-shrink:0;
     }
+    .ieq-icon-btn:disabled { opacity:.4; cursor:not-allowed; }
 
-    /* perfil badge */
+    /* botões de aprovar/rejeitar */
+    .ieq-btn-aprovar {
+      background: none;
+      border: 1px solid rgba(18,160,96,.35);
+      border-radius: 6px;
+      color: #12A060;
+      font-family:'Cinzel',serif; font-size:8px; font-weight:700; letter-spacing:.12em;
+      cursor:pointer; transition: all .2s;
+      display:flex; align-items:center; gap:5px;
+      padding: 5px 10px; white-space:nowrap; flex-shrink:0;
+    }
+    .ieq-btn-aprovar:hover:not(:disabled) { background:rgba(18,160,96,.12); border-color:#12A060; }
+    .ieq-btn-aprovar:disabled { opacity:.4; cursor:not-allowed; }
+
+    .ieq-btn-rejeitar {
+      background: none;
+      border: 1px solid rgba(200,16,46,.35);
+      border-radius: 6px;
+      color: ${IEQ.red};
+      font-family:'Cinzel',serif; font-size:8px; font-weight:700; letter-spacing:.12em;
+      cursor:pointer; transition: all .2s;
+      display:flex; align-items:center; gap:5px;
+      padding: 5px 10px; white-space:nowrap; flex-shrink:0;
+    }
+    .ieq-btn-rejeitar:hover:not(:disabled) { background:rgba(200,16,46,.1); border-color:${IEQ.red}; }
+    .ieq-btn-rejeitar:disabled { opacity:.4; cursor:not-allowed; }
+
     .ieq-perfil-badge {
       display:inline-flex; align-items:center;
       padding:4px 10px; border-radius:99px;
       font-family:'Cinzel',serif; font-size:8px; font-weight:700; letter-spacing:.12em;
-      border:1px solid;
-      white-space: nowrap;
+      border:1px solid; white-space: nowrap;
     }
 
-    /* stat kpi */
     .ieq-stat-box {
       background:${isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.04)"};
       border:1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"};
       border-radius:10px; padding:14px 16px;
       display:flex; align-items:center; gap:12px;
     }
+
+    /* faixa de aviso pendência no topo da lista */
+    .ieq-pendentes-banner {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 18px;
+      background:${isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.12)"};
+      border-bottom: 1px solid rgba(253,184,19,.25);
+    }
   `;
 
   const ativos    = usuarios.filter(u => u.ativo).length;
   const suspensos = usuarios.filter(u => !u.ativo).length;
+  const qtdPendentes = pendentes.size;
 
   if (loading && usuarios.length === 0) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? IEQ.dark : "#F0EAE8" }}>
@@ -457,7 +529,7 @@ export default function AdminUsers() {
 
         <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"24px 16px 0" }}>
 
-          {/* ── HEADER ── */}
+          {/* HEADER */}
           <motion.header
               initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
               style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:28, flexWrap:"wrap", gap:14 }}
@@ -487,15 +559,16 @@ export default function AdminUsers() {
             </div>
           </motion.header>
 
-          {/* ── KPI strip ── */}
+          {/* KPI strip — inclui pendentes */}
           <motion.div
               initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:.1 }}
-              style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:24 }}
+              style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10, marginBottom:24 }}
           >
             {[
-              { icon:<Users size={18}/>,  label:"TOTAL",     value: usuarios.length, color: IEQ.blue   },
-              { icon:<Power size={18}/>,  label:"ATIVOS",    value: ativos,          color: "#12A060"   },
-              { icon:<Shield size={18}/>, label:"SUSPENSOS", value: suspensos,       color: IEQ.redDark },
+              { icon:<Users size={18}/>,     label:"TOTAL",     value: usuarios.length, color: IEQ.blue      },
+              { icon:<Power size={18}/>,     label:"ATIVOS",    value: ativos,          color: "#12A060"     },
+              { icon:<Shield size={18}/>,    label:"SUSPENSOS", value: suspensos,       color: IEQ.redDark   },
+              { icon:<Clock size={18}/>,     label:"PENDENTES", value: qtdPendentes,    color: IEQ.yellowDark },
             ].map(({ icon, label, value, color }) => (
                 <div key={label} className="ieq-stat-box">
                   <div style={{ width:36, height:36, borderRadius:8, background:`${color}18`, display:"flex", alignItems:"center", justifyContent:"center", color, flexShrink:0 }}>
@@ -503,16 +576,16 @@ export default function AdminUsers() {
                   </div>
                   <div style={{ minWidth:0 }}>
                     <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".2em", color:textSecondary, margin:0 }}>{label}</p>
-                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(20px,5vw,28px)", fontWeight:700, color:textPrimary, margin:0, lineHeight:1.1 }}>{loading ? "—" : value}</p>
+                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:"clamp(20px,5vw,28px)", fontWeight:700, color: label === "PENDENTES" && value > 0 ? IEQ.yellowDark : textPrimary, margin:0, lineHeight:1.1 }}>{loading ? "—" : value}</p>
                   </div>
                 </div>
             ))}
           </motion.div>
 
-          {/* ── GRID PRINCIPAL ── */}
+          {/* GRID PRINCIPAL */}
           <div className="ieq-admin-grid">
 
-            {/* ── FORMULÁRIO ── */}
+            {/* FORMULÁRIO */}
             <motion.div initial={{ opacity:0, x:-20 }} animate={{ opacity:1, x:0 }} transition={{ delay:.15 }}>
               <div className="ieq-card" style={{ padding:"24px 20px" }}>
 
@@ -549,7 +622,7 @@ export default function AdminUsers() {
               </div>
             </motion.div>
 
-            {/* ── LISTAGEM ── */}
+            {/* LISTAGEM */}
             <motion.div initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }} transition={{ delay:.2 }}>
               <div className="ieq-card" style={{ overflow:"hidden" }}>
 
@@ -574,6 +647,21 @@ export default function AdminUsers() {
                   </button>
                 </div>
 
+                {/* faixa de aviso quando há pendências */}
+                <AnimatePresence>
+                  {qtdPendentes > 0 && (
+                      <motion.div
+                          initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:"auto" }} exit={{ opacity:0, height:0 }}
+                          className="ieq-pendentes-banner"
+                      >
+                        <Clock size={14} style={{ color: IEQ.yellowDark, flexShrink:0 }} />
+                        <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".14em", color: IEQ.yellowDark }}>
+                        {qtdPendentes} SOLICITAÇÃO{qtdPendentes > 1 ? "ÕES" : ""} DE ALTERAÇÃO AGUARDANDO APROVAÇÃO
+                      </span>
+                      </motion.div>
+                  )}
+                </AnimatePresence>
+
                 {/* lista */}
                 <div style={{ minHeight:120 }}>
                   {loading && usuarios.length === 0 ? (
@@ -582,95 +670,140 @@ export default function AdminUsers() {
                       </div>
                   ) : (
                       <AnimatePresence>
-                        {usuarios.map((u, i) => (
-                            <motion.div
-                                key={u.id}
-                                initial={{ opacity:0, y:8 }}
-                                animate={{ opacity:1, y:0 }}
-                                exit={{ opacity:0, x:-20 }}
-                                transition={{ delay: i * 0.04 }}
-                                className="ieq-member-row"
-                            >
-                              {/* identidade */}
-                              <div className="ieq-member-identity">
-                                <div
-                                    className={`ieq-avatar${u.ativo ? "" : " ieq-avatar-inactive"}`}
-                                    style={u.ativo ? {} : { background:`${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"}` }}
-                                >
-                                  {u.nome?.charAt(0).toUpperCase()}
+                        {usuarios.map((u, i) => {
+                          const temPendencia = pendentes.has(u.id);
+                          const estaAprovando = aprovando === u.id;
+
+                          return (
+                              <motion.div
+                                  key={u.id}
+                                  initial={{ opacity:0, y:8 }}
+                                  animate={{ opacity:1, y:0 }}
+                                  exit={{ opacity:0, x:-20 }}
+                                  transition={{ delay: i * 0.04 }}
+                                  className={`ieq-member-row${temPendencia ? " tem-pendencia" : ""}`}
+                              >
+                                {/* identidade */}
+                                <div className="ieq-member-identity">
+                                  <div
+                                      className={[
+                                        "ieq-avatar",
+                                        u.ativo ? "" : "ieq-avatar-inactive",
+                                        temPendencia ? "ieq-avatar-pendente" : "",
+                                      ].join(" ").trim()}
+                                      style={u.ativo ? {} : { background:`${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"}` }}
+                                  >
+                                    {u.nome?.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div style={{ minWidth:0, flex:1 }}>
+                                    <p className="ieq-member-name" style={{ color:textPrimary }}>{u.nome}</p>
+                                    <p className="ieq-member-email" style={{ color:textSecondary }}>{u.email}</p>
+                                  </div>
                                 </div>
-                                <div style={{ minWidth:0, flex:1 }}>
-                                  <p className="ieq-member-name" style={{ color:textPrimary }}>{u.nome}</p>
-                                  <p className="ieq-member-email" style={{ color:textSecondary }}>{u.email}</p>
+
+                                {/* badges + ações */}
+                                <div className="ieq-member-actions">
+
+                                  {/* perfil */}
+                                  <span className="ieq-perfil-badge" style={{
+                                    color: IEQ.blue,
+                                    borderColor: `${IEQ.blue}30`,
+                                    background: `${IEQ.blue}10`,
+                                  }}>
+                                    {u.perfil?.replace(/_/g," ")}
+                                  </span>
+
+                                  {/* status */}
+                                  <span className="ieq-perfil-badge" style={{
+                                    color:       u.ativo ? "#12A060" : textSecondary,
+                                    borderColor: u.ativo ? "#12A06030" : `${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                                    background:  u.ativo ? "#12A06010" : `${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)"}`,
+                                    display:"flex", alignItems:"center", gap:5,
+                                  }}>
+                                    <span style={{
+                                      width:6, height:6, borderRadius:"50%",
+                                      background: u.ativo ? "#12A060" : (isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)"),
+                                      display:"inline-block",
+                                      animation: u.ativo ? "pulse 2s ease-in-out infinite" : "none",
+                                      flexShrink: 0,
+                                    }} />
+                                    {u.ativo ? "ATIVO" : "SUSPENSO"}
+                                  </span>
+
+                                  {/* ── BOTÕES APROVAR / REJEITAR (apenas quando há pendência) ── */}
+                                  <AnimatePresence>
+                                    {temPendencia && (
+                                        <motion.div
+                                            initial={{ opacity:0, scale:.85 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0, scale:.85 }}
+                                            style={{ display:"flex", gap:6, alignItems:"center" }}
+                                        >
+                                          <button
+                                              className="ieq-btn-aprovar"
+                                              onClick={() => aprovarAlteracao(u.id, u.nome)}
+                                              disabled={estaAprovando}
+                                              title="Aprovar alteração de dados pendente"
+                                          >
+                                            {estaAprovando
+                                                ? <Loader2 size={12} className="spin-icon" />
+                                                : <CheckCircle size={12} />
+                                            }
+                                            APROVAR
+                                          </button>
+                                          <button
+                                              className="ieq-btn-rejeitar"
+                                              onClick={() => rejeitarAlteracao(u.id, u.nome)}
+                                              disabled={estaAprovando}
+                                              title="Rejeitar alteração de dados pendente"
+                                          >
+                                            {estaAprovando
+                                                ? <Loader2 size={12} className="spin-icon" />
+                                                : <XCircle size={12} />
+                                            }
+                                            REJEITAR
+                                          </button>
+                                        </motion.div>
+                                    )}
+                                  </AnimatePresence>
+
+                                  {/* editar */}
+                                  <button
+                                      className="ieq-icon-btn"
+                                      title="Editar"
+                                      onClick={() => abrirEdicao(u)}
+                                      style={{ color:textSecondary }}
+                                      onMouseEnter={e => { e.currentTarget.style.color=IEQ.blue; e.currentTarget.style.background=`${IEQ.blue}12`; }}
+                                      onMouseLeave={e => { e.currentTarget.style.color=textSecondary; e.currentTarget.style.background="none"; }}
+                                  >
+                                    <Pencil size={15} />
+                                  </button>
+
+                                  {/* alternar status */}
+                                  <button
+                                      className="ieq-icon-btn"
+                                      title="Alternar status"
+                                      onClick={() => alternarStatus(u.id)}
+                                      style={{ color: u.ativo ? IEQ.yellowDark : "#12A060" }}
+                                      onMouseEnter={e => { e.currentTarget.style.background= u.ativo ? "rgba(253,184,19,.12)" : "rgba(18,160,96,.12)"; }}
+                                      onMouseLeave={e => { e.currentTarget.style.background="none"; }}
+                                  >
+                                    <Power size={15} />
+                                  </button>
+
+                                  {/* deletar */}
+                                  <button
+                                      className="ieq-icon-btn"
+                                      title="Excluir"
+                                      onClick={() => deletarUsuario(u.id)}
+                                      style={{ color:textSecondary }}
+                                      onMouseEnter={e => { e.currentTarget.style.color=IEQ.red; e.currentTarget.style.background="rgba(200,16,46,.1)"; }}
+                                      onMouseLeave={e => { e.currentTarget.style.color=textSecondary; e.currentTarget.style.background="none"; }}
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
                                 </div>
-                              </div>
-
-                              {/* badges + ações */}
-                              <div className="ieq-member-actions">
-                                {/* perfil */}
-                                <span className="ieq-perfil-badge" style={{
-                                  color: IEQ.blue,
-                                  borderColor: `${IEQ.blue}30`,
-                                  background: `${IEQ.blue}10`,
-                                }}>
-                            {u.perfil?.replace(/_/g," ")}
-                          </span>
-
-                                {/* status */}
-                                <span className="ieq-perfil-badge" style={{
-                                  color:       u.ativo ? "#12A060" : textSecondary,
-                                  borderColor: u.ativo ? "#12A06030" : `${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                                  background:  u.ativo ? "#12A06010" : `${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)"}`,
-                                  display:"flex", alignItems:"center", gap:5,
-                                }}>
-                            <span style={{
-                              width:6, height:6, borderRadius:"50%",
-                              background: u.ativo ? "#12A060" : (isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)"),
-                              display:"inline-block",
-                              animation: u.ativo ? "pulse 2s ease-in-out infinite" : "none",
-                              flexShrink: 0,
-                            }} />
-                                  {u.ativo ? "ATIVO" : "SUSPENSO"}
-                          </span>
-
-                                {/* editar */}
-                                <button
-                                    className="ieq-icon-btn"
-                                    title="Editar"
-                                    onClick={() => abrirEdicao(u)}
-                                    style={{ color:textSecondary }}
-                                    onMouseEnter={e => { e.currentTarget.style.color=IEQ.blue; e.currentTarget.style.background=`${IEQ.blue}12`; }}
-                                    onMouseLeave={e => { e.currentTarget.style.color=textSecondary; e.currentTarget.style.background="none"; }}
-                                >
-                                  <Pencil size={15} />
-                                </button>
-
-                                {/* alternar status */}
-                                <button
-                                    className="ieq-icon-btn"
-                                    title="Alternar status"
-                                    onClick={() => alternarStatus(u.id)}
-                                    style={{ color: u.ativo ? IEQ.yellowDark : "#12A060" }}
-                                    onMouseEnter={e => { e.currentTarget.style.background= u.ativo ? "rgba(253,184,19,.12)" : "rgba(18,160,96,.12)"; }}
-                                    onMouseLeave={e => { e.currentTarget.style.background="none"; }}
-                                >
-                                  <Power size={15} />
-                                </button>
-
-                                {/* deletar */}
-                                <button
-                                    className="ieq-icon-btn"
-                                    title="Excluir"
-                                    onClick={() => deletarUsuario(u.id)}
-                                    style={{ color:textSecondary }}
-                                    onMouseEnter={e => { e.currentTarget.style.color=IEQ.red; e.currentTarget.style.background="rgba(200,16,46,.1)"; }}
-                                    onMouseLeave={e => { e.currentTarget.style.color=textSecondary; e.currentTarget.style.background="none"; }}
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </div>
-                            </motion.div>
-                        ))}
+                              </motion.div>
+                          );
+                        })}
                       </AnimatePresence>
                   )}
                 </div>
@@ -684,7 +817,7 @@ export default function AdminUsers() {
           </p>
         </div>
 
-        {/* ── MODAL DE EDIÇÃO ── */}
+        {/* MODAL DE EDIÇÃO */}
         <AnimatePresence>
           {isEditModalOpen && (
               <div className="ieq-modal-backdrop">
@@ -699,7 +832,6 @@ export default function AdminUsers() {
                     style={{ maxWidth:440 }}
                 >
                   <div style={{ padding:"24px 20px", overflowY:"auto", flex:1 }}>
-
                     <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18 }}>
                       <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                         <QuadrangularCross size={26} />
@@ -747,7 +879,20 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ── TOAST ERRO ── */}
+        {/* TOAST SUCESSO */}
+        <AnimatePresence>
+          {sucesso && (
+              <motion.div
+                  initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }}
+                  style={{ position:"fixed", bottom:72, left:"50%", transform:"translateX(-50%)", background:"#12A060", color:"#fff", padding:"14px 20px", borderRadius:10, fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".15em", display:"flex", alignItems:"center", gap:12, zIndex:200, maxWidth:"90vw", boxShadow:"0 8px 32px rgba(18,160,96,.35)" }}
+              >
+                <CheckCircle size={14} />
+                <span>{sucesso}</span>
+              </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* TOAST ERRO */}
         <AnimatePresence>
           {erro && (
               <motion.div
