@@ -10,14 +10,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post("auth/login", { email, senha });
       const receivedToken = response.data.token;
-      if (!receivedToken) throw new Error("Token não recebido do servidor");
-
+      if (!receivedToken) throw new Error("sem_token");
       localStorage.setItem("token", receivedToken);
       setToken(receivedToken);
       return receivedToken;
     } catch (error) {
-      console.error("Erro no login:", error);
-      throw new Error("Credenciais inválidas ou erro de conexão");
+      // ✅ Relança o erro original — preserva error.response.status e error.response.data
+      throw error;
     }
   };
 

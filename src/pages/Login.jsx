@@ -104,7 +104,7 @@ export default function Login() {
     const [cadSucesso, setCadSucesso]     = useState(false);
 
     // ── Alterar state ─────────────────────────────────────────
-    const [altEmail,          setAltEmail]          = useState("");  // identifica o usuário
+    const [altEmail,          setAltEmail]          = useState("");
     const [altSenhaAtual,     setAltSenhaAtual]     = useState("");
     const [altEmailNovo,      setAltEmailNovo]      = useState("");
     const [altNovaSenha,      setAltNovaSenha]      = useState("");
@@ -165,11 +165,7 @@ export default function Login() {
         e.preventDefault();
         setError(null);
         setLoading(true);
-        if (attempts >= 5) {
-            setError({ tipo:"limite", titulo:"Muitas tentativas", msg:"Você errou a senha muitas vezes. Aguarde alguns minutos e tente novamente." });
-            setLoading(false);
-            return;
-        }
+
         try {
             const token = await login(email, password);
             if (!token) throw new Error("sem_token");
@@ -188,17 +184,60 @@ export default function Login() {
             setAttempts(0);
         } catch (err) {
             const status = err?.response?.status;
+            const body   = err?.response?.data;
+
+            // Incrementa contador apenas para feedback visual
             setAttempts(prev => prev + 1);
-            if (status === 401 || status === 403) {
-                setError({ tipo:"senha", titulo:"Credenciais inválidas", msg:"E-mail ou senha incorretos. Verifique os dados e tente novamente." });
-            } else if (status === 429) {
-                setError({ tipo:"limite", titulo:"Muitas tentativas", msg:"Aguarde alguns minutos antes de tentar novamente." });
+
+            if (status === 429) {
+                // Backend: { erro: "Muitas tentativas de login.", mensagem: "Tente novamente em X minuto(s).", tentativas: 0 }
+                setError({
+                    tipo:   "limite",
+                    titulo: "Acesso temporariamente bloqueado",
+                    msg:    `⏳ ${body?.mensagem ?? "Aguarde alguns minutos antes de tentar novamente."}`,
+                });
+            } else if (status === 401 || status === 403) {
+                // Backend: { erro: "Credenciais inválidas.", mensagem: "Você tem X tentativa(s) restante(s)." ou "Conta bloqueada por 5 minutos.", tentativasRestantes: N }
+                const tentativas = body?.tentativasRestantes ?? 0;
+                const msgBack    = body?.mensagem ?? "";
+                const bloqueado  = tentativas === 0 || msgBack.toLowerCase().includes("bloqueada");
+
+                if (bloqueado) {
+                    // Última tentativa esgotada — conta bloqueada
+                    setError({
+                        tipo:   "limite",
+                        titulo: "Conta bloqueada",
+                        msg:    `🔒 Muitas tentativas incorretas. ${msgBack || "Conta bloqueada por 5 minutos."}`,
+                    });
+                } else {
+                    // Ainda tem tentativas restantes
+                    setError({
+                        tipo:   "senha",
+                        titulo: "Credenciais inválidas",
+                        msg:    `❌ E-mail ou senha incorretos. ${msgBack}`,
+                    });
+                }
             } else if (!navigator.onLine || err.code === "ERR_NETWORK" || err.message === "Network Error") {
-                setError({ tipo:"rede", titulo:"Sem conexão", msg:"Não foi possível conectar ao servidor. Verifique sua internet e tente novamente." });
+                setError({
+                    tipo:   "rede",
+                    titulo: "Sem conexão",
+                    msg:    "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.",
+                });
             } else if (err.message === "sem_token") {
-                setError({ tipo:"geral", titulo:"Erro no servidor", msg:"O servidor não retornou uma resposta válida. Tente novamente em instantes." });
+                setError({
+                    tipo:   "geral",
+                    titulo: "Erro no servidor",
+                    msg:    "O servidor não retornou uma resposta válida. Tente novamente em instantes.",
+                });
             } else {
-                setError({ tipo:"senha", titulo:"Credenciais inválidas", msg:"E-mail ou senha incorretos. Verifique os dados e tente novamente." });
+                const msgBack = body?.mensagem || body?.message || body?.erro;
+                setError({
+                    tipo:   "geral",
+                    titulo: "Erro inesperado",
+                    msg:    typeof msgBack === "string"
+                        ? msgBack
+                        : "Ocorreu um erro inesperado. Tente novamente.",
+                });
             }
         } finally { setLoading(false); }
     };
@@ -440,12 +479,6 @@ export default function Login() {
                                     <div>
                                         <p style={{ margin:0, fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, color:erroColor(error), letterSpacing:".06em" }}>{error.titulo}</p>
                                         <p style={{ margin:"4px 0 0", fontSize:12.5, color:isDark?"rgba(245,240,232,.75)":"rgba(26,10,13,.7)", lineHeight:1.5 }}>{error.msg}</p>
-                                        {error.tipo==="senha" && attempts>0 && attempts<5 && (
-                                            <p style={{ margin:"4px 0 0", fontSize:11, color:erroColor(error), opacity:0.7 }}>
-                                                Tentativa {attempts} de 5.{" "}
-                                                {5-attempts===1 ? "Última chance antes do bloqueio temporário." : `${5-attempts} restantes.`}
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
                             )}

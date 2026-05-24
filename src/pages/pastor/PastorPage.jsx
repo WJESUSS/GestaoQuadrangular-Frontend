@@ -57,34 +57,7 @@ const PAGE_TITLES = {
   "missao70":          "Missão 70 · Evangelismo",
 };
 
-/* ─── Cruz memoizada ─────────────────────────────────────────────────────── */
-const QuadrangularCross = React.memo(function QuadrangularCross({ size = 32 }) {
-  return (
-      <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
-        <defs>
-          <linearGradient id="pgV" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor={IEQ.redLight} />
-            <stop offset="100%" stopColor={IEQ.redDark}  />
-          </linearGradient>
-          <linearGradient id="pgH" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor={IEQ.blueDark}  />
-            <stop offset="50%"  stopColor={IEQ.blueLight} />
-            <stop offset="100%" stopColor={IEQ.blueDark}  />
-          </linearGradient>
-          <filter id="pglow">
-            <feGaussianBlur stdDeviation="2" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <rect x="38" y="4"  width="24" height="92" rx="3" fill="url(#pgV)" filter="url(#pglow)" />
-        <rect x="4"  y="38" width="92" height="24" rx="3" fill="url(#pgH)" filter="url(#pglow)" />
-        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#pglow)" />
-        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
-      </svg>
-  );
-});
-
-/* ─── CSS estático (fora do componente — não recria a cada render) ────────── */
+/* ─── CSS estático ───────────────────────────────────────────────────────── */
 const STATIC_CSS = `
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
@@ -264,34 +237,56 @@ const STATIC_CSS = `
   }
 
   .ieq-stat-mini { display:flex; flex-direction:column; align-items:flex-end; }
+
+  /* Avatar do logo (topo sidebar) */
+  .pastor-logo-avatar {
+    width:38px; height:38px; border-radius:50%; overflow:hidden;
+    border:2px solid rgba(200,16,46,.4);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .pastor-logo-avatar img {
+    width:100%; height:100%; object-fit:cover; border-radius:50%;
+  }
+  .pastor-logo-avatar-fallback {
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(200,16,46,.08);
+    font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#F5F0E8;
+  }
 `;
 
 export default function PastorPage() {
-  const [celulas,     setCelulas]     = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDark,      setIsDark]      = useState(() => localStorage.getItem("theme") === "dark");
+  const [celulas,       setCelulas]       = useState([]);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [sidebarOpen,   setSidebarOpen]   = useState(false);
+  const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
   const location = useLocation();
 
   useEffect(() => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
-  // Fecha sidebar ao navegar
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     (async () => {
       const token = localStorage.getItem("token")?.replace(/"/g, "");
       try {
-        const res = await api.get("/celulas", { headers: { Authorization: `Bearer ${token}` } });
-        setCelulas(res.data || []);
-      } catch (err) { console.error("Erro ao carregar células:", err); }
-      finally { setLoading(false); }
+        const [resCelulas, resUsuario] = await Promise.all([
+          api.get("/celulas", { headers: { Authorization: `Bearer ${token}` } }),
+          api.get("/usuarios/me"),
+        ]);
+        setCelulas(resCelulas.data || []);
+        setUsuarioLogado(resUsuario.data);
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
-  // Derivados memoizados
   const { totalAtivas, porcentagem } = useMemo(() => {
     const totalAtivas = celulas.filter(c => c.ativa === true).length;
     const porcentagem = celulas.length > 0 ? Math.round((totalAtivas / celulas.length) * 100) : 0;
@@ -310,8 +305,15 @@ export default function PastorPage() {
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? IEQ.dark : "#F0EAE8" }}>
         <style>{STATIC_CSS}</style>
         <div style={{ textAlign:"center" }}>
-          <QuadrangularCross size={48} />
-          <p style={{ fontFamily:"'Cinzel',serif", color: isDark ? IEQ.offWhite : IEQ.redDark, marginTop:16, letterSpacing:".2em", fontSize:11 }}>CARREGANDO...</p>
+          <div style={{ width:64, height:64, borderRadius:"50%", margin:"0 auto 16px", overflow:"hidden", border:"2px solid rgba(200,16,46,.4)", display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(200,16,46,.08)" }}>
+            {usuarioLogado?.fotoPerfil
+                ? <img src={usuarioLogado.fotoPerfil} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                : <span style={{ fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:22, color:IEQ.offWhite }}>
+                  {usuarioLogado?.nome?.charAt(0).toUpperCase() || "P"}
+                </span>
+            }
+          </div>
+          <p style={{ fontFamily:"'Cinzel',serif", color: isDark ? IEQ.offWhite : IEQ.redDark, letterSpacing:".2em", fontSize:11 }}>CARREGANDO...</p>
         </div>
       </div>
   );
@@ -335,21 +337,36 @@ export default function PastorPage() {
         {/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */}
         <aside className={`pastor-sidebar ${sidebarOpen ? "open" : "closed"}`}>
 
-          {/* Logo */}
+          {/* ─── Logo com foto do pastor no lugar da cruz ─────────────────────── */}
           <div style={{ padding:"28px 20px 22px", borderBottom:"1px solid rgba(200,16,46,.12)" }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
               <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+
+                {/* Círculo com foto */}
                 <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
                   <div className="pulse-ring" style={{ width:52, height:52 }} />
-                  <div style={{ width:38, height:38, borderRadius:"50%", background:"rgba(200,16,46,.08)", border:"1px solid rgba(200,16,46,.25)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    <QuadrangularCross size={24} />
+                  <div className="pastor-logo-avatar">
+                    {usuarioLogado?.fotoPerfil ? (
+                        <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome || "Pastor"} />
+                    ) : (
+                        <div className="pastor-logo-avatar-fallback">
+                          {usuarioLogado?.nome?.charAt(0).toUpperCase() || "P"}
+                        </div>
+                    )}
                   </div>
                 </div>
+
                 <div>
                   <h2 className="ieq-title" style={{ fontSize:15, fontWeight:700, letterSpacing:".18em" }}>IEQ PITUAÇU</h2>
                   <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".2em", color:"rgba(245,240,232,.35)", marginTop:2 }}>GESTÃO PASTORAL</p>
+                  {usuarioLogado?.nome && (
+                      <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:"rgba(245,240,232,.45)", margin:"3px 0 0", fontStyle:"italic" }}>
+                        {usuarioLogado.nome}
+                      </p>
+                  )}
                 </div>
               </div>
+
               <button onClick={() => setSidebarOpen(false)} className="ieq-icon-btn">
                 <X size={16} />
               </button>
@@ -416,13 +433,16 @@ export default function PastorPage() {
             </NavLink>
           </nav>
 
-          {/* Rodapé */}
+          {/* ─── Rodapé — sem avatar, só texto + logout ──────────────────────── */}
           <div style={{ padding:"14px 16px", borderTop:"1px solid rgba(200,16,46,.1)" }}>
             <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"rgba(200,16,46,.06)", border:"1px solid rgba(200,16,46,.1)", borderRadius:10 }}>
-              <div style={{ width:34, height:34, borderRadius:8, background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:12, flexShrink:0 }}>PS</div>
               <div style={{ flex:1, minWidth:0 }}>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".12em", color:IEQ.offWhite, margin:0 }}>PASTOR</p>
-                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:"rgba(245,240,232,.4)", margin:0 }}>Administrador</p>
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".12em", color:IEQ.offWhite, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                  {usuarioLogado?.nome?.split(" ")[0].toUpperCase() || "PASTOR"}
+                </p>
+                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:"rgba(245,240,232,.4)", margin:0 }}>
+                  {usuarioLogado?.perfil?.replace("ROLE_", "") || "Administrador"}
+                </p>
               </div>
               <button onClick={() => { localStorage.clear(); window.location.href = "/"; }} className="ieq-icon-btn" title="Sair">
                 <LogOut size={14} />
@@ -452,9 +472,9 @@ export default function PastorPage() {
               <div className="ieq-stat-mini" style={{ marginRight:6 }}>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".15em", color:"rgba(200,16,46,.55)" }}>TOTAL</span>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, color:textPrimary, lineHeight:1 }}>
-                {celulas.length}{" "}
+                  {celulas.length}{" "}
                   <span style={{ fontSize:9, color:textSec, fontWeight:400 }}>CÉL.</span>
-              </span>
+                </span>
               </div>
 
               <button className="ieq-icon-btn" onClick={() => setIsDark(d => !d)} title={isDark ? "Modo Claro" : "Modo Escuro"}
