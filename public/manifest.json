@@ -1,0 +1,17 @@
+{
+  "name": "IEQ Pituaçu | Portal Administrativo",
+  "short_name": "IEQ Pituaçu",
+  "description": "Plataforma de gestão e administração eclesiástica da IEQ Pituaçu.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A0608",
+  "theme_color": "#C8102E",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
