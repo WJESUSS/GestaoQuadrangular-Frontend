@@ -88,9 +88,9 @@ export default function TelaPendencias({ isDark = false }) {
 
     .pend-badge {
       display:inline-flex; align-items:center; gap:5px;
-      padding:4px 11px; border-radius:99px;
+      padding:5px 13px; border-radius:99px;
       font-family:'Cinzel',serif; font-size:8.5px; font-weight:700;
-      letter-spacing:.14em; border:1px solid; white-space:nowrap;
+      letter-spacing:.12em; border:1px solid; white-space:nowrap;
     }
 
     .pend-avatar {
@@ -117,6 +117,11 @@ export default function TelaPendencias({ isDark = false }) {
       background:linear-gradient(90deg,transparent,
         ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent);
       margin:8px 0;
+    }
+
+    .pend-status-group {
+      display:flex; flex-direction:column; gap:6px;
+      flex-shrink:0; align-items:flex-end;
     }
   `;
 
@@ -217,12 +222,12 @@ export default function TelaPendencias({ isDark = false }) {
                             </div>
                         </div>
                         <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-              <span className="pend-badge" style={{ color:IEQ.red, borderColor:`${IEQ.red}30`, background:`${IEQ.red}10` }}>
-                <FileText size={10}/> RELATÓRIO
-              </span>
+                            <span className="pend-badge" style={{ color:IEQ.red, borderColor:`${IEQ.red}30`, background:`${IEQ.red}10` }}>
+                                <FileText size={10}/> RELATÓRIO SEMANAL
+                            </span>
                             <span className="pend-badge" style={{ color:IEQ.blue, borderColor:`${IEQ.blue}30`, background:`${IEQ.blue}10` }}>
-                <BookOpen size={10}/> DISCIPULADO
-              </span>
+                                <BookOpen size={10}/> DISCIPULADO
+                            </span>
                         </div>
                     </div>
 
@@ -276,42 +281,53 @@ export default function TelaPendencias({ isDark = false }) {
                                                     {p.nomeCelula}
                                                 </p>
                                                 <div style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap", marginTop:3 }}>
-                          <span style={{ display:"flex", alignItems:"center", gap:5,
-                              fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary }}>
-                            <User size={12}/> {p.nomeLider}
-                          </span>
+                                                    <span style={{ display:"flex", alignItems:"center", gap:5,
+                                                        fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary }}>
+                                                        <User size={12}/> {p.nomeLider}
+                                                    </span>
                                                     {p.bairro && (
                                                         <span style={{ display:"flex", alignItems:"center", gap:5,
                                                             fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary }}>
-                              <MapPin size={12}/> {p.bairro}
-                            </span>
+                                                            <MapPin size={12}/> {p.bairro}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* badges */}
-                                        <div style={{ display:"flex", gap:8, flexWrap:"wrap", flexShrink:0 }}>
-                                            {p.relatorioPendente && (
-                                                <span className="pend-badge" style={{ color:IEQ.red, borderColor:`${IEQ.red}35`, background:`${IEQ.red}12` }}>
-                          <FileText size={10}/> SEM RELATÓRIO
-                        </span>
+                                        {/* ── STATUS BADGES (sempre exibe os dois, OK ou PENDENTE) ── */}
+                                        <div className="pend-status-group">
+
+                                            {/* Relatório Semanal */}
+                                            {p.relatorioPendente ? (
+                                                <span className="pend-badge"
+                                                      style={{ color:IEQ.red, borderColor:`${IEQ.red}35`, background:`${IEQ.red}12` }}>
+                                                    <FileText size={10}/>
+                                                    RELATÓRIO SEMANAL: PENDENTE
+                                                </span>
+                                            ) : (
+                                                <span className="pend-badge"
+                                                      style={{ color:"#12A060", borderColor:"rgba(18,160,96,.3)", background:"rgba(18,160,96,.1)" }}>
+                                                    <CheckCircle2 size={10}/>
+                                                    RELATÓRIO SEMANAL: OK
+                                                </span>
                                             )}
-                                            {p.discipuladoPendente && (
-                                                <span className="pend-badge" style={{ color:IEQ.blue, borderColor:`${IEQ.blue}35`, background:`${IEQ.blue}12` }}>
-                          <BookOpen size={10}/> SEM DISCIPULADO
-                        </span>
+
+                                            {/* Discipulado */}
+                                            {p.discipuladoPendente ? (
+                                                <span className="pend-badge"
+                                                      style={{ color:IEQ.blue, borderColor:`${IEQ.blue}35`, background:`${IEQ.blue}12` }}>
+                                                    <BookOpen size={10}/>
+                                                    DISCIPULADO: PENDENTE
+                                                </span>
+                                            ) : (
+                                                <span className="pend-badge"
+                                                      style={{ color:"#12A060", borderColor:"rgba(18,160,96,.3)", background:"rgba(18,160,96,.1)" }}>
+                                                    <CheckCircle2 size={10}/>
+                                                    DISCIPULADO: OK
+                                                </span>
                                             )}
-                                            {!p.relatorioPendente && (
-                                                <span className="pend-badge" style={{ color:"#12A060", borderColor:"rgba(18,160,96,.3)", background:"rgba(18,160,96,.1)" }}>
-                          <CheckCircle2 size={10}/> RELATÓRIO OK
-                        </span>
-                                            )}
-                                            {!p.discipuladoPendente && (
-                                                <span className="pend-badge" style={{ color:"#12A060", borderColor:"rgba(18,160,96,.3)", background:"rgba(18,160,96,.1)" }}>
-                          <CheckCircle2 size={10}/> DISCIPULADO OK
-                        </span>
-                                            )}
+
                                         </div>
                                     </motion.div>
                                 );
