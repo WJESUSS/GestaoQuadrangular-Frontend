@@ -25,17 +25,16 @@ const IEQ = {
     dark:       "#0A0608",
 };
 
-/* Retorna a segunda-feira da semana que contém a data dada */
 const inicioSemana = (date) => {
     const d = new Date(date);
-    const day = d.getDay(); // 0=Dom
+    const day = d.getDay();
     const diff = day === 0 ? -6 : 1 - day;
     d.setDate(d.getDate() + diff);
     d.setHours(0, 0, 0, 0);
     return d;
 };
 
-const toISO = (d) => d.toISOString().split("T")[0]; // "YYYY-MM-DD"
+const toISO = (d) => d.toISOString().split("T")[0];
 
 const formatarSemana = (inicio, fim) => {
     const fmt = (d) => { const [, m, dia] = d.split("-"); return `${dia}/${m}`; };
@@ -53,19 +52,18 @@ export default function TelaPendencias({ isDark = false }) {
     const semanaAtual = inicioSemana(hoje);
 
     const [semanaRef,  setSemanaRef]  = useState(semanaAtual);
-    const [pendencias, setPendencias] = useState([]);
+    const [celulas,    setCelulas]    = useState([]); // TODAS as células
     const [loading,    setLoading]    = useState(true);
     const [erro,       setErro]       = useState("");
     const [filtro,     setFiltro]     = useState("TODAS");
     const [showPicker, setShowPicker] = useState(false);
     const [pickerPos,  setPickerPos]  = useState({ top: 0, left: 0 });
-    const pickerRef  = useRef(null);
-    const labelRef   = useRef(null);
+    const pickerRef = useRef(null);
+    const labelRef  = useRef(null);
 
     const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
     const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
-    /* Fecha o picker ao clicar fora */
     useEffect(() => {
         const handler = (e) => {
             if (pickerRef.current && !pickerRef.current.contains(e.target))
@@ -79,12 +77,13 @@ export default function TelaPendencias({ isDark = false }) {
         setLoading(true);
         setErro("");
         try {
+            // Passa semanaInicio E solicita todas as células (incluindo as em dia)
             const res = await api.get("/pastor/pendencias", {
-                params: { semanaInicio: toISO(semana) },
+                params: { semanaInicio: toISO(semana), todas: true },
             });
-            setPendencias(res.data);
+            setCelulas(res.data);
         } catch (err) {
-            setErro("Não foi possível carregar as pendências.");
+            setErro("Não foi possível carregar as células.");
             console.error(err);
         } finally {
             setLoading(false);
@@ -113,24 +112,35 @@ export default function TelaPendencias({ isDark = false }) {
     const abrirPicker = () => {
         if (labelRef.current) {
             const rect = labelRef.current.getBoundingClientRect();
-            setPickerPos({
-                top:  rect.bottom + 8,
-                left: rect.left + rect.width / 2,
-            });
+            setPickerPos({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
         }
         setShowPicker(v => !v);
     };
 
-    const pendenciasFiltradas = pendencias.filter((p) => {
-        if (filtro === "RELATORIO")   return p.relatorioPendente && !p.discipuladoPendente;
-        if (filtro === "DISCIPULADO") return p.discipuladoPendente && !p.relatorioPendente;
-        if (filtro === "AMBAS")       return p.relatorioPendente && p.discipuladoPendente;
-        return true;
+    // ── FILTROS ──────────────────────────────────────────────
+    // "TODAS"       → todas as células (em dia ou não)
+    // "PENDENTES"   → qualquer pendência
+    // "AMBAS"       → as duas pendentes
+    // "RELATORIO"   → só relatório pendente
+    // "DISCIPULADO" → só discipulado pendente
+    // "EM_DIA"      → nenhuma pendência
+    const celulasFiltradas = celulas.filter((p) => {
+        const temRelatorio   = p.relatorioPendente;
+        const temDiscipulado = p.discipuladoPendente;
+        const emDia          = !temRelatorio && !temDiscipulado;
+
+        if (filtro === "PENDENTES")   return temRelatorio || temDiscipulado;
+        if (filtro === "AMBAS")       return temRelatorio && temDiscipulado;
+        if (filtro === "RELATORIO")   return temRelatorio && !temDiscipulado;
+        if (filtro === "DISCIPULADO") return temDiscipulado && !temRelatorio;
+        if (filtro === "EM_DIA")      return emDia;
+        return true; // TODAS
     });
 
-    const totalAmbas       = pendencias.filter(p => p.relatorioPendente && p.discipuladoPendente).length;
-    const totalRelatorio   = pendencias.filter(p => p.relatorioPendente).length;
-    const totalDiscipulado = pendencias.filter(p => p.discipuladoPendente).length;
+    const totalAmbas       = celulas.filter(p => p.relatorioPendente && p.discipuladoPendente).length;
+    const totalRelatorio   = celulas.filter(p => p.relatorioPendente).length;
+    const totalDiscipulado = celulas.filter(p => p.discipuladoPendente).length;
+    const totalEmDia       = celulas.filter(p => !p.relatorioPendente && !p.discipuladoPendente).length;
     const semanaLabel      = labelSemana(semanaRef);
 
     const globalStyles = `
@@ -159,7 +169,7 @@ export default function TelaPendencias({ isDark = false }) {
     .pend-avatar {
       width:42px; height:42px; border-radius:9px; flex-shrink:0;
       display:flex; align-items:center; justify-content:center;
-      color:#fff; font-family:'Cinzel',serif; font-weight:700; font-size:15px;
+      font-family:'Cinzel',serif; font-weight:700; font-size:15px;
     }
     .pend-filtro-btn {
       font-family:'Cinzel',serif; font-size:9px; font-weight:700;
@@ -177,7 +187,6 @@ export default function TelaPendencias({ isDark = false }) {
       flex-shrink:0; align-items:flex-end;
     }
 
-    /* Navegador de semana */
     .semana-nav {
       display:flex; align-items:center; gap:4px;
       background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
@@ -201,24 +210,21 @@ export default function TelaPendencias({ isDark = false }) {
       display:flex; align-items:center; gap:6px;
       font-family:'Cinzel',serif; font-size:10px; font-weight:700;
       letter-spacing:.13em; color:${textPrimary};
-      min-width:120px; text-align:center; justify-content:center;
+      min-width:120px; justify-content:center;
       cursor:pointer; padding:5px 10px; border-radius:6px;
       background:none; border:none; transition:background .2s;
     }
     .semana-label-btn:hover {
       background:${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.07)"};
     }
-
     .semana-hoje-btn {
       font-family:'Cinzel',serif; font-size:8px; font-weight:700;
       letter-spacing:.14em; border-radius:6px; cursor:pointer;
-      padding:5px 11px;
-      border:1px solid ${IEQ.red}40; background:${IEQ.red}12;
-      color:${IEQ.red}; transition:all .2s; white-space:nowrap;
+      padding:5px 11px; border:1px solid ${IEQ.red}40;
+      background:${IEQ.red}12; color:${IEQ.red}; transition:all .2s; white-space:nowrap;
     }
     .semana-hoje-btn:hover { background:${IEQ.red}22; }
 
-    /* Popup picker */
     .date-picker-popup {
       position:fixed; z-index:9999;
       background:${isDark ? "rgba(12,6,9,.99)" : "#fff"};
@@ -277,46 +283,34 @@ export default function TelaPendencias({ isDark = false }) {
             {/* ── NAVEGADOR DE SEMANA ── */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .04 }}
                         style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, flexWrap: "wrap", position: "relative", zIndex: 10 }}>
-
                 <div className="semana-nav">
                     <button className="semana-nav-btn" onClick={() => navSemana(-1)} title="Semana anterior">
                         <ChevronLeft size={15} />
                     </button>
-
-                    {/* Label clicável abre picker de data */}
                     <div style={{ position: "relative" }} ref={pickerRef}>
-                        <button className="semana-label-btn" onClick={() => setShowPicker(v => !v)}>
+                        <button className="semana-label-btn" ref={labelRef} onClick={abrirPicker}>
                             <CalendarDays size={12} style={{ color: IEQ.red, flexShrink: 0 }} />
                             {semanaLabel}
                         </button>
-
                         <AnimatePresence>
                             {showPicker && (
                                 <motion.div className="date-picker-popup"
+                                            style={{ top: pickerPos.top, left: pickerPos.left, transform: "translateX(-50%)" }}
                                             initial={{ opacity: 0, y: -6, scale: .97 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: -6, scale: .97 }}
                                             transition={{ duration: .16 }}>
                                     <label>ESCOLHA QUALQUER DIA DA SEMANA</label>
-                                    <input
-                                        type="date"
-                                        max={toISO(hoje)}
-                                        defaultValue={toISO(semanaRef)}
-                                        onChange={onPickDate}
-                                    />
+                                    <input type="date" max={toISO(hoje)} defaultValue={toISO(semanaRef)} onChange={onPickDate} />
                                     <p className="date-picker-hint">A semana começa na segunda-feira.</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
-
-                    <button className="semana-nav-btn" onClick={() => navSemana(1)}
-                            disabled={ehSemanaAtual} title="Próxima semana">
+                    <button className="semana-nav-btn" onClick={() => navSemana(1)} disabled={ehSemanaAtual} title="Próxima semana">
                         <ChevronRight size={15} />
                     </button>
                 </div>
-
-                {/* Botão voltar à semana atual */}
                 <AnimatePresence>
                     {!ehSemanaAtual && (
                         <motion.button className="semana-hoje-btn"
@@ -326,25 +320,23 @@ export default function TelaPendencias({ isDark = false }) {
                         </motion.button>
                     )}
                 </AnimatePresence>
-
                 {!ehSemanaAtual && (
                     <span style={{
                         fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".14em",
                         color: IEQ.yellowDark, background: `${IEQ.yellow}18`,
                         border: `1px solid ${IEQ.yellow}40`, borderRadius: 6, padding: "4px 10px",
-                    }}>
-                        SEMANA ANTERIOR
-                    </span>
+                    }}>SEMANA ANTERIOR</span>
                 )}
             </motion.div>
 
             {/* ── KPIs ── */}
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }}
-                        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 14, marginBottom: 20 }}>
+                        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 14, marginBottom: 20 }}>
                 {[
                     { label: "AMBAS PENDENTES", value: totalAmbas,       color: IEQ.red,        icon: <AlertTriangle size={18} /> },
                     { label: "SEM RELATÓRIO",   value: totalRelatorio,   color: IEQ.yellowDark, icon: <FileText size={18} />      },
                     { label: "SEM DISCIPULADO", value: totalDiscipulado, color: IEQ.blue,       icon: <BookOpen size={18} />      },
+                    { label: "EM DIA",          value: totalEmDia,       color: "#12A060",      icon: <CheckCircle2 size={18} />  },
                 ].map(({ label, value, color, icon }) => (
                     <div key={label} className="pend-kpi">
                         <div style={{
@@ -366,17 +358,20 @@ export default function TelaPendencias({ isDark = false }) {
                         style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
                 {[
                     { key: "TODAS",       label: "TODAS"           },
+                    { key: "PENDENTES",   label: "COM PENDÊNCIA"   },
                     { key: "AMBAS",       label: "AMBAS FALHAS"    },
                     { key: "RELATORIO",   label: "SEM RELATÓRIO"   },
                     { key: "DISCIPULADO", label: "SEM DISCIPULADO" },
+                    { key: "EM_DIA",      label: "EM DIA"          },
                 ].map(({ key, label }) => {
                     const ativo = filtro === key;
+                    const isEmDia = key === "EM_DIA";
                     return (
                         <button key={key} className="pend-filtro-btn" onClick={() => setFiltro(key)}
                                 style={{
-                                    background:  ativo ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : "transparent",
+                                    background:  ativo ? (isEmDia ? "linear-gradient(135deg,#0e7a4a,#12A060)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`) : "transparent",
                                     color:       ativo ? "#fff" : textSecondary,
-                                    borderColor: ativo ? IEQ.red : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"),
+                                    borderColor: ativo ? (isEmDia ? "#12A060" : IEQ.red) : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"),
                                 }}>
                             {label}
                         </button>
@@ -388,7 +383,7 @@ export default function TelaPendencias({ isDark = false }) {
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .16 }}>
                 <div className="pend-card" style={{ overflow: "hidden" }}>
 
-                    {/* cabeçalho da lista */}
+                    {/* cabeçalho */}
                     <div style={{
                         padding: "18px 22px",
                         borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`,
@@ -404,10 +399,10 @@ export default function TelaPendencias({ isDark = false }) {
                             </div>
                             <div>
                                 <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".15em", margin: 0, color: textPrimary }}>
-                                    CÉLULAS PENDENTES
+                                    CÉLULAS — VISÃO GERAL
                                 </p>
                                 <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSecondary, margin: 0 }}>
-                                    {loading ? "carregando..." : `${pendenciasFiltradas.length} célula(s) · ${semanaLabel}`}
+                                    {loading ? "carregando..." : `${celulasFiltradas.length} célula(s) · ${semanaLabel}`}
                                 </p>
                             </div>
                         </div>
@@ -431,36 +426,42 @@ export default function TelaPendencias({ isDark = false }) {
                             <AlertTriangle size={28} style={{ color: IEQ.red, margin: "0 auto 10px" }} />
                             <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".16em", color: IEQ.red }}>{erro}</p>
                         </div>
-                    ) : pendenciasFiltradas.length === 0 ? (
+                    ) : celulasFiltradas.length === 0 ? (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                                     style={{ padding: "52px 20px", textAlign: "center" }}>
                             <CheckCircle2 size={36} style={{ color: "#12A060", margin: "0 auto 12px" }} />
                             <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: ".18em", color: "#12A060", margin: 0 }}>
-                                TUDO EM DIA!
+                                NENHUM RESULTADO
                             </p>
                             <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: textSecondary, marginTop: 6 }}>
-                                Nenhuma célula com pendência para este filtro.
+                                Nenhuma célula encontrada para este filtro.
                             </p>
                         </motion.div>
                     ) : (
                         <AnimatePresence>
-                            {pendenciasFiltradas.map((p, i) => {
-                                const ambas = p.relatorioPendente && p.discipuladoPendente;
-                                const avatarBg = ambas
-                                    ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`
-                                    : p.relatorioPendente
-                                        ? `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`
-                                        : `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`;
+                            {celulasFiltradas.map((p, i) => {
+                                const ambas  = p.relatorioPendente && p.discipuladoPendente;
+                                const emDia  = !p.relatorioPendente && !p.discipuladoPendente;
+
+                                const avatarBg = emDia
+                                    ? "linear-gradient(135deg,#0e7a4a,#12A060)"
+                                    : ambas
+                                        ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`
+                                        : p.relatorioPendente
+                                            ? `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`
+                                            : `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`;
+
+                                const avatarColor = p.relatorioPendente && !p.discipuladoPendente ? "#1A0A0D" : "#fff";
 
                                 return (
                                     <motion.div key={p.idCelula}
                                                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: i * 0.05 }}
+                                                transition={{ delay: i * 0.04 }}
                                                 className="pend-row">
+
                                         {/* identidade */}
                                         <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
-                                            <div className="pend-avatar"
-                                                 style={{ background: avatarBg, color: p.relatorioPendente && !p.discipuladoPendente ? "#1A0A0D" : "#fff" }}>
+                                            <div className="pend-avatar" style={{ background: avatarBg, color: avatarColor }}>
                                                 {p.nomeCelula?.charAt(0).toUpperCase()}
                                             </div>
                                             <div style={{ minWidth: 0 }}>
