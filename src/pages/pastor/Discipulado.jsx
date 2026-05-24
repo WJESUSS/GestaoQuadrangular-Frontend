@@ -23,7 +23,6 @@ const COLUNAS = [
   { campo: "domingoNoite",  label: "Dom. Noite" },
 ];
 
-// ✅ Pega o token limpo sempre que precisar
 function getToken() {
   return localStorage.getItem("token")?.replace(/"/g, "").trim() || "";
 }
@@ -52,6 +51,15 @@ function QuadrangularCross({ size = 28 }) {
         <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
       </svg>
   );
+}
+
+// ── Helpers de presença para o PDF ──────────────────────────────────────────
+// jsPDF não suporta unicode especial (✓ ✗) — usamos texto simples com cor
+function presTexto(val) { return val ? "PRESENTE" : "FALTOU"; }
+function presStyle(val) {
+  return val
+      ? { textColor: [22, 163, 74],  fontStyle: "bold" }   // verde
+      : { textColor: [200, 16, 46],  fontStyle: "normal" }; // vermelho
 }
 
 export default function Discipulado({ isDark = false }) {
@@ -179,9 +187,7 @@ export default function Discipulado({ isDark = false }) {
     try {
       setLoading(true);
       setErro(null);
-
       const res = await api.get("/relatorios/todos-relatorios");
-
       setRelatorios(res.data || []);
     } catch (e) {
       setErro({
@@ -210,56 +216,169 @@ export default function Discipulado({ isDark = false }) {
     return ok && periodo;
   }), [relatorios, termoBusca, dataInicioFiltro, dataFimFiltro]);
 
+  // ── PDF Individual ───────────────────────────────────────────────────────
   const gerarPDFIndividual = (rel) => {
     const doc = new jsPDF();
-    doc.setFontSize(16); doc.setTextColor(0, 36, 112);
-    doc.text(`Relatório: ${rel.nomeCelula}`, 14, 20);
-    doc.setFontSize(10); doc.setTextColor(100);
-    doc.text(`Líder: ${rel.nomeLider}`, 14, 28);
-    doc.text(`Período: ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 14, 34);
+
+    // Cabeçalho
+    doc.setFillColor(139, 11, 31);
+    doc.rect(0, 0, 210, 36, "F");
+    doc.setFontSize(16); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
+    doc.text("IEQ PITUACU - RELATORIO DE DISCIPULADO", 14, 14);
+    doc.setFontSize(10); doc.setFont("helvetica", "normal");
+    doc.text(`Celula: ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}`, 14, 22);
+    doc.text(`Periodo: ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 14, 29);
+
+    // Resumo
+    const total    = rel.presencas?.length || 0;
+    const presentes = (campo) => rel.presencas?.filter(p => p[campo]).length || 0;
+
+    doc.setTextColor(0); doc.setFontSize(9); doc.setFont("helvetica", "bold");
+    doc.text("RESUMO DE PRESENCAS:", 14, 44);
+
     autoTable(doc, {
-      startY: 40,
-      head: [["Membro", "EBD", "4ª Noite", "5ª Noite", "Dom. Manhã", "Dom. Noite"]],
-      body: rel.presencas?.map(p => [
-        p.nomeMembro,
-        p.escolaBiblica ? "Sim" : "Não",
-        p.quartaNoite   ? "Sim" : "Não",
-        p.quintaNoite   ? "Sim" : "Não",
-        p.domingoManha  ? "Sim" : "Não",
-        p.domingoNoite  ? "Sim" : "Não",
-      ]) || [],
-      headStyles: { fillColor: [0, 36, 112] }, theme: "grid", styles: { fontSize: 9 },
+      startY: 48,
+      head: [["Culto", "Presentes", "Faltas", "% Presenca"]],
+      body: COLUNAS.map(c => {
+        const p = presentes(c.campo);
+        const f = total - p;
+        const pct = total > 0 ? Math.round((p / total) * 100) : 0;
+        return [c.label, p, f, `${pct}%`];
+      }),
+      headStyles: { fillColor: [139, 11, 31], textColor: 255, fontStyle: "bold", fontSize: 9 },
+      bodyStyles: { fontSize: 9 },
+      columnStyles: {
+        1: { halign: "center", textColor: [22, 163, 74], fontStyle: "bold" },
+        2: { halign: "center", textColor: [200, 16, 46] },
+        3: { halign: "center", fontStyle: "bold" },
+      },
+      theme: "grid",
+      margin: { left: 14, right: 14 },
     });
+
+    // Lista de membros
+    const afterResumo = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(0);
+    doc.text("LISTA DE PRESENCAS POR MEMBRO:", 14, afterResumo);
+
+    autoTable(doc, {
+      startY: afterResumo + 4,
+      head: [["Membro", "EBD", "4a Noite", "5a Noite", "Dom. Manha", "Dom. Noite", "Total"]],
+      body: rel.presencas?.map(p => {
+        const campos = COLUNAS.map(c => p[c.campo]);
+        const totalP = campos.filter(Boolean).length;
+        return [
+          p.nomeMembro,
+          ...campos.map(v => presTexto(v)),
+          `${totalP}/${COLUNAS.length}`,
+        ];
+      }) || [],
+      headStyles: { fillColor: [0, 36, 112], textColor: 255, fontStyle: "bold", fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      // Colore cada célula de presença individualmente
+      didParseCell(data) {
+        if (data.section === "body" && data.column.index >= 1 && data.column.index <= 5) {
+          const val = data.cell.raw;
+          if (val === "PRESENTE") {
+            data.cell.styles.textColor = [22, 163, 74];
+            data.cell.styles.fontStyle = "bold";
+          } else if (val === "FALTOU") {
+            data.cell.styles.textColor = [200, 16, 46];
+          }
+          data.cell.styles.halign = "center";
+        }
+        if (data.section === "body" && data.column.index === 6) {
+          data.cell.styles.halign = "center";
+          data.cell.styles.fontStyle = "bold";
+        }
+      },
+      theme: "grid",
+      margin: { left: 14, right: 14 },
+    });
+
+    // Rodapé
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7); doc.setTextColor(150); doc.setFont("helvetica", "normal");
+      doc.text(`IEQ Pituacu - Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 290);
+      doc.text(`Pagina ${i} de ${pageCount}`, 185, 290, { align: "right" });
+    }
+
     doc.save(`Relatorio_${rel.nomeCelula}_${rel.dataInicio}.pdf`);
   };
 
+  // ── PDF Geral ────────────────────────────────────────────────────────────
   const gerarPDFGeral = () => {
     if (!filtrados.length) return;
     const doc = new jsPDF("l", "mm", "a4");
-    doc.setFontSize(16); doc.setTextColor(0, 36, 112);
-    doc.text("Relatório Geral de Discipulado", 14, 15);
-    doc.setFontSize(9); doc.setTextColor(100);
-    doc.text(`Período: ${dataInicioFiltro} até ${dataFimFiltro}`, 14, 22);
-    let y = 30;
-    filtrados.forEach(rel => {
+
+    // Capa
+    doc.setFillColor(139, 11, 31);
+    doc.rect(0, 0, 297, 40, "F");
+    doc.setFontSize(18); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
+    doc.text("IEQ PITUACU - RELATORIO GERAL DE DISCIPULADO", 14, 16);
+    doc.setFontSize(10); doc.setFont("helvetica", "normal");
+    doc.text(`Periodo: ${formatarSemana(dataInicioFiltro, dataFimFiltro)}  |  Total de celulas: ${filtrados.length}`, 14, 26);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString("pt-BR")} as ${new Date().toLocaleTimeString("pt-BR")}`, 14, 33);
+
+    let y = 50;
+
+    filtrados.forEach((rel, idx) => {
       if (y > 170) { doc.addPage(); y = 20; }
-      doc.setFontSize(11); doc.setTextColor(0, 36, 112);
-      doc.text(`${rel.nomeCelula} | Líder: ${rel.nomeLider}`, 14, y);
+
+      // Título da célula
+      doc.setFillColor(0, 36, 112);
+      doc.roundedRect(14, y - 4, 269, 10, 2, 2, "F");
+      doc.setFontSize(10); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
+      doc.text(`${idx + 1}. ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}  |  ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 17, y + 3);
+
       autoTable(doc, {
-        startY: y + 5,
-        head: [["Membro", "EBD", "4ª", "5ª", "Dom.M", "Dom.N"]],
-        body: rel.presencas?.map(p => [
-          p.nomeMembro,
-          p.escolaBiblica ? "✓" : "✗",
-          p.quartaNoite   ? "✓" : "✗",
-          p.quintaNoite   ? "✓" : "✗",
-          p.domingoManha  ? "✓" : "✗",
-          p.domingoNoite  ? "✓" : "✗",
-        ]) || [],
-        headStyles: { fillColor: [0, 36, 112] }, styles: { fontSize: 8 }, margin: { left: 14 },
+        startY: y + 8,
+        head: [["Membro", "EBD", "4a Noite", "5a Noite", "Dom. Manha", "Dom. Noite", "Total"]],
+        body: rel.presencas?.map(p => {
+          const campos = COLUNAS.map(c => p[c.campo]);
+          const totalP = campos.filter(Boolean).length;
+          return [
+            p.nomeMembro,
+            ...campos.map(v => presTexto(v)),
+            `${totalP}/${COLUNAS.length}`,
+          ];
+        }) || [],
+        headStyles: { fillColor: [139, 11, 31], textColor: 255, fontSize: 7, fontStyle: "bold" },
+        bodyStyles: { fontSize: 7 },
+        didParseCell(data) {
+          if (data.section === "body" && data.column.index >= 1 && data.column.index <= 5) {
+            const val = data.cell.raw;
+            if (val === "PRESENTE") {
+              data.cell.styles.textColor = [22, 163, 74];
+              data.cell.styles.fontStyle = "bold";
+            } else if (val === "FALTOU") {
+              data.cell.styles.textColor = [200, 16, 46];
+            }
+            data.cell.styles.halign = "center";
+          }
+          if (data.section === "body" && data.column.index === 6) {
+            data.cell.styles.halign = "center";
+            data.cell.styles.fontStyle = "bold";
+          }
+        },
+        theme: "grid",
+        margin: { left: 14, right: 14 },
       });
+
       y = doc.lastAutoTable.finalY + 14;
     });
+
+    // Rodapé em todas as páginas
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7); doc.setTextColor(150); doc.setFont("helvetica", "normal");
+      doc.text(`IEQ Pituacu - Relatorio Geral`, 14, 205);
+      doc.text(`Pagina ${i} de ${pageCount}`, 283, 205, { align: "right" });
+    }
+
     doc.save("Relatorio_Geral_Discipulado.pdf");
   };
 
@@ -309,17 +428,14 @@ export default function Discipulado({ isDark = false }) {
 
           <div className="sd-divider" style={{ marginBottom:24 }} />
 
-          {/* Painel de erro — agora mostra se o token estava presente */}
           {erro && (
               <div className="sd-erro">
                 <p style={{ color:"#ff6666", fontWeight:"bold", margin:"0 0 12px", fontSize:14 }}>
-                  ❌ ERRO AO CARREGAR — MANDE ESSE PRINT PARA O SUPORTE
+                  ERRO AO CARREGAR
                 </p>
-                <p className="sd-erro-row">🔴 <b>Status HTTP:</b> {erro.status}</p>
-                <p className="sd-erro-row">📋 <b>Resposta do servidor:</b> {erro.msg}</p>
-                <p className="sd-erro-row">🌐 <b>URL chamada:</b> {erro.url}</p>
-                <p className="sd-erro-row">🔑 <b>Header Authorization enviado:</b> {erro.header}</p>
-                <p className="sd-erro-row">🗝️ <b>Token no localStorage:</b> {erro.temToken}</p>
+                <p className="sd-erro-row">Status HTTP: {erro.status}</p>
+                <p className="sd-erro-row">Resposta: {erro.msg}</p>
+                <p className="sd-erro-row">URL: {erro.url}</p>
               </div>
           )}
 
@@ -447,21 +563,29 @@ export default function Discipulado({ isDark = false }) {
                         <tr>
                           <th>MEMBRO</th>
                           {COLUNAS.map(c => <th key={c.campo} style={{ textAlign:"center" }}>{c.label}</th>)}
+                          <th style={{ textAlign:"center" }}>TOTAL</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {relatorioSelecionado.presencas?.map((p, i) => (
-                            <tr key={i}>
-                              <td>{p.nomeMembro}</td>
-                              {COLUNAS.map(col => (
-                                  <td key={col.campo} style={{ textAlign:"center" }}>
-                                    {p[col.campo]
-                                        ? <CheckCircle2 size={18} style={{ color:"#16a34a", margin:"0 auto" }} />
-                                        : <X size={16} style={{ color: isDark ? "rgba(255,255,255,.15)" : "rgba(26,10,13,.15)", margin:"0 auto" }} />}
-                                  </td>
-                              ))}
-                            </tr>
-                        ))}
+                        {relatorioSelecionado.presencas?.map((p, i) => {
+                          const totalP = COLUNAS.filter(c => p[c.campo]).length;
+                          return (
+                              <tr key={i}>
+                                <td>{p.nomeMembro}</td>
+                                {COLUNAS.map(col => (
+                                    <td key={col.campo} style={{ textAlign:"center" }}>
+                                      {p[col.campo]
+                                          ? <CheckCircle2 size={18} style={{ color:"#16a34a", margin:"0 auto" }} />
+                                          : <X size={16} style={{ color: isDark ? "rgba(255,255,255,.15)" : "rgba(26,10,13,.15)", margin:"0 auto" }} />}
+                                    </td>
+                                ))}
+                                <td style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700,
+                                  color: totalP === COLUNAS.length ? "#16a34a" : totalP === 0 ? IEQ.red : textPrimary }}>
+                                  {totalP}/{COLUNAS.length}
+                                </td>
+                              </tr>
+                          );
+                        })}
                         </tbody>
                       </table>
                     </div>
