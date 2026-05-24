@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Routes, Route, NavLink, useLocation } from "react-router-dom";
 import api from "../../services/api.js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ import {
   Bell, Menu, X, LogOut, Sun, Moon, ClipboardList, Home, Flame,
 } from "lucide-react";
 
-/* ── Paleta IEQ ── */
+/* ─── Paleta IEQ ─────────────────────────────────────────────────────────── */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#8B0B1F",
@@ -34,7 +34,6 @@ const IEQ = {
   darkCard:   "#110A0D",
 };
 
-/* ── Itens de navegação com cor individual ── */
 const NAV_ITEMS = [
   { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",      color: IEQ.blueLight, end: true },
   { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",     color: IEQ.red                 },
@@ -54,11 +53,12 @@ const PAGE_TITLES = {
   "ranking-celulas":   "Ranking de Células",
   "alertas":           "Painel de Alertas",
   "pendencias":        "Pendências da Semana",
-  "casas-de-paz":      "Relatórios — Casas de Paz",
-  "missao70":          "Missão 70 — Evangelismo",
+  "casas-de-paz":      "Relatórios · Casas de Paz",
+  "missao70":          "Missão 70 · Evangelismo",
 };
 
-function QuadrangularCross({ size = 32 }) {
+/* ─── Cruz memoizada ─────────────────────────────────────────────────────── */
+const QuadrangularCross = React.memo(function QuadrangularCross({ size = 32 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
         <defs>
@@ -82,17 +82,16 @@ function QuadrangularCross({ size = 32 }) {
         <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
       </svg>
   );
-}
+});
 
+/* ─── CSS estático (fora do componente — não recria a cada render) ────────── */
 const STATIC_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
   @keyframes stripe     { 0%{background-position:0 0} 100%{background-position:60px 60px} }
   @keyframes pulse-ring { 0%,100%{transform:scale(1);opacity:.4} 50%{transform:scale(1.12);opacity:.1} }
   @keyframes spin       { to{transform:rotate(360deg)} }
 
-  /* tokens claros (padrão) */
   .pastor-root {
     --bg:          #F0EAE8;
     --text:        #1A0A0D;
@@ -109,7 +108,6 @@ const STATIC_CSS = `
     --stripe-b:    rgba(253,184,19,.05);
     --divider-c:   rgba(200,16,46,.2);
   }
-  /* tokens escuros */
   .pastor-root.dark {
     --bg:          #0A0608;
     --text:        #F5F0E8;
@@ -148,7 +146,7 @@ const STATIC_CSS = `
 
   .ieq-title {
     font-family:'Cinzel',serif;
-    background:linear-gradient(90deg,${IEQ.redDark},${IEQ.red},${IEQ.yellow},${IEQ.blue});
+    background:linear-gradient(90deg,#8B0B1F,#C8102E,#FDB813,#003DA5);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
   }
 
@@ -176,7 +174,7 @@ const STATIC_CSS = `
     animation:pulse-ring 3s ease-in-out infinite;
   }
 
-  /* ── SIDEBAR ── */
+  /* SIDEBAR */
   .pastor-sidebar {
     position:fixed; inset-y:0; left:0; z-index:50; width:260px;
     background:var(--sidebar-bg);
@@ -190,7 +188,7 @@ const STATIC_CSS = `
     .pastor-sidebar { position:relative; transform:translateX(0) !important; }
   }
 
-  /* ── NAV LINKS ── */
+  /* NAV LINKS */
   .ieq-nav-link {
     display:flex; align-items:center; justify-content:space-between;
     padding:12px 14px; border-radius:10px; gap:12px; margin-bottom:4px;
@@ -216,7 +214,7 @@ const STATIC_CSS = `
     padding:12px 14px; border-radius:10px; gap:12px; margin-bottom:4px;
     font-family:'Cinzel',serif; font-size:10.5px; font-weight:700;
     letter-spacing:.14em; text-decoration:none;
-    color:${IEQ.redLight};
+    color:#E8294A;
     background:rgba(200,16,46,.1);
     border:1px solid rgba(200,16,46,.25);
     transition:all .2s;
@@ -227,7 +225,7 @@ const STATIC_CSS = `
     border-color:rgba(200,16,46,.4);
   }
 
-  /* ── MAIN / HEADER / CONTENT ── */
+  /* MAIN / HEADER / CONTENT */
   .pastor-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
 
   .pastor-header {
@@ -252,7 +250,7 @@ const STATIC_CSS = `
     backdrop-filter:blur(10px); z-index:40;
   }
 
-  /* ── ICON BTN ── */
+  /* ICON BTN */
   .ieq-icon-btn {
     width:36px; height:36px; border-radius:8px;
     display:inline-flex; align-items:center; justify-content:center;
@@ -261,7 +259,7 @@ const STATIC_CSS = `
     border:1px solid var(--icon-bdr);
   }
   .ieq-icon-btn:hover {
-    color:${IEQ.red}; background:rgba(200,16,46,.1);
+    color:#C8102E; background:rgba(200,16,46,.1);
     border-color:rgba(200,16,46,.3);
   }
 
@@ -279,6 +277,7 @@ export default function PastorPage() {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
+  // Fecha sidebar ao navegar
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   useEffect(() => {
@@ -292,8 +291,12 @@ export default function PastorPage() {
     })();
   }, []);
 
-  const totalAtivas = celulas.filter(c => c.ativa === true).length;
-  const porcentagem = celulas.length > 0 ? Math.round((totalAtivas / celulas.length) * 100) : 0;
+  // Derivados memoizados
+  const { totalAtivas, porcentagem } = useMemo(() => {
+    const totalAtivas = celulas.filter(c => c.ativa === true).length;
+    const porcentagem = celulas.length > 0 ? Math.round((totalAtivas / celulas.length) * 100) : 0;
+    return { totalAtivas, porcentagem };
+  }, [celulas]);
 
   const getPageTitle = () => {
     const seg = location.pathname.split("/").pop();
@@ -321,13 +324,15 @@ export default function PastorPage() {
         {/* Overlay mobile */}
         <AnimatePresence>
           {sidebarOpen && (
-              <motion.div key="overlay" className="sidebar-overlay"
-                          initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                          onClick={() => setSidebarOpen(false)} />
+              <motion.div
+                  key="overlay" className="sidebar-overlay"
+                  initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                  onClick={() => setSidebarOpen(false)}
+              />
           )}
         </AnimatePresence>
 
-        {/* ── SIDEBAR ── */}
+        {/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */}
         <aside className={`pastor-sidebar ${sidebarOpen ? "open" : "closed"}`}>
 
           {/* Logo */}
@@ -426,7 +431,7 @@ export default function PastorPage() {
           </div>
         </aside>
 
-        {/* ── CONTEÚDO PRINCIPAL ── */}
+        {/* ─── CONTEÚDO PRINCIPAL ──────────────────────────────────────────────── */}
         <main className="pastor-main">
 
           {/* Header */}
@@ -455,12 +460,13 @@ export default function PastorPage() {
               <button className="ieq-icon-btn" onClick={() => setIsDark(d => !d)} title={isDark ? "Modo Claro" : "Modo Escuro"}
                       style={{ position:"relative", overflow:"hidden" }}>
                 <AnimatePresence mode="wait" initial={false}>
-                  <motion.span key={isDark ? "sun" : "moon"}
-                               initial={{ opacity:0, rotate:-90, scale:.5 }}
-                               animate={{ opacity:1, rotate:0,   scale:1   }}
-                               exit={{    opacity:0, rotate: 90, scale:.5  }}
-                               transition={{ duration:.22 }}
-                               style={{ display:"inline-flex", position:"absolute" }}
+                  <motion.span
+                      key={isDark ? "sun" : "moon"}
+                      initial={{ opacity:0, rotate:-90, scale:.5 }}
+                      animate={{ opacity:1, rotate:0,   scale:1   }}
+                      exit={{    opacity:0, rotate: 90, scale:.5  }}
+                      transition={{ duration:.22 }}
+                      style={{ display:"inline-flex", position:"absolute" }}
                   >
                     {isDark ? <Sun size={15} /> : <Moon size={15} />}
                   </motion.span>
@@ -478,7 +484,7 @@ export default function PastorPage() {
               <motion.div
                   key={location.pathname}
                   initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }}
-                  transition={{ duration:.2, ease:"easeOut" }}
+                  transition={{ duration:.18, ease:"easeOut" }}
                   style={{ height:"100%" }}
               >
                 <Routes location={location}>
