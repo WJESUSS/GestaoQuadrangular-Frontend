@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Trophy, Loader2, AlertCircle, RefreshCw,
-  Calendar, TrendingUp, Star, Medal
+  Calendar, Star, Medal
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import api from "../../services/api.js";
 
 const IEQ = {
@@ -84,15 +84,6 @@ export default function RankingCelulas({ isDark = false }) {
       transition: all .3s;
     }
     .ieq-card-rank:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(200,16,46,.1); }
-    .ieq-btn-ghost-rank {
-      background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.06)"};
-      color: ${isDark ? IEQ.offWhite : IEQ.redDark};
-      border: 1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"};
-      border-radius:8px; font-family:'Cinzel',serif; font-size:10px; font-weight:700;
-      letter-spacing:.15em; cursor:pointer; transition:all .25s; padding:12px 20px;
-      display:flex; align-items:center; gap:8px;
-    }
-    .ieq-btn-ghost-rank:hover { border-color:${IEQ.red}; }
     .ieq-btn-primary-rank {
       background: linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red});
       color:#fff; border:none; border-radius:8px;
@@ -133,7 +124,9 @@ export default function RankingCelulas({ isDark = false }) {
   const carregarRanking = async () => {
     setLoading(true); setError(null);
     try {
-      const res = await api.get(`/api/ranking/celulas?mes=${mesSelecionado}`);
+      const res = await api.get(`/api/ranking/celulas?mes=${mesSelecionado}`, {
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       setRanking(res.data || []);
     } catch {
       setError("Não foi possível carregar o ranking.");
@@ -142,10 +135,17 @@ export default function RankingCelulas({ isDark = false }) {
     }
   };
 
-  useEffect(() => { carregarRanking(); }, [mesSelecionado]);
+  // Polling automático a cada 30 segundos + recarrega ao trocar o mês
+  useEffect(() => {
+    carregarRanking();
+    const intervalo = setInterval(() => {
+      carregarRanking();
+    }, 10000);
+    return () => clearInterval(intervalo);
+  }, [mesSelecionado]);
 
-  const top3    = useMemo(() => ranking.slice(0, 3), [ranking]);
-  const restante = useMemo(() => ranking.slice(3), [ranking]);
+  const top3     = useMemo(() => ranking.slice(0, 3), [ranking]);
+  const restante = useMemo(() => ranking.slice(3),    [ranking]);
 
   if (loading && ranking.length === 0) return (
       <div style={{ minHeight:"60vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:bg }}>
@@ -169,8 +169,7 @@ export default function RankingCelulas({ isDark = false }) {
         <div style={{ position:"relative", zIndex:10, maxWidth:900, margin:"0 auto", padding:"32px 16px 0" }}>
 
           {/* Header */}
-          <motion.div initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
-                      style={{ marginBottom:36 }}>
+          <motion.div initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }} style={{ marginBottom:36 }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16, marginBottom:24 }}>
               <div style={{ display:"flex", alignItems:"center", gap:16 }}>
                 <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
@@ -235,8 +234,12 @@ export default function RankingCelulas({ isDark = false }) {
                       <motion.div initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ delay:.1 }}
                                   style={{ flex:"1 1 0", minWidth:0 }}>
                         <div className="ieq-card-rank" style={{ padding:"28px 20px 20px", textAlign:"center", position:"relative" }}>
-                          <div style={{ position:"absolute", top:-20, left:"50%", transform:"translateX(-50%)", width:40, height:40, borderRadius:"50%", background:isDark ? "rgba(255,255,255,.1)" : "rgba(26,10,13,.07)", border:`3px solid ${isDark ? "#1A0A0D" : "#F0EAE8"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>
-                            🥈
+                          <div style={{ position:"absolute", top:-20, left:"50%", transform:"translateX(-50%)",
+                            width:40, height:40, borderRadius:"50%",
+                            background:"linear-gradient(135deg, #C0C0C0, #808080)",
+                            border:`3px solid ${isDark ? "#1A0A0D" : "#F0EAE8"}`,
+                            display:"flex", alignItems:"center", justifyContent:"center" }}>
+                            <Medal size={20} style={{ color:"#fff" }} />
                           </div>
                           <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"8px 0 6px" }}>2º LUGAR</p>
                           <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 4px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
@@ -260,11 +263,14 @@ export default function RankingCelulas({ isDark = false }) {
                       <motion.div initial={{ opacity:0, y:40 }} animate={{ opacity:1, y:0 }} transition={{ delay:.05 }}
                                   style={{ flex:"1 1 0", minWidth:0, transform:"scale(1.04)", zIndex:2 }}>
                         <div className="podio-1st" style={{ borderRadius:20, padding:"44px 24px 24px", textAlign:"center", position:"relative", boxShadow:"0 20px 60px rgba(200,16,46,.3)" }}>
-                          {/* Troféu */}
-                          <div style={{ position:"absolute", top:-28, left:"50%", transform:"translateX(-50%)", width:56, height:56, borderRadius:"50%", background:`linear-gradient(135deg, ${IEQ.yellow}, ${IEQ.yellowDark})`, border:`4px solid ${isDark ? IEQ.dark : "#F0EAE8"}`, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 8px 24px rgba(253,184,19,.5)" }}>
+                          <div style={{ position:"absolute", top:-28, left:"50%", transform:"translateX(-50%)",
+                            width:56, height:56, borderRadius:"50%",
+                            background:`linear-gradient(135deg, ${IEQ.yellow}, ${IEQ.yellowDark})`,
+                            border:`4px solid ${isDark ? IEQ.dark : "#F0EAE8"}`,
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            boxShadow:"0 8px 24px rgba(253,184,19,.5)" }}>
                             <Trophy size={28} style={{ color:"#fff" }} />
                           </div>
-                          {/* Estrelas */}
                           <div style={{ display:"flex", justifyContent:"center", gap:3, marginBottom:10 }}>
                             {[0,1,2].map(i => <Star key={i} size={12} style={{ color:IEQ.yellow }} fill={IEQ.yellow} />)}
                           </div>
@@ -290,8 +296,12 @@ export default function RankingCelulas({ isDark = false }) {
                       <motion.div initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ delay:.15 }}
                                   style={{ flex:"1 1 0", minWidth:0 }}>
                         <div className="ieq-card-rank" style={{ padding:"28px 20px 20px", textAlign:"center", position:"relative" }}>
-                          <div style={{ position:"absolute", top:-20, left:"50%", transform:"translateX(-50%)", width:40, height:40, borderRadius:"50%", background:"rgba(200,80,16,.12)", border:`3px solid ${isDark ? "#1A0A0D" : "#F0EAE8"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>
-                            🥉
+                          <div style={{ position:"absolute", top:-20, left:"50%", transform:"translateX(-50%)",
+                            width:40, height:40, borderRadius:"50%",
+                            background:"linear-gradient(135deg, #CD7F32, #8B4513)",
+                            border:`3px solid ${isDark ? "#1A0A0D" : "#F0EAE8"}`,
+                            display:"flex", alignItems:"center", justifyContent:"center" }}>
+                            <Medal size={20} style={{ color:"#fff" }} />
                           </div>
                           <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"8px 0 6px" }}>3º LUGAR</p>
                           <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 4px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
@@ -321,7 +331,11 @@ export default function RankingCelulas({ isDark = false }) {
                           <motion.div key={cel.celulaId} initial={{ opacity:0, x:-16 }} animate={{ opacity:1, x:0 }} transition={{ delay:i*.04 }}
                                       className="rank-row">
                             <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                              <div style={{ width:40, height:40, borderRadius:10, background:isDark ? "rgba(255,255,255,.05)" : "rgba(200,16,46,.07)", border:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:12, color:textSecondary, flexShrink:0 }}>
+                              <div style={{ width:40, height:40, borderRadius:10,
+                                background:isDark ? "rgba(255,255,255,.05)" : "rgba(200,16,46,.07)",
+                                border:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`,
+                                display:"flex", alignItems:"center", justifyContent:"center",
+                                fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:12, color:textSecondary, flexShrink:0 }}>
                                 {i + 4}º
                               </div>
                               <div>
