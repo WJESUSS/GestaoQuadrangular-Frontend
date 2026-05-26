@@ -8,7 +8,7 @@ import TelaFichas from "./TelaFichas";
 import RelatorioDiscipulado from "./RelatorioDiscipulado";
 import CasasDePazLider from "./CasasDePazLider";
 import Missao70Lider from "./Missao70Lider";
-import SinoAniversariantes from "./SinoAniversariantes"; // ← ADICIONADO
+import SinoAniversariantes from "./SinoAniversariantes";
 import {
   Trash2, Loader2, Users, Plus, Search, X,
   TrendingUp, Target, Sparkles, LogOut,
@@ -103,6 +103,57 @@ const STATIC_CSS = `
   .ieq-lider-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid rgba(200,16,46,.4); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .ieq-lider-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .ieq-lider-avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+  /* ── GRIDS RESPONSIVOS ───────────────────────── */
+  .ieq-kpi-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+  .ieq-members-grid {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  /* ── MOBILE FIXES ────────────────────────────── */
+  @media (max-width: 599px) {
+    .ieq-kpi-grid {
+      grid-template-columns: 1fr;
+    }
+    .ieq-members-grid {
+      grid-template-columns: 1fr;
+    }
+    .ieq-big-number {
+      font-size: 38px !important;
+    }
+    .ieq-header-actions {
+      gap: 6px !important;
+    }
+    .ieq-header-actions button {
+      padding: 8px 10px !important;
+      font-size: 9px !important;
+    }
+    .ieq-celula-label {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ieq-header-info {
+      min-width: 0;
+    }
+    .ieq-page-padding {
+      padding: 20px 14px 0 !important;
+    }
+    .ieq-card-hero {
+      padding: 22px 18px !important;
+    }
+    .ieq-card-action {
+      padding: 20px 18px !important;
+    }
+  }
 `;
 
 export default function DashboardLider() {
@@ -198,13 +249,14 @@ export default function DashboardLider() {
         <style>{STATIC_CSS}</style>
         <div className={`ieq-bg ${t}`} />
 
-        <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 24px 0" }}>
+        <div className="ieq-page-padding" style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 24px 0" }}>
           <motion.header
               initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
               style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:40, flexWrap:"wrap", gap:16 }}
           >
-            <div style={{ display:"flex", alignItems:"center", gap:18 }}>
-              <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+            {/* Identidade */}
+            <div style={{ display:"flex", alignItems:"center", gap:18, minWidth:0, flex:1 }}>
+              <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                 <div className="pulse-ring" style={{ width:72, height:72 }} />
                 <div className="ieq-lider-avatar" style={{ background: isDark ? "#1A0A0D" : "#fff" }}>
                   {usuarioLogado?.fotoPerfil
@@ -213,24 +265,22 @@ export default function DashboardLider() {
                   }
                 </div>
               </div>
-              <div>
+              <div className="ieq-header-info" style={{ minWidth:0 }}>
                 <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
-                  CÉLULA {celula?.nome?.toUpperCase() || "?"} · PAINEL DO LÍDER
+                <p className="ieq-celula-label" style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
+                  CÉLULA {celula?.nome?.toUpperCase() || "?"} — PAINEL DO LÍDER
                 </p>
                 {usuarioLogado?.nome && (
-                    <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color: isDark ? "rgba(245,240,232,.6)" : "rgba(26,10,13,.55)", margin:"3px 0 0", fontStyle:"italic" }}>
+                    <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color: isDark ? "rgba(245,240,232,.6)" : "rgba(26,10,13,.55)", margin:"3px 0 0", fontStyle:"italic", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                       {usuarioLogado.nome}
                     </p>
                 )}
               </div>
             </div>
 
-            {/* ── Ações do header ── */}
-            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              {/* 🔔 SINO DE ANIVERSARIANTES */}
+            {/* Ações */}
+            <div className="ieq-header-actions" style={{ display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
               <SinoAniversariantes isDark={isDark} />
-
               <button className={`ieq-btn-ghost ${t}`} onClick={() => setIsDark(!isDark)} style={{ padding:"10px 14px" }}>
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
@@ -259,8 +309,10 @@ export default function DashboardLider() {
                             exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}
                             style={{ display:"flex", flexDirection:"column", gap:24 }}
                 >
-                  <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:20 }}>
-                    <div className={`ieq-card ${t}`} style={{ padding:"36px 40px", background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, border:"none", position:"relative", overflow:"hidden" }}>
+                  {/* ── Grid KPIs ── */}
+                  <div className="ieq-kpi-grid">
+                    {/* Card hero — membros */}
+                    <div className={`ieq-card ${t} ieq-card-hero`} style={{ padding:"36px 40px", background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, border:"none", position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", inset:0, backgroundImage:`repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)`, backgroundSize:"40px 40px" }} />
                       <div style={{ position:"relative", zIndex:1 }}>
                     <span className="ieq-badge" style={{ color:IEQ.yellow, borderColor:"rgba(253,184,19,.35)", background:"rgba(253,184,19,.1)", marginBottom:20 }}>
@@ -268,7 +320,9 @@ export default function DashboardLider() {
                     </span>
                         <div style={{ display:"flex", flexWrap:"wrap", justifyContent:"space-between", alignItems:"flex-end", gap:24 }}>
                           <div>
-                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:52, fontWeight:700, color:"#fff", margin:0, lineHeight:1 }}>{qtdMembros}</p>
+                            <p className="ieq-big-number" style={{ fontFamily:"'Cinzel',serif", fontSize:52, fontWeight:700, color:"#fff", margin:0, lineHeight:1 }}>
+                              {qtdMembros}
+                            </p>
                             <p style={{ fontFamily:"'Cinzel',serif", fontSize:11, letterSpacing:".2em", color:"rgba(255,255,255,.6)", marginTop:6 }}>MEMBROS ATIVOS</p>
                             <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:"rgba(255,255,255,.5)", marginTop:10, maxWidth:260 }}>
                               {!atingiuMeta ? `Faltam ${8 - qtdMembros} membros para a meta de multiplicação.`
@@ -277,7 +331,7 @@ export default function DashboardLider() {
                                           : "Meta de 8 membros atingida! Solicite a multiplicação."}
                             </p>
                           </div>
-                          <div style={{ minWidth:200, flex:1 }}>
+                          <div style={{ minWidth:160, flex:1 }}>
                             <div style={{ display:"flex", justifyContent:"space-between", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".15em", color:"rgba(255,255,255,.6)", marginBottom:8 }}>
                               <span>{atingiuMeta ? "META CONCLUÍDA" : "PROGRESSO"}</span>
                               <span>{Math.round(porcentagemMeta)}%</span>
@@ -291,7 +345,8 @@ export default function DashboardLider() {
                       </div>
                     </div>
 
-                    <div className={`ieq-card ${t}`} style={{ padding:30, display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+                    {/* Card ação pastoral */}
+                    <div className={`ieq-card ${t} ieq-card-action`} style={{ padding:30, display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
                       <div>
                         <div style={{ width:50, height:50, borderRadius:10, marginBottom:18, background: isAprovado ? "rgba(0,61,165,.12)" : isAnalise ? "rgba(253,184,19,.12)" : "rgba(200,16,46,.1)", display:"flex", alignItems:"center", justifyContent:"center", color: isAprovado ? IEQ.blue : isAnalise ? IEQ.yellowDark : IEQ.red }}>
                           {isAprovado ? <CheckCircle2 size={24} /> : isAnalise ? <Loader2 size={24} className="spin-icon" /> : <Target size={24} />}
@@ -319,6 +374,7 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
+                  {/* ── Menu ── */}
                   <div className="ieq-menu-grid">
                     {[
                       { icon:<Target size={20}/>,     title:"DISCIPULADO", desc:"Acompanhar",  aba:"discipulado", color:IEQ.blue    },
@@ -338,6 +394,7 @@ export default function DashboardLider() {
                     ))}
                   </div>
 
+                  {/* ── Lista de membros ── */}
                   <div className={`ieq-card ${t}`} style={{ overflow:"hidden" }}>
                     <div style={{ padding:"24px 28px", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
                       <div>
@@ -348,7 +405,7 @@ export default function DashboardLider() {
                         <Plus size={15} /> NOVO MEMBRO
                       </button>
                     </div>
-                    <div style={{ padding:20, display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:10 }}>
+                    <div className="ieq-members-grid">
                       {membros.map((m) => (
                           <div key={m.id} className={`ieq-member-row ${t}`}>
                             <div style={{ display:"flex", alignItems:"center", gap:10, minWidth:0 }}>
@@ -368,7 +425,7 @@ export default function DashboardLider() {
                   <HistoricoRelatorios celulaId={celula?.id} />
                   <div className="divider" />
                   <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, padding:"0 0 8px" }}>
-                    © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
+                    © IEQ PITUAÇU — SISTEMA SEGURO — {new Date().getFullYear()}
                   </p>
                 </motion.div>
             ) : (
@@ -384,6 +441,7 @@ export default function DashboardLider() {
           </AnimatePresence>
         </div>
 
+        {/* ── Modais ── */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="ieq-modal-backdrop">
