@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import api from "../../services/api.js";
-import { Bell, Cake, X, Phone, Mail } from "lucide-react";
+import { Bell, Cake, X, Phone } from "lucide-react";
 
-/* ─── Cores Oficiais IEQ ─── */
 const IEQ = {
     red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
     yellow: "#FDB813",
@@ -22,13 +21,15 @@ const globalStyles = (isDark) => `
     60%{transform:rotate(-8deg)}
     75%{transform:rotate(4deg)}
   }
-  @keyframes dropIn   { from{opacity:0;transform:translateY(-10px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-  @keyframes fadeIn   { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes shimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-  @keyframes confetti {
+  @keyframes dropIn      { from{opacity:0;transform:translateY(-10px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+  @keyframes slideUpIn   { from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.97)} to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)} }
+  @keyframes fadeIn      { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes shimmer     { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  @keyframes confetti    {
     0%  { transform: translateY(0) rotate(0deg);   opacity: 1; }
     100%{ transform: translateY(60px) rotate(720deg); opacity: 0; }
   }
+  @keyframes backdropIn  { from{opacity:0} to{opacity:1} }
 
   .ieq-bell-btn {
     position: relative;
@@ -53,6 +54,7 @@ const globalStyles = (isDark) => `
     box-shadow: 0 2px 8px rgba(200,16,46,.5);
   }
 
+  /* Desktop: dropdown ancorado à direita do botão */
   .ieq-dropdown {
     position: absolute; top: calc(100% + 12px); right: 0;
     width: 340px; border-radius: 14px;
@@ -62,6 +64,38 @@ const globalStyles = (isDark) => `
     backdrop-filter: blur(24px);
     animation: dropIn .25s cubic-bezier(.34,1.1,.64,1) both;
     z-index: 9999; overflow: hidden;
+  }
+
+  /* Mobile: painel centralizado fixo na tela */
+  @media (max-width: 599px) {
+    .ieq-dropdown {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%) translateY(-50%);
+      width: calc(100vw - 32px);
+      max-width: 360px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: none;
+      border-radius: 16px;
+    }
+  }
+
+  /* Backdrop escuro só no mobile */
+  .ieq-mobile-backdrop {
+    display: none;
+  }
+  @media (max-width: 599px) {
+    .ieq-mobile-backdrop {
+      display: block;
+      position: fixed; inset: 0;
+      background: rgba(10,6,8,.7);
+      backdrop-filter: blur(6px);
+      z-index: 9998;
+      animation: backdropIn .2s ease;
+    }
   }
 
   .ieq-drop-header {
@@ -138,27 +172,20 @@ function ConfettiParticles() {
 }
 
 export default function SinoAniversariantes({ isDark = false }) {
-    const [aberto,        setAberto]        = useState(false);
-    const [membros,       setMembros]       = useState([]);
-    const [loading,       setLoading]       = useState(false);
-    const [visto,         setVisto]         = useState(false);
-    const [ringing,       setRinging]       = useState(false);
+    const [aberto,  setAberto]  = useState(false);
+    const [membros, setMembros] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [visto,   setVisto]   = useState(false);
+    const [ringing, setRinging] = useState(false);
     const dropRef = useRef(null);
 
     const tp = isDark ? IEQ.offWhite : "#1A0A0D";
     const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
-    const getHeaders = () => {
-        const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-        return { Authorization: `Bearer ${token}` };
-    };
-
     const buscarAniversariantes = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await api.get(`/api/aniversariantes/hoje`, {
-                headers: getHeaders(),
-            });
+            const res = await api.get(`/api/aniversariantes/hoje`);
             const lista = res.data || [];
             setMembros(lista);
             if (lista.length > 0) {
@@ -172,14 +199,13 @@ export default function SinoAniversariantes({ isDark = false }) {
         }
     }, []);
 
-    // Busca ao montar e a cada 1h
     useEffect(() => {
         buscarAniversariantes();
         const intervalo = setInterval(buscarAniversariantes, 60 * 60 * 1000);
         return () => clearInterval(intervalo);
     }, [buscarAniversariantes]);
 
-    // Fecha ao clicar fora
+    // Fecha ao clicar fora (desktop)
     useEffect(() => {
         const handler = (e) => {
             if (dropRef.current && !dropRef.current.contains(e.target)) {
@@ -190,10 +216,22 @@ export default function SinoAniversariantes({ isDark = false }) {
         return () => document.removeEventListener("mousedown", handler);
     }, []);
 
+    // Trava scroll do body quando modal mobile está aberto
+    useEffect(() => {
+        if (aberto) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => { document.body.style.overflow = ""; };
+    }, [aberto]);
+
     const handleAbrir = () => {
         setAberto((v) => !v);
         setVisto(true);
     };
+
+    const fechar = () => setAberto(false);
 
     const temAniversario = membros.length > 0;
     const mostrarBadge   = temAniversario && !visto;
@@ -201,6 +239,11 @@ export default function SinoAniversariantes({ isDark = false }) {
     return (
         <>
             <style>{globalStyles(isDark)}</style>
+
+            {/* Backdrop mobile — clica fora para fechar */}
+            {aberto && (
+                <div className="ieq-mobile-backdrop" onClick={fechar} />
+            )}
 
             <div ref={dropRef} style={{ position: "relative", display: "inline-block" }}>
 
@@ -216,7 +259,7 @@ export default function SinoAniversariantes({ isDark = false }) {
                     )}
                 </button>
 
-                {/* Dropdown */}
+                {/* Dropdown / Modal */}
                 {aberto && (
                     <div className="ieq-dropdown">
 
@@ -235,7 +278,7 @@ export default function SinoAniversariantes({ isDark = false }) {
                                 </div>
                             </div>
                             <button
-                                onClick={() => setAberto(false)}
+                                onClick={fechar}
                                 style={{ background: "none", border: "none", cursor: "pointer", color: ts, padding: 4, borderRadius: 6 }}
                             >
                                 <X size={16} />
@@ -283,16 +326,12 @@ export default function SinoAniversariantes({ isDark = false }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {/* Idade */}
                                         {m.dataNascimento && (() => {
-                                            const nasc = new Date(m.dataNascimento);
-                                            const hoje = new Date();
+                                            const nasc  = new Date(m.dataNascimento);
+                                            const hoje  = new Date();
                                             const idade = hoje.getFullYear() - nasc.getFullYear();
                                             return (
-                                                <div style={{
-                                                    background: `linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red})`,
-                                                    borderRadius: 8, padding: "4px 10px", flexShrink: 0,
-                                                }}>
+                                                <div style={{ background: `linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red})`, borderRadius: 8, padding: "4px 10px", flexShrink: 0 }}>
                                                     <p style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, color: "#fff", margin: 0 }}>{idade}</p>
                                                     <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".1em", color: "rgba(255,255,255,.7)", margin: 0 }}>ANOS</p>
                                                 </div>
@@ -317,7 +356,6 @@ export default function SinoAniversariantes({ isDark = false }) {
                                 </p>
                             </div>
                         )}
-
                     </div>
                 )}
             </div>
