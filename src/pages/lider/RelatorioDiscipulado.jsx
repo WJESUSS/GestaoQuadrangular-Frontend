@@ -34,14 +34,20 @@ function QuadrangularCross({ size = 32 }) {
 
 function obterSemanaAtual() {
   const hoje = new Date();
-  const diaSemana = hoje.getDay();
-  const diffSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
-  const segunda = new Date(hoje);
-  segunda.setDate(hoje.getDate() + diffSegunda);
-  const domingo = new Date(segunda);
-  domingo.setDate(segunda.getDate() + 6);
-  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  return { inicio: fmt(segunda), fim: fmt(domingo) };
+  const diaSemana = hoje.getDay(); // 0 = domingo, 6 = sábado
+
+  // Volta até o domingo da semana atual
+  const domingo = new Date(hoje);
+  domingo.setDate(hoje.getDate() - diaSemana);
+
+  // Sábado = domingo + 6
+  const sabado = new Date(domingo);
+  sabado.setDate(domingo.getDate() + 6);
+
+  const fmt = (d) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  return { inicio: fmt(domingo), fim: fmt(sabado) };
 }
 
 const COLUNAS = [

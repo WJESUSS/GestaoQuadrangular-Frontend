@@ -8,40 +8,31 @@ import TelaFichas from "./TelaFichas";
 import RelatorioDiscipulado from "./RelatorioDiscipulado";
 import CasasDePazLider from "./CasasDePazLider";
 import Missao70Lider from "./Missao70Lider";
+import SinoAniversariantes from "./SinoAniversariantes"; // ← ADICIONADO
 import {
   Trash2, Loader2, Users, Plus, Search, X,
   TrendingUp, Target, Sparkles, LogOut,
   Sun, Moon, CheckCircle2, Home, Flame,
 } from "lucide-react";
 
-/* ─── Paleta IEQ ─────────────────────────────────────────────────────────── */
 const IEQ = {
-  red:        "#C8102E",
-  redDark:    "#8B0B1F",
-  redLight:   "#E8294A",
-  yellow:     "#FDB813",
-  yellowDark: "#C48C00",
-  blue:       "#003DA5",
-  blueDark:   "#002470",
-  blueLight:  "#1A56C4",
-  white:      "#FFFFFF",
-  offWhite:   "#F5F0E8",
-  dark:       "#0A0608",
-  darkCard:   "#110A0D",
+  red:"#C8102E", redDark:"#8B0B1F", redLight:"#E8294A",
+  yellow:"#FDB813", yellowDark:"#C48C00",
+  blue:"#003DA5", blueDark:"#002470", blueLight:"#1A56C4",
+  white:"#FFFFFF", offWhite:"#F5F0E8", dark:"#0A0608", darkCard:"#110A0D",
 };
 
-/* ─── Cruz Quadrangular (memoizada — não recria SVG a cada render) ────────── */
 const QuadrangularCross = React.memo(function QuadrangularCross({ size = 32 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
         <defs>
           <linearGradient id="gV2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor={IEQ.redLight} />
+            <stop offset="0%" stopColor={IEQ.redLight} />
             <stop offset="100%" stopColor={IEQ.redDark} />
           </linearGradient>
           <linearGradient id="gH2" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor={IEQ.blueDark} />
-            <stop offset="50%"  stopColor={IEQ.blueLight} />
+            <stop offset="0%" stopColor={IEQ.blueDark} />
+            <stop offset="50%" stopColor={IEQ.blueLight} />
             <stop offset="100%" stopColor={IEQ.blueDark} />
           </linearGradient>
           <filter id="glow2">
@@ -62,80 +53,53 @@ const containerVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, staggerChildren: 0.07 } },
 };
 
-/* ─── CSS estático (fora do componente — gerado UMA vez) ─────────────────── */
 const STATIC_CSS = `
   * { box-sizing: border-box; }
-
   @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
   @keyframes stripe { 0% { background-position:0 0; } 100% { background-position:60px 60px; } }
   @keyframes pulse  { 0%,100% { transform:scale(1); opacity:.45; } 50% { transform:scale(1.12); opacity:.12; } }
   @keyframes spin   { to { transform: rotate(360deg); } }
-
-  .ieq-bg {
-    position:fixed; inset:0; pointer-events:none; z-index:0;
-    background-size:60px 60px;
-    animation: stripe 8s linear infinite;
-  }
+  .ieq-bg { position:fixed; inset:0; pointer-events:none; z-index:0; background-size:60px 60px; animation: stripe 8s linear infinite; }
   .ieq-bg.dark  { background: repeating-linear-gradient(-55deg, rgba(200,16,46,.04) 0 10px, transparent 10px 20px, rgba(253,184,19,.03) 20px 30px, transparent 30px 40px); }
   .ieq-bg.light { background: repeating-linear-gradient(-55deg, rgba(200,16,46,.06) 0 10px, transparent 10px 20px, rgba(253,184,19,.05) 20px 30px, transparent 30px 40px); }
-
-  .ieq-title {
-    font-family:'Cinzel',serif;
-    background: linear-gradient(90deg, #8B0B1F, #C8102E, #FDB813, #003DA5);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  }
-
+  .ieq-title { font-family:'Cinzel',serif; background: linear-gradient(90deg, #8B0B1F, #C8102E, #FDB813, #003DA5); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
   .ieq-card.dark  { background: rgba(17,10,13,.97); border: 1px solid rgba(200,16,46,.15); border-radius: 14px; backdrop-filter: blur(24px); }
   .ieq-card.light { background: rgba(255,255,255,.92); border: 1px solid rgba(200,16,46,.12); border-radius: 14px; backdrop-filter: blur(24px); }
-
   .ieq-btn-primary { background: linear-gradient(135deg, #8B0B1F, #C8102E); color: #fff; border:none; border-radius:8px; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em; cursor:pointer; transition: all .25s; padding:13px 24px; }
   .ieq-btn-primary:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.12); }
-
   .ieq-btn-blue { background: linear-gradient(135deg, #002470, #003DA5); color: #fff; border:none; border-radius:8px; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em; cursor:pointer; transition: all .25s; padding:13px 24px; }
   .ieq-btn-blue:hover { transform:translateY(-2px); filter:brightness(1.12); }
-
   .ieq-btn-ghost.dark  { background: rgba(255,255,255,.04); color: #F5F0E8; border: 1px solid rgba(200,16,46,.2); border-radius:8px; font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.15em; cursor:pointer; transition: all .25s; padding:11px 20px; }
   .ieq-btn-ghost.light { background: rgba(200,16,46,.06); color: #8B0B1F; border: 1px solid rgba(200,16,46,.18); border-radius:8px; font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.15em; cursor:pointer; transition: all .25s; padding:11px 20px; }
   .ieq-btn-ghost:hover { border-color:#C8102E; background:rgba(200,16,46,.1); }
-
   .ieq-input-field.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(200,16,46,.2); color:#F5F0E8; }
   .ieq-input-field.light { background:rgba(0,0,0,.03); border:1px solid rgba(200,16,46,.18); color:#1A0A0D; }
   .ieq-input-field { width:100%; padding:13px 16px; border-radius:8px; outline:none; font-family:'EB Garamond',serif; font-size:15px; transition: all .25s; }
   .ieq-input-field:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
   .ieq-input-field.dark::placeholder  { color:rgba(245,240,232,.25); }
   .ieq-input-field.light::placeholder { color:rgba(26,10,13,.3); }
-
   .ieq-menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
   @media (min-width: 600px) { .ieq-menu-grid { grid-template-columns: repeat(6, 1fr); gap: 16px; } }
-  .ieq-menu-card-full { grid-column: 1 / -1; }
-  @media (min-width: 600px) { .ieq-menu-card-full { grid-column: auto; } }
-
   .ieq-menu-card.dark  { background: rgba(17,10,13,.97); border: 1px solid rgba(200,16,46,.15); border-radius:12px; padding:18px 12px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:10px; transition: all .3s; text-align:center; }
   .ieq-menu-card.light { background: rgba(255,255,255,.9); border: 1px solid rgba(200,16,46,.12); border-radius:12px; padding:18px 12px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:10px; transition: all .3s; text-align:center; }
   .ieq-menu-card:hover { transform:translateY(-4px); box-shadow:0 14px 36px rgba(200,16,46,.15); border-color:#C8102E; }
-
   .ieq-member-row.dark  { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:rgba(255,255,255,.03); border:1px solid rgba(200,16,46,.1); border-radius:8px; transition:all .2s; gap:8px; }
   .ieq-member-row.light { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:rgba(200,16,46,.04); border:1px solid rgba(200,16,46,.08); border-radius:8px; transition:all .2s; gap:8px; }
   .ieq-member-row:hover { border-color:#C8102E; }
-
   .ieq-avatar { width:36px; height:36px; border-radius:6px; flex-shrink:0; background: linear-gradient(135deg, #8B0B1F, #003DA5); display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Cinzel',serif; font-weight:700; font-size:13px; }
   .ieq-member-name { font-family:'EB Garamond',serif; font-size:15px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   @media (max-width:420px) { .ieq-member-name { font-size:13px; } }
-
   .ieq-progress-track { height:8px; border-radius:99px; overflow:hidden; }
   .ieq-progress-track.dark  { background:rgba(255,255,255,.08); }
   .ieq-progress-track.light { background:rgba(200,16,46,.1); }
-
   .ieq-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 14px; border-radius:99px; font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.18em; border:1px solid; }
   .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation: pulse 3s ease-in-out infinite; }
   .spin-icon { animation: spin 1s linear infinite; }
   .divider { height:1px; background: linear-gradient(90deg, transparent, rgba(200,16,46,.2), transparent); margin: 8px 0; }
-
   .ieq-modal-backdrop { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
   @media (min-width: 520px) { .ieq-modal-backdrop { align-items: center; padding: 12px; } }
   .ieq-modal-box { position: relative; z-index: 10; width: 100%; max-height: 90vh; display: flex; flex-direction: column; border-radius: 16px 16px 0 0; overflow: hidden; }
   @media (min-width: 520px) { .ieq-modal-box { border-radius: 14px; max-height: calc(100vh - 24px); } }
-
   .ieq-lider-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid rgba(200,16,46,.4); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .ieq-lider-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .ieq-lider-avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
@@ -155,46 +119,31 @@ export default function DashboardLider() {
 
   const t = isDark ? "dark" : "light";
 
-  useEffect(() => {
-    localStorage.setItem("theme", t);
-  }, [t]);
+  useEffect(() => { localStorage.setItem("theme", t); }, [t]);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/login";
-  };
+  const handleLogout = () => { localStorage.clear(); window.location.href = "/login"; };
 
-  /* ─── Carrega célula + usuário em paralelo, membros logo após ────────────── */
   const carregarDados = useCallback(async (isSilent = false) => {
     try {
       if (!isSilent) setLoading(true);
-
-      // Paralelo: célula e usuário ao mesmo tempo
       const [resCelula, resUsuario] = await Promise.all([
         api.get("/celulas/minha-celula"),
         api.get("/usuarios/me"),
       ]);
-
       const celulaData = resCelula.data;
       setCelula(celulaData);
       setUsuarioLogado(resUsuario.data);
-
-      // Membros só se tiver id (evita request desnecessário)
       if (celulaData?.id) {
         const resM = await api.get(`/celulas/${celulaData.id}/membros`);
         const unique = (arr) => arr.filter((item, i, self) => i === self.findIndex(t => t.id === item.id));
         setMembros(unique(resM.data || []));
       }
-    } catch (err) {
-      console.error("Erro ao carregar dashboard:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error("Erro ao carregar dashboard:", err); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
     carregarDados();
-    // Polling reduzido para 2 minutos — 30s era excessivo
     const interval = setInterval(() => carregarDados(true), 120_000);
     return () => clearInterval(interval);
   }, [carregarDados]);
@@ -203,11 +152,8 @@ export default function DashboardLider() {
     if (!window.confirm(`Remover ${nome} da célula?`)) return;
     try {
       await api.delete(`/celulas/${celula.id}/membros/${membroId}`);
-      // Atualiza localmente sem nova request
       setMembros(prev => prev.filter(m => m.id !== membroId));
-    } catch (err) {
-      alert(err.response?.data?.message || "Erro ao remover.");
-    }
+    } catch (err) { alert(err.response?.data?.message || "Erro ao remover."); }
   };
 
   const solicitarMultiplicacao = async () => {
@@ -219,15 +165,11 @@ export default function DashboardLider() {
       setShowModalMultiplicacao(false);
       setMotivoMultiplicacao("");
       carregarDados();
-    } catch (err) {
-      alert(err.response?.data?.message || "Erro ao enviar solicitação.");
-    } finally {
-      setSolicitandoMulti(false);
-    }
+    } catch (err) { alert(err.response?.data?.message || "Erro ao enviar solicitação."); }
+    finally { setSolicitandoMulti(false); }
   };
 
-  // Derivados memoizados — não recalcula a cada render
-  const { qtdMembros, atingiuMeta, statusMulti, isAnalise, isAprovado, podeSolicitar, porcentagemMeta } = useMemo(() => {
+  const { qtdMembros, atingiuMeta, isAnalise, isAprovado, podeSolicitar, porcentagemMeta } = useMemo(() => {
     const qtdMembros      = membros.length;
     const atingiuMeta     = qtdMembros >= 8;
     const statusMulti     = celula?.statusMultiplicacao || "NORMAL";
@@ -235,7 +177,7 @@ export default function DashboardLider() {
     const isAprovado      = atingiuMeta && statusMulti === "APROVADO";
     const podeSolicitar   = atingiuMeta && !isAnalise;
     const porcentagemMeta = Math.min((qtdMembros / 8) * 100, 100);
-    return { qtdMembros, atingiuMeta, statusMulti, isAnalise, isAprovado, podeSolicitar, porcentagemMeta };
+    return { qtdMembros, atingiuMeta, isAnalise, isAprovado, podeSolicitar, porcentagemMeta };
   }, [membros, celula]);
 
   const bg            = isDark ? IEQ.dark : "#F0EAE8";
@@ -246,21 +188,16 @@ export default function DashboardLider() {
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: bg }}>
         <div style={{ textAlign:"center" }}>
           <QuadrangularCross size={48} />
-          <p style={{ fontFamily:"'Cinzel',serif", color: isDark ? IEQ.offWhite : IEQ.redDark, marginTop:16, letterSpacing:".2em", fontSize:11 }}>
-            CARREGANDO...
-          </p>
+          <p style={{ fontFamily:"'Cinzel',serif", color: isDark ? IEQ.offWhite : IEQ.redDark, marginTop:16, letterSpacing:".2em", fontSize:11 }}>CARREGANDO...</p>
         </div>
       </div>
   );
 
   return (
       <div style={{ minHeight:"100vh", background:bg, color:textPrimary, fontFamily:"'EB Garamond',serif", position:"relative", transition:"background .5s", paddingBottom:60 }}>
-        {/* CSS injetado UMA vez (não recria string a cada render) */}
         <style>{STATIC_CSS}</style>
-
         <div className={`ieq-bg ${t}`} />
 
-        {/* ─── HEADER ─────────────────────────────────────────────────────────── */}
         <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 24px 0" }}>
           <motion.header
               initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
@@ -270,20 +207,14 @@ export default function DashboardLider() {
               <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
                 <div className="pulse-ring" style={{ width:72, height:72 }} />
                 <div className="ieq-lider-avatar" style={{ background: isDark ? "#1A0A0D" : "#fff" }}>
-                  {usuarioLogado?.fotoPerfil ? (
-                      <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome || "Foto do líder"} />
-                  ) : (
-                      <div className="ieq-lider-avatar-fallback">
-                        <QuadrangularCross size={32} />
-                      </div>
-                  )}
+                  {usuarioLogado?.fotoPerfil
+                      ? <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome || "Foto do líder"} />
+                      : <div className="ieq-lider-avatar-fallback"><QuadrangularCross size={32} /></div>
+                  }
                 </div>
               </div>
-
               <div>
-                <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>
-                  IEQ PITUAÇU
-                </h1>
+                <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
                   CÉLULA {celula?.nome?.toUpperCase() || "?"} · PAINEL DO LÍDER
                 </p>
@@ -295,7 +226,11 @@ export default function DashboardLider() {
               </div>
             </div>
 
+            {/* ── Ações do header ── */}
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              {/* 🔔 SINO DE ANIVERSARIANTES */}
+              <SinoAniversariantes isDark={isDark} />
+
               <button className={`ieq-btn-ghost ${t}`} onClick={() => setIsDark(!isDark)} style={{ padding:"10px 14px" }}>
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
@@ -306,7 +241,6 @@ export default function DashboardLider() {
             </div>
           </motion.header>
 
-          {/* Banner aprovação */}
           <AnimatePresence>
             {isAprovado && (
                 <motion.div
@@ -319,17 +253,12 @@ export default function DashboardLider() {
             )}
           </AnimatePresence>
 
-          {/* ─── CONTEÚDO ──────────────────────────────────────────────────────── */}
           <AnimatePresence mode="wait">
             {abaAtiva === "home" ? (
-                <motion.div
-                    key="home"
-                    variants={containerVariants}
-                    initial="hidden" animate="visible"
-                    exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}
-                    style={{ display:"flex", flexDirection:"column", gap:24 }}
+                <motion.div key="home" variants={containerVariants} initial="hidden" animate="visible"
+                            exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}
+                            style={{ display:"flex", flexDirection:"column", gap:24 }}
                 >
-                  {/* KPI Hero */}
                   <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:20 }}>
                     <div className={`ieq-card ${t}`} style={{ padding:"36px 40px", background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, border:"none", position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", inset:0, backgroundImage:`repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)`, backgroundSize:"40px 40px" }} />
@@ -354,11 +283,8 @@ export default function DashboardLider() {
                               <span>{Math.round(porcentagemMeta)}%</span>
                             </div>
                             <div className={`ieq-progress-track ${t}`}>
-                              <motion.div
-                                  initial={{ width:0 }} animate={{ width:`${porcentagemMeta}%` }}
-                                  transition={{ duration:1.2, ease:"easeOut" }}
-                                  style={{ height:"100%", borderRadius:99, background: atingiuMeta ? IEQ.yellow : `linear-gradient(90deg,${IEQ.red},${IEQ.yellow})` }}
-                              />
+                              <motion.div initial={{ width:0 }} animate={{ width:`${porcentagemMeta}%` }} transition={{ duration:1.2, ease:"easeOut" }}
+                                          style={{ height:"100%", borderRadius:99, background: atingiuMeta ? IEQ.yellow : `linear-gradient(90deg,${IEQ.red},${IEQ.yellow})` }} />
                             </div>
                           </div>
                         </div>
@@ -393,7 +319,6 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* Menu de navegação */}
                   <div className="ieq-menu-grid">
                     {[
                       { icon:<Target size={20}/>,     title:"DISCIPULADO", desc:"Acompanhar",  aba:"discipulado", color:IEQ.blue    },
@@ -404,9 +329,7 @@ export default function DashboardLider() {
                       { icon:<Flame size={20}/>,      title:"MISSÃO 70",   desc:"Evangelismo", aba:"missao70",    color:IEQ.yellow  },
                     ].map(({ icon, title, desc, aba, color }) => (
                         <motion.div key={aba} className={`ieq-menu-card ${t}`} whileHover={{ y:-4 }} whileTap={{ scale:.97 }} onClick={() => setAbaAtiva(aba)}>
-                          <div style={{ width:42, height:42, borderRadius:10, background:`${color}18`, display:"flex", alignItems:"center", justifyContent:"center", color }}>
-                            {icon}
-                          </div>
+                          <div style={{ width:42, height:42, borderRadius:10, background:`${color}18`, display:"flex", alignItems:"center", justifyContent:"center", color }}>{icon}</div>
                           <div>
                             <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>{title}</p>
                             <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:textSecondary, margin:0 }}>{desc}</p>
@@ -415,7 +338,6 @@ export default function DashboardLider() {
                     ))}
                   </div>
 
-                  {/* Lista de membros */}
                   <div className={`ieq-card ${t}`} style={{ overflow:"hidden" }}>
                     <div style={{ padding:"24px 28px", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
                       <div>
@@ -433,33 +355,24 @@ export default function DashboardLider() {
                               <div className="ieq-avatar">{m.nome?.charAt(0).toUpperCase()}</div>
                               <span className="ieq-member-name" style={{ color:textPrimary }}>{m.nome}</span>
                             </div>
-                            <button
-                                onClick={() => removerMembro(m.id, m.nome)}
-                                style={{ background:"none", border:"none", cursor:"pointer", color:textSecondary, padding:6, borderRadius:6, transition:"color .2s", flexShrink:0 }}
-                                onMouseEnter={e => e.currentTarget.style.color = IEQ.red}
-                                onMouseLeave={e => e.currentTarget.style.color = textSecondary}
-                            >
-                              <Trash2 size={15} />
-                            </button>
+                            <button onClick={() => removerMembro(m.id, m.nome)}
+                                    style={{ background:"none", border:"none", cursor:"pointer", color:textSecondary, padding:6, borderRadius:6, transition:"color .2s", flexShrink:0 }}
+                                    onMouseEnter={e => e.currentTarget.style.color = IEQ.red}
+                                    onMouseLeave={e => e.currentTarget.style.color = textSecondary}
+                            ><Trash2 size={15} /></button>
                           </div>
                       ))}
                     </div>
                   </div>
 
                   <HistoricoRelatorios celulaId={celula?.id} />
-
                   <div className="divider" />
                   <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, padding:"0 0 8px" }}>
                     © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
                   </p>
                 </motion.div>
-
             ) : (
-                <motion.div
-                    key="content"
-                    initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }}
-                    exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}
-                >
+                <motion.div key="content" initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}>
                   {abaAtiva === "relatorio"   && <TelaRelatorio        celula={celula}       isDark={isDark} />}
                   {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}      isDark={isDark} />}
                   {abaAtiva === "visitantes"  && <TelaVisitantes       celulaId={celula?.id}  isDark={isDark} />}
@@ -471,62 +384,34 @@ export default function DashboardLider() {
           </AnimatePresence>
         </div>
 
-        {/* ─── MODAL: Adicionar Membro ──────────────────────────────────────────── */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="ieq-modal-backdrop">
-                <motion.div
-                    initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                    onClick={() => setShowModalAddMembro(false)}
-                    style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }}
-                />
-                <motion.div
-                    initial={{ y:80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:80, opacity:0 }}
-                    className={`ieq-card ${t} ieq-modal-box`} style={{ maxWidth:480 }}
-                >
-                  <ModalBuscarMembro
-                      celulaId={celula?.id}
-                      isDark={isDark}
-                      textPrimary={textPrimary}
-                      textSecondary={textSecondary}
-                      onClose={() => {
-                        setShowModalAddMembro(false);
-                        carregarDados();
-                      }}
-                  />
+                <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                            onClick={() => setShowModalAddMembro(false)}
+                            style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }} />
+                <motion.div initial={{ y:80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:80, opacity:0 }}
+                            className={`ieq-card ${t} ieq-modal-box`} style={{ maxWidth:480 }}>
+                  <ModalBuscarMembro celulaId={celula?.id} isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}
+                                     onClose={() => { setShowModalAddMembro(false); carregarDados(); }} />
                 </motion.div>
               </div>
           )}
-
-          {/* MODAL: Multiplicação */}
           {showModalMultiplicacao && (
               <div className="ieq-modal-backdrop">
-                <motion.div
-                    initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                    style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }}
-                />
-                <motion.div
-                    initial={{ y:80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:80, opacity:0 }}
-                    className={`ieq-card ${t} ieq-modal-box`}
-                    style={{ maxWidth:440, padding:"32px 24px", overflowY:"auto" }}
-                >
+                <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                            style={{ position:"fixed", inset:0, background:"rgba(10,6,8,.85)", backdropFilter:"blur(16px)", zIndex:0 }} />
+                <motion.div initial={{ y:80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:80, opacity:0 }}
+                            className={`ieq-card ${t} ieq-modal-box`} style={{ maxWidth:440, padding:"32px 24px", overflowY:"auto" }}>
                   <div style={{ textAlign:"center", marginBottom:22 }}>
                     <QuadrangularCross size={32} />
-                    <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"14px 0 6px" }}>
-                      PLANO DE MULTIPLICAÇÃO
-                    </h2>
-                    <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:textSecondary, margin:0 }}>
-                      Informe o novo líder e o local da nova célula.
-                    </p>
+                    <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"14px 0 6px" }}>PLANO DE MULTIPLICAÇÃO</h2>
+                    <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:textSecondary, margin:0 }}>Informe o novo líder e o local da nova célula.</p>
                   </div>
                   <div className="divider" style={{ marginBottom:18 }} />
-                  <textarea
-                      className={`ieq-input-field ${t}`}
-                      style={{ minHeight:110, resize:"vertical" }}
-                      placeholder="Ex: Novo líder será o João, anfitrião Maria..."
-                      value={motivoMultiplicacao}
-                      onChange={(e) => setMotivoMultiplicacao(e.target.value)}
-                  />
+                  <textarea className={`ieq-input-field ${t}`} style={{ minHeight:110, resize:"vertical" }}
+                            placeholder="Ex: Novo líder será o João, anfitrião Maria..."
+                            value={motivoMultiplicacao} onChange={(e) => setMotivoMultiplicacao(e.target.value)} />
                   <div style={{ display:"flex", gap:10, marginTop:18 }}>
                     <button className={`ieq-btn-ghost ${t}`} style={{ flex:1 }} onClick={() => setShowModalMultiplicacao(false)}>CANCELAR</button>
                     <button className="ieq-btn-blue" style={{ flex:2 }} onClick={solicitarMultiplicacao} disabled={solicitandoMulti}>
@@ -541,12 +426,10 @@ export default function DashboardLider() {
   );
 }
 
-/* ─── Modal Buscar Membro ─────────────────────────────────────────────────── */
 function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSecondary }) {
   const [busca,      setBusca]      = useState("");
   const [membrosSem, setMembrosSem] = useState([]);
   const [loading,    setLoading]    = useState(false);
-
   const t = isDark ? "dark" : "light";
 
   useEffect(() => {
@@ -560,13 +443,10 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
   }, []);
 
   const vincular = async (id) => {
-    try {
-      await api.post(`/celulas/${celulaId}/membros/${id}`);
-      onClose();
-    } catch { alert("Erro ao vincular."); }
+    try { await api.post(`/celulas/${celulaId}/membros/${id}`); onClose(); }
+    catch { alert("Erro ao vincular."); }
   };
 
-  // Filtragem memoizada
   const filtrados = useMemo(() =>
           membrosSem.filter(m => m.nome?.toLowerCase().includes(busca.toLowerCase())),
       [membrosSem, busca]
@@ -575,25 +455,14 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
   return (
       <div style={{ padding:"20px 18px", display:"flex", flexDirection:"column", flex:1, minHeight:0 }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, flexShrink:0 }}>
-          <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".14em", color:textPrimary, margin:0 }}>
-            VINCULAR MEMBRO
-          </h2>
-          <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:textSecondary, padding:4 }}>
-            <X size={20} />
-          </button>
+          <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:700, letterSpacing:".14em", color:textPrimary, margin:0 }}>VINCULAR MEMBRO</h2>
+          <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:textSecondary, padding:4 }}><X size={20} /></button>
         </div>
-
         <div style={{ position:"relative", marginBottom:12, flexShrink:0 }}>
           <Search size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:IEQ.red, opacity:.6 }} />
-          <input
-              className={`ieq-input-field ${t}`}
-              style={{ paddingLeft:40, padding:"10px 14px 10px 40px", fontSize:14 }}
-              placeholder="Buscar por nome..."
-              value={busca}
-              onChange={e => setBusca(e.target.value)}
-          />
+          <input className={`ieq-input-field ${t}`} style={{ paddingLeft:40, padding:"10px 14px 10px 40px", fontSize:14 }}
+                 placeholder="Buscar por nome..." value={busca} onChange={e => setBusca(e.target.value)} />
         </div>
-
         <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:8, minHeight:0 }}>
           {loading ? (
               <div style={{ textAlign:"center", paddingTop:28 }}>
@@ -605,18 +474,12 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, textPrimary, textSeconda
                   <div style={{ width:28, height:28, borderRadius:6, flexShrink:0, background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:11 }}>
                     {m.nome?.charAt(0).toUpperCase()}
                   </div>
-                  <span style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:textPrimary, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                {m.nome}
-              </span>
+                  <span style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:textPrimary, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{m.nome}</span>
                 </div>
-                <button className="ieq-btn-primary" style={{ fontSize:9, padding:"6px 11px", letterSpacing:".1em", flexShrink:0 }} onClick={() => vincular(m.id)}>
-                  VINCULAR
-                </button>
+                <button className="ieq-btn-primary" style={{ fontSize:9, padding:"6px 11px", letterSpacing:".1em", flexShrink:0 }} onClick={() => vincular(m.id)}>VINCULAR</button>
               </div>
           )) : (
-              <p style={{ textAlign:"center", paddingTop:28, fontFamily:"'EB Garamond',serif", fontStyle:"italic", color:textSecondary }}>
-                Nenhum membro encontrado.
-              </p>
+              <p style={{ textAlign:"center", paddingTop:28, fontFamily:"'EB Garamond',serif", fontStyle:"italic", color:textSecondary }}>Nenhum membro encontrado.</p>
           )}
         </div>
       </div>

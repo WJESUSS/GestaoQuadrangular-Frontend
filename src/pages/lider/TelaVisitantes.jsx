@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import {
   Plus, Phone, Calendar, X, Search,
-  Loader2, UserCheck, Mail, ExternalLink,
+  Loader2, UserCheck, Mail, ExternalLink, Trash2, AlertTriangle,
 } from "lucide-react";
 
 /* ─── Cores Oficiais IEQ ─── */
@@ -50,6 +50,8 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
   const [modalAberto,          setModalAberto]          = useState(false);
   const [editando,             setEditando]             = useState(false);
   const [visitanteSelecionado, setVisitanteSelecionado] = useState(null);
+  const [confirmandoDeletar,   setConfirmandoDeletar]   = useState(false);
+  const [deletando,            setDeletando]            = useState(false);
 
   const estadoInicial = {
     nome: "", telefone: "", email: "",
@@ -89,12 +91,28 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     } catch { alert("Erro ao salvar dados."); } finally { setLoading(false); }
   };
 
+  const handleDeletar = async () => {
+    if (!visitanteSelecionado) return;
+    try {
+      setDeletando(true);
+      await api.delete(`/visitantes/${visitanteSelecionado.id}`, { headers: getHeaders() });
+      fecharModal();
+      carregarVisitantes();
+    } catch { alert("Erro ao remover visitante."); } finally { setDeletando(false); }
+  };
+
   const abrirModal = (v = null) => {
+    setConfirmandoDeletar(false);
     if (v) { setEditando(true); setVisitanteSelecionado(v); setFormVisitante({ ...v }); }
     else   { setEditando(false); setFormVisitante(estadoInicial); }
     setModalAberto(true);
   };
-  const fecharModal = () => { setModalAberto(false); setFormVisitante(estadoInicial); };
+
+  const fecharModal = () => {
+    setModalAberto(false);
+    setConfirmandoDeletar(false);
+    setFormVisitante(estadoInicial);
+  };
 
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
@@ -106,6 +124,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
     @keyframes spin   { to{transform:rotate(360deg)} }
     @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes shakeIn { 0%{opacity:0;transform:scale(.95)} 60%{transform:scale(1.02)} 100%{opacity:1;transform:scale(1)} }
 
     .ieq-bg-stripe {
       position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -153,6 +172,40 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     .ieq-btn-primary:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
     .ieq-btn-primary:disabled { opacity:.5; cursor:not-allowed; }
     .ieq-btn-primary.full { width:100%; justify-content:center; }
+
+    .ieq-btn-danger {
+      background:transparent;
+      border:1px solid rgba(200,16,46,.35); color:${IEQ.red};
+      border-radius:8px; padding:13px 24px; cursor:pointer;
+      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
+      display:flex; align-items:center; gap:8px; transition:all .25s; width:100%; justify-content:center;
+    }
+    .ieq-btn-danger:hover:not(:disabled) { background:rgba(200,16,46,.08); border-color:${IEQ.red}; transform:translateY(-1px); }
+    .ieq-btn-danger:disabled { opacity:.5; cursor:not-allowed; }
+
+    .ieq-btn-danger-confirm {
+      background:linear-gradient(135deg,#7A0B1A,${IEQ.redDark}); color:#fff;
+      border:none; border-radius:8px; padding:13px 24px; cursor:pointer;
+      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
+      display:flex; align-items:center; gap:8px; transition:all .25s; flex:1; justify-content:center;
+    }
+    .ieq-btn-danger-confirm:hover:not(:disabled) { filter:brightness(1.15); }
+    .ieq-btn-danger-confirm:disabled { opacity:.5; cursor:not-allowed; }
+
+    .ieq-btn-cancel {
+      background:${isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)"};
+      border:1px solid ${isDark?"rgba(255,255,255,.1)":"rgba(0,0,0,.1)"}; color:${ts};
+      border-radius:8px; padding:13px 24px; cursor:pointer;
+      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
+      display:flex; align-items:center; gap:8px; transition:all .25s; flex:1; justify-content:center;
+    }
+    .ieq-btn-cancel:hover { background:${isDark?"rgba(255,255,255,.1)":"rgba(0,0,0,.08)"}; }
+
+    .ieq-confirm-box {
+      background:${isDark?"rgba(139,11,31,.12)":"rgba(200,16,46,.06)"};
+      border:1px solid rgba(200,16,46,.3); border-radius:10px;
+      padding:20px; animation:shakeIn .3s ease both;
+    }
 
     .ieq-origin-btn {
       padding:8px 14px; border-radius:8px; cursor:pointer;
@@ -339,6 +392,55 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                     {loading ? <><Loader2 size={16} className="spin-icon" /> SALVANDO...</> : (editando ? "ATUALIZAR DADOS" : "FINALIZAR CADASTRO")}
                   </button>
                 </form>
+
+                {/* ── Botão / Confirmação de Deletar — só aparece no modo edição ── */}
+                {editando && (
+                    <div style={{ marginTop:16 }}>
+                      {!confirmandoDeletar ? (
+                          <button
+                              type="button"
+                              className="ieq-btn-danger"
+                              onClick={() => setConfirmandoDeletar(true)}
+                          >
+                            <Trash2 size={15} /> REMOVER VISITANTE
+                          </button>
+                      ) : (
+                          <div className="ieq-confirm-box">
+                            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
+                              <AlertTriangle size={18} style={{ color:IEQ.red, flexShrink:0 }} />
+                              <div>
+                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".14em", color:IEQ.red, margin:"0 0 3px" }}>CONFIRMAR REMOÇÃO</p>
+                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:ts, margin:0 }}>
+                                  Deseja remover <strong style={{ color:tp }}>{visitanteSelecionado?.nome}</strong>? Esta ação não pode ser desfeita.
+                                </p>
+                              </div>
+                            </div>
+                            <div style={{ display:"flex", gap:10 }}>
+                              <button
+                                  type="button"
+                                  className="ieq-btn-cancel"
+                                  onClick={() => setConfirmandoDeletar(false)}
+                                  disabled={deletando}
+                              >
+                                CANCELAR
+                              </button>
+                              <button
+                                  type="button"
+                                  className="ieq-btn-danger-confirm"
+                                  onClick={handleDeletar}
+                                  disabled={deletando}
+                              >
+                                {deletando
+                                    ? <><Loader2 size={15} className="spin-icon" /> REMOVENDO...</>
+                                    : <><Trash2 size={15} /> SIM, REMOVER</>
+                                }
+                              </button>
+                            </div>
+                          </div>
+                      )}
+                    </div>
+                )}
+
               </div>
             </div>
         )}

@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 // Carrega imediatamente — são as telas de entrada
@@ -12,6 +12,8 @@ const PastorPage     = lazy(() => import("./pages/pastor/PastorPage"));
 const SecretariaPage = lazy(() => import("./pages/secretaria/SecretariaPage"));
 const DashboardLider = lazy(() => import("./pages/lider/DashboardLider"));
 const TesourariaPage = lazy(() => import("./pages/tesouraria/TesourariaPage"));
+
+const ROTAS_PROTEGIDAS = ["/lider", "/pastor", "/secretaria", "/admin", "/tesouraria"];
 
 const PrivateRoute = ({ children, allowedRoles }) => {
     const token = localStorage.getItem("token");
@@ -29,7 +31,7 @@ const PrivateRoute = ({ children, allowedRoles }) => {
 
         if (!allowedRoles) return children;
 
-        const roles     = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+        const roles      = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
         const autorizado = roles.some(r => r.toUpperCase() === perfil);
 
         return autorizado ? children : <Navigate to="/unauthorized" replace />;
@@ -39,7 +41,6 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     }
 };
 
-// Tela de loading exibida enquanto o chunk carrega
 function CarregandoTela() {
     return (
         <div style={{
@@ -62,10 +63,36 @@ function CarregandoTela() {
     );
 }
 
+function BackButtonHandler() {
+    const navigate  = useNavigate();
+    const location  = useLocation();
+
+    useEffect(() => {
+        window.history.pushState({ page: location.pathname }, "");
+
+        const handlePopState = () => {
+            const rotaAtual          = location.pathname;
+            const estaEmRotaProtegida = ROTAS_PROTEGIDAS.some(r => rotaAtual.startsWith(r));
+
+            if (estaEmRotaProtegida) {
+                navigate("/", { replace: true });
+            } else {
+                window.history.pushState({ page: rotaAtual }, "");
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [location.pathname, navigate]);
+
+    return null;
+}
+
 export default function App() {
     return (
         <BrowserRouter>
             <Suspense fallback={<CarregandoTela />}>
+                <BackButtonHandler />
                 <Routes>
 
                     {/* PÚBLICA */}
