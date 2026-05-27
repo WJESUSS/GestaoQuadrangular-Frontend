@@ -17,6 +17,168 @@ const IEQ = {
 
 const draftKey = (celulaId) => `ieq_relatorio_draft_${celulaId}`;
 
+/* ─── Dados completos da Bíblia (66 livros) ─── */
+const BIBLIA = [
+  { nome: "Gênesis",           cap: 50, vers: [31,25,24,26,32,22,24,22,29,32,32,20,18,24,21,16,27,33,38,18,34,24,20,67,34,35,46,22,35,43,55,32,20,31,29,43,36,30,23,23,57,38,34,34,28,34,31,22,33,26] },
+  { nome: "Êxodo",             cap: 40, vers: [22,25,22,31,23,30,25,32,35,29,10,51,22,31,27,36,16,27,25,26,36,31,33,18,40,37,21,43,46,38,18,35,23,35,35,38,29,31,43,38] },
+  { nome: "Levítico",          cap: 27, vers: [17,16,17,35,19,30,38,36,24,20,47,8,59,57,33,34,16,30,24,46,22,22,15,64,44,21,29] },
+  { nome: "Números",           cap: 36, vers: [54,34,51,49,31,27,89,26,23,36,35,16,33,45,41,50,13,32,22,29,35,41,30,25,18,65,23,31,40,16,54,42,56,29,34,13] },
+  { nome: "Deuteronômio",      cap: 34, vers: [46,37,29,49,33,25,26,20,29,22,32,32,18,29,23,22,20,22,21,20,23,30,25,22,19,19,26,68,29,20,30,52,29,12] },
+  { nome: "Josué",             cap: 24, vers: [18,24,17,24,15,27,26,35,27,43,23,24,33,15,63,10,18,28,51,9,45,34,16,33] },
+  { nome: "Juízes",            cap: 21, vers: [36,23,31,24,31,40,25,35,57,18,40,15,25,20,20,31,13,31,30,48,25] },
+  { nome: "Rute",              cap: 4,  vers: [22,23,18,22] },
+  { nome: "1 Samuel",          cap: 31, vers: [28,36,21,22,12,21,17,22,27,27,15,25,14,23,29,23,25,18,22,19,19,25,22,31,26,16,23,30,28,11,13] },
+  { nome: "2 Samuel",          cap: 24, vers: [27,32,39,12,25,23,29,18,13,19,27,31,39,33,37,23,29,33,43,26,22,51,39,25] },
+  { nome: "1 Reis",            cap: 22, vers: [53,46,28,34,18,38,51,66,28,29,43,33,34,31,34,34,24,46,21,43,29,53] },
+  { nome: "2 Reis",            cap: 25, vers: [18,25,27,44,27,33,20,29,37,36,21,21,25,29,38,20,41,37,37,21,26,20,37,20,30] },
+  { nome: "1 Crônicas",        cap: 29, vers: [54,55,24,43,26,81,40,40,44,14,47,40,14,17,29,43,27,17,19,8,30,19,32,31,31,32,34,21,30] },
+  { nome: "2 Crônicas",        cap: 36, vers: [17,18,17,22,14,42,22,18,31,19,23,16,22,15,19,14,19,34,11,37,20,12,21,27,28,23,9,27,36,27,21,33,25,33,27,23] },
+  { nome: "Esdras",            cap: 10, vers: [11,70,13,24,17,22,28,36,15,44] },
+  { nome: "Neemias",           cap: 13, vers: [11,20,32,23,19,19,73,18,38,39,36,47,31] },
+  { nome: "Ester",             cap: 10, vers: [22,23,15,17,14,14,10,17,32,3] },
+  { nome: "Jó",                cap: 42, vers: [22,13,26,21,27,30,21,22,35,22,20,25,28,22,35,22,16,21,29,29,34,30,17,25,6,14,23,28,25,31,40,22,33,37,16,33,24,41,30,24,34,17] },
+  { nome: "Salmos",            cap: 150, vers: [6,12,8,8,12,10,17,9,20,18,7,8,6,7,5,11,15,50,14,9,13,31,6,10,22,12,14,9,11,12,24,11,22,22,28,12,40,22,13,17,13,11,5,20,28,22,35,22,46,28,35,34,46,46,39,51,46,75,66,20,45,28,69,75,10,21,19,31,46,58,32,18,36,76,22,17,32,24,46,37,22,17,19,26,13,25,11,22,24,30,30,21,30,28,26,28,16,34,51,6,27,11,30,30,21,30,21,29,30,20,29,29,55,24,14,47,47,9,15,37,13,19,16,28,22,17,21,22,27,27,9,20,23,38,22,7,23,28,23,24,9,21,13,24,20,21,20,15,21,21,8,17,14,21,21,18,21,18,21,21,29,31,19,28,39,19,21,25,23,29,25,29,25,21,28,21,25,24,21,27] },
+  { nome: "Provérbios",        cap: 31, vers: [33,22,35,27,23,35,27,36,18,32,31,28,25,35,33,33,28,24,29,30,31,29,35,34,28,28,27,28,27,33,31] },
+  { nome: "Eclesiastes",       cap: 12, vers: [18,26,22,16,20,12,29,17,18,20,10,14] },
+  { nome: "Cânticos",          cap: 8,  vers: [17,17,11,16,16,13,13,14] },
+  { nome: "Isaías",            cap: 66, vers: [31,22,26,6,30,13,25,22,21,34,16,6,22,32,9,14,14,7,25,6,17,25,18,23,12,21,13,29,24,33,9,20,24,17,10,22,38,22,8,31,29,25,28,28,25,13,15,22,26,11,23,15,12,17,13,12,21,14,21,22,11,12,19,12,25,24] },
+  { nome: "Jeremias",          cap: 52, vers: [19,37,25,31,31,30,34,22,26,25,23,17,27,22,21,21,27,23,15,18,14,30,40,10,38,24,22,17,32,24,40,44,26,22,19,32,21,28,18,16,18,22,13,30,5,28,7,47,39,46,64,34] },
+  { nome: "Lamentações",       cap: 5,  vers: [22,22,66,22,22] },
+  { nome: "Ezequiel",          cap: 48, vers: [28,10,27,21,17,17,14,20,28,22,35,22,22,27,22,29,39,26,22,21,22,27,27,19,42,22,17,18,19,29,22,26,22,22,28,22,11,33,25,8,29,29,35,29,34,39,14,18] },
+  { nome: "Daniel",            cap: 12, vers: [21,49,30,37,31,28,28,27,27,21,45,13] },
+  { nome: "Oséias",            cap: 14, vers: [11,23,5,19,15,11,16,14,17,15,12,14,16,9] },
+  { nome: "Joel",              cap: 3,  vers: [20,32,21] },
+  { nome: "Amós",              cap: 9,  vers: [15,16,15,13,27,14,17,14,15] },
+  { nome: "Obadias",           cap: 1,  vers: [21] },
+  { nome: "Jonas",             cap: 4,  vers: [17,10,10,11] },
+  { nome: "Miquéias",          cap: 7,  vers: [16,13,12,13,15,16,20] },
+  { nome: "Naum",              cap: 3,  vers: [15,13,19] },
+  { nome: "Habacuque",         cap: 3,  vers: [17,20,19] },
+  { nome: "Sofonias",          cap: 3,  vers: [18,15,20] },
+  { nome: "Ageu",              cap: 2,  vers: [15,23] },
+  { nome: "Zacarias",          cap: 14, vers: [21,13,10,14,11,15,14,23,17,12,17,14,9,21] },
+  { nome: "Malaquias",         cap: 4,  vers: [14,17,18,6] },
+  { nome: "Mateus",            cap: 28, vers: [25,23,17,25,48,34,29,34,38,42,30,50,58,36,39,28,27,35,30,34,46,46,39,51,46,75,66,20] },
+  { nome: "Marcos",            cap: 16, vers: [45,28,35,41,43,56,37,38,50,52,33,44,37,72,47,20] },
+  { nome: "Lucas",             cap: 24, vers: [80,52,38,44,39,49,50,56,62,42,54,59,35,35,32,31,37,43,48,47,38,71,56,53] },
+  { nome: "João",              cap: 21, vers: [51,25,36,54,47,71,53,59,41,42,57,50,38,31,27,33,26,40,42,31,25] },
+  { nome: "Atos",              cap: 28, vers: [26,47,26,37,42,15,60,40,43,48,30,25,52,28,41,40,34,28,41,38,40,30,35,27,27,32,44,31] },
+  { nome: "Romanos",           cap: 16, vers: [32,29,31,25,21,23,25,39,33,21,36,21,14,26,33,24] },
+  { nome: "1 Coríntios",       cap: 16, vers: [31,16,23,21,13,20,40,13,27,33,34,31,13,54,22,24] },
+  { nome: "2 Coríntios",       cap: 13, vers: [24,17,18,18,21,18,16,24,15,18,33,21,14] },
+  { nome: "Gálatas",           cap: 6,  vers: [24,21,29,31,26,18] },
+  { nome: "Efésios",           cap: 6,  vers: [23,22,21,28,22,24] },
+  { nome: "Filipenses",        cap: 4,  vers: [30,30,21,23] },
+  { nome: "Colossenses",       cap: 4,  vers: [29,23,25,18] },
+  { nome: "1 Tessalonicenses", cap: 5,  vers: [10,20,13,18,28] },
+  { nome: "2 Tessalonicenses", cap: 3,  vers: [12,17,18] },
+  { nome: "1 Timóteo",         cap: 6,  vers: [20,15,16,16,25,21] },
+  { nome: "2 Timóteo",         cap: 4,  vers: [18,26,17,22] },
+  { nome: "Tito",              cap: 3,  vers: [16,15,15] },
+  { nome: "Filemom",           cap: 1,  vers: [25] },
+  { nome: "Hebreus",           cap: 13, vers: [14,18,19,16,14,20,28,13,28,39,40,29,25] },
+  { nome: "Tiago",             cap: 5,  vers: [27,26,18,17,20] },
+  { nome: "1 Pedro",           cap: 5,  vers: [25,25,22,19,14] },
+  { nome: "2 Pedro",           cap: 3,  vers: [21,22,18] },
+  { nome: "1 João",            cap: 5,  vers: [10,29,24,21,21] },
+  { nome: "2 João",            cap: 1,  vers: [13] },
+  { nome: "3 João",            cap: 1,  vers: [14] },
+  { nome: "Judas",             cap: 1,  vers: [25] },
+  { nome: "Apocalipse",        cap: 22, vers: [20,29,36,22,20,25,28,22,31,23,23,15,49,26,20,68,21,24,29,28,32,34,24] },
+];
+
+/* ══════════════════════════════════════════════════════
+   COMPONENTE: Seletor de Referência Bíblica
+══════════════════════════════════════════════════════ */
+function SeletorReferenciaBiblica({ value, onChange, isDark }) {
+  const [livroIdx,  setLivroIdx]  = useState("");
+  const [capitulo,  setCapitulo]  = useState("");
+  const [versiculo, setVersiculo] = useState("");
+
+  const ts        = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const tp        = isDark ? IEQ.offWhite : "#1A0A0D";
+  const totalCaps = livroIdx !== "" ? BIBLIA[livroIdx].cap : 0;
+  const totalVers = livroIdx !== "" && capitulo !== ""
+      ? BIBLIA[livroIdx].vers[Number(capitulo) - 1]
+      : 0;
+
+  const montar = (li, cap, ver) => {
+    if (li === "") return "";
+    const nome = BIBLIA[li].nome;
+    if (!cap) return nome;
+    if (!ver)  return `${nome} ${cap}`;
+    return `${nome} ${cap}:${ver}`;
+  };
+
+  const handleLivro = (val) => {
+    setLivroIdx(val); setCapitulo(""); setVersiculo("");
+    onChange(montar(val, "", ""));
+  };
+  const handleCap = (val) => {
+    setCapitulo(val); setVersiculo("");
+    onChange(montar(livroIdx, val, ""));
+  };
+  const handleVer = (val) => {
+    setVersiculo(val);
+    onChange(montar(livroIdx, capitulo, val));
+  };
+
+  return (
+      <div>
+        <label className="ieq-label">
+          <BookOpen size={11} style={{ display: "inline", marginRight: 6 }} />
+          REFERÊNCIA BÍBLICA DO ESTUDO
+        </label>
+
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 10 }}>
+          <div style={{ position: "relative" }}>
+            <select className="ieq-select" value={livroIdx} onChange={e => handleLivro(e.target.value)}>
+              <option value="">Livro...</option>
+              {BIBLIA.map((l, i) => (
+                  <option key={i} value={i}>{l.nome}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: ts, pointerEvents: "none" }} />
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <select className="ieq-select" value={capitulo} disabled={livroIdx === ""} onChange={e => handleCap(e.target.value)} style={{ opacity: livroIdx === "" ? 0.4 : 1 }}>
+              <option value="">Cap.</option>
+              {Array.from({ length: totalCaps }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>{i + 1}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: ts, pointerEvents: "none" }} />
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <select className="ieq-select" value={versiculo} disabled={capitulo === ""} onChange={e => handleVer(e.target.value)} style={{ opacity: capitulo === "" ? 0.4 : 1 }}>
+              <option value="">Ver.</option>
+              {Array.from({ length: totalVers }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>{i + 1}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: ts, pointerEvents: "none" }} />
+          </div>
+        </div>
+
+        {value && (
+            <div style={{
+              marginTop: 10, padding: "10px 14px",
+              background: isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.05)",
+              border: `1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"}`,
+              borderRadius: 8, display: "flex", alignItems: "center", gap: 8,
+            }}>
+              <BookOpen size={14} style={{ color: IEQ.red, flexShrink: 0 }} />
+              <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: 600, color: tp }}>
+                {value}
+              </span>
+            </div>
+        )}
+      </div>
+  );
+}
+
 function QuadrangularCross({ size = 32 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -29,11 +191,183 @@ function QuadrangularCross({ size = 32 }) {
           </linearGradient>
           <filter id="glowR"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
-        <rect x="38" y="4" width="24" height="92" rx="3" fill="url(#gVR)" filter="url(#glowR)" />
-        <rect x="4" y="38" width="92" height="24" rx="3" fill="url(#gHR)" filter="url(#glowR)" />
-        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowR)" />
+        <rect x="38" y="4"  width="24" height="92" rx="3" fill="url(#gVR)" filter="url(#glowR)" />
+        <rect x="4"  y="38" width="92" height="24" rx="3" fill="url(#gHR)" filter="url(#glowR)" />
+        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow}  filter="url(#glowR)" />
         <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
       </svg>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   COMPONENTE: Toast de Sucesso Animado
+══════════════════════════════════════════════════════ */
+function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
+  const [saindo, setSaindo] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSaindo(true);
+      setTimeout(() => { if (onClose) onClose(); }, 450);
+    }, 4800);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  const confettiCores = [
+    IEQ.yellow, IEQ.red, IEQ.blue, IEQ.yellow,
+    IEQ.redLight, IEQ.blueLight, IEQ.yellow, IEQ.red,
+  ];
+
+  return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 300,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 20px",
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(6px)",
+        animation: saindo ? "ieqOverlayOut .45s ease forwards" : "ieqOverlayIn .3s ease forwards",
+      }}>
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
+          animation: saindo ? "ieqToastOut .45s cubic-bezier(.4,0,.6,1) forwards" : "ieqToastIn .55s cubic-bezier(.34,1.56,.64,1) forwards",
+        }}>
+          {/* Confetes */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 16, height: 32, alignItems: "flex-end" }}>
+            {confettiCores.map((cor, i) => (
+                <div key={i} style={{
+                  width: i % 3 === 0 ? 12 : 8,
+                  height: i % 3 === 0 ? 12 : 8,
+                  borderRadius: i % 2 === 0 ? "50%" : 2,
+                  background: cor,
+                  opacity: 0,
+                  animation: `ieqConfetti 1.4s ease ${0.04 + i * 0.06}s forwards`,
+                }} />
+            ))}
+          </div>
+
+          {/* Card principal */}
+          <div style={{
+            background: "linear-gradient(160deg, #0d6e3a 0%, #0a5530 60%, #073d22 100%)",
+            borderRadius: 22,
+            padding: "32px 40px 28px",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
+            minWidth: 300, maxWidth: 380, width: "100%",
+            boxShadow: "0 16px 60px rgba(13,110,58,.5), 0 0 0 1px rgba(255,255,255,.08)",
+            position: "relative", overflow: "hidden",
+          }}>
+            {/* Brilho interno decorativo */}
+            <div style={{
+              position: "absolute", top: -40, right: -40,
+              width: 160, height: 160, borderRadius: "50%",
+              background: "rgba(255,255,255,.04)",
+              pointerEvents: "none",
+            }} />
+            <div style={{
+              position: "absolute", bottom: -20, left: -20,
+              width: 100, height: 100, borderRadius: "50%",
+              background: "rgba(253,184,19,.06)",
+              pointerEvents: "none",
+            }} />
+
+            {/* Ícone com anel pulsante */}
+            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{
+                position: "absolute", inset: -8, borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,.25)",
+                animation: "ieqRingPulse 2s ease-out forwards",
+              }} />
+              <div style={{
+                position: "absolute", inset: -16, borderRadius: "50%",
+                border: "1.5px solid rgba(255,255,255,.12)",
+                animation: "ieqRingPulse 2s ease-out .3s forwards",
+              }} />
+              <div style={{
+                width: 68, height: 68, borderRadius: "50%",
+                background: "rgba(255,255,255,.18)",
+                border: "2px solid rgba(255,255,255,.35)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <CheckCircle2 size={32} style={{ color: "#fff" }} />
+              </div>
+            </div>
+
+            {/* Cruz IEQ pequena acima do título */}
+            <div style={{ marginTop: -6, marginBottom: -6 }}>
+              <QuadrangularCross size={22} />
+            </div>
+
+            {/* Título */}
+            <div style={{ textAlign: "center" }}>
+              <p style={{
+                fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700,
+                letterSpacing: ".18em", color: "#fff", margin: "0 0 8px",
+              }}>
+                GLÓRIA A DEUS!
+              </p>
+              <p style={{
+                fontFamily: "'EB Garamond',serif", fontSize: 18,
+                color: "rgba(255,255,255,.82)", lineHeight: 1.55, margin: 0,
+              }}>
+                Relatório enviado com sucesso.<br />
+                <em>O Senhor viu cada presença!</em>
+              </p>
+            </div>
+
+            {/* Divisor */}
+            <div style={{
+              width: "100%", height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent)",
+            }} />
+
+            {/* Pills de informação */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+              <div style={{
+                background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)",
+                borderRadius: 20, padding: "6px 14px",
+                fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em",
+                color: "rgba(255,255,255,.92)", display: "flex", alignItems: "center", gap: 6,
+              }}>
+                <Users2 size={12} /> {total} PRESENTES
+              </div>
+              {estudo && (
+                  <div style={{
+                    background: "rgba(253,184,19,.15)", border: "1px solid rgba(253,184,19,.3)",
+                    borderRadius: 20, padding: "6px 14px",
+                    fontFamily: "'EB Garamond',serif", fontSize: 14, fontWeight: 600,
+                    color: IEQ.yellow, display: "flex", alignItems: "center", gap: 6,
+                  }}>
+                    <BookOpen size={12} /> {estudo}
+                  </div>
+              )}
+              {nomeCelula && (
+                  <div style={{
+                    background: "rgba(0,61,165,.2)", border: "1px solid rgba(0,61,165,.35)",
+                    borderRadius: 20, padding: "6px 14px",
+                    fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em",
+                    color: "rgba(255,255,255,.85)", display: "flex", alignItems: "center", gap: 6,
+                  }}>
+                    <CheckCircle2 size={12} /> {nomeCelula.toUpperCase()}
+                  </div>
+              )}
+            </div>
+
+            {/* Versículo */}
+            <p style={{
+              fontFamily: "'EB Garamond',serif", fontStyle: "italic",
+              fontSize: 14, color: "rgba(255,255,255,.5)",
+              textAlign: "center", margin: 0, lineHeight: 1.5,
+            }}>
+              "Porque onde dois ou três estão reunidos em meu nome, ali estou no meio deles."
+            </p>
+            <p style={{
+              fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em",
+              color: "rgba(255,255,255,.35)", margin: "-12px 0 0",
+            }}>
+              MATEUS 18:20
+            </p>
+          </div>
+        </div>
+      </div>
   );
 }
 
@@ -59,7 +393,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
 
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const selectBg = isDark ? "#1a0a0d" : "#ffffff";
 
   const carregarDados = useCallback(async () => {
     try {
@@ -75,7 +408,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       setCelulaId(rel.celulaId);
 
       const [resMembros, resVisitantes] = await Promise.all([
-        api.get(`/celulas/${rel.celulaId}/membros`, { headers }),
+        api.get(`/celulas/${rel.celulaId}/membros`,          { headers }),
         api.get(`/visitantes/celula/${rel.celulaId}/ativos`, { headers }),
       ]);
 
@@ -94,10 +427,10 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       });
 
       setForm({
-        dataReuniao: rel.dataReuniao || "",
-        estudo: rel.estudo || "",
+        dataReuniao:      rel.dataReuniao || "",
+        estudo:           rel.estudo      || "",
         selecionadosKeys: keysPresentes,
-        decisoes: decisoesIniciais,
+        decisoes:         decisoesIniciais,
       });
     } catch (err) {
       console.error("Erro ao carregar relatório:", err);
@@ -113,9 +446,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
     const isMarcado = form.selecionadosKeys.includes(uKey);
     setProcessingIds(prev => new Set(prev).add(uKey));
     setForm(prev => {
-      const novasKeys = isMarcado
-          ? prev.selecionadosKeys.filter(k => k !== uKey)
-          : [...prev.selecionadosKeys, uKey];
+      const novasKeys     = isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey];
       const novasDecisoes = { ...prev.decisoes };
       if (isMarcado) delete novasDecisoes[uKey];
       return { ...prev, selecionadosKeys: novasKeys, decisoes: novasDecisoes };
@@ -128,7 +459,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const total               = membrosPresentes + visitantesPresentes;
 
   const handleSalvar = async () => {
-    if (!form.estudo.trim()) return alert("Informe o tema do estudo.");
+    if (!form.estudo.trim()) return alert("Selecione a referência bíblica do estudo.");
     try {
       setSalvando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
@@ -174,7 +505,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       <div style={{ minHeight: "100vh", position: "relative", paddingBottom: 120 }}>
         <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
 
-          {/* Botão Voltar */}
           <div style={{ paddingTop: 20, paddingBottom: 8 }}>
             <button
                 onClick={onVoltar}
@@ -189,7 +519,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </button>
           </div>
 
-          {/* Toast sucesso */}
           {sucesso && (
               <div style={{
                 marginBottom: 12, animation: "fadeIn .4s ease",
@@ -203,7 +532,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
               </div>
           )}
 
-          {/* Banner aviso */}
           <div style={{
             marginBottom: 12,
             background: "linear-gradient(135deg,rgba(253,184,19,.15),rgba(196,140,0,.1))",
@@ -217,7 +545,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </p>
           </div>
 
-          {/* Header */}
           <div style={{
             padding: "36px 40px 32px", marginBottom: 24,
             background: isDark ? "linear-gradient(135deg,#1A0A0D,#0A0608)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
@@ -251,7 +578,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </div>
           </div>
 
-          {/* Campos */}
           <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
@@ -259,13 +585,11 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
                 <input className="ieq-input" type="date" value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
               </div>
               <div>
-                <label className="ieq-label"><BookOpen size={11} style={{ display: "inline", marginRight: 6 }} />TEMA DO ESTUDO</label>
-                <input className="ieq-input" placeholder="Qual foi o estudo?" value={form.estudo} onChange={e => setForm({ ...form, estudo: e.target.value })} />
+                <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
               </div>
             </div>
           </div>
 
-          {/* KPIs */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
             {[
               { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red },
@@ -279,7 +603,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             ))}
           </div>
 
-          {/* Chamada */}
           <div className="ieq-card" style={{ overflow: "hidden", marginBottom: 16 }}>
             <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
               <Users2 size={18} style={{ color: IEQ.red }} />
@@ -352,7 +675,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
           </div>
         </div>
 
-        {/* Botão salvar fixo */}
         <div style={{
           position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50,
           background: isDark ? "linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)" : "linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)",
@@ -384,13 +706,9 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
    TELA PRINCIPAL — NOVO RELATÓRIO + HISTÓRICO
 ══════════════════════════════════════════════════════ */
 export default function TelaRelatorio({ isDark = false }) {
-  /* Modo: "novo" | "historico" | "editar" */
   const [modo,            setModo]            = useState("novo");
   const [relatorioEditId, setRelatorioEditId] = useState(null);
-
-  /* ── NOVO: estado do modal de duplicação ── */
-  const [modalDuplicado, setModalDuplicado] = useState(null);
-  // null | { relatorioId, dataReuniao, estudo }
+  const [modalDuplicado,  setModalDuplicado]  = useState(null);
 
   const [celula,        setCelula]        = useState(null);
   const [pessoas,       setPessoas]       = useState([]);
@@ -400,6 +718,9 @@ export default function TelaRelatorio({ isDark = false }) {
   const [enviando,      setEnviando]      = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
   const [rascunhoCarregado, setRascunhoCarregado] = useState(false);
+
+  /* Estado do toast de sucesso com dados do envio */
+  const [toastSucesso, setToastSucesso] = useState(null); // null | { total, estudo, nomeCelula }
 
   const prontoParaSalvar = useRef(false);
 
@@ -411,14 +732,15 @@ export default function TelaRelatorio({ isDark = false }) {
     decisoes: {},
   });
 
-  /* Salvar rascunho no localStorage */
   useEffect(() => {
     if (!prontoParaSalvar.current || !form.celulaId) return;
     try {
       localStorage.setItem(draftKey(form.celulaId), JSON.stringify({
-        dataReuniao: form.dataReuniao, estudo: form.estudo,
-        selecionadosKeys: form.selecionadosKeys, decisoes: form.decisoes,
-        salvoEm: new Date().toISOString(),
+        dataReuniao:      form.dataReuniao,
+        estudo:           form.estudo,
+        selecionadosKeys: form.selecionadosKeys,
+        decisoes:         form.decisoes,
+        salvoEm:          new Date().toISOString(),
       }));
     } catch (err) { console.warn("Não foi possível salvar rascunho:", err); }
   }, [form]);
@@ -427,14 +749,14 @@ export default function TelaRelatorio({ isDark = false }) {
     try {
       prontoParaSalvar.current = false;
       setLoading(true);
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+      const token   = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const headers = { Authorization: `Bearer ${token}` };
-      const resCelula = await api.get("/celulas/minha-celula", { headers });
+      const resCelula   = await api.get("/celulas/minha-celula", { headers });
       const dadosCelula = resCelula.data;
       setCelula(dadosCelula);
 
       const [resMembros, resVisitantes] = await Promise.all([
-        api.get(`/celulas/${dadosCelula.id}/membros`, { headers }),
+        api.get(`/celulas/${dadosCelula.id}/membros`,          { headers }),
         api.get(`/visitantes/celula/${dadosCelula.id}/ativos`, { headers }),
       ]);
       const membros    = (resMembros.data    || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}` }));
@@ -447,11 +769,11 @@ export default function TelaRelatorio({ isDark = false }) {
         if (raw) {
           const draft = JSON.parse(raw);
           setForm({
-            celulaId: dadosCelula.id,
-            dataReuniao: draft.dataReuniao || (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })(),
-            estudo: draft.estudo || "",
+            celulaId:         dadosCelula.id,
+            dataReuniao:      draft.dataReuniao || (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })(),
+            estudo:           draft.estudo || "",
             selecionadosKeys: draft.selecionadosKeys || [],
-            decisoes: draft.decisoes || {},
+            decisoes:         draft.decisoes || {},
           });
           restaurou = true;
           setRascunhoCarregado(true);
@@ -470,12 +792,11 @@ export default function TelaRelatorio({ isDark = false }) {
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
 
-  /* Carregar histórico */
   const carregarHistorico = useCallback(async () => {
     try {
       setLoadingHist(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const res = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
+      const res   = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
       setHistorico(res.data || []);
     } catch (err) {
       console.error("Erro ao carregar histórico:", err);
@@ -492,7 +813,7 @@ export default function TelaRelatorio({ isDark = false }) {
     const isMarcado = form.selecionadosKeys.includes(uKey);
     setProcessingIds(prev => new Set(prev).add(uKey));
     setForm(prev => {
-      const novasKeys = isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey];
+      const novasKeys     = isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey];
       const novasDecisoes = { ...prev.decisoes };
       if (isMarcado) delete novasDecisoes[uKey];
       return { ...prev, selecionadosKeys: novasKeys, decisoes: novasDecisoes };
@@ -504,43 +825,32 @@ export default function TelaRelatorio({ isDark = false }) {
   const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
   const total               = membrosPresentes + visitantesPresentes;
 
-  /* ══════════════════════════════════════════════════════
-     handleSubmit — com verificação de duplicata
-  ══════════════════════════════════════════════════════ */
   const handleSubmit = async () => {
-    if (!form.estudo.trim()) return alert("Informe o tema do estudo.");
+    if (!form.estudo.trim()) return alert("Selecione a referência bíblica do estudo.");
 
-    // ── Verifica se já existe relatório na mesma data ──
     try {
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const res = await api.get("/relatorios/historico", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const existente = (res.data || []).find(
-          (r) => r.dataReuniao === form.dataReuniao
-      );
+      const res   = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
+      const existente = (res.data || []).find(r => r.dataReuniao === form.dataReuniao);
       if (existente) {
-        // Bloqueia e abre o modal de duplicação
-        setModalDuplicado({
-          relatorioId: existente.id,
-          dataReuniao:  existente.dataReuniao,
-          estudo:       existente.estudo || "Sem tema",
-        });
+        setModalDuplicado({ relatorioId: existente.id, dataReuniao: existente.dataReuniao, estudo: existente.estudo || "Sem tema" });
         return;
       }
-    } catch (err) {
-      // Se a checagem falhar, continua (fail-open)
-      console.warn("Não foi possível verificar duplicata:", err);
-    }
-    // ──────────────────────────────────────────────────
+    } catch (err) { console.warn("Não foi possível verificar duplicata:", err); }
 
     try {
       setEnviando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+
+      /* Captura dados antes de limpar o form */
+      const totalEnviado   = total;
+      const estudoEnviado  = form.estudo;
+      const nomeCell       = celula?.nome || "";
+
       const payload = {
-        celulaId: Number(form.celulaId),
+        celulaId:    Number(form.celulaId),
         dataReuniao: form.dataReuniao,
-        estudo: form.estudo.trim(),
+        estudo:      form.estudo.trim(),
         membrosPresentesIds: form.selecionadosKeys
             .filter(k => k.startsWith("MEMBRO-"))
             .map(k => Number(k.replace("MEMBRO-", ""))),
@@ -551,12 +861,17 @@ export default function TelaRelatorio({ isDark = false }) {
               decisaoEspiritual: form.decisoes[k] || "NENHUMA",
             })),
       };
+
       await api.post("/relatorios", payload, { headers: { Authorization: `Bearer ${token}` } });
+
       try { localStorage.removeItem(draftKey(form.celulaId)); } catch (_) {}
       prontoParaSalvar.current = false;
       setForm(f => ({ ...f, estudo: "", selecionadosKeys: [], decisoes: {} }));
       setTimeout(() => { prontoParaSalvar.current = true; }, 0);
-      alert("Relatório enviado com sucesso!");
+
+      /* Exibe o toast animado com os dados do envio */
+      setToastSucesso({ total: totalEnviado, estudo: estudoEnviado, nomeCelula: nomeCell });
+
     } catch (err) {
       alert(err.response?.data?.message || "Erro ao enviar relatório.");
     } finally { setEnviando(false); }
@@ -564,18 +879,25 @@ export default function TelaRelatorio({ isDark = false }) {
 
   const nomeCelula       = celula?.nome || "Carregando...";
   const nomeUsuarioLider = celula?.nomeLider || celula?.lider?.nome || celula?.usuario?.nome || "Líder";
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const selectBg = isDark ? "#1a0a0d" : "#ffffff";
+  const tp        = isDark ? IEQ.offWhite : "#1A0A0D";
+  const ts        = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const selectBg  = isDark ? "#1a0a0d" : "#ffffff";
 
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     * { box-sizing:border-box; }
-    @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-    @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
-    @keyframes spin   { to{transform:rotate(360deg)} }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes stripe  { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+    @keyframes pulse   { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
+    @keyframes spin    { to{transform:rotate(360deg)} }
+    @keyframes fadeIn  { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
     @keyframes modalIn { from{opacity:0;transform:scale(.94) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    /* ── Toast de sucesso ── */
+    @keyframes ieqOverlayIn  { from{opacity:0} to{opacity:1} }
+    @keyframes ieqOverlayOut { from{opacity:1} to{opacity:0} }
+    @keyframes ieqToastIn    { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    @keyframes ieqToastOut   { from{opacity:1;transform:scale(1) translateY(0)} to{opacity:0;transform:scale(.92) translateY(-18px)} }
+    @keyframes ieqRingPulse  { 0%{opacity:0;transform:scale(.85)} 40%{opacity:.7} 100%{opacity:0;transform:scale(1.55)} }
+    @keyframes ieqConfetti   { 0%{opacity:0;transform:translateY(-20px) rotate(0deg) scale(.5)} 35%{opacity:1;transform:translateY(4px) rotate(120deg) scale(1)} 100%{opacity:.15;transform:translateY(22px) rotate(260deg) scale(.8)} }
     .ieq-bg-stripe {
       position:fixed; inset:0; pointer-events:none; z-index:0;
       background:repeating-linear-gradient(-55deg,
@@ -713,19 +1035,24 @@ export default function TelaRelatorio({ isDark = false }) {
         <style>{globalStyles}</style>
         <div className="ieq-bg-stripe" />
 
-        {/* ══════════════════════════════════════════════════════
-          MODAL — Relatório duplicado na mesma data
-      ══════════════════════════════════════════════════════ */}
+        {/* ══ TOAST DE SUCESSO ANIMADO ══ */}
+        {toastSucesso && (
+            <ToastSucesso
+                total={toastSucesso.total}
+                estudo={toastSucesso.estudo}
+                nomeCelula={toastSucesso.nomeCelula}
+                onClose={() => setToastSucesso(null)}
+            />
+        )}
+
+        {/* Modal — Relatório duplicado */}
         {modalDuplicado && (
             <div className="ieq-modal-overlay" onClick={() => setModalDuplicado(null)}>
               <div className="ieq-modal-box" onClick={e => e.stopPropagation()}>
-
-                {/* Ícone + título */}
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
                   <div style={{
                     width: 48, height: 48, borderRadius: "50%", flexShrink: 0,
-                    background: "rgba(253,184,19,.15)",
-                    border: "1px solid rgba(253,184,19,.4)",
+                    background: "rgba(253,184,19,.15)", border: "1px solid rgba(253,184,19,.4)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
                     <AlertTriangle size={22} style={{ color: IEQ.yellow }} />
@@ -735,50 +1062,32 @@ export default function TelaRelatorio({ isDark = false }) {
                       RELATÓRIO JÁ ENVIADO
                     </p>
                     <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "3px 0 0" }}>
-                      {new Date(modalDuplicado.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", {
-                        day: "2-digit", month: "long", year: "numeric",
-                      })}
+                      {new Date(modalDuplicado.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                     </p>
                   </div>
                 </div>
-
-                {/* Mensagem */}
                 <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, color: ts, lineHeight: 1.65, margin: "0 0 16px" }}>
                   Já existe um relatório enviado para esta data. Deseja{" "}
                   <strong style={{ color: tp, fontWeight: 600 }}>editar o relatório existente</strong>{" "}
                   em vez de criar um novo?
                 </p>
-
-                {/* Card do relatório existente */}
                 <div style={{
                   background: isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.08)",
                   border: "1px solid rgba(253,184,19,.25)",
                   borderRadius: 10, padding: "14px 18px", marginBottom: 22,
                 }}>
                   <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".16em", color: IEQ.yellowDark, margin: "0 0 5px" }}>
-                    TEMA DO ESTUDO EXISTENTE
+                    REFERÊNCIA EXISTENTE
                   </p>
                   <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 17, fontWeight: 600, color: tp, margin: 0 }}>
                     {modalDuplicado.estudo}
                   </p>
                 </div>
-
-                {/* Botões */}
                 <div style={{ display: "flex", gap: 10 }}>
-                  <button
-                      className="ieq-modal-cancel"
-                      onClick={() => setModalDuplicado(null)}
-                  >
-                    CANCELAR
-                  </button>
+                  <button className="ieq-modal-cancel" onClick={() => setModalDuplicado(null)}>CANCELAR</button>
                   <button
                       className="ieq-modal-confirm"
-                      onClick={() => {
-                        const id = modalDuplicado.relatorioId;
-                        setModalDuplicado(null);
-                        setRelatorioEditId(id);
-                        setModo("editar");
-                      }}
+                      onClick={() => { const id = modalDuplicado.relatorioId; setModalDuplicado(null); setRelatorioEditId(id); setModo("editar"); }}
                   >
                     <Edit3 size={14} /> EDITAR EXISTENTE
                   </button>
@@ -789,7 +1098,7 @@ export default function TelaRelatorio({ isDark = false }) {
 
         <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
 
-          {/* Abas Novo / Histórico */}
+          {/* Abas */}
           <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", margin: "16px 0", border: `1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"}` }}>
             {[
               { key: "novo",      label: "NOVO RELATÓRIO", icon: <ClipboardCheck size={13} /> },
@@ -818,7 +1127,6 @@ export default function TelaRelatorio({ isDark = false }) {
                   <History size={18} style={{ color: IEQ.red }} />
                   <span style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".16em", color: tp }}>SEUS RELATÓRIOS</span>
                 </div>
-
                 {loadingHist ? (
                     <div style={{ padding: 40, textAlign: "center" }}>
                       <Loader2 size={28} style={{ color: IEQ.red, animation: "spin 1s linear infinite" }} />
@@ -834,15 +1142,12 @@ export default function TelaRelatorio({ isDark = false }) {
                             <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: tp, margin: "0 0 4px" }}>
                               {rel.dataReuniao ? new Date(rel.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "?"}
                             </p>
-                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "0 0 6px" }}>{rel.estudo || "Sem tema"}</p>
+                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "0 0 6px" }}>{rel.estudo || "Sem referência"}</p>
                             <div style={{ display: "flex", gap: 10 }}>
                               <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".12em", color: IEQ.red }}>{rel.totalPresentes || 0} PRESENTES</span>
                             </div>
                           </div>
-                          <button
-                              className="ieq-edit-btn"
-                              onClick={() => { setRelatorioEditId(rel.id); setModo("editar"); }}
-                          >
+                          <button className="ieq-edit-btn" onClick={() => { setRelatorioEditId(rel.id); setModo("editar"); }}>
                             <Edit3 size={12} /> EDITAR
                           </button>
                         </div>
@@ -905,8 +1210,11 @@ export default function TelaRelatorio({ isDark = false }) {
                       <input className="ieq-input" type="date" value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
                     </div>
                     <div>
-                      <label className="ieq-label"><BookOpen size={11} style={{ display: "inline", marginRight: 6 }} />TEMA DO ESTUDO</label>
-                      <input className="ieq-input" placeholder="Qual foi o estudo de hoje?" value={form.estudo} onChange={e => setForm({ ...form, estudo: e.target.value })} />
+                      <SeletorReferenciaBiblica
+                          value={form.estudo}
+                          onChange={val => setForm({ ...form, estudo: val })}
+                          isDark={isDark}
+                      />
                     </div>
                   </div>
                 </div>
