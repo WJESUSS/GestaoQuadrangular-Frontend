@@ -696,7 +696,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
           <div className="divider"/>
           <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".15em", color:ts }}>
-            © IEQ PITAÚ — SISTEMA SEGURO — {new Date().getFullYear()}
+            © IEQ PITUAÇÚ — SISTEMA SEGURO — {new Date().getFullYear()}
           </p>
         </div>
       </div>

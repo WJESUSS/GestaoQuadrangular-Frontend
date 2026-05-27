@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import {
-  Plus, Phone, Calendar, X, Search,
+  Plus, Phone, X, Search,
   Loader2, UserCheck, Mail, ExternalLink, Trash2, AlertTriangle,
 } from "lucide-react";
 
@@ -26,8 +26,8 @@ function QuadrangularCross({ size = 28 }) {
           </linearGradient>
           <filter id="glowV"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
-        <rect x="38" y="4" width="24" height="92" rx="3" fill="url(#gVV)" filter="url(#glowV)" />
-        <rect x="4" y="38" width="92" height="24" rx="3" fill="url(#gHV)" filter="url(#glowV)" />
+        <rect x="38" y="4"  width="24" height="92" rx="3" fill="url(#gVV)" filter="url(#glowV)" />
+        <rect x="4"  y="38" width="92" height="24" rx="3" fill="url(#gHV)" filter="url(#glowV)" />
         <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowV)" />
         <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
       </svg>
@@ -35,12 +35,12 @@ function QuadrangularCross({ size = 28 }) {
 }
 
 const listaOrigens = [
-  { id:"CONVITE",      label:"Convite",    emoji:"✉️" },
-  { id:"CASA_DE_PAZ",  label:"Casa de Paz",emoji:"🏠" },
-  { id:"EVENTO",       label:"Evento",     emoji:"🎟️" },
-  { id:"MISSSAO_70",   label:"Missão 70",  emoji:"👣" },
-  { id:"REDES_SOCIAIS",label:"Social",     emoji:"📱" },
-  { id:"CELULA",       label:"Célula",     emoji:"👥" },
+  { id:"CONVITE",       label:"Convite",    emoji:"🤝" },
+  { id:"CASA_DE_PAZ",   label:"Casa de Paz",emoji:"🏠" },
+  { id:"EVENTO",        label:"Evento",     emoji:"🎉" },
+  { id:"MISSSAO_70",    label:"Missão 70",  emoji:"✝️" },
+  { id:"REDES_SOCIAIS", label:"Social",     emoji:"📱" },
+  { id:"CELULA",        label:"Célula",     emoji:"🔥" },
 ];
 
 export default function TelaVisitantes({ celulaId, isDark = false }) {
@@ -120,12 +120,11 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     * { box-sizing:border-box; }
-    @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-    @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
-    @keyframes spin   { to{transform:rotate(360deg)} }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes stripe  { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+    @keyframes pulse   { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
+    @keyframes spin    { to{transform:rotate(360deg)} }
+    @keyframes fadeIn  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
     @keyframes shakeIn { 0%{opacity:0;transform:scale(.95)} 60%{transform:scale(1.02)} 100%{opacity:1;transform:scale(1)} }
-
     .ieq-bg-stripe {
       position:fixed; inset:0; pointer-events:none; z-index:0;
       background:repeating-linear-gradient(-55deg,
@@ -133,21 +132,17 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
         ${isDark?"rgba(253,184,19,.03)":"rgba(253,184,19,.04)"} 20px 30px,transparent 30px 40px);
       background-size:60px 60px; animation:stripe 8s linear infinite;
     }
-
     .ieq-card {
       background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
       border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};
       border-radius:14px; backdrop-filter:blur(24px);
     }
-
     .ieq-visitor-card {
       background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};
       border:1px solid ${isDark?"rgba(200,16,46,.12)":"rgba(200,16,46,.1)"};
-      border-radius:12px; padding:22px; transition:all .3s;
-      animation:fadeIn .5s ease both;
+      border-radius:12px; padding:22px; transition:all .3s; animation:fadeIn .5s ease both;
     }
     .ieq-visitor-card:hover { transform:translateY(-5px); border-color:${IEQ.red}; box-shadow:0 16px 40px rgba(200,16,46,.12); }
-
     .ieq-input {
       width:100%;
       background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
@@ -157,12 +152,10 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     }
     .ieq-input:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
     .ieq-input::placeholder { color:${ts}; }
-
     .ieq-label {
       display:block; margin-bottom:6px;
       font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.18em; color:${IEQ.red};
     }
-
     .ieq-btn-primary {
       background:linear-gradient(135deg,${IEQ.redDark},${IEQ.red}); color:#fff;
       border:none; border-radius:8px; padding:13px 24px; cursor:pointer;
@@ -172,17 +165,14 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     .ieq-btn-primary:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
     .ieq-btn-primary:disabled { opacity:.5; cursor:not-allowed; }
     .ieq-btn-primary.full { width:100%; justify-content:center; }
-
     .ieq-btn-danger {
-      background:transparent;
-      border:1px solid rgba(200,16,46,.35); color:${IEQ.red};
+      background:transparent; border:1px solid rgba(200,16,46,.35); color:${IEQ.red};
       border-radius:8px; padding:13px 24px; cursor:pointer;
       font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
       display:flex; align-items:center; gap:8px; transition:all .25s; width:100%; justify-content:center;
     }
     .ieq-btn-danger:hover:not(:disabled) { background:rgba(200,16,46,.08); border-color:${IEQ.red}; transform:translateY(-1px); }
     .ieq-btn-danger:disabled { opacity:.5; cursor:not-allowed; }
-
     .ieq-btn-danger-confirm {
       background:linear-gradient(135deg,#7A0B1A,${IEQ.redDark}); color:#fff;
       border:none; border-radius:8px; padding:13px 24px; cursor:pointer;
@@ -191,7 +181,6 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     }
     .ieq-btn-danger-confirm:hover:not(:disabled) { filter:brightness(1.15); }
     .ieq-btn-danger-confirm:disabled { opacity:.5; cursor:not-allowed; }
-
     .ieq-btn-cancel {
       background:${isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)"};
       border:1px solid ${isDark?"rgba(255,255,255,.1)":"rgba(0,0,0,.1)"}; color:${ts};
@@ -200,19 +189,16 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
       display:flex; align-items:center; gap:8px; transition:all .25s; flex:1; justify-content:center;
     }
     .ieq-btn-cancel:hover { background:${isDark?"rgba(255,255,255,.1)":"rgba(0,0,0,.08)"}; }
-
     .ieq-confirm-box {
       background:${isDark?"rgba(139,11,31,.12)":"rgba(200,16,46,.06)"};
       border:1px solid rgba(200,16,46,.3); border-radius:10px;
       padding:20px; animation:shakeIn .3s ease both;
     }
-
     .ieq-origin-btn {
       padding:8px 14px; border-radius:8px; cursor:pointer;
       font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.12em;
       border:1px solid; transition:all .2s;
     }
-
     .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
     .spin-icon  { animation:spin 1s linear infinite; }
     .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark?"rgba(200,16,46,.25)":"rgba(200,16,46,.2)"},transparent); margin:6px 0; }
@@ -305,10 +291,13 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
 
                       <div className="divider" />
 
+                      {/* Card: QUEM VAI CONSOLIDAR */}
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:10 }}>
                         <div>
-                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".12em", color:ts, margin:"0 0 2px" }}>ACOMPANHAMENTO</p>
-                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:IEQ.red, fontWeight:600, margin:0 }}>{v.responsavelAcompanhamento || "Pendente"}</p>
+                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".12em", color:ts, margin:"0 0 2px" }}>QUEM VAI CONSOLIDAR</p>
+                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:IEQ.red, fontWeight:600, margin:0 }}>
+                            {v.responsavelAcompanhamento || "Pendente"}
+                          </p>
                         </div>
                         <button onClick={() => abrirModal(v)} style={{
                           width:36, height:36, borderRadius:8,
@@ -350,25 +339,43 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                 <form onSubmit={handleSalvar} style={{ display:"flex", flexDirection:"column", gap:16 }}>
                   <div>
                     <label className="ieq-label">NOME COMPLETO</label>
-                    <input className="ieq-input" required value={formVisitante.nome} onChange={e => setFormVisitante({...formVisitante, nome:e.target.value})} placeholder="Nome completo" />
+                    <input className="ieq-input" required
+                           value={formVisitante.nome}
+                           onChange={e => setFormVisitante({...formVisitante, nome:e.target.value})}
+                           placeholder="Nome completo" />
                   </div>
+
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
                     <div>
                       <label className="ieq-label">WHATSAPP</label>
-                      <input className="ieq-input" value={formVisitante.telefone} onChange={e => setFormVisitante({...formVisitante, telefone:e.target.value})} placeholder="(00) 00000-0000" />
+                      <input className="ieq-input"
+                             value={formVisitante.telefone}
+                             onChange={e => setFormVisitante({...formVisitante, telefone:e.target.value})}
+                             placeholder="(00) 00000-0000" />
                     </div>
                     <div>
                       <label className="ieq-label">DATA DA VISITA</label>
-                      <input className="ieq-input" type="date" value={formVisitante.dataPrimeiraVisita} onChange={e => setFormVisitante({...formVisitante, dataPrimeiraVisita:e.target.value})} />
+                      <input className="ieq-input" type="date"
+                             value={formVisitante.dataPrimeiraVisita}
+                             onChange={e => setFormVisitante({...formVisitante, dataPrimeiraVisita:e.target.value})} />
                     </div>
                   </div>
+
+                  {/* Modal: QUEM CONVIDOU? */}
                   <div>
-                    <label className="ieq-label">QUEM IRÁ CONSOLIDAR?</label>
+                    <label className="ieq-label">QUEM CONVIDOU?</label>
                     <div style={{ position:"relative" }}>
                       <UserCheck size={16} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:IEQ.red }} />
-                      <input className="ieq-input" style={{ paddingLeft:42 }} value={formVisitante.responsavelAcompanhamento} onChange={e => setFormVisitante({...formVisitante, responsavelAcompanhamento:e.target.value})} placeholder="Nome do líder ou obreiro" />
+                      <input
+                          className="ieq-input"
+                          style={{ paddingLeft:42 }}
+                          value={formVisitante.responsavelAcompanhamento}
+                          onChange={e => setFormVisitante({...formVisitante, responsavelAcompanhamento:e.target.value})}
+                          placeholder="Nome do líder ou membro"
+                      />
                     </div>
                   </div>
+
                   <div>
                     <label className="ieq-label">ORIGEM DA VISITA</label>
                     <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:4 }}>
@@ -389,19 +396,18 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                   <div className="divider" />
 
                   <button type="submit" className="ieq-btn-primary full" disabled={loading}>
-                    {loading ? <><Loader2 size={16} className="spin-icon" /> SALVANDO...</> : (editando ? "ATUALIZAR DADOS" : "FINALIZAR CADASTRO")}
+                    {loading
+                        ? <><Loader2 size={16} className="spin-icon" /> SALVANDO...</>
+                        : (editando ? "ATUALIZAR DADOS" : "FINALIZAR CADASTRO")
+                    }
                   </button>
                 </form>
 
-                {/* ── Botão / Confirmação de Deletar — só aparece no modo edição ── */}
+                {/* Deletar — só no modo edição */}
                 {editando && (
                     <div style={{ marginTop:16 }}>
                       {!confirmandoDeletar ? (
-                          <button
-                              type="button"
-                              className="ieq-btn-danger"
-                              onClick={() => setConfirmandoDeletar(true)}
-                          >
+                          <button type="button" className="ieq-btn-danger" onClick={() => setConfirmandoDeletar(true)}>
                             <Trash2 size={15} /> REMOVER VISITANTE
                           </button>
                       ) : (
@@ -416,20 +422,12 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                               </div>
                             </div>
                             <div style={{ display:"flex", gap:10 }}>
-                              <button
-                                  type="button"
-                                  className="ieq-btn-cancel"
-                                  onClick={() => setConfirmandoDeletar(false)}
-                                  disabled={deletando}
-                              >
+                              <button type="button" className="ieq-btn-cancel"
+                                      onClick={() => setConfirmandoDeletar(false)} disabled={deletando}>
                                 CANCELAR
                               </button>
-                              <button
-                                  type="button"
-                                  className="ieq-btn-danger-confirm"
-                                  onClick={handleDeletar}
-                                  disabled={deletando}
-                              >
+                              <button type="button" className="ieq-btn-danger-confirm"
+                                      onClick={handleDeletar} disabled={deletando}>
                                 {deletando
                                     ? <><Loader2 size={15} className="spin-icon" /> REMOVENDO...</>
                                     : <><Trash2 size={15} /> SIM, REMOVER</>
