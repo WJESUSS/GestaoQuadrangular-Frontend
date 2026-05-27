@@ -170,11 +170,17 @@ export default function Discipulado({ isDark = false }) {
   `;
 
   function obterSemanaAtual() {
-    const hoje = new Date();
-    const diff = hoje.getDay() === 0 ? -6 : 1 - hoje.getDay();
-    const seg  = new Date(hoje); seg.setDate(hoje.getDate() + diff);
-    const dom  = new Date(seg);  dom.setDate(seg.getDate() + 6);
-    return { inicio: seg.toISOString().split("T")[0], fim: dom.toISOString().split("T")[0] };
+    const hoje   = new Date();
+    const domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - hoje.getDay()); // recua até domingo
+
+    const sabado = new Date(domingo);
+    sabado.setDate(domingo.getDate() + 6); // domingo + 6 = sábado
+
+    return {
+      inicio: domingo.toISOString().split("T")[0],
+      fim:    sabado.toISOString().split("T")[0],
+    };
   }
 
   const formatarSemana = (inicio, fim) => {
