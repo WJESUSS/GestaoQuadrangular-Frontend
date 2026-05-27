@@ -37,9 +37,9 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    TELA DE EDIÇÃO DE RELATÓRIO EXISTENTE
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false }) {
   const [loading,       setLoading]       = useState(true);
   const [salvando,      setSalvando]      = useState(false);
@@ -380,13 +380,17 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   );
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    TELA PRINCIPAL — NOVO RELATÓRIO + HISTÓRICO
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 export default function TelaRelatorio({ isDark = false }) {
-  /* ── Modo: "novo" | "historico" | "editar" ── */
-  const [modo,             setModo]             = useState("novo");
-  const [relatorioEditId,  setRelatorioEditId]  = useState(null);
+  /* Modo: "novo" | "historico" | "editar" */
+  const [modo,            setModo]            = useState("novo");
+  const [relatorioEditId, setRelatorioEditId] = useState(null);
+
+  /* ── NOVO: estado do modal de duplicação ── */
+  const [modalDuplicado, setModalDuplicado] = useState(null);
+  // null | { relatorioId, dataReuniao, estudo }
 
   const [celula,        setCelula]        = useState(null);
   const [pessoas,       setPessoas]       = useState([]);
@@ -407,7 +411,7 @@ export default function TelaRelatorio({ isDark = false }) {
     decisoes: {},
   });
 
-  /* ── Salvar rascunho no localStorage ── */
+  /* Salvar rascunho no localStorage */
   useEffect(() => {
     if (!prontoParaSalvar.current || !form.celulaId) return;
     try {
@@ -466,7 +470,7 @@ export default function TelaRelatorio({ isDark = false }) {
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
 
-  /* ── Carregar histórico ── */
+  /* Carregar histórico */
   const carregarHistorico = useCallback(async () => {
     try {
       setLoadingHist(true);
@@ -500,8 +504,36 @@ export default function TelaRelatorio({ isDark = false }) {
   const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
   const total               = membrosPresentes + visitantesPresentes;
 
+  /* ══════════════════════════════════════════════════════
+     handleSubmit — com verificação de duplicata
+  ══════════════════════════════════════════════════════ */
   const handleSubmit = async () => {
     if (!form.estudo.trim()) return alert("Informe o tema do estudo.");
+
+    // ── Verifica se já existe relatório na mesma data ──
+    try {
+      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+      const res = await api.get("/relatorios/historico", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const existente = (res.data || []).find(
+          (r) => r.dataReuniao === form.dataReuniao
+      );
+      if (existente) {
+        // Bloqueia e abre o modal de duplicação
+        setModalDuplicado({
+          relatorioId: existente.id,
+          dataReuniao:  existente.dataReuniao,
+          estudo:       existente.estudo || "Sem tema",
+        });
+        return;
+      }
+    } catch (err) {
+      // Se a checagem falhar, continua (fail-open)
+      console.warn("Não foi possível verificar duplicata:", err);
+    }
+    // ──────────────────────────────────────────────────
+
     try {
       setEnviando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
@@ -509,8 +541,15 @@ export default function TelaRelatorio({ isDark = false }) {
         celulaId: Number(form.celulaId),
         dataReuniao: form.dataReuniao,
         estudo: form.estudo.trim(),
-        membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
-        visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => ({ id: Number(k.replace("VISITANTE-", "")), decisaoEspiritual: form.decisoes[k] || "NENHUMA" })),
+        membrosPresentesIds: form.selecionadosKeys
+            .filter(k => k.startsWith("MEMBRO-"))
+            .map(k => Number(k.replace("MEMBRO-", ""))),
+        visitantesPresentes: form.selecionadosKeys
+            .filter(k => k.startsWith("VISITANTE-"))
+            .map(k => ({
+              id: Number(k.replace("VISITANTE-", "")),
+              decisaoEspiritual: form.decisoes[k] || "NENHUMA",
+            })),
       };
       await api.post("/relatorios", payload, { headers: { Authorization: `Bearer ${token}` } });
       try { localStorage.removeItem(draftKey(form.celulaId)); } catch (_) {}
@@ -536,6 +575,7 @@ export default function TelaRelatorio({ isDark = false }) {
     @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
     @keyframes spin   { to{transform:rotate(360deg)} }
     @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes modalIn { from{opacity:0;transform:scale(.94) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
     .ieq-bg-stripe {
       position:fixed; inset:0; pointer-events:none; z-index:0;
       background:repeating-linear-gradient(-55deg,
@@ -591,7 +631,7 @@ export default function TelaRelatorio({ isDark = false }) {
     .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
     .spin-icon  { animation:spin 1s linear infinite; }
     .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); }
-    .ieq-tab { 
+    .ieq-tab {
       flex:1; padding:12px; border:none; cursor:pointer;
       font-family:'Cinzel',serif; font-size:9px; letter-spacing:.16em;
       transition:all .25s; display:flex; align-items:center; justify-content:center; gap:7px;
@@ -610,9 +650,39 @@ export default function TelaRelatorio({ isDark = false }) {
       transition:opacity .2s;
     }
     .ieq-edit-btn:hover { opacity:.85; }
+    .ieq-modal-overlay {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,.6); backdrop-filter:blur(5px);
+      display:flex; align-items:center; justify-content:center; padding:0 20px;
+    }
+    .ieq-modal-box {
+      background:${isDark ? "#110A0D" : "#fff"};
+      border:1px solid rgba(253,184,19,.35);
+      border-radius:16px; padding:28px 28px 24px;
+      max-width:420px; width:100%;
+      animation:modalIn .3s cubic-bezier(.34,1.56,.64,1);
+      box-shadow:0 20px 60px rgba(0,0,0,.4);
+    }
+    .ieq-modal-cancel {
+      flex:1; padding:13px 0; border-radius:9px;
+      border:1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"};
+      background:transparent; color:${tp}; cursor:pointer;
+      font-family:'Cinzel',serif; font-size:9px; letter-spacing:.16em;
+      transition:background .2s;
+    }
+    .ieq-modal-cancel:hover { background:${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)"}; }
+    .ieq-modal-confirm {
+      flex:1; padding:13px 0; border-radius:9px; border:none;
+      background:linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow});
+      color:${IEQ.dark}; cursor:pointer;
+      font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.16em;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      transition:opacity .2s;
+    }
+    .ieq-modal-confirm:hover { opacity:.88; }
   `;
 
-  /* ── Tela de edição ── */
+  /* Tela de edição */
   if (modo === "editar" && relatorioEditId) {
     return (
         <>
@@ -643,9 +713,83 @@ export default function TelaRelatorio({ isDark = false }) {
         <style>{globalStyles}</style>
         <div className="ieq-bg-stripe" />
 
+        {/* ══════════════════════════════════════════════════════
+          MODAL — Relatório duplicado na mesma data
+      ══════════════════════════════════════════════════════ */}
+        {modalDuplicado && (
+            <div className="ieq-modal-overlay" onClick={() => setModalDuplicado(null)}>
+              <div className="ieq-modal-box" onClick={e => e.stopPropagation()}>
+
+                {/* Ícone + título */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: "50%", flexShrink: 0,
+                    background: "rgba(253,184,19,.15)",
+                    border: "1px solid rgba(253,184,19,.4)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <AlertTriangle size={22} style={{ color: IEQ.yellow }} />
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: ".2em", fontWeight: 700, color: tp, margin: 0 }}>
+                      RELATÓRIO JÁ ENVIADO
+                    </p>
+                    <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "3px 0 0" }}>
+                      {new Date(modalDuplicado.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", {
+                        day: "2-digit", month: "long", year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mensagem */}
+                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, color: ts, lineHeight: 1.65, margin: "0 0 16px" }}>
+                  Já existe um relatório enviado para esta data. Deseja{" "}
+                  <strong style={{ color: tp, fontWeight: 600 }}>editar o relatório existente</strong>{" "}
+                  em vez de criar um novo?
+                </p>
+
+                {/* Card do relatório existente */}
+                <div style={{
+                  background: isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.08)",
+                  border: "1px solid rgba(253,184,19,.25)",
+                  borderRadius: 10, padding: "14px 18px", marginBottom: 22,
+                }}>
+                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".16em", color: IEQ.yellowDark, margin: "0 0 5px" }}>
+                    TEMA DO ESTUDO EXISTENTE
+                  </p>
+                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 17, fontWeight: 600, color: tp, margin: 0 }}>
+                    {modalDuplicado.estudo}
+                  </p>
+                </div>
+
+                {/* Botões */}
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button
+                      className="ieq-modal-cancel"
+                      onClick={() => setModalDuplicado(null)}
+                  >
+                    CANCELAR
+                  </button>
+                  <button
+                      className="ieq-modal-confirm"
+                      onClick={() => {
+                        const id = modalDuplicado.relatorioId;
+                        setModalDuplicado(null);
+                        setRelatorioEditId(id);
+                        setModo("editar");
+                      }}
+                  >
+                    <Edit3 size={14} /> EDITAR EXISTENTE
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
+
         <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
 
-          {/* ── Abas Novo / Histórico ── */}
+          {/* Abas Novo / Histórico */}
           <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", margin: "16px 0", border: `1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"}` }}>
             {[
               { key: "novo",      label: "NOVO RELATÓRIO", icon: <ClipboardCheck size={13} /> },
@@ -667,7 +811,7 @@ export default function TelaRelatorio({ isDark = false }) {
             ))}
           </div>
 
-          {/* ══ ABA: HISTÓRICO ══ */}
+          {/* ABA: HISTÓRICO */}
           {modo === "historico" && (
               <div className="ieq-card" style={{ overflow: "hidden" }}>
                 <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
@@ -688,7 +832,7 @@ export default function TelaRelatorio({ isDark = false }) {
                         <div key={rel.id} className="ieq-hist-card">
                           <div>
                             <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: tp, margin: "0 0 4px" }}>
-                              {rel.dataReuniao ? new Date(rel.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "—"}
+                              {rel.dataReuniao ? new Date(rel.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "?"}
                             </p>
                             <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "0 0 6px" }}>{rel.estudo || "Sem tema"}</p>
                             <div style={{ display: "flex", gap: 10 }}>
@@ -707,7 +851,7 @@ export default function TelaRelatorio({ isDark = false }) {
               </div>
           )}
 
-          {/* ══ ABA: NOVO RELATÓRIO ══ */}
+          {/* ABA: NOVO RELATÓRIO */}
           {modo === "novo" && (
               <>
                 {rascunhoCarregado && (
@@ -856,7 +1000,7 @@ export default function TelaRelatorio({ isDark = false }) {
           )}
         </div>
 
-        {/* ── Botão fixo — só aparece na aba novo ── */}
+        {/* Botão fixo — só aparece na aba novo */}
         {modo === "novo" && (
             <div style={{
               position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50,
@@ -874,7 +1018,10 @@ export default function TelaRelatorio({ isDark = false }) {
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all .25s",
                     }}
                 >
-                  {enviando ? <><Loader2 size={17} className="spin-icon" /> ENVIANDO...</> : <><ClipboardCheck size={17} /> FINALIZAR RELATÓRIO ({total})</>}
+                  {enviando
+                      ? <><Loader2 size={17} className="spin-icon" /> ENVIANDO...</>
+                      : <><ClipboardCheck size={17} /> FINALIZAR RELATÓRIO ({total})</>
+                  }
                 </button>
               </div>
             </div>

@@ -14,7 +14,7 @@ const IEQ = {
 };
 
 const COLUNAS = [
-  { campo: "escolaBiblica", label: "EBD",        emoji: "📖" },
+  { campo: "escolaBiblica", label: "EBQ",        emoji: "📖" },
   { campo: "quartaNoite",   label: "4ª Noite",   emoji: "🌙" },
   { campo: "quintaNoite",   label: "5ª Noite",   emoji: "🌙" },
   { campo: "domingoManha",  label: "Dom. Manhã", emoji: "☀️" },
