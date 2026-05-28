@@ -25,11 +25,12 @@ const IEQ = {
     dark:       "#0A0608",
 };
 
+// ── Retorna o domingo da semana de qualquer data ──────────────
+// Exemplo: quarta dia 28 → domingo dia 24
 const inicioSemana = (date) => {
     const d = new Date(date);
-    const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    d.setDate(d.getDate() + diff);
+    const day = d.getDay(); // 0=dom, 1=seg, ..., 6=sab
+    d.setDate(d.getDate() - day); // recua até domingo
     d.setHours(0, 0, 0, 0);
     return d;
 };
@@ -41,6 +42,7 @@ const formatarSemana = (inicio, fim) => {
     return `${fmt(inicio)} – ${fmt(fim)}`;
 };
 
+// domingo + 6 dias = sábado
 const labelSemana = (inicioDate) => {
     const fimDate = new Date(inicioDate);
     fimDate.setDate(fimDate.getDate() + 6);
@@ -52,7 +54,7 @@ export default function TelaPendencias({ isDark = false }) {
     const semanaAtual = inicioSemana(hoje);
 
     const [semanaRef,  setSemanaRef]  = useState(semanaAtual);
-    const [celulas,    setCelulas]    = useState([]); // TODAS as células
+    const [celulas,    setCelulas]    = useState([]);
     const [loading,    setLoading]    = useState(true);
     const [erro,       setErro]       = useState("");
     const [filtro,     setFiltro]     = useState("TODAS");
@@ -77,7 +79,6 @@ export default function TelaPendencias({ isDark = false }) {
         setLoading(true);
         setErro("");
         try {
-            // Passa semanaInicio E solicita todas as células (incluindo as em dia)
             const res = await api.get("/pastor/pendencias", {
                 params: { semanaInicio: toISO(semana), todas: true },
             });
@@ -118,12 +119,6 @@ export default function TelaPendencias({ isDark = false }) {
     };
 
     // ── FILTROS ──────────────────────────────────────────────
-    // "TODAS"       → todas as células (em dia ou não)
-    // "PENDENTES"   → qualquer pendência
-    // "AMBAS"       → as duas pendentes
-    // "RELATORIO"   → só relatório pendente
-    // "DISCIPULADO" → só discipulado pendente
-    // "EM_DIA"      → nenhuma pendência
     const celulasFiltradas = celulas.filter((p) => {
         const temRelatorio   = p.relatorioPendente;
         const temDiscipulado = p.discipuladoPendente;
@@ -302,7 +297,7 @@ export default function TelaPendencias({ isDark = false }) {
                                             transition={{ duration: .16 }}>
                                     <label>ESCOLHA QUALQUER DIA DA SEMANA</label>
                                     <input type="date" max={toISO(hoje)} defaultValue={toISO(semanaRef)} onChange={onPickDate} />
-                                    <p className="date-picker-hint">A semana começa na segunda-feira.</p>
+                                    <p className="date-picker-hint">A semana vai de domingo a sábado.</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
