@@ -1,6 +1,12 @@
 /* ============================================================
-   TelaPendencias.jsx
-   src/pages/pastor/TelaPendencias.jsx
+   TelaPendencias.jsx  —  COM POLLING AUTOMÁTICO
+
+   MUDANÇAS vs versão original:
+   1. Polling a cada 60s — atualiza automaticamente
+   2. Indicador visual "AO VIVO" pulsando
+   3. Contador regressivo mostrando próxima atualização
+   4. Polling pausa quando a aba está oculta (Page Visibility API)
+   5. Polling reseta ao trocar de semana ou filtro
    ============================================================ */
 
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -9,7 +15,7 @@ import api from "../../services/api.js";
 import {
     AlertTriangle, CheckCircle2, RefreshCw, Loader2,
     FileText, BookOpen, MapPin, User, ClipboardList,
-    CalendarDays, ChevronLeft, ChevronRight,
+    CalendarDays, ChevronLeft, ChevronRight, Radio,
 } from "lucide-react";
 
 const IEQ = {
@@ -25,12 +31,12 @@ const IEQ = {
     dark:       "#0A0608",
 };
 
-// ── Retorna o domingo da semana de qualquer data ──────────────
-// Exemplo: quarta dia 28 → domingo dia 24
+const POLLING_INTERVAL = 60; // segundos
+
 const inicioSemana = (date) => {
     const d = new Date(date);
-    const day = d.getDay(); // 0=dom, 1=seg, ..., 6=sab
-    d.setDate(d.getDate() - day); // recua até domingo
+    const day = d.getDay();
+    d.setDate(d.getDate() - day);
     d.setHours(0, 0, 0, 0);
     return d;
 };
@@ -42,7 +48,6 @@ const formatarSemana = (inicio, fim) => {
     return `${fmt(inicio)} – ${fmt(fim)}`;
 };
 
-// domingo + 6 dias = sábado
 const labelSemana = (inicioDate) => {
     const fimDate = new Date(inicioDate);
     fimDate.setDate(fimDate.getDate() + 6);
@@ -53,13 +58,25 @@ export default function TelaPendencias({ isDark = false }) {
     const hoje        = new Date();
     const semanaAtual = inicioSemana(hoje);
 
-    const [semanaRef,  setSemanaRef]  = useState(semanaAtual);
-    const [celulas,    setCelulas]    = useState([]);
-    const [loading,    setLoading]    = useState(true);
-    const [erro,       setErro]       = useState("");
-    const [filtro,     setFiltro]     = useState("TODAS");
-    const [showPicker, setShowPicker] = useState(false);
-    const [pickerPos,  setPickerPos]  = useState({ top: 0, left: 0 });
+    const [semanaRef,   setSemanaRef]   = useState(semanaAtual);
+    const [celulas,     setCelulas]     = useState([]);
+    const [loading,     setLoading]     = useState(true);
+    const [erro,        setErro]        = useState("");
+    const [filtro,      setFiltro]      = useState("TODAS");
+    const [showPicker,  setShowPicker]  = useState(false);
+    const [pickerPos,   setPickerPos]   = useState({ top: 0, left: 0 });
+
+    // ── POLLING ──────────────────────────────────────────────
+    const [countdown,      setCountdown]      = useState(POLLING_INTERVAL);
+    const [ultimaAtt,      setUltimaAtt]      = useState(null);   // horário da última atualização
+    const [pollingAtivo,   setPollingAtivo]   = useState(true);
+    const pollingTimerRef  = useRef(null);
+    const countdownRef     = useRef(null);
+    const semanaRefRef     = useRef(semanaRef); // ref para usar dentro do setInterval sem stale closure
+
+    // mantém ref sincronizado com state
+    useEffect(() => { semanaRefRef.current = semanaRef; }, [semanaRef]);
+
     const pickerRef = useRef(null);
     const labelRef  = useRef(null);
 
@@ -75,23 +92,78 @@ export default function TelaPendencias({ isDark = false }) {
         return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    const carregar = useCallback(async (semana) => {
-        setLoading(true);
+    // ── Função de carga (usada pelo polling e pelo manual) ──
+    const carregar = useCallback(async (semana, silencioso = false) => {
+        if (!silencioso) setLoading(true);
         setErro("");
         try {
             const res = await api.get("/pastor/pendencias", {
                 params: { semanaInicio: toISO(semana), todas: true },
             });
             setCelulas(res.data);
+            setUltimaAtt(new Date());
         } catch (err) {
             setErro("Não foi possível carregar as células.");
             console.error(err);
         } finally {
-            setLoading(false);
+            if (!silencioso) setLoading(false);
         }
     }, []);
 
-    useEffect(() => { carregar(semanaRef); }, [carregar, semanaRef]);
+    // ── Carga inicial ao montar / trocar semana ──
+    useEffect(() => {
+        carregar(semanaRef);
+        // Reinicia o countdown ao trocar de semana
+        setCountdown(POLLING_INTERVAL);
+    }, [carregar, semanaRef]);
+
+    // ── POLLING: tick a cada segundo, dispara carga a cada 60s ──
+    useEffect(() => {
+        // Para qualquer timer anterior
+        clearInterval(pollingTimerRef.current);
+        clearInterval(countdownRef.current);
+
+        if (!pollingAtivo) return;
+
+        // Countdown visual (decrementa 1 por segundo)
+        countdownRef.current = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    // Dispara a atualização silenciosa (sem spinner de loading)
+                    carregar(semanaRefRef.current, true);
+                    return POLLING_INTERVAL; // reinicia
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => {
+            clearInterval(pollingTimerRef.current);
+            clearInterval(countdownRef.current);
+        };
+    }, [pollingAtivo, carregar]);
+
+    // ── Pausa o polling quando a aba fica oculta ──
+    useEffect(() => {
+        const onVisibilityChange = () => {
+            if (document.hidden) {
+                setPollingAtivo(false);
+            } else {
+                // Volta para a aba: atualiza imediatamente e retoma polling
+                carregar(semanaRefRef.current, true);
+                setCountdown(POLLING_INTERVAL);
+                setPollingAtivo(true);
+            }
+        };
+        document.addEventListener("visibilitychange", onVisibilityChange);
+        return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+    }, [carregar]);
+
+    // ── Atualização manual (botão ATUALIZAR) ──
+    const handleAtualizar = () => {
+        carregar(semanaRef);
+        setCountdown(POLLING_INTERVAL); // reinicia contador
+    };
 
     const navSemana = (delta) => {
         setSemanaRef(prev => {
@@ -118,7 +190,7 @@ export default function TelaPendencias({ isDark = false }) {
         setShowPicker(v => !v);
     };
 
-    // ── FILTROS ──────────────────────────────────────────────
+    // ── FILTROS ──
     const celulasFiltradas = celulas.filter((p) => {
         const temRelatorio   = p.relatorioPendente;
         const temDiscipulado = p.discipuladoPendente;
@@ -129,7 +201,7 @@ export default function TelaPendencias({ isDark = false }) {
         if (filtro === "RELATORIO")   return temRelatorio && !temDiscipulado;
         if (filtro === "DISCIPULADO") return temDiscipulado && !temRelatorio;
         if (filtro === "EM_DIA")      return emDia;
-        return true; // TODAS
+        return true;
     });
 
     const totalAmbas       = celulas.filter(p => p.relatorioPendente && p.discipuladoPendente).length;
@@ -138,8 +210,15 @@ export default function TelaPendencias({ isDark = false }) {
     const totalEmDia       = celulas.filter(p => !p.relatorioPendente && !p.discipuladoPendente).length;
     const semanaLabel      = labelSemana(semanaRef);
 
+    // Formata horário da última atualização
+    const ultimaAttLabel = ultimaAtt
+        ? ultimaAtt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+        : null;
+
     const globalStyles = `
-    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes spin        { to { transform:rotate(360deg); } }
+    @keyframes livePulse   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
+    @keyframes countRing   { from{stroke-dashoffset:0} to{stroke-dashoffset:100} }
 
     .pend-card {
       background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
@@ -181,7 +260,6 @@ export default function TelaPendencias({ isDark = false }) {
       display:flex; flex-direction:column; gap:6px;
       flex-shrink:0; align-items:flex-end;
     }
-
     .semana-nav {
       display:flex; align-items:center; gap:4px;
       background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
@@ -200,7 +278,6 @@ export default function TelaPendencias({ isDark = false }) {
     }
     .semana-nav-btn:disabled { opacity:.3; cursor:default; }
     .semana-nav-btn:disabled:hover { background:none; color:${textSecondary}; }
-
     .semana-label-btn {
       display:flex; align-items:center; gap:6px;
       font-family:'Cinzel',serif; font-size:10px; font-weight:700;
@@ -219,7 +296,6 @@ export default function TelaPendencias({ isDark = false }) {
       background:${IEQ.red}12; color:${IEQ.red}; transition:all .2s; white-space:nowrap;
     }
     .semana-hoje-btn:hover { background:${IEQ.red}22; }
-
     .date-picker-popup {
       position:fixed; z-index:9999;
       background:${isDark ? "rgba(12,6,9,.99)" : "#fff"};
@@ -243,7 +319,44 @@ export default function TelaPendencias({ isDark = false }) {
       font-family:'EB Garamond',serif; font-size:12px;
       color:${textSecondary}; margin-top:8px; text-align:center;
     }
+
+    /* ── POLLING UI ── */
+    .live-dot {
+      width:7px; height:7px; border-radius:50%;
+      background:#12A060; animation:livePulse 1.6s ease-in-out infinite;
+      flex-shrink:0;
+    }
+    .polling-bar {
+      display:flex; align-items:center; gap:10px;
+      background:${isDark ? "rgba(18,160,96,.07)" : "rgba(18,160,96,.06)"};
+      border:1px solid rgba(18,160,96,.2);
+      border-radius:9px; padding:8px 14px;
+    }
+    .countdown-ring {
+      position:relative; width:22px; height:22px; flex-shrink:0;
+    }
+    .countdown-ring svg {
+      transform: rotate(-90deg);
+    }
+    .countdown-ring circle {
+      fill:none; stroke-width:2.5;
+    }
+    .countdown-ring .track { stroke:rgba(18,160,96,.15); }
+    .countdown-ring .fill  {
+      stroke:#12A060;
+      stroke-dasharray:57;
+      transition:stroke-dashoffset .9s linear;
+    }
+    .countdown-num {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Cinzel',serif; font-size:7px; font-weight:700;
+      color:#12A060;
+    }
   `;
+
+    // Calcula o dashoffset do anel SVG (0 = cheio, 57 = vazio)
+    const ringOffset = ((POLLING_INTERVAL - countdown) / POLLING_INTERVAL) * 57;
 
     return (
         <div style={{ color: textPrimary, fontFamily: "'EB Garamond',serif" }}>
@@ -251,7 +364,7 @@ export default function TelaPendencias({ isDark = false }) {
 
             {/* ── HEADER ── */}
             <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 14 }}>
+                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 14 }}>
                 <div>
                     <h2 style={{
                         fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 700, letterSpacing: ".18em", margin: 0,
@@ -264,7 +377,7 @@ export default function TelaPendencias({ isDark = false }) {
                         RELATÓRIOS E DISCIPULADO
                     </p>
                 </div>
-                <button onClick={() => carregar(semanaRef)} style={{
+                <button onClick={handleAtualizar} style={{
                     background: "none", border: `1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"}`,
                     borderRadius: 8, padding: "9px 16px", cursor: "pointer", color: textSecondary,
                     display: "flex", alignItems: "center", gap: 8, fontFamily: "'Cinzel',serif",
@@ -273,6 +386,58 @@ export default function TelaPendencias({ isDark = false }) {
                     <RefreshCw size={13} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
                     ATUALIZAR
                 </button>
+            </motion.div>
+
+            {/* ── BARRA DE POLLING AO VIVO ── */}
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .02 }}
+                        style={{ marginBottom: 16 }}>
+                <div className="polling-bar">
+                    {/* Ponto verde pulsando */}
+                    <div className="live-dot" />
+
+                    {/* Anel de countdown */}
+                    <div className="countdown-ring">
+                        <svg width="22" height="22" viewBox="0 0 22 22">
+                            <circle className="track" cx="11" cy="11" r="9" />
+                            <circle
+                                className="fill"
+                                cx="11" cy="11" r="9"
+                                strokeDashoffset={ringOffset}
+                            />
+                        </svg>
+                        <div className="countdown-num">{countdown}</div>
+                    </div>
+
+                    {/* Texto */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, fontWeight: 700, letterSpacing: ".14em", color: "#12A060", margin: 0 }}>
+                            AO VIVO — ATUALIZAÇÃO AUTOMÁTICA
+                        </p>
+                        {ultimaAttLabel && (
+                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: textSecondary, margin: "2px 0 0" }}>
+                                Última atualização às {ultimaAttLabel} · próxima em {countdown}s
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Toggle pausar/retomar */}
+                    <button
+                        onClick={() => {
+                            setPollingAtivo(v => !v);
+                            if (!pollingAtivo) setCountdown(POLLING_INTERVAL);
+                        }}
+                        style={{
+                            background: pollingAtivo ? "rgba(18,160,96,.12)" : `${IEQ.red}12`,
+                            border: `1px solid ${pollingAtivo ? "rgba(18,160,96,.3)" : `${IEQ.red}30`}`,
+                            borderRadius: 6, padding: "5px 12px", cursor: "pointer",
+                            fontFamily: "'Cinzel',serif", fontSize: 8, fontWeight: 700,
+                            letterSpacing: ".14em", color: pollingAtivo ? "#12A060" : IEQ.red,
+                            transition: "all .2s", whiteSpace: "nowrap", flexShrink: 0,
+                        }}
+                    >
+                        {pollingAtivo ? "PAUSAR" : "RETOMAR"}
+                    </button>
+                </div>
             </motion.div>
 
             {/* ── NAVEGADOR DE SEMANA ── */}
@@ -359,7 +524,7 @@ export default function TelaPendencias({ isDark = false }) {
                     { key: "DISCIPULADO", label: "SEM DISCIPULADO" },
                     { key: "EM_DIA",      label: "EM DIA"          },
                 ].map(({ key, label }) => {
-                    const ativo = filtro === key;
+                    const ativo   = filtro === key;
                     const isEmDia = key === "EM_DIA";
                     return (
                         <button key={key} className="pend-filtro-btn" onClick={() => setFiltro(key)}
@@ -454,7 +619,6 @@ export default function TelaPendencias({ isDark = false }) {
                                                 transition={{ delay: i * 0.04 }}
                                                 className="pend-row">
 
-                                        {/* identidade */}
                                         <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
                                             <div className="pend-avatar" style={{ background: avatarBg, color: avatarColor }}>
                                                 {p.nomeCelula?.charAt(0).toUpperCase()}
@@ -480,7 +644,6 @@ export default function TelaPendencias({ isDark = false }) {
                                             </div>
                                         </div>
 
-                                        {/* ── STATUS BADGES ── */}
                                         <div className="pend-status-group">
                                             {p.relatorioPendente ? (
                                                 <span className="pend-badge" style={{ color: IEQ.red, borderColor: `${IEQ.red}35`, background: `${IEQ.red}12` }}>

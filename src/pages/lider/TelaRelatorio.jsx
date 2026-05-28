@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../services/api.js";
 import {
@@ -130,6 +131,15 @@ const TEMAS_FIXOS = [
 ];
 
 /* ══════════════════════════════════════════════════════
+   UTILITÁRIO: normaliza data para "YYYY-MM-DD"
+   ✅ CORREÇÃO BUG: API pode retornar "2025-01-15T03:00:00.000Z"
+══════════════════════════════════════════════════════ */
+const normalizarData = (dataStr) => {
+  if (!dataStr) return "";
+  return String(dataStr).substring(0, 10);
+};
+
+/* ══════════════════════════════════════════════════════
    COMPONENTE: Seletor de Referência Bíblica com Autocomplete
    — dropdown com scroll, abre para cima ou para baixo
 ══════════════════════════════════════════════════════ */
@@ -138,19 +148,17 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
   const [sugestoes,     setSugestoes]     = useState([]);
   const [aberto,        setAberto]        = useState(false);
   const [abrirParaCima, setAbrirParaCima] = useState(false);
-  const inputRef   = useRef(null);
-  const dropRef    = useRef(null);
+  const inputRef = useRef(null);
+  const dropRef  = useRef(null);
 
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
-  /* Sincroniza quando valor externo muda (ex: rascunho restaurado) */
   useEffect(() => {
     if (value !== inputVal) setInputVal(value || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  /* Decide se o dropdown deve abrir para cima */
   const calcularDirecao = () => {
     if (!inputRef.current) return;
     const rect         = inputRef.current.getBoundingClientRect();
@@ -162,7 +170,6 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
     if (!texto.trim()) { setSugestoes([]); return; }
     const lower = texto.toLowerCase();
 
-    /* 1. Sugestões de capítulo:versículo */
     const extrasRef = [];
     const matchRef  = texto.match(/^(.+?)\s+(\d+)(?::(\d+))?/);
     if (matchRef) {
@@ -181,20 +188,17 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
       }
     }
 
-    /* 2. Livros que contêm o texto */
     const livrosMatch = BIBLIA
         .filter(l => l.nome.toLowerCase().includes(lower))
         .slice(0, 4)
         .map(l => l.nome);
 
-    /* 3. Temas livres que contêm o texto */
     const temasMatch = TEMAS_FIXOS
         .filter(t => t.toLowerCase().includes(lower))
-        .slice(0, 20); // retorna mais para permitir scroll
+        .slice(0, 20);
 
     const todas = [...new Set([...extrasRef, ...livrosMatch, ...temasMatch])];
 
-    /* Texto digitado aparece como primeira opção */
     const digitadoLimpo = texto.trim();
     if (digitadoLimpo && !todas.some(s => s.toLowerCase() === lower)) {
       todas.unshift(digitadoLimpo);
@@ -260,12 +264,12 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
                   style={{
                     position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
                     background: "none", border: "none", cursor: "pointer",
-                    color: ts, fontSize: 18, lineHeight: 1, padding: "2px 4px",
+                    color: isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)",
+                    fontSize: 18, lineHeight: 1, padding: "2px 4px",
                   }}
               >×</button>
           )}
 
-          {/* ── Dropdown com scroll, abre para cima ou para baixo ── */}
           {aberto && sugestoes.length > 0 && (
               <div
                   ref={dropRef}
@@ -273,17 +277,13 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
                     position: "absolute",
                     ...(abrirParaCima
                         ? { bottom: "calc(100% + 6px)", top: "auto" }
-                        : { top: "calc(100% + 6px)",    bottom: "auto" }),
+                        : { top: "calc(100% + 6px)", bottom: "auto" }),
                     left: 0, right: 0, zIndex: 200,
                     background: isDark ? "#1a0a0d" : "#fff",
                     border: `1px solid ${isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.22)"}`,
                     borderRadius: 10,
-                    /* ── scroll ── */
-                    maxHeight: 260,
-                    overflowY: "auto",
-                    overflowX: "hidden",
+                    maxHeight: 260, overflowY: "auto", overflowX: "hidden",
                     boxShadow: "0 8px 28px rgba(0,0,0,.22)",
-                    /* scrollbar sutil */
                     scrollbarWidth: "thin",
                     scrollbarColor: `${IEQ.red} transparent`,
                   }}
@@ -303,8 +303,7 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
                             fontFamily: "'EB Garamond',serif", fontSize: 15, color: tp,
                             borderBottom: i < sugestoes.length - 1
                                 ? `1px solid ${isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.07)"}` : "none",
-                            display: "flex", alignItems: "center", gap: 10,
-                            flexShrink: 0,
+                            display: "flex", alignItems: "center", gap: 10, flexShrink: 0,
                           }}
                           onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(200,16,46,.09)" : "rgba(200,16,46,.05)"}
                           onMouseLeave={e => e.currentTarget.style.background = "none"}
@@ -317,10 +316,9 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
                         }
                         <span style={{ flex: 1 }}>{s}</span>
                         {isDigitado && (
-                            <span style={{
-                              fontFamily: "'Cinzel',serif", fontSize: 7.5,
-                              letterSpacing: ".14em", color: ts, flexShrink: 0,
-                            }}>USAR ESTE</span>
+                            <span style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".14em", color: ts, flexShrink: 0 }}>
+                              USAR ESTE
+                            </span>
                         )}
                       </button>
                   );
@@ -329,7 +327,6 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
           )}
         </div>
 
-        {/* Preview do valor selecionado */}
         {value && (
             <div style={{
               marginTop: 10, padding: "10px 14px",
@@ -339,8 +336,8 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
             }}>
               <BookOpen size={14} style={{ color: IEQ.red, flexShrink: 0 }} />
               <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: 600, color: tp }}>
-            {value}
-          </span>
+                {value}
+              </span>
             </div>
         )}
       </div>
@@ -384,18 +381,13 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
     return () => clearTimeout(t);
   }, [onClose]);
 
-  const confettiCores = [
-    IEQ.yellow, IEQ.red, IEQ.blue, IEQ.yellow,
-    IEQ.redLight, IEQ.blueLight, IEQ.yellow, IEQ.red,
-  ];
+  const confettiCores = [IEQ.yellow, IEQ.red, IEQ.blue, IEQ.yellow, IEQ.redLight, IEQ.blueLight, IEQ.yellow, IEQ.red];
 
   return (
       <div style={{
         position: "fixed", inset: 0, zIndex: 300,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "0 20px",
-        background: "rgba(0,0,0,0.55)",
-        backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px",
+        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
         animation: saindo ? "ieqOverlayOut .45s ease forwards" : "ieqOverlayIn .3s ease forwards",
       }}>
         <div style={{
@@ -411,7 +403,6 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
                 }} />
             ))}
           </div>
-
           <div style={{
             background: "linear-gradient(160deg, #0d6e3a 0%, #0a5530 60%, #073d22 100%)",
             borderRadius: 22, padding: "32px 40px 28px",
@@ -422,7 +413,6 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
           }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,.04)", pointerEvents: "none" }} />
             <div style={{ position: "absolute", bottom: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(253,184,19,.06)", pointerEvents: "none" }} />
-
             <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ position: "absolute", inset: -8, borderRadius: "50%", border: "2px solid rgba(255,255,255,.25)", animation: "ieqRingPulse 2s ease-out forwards" }} />
               <div style={{ position: "absolute", inset: -16, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,.12)", animation: "ieqRingPulse 2s ease-out .3s forwards" }} />
@@ -430,20 +420,14 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
                 <CheckCircle2 size={32} style={{ color: "#fff" }} />
               </div>
             </div>
-
             <div style={{ marginTop: -6, marginBottom: -6 }}><QuadrangularCross size={22} /></div>
-
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, letterSpacing: ".18em", color: "#fff", margin: "0 0 8px" }}>
-                GLÓRIA A DEUS!
-              </p>
+              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, letterSpacing: ".18em", color: "#fff", margin: "0 0 8px" }}>GLÓRIA A DEUS!</p>
               <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 18, color: "rgba(255,255,255,.82)", lineHeight: 1.55, margin: 0 }}>
                 Relatório enviado com sucesso.<br /><em>O Senhor viu cada presença!</em>
               </p>
             </div>
-
             <div style={{ width: "100%", height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent)" }} />
-
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
               <div style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: 20, padding: "6px 14px", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: "rgba(255,255,255,.92)", display: "flex", alignItems: "center", gap: 6 }}>
                 <Users2 size={12} /> {total} PRESENTES
@@ -459,7 +443,6 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
                   </div>
               )}
             </div>
-
             <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 14, color: "rgba(255,255,255,.5)", textAlign: "center", margin: 0, lineHeight: 1.5 }}>
               "Porque onde dois ou três estão reunidos em meu nome, ali estou no meio deles."
             </p>
@@ -474,6 +457,10 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
 
 /* ══════════════════════════════════════════════════════
    TELA DE EDIÇÃO DE RELATÓRIO EXISTENTE
+   ✅ CORREÇÕES:
+   1. normalizarData() — data sempre "YYYY-MM-DD"
+   2. Removido quantidadeVisitantes: 0 hardcoded
+   3. Logs de debug adicionados
 ══════════════════════════════════════════════════════ */
 function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false }) {
   const [loading,       setLoading]       = useState(true);
@@ -498,14 +485,15 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const carregarDados = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+      const token   = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const headers = { Authorization: `Bearer ${token}` };
 
       const resRelatorio = await api.get(`/relatorios/${relatorioId}`, { headers });
       const rel = resRelatorio.data;
+      console.debug("[TelaEditar] Relatório carregado:", rel);
 
       setNomeCelula(rel.nomeCelula || "");
-      setNomeLider(rel.nomeLider || "");
+      setNomeLider(rel.nomeLider   || "");
       setCelulaId(rel.celulaId);
 
       const [resMembros, resVisitantes] = await Promise.all([
@@ -528,8 +516,8 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       });
 
       setForm({
-        dataReuniao:      rel.dataReuniao || "",
-        estudo:           rel.estudo      || "",
+        dataReuniao:      normalizarData(rel.dataReuniao), // ✅ CORREÇÃO 1
+        estudo:           rel.estudo || "",
         selecionadosKeys: keysPresentes,
         decisoes:         decisoesIniciais,
       });
@@ -564,21 +552,25 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
     try {
       setSalvando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+
+      // ✅ CORREÇÃO 1: data normalizada antes de enviar
+      // ✅ CORREÇÃO 2: removido quantidadeVisitantes: 0 hardcoded
       const payload = {
-        celulaId: Number(celulaId),
-        dataReuniao: form.dataReuniao,
-        estudo: form.estudo.trim(),
+        celulaId:    Number(celulaId),
+        dataReuniao: normalizarData(form.dataReuniao),
+        estudo:      form.estudo.trim(),
         membrosPresentesIds: form.selecionadosKeys
             .filter(k => k.startsWith("MEMBRO-"))
             .map(k => Number(k.replace("MEMBRO-", ""))),
         visitantesPresentes: form.selecionadosKeys
             .filter(k => k.startsWith("VISITANTE-"))
             .map(k => ({
-              id: Number(k.replace("VISITANTE-", "")),
+              id:                Number(k.replace("VISITANTE-", "")),
               decisaoEspiritual: form.decisoes[k] || "NENHUMA",
             })),
-        quantidadeVisitantes: 0,
       };
+
+      console.debug("[TelaEditar] Payload enviado:", payload);
 
       await api.put(`/relatorios/${relatorioId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
@@ -587,6 +579,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       setSucesso(true);
       setTimeout(() => { setSucesso(false); if (onSalvo) onSalvo(); }, 2200);
     } catch (err) {
+      console.error("[TelaEditar] Erro ao salvar:", err.response?.data || err);
       alert(err.response?.data?.message || "Erro ao salvar alterações.");
     } finally {
       setSalvando(false);
@@ -607,15 +600,12 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
         <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
 
           <div style={{ paddingTop: 20, paddingBottom: 8 }}>
-            <button
-                onClick={onVoltar}
-                style={{
-                  background: "none", border: `1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"}`,
-                  color: tp, padding: "9px 16px", borderRadius: 8, cursor: "pointer",
-                  fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".15em",
-                  display: "flex", alignItems: "center", gap: 8,
-                }}
-            >
+            <button onClick={onVoltar} style={{
+              background: "none", border: `1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"}`,
+              color: tp, padding: "9px 16px", borderRadius: 8, cursor: "pointer",
+              fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".15em",
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
               <ArrowLeft size={13} /> VOLTAR
             </button>
           </div>
@@ -646,7 +636,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </p>
           </div>
 
-          {/* Header edição */}
           <div style={{
             padding: "36px 40px 32px", marginBottom: 24,
             background: isDark ? "linear-gradient(135deg,#1A0A0D,#0A0608)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
@@ -680,7 +669,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </div>
           </div>
 
-          {/* Campos data + tema */}
           <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
@@ -693,7 +681,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </div>
           </div>
 
-          {/* KPIs */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
             {[
               { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red },
@@ -707,7 +694,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             ))}
           </div>
 
-          {/* Chamada */}
           <div className="ieq-card" style={{ overflow: "hidden", marginBottom: 16 }}>
             <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
               <Users2 size={18} style={{ color: IEQ.red }} />
@@ -780,7 +766,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
           </div>
         </div>
 
-        {/* Botão salvar fixo */}
         <div style={{
           position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50,
           background: isDark ? "linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)" : "linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)",
@@ -830,13 +815,15 @@ export default function TelaRelatorio({ isDark = false }) {
 
   const [form, setForm] = useState({
     celulaId: null,
-    dataReuniao: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })(),
+    dataReuniao: (() => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    })(),
     estudo: "",
     selecionadosKeys: [],
     decisoes: {},
   });
 
-  /* Salva rascunho automaticamente */
   useEffect(() => {
     if (!prontoParaSalvar.current || !form.celulaId) return;
     try {
@@ -856,6 +843,7 @@ export default function TelaRelatorio({ isDark = false }) {
       setLoading(true);
       const token   = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const headers = { Authorization: `Bearer ${token}` };
+
       const resCelula   = await api.get("/celulas/minha-celula", { headers });
       const dadosCelula = resCelula.data;
       setCelula(dadosCelula);
@@ -873,9 +861,10 @@ export default function TelaRelatorio({ isDark = false }) {
         const raw = localStorage.getItem(draftKey(dadosCelula.id));
         if (raw) {
           const draft = JSON.parse(raw);
+          const hoje  = new Date();
           setForm({
             celulaId:         dadosCelula.id,
-            dataReuniao:      draft.dataReuniao || (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })(),
+            dataReuniao:      draft.dataReuniao || `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`,
             estudo:           draft.estudo || "",
             selecionadosKeys: draft.selecionadosKeys || [],
             decisoes:         draft.decisoes || {},
@@ -936,7 +925,8 @@ export default function TelaRelatorio({ isDark = false }) {
     try {
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const res   = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
-      const existente = (res.data || []).find(r => r.dataReuniao === form.dataReuniao);
+      // ✅ Comparação de data normalizada para evitar falso negativo
+      const existente = (res.data || []).find(r => normalizarData(r.dataReuniao) === normalizarData(form.dataReuniao));
       if (existente) {
         setModalDuplicado({ relatorioId: existente.id, dataReuniao: existente.dataReuniao, estudo: existente.estudo || "Sem tema" });
         return;
@@ -1053,7 +1043,6 @@ export default function TelaRelatorio({ isDark = false }) {
     }
     .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
     .spin-icon  { animation:spin 1s linear infinite; }
-    .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); }
     .ieq-tab {
       flex:1; padding:12px; border:none; cursor:pointer;
       font-family:'Cinzel',serif; font-size:9px; letter-spacing:.16em;
@@ -1090,8 +1079,7 @@ export default function TelaRelatorio({ isDark = false }) {
       flex:1; padding:13px 0; border-radius:9px;
       border:1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"};
       background:transparent; color:${tp}; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:9px; letter-spacing:.16em;
-      transition:background .2s;
+      font-family:'Cinzel',serif; font-size:9px; letter-spacing:.16em; transition:background .2s;
     }
     .ieq-modal-cancel:hover { background:${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)"}; }
     .ieq-modal-confirm {
@@ -1099,17 +1087,11 @@ export default function TelaRelatorio({ isDark = false }) {
       background:linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow});
       color:${IEQ.dark}; cursor:pointer;
       font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.16em;
-      display:flex; align-items:center; justify-content:center; gap:8px;
-      transition:opacity .2s;
+      display:flex; align-items:center; justify-content:center; gap:8px; transition:opacity .2s;
     }
     .ieq-modal-confirm:hover { opacity:.88; }
-    /* scrollbar do dropdown */
-    .ieq-dropdown-scroll::-webkit-scrollbar { width:5px; }
-    .ieq-dropdown-scroll::-webkit-scrollbar-track { background:transparent; }
-    .ieq-dropdown-scroll::-webkit-scrollbar-thumb { background:${IEQ.red}; border-radius:3px; opacity:.5; }
   `;
 
-  /* ── Tela de edição ── */
   if (modo === "editar" && relatorioEditId) {
     return (
         <>
@@ -1140,7 +1122,6 @@ export default function TelaRelatorio({ isDark = false }) {
         <style>{globalStyles}</style>
         <div className="ieq-bg-stripe" />
 
-        {/* Toast de sucesso */}
         {toastSucesso && (
             <ToastSucesso
                 total={toastSucesso.total}
@@ -1150,7 +1131,6 @@ export default function TelaRelatorio({ isDark = false }) {
             />
         )}
 
-        {/* Modal duplicado */}
         {modalDuplicado && (
             <div className="ieq-modal-overlay" onClick={() => setModalDuplicado(null)}>
               <div className="ieq-modal-box" onClick={e => e.stopPropagation()}>
@@ -1161,7 +1141,7 @@ export default function TelaRelatorio({ isDark = false }) {
                   <div>
                     <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: ".2em", fontWeight: 700, color: tp, margin: 0 }}>RELATÓRIO JÁ ENVIADO</p>
                     <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "3px 0 0" }}>
-                      {new Date(modalDuplicado.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                      {new Date(normalizarData(modalDuplicado.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                     </p>
                   </div>
                 </div>
@@ -1189,23 +1169,16 @@ export default function TelaRelatorio({ isDark = false }) {
 
         <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
 
-          {/* Abas */}
           <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", margin: "16px 0", border: `1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"}` }}>
             {[
               { key: "novo",      label: "NOVO RELATÓRIO", icon: <ClipboardCheck size={13} /> },
               { key: "historico", label: "HISTÓRICO",      icon: <History size={13} /> },
             ].map(tab => (
-                <button
-                    key={tab.key}
-                    className="ieq-tab"
-                    onClick={() => setModo(tab.key)}
-                    style={{
-                      background: modo === tab.key
-                          ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`
-                          : (isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"),
-                      color: modo === tab.key ? "#fff" : ts,
-                    }}
-                >
+                <button key={tab.key} className="ieq-tab" onClick={() => setModo(tab.key)}
+                        style={{
+                          background: modo === tab.key ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : (isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"),
+                          color: modo === tab.key ? "#fff" : ts,
+                        }}>
                   {tab.icon} {tab.label}
                 </button>
             ))}
@@ -1231,7 +1204,7 @@ export default function TelaRelatorio({ isDark = false }) {
                         <div key={rel.id} className="ieq-hist-card">
                           <div>
                             <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: tp, margin: "0 0 4px" }}>
-                              {rel.dataReuniao ? new Date(rel.dataReuniao + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "?"}
+                              {rel.dataReuniao ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "?"}
                             </p>
                             <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "0 0 6px" }}>{rel.estudo || "Sem referência"}</p>
                             <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".12em", color: IEQ.red }}>{rel.totalPresentes || 0} PRESENTES</span>
@@ -1257,7 +1230,6 @@ export default function TelaRelatorio({ isDark = false }) {
                     </div>
                 )}
 
-                {/* Header */}
                 <div style={{
                   padding: "40px 40px 36px", marginBottom: 24,
                   background: isDark ? "linear-gradient(135deg,#1A0A0D,#0A0608)" : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`,
@@ -1291,7 +1263,6 @@ export default function TelaRelatorio({ isDark = false }) {
                   </div>
                 </div>
 
-                {/* Campos data + tema */}
                 <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                     <div>
@@ -1299,16 +1270,11 @@ export default function TelaRelatorio({ isDark = false }) {
                       <input className="ieq-input" type="date" value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
                     </div>
                     <div>
-                      <SeletorReferenciaBiblica
-                          value={form.estudo}
-                          onChange={val => setForm({ ...form, estudo: val })}
-                          isDark={isDark}
-                      />
+                      <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
                     </div>
                   </div>
                 </div>
 
-                {/* KPIs */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
                   {[
                     { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red },
@@ -1322,7 +1288,6 @@ export default function TelaRelatorio({ isDark = false }) {
                   ))}
                 </div>
 
-                {/* Chamada */}
                 <div className="ieq-card" style={{ overflow: "hidden", marginBottom: 16 }}>
                   <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
                     <Users2 size={18} style={{ color: IEQ.red }} />
@@ -1397,7 +1362,6 @@ export default function TelaRelatorio({ isDark = false }) {
           )}
         </div>
 
-        {/* Botão fixo — só aparece na aba novo */}
         {modo === "novo" && (
             <div style={{
               position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50,
