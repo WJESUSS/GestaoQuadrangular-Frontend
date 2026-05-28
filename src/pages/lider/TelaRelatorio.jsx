@@ -87,7 +87,7 @@ const BIBLIA = [
   { nome: "Apocalipse",        cap: 22,  vers: [20,29,36,22,20,25,28,22,31,23,23,15,49,26,20,68,21,24,29,28,32,34,24] },
 ];
 
-/* Temas livres pré-definidos */
+/* ─── Temas livres pré-definidos ─── */
 const TEMAS_FIXOS = [
   "A adoração verdadeira", "Alegria do Senhor", "Amizade com Deus",
   "Andar no Espírito", "Autoridade espiritual", "Bondade e compaixão",
@@ -109,8 +109,6 @@ const TEMAS_FIXOS = [
   "Chamados para servir", "Esperando no tempo de Deus", "O Deus do impossível",
   "Vitória sobre o medo", "A paz de Cristo", "Firmes na Palavra",
   "Esperança da vida eterna", "O agir de Deus", "Recomeços com Deus",
-
-  // --- novos temas ---
   "A graça que transforma", "A presença de Deus", "A voz do Senhor",
   "Arrependimento genuíno", "Avivamento e renovação", "Bênçãos da obediência",
   "Buscando a face de Deus", "Clamor que Deus ouve", "Compromisso com o Evangelho",
@@ -128,31 +126,43 @@ const TEMAS_FIXOS = [
   "Santidade de vida", "Sede de Deus", "Servindo com alegria",
   "Tempo de despertar", "Testemunho cristão", "Unidade no Espírito",
   "Valentes para Deus", "Vida de oração", "Vitória pelo sangue do Cordeiro",
-  "Voltando ao primeiro amor", "Zelo pela casa de Deus"
+  "Voltando ao primeiro amor", "Zelo pela casa de Deus",
 ];
+
 /* ══════════════════════════════════════════════════════
    COMPONENTE: Seletor de Referência Bíblica com Autocomplete
+   — dropdown com scroll, abre para cima ou para baixo
 ══════════════════════════════════════════════════════ */
 function SeletorReferenciaBiblica({ value, onChange, isDark }) {
-  const [inputVal,  setInputVal]  = useState(value || "");
-  const [sugestoes, setSugestoes] = useState([]);
-  const [aberto,    setAberto]    = useState(false);
-  const inputRef = useRef(null);
+  const [inputVal,      setInputVal]      = useState(value || "");
+  const [sugestoes,     setSugestoes]     = useState([]);
+  const [aberto,        setAberto]        = useState(false);
+  const [abrirParaCima, setAbrirParaCima] = useState(false);
+  const inputRef   = useRef(null);
+  const dropRef    = useRef(null);
 
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
-  // Sincroniza quando valor externo muda (ex: rascunho restaurado)
+  /* Sincroniza quando valor externo muda (ex: rascunho restaurado) */
   useEffect(() => {
     if (value !== inputVal) setInputVal(value || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
+  /* Decide se o dropdown deve abrir para cima */
+  const calcularDirecao = () => {
+    if (!inputRef.current) return;
+    const rect         = inputRef.current.getBoundingClientRect();
+    const espacoAbaixo = window.innerHeight - rect.bottom;
+    setAbrirParaCima(espacoAbaixo < 280);
+  };
+
   const gerarSugestoes = (texto) => {
     if (!texto.trim()) { setSugestoes([]); return; }
     const lower = texto.toLowerCase();
 
-    // 1. Sugestões de capítulo:versículo (ex: "João 3" → "João 3:1"...)
+    /* 1. Sugestões de capítulo:versículo */
     const extrasRef = [];
     const matchRef  = texto.match(/^(.+?)\s+(\d+)(?::(\d+))?/);
     if (matchRef) {
@@ -171,26 +181,26 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
       }
     }
 
-    // 2. Livros que contêm o texto
+    /* 2. Livros que contêm o texto */
     const livrosMatch = BIBLIA
         .filter(l => l.nome.toLowerCase().includes(lower))
         .slice(0, 4)
         .map(l => l.nome);
 
-    // 3. Temas livres que contêm o texto
+    /* 3. Temas livres que contêm o texto */
     const temasMatch = TEMAS_FIXOS
         .filter(t => t.toLowerCase().includes(lower))
-        .slice(0, 4);
+        .slice(0, 20); // retorna mais para permitir scroll
 
-    const todas = [...new Set([...extrasRef, ...livrosMatch, ...temasMatch])].slice(0, 7);
+    const todas = [...new Set([...extrasRef, ...livrosMatch, ...temasMatch])];
 
-    // Texto digitado sempre aparece como primeira opção (se não for idêntico a alguma sugestão)
+    /* Texto digitado aparece como primeira opção */
     const digitadoLimpo = texto.trim();
     if (digitadoLimpo && !todas.some(s => s.toLowerCase() === lower)) {
       todas.unshift(digitadoLimpo);
     }
 
-    setSugestoes(todas.slice(0, 7));
+    setSugestoes(todas.slice(0, 20));
   };
 
   const handleChange = (e) => {
@@ -198,6 +208,7 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
     setInputVal(val);
     onChange(val);
     gerarSugestoes(val);
+    calcularDirecao();
     setAberto(true);
   };
 
@@ -231,11 +242,18 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
               placeholder="Ex: João 3:16 ou A fé que move..."
               value={inputVal}
               onChange={handleChange}
-              onFocus={() => { if (inputVal.trim()) { gerarSugestoes(inputVal); setAberto(true); } }}
+              onFocus={() => {
+                if (inputVal.trim()) {
+                  gerarSugestoes(inputVal);
+                  calcularDirecao();
+                  setAberto(true);
+                }
+              }}
               onBlur={() => setTimeout(() => setAberto(false), 160)}
               autoComplete="off"
               spellCheck={false}
           />
+
           {inputVal && (
               <button
                   onMouseDown={e => { e.preventDefault(); handleClear(); }}
@@ -247,18 +265,34 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
               >×</button>
           )}
 
-          {/* Dropdown de sugestões */}
+          {/* ── Dropdown com scroll, abre para cima ou para baixo ── */}
           {aberto && sugestoes.length > 0 && (
-              <div style={{
-                position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 200,
-                background: isDark ? "#1a0a0d" : "#fff",
-                border: `1px solid ${isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.22)"}`,
-                borderRadius: 10, overflow: "hidden",
-                boxShadow: "0 8px 28px rgba(0,0,0,.22)",
-              }}>
+              <div
+                  ref={dropRef}
+                  style={{
+                    position: "absolute",
+                    ...(abrirParaCima
+                        ? { bottom: "calc(100% + 6px)", top: "auto" }
+                        : { top: "calc(100% + 6px)",    bottom: "auto" }),
+                    left: 0, right: 0, zIndex: 200,
+                    background: isDark ? "#1a0a0d" : "#fff",
+                    border: `1px solid ${isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.22)"}`,
+                    borderRadius: 10,
+                    /* ── scroll ── */
+                    maxHeight: 260,
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    boxShadow: "0 8px 28px rgba(0,0,0,.22)",
+                    /* scrollbar sutil */
+                    scrollbarWidth: "thin",
+                    scrollbarColor: `${IEQ.red} transparent`,
+                  }}
+              >
                 {sugestoes.map((s, i) => {
-                  const isDigitado = i === 0 && s === inputVal.trim() && !BIBLIA.some(l => l.nome === s) && !TEMAS_FIXOS.includes(s);
-                  const isRef      = /\d/.test(s) && !isDigitado;
+                  const isDigitado = i === 0 && s === inputVal.trim()
+                      && !BIBLIA.some(l => l.nome === s)
+                      && !TEMAS_FIXOS.includes(s);
+                  const isRef = /\d/.test(s) && !isDigitado;
                   return (
                       <button
                           key={i}
@@ -270,12 +304,13 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
                             borderBottom: i < sugestoes.length - 1
                                 ? `1px solid ${isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.07)"}` : "none",
                             display: "flex", alignItems: "center", gap: 10,
+                            flexShrink: 0,
                           }}
                           onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(200,16,46,.09)" : "rgba(200,16,46,.05)"}
                           onMouseLeave={e => e.currentTarget.style.background = "none"}
                       >
                         {isDigitado
-                            ? <Edit3      size={13} style={{ color: ts,       flexShrink: 0 }} />
+                            ? <Edit3        size={13} style={{ color: ts,       flexShrink: 0 }} />
                             : isRef
                                 ? <BookOpen   size={13} style={{ color: IEQ.red,  flexShrink: 0 }} />
                                 : <CheckCircle2 size={13} style={{ color: IEQ.blue, flexShrink: 0 }} />
@@ -284,7 +319,7 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
                         {isDigitado && (
                             <span style={{
                               fontFamily: "'Cinzel',serif", fontSize: 7.5,
-                              letterSpacing: ".14em", color: ts,
+                              letterSpacing: ".14em", color: ts, flexShrink: 0,
                             }}>USAR ESTE</span>
                         )}
                       </button>
@@ -367,7 +402,6 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
           display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
           animation: saindo ? "ieqToastOut .45s cubic-bezier(.4,0,.6,1) forwards" : "ieqToastIn .55s cubic-bezier(.34,1.56,.64,1) forwards",
         }}>
-          {/* Confetes */}
           <div style={{ display: "flex", gap: 10, marginBottom: 16, height: 32, alignItems: "flex-end" }}>
             {confettiCores.map((cor, i) => (
                 <div key={i} style={{
@@ -378,7 +412,6 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
             ))}
           </div>
 
-          {/* Card principal */}
           <div style={{
             background: "linear-gradient(160deg, #0d6e3a 0%, #0a5530 60%, #073d22 100%)",
             borderRadius: 22, padding: "32px 40px 28px",
@@ -390,7 +423,6 @@ function ToastSucesso({ total, estudo, nomeCelula, onClose }) {
             <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,.04)", pointerEvents: "none" }} />
             <div style={{ position: "absolute", bottom: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(253,184,19,.06)", pointerEvents: "none" }} />
 
-            {/* Ícone com anel pulsante */}
             <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ position: "absolute", inset: -8, borderRadius: "50%", border: "2px solid rgba(255,255,255,.25)", animation: "ieqRingPulse 2s ease-out forwards" }} />
               <div style={{ position: "absolute", inset: -16, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,.12)", animation: "ieqRingPulse 2s ease-out .3s forwards" }} />
@@ -804,7 +836,7 @@ export default function TelaRelatorio({ isDark = false }) {
     decisoes: {},
   });
 
-  // Salva rascunho automaticamente
+  /* Salva rascunho automaticamente */
   useEffect(() => {
     if (!prontoParaSalvar.current || !form.celulaId) return;
     try {
@@ -1071,6 +1103,10 @@ export default function TelaRelatorio({ isDark = false }) {
       transition:opacity .2s;
     }
     .ieq-modal-confirm:hover { opacity:.88; }
+    /* scrollbar do dropdown */
+    .ieq-dropdown-scroll::-webkit-scrollbar { width:5px; }
+    .ieq-dropdown-scroll::-webkit-scrollbar-track { background:transparent; }
+    .ieq-dropdown-scroll::-webkit-scrollbar-thumb { background:${IEQ.red}; border-radius:3px; opacity:.5; }
   `;
 
   /* ── Tela de edição ── */

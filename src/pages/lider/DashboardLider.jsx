@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import api from "../../services/api.js";
 import { motion, AnimatePresence } from "framer-motion";
-import HistoricoRelatorios from "./HistoricoRelatorios";
-import TelaRelatorio from "./TelaRelatorio";
-import TelaVisitantes from "./TelaVisitantes";
-import TelaFichas from "./TelaFichas";
-import RelatorioDiscipulado from "./RelatorioDiscipulado";
-import CasasDePazLider from "./CasasDePazLider";
-import Missao70Lider from "./Missao70Lider";
 import SinoAniversariantes from "./SinoAniversariantes";
 import {
   Trash2, Loader2, Users, Plus, Search, X,
   TrendingUp, Target, Sparkles, LogOut,
   Sun, Moon, CheckCircle2, Home, Flame,
 } from "lucide-react";
+
+// Lazy loading dos sub-componentes — só carrega quando o usuário navegar
+const HistoricoRelatorios  = lazy(() => import("./HistoricoRelatorios"));
+const TelaRelatorio        = lazy(() => import("./TelaRelatorio"));
+const TelaVisitantes       = lazy(() => import("./TelaVisitantes"));
+const TelaFichas           = lazy(() => import("./TelaFichas"));
+const RelatorioDiscipulado = lazy(() => import("./RelatorioDiscipulado"));
+const CasasDePazLider      = lazy(() => import("./CasasDePazLider"));
+const Missao70Lider        = lazy(() => import("./Missao70Lider"));
 
 const IEQ = {
   red:"#C8102E", redDark:"#8B0B1F", redLight:"#E8294A",
@@ -103,58 +105,30 @@ const STATIC_CSS = `
   .ieq-lider-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid rgba(200,16,46,.4); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .ieq-lider-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .ieq-lider-avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-
-  /* ── GRIDS RESPONSIVOS ───────────────────────── */
-  .ieq-kpi-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-  }
-  .ieq-members-grid {
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-  }
-
-  /* ── MOBILE FIXES ────────────────────────────── */
+  .ieq-kpi-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  .ieq-members-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
   @media (max-width: 599px) {
-    .ieq-kpi-grid {
-      grid-template-columns: 1fr;
-    }
-    .ieq-members-grid {
-      grid-template-columns: 1fr;
-    }
-    .ieq-big-number {
-      font-size: 38px !important;
-    }
-    .ieq-header-actions {
-      gap: 6px !important;
-    }
-    .ieq-header-actions button {
-      padding: 8px 10px !important;
-      font-size: 9px !important;
-    }
-    .ieq-celula-label {
-      max-width: 180px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .ieq-header-info {
-      min-width: 0;
-    }
-    .ieq-page-padding {
-      padding: 20px 14px 0 !important;
-    }
-    .ieq-card-hero {
-      padding: 22px 18px !important;
-    }
-    .ieq-card-action {
-      padding: 20px 18px !important;
-    }
+    .ieq-kpi-grid { grid-template-columns: 1fr; }
+    .ieq-members-grid { grid-template-columns: 1fr; }
+    .ieq-big-number { font-size: 38px !important; }
+    .ieq-header-actions { gap: 6px !important; }
+    .ieq-header-actions button { padding: 8px 10px !important; font-size: 9px !important; }
+    .ieq-celula-label { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ieq-header-info { min-width: 0; }
+    .ieq-page-padding { padding: 20px 14px 0 !important; }
+    .ieq-card-hero { padding: 22px 18px !important; }
+    .ieq-card-action { padding: 20px 18px !important; }
   }
 `;
+
+// Fallback simples usado pelo Suspense dos sub-componentes
+function SubComponenteCarregando({ isDark }) {
+  return (
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:60 }}>
+        <Loader2 size={28} style={{ animation:"spin 1s linear infinite", color: isDark ? IEQ.offWhite : IEQ.red }} />
+      </div>
+  );
+}
 
 export default function DashboardLider() {
   const [abaAtiva,               setAbaAtiva]               = useState("home");
@@ -177,20 +151,37 @@ export default function DashboardLider() {
   const carregarDados = useCallback(async (isSilent = false) => {
     try {
       if (!isSilent) setLoading(true);
-      const [resCelula, resUsuario] = await Promise.all([
-        api.get("/celulas/minha-celula"),
-        api.get("/usuarios/me"),
-      ]);
-      const celulaData = resCelula.data;
-      setCelula(celulaData);
-      setUsuarioLogado(resUsuario.data);
-      if (celulaData?.id) {
-        const resM = await api.get(`/celulas/${celulaData.id}/membros`);
-        const unique = (arr) => arr.filter((item, i, self) => i === self.findIndex(t => t.id === item.id));
-        setMembros(unique(resM.data || []));
-      }
-    } catch (err) { console.error("Erro ao carregar dashboard:", err); }
-    finally { setLoading(false); }
+
+      // Uma única requisição no lugar de três (minha-celula + membros + usuarios/me)
+      const { data } = await api.get("/celulas/minha-celula/detalhes");
+
+      setCelula({
+        id:                      data.id,
+        nome:                    data.nome,
+        anfitriao:               data.anfitriao,
+        endereco:                data.endereco,
+        bairro:                  data.bairro,
+        diaSemana:               data.diaSemana,
+        horario:                 data.horario,
+        ativa:                   data.ativa,
+        statusMultiplicacao:     data.statusMultiplicacao,
+        quantidadeMembrosAtivos: data.quantidadeMembrosAtivos,
+        liderId:                 data.liderId,
+        nomeLider:               data.nomeLider,
+        membros:                 data.membros,
+      });
+
+      // Deduplica membros por segurança
+      const unique = (arr) => arr.filter((item, i, self) => i === self.findIndex(m => m.id === item.id));
+      setMembros(unique(data.membros || []));
+
+      setUsuarioLogado(data.usuario);
+
+    } catch (err) {
+      console.error("Erro ao carregar dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -254,7 +245,6 @@ export default function DashboardLider() {
               initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
               style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:40, flexWrap:"wrap", gap:16 }}
           >
-            {/* Identidade */}
             <div style={{ display:"flex", alignItems:"center", gap:18, minWidth:0, flex:1 }}>
               <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                 <div className="pulse-ring" style={{ width:72, height:72 }} />
@@ -268,7 +258,7 @@ export default function DashboardLider() {
               <div className="ieq-header-info" style={{ minWidth:0 }}>
                 <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
                 <p className="ieq-celula-label" style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
-                  CÉLULA {celula?.nome?.toUpperCase() || "?"} — PAINEL DO LÍDER
+                  CÉLULA {celula?.nome?.toUpperCase() || "?"} · PAINEL DO LÍDER
                 </p>
                 {usuarioLogado?.nome && (
                     <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color: isDark ? "rgba(245,240,232,.6)" : "rgba(26,10,13,.55)", margin:"3px 0 0", fontStyle:"italic", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
@@ -278,7 +268,6 @@ export default function DashboardLider() {
               </div>
             </div>
 
-            {/* Ações */}
             <div className="ieq-header-actions" style={{ display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
               <SinoAniversariantes isDark={isDark} />
               <button className={`ieq-btn-ghost ${t}`} onClick={() => setIsDark(!isDark)} style={{ padding:"10px 14px" }}>
@@ -309,9 +298,7 @@ export default function DashboardLider() {
                             exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}
                             style={{ display:"flex", flexDirection:"column", gap:24 }}
                 >
-                  {/* ── Grid KPIs ── */}
                   <div className="ieq-kpi-grid">
-                    {/* Card hero — membros */}
                     <div className={`ieq-card ${t} ieq-card-hero`} style={{ padding:"36px 40px", background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, border:"none", position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", inset:0, backgroundImage:`repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)`, backgroundSize:"40px 40px" }} />
                       <div style={{ position:"relative", zIndex:1 }}>
@@ -345,7 +332,6 @@ export default function DashboardLider() {
                       </div>
                     </div>
 
-                    {/* Card ação pastoral */}
                     <div className={`ieq-card ${t} ieq-card-action`} style={{ padding:30, display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
                       <div>
                         <div style={{ width:50, height:50, borderRadius:10, marginBottom:18, background: isAprovado ? "rgba(0,61,165,.12)" : isAnalise ? "rgba(253,184,19,.12)" : "rgba(200,16,46,.1)", display:"flex", alignItems:"center", justifyContent:"center", color: isAprovado ? IEQ.blue : isAnalise ? IEQ.yellowDark : IEQ.red }}>
@@ -374,7 +360,6 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* ── Menu ── */}
                   <div className="ieq-menu-grid">
                     {[
                       { icon:<Target size={20}/>,     title:"DISCIPULADO", desc:"Acompanhar",  aba:"discipulado", color:IEQ.blue    },
@@ -394,7 +379,6 @@ export default function DashboardLider() {
                     ))}
                   </div>
 
-                  {/* ── Lista de membros ── */}
                   <div className={`ieq-card ${t}`} style={{ overflow:"hidden" }}>
                     <div style={{ padding:"24px 28px", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
                       <div>
@@ -422,26 +406,30 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  <HistoricoRelatorios celulaId={celula?.id} />
+                  <Suspense fallback={<SubComponenteCarregando isDark={isDark} />}>
+                    <HistoricoRelatorios celulaId={celula?.id} />
+                  </Suspense>
+
                   <div className="divider" />
                   <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, padding:"0 0 8px" }}>
-                    © IEQ PITUAÇU — SISTEMA SEGURO — {new Date().getFullYear()}
+                    © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
                   </p>
                 </motion.div>
             ) : (
                 <motion.div key="content" initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}>
-                  {abaAtiva === "relatorio"   && <TelaRelatorio        celula={celula}       isDark={isDark} />}
-                  {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}      isDark={isDark} />}
-                  {abaAtiva === "visitantes"  && <TelaVisitantes       celulaId={celula?.id}  isDark={isDark} />}
-                  {abaAtiva === "fichas"      && <TelaFichas           celula={celula}        isDark={isDark} />}
-                  {abaAtiva === "casas"       && <CasasDePazLider      celulaId={celula?.id}  isDark={isDark} />}
-                  {abaAtiva === "missao70"    && <Missao70Lider        celulaId={celula?.id}  isDark={isDark} />}
+                  <Suspense fallback={<SubComponenteCarregando isDark={isDark} />}>
+                    {abaAtiva === "relatorio"   && <TelaRelatorio        celula={celula}       isDark={isDark} />}
+                    {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}      isDark={isDark} />}
+                    {abaAtiva === "visitantes"  && <TelaVisitantes       celulaId={celula?.id}  isDark={isDark} />}
+                    {abaAtiva === "fichas"      && <TelaFichas           celula={celula}        isDark={isDark} />}
+                    {abaAtiva === "casas"       && <CasasDePazLider      celulaId={celula?.id}  isDark={isDark} />}
+                    {abaAtiva === "missao70"    && <Missao70Lider        celulaId={celula?.id}  isDark={isDark} />}
+                  </Suspense>
                 </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* ── Modais ── */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="ieq-modal-backdrop">
