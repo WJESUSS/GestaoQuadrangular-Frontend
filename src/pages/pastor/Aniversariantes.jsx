@@ -44,6 +44,27 @@ const itemVariants = {
   visible: { opacity:1, y:0, scale:1, transition:{ type:"spring", stiffness:100 } },
 };
 
+/* ─── Monta número seguro para WhatsApp ──────────────────────────── */
+function obterLink(membro) {
+  // 1. remove tudo que não é dígito
+  const digits = (membro.telefone || "").replace(/\D/g, "");
+
+  // 2. número vazio ou curto demais → retorna null
+  if (!digits || digits.length < 10) return null;
+
+  // 3. garante DDI 55 sem duplicar
+  //    ex: "71983039345" (11 dígitos) → "5571983039345"
+  //    ex: "5571983039345" (13 dígitos) → mantém
+  const numero = digits.startsWith("55") && digits.length >= 12
+      ? digits
+      : `55${digits}`;
+
+  const saudacao = `A paz seja contigo, minha ovelhinha! 🕊️\n\nFeliz aniversário! Que Deus abençoe grandemente sua vida, trazendo saúde e paz. 🙏\n\nSão os votos do *Pastor Renato e Jaci Soares*. ❤`;
+
+  // 4. usa api.whatsapp.com (mais confiável que wa.me para números BR)
+  return `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(saudacao)}`;
+}
+
 export default function AniversariantesPremium({ isDark = false }) {
   const [lista,    setLista]    = useState([]);
   const [enviados, setEnviados] = useState(new Set());
@@ -101,6 +122,9 @@ export default function AniversariantesPremium({ isDark = false }) {
       background: ${isDark ? "rgba(255,255,255,.02)" : "rgba(26,10,13,.03)"};
       border-color: ${isDark ? "rgba(255,255,255,.06)" : "rgba(26,10,13,.08)"};
     }
+    .aniv-member-card.no-phone {
+      opacity:.5;
+    }
     .pulse-ring-b { position:absolute; border-radius:50%; border:1px solid rgba(253,184,19,.4); animation: pulse 3s ease-in-out infinite; }
     .divider-b { height:1px; background: linear-gradient(90deg, transparent, ${isDark ? "rgba(253,184,19,.25)" : "rgba(200,16,46,.2)"}, transparent); margin:8px 0; }
     .send-all-btn {
@@ -118,17 +142,10 @@ export default function AniversariantesPremium({ isDark = false }) {
     }
   `;
 
-  const obterLink = (membro) => {
-    const saudacao = `A paz seja contigo, minha ovelhinha! 🕊️\n\nFeliz aniversário! Que Deus abençoe grandemente sua vida, trazendo saúde e paz. 🙏\n\nSão os votos do *Pastor Renato e Jaci Soares*. ❤`;
-    let numero = membro.telefone.replace(/\D/g, "");
-    if (!numero.startsWith("55")) numero = `55${numero}`;
-    return `https://wa.me/${numero}?text=${encodeURIComponent(saudacao)}`;
-  };
-
   useEffect(() => {
     const salvo = localStorage.getItem(STORAGE_KEY);
     if (salvo) setEnviados(new Set(JSON.parse(salvo)));
-    api.get("/aniversariantes/hoje")
+    api.get("api/aniversariantes/hoje")
         .then(res => setLista(res.data || []))
         .catch(console.error)
         .finally(() => setLoading(false));
@@ -140,9 +157,10 @@ export default function AniversariantesPremium({ isDark = false }) {
 
   const marcarEnviado = (id) => setEnviados(prev => new Set(prev).add(id));
 
-  const filtrados   = lista.filter(m => m.nome?.toLowerCase().includes(busca.toLowerCase()));
-  const progresso   = lista.length > 0 ? (enviados.size / lista.length) * 100 : 0;
-  const pendentes   = lista.filter(m => !enviados.has(m.id));
+  const filtrados = lista.filter(m => m.nome?.toLowerCase().includes(busca.toLowerCase()));
+  const progresso = lista.length > 0 ? (enviados.size / lista.length) * 100 : 0;
+  // pendentes: só quem tem telefone válido e ainda não foi enviado
+  const pendentes = lista.filter(m => !enviados.has(m.id) && obterLink(m));
 
   if (loading) return (
       <div style={{ minHeight:"60vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:bg }}>
@@ -191,8 +209,8 @@ export default function AniversariantesPremium({ isDark = false }) {
               <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
                 <Gift size={16} style={{ color:IEQ.yellow }} />
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:"rgba(253,184,19,.6)" }}>
-                ANIVERSARIANTES DE HOJE
-              </span>
+                  ANIVERSARIANTES DE HOJE
+                </span>
               </div>
               <p style={{ fontFamily:"'Cinzel',serif", fontSize:56, fontWeight:700, color:"#fff", margin:"0 0 20px", lineHeight:1 }}>
                 {lista.length}
@@ -222,29 +240,54 @@ export default function AniversariantesPremium({ isDark = false }) {
             <AnimatePresence>
               {filtrados.map(m => {
                 const jaEnviado = enviados.has(m.id);
+                const link      = obterLink(m);
+                const temFone   = !!link;
+
                 return (
                     <motion.div key={m.id} variants={itemVariants} layout
-                                className={`aniv-member-card${jaEnviado ? " sent" : ""}`}>
+                                className={`aniv-member-card${jaEnviado ? " sent" : ""}${!temFone ? " no-phone" : ""}`}>
+
+                      {/* Avatar */}
                       <div style={{ width:42, height:42, borderRadius:10, flexShrink:0,
-                        background: jaEnviado ? (isDark ? "rgba(255,255,255,.06)" : "rgba(26,10,13,.07)")
+                        background: jaEnviado || !temFone
+                            ? (isDark ? "rgba(255,255,255,.06)" : "rgba(26,10,13,.07)")
                             : `linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.yellow})`,
                         display:"flex", alignItems:"center", justifyContent:"center",
-                        color: jaEnviado ? textSecondary : "#fff",
+                        color: jaEnviado || !temFone ? textSecondary : "#fff",
                         fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:16 }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
+
+                      {/* Info */}
                       <div style={{ flex:1, minWidth:0 }}>
                         <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                           {m.nome}
                         </p>
                         <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:0 }}>
-                          {m.telefone}
+                          {temFone ? m.telefone : "📵 Sem telefone cadastrado"}
                         </p>
                       </div>
-                      <button onClick={() => { window.open(obterLink(m), "_blank"); marcarEnviado(m.id); }}
-                              style={{ width:42, height:42, borderRadius:10, border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all .2s",
-                                background: jaEnviado ? "rgba(0,61,165,.1)" : `linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red})`,
-                                color: jaEnviado ? IEQ.blue : "#fff" }}>
+
+                      {/* Botão WhatsApp */}
+                      <button
+                          disabled={!temFone}
+                          onClick={() => {
+                            if (!link) return;
+                            window.open(link, "_blank");
+                            marcarEnviado(m.id);
+                          }}
+                          title={!temFone ? "Sem telefone cadastrado" : jaEnviado ? "Já enviado!" : "Enviar parabéns"}
+                          style={{
+                            width:42, height:42, borderRadius:10, border:"none",
+                            cursor: !temFone ? "not-allowed" : "pointer",
+                            opacity: !temFone ? 0.3 : 1,
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            flexShrink:0, transition:"all .2s",
+                            background: !temFone
+                                ? (isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)")
+                                : jaEnviado ? "rgba(0,61,165,.1)" : `linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red})`,
+                            color: !temFone ? "#888" : jaEnviado ? IEQ.blue : "#fff",
+                          }}>
                         {jaEnviado ? <CheckCircle2 size={18} /> : <MessageCircle size={18} />}
                       </button>
                     </motion.div>
@@ -254,11 +297,14 @@ export default function AniversariantesPremium({ isDark = false }) {
           </motion.div>
         </div>
 
-        {/* Botão flutuante */}
+        {/* Botão flutuante — só aparece se há pendentes COM telefone */}
         {!loading && progresso < 100 && pendentes.length > 0 && (
             <motion.button initial={{ y:100 }} animate={{ y:0 }} className="send-all-btn"
                            onClick={() => {
-                             pendentes.forEach(p => window.open(obterLink(p), "_blank"));
+                             pendentes.forEach(p => {
+                               const l = obterLink(p);
+                               if (l) window.open(l, "_blank");
+                             });
                              setEnviados(new Set(lista.map(l => l.id)));
                            }}>
               <Send size={16} /> ENVIAR PARA TODOS ({pendentes.length})

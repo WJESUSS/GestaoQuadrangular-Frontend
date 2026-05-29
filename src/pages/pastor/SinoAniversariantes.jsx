@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../../services/api.js";
-import { Bell, Cake, CheckCircle2 } from "lucide-react";
+import { Bell, Cake, X, MessageCircle, CheckCircle2 } from "lucide-react";
 
 const IEQ = {
     red: "#C8102E",
@@ -27,7 +27,7 @@ export default function SinoAniversariantes({ isDark = false }) {
     const [hoje, setHoje] = useState([]);
     const [semana, setSemana] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [marcados, setMarcados] = useState(new Set()); // Quem já recebeu parabéns
+    const [enviados, setEnviados] = useState(new Set());
 
     const ref = useRef(null);
 
@@ -62,6 +62,8 @@ export default function SinoAniversariantes({ isDark = false }) {
                 setSemana(Array.isArray(resSemana.data) ? resSemana.data : []);
             } catch (err) {
                 console.error("Erro ao carregar aniversariantes:", err);
+                setHoje([]);
+                setSemana([]);
             } finally {
                 setLoading(false);
             }
@@ -70,13 +72,15 @@ export default function SinoAniversariantes({ isDark = false }) {
         carregarAniversariantes();
     }, []);
 
-    // Marcar como já felicitado
-    const marcarComoFeito = (id) => {
-        setMarcados(prev => new Set([...prev, id]));
-    };
-
     const lista = tab === "hoje" ? hoje : semana;
     const temHoje = hoje.length > 0;
+
+    const gerarLinkWhats = (m) => {
+        const saudacao = `A paz seja contigo! 🙌\n\nFeliz aniversário! Que Deus te abençoe grandemente neste novo ano de vida.\n\nCom carinho, Pastores Renato e Jaci Soares`;
+        let numero = (m.telefone || "").replace(/\D/g, "");
+        if (!numero.startsWith("55")) numero = `55${numero}`;
+        return `https://wa.me/${numero}?text=${encodeURIComponent(saudacao)}`;
+    };
 
     return (
         <div ref={ref} style={{ position: "relative" }}>
@@ -100,8 +104,8 @@ export default function SinoAniversariantes({ isDark = false }) {
                         alignItems: "center", justifyContent: "center",
                         border: `2px solid ${isDark ? "#0A0608" : "#F0EAE8"}`
                     }}>
-                        {hoje.length}
-                    </span>
+            {hoje.length}
+          </span>
                 )}
             </button>
 
@@ -155,18 +159,20 @@ export default function SinoAniversariantes({ isDark = false }) {
                         ))}
                     </div>
 
-                    {/* Lista de Lembretes */}
+                    {/* Lista */}
                     <div style={{ maxHeight: 400, overflowY: "auto", padding: "12px" }}>
                         {loading ? (
-                            <p style={{ textAlign: "center", padding: "50px 20px", color: "#888" }}>Carregando...</p>
+                            <p style={{ textAlign: "center", padding: "50px 20px", color: "#888" }}>Carregando aniversariantes...</p>
                         ) : lista.length === 0 ? (
                             <p style={{ textAlign: "center", padding: "50px 20px", color: "#888", fontStyle: "italic" }}>
-                                {tab === "hoje" ? "Nenhum aniversariante hoje." : "Nenhum aniversariante esta semana."}
+                                {tab === "hoje"
+                                    ? "Nenhum aniversariante hoje."
+                                    : "Nenhum aniversariante encontrado nesta semana."}
                             </p>
                         ) : (
                             lista.map((m, i) => {
                                 const cor = CORES[i % CORES.length];
-                                const jaMarcado = marcados.has(m.id);
+                                const enviado = enviados.has(m.id);
 
                                 return (
                                     <div key={m.id} style={{
@@ -176,9 +182,8 @@ export default function SinoAniversariantes({ isDark = false }) {
                                         padding: "14px",
                                         marginBottom: 10,
                                         borderRadius: 12,
-                                        background: jaMarcado ? "rgba(0,0,0,.05)" : (tab === "hoje" ? "rgba(200,16,46,.08)" : "rgba(0,0,0,.03)"),
-                                        opacity: jaMarcado ? 0.7 : 1,
-                                        border: tab === "hoje" && !jaMarcado ? "1px solid rgba(200,16,46,.4)" : "none"
+                                        background: tab === "hoje" ? "rgba(200,16,46,.08)" : (isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)"),
+                                        border: tab === "hoje" ? "1px solid rgba(200,16,46,.4)" : "none"
                                     }}>
                                         <div style={{
                                             width: 52, height: 52, borderRadius: "50%",
@@ -194,30 +199,24 @@ export default function SinoAniversariantes({ isDark = false }) {
                                             <p style={{ margin: "4px 0 0", color: "#888", fontSize: 13.5 }}>{m.telefone}</p>
                                         </div>
 
-                                        <button
-                                            onClick={() => marcarComoFeito(m.id)}
-                                            disabled={jaMarcado}
+                                        <a
+                                            href={gerarLinkWhats(m)}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            onClick={() => setEnviados(prev => new Set([...prev, m.id]))}
                                             style={{
                                                 width: 48, height: 48, borderRadius: 12,
-                                                background: jaMarcado ? "#10B981" : IEQ.red,
-                                                color: "#fff",
-                                                border: "none",
-                                                cursor: jaMarcado ? "default" : "pointer",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center"
+                                                background: enviado ? "#003DA5" : `linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red})`,
+                                                color: "#fff", display: "flex", alignItems: "center",
+                                                justifyContent: "center", textDecoration: "none"
                                             }}
                                         >
-                                            <CheckCircle2 size={22} />
-                                        </button>
+                                            {enviado ? <CheckCircle2 size={22} /> : <MessageCircle size={22} />}
+                                        </a>
                                     </div>
                                 );
                             })
                         )}
-                    </div>
-
-                    <div style={{ padding: "12px", textAlign: "center", fontSize: 10, color: "#777" }}>
-                        Lembrete de Aniversários • IEQ Pituaçu
                     </div>
                 </div>
             )}

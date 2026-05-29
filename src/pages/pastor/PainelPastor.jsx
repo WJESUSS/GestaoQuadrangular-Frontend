@@ -82,6 +82,7 @@ export default function PainelPastor({ isDark = false }) {
       const [resMetricas, resAlertas] = await Promise.all([
         api.get("/api/pastor/metricas", config),
         api.get("/discipulado/alertas",  config),
+
       ]);
 
       setMetricas(resMetricas.data || { celulasAtivas: 0, totalMembros: 0, multiplicacoesMes: 0 });

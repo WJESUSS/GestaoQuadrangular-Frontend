@@ -10,7 +10,6 @@ import {
   ResponsiveContainer, CartesianGrid, Cell,
 } from "recharts";
 
-/* ─── Paleta IEQ ─── */
 const IEQ = {
   red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
   yellow: "#FDB813", yellowDark: "#C48C00",
@@ -50,7 +49,7 @@ export default function PainelAlertas({ isDark = false }) {
   const [loading,   setLoading]   = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
-  const bg            = isDark ? IEQ.dark    : "#F0EAE8";
+  const bg            = isDark ? IEQ.dark     : "#F0EAE8";
   const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
@@ -107,6 +106,12 @@ export default function PainelAlertas({ isDark = false }) {
     }
   `;
 
+  // ✅ isMounted separado — só ativa após o primeiro paint do browser
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setIsMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const carregarAlertas = async () => {
     setLoading(true);
     const token = localStorage.getItem("token")?.replace(/"/g, "");
@@ -119,7 +124,7 @@ export default function PainelAlertas({ isDark = false }) {
       console.error("Erro ao carregar alertas:", err);
     } finally {
       setLoading(false);
-      setIsMounted(true);
+      // ✅ sem setIsMounted aqui
     }
   };
 
@@ -200,7 +205,9 @@ export default function PainelAlertas({ isDark = false }) {
               {alertas.map((alerta, index) => {
                 const mediaAtual    = Number(alerta.mediaAtual    || 0);
                 const mediaAnterior = Number(alerta.mediaAnterior || 0);
-                const diffPercent   = mediaAnterior > 0 ? ((mediaAnterior - mediaAtual) / mediaAnterior * 100).toFixed(0) : 0;
+                const diffPercent   = mediaAnterior > 0
+                    ? ((mediaAnterior - mediaAtual) / mediaAnterior * 100).toFixed(0)
+                    : 0;
                 const chartData = [
                   { label: "Anterior", valor: mediaAnterior },
                   { label: "Atual",    valor: mediaAtual    },
@@ -254,12 +261,13 @@ export default function PainelAlertas({ isDark = false }) {
                         </div>
                       </div>
 
-                      {/* Gráfico */}
-                      <div style={{ height:140, padding:"8px 8px 0" }}>
+                      {/* ✅ minHeight garante dimensões válidas para o Recharts */}
+                      <div style={{ height:140, minHeight:140, padding:"8px 8px 0" }}>
                         {isMounted && (
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart data={chartData} margin={{ top:10, right:10, left:-25, bottom:0 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.08} stroke={isDark ? "#fff" : "#000"} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.08}
+                                               stroke={isDark ? "#fff" : "#000"} />
                                 <XAxis dataKey="label" axisLine={false} tickLine={false}
                                        tick={{ fontSize:9, fontWeight:700, fill: isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.4)", fontFamily:"'Cinzel',serif", letterSpacing:".1em" }} />
                                 <YAxis axisLine={false} tickLine={false}
