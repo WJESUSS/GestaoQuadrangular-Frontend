@@ -402,8 +402,8 @@ function SinoPastor({ isDark }) {
 
   useEffect(() => {
     Promise.all([
-      api.get("api/aniversariantes/hoje"),
-      api.get("api/aniversariantes/semana"),
+      api.get("/api/aniversariantes/hoje"),
+      api.get("/api/aniversariantes/semana"),
     ]).then(([rH, rS]) => {
       setHoje(rH.data   || []);
       setSemana(rS.data || []);
