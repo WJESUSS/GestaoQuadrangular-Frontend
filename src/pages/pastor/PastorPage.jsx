@@ -425,8 +425,21 @@ function SinoPastor({ isDark }) {
 
   // ✅ CORREÇÃO: monta o link do WhatsApp a partir do telefone cadastrado
   const abrirWhatsApp = (m, id) => {
-    // ✅ usa o link que o backend já montou com a mensagem certa
-    window.open(m.link, "_blank");
+    const numero   = (m.telefone || "").replace(/\D/g, ""); // remove tudo que não é dígito
+    const mensagem = encodeURIComponent(
+        `🎂 Paz seja contigo minha ovelhinha 🐑! Feliz Aniversário %s!
+                
+                                             Que Deus abençoe sua vida,
+                                             lhe conceda saúde, paz e prosperidade.
+                
+                                             Com carinho,
+                                             Pastores Renato e Jaci Soares 🐑 🙏${m.nome}! Que Deus te abençoe! 🙏`
+    );
+    // Se o número já vier com DDI 55 no banco (ex: "5571999999999"), use só numero.
+    // Caso contrário, o prefixo 55 é adicionado automaticamente abaixo.
+    const ddi = numero.startsWith("55") ? "" : "55";
+    const link = `https://wa.me/${ddi}${numero}?text=${mensagem}`;
+    window.open(link, "_blank");
     setEnviados(prev => ({ ...prev, [id]: true }));
   };
 

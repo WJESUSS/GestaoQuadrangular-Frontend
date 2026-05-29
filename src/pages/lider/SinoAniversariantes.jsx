@@ -92,12 +92,8 @@ export default function SinoAniversariantes({ isDark = false }) {
         return () => { document.body.style.overflow = ""; };
     }, [isMobile, open]);
 
-    // ✅ Abre WhatsApp com o link que vem PRONTO do backend (m.link)
-    // e marca como felicitado ao mesmo tempo
-    const enviarParabens = (m) => {
-        window.open(m.link, "_blank");
-        setMarcados(prev => new Set([...prev, m.id]));
-    };
+    const marcarComoFeito = (id) =>
+        setMarcados(prev => new Set([...prev, id]));
 
     const lista   = tab === "hoje" ? hoje : semana;
     const temHoje = hoje.length > 0;
@@ -108,7 +104,7 @@ export default function SinoAniversariantes({ isDark = false }) {
             tab={tab} setTab={setTab}
             lista={lista} loading={loading}
             marcados={marcados}
-            enviarParabens={enviarParabens}
+            marcarComoFeito={marcarComoFeito}
             dataHojeFormatada={dataHojeFormatada}
             periodoSemana={periodoSemana}
             onClose={() => setOpen(false)}
@@ -216,7 +212,7 @@ export default function SinoAniversariantes({ isDark = false }) {
 
 function PainelConteudo({
                             isDark, tab, setTab, lista, loading,
-                            marcados, enviarParabens,
+                            marcados, marcarComoFeito,
                             dataHojeFormatada, periodoSemana, onClose,
                         }) {
     const sub = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
@@ -340,23 +336,33 @@ function PainelConteudo({
                                 </p>
                             </div>
 
-                            {/* ✅ Botão WhatsApp — usa m.link do backend */}
-                            <button
-                                onClick={() => enviarParabens(m)}
-                                disabled={marcado}
-                                title={marcado ? "Parabéns já enviado!" : "Enviar parabéns no WhatsApp"}
-                                style={{
+                            {/* ✅ <a> nativo em vez de window.open — não branqueia no mobile */}
+                            {marcado ? (
+                                <div style={{
                                     width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                                    // verde WhatsApp quando pendente, verde escuro quando enviado
-                                    background: marcado ? "#10B981" : "#25D366",
-                                    color: "#fff", border: "none",
-                                    cursor: marcado ? "default" : "pointer",
+                                    background: "#10B981",
                                     display: "flex", alignItems: "center", justifyContent: "center",
-                                    transition: "background .2s",
-                                }}
-                            >
-                                {marcado ? <CheckCircle2 size={20} /> : <Send size={20} />}
-                            </button>
+                                }}>
+                                    <CheckCircle2 size={20} color="#fff" />
+                                </div>
+                            ) : (
+                                <a
+                                    href={m.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => marcarComoFeito(m.id)}
+                                    title="Enviar parabéns no WhatsApp"
+                                    style={{
+                                        width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                                        background: "#25D366",
+                                        color: "#fff", textDecoration: "none",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        transition: "background .2s",
+                                    }}
+                                >
+                                    <Send size={20} />
+                                </a>
+                            )}
                         </div>
                     );
                 })}
