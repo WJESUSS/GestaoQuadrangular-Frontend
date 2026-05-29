@@ -22,7 +22,7 @@ import {
   Cake, Bell, Send, Check, X,
 } from "lucide-react";
 
-/* ─── Paleta IEQ ─────────────────────────────────────────────────── */
+/* ??? Paleta IEQ ??????????????????????????????????????????????????? */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#9B0B1E",
@@ -37,7 +37,7 @@ const IEQ = {
   stone:      "#1A1416",
 };
 
-/* ─── Nav items ──────────────────────────────────────────────────── */
+/* ??? Nav items ???????????????????????????????????????????????????? */
 const NAV_ITEMS = [
   { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",    color: IEQ.blueLight,  end: true  },
   { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",   color: IEQ.red                   },
@@ -58,11 +58,11 @@ const PAGE_TITLES = {
   "ranking-celulas":   "Ranking de Células",
   "alertas":           "Painel de Alertas",
   "pendencias":        "Pendências da Semana",
-  "casas-de-paz":      "Relatórios · Casas de Paz",
-  "missao70":          "Missão 70 · Evangelismo",
+  "casas-de-paz":      "Relatórios à Casas de Paz",
+  "missao70":          "Missão 70 – Evangelismo",
 };
 
-/* ─── Logo IEQ ───────────────────────────────────────────────────── */
+/* ??? Logo IEQ ????????????????????????????????????????????????????? */
 function IEQCross({ size = 300, src = "/quadrangular.png" }) {
   return (
       <img
@@ -77,7 +77,7 @@ function IEQCross({ size = 300, src = "/quadrangular.png" }) {
   );
 }
 
-/* ─── CSS global ─────────────────────────────────────────────────── */
+/* ??? CSS global ??????????????????????????????????????????????????? */
 const buildCSS = (dark) => {
   const bg     = dark ? IEQ.dark  : "#F0EAE8";
   const txt    = dark ? IEQ.light : IEQ.dark;
@@ -98,7 +98,7 @@ const buildCSS = (dark) => {
     @keyframes shimmer     { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
     @keyframes tabSlide    { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
 
-    /* ── Sino de aniversários ── */
+    /* ?? Sino de aniversários ?? */
     @keyframes badgePulse {
       0%,100% { transform:scale(1); box-shadow:0 0 0 0 rgba(200,16,46,0); }
       50%     { transform:scale(1.18); box-shadow:0 0 0 5px rgba(200,16,46,.18); }
@@ -175,7 +175,7 @@ const buildCSS = (dark) => {
       background-size: 60px 60px;
     }
 
-    /* ── HEADER ── */
+    /* ?? HEADER ?? */
     .pr-header {
       position: sticky; top: 0; z-index: 50;
       background: ${hdrBg};
@@ -269,7 +269,7 @@ const buildCSS = (dark) => {
     }
     @media(max-width:600px) { .pr-header-line { top: 56px; } }
 
-    /* ── NAV ── */
+    /* ?? NAV ?? */
     .pr-nav {
       position: sticky; top: 66px; z-index: 40;
       background: ${navBg};
@@ -334,7 +334,7 @@ const buildCSS = (dark) => {
       background: ${IEQ.red}; box-shadow: 0 0 6px ${IEQ.red};
     }
 
-    /* ── MAIN ── */
+    /* ?? MAIN ?? */
     .pr-main { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; z-index: 1; }
     .pr-content {
       flex: 1; overflow-y: auto; padding: 24px 18px 40px;
@@ -376,9 +376,9 @@ const buildCSS = (dark) => {
   `;
 };
 
-/* ═══════════════════════════════════════════════════════════════════
+/* ???????????????????????????????????????????????????????????????????
    SINO DE ANIVERSARIANTES
-═══════════════════════════════════════════════════════════════════ */
+??????????????????????????????????????????????????????????????????? */
 const CORES_SINO = [
   { bg: "rgba(200,16,46,.12)",  text: "#9B0B1E" },
   { bg: "rgba(0,61,165,.10)",   text: "#002470" },
@@ -423,30 +423,58 @@ function SinoPastor({ isDark }) {
   const subClr  = isDark ? "rgba(245,240,235,.45)" : "rgba(10,6,8,.45)";
   const borderC = "rgba(200,16,46,.22)";
 
-  // ✅ CORREÇÃO: monta o link do WhatsApp a partir do telefone cadastrado
+  // ? SIMPLIFICADO: usa o link que vem do backend
   const abrirWhatsApp = (m, id) => {
-    const numero   = (m.telefone || "").replace(/\D/g, ""); // remove tudo que não é dígito
-    const mensagem = encodeURIComponent(
-        `🎂 Paz seja contigo minha ovelhinha 🐑! Feliz Aniversário %s!
-                
-                                             Que Deus abençoe sua vida,
-                                             lhe conceda saúde, paz e prosperidade.
-                
-                                             Com carinho,
-                                             Pastores Renato e Jaci Soares 🐑 🙏${m.nome}! Que Deus te abençoe! 🙏`
-    );
-    // Se o número já vier com DDI 55 no banco (ex: "5571999999999"), use só numero.
-    // Caso contrário, o prefixo 55 é adicionado automaticamente abaixo.
-    const ddi = numero.startsWith("55") ? "" : "55";
-    const link = `https://wa.me/${ddi}${numero}?text=${mensagem}`;
-    window.open(link, "_blank");
-    setEnviados(prev => ({ ...prev, [id]: true }));
-  };
+    try {
+      console.log("📱 Objeto recebido:", m);
 
+      // Se o backend retornar link, usa
+      if (m.link) {
+        window.open(m.link, "_blank");
+        console.log("✅ Usando link do backend");
+        setEnviados(prev => ({ ...prev, [id]: true }));
+        return;
+      }
+
+      // Caso contrário, monta aqui
+      console.log("⚠️ Montando link no frontend...");
+
+      // Garante que o telefone está limpo
+      let telefoneLimpo = (m.telefone || "").replace(/\D/g, "");
+
+      if (!telefoneLimpo) {
+        console.error("❌ Telefone vazio!", m);
+        alert("❌ Telefone não disponível para " + m.nome);
+        return;
+      }
+
+      const ddi = telefoneLimpo.startsWith("55") ? "" : "55";
+
+      const mensagem = encodeURIComponent(
+          `🎂 Paz seja contigo minha ovelhinha 🙏! Feliz Aniversário ${m.nome}!
+
+Que Deus abençoe sua vida,
+lhe conceda saúde, paz e prosperidade.
+
+Com carinho,
+Pastores Renato e Jaci Soares 🙏 🤍`
+      );
+
+      const link = `https://wa.me/${ddi}${telefoneLimpo}?text=${mensagem}`;
+
+      console.log("✅ Link montado:", link);
+      window.open(link, "_blank");
+      setEnviados(prev => ({ ...prev, [id]: true }));
+
+    } catch (error) {
+      console.error("❌ Erro:", error);
+      alert("Erro ao abrir WhatsApp");
+    }
+  };
   return (
       <div ref={ref} style={{ position: "relative" }}>
 
-        {/* ── Botão sino ── */}
+        {/* ?? Botão sino ?? */}
         <button
             className="pr-icon-btn"
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); setOpen(o => !o); }}
@@ -480,7 +508,7 @@ function SinoPastor({ isDark }) {
           )}
         </button>
 
-        {/* ── Painel dropdown ── */}
+        {/* ?? Painel dropdown ?? */}
         {open && (
             <div
                 className="sino-panel"
@@ -573,7 +601,7 @@ function SinoPastor({ isDark }) {
                       textAlign: "center", padding: "28px 0",
                       fontFamily: "'Manrope', sans-serif", fontSize: 13, color: subClr,
                     }}>
-                      🙏 Nenhum aniversariante {tab === "hoje" ? "hoje" : "essa semana"}.
+                      🎂 Nenhum aniversariante {tab === "hoje" ? "hoje" : "essa semana"}.
                     </p>
                 ) : lista.map((m, i) => {
                   const cor     = CORES_SINO[i % CORES_SINO.length];
@@ -638,7 +666,10 @@ function SinoPastor({ isDark }) {
 
                         {/* Botão WhatsApp */}
                         <button
-                            onClick={(e) => { e.stopPropagation(); abrirWhatsApp(m, m.id); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              abrirWhatsApp(m, m.id);
+                            }}
                             title={enviado ? "Enviado!" : "Enviar parabéns no WhatsApp"}
                             style={{
                               width: 34, height: 34, borderRadius: 9, flexShrink: 0,
@@ -663,7 +694,7 @@ function SinoPastor({ isDark }) {
                 letterSpacing: ".16em", color: subClr,
                 background: "rgba(200,16,46,.03)",
               }}>
-                ✦ IEQ PITUAÇU · SISTEMA PASTORAL ✦
+                🙏 IEQ PITUAÇU – SISTEMA PASTORAL 🙏
               </div>
             </div>
         )}
@@ -671,9 +702,9 @@ function SinoPastor({ isDark }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   COMPONENTE PRINCIPAL — PastorPage
-═══════════════════════════════════════════════════════════════════ */
+/* ???????????????????????????????????????????????????????????????????
+   COMPONENTE PRINCIPAL – PastorPage
+??????????????????????????????????????????????????????????????????? */
 export default function PastorPage() {
   const [celulas,       setCelulas]       = useState([]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
@@ -710,7 +741,7 @@ export default function PastorPage() {
   const getPageTitle   = () => PAGE_TITLES[getPageSegment()] || PAGE_TITLES["pastor"];
   const css = buildCSS(isDark);
 
-  /* ── Tela de loading ── */
+  /* ?? Tela de loading ?? */
   if (loading) return (
       <div className="pr-loading" style={{ background: isDark ? IEQ.dark : "#F0EAE8" }}>
         <style>{css}</style>
@@ -744,14 +775,14 @@ export default function PastorPage() {
       <div className="pr-root">
         <style key={isDark ? "dark" : "light"}>{css}</style>
 
-        {/* ── Fundo ── */}
+        {/* ?? Fundo ?? */}
         <div className="pr-grid-bg" />
         <div className="pr-stripes" />
         <div className="pr-glow-r" />
         <div className="pr-glow-b" />
         <div className="pr-glow-y" />
 
-        {/* ══════════════════ HEADER ══════════════════ */}
+        {/* ?????????????????? HEADER ?????????????????? */}
         <header className="pr-header">
           <div className="pr-hdr-left">
 
@@ -832,7 +863,7 @@ export default function PastorPage() {
         {/* Linha gradiente decorativa */}
         <div className="pr-header-line" />
 
-        {/* ══════════════════ NAV ══════════════════ */}
+        {/* ?????????????????? NAV ?????????????????? */}
         <nav className="pr-nav" aria-label="Navegação pastoral">
           <div className="pr-nav-inner">
             {NAV_ITEMS.map(({ to, icon: Icon, label, color, end, alert }) => (
@@ -876,7 +907,7 @@ export default function PastorPage() {
           </div>
         </nav>
 
-        {/* ══════════════════ CONTEÚDO ══════════════════ */}
+        {/* ?????????????????? CONTEÚDO ?????????????????? */}
         <main className="pr-main">
           <section className="pr-content">
             <AnimatePresence mode="wait" initial={false}>
@@ -904,7 +935,7 @@ export default function PastorPage() {
                   <div className="pr-ornament-dot" />
                 </div>
                 <p className="pr-footer">
-                  © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
+                  © IEQ PITUAÇU – SISTEMA SEGURO – {new Date().getFullYear()}
                 </p>
               </motion.div>
             </AnimatePresence>
