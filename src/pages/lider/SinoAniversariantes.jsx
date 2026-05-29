@@ -31,7 +31,7 @@ function useIsMobile() {
     return isMobile;
 }
 
-export default function SinoAniversariantes({ isDark = false }) {
+export default function SinoAniversariantes({ isDark = false, celulaId = null }) {
     const [open,     setOpen]     = useState(false);
     const [tab,      setTab]      = useState("hoje");
     const [hoje,     setHoje]     = useState([]);
@@ -62,9 +62,14 @@ export default function SinoAniversariantes({ isDark = false }) {
         (async () => {
             setLoading(true);
             try {
+                // 🎯 Se tem celulaId, busca apenas dessa célula. Senão, busca geral
+                const endpoint = celulaId
+                    ? `/api/aniversariantes/celula/${celulaId}`
+                    : "/api/aniversariantes";
+
                 const [rH, rS] = await Promise.all([
-                    api.get("/api/aniversariantes/hoje"),
-                    api.get("/api/aniversariantes/semana"),
+                    api.get(`${endpoint}/hoje`),
+                    api.get(`${endpoint}/semana`),
                 ]);
                 setHoje(Array.isArray(rH.data) ? rH.data : []);
                 setSemana(Array.isArray(rS.data) ? rS.data : []);
@@ -74,7 +79,7 @@ export default function SinoAniversariantes({ isDark = false }) {
                 setLoading(false);
             }
         })();
-    }, []);
+    }, [celulaId]); // ✅ Recarrega se celulaId mudar
 
     useEffect(() => {
         if (!open || isMobile) return;
@@ -336,7 +341,7 @@ function PainelConteudo({
                                 </p>
                             </div>
 
-                            {/* ✅ <a> nativo em vez de window.open — não branqueia no mobile */}
+                            {/* 🎁 <a> nativo em vez de window.open – não branqueia no mobile */}
                             {marcado ? (
                                 <div style={{
                                     width: 40, height: 40, borderRadius: 10, flexShrink: 0,
@@ -375,7 +380,7 @@ function PainelConteudo({
                 borderTop: "1px solid rgba(200,16,46,.1)",
                 flexShrink: 0,
             }}>
-                Lembrete de Aniversários · IEQ Pituaçu
+                Lembrete de Aniversários – IEQ Pituaçu
             </div>
         </>
     );

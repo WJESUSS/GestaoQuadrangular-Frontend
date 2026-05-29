@@ -104,7 +104,7 @@ const STATIC_CSS = `
   .ieq-lider-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .ieq-lider-avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 
-  /* ── GRIDS RESPONSIVOS ───────────────────────── */
+  /* GRIDS RESPONSIVOS */
   .ieq-kpi-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -117,7 +117,7 @@ const STATIC_CSS = `
     gap: 10px;
   }
 
-  /* ── MOBILE FIXES ────────────────────────────── */
+  /* MOBILE FIXES */
   @media (max-width: 599px) {
     .ieq-kpi-grid {
       grid-template-columns: 1fr;
@@ -268,7 +268,7 @@ export default function DashboardLider() {
               <div className="ieq-header-info" style={{ minWidth:0 }}>
                 <h1 className="ieq-title" style={{ fontSize:22, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
                 <p className="ieq-celula-label" style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:textSecondary, margin:0 }}>
-                  CÉLULA {celula?.nome?.toUpperCase() || "?"} — PAINEL DO LÍDER
+                  CÉLULA {celula?.nome?.toUpperCase() || "?"} · PAINEL DO LÍDER
                 </p>
                 {usuarioLogado?.nome && (
                     <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color: isDark ? "rgba(245,240,232,.6)" : "rgba(26,10,13,.55)", margin:"3px 0 0", fontStyle:"italic", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
@@ -280,7 +280,8 @@ export default function DashboardLider() {
 
             {/* Ações */}
             <div className="ieq-header-actions" style={{ display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
-              <SinoAniversariantes isDark={isDark} />
+              {/* ✅ CORREÇÃO: celulaId passado para buscar apenas aniversariantes da célula */}
+              <SinoAniversariantes isDark={isDark} celulaId={celula?.id} />
               <button className={`ieq-btn-ghost ${t}`} onClick={() => setIsDark(!isDark)} style={{ padding:"10px 14px" }}>
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
@@ -309,9 +310,9 @@ export default function DashboardLider() {
                             exit={{ opacity:0, x:-20, transition:{ duration:.15 } }}
                             style={{ display:"flex", flexDirection:"column", gap:24 }}
                 >
-                  {/* ── Grid KPIs ── */}
+                  {/* Grid KPIs */}
                   <div className="ieq-kpi-grid">
-                    {/* Card hero — membros */}
+                    {/* Card hero - membros */}
                     <div className={`ieq-card ${t} ieq-card-hero`} style={{ padding:"36px 40px", background: isDark ? `linear-gradient(135deg,#1A0A0D,#0A0608)` : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, border:"none", position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", inset:0, backgroundImage:`repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)`, backgroundSize:"40px 40px" }} />
                       <div style={{ position:"relative", zIndex:1 }}>
@@ -374,7 +375,7 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* ── Menu ── */}
+                  {/* Menu */}
                   <div className="ieq-menu-grid">
                     {[
                       { icon:<Target size={20}/>,     title:"DISCIPULADO", desc:"Acompanhar",  aba:"discipulado", color:IEQ.blue    },
@@ -394,7 +395,7 @@ export default function DashboardLider() {
                     ))}
                   </div>
 
-                  {/* ── Lista de membros ── */}
+                  {/* Lista de membros */}
                   <div className={`ieq-card ${t}`} style={{ overflow:"hidden" }}>
                     <div style={{ padding:"24px 28px", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
                       <div>
@@ -425,7 +426,7 @@ export default function DashboardLider() {
                   <HistoricoRelatorios celulaId={celula?.id} />
                   <div className="divider" />
                   <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, padding:"0 0 8px" }}>
-                    © IEQ PITUAÇU — SISTEMA SEGURO — {new Date().getFullYear()}
+                    © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
                   </p>
                 </motion.div>
             ) : (
@@ -441,7 +442,7 @@ export default function DashboardLider() {
           </AnimatePresence>
         </div>
 
-        {/* ── Modais ── */}
+        {/* Modais */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="ieq-modal-backdrop">
