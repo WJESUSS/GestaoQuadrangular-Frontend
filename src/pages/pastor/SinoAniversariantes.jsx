@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../../services/api.js";
-import { Bell, Cake, CheckCircle2, X } from "lucide-react";
+import { Bell, Cake, CheckCircle2, X, Send } from "lucide-react";
 
 const IEQ = {
     red: "#C8102E",
@@ -13,15 +13,14 @@ const IEQ = {
 
 const CORES = [
     { bg: "rgba(200,16,46,.12)", text: "#9B0B1E" },
-    { bg: "rgba(0,61,165,.10)", text: "#002470" },
-    { bg: "rgba(253,184,19,.15)", text: "#C48C00" },
+    { bg: "rgba(0,61,165,.10)",  text: "#002470"  },
+    { bg: "rgba(253,184,19,.15)",text: "#C48C00"  },
 ];
 
 function initials(nome = "") {
     return nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
 }
 
-// ✅ Hook para detectar mobile
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 520);
     useEffect(() => {
@@ -33,14 +32,15 @@ function useIsMobile() {
 }
 
 export default function SinoAniversariantes({ isDark = false }) {
-    const [open, setOpen] = useState(false);
-    const [tab, setTab] = useState("hoje");
-    const [hoje, setHoje] = useState([]);
-    const [semana, setSemana] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [open,     setOpen]     = useState(false);
+    const [tab,      setTab]      = useState("hoje");
+    const [hoje,     setHoje]     = useState([]);
+    const [semana,   setSemana]   = useState([]);
+    const [loading,  setLoading]  = useState(true);
     const [marcados, setMarcados] = useState(new Set());
 
-    const ref = useRef(null);
+    const btnRef   = useRef(null);
+    const panelRef = useRef(null);
     const isMobile = useIsMobile();
 
     const dataHojeFormatada = new Intl.DateTimeFormat('pt-BR', {
@@ -48,114 +48,93 @@ export default function SinoAniversariantes({ isDark = false }) {
     }).format(new Date());
 
     const periodoSemana = (() => {
-        const h = new Date();
+        const h   = new Date();
         const dia = h.getDay();
-        const segunda = new Date(h);
-        segunda.setDate(h.getDate() - (dia === 0 ? 6 : dia - 1));
-        const domingo = new Date(segunda);
-        domingo.setDate(segunda.getDate() + 6);
-        return `${segunda.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} a ${domingo.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`;
+        const seg = new Date(h);
+        seg.setDate(h.getDate() - (dia === 0 ? 6 : dia - 1));
+        const dom = new Date(seg);
+        dom.setDate(seg.getDate() + 6);
+        const fmt = (d) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        return `${fmt(seg)} a ${fmt(dom)}`;
     })();
 
     useEffect(() => {
-        const carregar = async () => {
+        (async () => {
             setLoading(true);
             try {
-                const [resHoje, resSemana] = await Promise.all([
+                const [rH, rS] = await Promise.all([
                     api.get("/api/aniversariantes/hoje"),
-                    api.get("/api/aniversariantes/semana")
+                    api.get("/api/aniversariantes/semana"),
                 ]);
-                setHoje(Array.isArray(resHoje.data) ? resHoje.data : []);
-                setSemana(Array.isArray(resSemana.data) ? resSemana.data : []);
+                setHoje(Array.isArray(rH.data) ? rH.data : []);
+                setSemana(Array.isArray(rS.data) ? rS.data : []);
             } catch (err) {
                 console.error("Erro ao carregar aniversariantes:", err);
             } finally {
                 setLoading(false);
             }
-        };
-        carregar();
+        })();
     }, []);
 
-    // ✅ Fecha ao clicar fora
     useEffect(() => {
-        if (!open) return;
+        if (!open || isMobile) return;
         const fn = (e) => {
-            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+            const noBtn   = btnRef.current   && !btnRef.current.contains(e.target);
+            const noPanel = panelRef.current && !panelRef.current.contains(e.target);
+            if (noBtn && noPanel) setOpen(false);
         };
         document.addEventListener("mousedown", fn);
         return () => document.removeEventListener("mousedown", fn);
-    }, [open]);
+    }, [open, isMobile]);
 
-    // ✅ Trava o scroll do body quando modal mobile estiver aberto
     useEffect(() => {
-        if (isMobile && open) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
+        document.body.style.overflow = (isMobile && open) ? "hidden" : "";
         return () => { document.body.style.overflow = ""; };
     }, [isMobile, open]);
 
-    const marcarComoFeito = (id) => {
-        setMarcados(prev => new Set([...prev, id]));
+    // ✅ Abre WhatsApp com o link que vem PRONTO do backend (m.link)
+    // e marca como felicitado ao mesmo tempo
+    const enviarParabens = (m) => {
+        window.open(m.link, "_blank");
+        setMarcados(prev => new Set([...prev, m.id]));
     };
 
-    const lista = tab === "hoje" ? hoje : semana;
+    const lista   = tab === "hoje" ? hoje : semana;
     const temHoje = hoje.length > 0;
 
-    // ✅ No mobile: bottom sheet com backdrop
-    // ✅ No desktop: dropdown alinhado à direita
-    const panelStyle = isMobile ? {
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        width: "100%",
-        maxHeight: "85dvh",
-        borderRadius: "20px 20px 0 0",
-        background: isDark ? "rgba(17,10,13,.99)" : "#fff",
-        border: "1px solid rgba(200,16,46,.35)",
-        borderBottom: "none",
-        boxShadow: "0 -8px 40px rgba(0,0,0,.3)",
-        zIndex: 1000,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-    } : {
-        position: "absolute",
-        top: 55,
-        right: 0,                                     // ✅ era -10, agora 0
-        width: "min(380px, calc(100vw - 32px))",      // ✅ nunca estoura a tela
-        background: isDark ? "rgba(17,10,13,.98)" : "#fff",
-        border: "1px solid rgba(200,16,46,.35)",
-        borderRadius: 16,
-        boxShadow: isDark ? "0 20px 50px rgba(0,0,0,0.8)" : "0 15px 40px rgba(200,16,46,.2)",
-        zIndex: 500,
-        overflow: "hidden",
-    };
+    const conteudo = (
+        <PainelConteudo
+            isDark={isDark}
+            tab={tab} setTab={setTab}
+            lista={lista} loading={loading}
+            marcados={marcados}
+            enviarParabens={enviarParabens}
+            dataHojeFormatada={dataHojeFormatada}
+            periodoSemana={periodoSemana}
+            onClose={() => setOpen(false)}
+        />
+    );
 
     return (
         <>
-            {/* ✅ Backdrop mobile */}
             {isMobile && open && (
                 <div
+                    onMouseDown={(e) => e.stopPropagation()}
                     onClick={() => setOpen(false)}
                     style={{
                         position: "fixed", inset: 0,
-                        background: "rgba(10,6,8,.6)",
+                        background: "rgba(10,6,8,.55)",
                         backdropFilter: "blur(4px)",
-                        zIndex: 999,
+                        zIndex: 998,
                     }}
                 />
             )}
 
-            <div ref={ref} style={{ position: "relative" }}>
-                {/* Botão sino */}
+            <div ref={btnRef} style={{ position: "relative", display: "inline-flex" }}>
                 <button
                     onClick={() => setOpen(o => !o)}
                     style={{
                         padding: "10px 14px",
-                        position: "relative",           // ✅ necessário pro badge absolute
                         background: open || temHoje ? "rgba(200,16,46,.14)" : "transparent",
                         border: `1px solid ${open || temHoje ? "rgba(200,16,46,.55)" : "rgba(200,16,46,.3)"}`,
                         borderRadius: 8,
@@ -163,72 +142,85 @@ export default function SinoAniversariantes({ isDark = false }) {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        position: "relative",
                     }}
                 >
                     <Bell size={18} style={{ color: temHoje ? IEQ.red : (isDark ? IEQ.offWhite : IEQ.dark) }} />
                     {temHoje && (
                         <span style={{
                             position: "absolute", top: -6, right: -6,
-                            background: IEQ.red, color: "#fff", fontSize: 10,
-                            fontWeight: 700, minWidth: 17, height: 17,
-                            borderRadius: "50%", display: "flex",
-                            alignItems: "center", justifyContent: "center",
-                            border: `2px solid ${isDark ? "#0A0608" : "#F0EAE8"}`
+                            background: IEQ.red, color: "#fff",
+                            fontSize: 10, fontWeight: 700,
+                            minWidth: 17, height: 17, borderRadius: "50%",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            border: `2px solid ${isDark ? "#0A0608" : "#F0EAE8"}`,
                         }}>
                             {hoje.length}
                         </span>
                     )}
                 </button>
 
-                {/* Painel dropdown (desktop) */}
                 {!isMobile && open && (
-                    <div style={panelStyle}>
-                        <PainelConteudo
-                            isDark={isDark}
-                            tab={tab} setTab={setTab}
-                            lista={lista} loading={loading}
-                            marcados={marcados} marcarComoFeito={marcarComoFeito}
-                            dataHojeFormatada={dataHojeFormatada}
-                            periodoSemana={periodoSemana}
-                            onClose={() => setOpen(false)}
-                        />
+                    <div
+                        ref={panelRef}
+                        style={{
+                            position: "absolute",
+                            top: 52, right: 0,
+                            width: "min(380px, calc(100vw - 32px))",
+                            background: isDark ? "rgba(17,10,13,.98)" : "#fff",
+                            border: "1px solid rgba(200,16,46,.35)",
+                            borderRadius: 16,
+                            boxShadow: isDark
+                                ? "0 20px 50px rgba(0,0,0,.8)"
+                                : "0 15px 40px rgba(200,16,46,.2)",
+                            zIndex: 500,
+                            overflow: "hidden",
+                        }}
+                    >
+                        {conteudo}
                     </div>
                 )}
             </div>
 
-            {/* Painel bottom sheet (mobile) */}
             {isMobile && open && (
-                <div style={panelStyle}>
-                    {/* Handle visual */}
+                <div
+                    ref={panelRef}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    style={{
+                        position: "fixed",
+                        bottom: 0, left: 0, right: 0,
+                        width: "100%",
+                        maxHeight: "85dvh",
+                        borderRadius: "20px 20px 0 0",
+                        background: isDark ? "rgba(17,10,13,.99)" : "#fff",
+                        border: "1px solid rgba(200,16,46,.35)",
+                        borderBottom: "none",
+                        boxShadow: "0 -8px 40px rgba(0,0,0,.3)",
+                        zIndex: 999,
+                        overflow: "hidden",
+                        display: "flex",
+                        flexDirection: "column",
+                    }}
+                >
                     <div style={{
                         width: 36, height: 4, borderRadius: 2,
                         background: "rgba(200,16,46,.3)",
-                        margin: "10px auto 0",
-                        flexShrink: 0,
+                        margin: "10px auto 0", flexShrink: 0,
                     }} />
-                    <PainelConteudo
-                        isDark={isDark}
-                        tab={tab} setTab={setTab}
-                        lista={lista} loading={loading}
-                        marcados={marcados} marcarComoFeito={marcarComoFeito}
-                        dataHojeFormatada={dataHojeFormatada}
-                        periodoSemana={periodoSemana}
-                        onClose={() => setOpen(false)}
-                        isMobile
-                    />
+                    {conteudo}
                 </div>
             )}
         </>
     );
 }
 
-// ✅ Conteúdo extraído para reutilizar em desktop e mobile
 function PainelConteudo({
                             isDark, tab, setTab, lista, loading,
-                            marcados, marcarComoFeito,
-                            dataHojeFormatada, periodoSemana,
-                            onClose, isMobile = false,
+                            marcados, enviarParabens,
+                            dataHojeFormatada, periodoSemana, onClose,
                         }) {
+    const sub = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+
     return (
         <>
             {/* Cabeçalho */}
@@ -240,15 +232,15 @@ function PainelConteudo({
                 flexShrink: 0,
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <Cake size={24} color={IEQ.red} />
+                    <Cake size={22} color={IEQ.red} />
                     <div>
                         <p style={{
-                            fontFamily: "'Cinzel', serif", fontSize: 14,
-                            fontWeight: 700, margin: 0, color: IEQ.red
+                            fontFamily: "'Cinzel', serif", fontSize: 13,
+                            fontWeight: 700, margin: 0, color: IEQ.red,
                         }}>
                             ANIVERSARIANTES
                         </p>
-                        <p style={{ fontSize: 12, marginTop: 3, color: isDark ? "#ccc" : "#555", margin: 0 }}>
+                        <p style={{ fontSize: 11.5, margin: "2px 0 0", color: isDark ? "#ccc" : "#666" }}>
                             {tab === "hoje" ? dataHojeFormatada : `Período: ${periodoSemana}`}
                         </p>
                     </div>
@@ -257,8 +249,8 @@ function PainelConteudo({
                     onClick={onClose}
                     style={{
                         background: "none", border: "none", cursor: "pointer",
-                        color: isDark ? "rgba(245,240,232,.5)" : "rgba(26,10,13,.4)",
-                        padding: 4, display: "flex", alignItems: "center",
+                        color: sub, padding: 4,
+                        display: "flex", alignItems: "center",
                     }}
                 >
                     <X size={18} />
@@ -267,20 +259,17 @@ function PainelConteudo({
 
             {/* Abas */}
             <div style={{ display: "flex", flexShrink: 0 }}>
-                {["hoje", "semana"].map((t) => (
+                {["hoje", "semana"].map(t => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
                         style={{
-                            flex: 1,
-                            padding: "12px",
+                            flex: 1, padding: "11px",
                             background: tab === t ? IEQ.red : "transparent",
                             color: tab === t ? "#fff" : (isDark ? "#aaa" : "#666"),
-                            fontWeight: 600,
-                            fontSize: 13,
-                            border: "none",
-                            cursor: "pointer",
-                            transition: "background .2s",
+                            fontWeight: 600, fontSize: 12.5,
+                            border: "none", cursor: "pointer",
+                            transition: "background .18s",
                         }}
                     >
                         {t === "hoje" ? "HOJE" : "ESTA SEMANA"}
@@ -290,50 +279,54 @@ function PainelConteudo({
 
             {/* Lista */}
             <div style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "12px",
+                flex: 1, overflowY: "auto", padding: "10px",
                 WebkitOverflowScrolling: "touch",
             }}>
                 {loading ? (
-                    <p style={{ textAlign: "center", padding: "50px 20px", color: "#888" }}>
+                    <p style={{ textAlign: "center", padding: "40px 0", color: "#888", fontSize: 13 }}>
                         Carregando...
                     </p>
                 ) : lista.length === 0 ? (
                     <p style={{
-                        textAlign: "center", padding: "50px 20px",
-                        color: "#888", fontStyle: "italic"
+                        textAlign: "center", padding: "40px 0",
+                        color: "#888", fontStyle: "italic", fontSize: 13,
                     }}>
-                        {tab === "hoje" ? "Nenhum aniversariante hoje." : "Nenhum aniversariante esta semana."}
+                        {tab === "hoje"
+                            ? "Nenhum aniversariante hoje."
+                            : "Nenhum aniversariante esta semana."}
                     </p>
                 ) : lista.map((m, i) => {
-                    const cor = CORES[i % CORES.length];
-                    const jaMarcado = marcados.has(m.id);
+                    const cor     = CORES[i % CORES.length];
+                    const marcado = marcados.has(m.id);
                     return (
-                        <div key={m.id} style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 12,
-                            padding: "12px",
-                            marginBottom: 8,
-                            borderRadius: 12,
-                            background: jaMarcado
-                                ? (isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)")
-                                : (tab === "hoje" ? "rgba(200,16,46,.07)" : (isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.02)")),
-                            opacity: jaMarcado ? 0.65 : 1,
-                            border: tab === "hoje" && !jaMarcado
-                                ? "1px solid rgba(200,16,46,.35)"
-                                : "1px solid transparent",
-                            transition: "opacity .25s",
-                        }}>
+                        <div
+                            key={m.id}
+                            style={{
+                                display: "flex", alignItems: "center", gap: 12,
+                                padding: "11px 10px", marginBottom: 8, borderRadius: 12,
+                                background: marcado
+                                    ? (isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)")
+                                    : (tab === "hoje"
+                                        ? "rgba(200,16,46,.07)"
+                                        : (isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.02)")),
+                                opacity: marcado ? 0.6 : 1,
+                                border: tab === "hoje" && !marcado
+                                    ? "1px solid rgba(200,16,46,.32)"
+                                    : "1px solid transparent",
+                                transition: "opacity .25s",
+                            }}
+                        >
+                            {/* Avatar */}
                             <div style={{
-                                width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
+                                width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
                                 background: cor.bg, color: cor.text,
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 fontSize: 14, fontWeight: 700,
                             }}>
                                 {initials(m.nome)}
                             </div>
+
+                            {/* Info */}
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{
                                     margin: 0, fontWeight: 600, fontSize: 14,
@@ -342,34 +335,38 @@ function PainelConteudo({
                                 }}>
                                     {m.nome}
                                 </p>
-                                <p style={{ margin: "3px 0 0", color: "#888", fontSize: 12 }}>
+                                <p style={{ margin: "2px 0 0", color: "#888", fontSize: 12 }}>
                                     {m.telefone}
                                 </p>
                             </div>
+
+                            {/* ✅ Botão WhatsApp — usa m.link do backend */}
                             <button
-                                onClick={() => marcarComoFeito(m.id)}
-                                disabled={jaMarcado}
-                                title={jaMarcado ? "Parabéns enviados!" : "Marcar como felicitado"}
+                                onClick={() => enviarParabens(m)}
+                                disabled={marcado}
+                                title={marcado ? "Parabéns já enviado!" : "Enviar parabéns no WhatsApp"}
                                 style={{
-                                    width: 42, height: 42, borderRadius: 10, flexShrink: 0,
-                                    background: jaMarcado ? "#10B981" : IEQ.red,
+                                    width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                                    // verde WhatsApp quando pendente, verde escuro quando enviado
+                                    background: marcado ? "#10B981" : "#25D366",
                                     color: "#fff", border: "none",
-                                    cursor: jaMarcado ? "default" : "pointer",
+                                    cursor: marcado ? "default" : "pointer",
                                     display: "flex", alignItems: "center", justifyContent: "center",
                                     transition: "background .2s",
                                 }}
                             >
-                                <CheckCircle2 size={20} />
+                                {marcado ? <CheckCircle2 size={20} /> : <Send size={20} />}
                             </button>
                         </div>
                     );
                 })}
             </div>
 
+            {/* Rodapé */}
             <div style={{
-                padding: "10px", textAlign: "center",
-                fontSize: 10, color: "#777",
-                borderTop: "1px solid rgba(200,16,46,.12)",
+                padding: "9px", textAlign: "center",
+                fontSize: 10, color: "#888",
+                borderTop: "1px solid rgba(200,16,46,.1)",
                 flexShrink: 0,
             }}>
                 Lembrete de Aniversários · IEQ Pituaçu
