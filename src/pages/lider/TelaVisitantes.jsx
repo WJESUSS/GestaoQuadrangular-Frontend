@@ -164,7 +164,6 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
-  // Cores para os <option> no select — garante legibilidade em dark/light
   const selectOptionBg    = isDark ? "#1A0A0D" : "#ffffff";
   const selectOptionColor = isDark ? IEQ.offWhite : "#1A0A0D";
 
@@ -175,6 +174,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     @keyframes pulse   { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
     @keyframes spin    { to{transform:rotate(360deg)} }
     @keyframes fadeIn  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
     @keyframes shakeIn { 0%{opacity:0;transform:scale(.95)} 60%{transform:scale(1.02)} 100%{opacity:1;transform:scale(1)} }
     
     .ieq-bg-stripe {
@@ -263,6 +263,84 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
     .spin-icon  { animation:spin 1s linear infinite; }
     .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); margin:6px 0; }
+
+    /* ── MODAL RESPONSIVO ── */
+
+    /* Desktop: modal centralizado flutuante */
+    .ieq-modal-overlay {
+      position:fixed; inset:0; z-index:1000;
+      display:flex; align-items:center; justify-content:center;
+      padding:16px;
+      background:rgba(10,6,8,.85); backdrop-filter:blur(16px);
+    }
+    .ieq-modal-box {
+      width:100%; max-width:520px;
+      padding:40px 36px;
+      max-height:90vh; overflow-y:auto;
+      position:relative;
+      animation:fadeIn .3s ease;
+      border-radius:14px;
+    }
+
+    /* Mobile (≤ 600px): modal como bottom-sheet cobrindo a tela toda */
+    @media (max-width:600px) {
+      .ieq-modal-overlay {
+        align-items:flex-end;
+        padding:0;
+      }
+      .ieq-modal-box {
+        max-width:100%;
+        width:100%;
+        /* ocupa até 96% da altura — suficiente para ver tudo sem rolar */
+        max-height:100vh;
+        height:92vh;
+        padding:28px 20px 36px;
+        border-radius:20px 20px 0 0;
+        animation:slideUp .32s cubic-bezier(.22,.68,0,1.2);
+        /* barra de "alça" visual */
+      }
+      .ieq-modal-box::before {
+        content:'';
+        display:block;
+        width:40px; height:4px;
+        border-radius:2px;
+        background:rgba(200,16,46,.3);
+        margin:0 auto 20px;
+      }
+      /* Campos lado-a-lado viram coluna única no mobile */
+      .ieq-two-col {
+        grid-template-columns:1fr !important;
+      }
+      /* Header do modal compacto */
+      .ieq-modal-header h2 {
+        font-size:12px !important;
+      }
+      /* Botões de ação no rodapé ficam fixos */
+      .ieq-modal-actions {
+        position:sticky;
+        bottom:0;
+        background:${isDark ? "rgba(17,10,13,.98)" : "rgba(255,255,255,.98)"};
+        padding:14px 0 0;
+        margin-top:8px;
+      }
+    }
+
+    /* Header da página responsivo */
+    @media (max-width:600px) {
+      .ieq-page-header {
+        padding:20px 18px !important;
+        flex-direction:column !important;
+        align-items:flex-start !important;
+        gap:14px !important;
+      }
+      .ieq-page-header h1 {
+        font-size:16px !important;
+      }
+      .ieq-page-header .ieq-btn-primary {
+        width:100% !important;
+        justify-content:center !important;
+      }
+    }
   `;
 
   const filtrados = visitantes.filter(v => v.nome.toLowerCase().includes(busca.toLowerCase()));
@@ -275,7 +353,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "0 16px" }}>
 
           {/* Header */}
-          <div className="ieq-card" style={{ padding: "28px 36px", marginBottom: 24, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+          <div className="ieq-card ieq-page-header" style={{ padding: "28px 36px", marginBottom: 24, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
               <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                 <div className="pulse-ring" style={{ width: 64, height: 64 }} />
@@ -388,10 +466,11 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
 
         {/* Modal de Cadastro / Edição */}
         {modalAberto && (
-            <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "rgba(10,6,8,.85)", backdropFilter: "blur(16px)" }}>
-              <div className="ieq-card" style={{ width: "100%", maxWidth: 520, padding: "40px 36px", maxHeight: "90vh", overflowY: "auto", position: "relative", animation: "fadeIn .3s ease" }}>
+            <div className="ieq-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) fecharModal(); }}>
+              <div className="ieq-card ieq-modal-box">
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
+                {/* Cabeçalho do modal */}
+                <div className="ieq-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
                   <div>
                     <QuadrangularCross size={28} />
                     <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 14, fontWeight: 700, letterSpacing: ".15em", color: tp, margin: "12px 0 4px" }}>
@@ -404,9 +483,9 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                   </button>
                 </div>
 
-                <div className="divider" style={{ marginBottom: 24 }} />
+                <div className="divider" style={{ marginBottom: 20 }} />
 
-                <form onSubmit={handleSalvar} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <form onSubmit={handleSalvar} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
                     <label className="ieq-label">NOME COMPLETO</label>
                     <input className="ieq-input" required
@@ -415,7 +494,8 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                            placeholder="Nome completo" />
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                  {/* Grid 2 colunas → 1 coluna no mobile via classe ieq-two-col */}
+                  <div className="ieq-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                     <div>
                       <label className="ieq-label">WHATSAPP</label>
                       <input className="ieq-input"
@@ -493,17 +573,20 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
 
                   <div className="divider" />
 
-                  <button type="submit" className="ieq-btn-primary full" disabled={loading}>
-                    {loading
-                        ? <><Loader2 size={16} className="spin-icon" /> SALVANDO...</>
-                        : (editando ? "ATUALIZAR DADOS" : "FINALIZAR CADASTRO")
-                    }
-                  </button>
+                  {/* Botão salvar — sticky no mobile */}
+                  <div className="ieq-modal-actions">
+                    <button type="submit" className="ieq-btn-primary full" disabled={loading}>
+                      {loading
+                          ? <><Loader2 size={16} className="spin-icon" /> SALVANDO...</>
+                          : (editando ? "ATUALIZAR DADOS" : "FINALIZAR CADASTRO")
+                      }
+                    </button>
+                  </div>
                 </form>
 
                 {/* Bloco de Remoção (Modo Edição) */}
                 {editando && (
-                    <div style={{ marginTop: 16 }}>
+                    <div style={{ marginTop: 12 }}>
                       {!confirmandoDeletar ? (
                           <button type="button" className="ieq-btn-danger" onClick={() => setConfirmandoDeletar(true)}>
                             <Trash2 size={15} /> REMOVER VISITANTE
