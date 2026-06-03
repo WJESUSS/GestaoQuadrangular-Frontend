@@ -44,17 +44,17 @@ function QuadrangularCross({ size = 28 }) {
 }
 
 export default function RelatorioCelula({ isDark = false }) {
-  const [relatorios,      setRelatorios]      = useState([]);
-  const [loading,         setLoading]         = useState(true);
-  const [erro,            setErro]            = useState(null);
-  const [baixandoPDF,     setBaixandoPDF]     = useState(false);
-  const [showFilters,     setShowFilters]     = useState(false);
-  const [selectedRel,     setSelectedRel]     = useState(null);
-  const [isModalOpen,     setIsModalOpen]     = useState(false);
-  const [dataInicio,      setDataInicio]      = useState(new Date().toISOString().split("T")[0]);
-  const [dataFim,         setDataFim]         = useState(new Date().toISOString().split("T")[0]);
+  const [relatorios,  setRelatorios]  = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [erro,        setErro]        = useState(null);
+  const [baixandoPDF, setBaixandoPDF] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedRel, setSelectedRel] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dataInicio,  setDataInicio]  = useState(new Date().toISOString().split("T")[0]);
+  const [dataFim,     setDataFim]     = useState(new Date().toISOString().split("T")[0]);
 
-  const bg            = isDark ? IEQ.dark    : "#F0EAE8";
+  const bg            = isDark ? IEQ.dark     : "#F0EAE8";
   const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
@@ -65,7 +65,7 @@ export default function RelatorioCelula({ isDark = false }) {
       0%   { background-position: 0 0; }
       100% { background-position: 60px 60px; }
     }
-    @keyframes spin  { to { transform: rotate(360deg); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .ieq-bg-rel {
       position:fixed; inset:0; pointer-events:none; z-index:0;
       background: repeating-linear-gradient(
@@ -81,15 +81,13 @@ export default function RelatorioCelula({ isDark = false }) {
     .ieq-rel-card {
       background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
       border: 1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"};
-      border-radius:16px; overflow:hidden; cursor:pointer;
-      transition: all .3s;
+      border-radius:16px; overflow:hidden; cursor:pointer; transition: all .3s;
     }
     .ieq-rel-card:hover { transform:translateY(-4px); box-shadow:0 14px 36px rgba(200,16,46,.12); border-color:${IEQ.red}; }
     .ieq-kpi-card {
       background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
       border: 1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"};
-      border-radius:16px; padding:20px 22px;
-      display:flex; align-items:center; gap:16px;
+      border-radius:16px; padding:20px 22px; display:flex; align-items:center; gap:16px;
     }
     .ieq-btn-primary-rel {
       background: linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red});
@@ -143,20 +141,22 @@ export default function RelatorioCelula({ isDark = false }) {
 
   const formatarDataLocal = (dataStr) => {
     if (!dataStr) return "?";
-    const [ano,mes,dia] = dataStr.split("-").map(Number);
-    return new Date(ano, mes-1, dia).toLocaleDateString("pt-BR", { weekday:"short", day:"2-digit", month:"short" });
+    const [ano, mes, dia] = dataStr.split("-").map(Number);
+    return new Date(ano, mes - 1, dia).toLocaleDateString("pt-BR", { weekday:"short", day:"2-digit", month:"short" });
   };
 
   const getDecisaoTexto = (d) => ({
-    ACEITOU_JESUS:"Novo Convertido", RECONCILIOU:"Reconciliação",
-    BATISMO_AGUAS:"Deseja Batismo", NENHUMA:"Nenhuma"
-  }[d] || d || "?");
+    ACEITOU_JESUS: "Novo Convertido",
+    RECONCILIOU:   "Reconciliação",
+    BATISMO_AGUAS: "Deseja Batismo",
+    NENHUMA:       "Nenhuma",
+  }[d] || d || "—");
 
   const getDecisaoCor = (d) => {
-    if (d === "ACEITOU_JESUS") return { background:"rgba(22,163,74,.12)", color:"#16a34a", borderColor:"rgba(22,163,74,.3)" };
-    if (d === "RECONCILIOU")   return { background:"rgba(14,165,233,.12)", color:"#0ea5e9", borderColor:"rgba(14,165,233,.3)" };
-    if (d === "BATISMO_AGUAS") return { background:"rgba(139,92,246,.12)", color:"#8b5cf6", borderColor:"rgba(139,92,246,.3)" };
-    return { background:`rgba(200,16,46,.08)`, color:IEQ.redDark, borderColor:"rgba(200,16,46,.2)" };
+    if (d === "ACEITOU_JESUS") return { background:"rgba(22,163,74,.12)",   color:"#16a34a", borderColor:"rgba(22,163,74,.3)"   };
+    if (d === "RECONCILIOU")   return { background:"rgba(14,165,233,.12)",  color:"#0ea5e9", borderColor:"rgba(14,165,233,.3)"  };
+    if (d === "BATISMO_AGUAS") return { background:"rgba(139,92,246,.12)",  color:"#8b5cf6", borderColor:"rgba(139,92,246,.3)"  };
+    return                            { background:"rgba(200,16,46,.08)",   color:IEQ.redDark, borderColor:"rgba(200,16,46,.2)" };
   };
 
   const carregarSemanaAtual = () => {
@@ -174,41 +174,63 @@ export default function RelatorioCelula({ isDark = false }) {
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       if (!token) return;
       const res = await api.get(`/relatorios/semana?inicio=${dataInicio}&fim=${dataFim}`,
-          { headers: { Authorization:`Bearer ${token}` } });
+          { headers: { Authorization: `Bearer ${token}` } });
       setRelatorios(Array.isArray(res.data) ? res.data : res.data?.relatorios || []);
     } catch { setErro("Erro ao buscar dados."); }
-    finally { setLoading(false); }
+    finally   { setLoading(false); }
   }, [dataInicio, dataFim]);
 
   const totais = useMemo(() => relatorios.reduce((acc, rel) => {
     const m = rel.membrosPresentes?.length || 0;
     const v = (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0);
-    return { membros: acc.membros+m, visitantes: acc.visitantes+v, geral: acc.geral+m+v };
+    return { membros: acc.membros + m, visitantes: acc.visitantes + v, geral: acc.geral + m + v };
   }, { membros:0, visitantes:0, geral:0 }), [relatorios]);
 
   useEffect(() => { carregarSemanaAtual(); }, []);
-  useEffect(() => { carregarRelatorios(); }, [carregarRelatorios]);
+  useEffect(() => { carregarRelatorios();  }, [carregarRelatorios]);
 
   const baixarPDF = () => {
     setBaixandoPDF(true);
     const doc = new jsPDF();
-    doc.setFontSize(16); doc.setTextColor(0,36,112);
+    doc.setFontSize(16); doc.setTextColor(0, 36, 112);
     doc.text("Relatório Geral de Células", 14, 20);
     doc.setFontSize(9); doc.setTextColor(100);
     doc.text(`Total Membros: ${totais.membros} | Total Visitantes: ${totais.visitantes} | Total Geral: ${totais.geral}`, 14, 28);
+
+    // Tabela principal
     autoTable(doc, {
-      startY:34,
-      head:[["Célula","Data","Membros","Visitas","Total","Estudo"]],
+      startY: 34,
+      head: [["Célula","Data","Membros","Visitas","Total","Estudo"]],
       body: relatorios.map(rel => [
         rel.nomeCelula,
         new Date(rel.dataReuniao).toLocaleDateString("pt-BR"),
         rel.membrosPresentes?.length || 0,
-        (rel.visitantesPresentes?.length || 0)+(rel.quantidadeVisitantes || 0),
-        (rel.membrosPresentes?.length || 0)+(rel.visitantesPresentes?.length || 0)+(rel.quantidadeVisitantes || 0),
-        rel.estudo || "N/A"
+        (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0),
+        (rel.membrosPresentes?.length || 0) + (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0),
+        rel.estudo || "N/A",
       ]),
-      theme:"grid", headStyles:{ fillColor:[0,36,112] }
+      theme: "grid", headStyles: { fillColor: [0, 36, 112] },
     });
+
+    // Tabela de decisões espirituais
+    const todasDecisoes = relatorios.flatMap(rel =>
+        (rel.visitantesPresentes || [])
+            .filter(v => v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA")
+            .map(v => [rel.nomeCelula, v.nome, getDecisaoTexto(v.decisaoEspiritual)])
+    );
+
+    if (todasDecisoes.length > 0) {
+      doc.addPage();
+      doc.setFontSize(13); doc.setTextColor(0, 36, 112);
+      doc.text("Decisões Espirituais da Semana", 14, 20);
+      autoTable(doc, {
+        startY: 28,
+        head: [["Célula","Visitante","Decisão"]],
+        body: todasDecisoes,
+        theme: "grid", headStyles: { fillColor: [139, 11, 31] },
+      });
+    }
+
     doc.save("relatorio-celulas.pdf");
     setBaixandoPDF(false);
   };
@@ -271,8 +293,8 @@ export default function RelatorioCelula({ isDark = false }) {
                     <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:textSecondary }}>DE</span>
                     <input className="ieq-date-rel" type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} style={{ minWidth:140 }} />
                     <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:textSecondary }}>ATÉ</span>
-                    <input className="ieq-date-rel" type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} style={{ minWidth:140 }} />
-                    <button className="ieq-btn-ghost-rel" onClick={carregarSemanaAtual} style={{ whiteSpace:"nowrap" }}>ESTA SEMANA</button>
+                    <input className="ieq-date-rel" type="date" value={dataFim}    onChange={e => setDataFim(e.target.value)}    style={{ minWidth:140 }} />
+                    <button className="ieq-btn-ghost-rel"   onClick={carregarSemanaAtual} style={{ whiteSpace:"nowrap" }}>ESTA SEMANA</button>
                     <button className="ieq-btn-primary-rel" onClick={carregarRelatorios}>APLICAR</button>
                   </div>
                 </motion.div>
@@ -282,7 +304,7 @@ export default function RelatorioCelula({ isDark = false }) {
           {/* KPIs */}
           <div className="kpi-grid" style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:16, marginBottom:28 }}>
             <div className="ieq-kpi-card">
-              <div style={{ width:46, height:46, borderRadius:12, background:`rgba(200,16,46,.1)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <div style={{ width:46, height:46, borderRadius:12, background:"rgba(200,16,46,.1)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                 <Users size={22} style={{ color:IEQ.red }} />
               </div>
               <div>
@@ -291,7 +313,7 @@ export default function RelatorioCelula({ isDark = false }) {
               </div>
             </div>
             <div className="ieq-kpi-card">
-              <div style={{ width:46, height:46, borderRadius:12, background:`rgba(253,184,19,.1)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <div style={{ width:46, height:46, borderRadius:12, background:"rgba(253,184,19,.1)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                 <UserPlus size={22} style={{ color:IEQ.yellowDark }} />
               </div>
               <div>
@@ -315,12 +337,13 @@ export default function RelatorioCelula({ isDark = false }) {
             {relatorios.map((rel, i) => {
               const m = rel.membrosPresentes?.length || 0;
               const v = (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0);
+              const decisoes = (rel.visitantesPresentes || []).filter(vt => vt.decisaoEspiritual && vt.decisaoEspiritual !== "NENHUMA");
               return (
-                  <motion.div key={rel.id} initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*.04 }}
+                  <motion.div key={rel.id} initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:i * .04 }}
                               className="ieq-rel-card" onClick={() => { setSelectedRel(rel); setIsModalOpen(true); }}>
                     <div style={{ padding:"20px 20px 0" }}>
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
-                        <div style={{ width:36, height:36, borderRadius:8, background:`rgba(200,16,46,.1)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                        <div style={{ width:36, height:36, borderRadius:8, background:"rgba(200,16,46,.1)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                           <Calendar size={18} style={{ color:IEQ.red }} />
                         </div>
                         <div style={{ textAlign:"right" }}>
@@ -331,18 +354,29 @@ export default function RelatorioCelula({ isDark = false }) {
                       <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 8px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                         {rel.nomeCelula}
                       </h3>
-                      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 10px", background:isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.05)", borderRadius:8, marginBottom:16 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 10px", background:isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.05)", borderRadius:8, marginBottom: decisoes.length > 0 ? 10 : 16 }}>
                         <BookOpen size={12} style={{ color:IEQ.red, flexShrink:0 }} />
                         <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".1em", color:textSecondary, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                           {rel.estudo || "SEM ESTUDO INFORMADO"}
                         </p>
                       </div>
+
+                      {/* Preview de decisões no card */}
+                      {decisoes.length > 0 && (
+                          <div style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 10px", background:"rgba(253,184,19,.08)", border:"1px solid rgba(253,184,19,.2)", borderRadius:8, marginBottom:16 }}>
+                            <Sparkles size={11} style={{ color:IEQ.yellowDark, flexShrink:0 }} />
+                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".1em", color:IEQ.yellowDark, margin:0 }}>
+                              {decisoes.length} DECISÃO{decisoes.length > 1 ? "ÕES" : ""} ESPIRITUAL{decisoes.length > 1 ? "IS" : ""}
+                            </p>
+                          </div>
+                      )}
                     </div>
+
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", borderTop:`1px solid ${isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.08)"}` }}>
                       {[
-                        { label:"MEMBROS",  value:m,   color:textPrimary },
-                        { label:"VISITAS",  value:v,   color:IEQ.yellow  },
-                        { label:"TOTAL",    value:m+v, color:IEQ.blue    },
+                        { label:"MEMBROS", value:m,   color:textPrimary },
+                        { label:"VISITAS", value:v,   color:IEQ.yellow  },
+                        { label:"TOTAL",   value:m+v, color:IEQ.blue    },
                       ].map((kpi, ki) => (
                           <div key={ki} style={{ padding:"12px 10px", textAlign:"center", borderRight: ki < 2 ? `1px solid ${isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.08)"}` : "none" }}>
                             <p style={{ fontFamily:"'Cinzel',serif", fontSize:18, fontWeight:700, color:kpi.color, margin:0 }}>{kpi.value}</p>
@@ -371,83 +405,129 @@ export default function RelatorioCelula({ isDark = false }) {
 
         {/* Modal */}
         <AnimatePresence>
-          {isModalOpen && selectedRel && (
-              <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                          className="modal-ov-rel" onClick={() => setIsModalOpen(false)}>
-                <motion.div initial={{ scale:.9, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:.9, y:20 }}
-                            className="modal-bx-rel" onClick={e => e.stopPropagation()}>
-                  {/* Header */}
-                  <div style={{ padding:"22px 24px", background:`linear-gradient(135deg, ${IEQ.blueDark}, ${IEQ.blue})`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                      <div style={{ width:44, height:44, background:"rgba(255,255,255,.15)", borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                        <UserCheck size={22} style={{ color:"#fff" }} />
-                      </div>
-                      <div>
-                        <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, letterSpacing:".12em", color:"#fff", margin:"0 0 3px" }}>{selectedRel.nomeCelula}</h3>
-                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color:"rgba(255,255,255,.6)", margin:0 }}>
-                          {formatarDataLocal(selectedRel.dataReuniao)}
-                        </p>
-                      </div>
-                    </div>
-                    <button onClick={() => setIsModalOpen(false)}
-                            style={{ background:"rgba(255,255,255,.15)", border:"none", color:"#fff", padding:10, borderRadius:8, cursor:"pointer" }}>
-                      <X size={18} />
-                    </button>
-                  </div>
+          {isModalOpen && selectedRel && (() => {
+            const comDecisao = (selectedRel.visitantesPresentes || [])
+                .filter(v => v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA");
 
-                  {/* Conteúdo */}
-                  <div style={{ overflowY:"auto", flex:1, padding:"24px" }}>
-                    {/* Membros */}
-                    <div style={{ marginBottom:28 }}>
-                      <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, margin:"0 0 14px" }}>
-                        MEMBROS PRESENTES ({selectedRel.membrosPresentes?.length || 0})
-                      </p>
-                      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:8 }}>
-                        {selectedRel.membrosPresentes?.map((m, i) => (
-                            <div key={i} style={{ padding:"10px 14px", background:isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.05)", border:`1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, borderRadius:8, fontFamily:"'EB Garamond',serif", fontSize:14, fontWeight:500, color:textPrimary }}>
-                              {m.nome || m}
-                            </div>
-                        ))}
-                      </div>
-                    </div>
+            return (
+                <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                            className="modal-ov-rel" onClick={() => setIsModalOpen(false)}>
+                  <motion.div initial={{ scale:.9, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:.9, y:20 }}
+                              className="modal-bx-rel" onClick={e => e.stopPropagation()}>
 
-                    {/* Visitantes */}
-                    {selectedRel.visitantesPresentes?.length > 0 && (
-                        <div style={{ marginBottom:28 }}>
-                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:IEQ.yellowDark, margin:"0 0 14px" }}>
-                            VISITANTES ({selectedRel.visitantesPresentes.length})
+                    {/* Header azul */}
+                    <div style={{ padding:"22px 24px", background:`linear-gradient(135deg, ${IEQ.blueDark}, ${IEQ.blue})`, display:"flex", justifyContent:"space-between", alignItems:"center", flexShrink:0 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                        <div style={{ width:44, height:44, background:"rgba(255,255,255,.15)", borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                          <UserCheck size={22} style={{ color:"#fff" }} />
+                        </div>
+                        <div>
+                          <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, letterSpacing:".12em", color:"#fff", margin:"0 0 3px" }}>{selectedRel.nomeCelula}</h3>
+                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color:"rgba(255,255,255,.6)", margin:0 }}>
+                            {formatarDataLocal(selectedRel.dataReuniao)}
+                            {comDecisao.length > 0 && (
+                                <span style={{ marginLeft:10, background:"rgba(253,184,19,.25)", color:IEQ.yellow, padding:"2px 8px", borderRadius:99, fontSize:8 }}>
+                            ✦ {comDecisao.length} DECISÃO{comDecisao.length > 1 ? "ÕES" : ""}
+                          </span>
+                            )}
                           </p>
-                          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px, 1fr))", gap:10 }}>
-                            {selectedRel.visitantesPresentes.map((v, i) => (
-                                <div key={i} style={{ padding:"12px 14px", background:isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.08)", border:`1px solid rgba(253,184,19,.2)`, borderRadius:10 }}>
-                                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".08em", color:textPrimary, margin:"0 0 6px" }}>{v.nome}</p>
-                                  {v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA" && (
-                                      <span className="decisao-badge" style={getDecisaoCor(v.decisaoEspiritual)}>
+                        </div>
+                      </div>
+                      <button onClick={() => setIsModalOpen(false)}
+                              style={{ background:"rgba(255,255,255,.15)", border:"none", color:"#fff", padding:10, borderRadius:8, cursor:"pointer" }}>
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    {/* Conteúdo scrollável */}
+                    <div style={{ overflowY:"auto", flex:1, padding:"24px", display:"flex", flexDirection:"column", gap:24 }}>
+
+                      {/* ✦ DECISÕES ESPIRITUAIS — bloco de destaque no topo */}
+                      {comDecisao.length > 0 && (
+                          <div style={{ padding:"18px 20px", background: isDark ? "rgba(253,184,19,.07)" : "rgba(253,184,19,.09)", border:"1px solid rgba(253,184,19,.28)", borderRadius:14 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+                              <Sparkles size={15} style={{ color:IEQ.yellowDark }} />
+                              <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:IEQ.yellowDark, fontWeight:700 }}>
+                          DECISÕES ESPIRITUAIS ({comDecisao.length})
+                        </span>
+                            </div>
+                            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                              {comDecisao.map((v, i) => (
+                                  <div key={i} style={{
+                                    display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:8,
+                                    padding:"12px 16px",
+                                    background: isDark ? "rgba(255,255,255,.04)" : "rgba(255,255,255,.75)",
+                                    border:`1px solid ${getDecisaoCor(v.decisaoEspiritual).borderColor}`,
+                                    borderRadius:10,
+                                  }}>
+                                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                                      <div style={{ width:34, height:34, borderRadius:8, background:`${getDecisaoCor(v.decisaoEspiritual).color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:14, color:getDecisaoCor(v.decisaoEspiritual).color }}>
+                                        {v.nome.charAt(0)}
+                                      </div>
+                                      <span style={{ fontFamily:"'EB Garamond',serif", fontSize:16, fontWeight:600, color:textPrimary }}>
+                                {v.nome}
+                              </span>
+                                    </div>
+                                    <span className="decisao-badge" style={getDecisaoCor(v.decisaoEspiritual)}>
                               {getDecisaoTexto(v.decisaoEspiritual)}
                             </span>
-                                  )}
-                                </div>
-                            ))}
+                                  </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                    )}
+                      )}
 
-                    {/* Observações */}
-                    {selectedRel.observacoes && (
-                        <div style={{ padding:"16px 18px", background:isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.05)", border:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, borderRadius:12 }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
-                            <MessageSquare size={14} style={{ color:IEQ.red }} />
-                            <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:IEQ.red }}>OBSERVAÇÕES</span>
-                          </div>
-                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:15, fontStyle:"italic", color:textSecondary, margin:0 }}>
-                            "{selectedRel.observacoes}"
-                          </p>
+                      {/* Membros presentes */}
+                      <div>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, margin:"0 0 14px" }}>
+                          MEMBROS PRESENTES ({selectedRel.membrosPresentes?.length || 0})
+                        </p>
+                        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:8 }}>
+                          {selectedRel.membrosPresentes?.map((m, i) => (
+                              <div key={i} style={{ padding:"10px 14px", background:isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.05)", border:`1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, borderRadius:8, fontFamily:"'EB Garamond',serif", fontSize:14, fontWeight:500, color:textPrimary }}>
+                                {m.nome || m}
+                              </div>
+                          ))}
                         </div>
-                    )}
-                  </div>
+                      </div>
+
+                      {/* Visitantes com badge de decisão */}
+                      {selectedRel.visitantesPresentes?.length > 0 && (
+                          <div>
+                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:IEQ.yellowDark, margin:"0 0 14px" }}>
+                              VISITANTES ({selectedRel.visitantesPresentes.length})
+                            </p>
+                            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px, 1fr))", gap:10 }}>
+                              {selectedRel.visitantesPresentes.map((v, i) => (
+                                  <div key={i} style={{ padding:"12px 14px", background:isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.08)", border:`1px solid rgba(253,184,19,.2)`, borderRadius:10 }}>
+                                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".08em", color:textPrimary, margin:"0 0 6px" }}>{v.nome}</p>
+                                    <span className="decisao-badge" style={getDecisaoCor(v.decisaoEspiritual)}>
+                              {getDecisaoTexto(v.decisaoEspiritual)}
+                            </span>
+                                  </div>
+                              ))}
+                            </div>
+                          </div>
+                      )}
+
+                      {/* Observações do líder */}
+                      {selectedRel.observacoes && (
+                          <div style={{ padding:"16px 18px", background:isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.05)", border:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`, borderRadius:12 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                              <MessageSquare size={14} style={{ color:IEQ.red }} />
+                              <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:IEQ.red }}>OBSERVAÇÕES DO LÍDER</span>
+                            </div>
+                            <p style={{ fontFamily:"'EB Garamond',serif", fontSize:15, fontStyle:"italic", color:textSecondary, margin:0 }}>
+                              "{selectedRel.observacoes}"
+                            </p>
+                          </div>
+                      )}
+
+                    </div>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-          )}
+            );
+          })()}
         </AnimatePresence>
       </div>
   );

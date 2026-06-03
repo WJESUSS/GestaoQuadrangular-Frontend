@@ -5,19 +5,67 @@ import { Flame, Plus, X, Loader2, CheckCircle2, ChevronDown, Search, Calendar } 
 
 const IEQ = {
     red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
-    yellow: "#FDB813", blue: "#003DA5", blueDark: "#002470",
-    blueLight: "#1A56C4", offWhite: "#F5F0E8",
+    yellow: "#FDB813", yellowDark: "#C48C00",
+    blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
+    offWhite: "#F5F0E8",
 };
 
 const TOTAL_SEMANAS = 4;
 
+const DECISAO_CONFIG = {
+    ACEITOU_JESUS: {
+        label: "Aceitou Jesus",
+        cor: "#185FA5", bg: "#E6F1FB", borda: "#B5D4F4",
+        icone: "✝️",
+    },
+    RECONCILIOU: {
+        label: "Reconciliou",
+        cor: "#854F0B", bg: "#FAEEDA", borda: "#FAC775",
+        icone: "🤝",
+    },
+    BATISMO_AGUAS: {
+        label: "Deseja Batismo",
+        cor: "#0F6E56", bg: "#E1F5EE", borda: "#9FE1CB",
+        icone: "💧",
+    },
+};
+
+function extrairDecisaoAtual(historico) {
+    if (!historico) return null;
+    if (Array.isArray(historico)) {
+        if (historico.length === 0) return null;
+        const ultimo = historico[historico.length - 1];
+        return ultimo?.decisaoEspiritual ?? null;
+    }
+    return historico?.decisaoEspiritual ?? null;
+}
+
+/* ── Badge Decisão ── */
+function BadgeDecisao({ decisao }) {
+    const cfg = decisao && decisao !== "NENHUMA" ? DECISAO_CONFIG[decisao] : null;
+    if (!cfg) return null;
+    return (
+        <span style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            padding: "2px 9px", borderRadius: 99,
+            fontSize: 11, fontWeight: 600,
+            fontFamily: "'EB Garamond', serif",
+            background: cfg.bg, color: cfg.cor,
+            border: `1px solid ${cfg.borda}`,
+            whiteSpace: "nowrap", flexShrink: 0,
+        }}>
+            {cfg.icone} {cfg.label}
+        </span>
+    );
+}
+
+/* ── Badge Status ── */
 function BadgeStatus({ status }) {
     const s = (status || "").toLowerCase();
     if (s.includes("ativ"))   return <span style={badge("#7A9E7E")}>✦ ATIVA</span>;
     if (s.includes("cancel")) return <span style={badge(IEQ.redLight)}>✦ CANCELADA</span>;
     if (s.includes("conclu")) return <span style={badge(IEQ.yellow)}>✦ CONCLUÍDA</span>;
     return <span style={badge(IEQ.yellow)}>✦ PENDENTE</span>;
-
     function badge(color) {
         return {
             display: "inline-flex", alignItems: "center", gap: 5,
@@ -29,6 +77,7 @@ function BadgeStatus({ status }) {
     }
 }
 
+/* ── Modal base ── */
 function IEQModal({ open, onClose, title, children, isDark, textPrimary, textSecondary }) {
     if (!open) return null;
     return (
@@ -53,76 +102,86 @@ function IEQModal({ open, onClose, title, children, isDark, textPrimary, textSec
     );
 }
 
+/* ── Hooks ── */
 function useMembros(celulaId) {
     const [membros, setMembros] = useState([]);
     const [loading, setLoading] = useState(false);
     const [erro, setErro]       = useState(null);
-
     const buscar = useCallback(async () => {
         if (!celulaId) return;
-        setLoading(true);
-        setErro(null);
+        setLoading(true); setErro(null);
         try {
             const res = await api.get(`/celulas/${celulaId}/membros`);
-            setMembros(
-                Array.isArray(res.data)
-                    ? res.data
-                    : res.data?.content ?? res.data?.data ?? []
-            );
+            setMembros(Array.isArray(res.data) ? res.data : res.data?.content ?? res.data?.data ?? []);
         } catch {
-            setErro("Não foi possível carregar membros da célula.");
-            setMembros([]);
-        } finally {
-            setLoading(false);
-        }
+            setErro("Não foi possível carregar membros da célula."); setMembros([]);
+        } finally { setLoading(false); }
     }, [celulaId]);
-
     return { membros, loading, erro, buscar };
 }
 
-// ← ALTERADO: recebe celulaId e busca só visitantes daquela célula
 function useVisitantes(celulaId) {
     const [visitantes, setVisitantes] = useState([]);
     const [loading, setLoading]       = useState(false);
     const [erro, setErro]             = useState(null);
-
     const buscar = useCallback(async () => {
         if (!celulaId) return;
-        setLoading(true);
-        setErro(null);
+        setLoading(true); setErro(null);
         try {
-            // Busca visitantes vinculados à célula específica
             const res = await api.get(`/celulas/${celulaId}/visitantes`);
             setVisitantes(Array.isArray(res.data) ? res.data : res.data?.content ?? res.data?.data ?? []);
         } catch {
-            setErro("Não foi possível carregar visitantes da célula.");
-            setVisitantes([]);
-        } finally {
-            setLoading(false);
-        }
+            setErro("Não foi possível carregar visitantes da célula."); setVisitantes([]);
+        } finally { setLoading(false); }
     }, [celulaId]);
-
     return { visitantes, loading, erro, buscar };
 }
 
+function useHistoricoDecisoes() {
+    const [historico, setHistorico] = useState({});
+
+    const buscarDecisao = useCallback(async (visitanteId) => {
+        if (!visitanteId || historico[visitanteId] !== undefined) return;
+        try {
+            const res = await api.get(`/visitantes/${visitanteId}/historico-decisoes`);
+            const decisao = extrairDecisaoAtual(res.data);
+            setHistorico(prev => ({ ...prev, [visitanteId]: decisao }));
+        } catch {
+            try {
+                const res2 = await api.get(`/visitantes/${visitanteId}`);
+                const decisao = res2.data?.decisaoEspiritual ?? null;
+                setHistorico(prev => ({ ...prev, [visitanteId]: decisao }));
+            } catch {
+                setHistorico(prev => ({ ...prev, [visitanteId]: null }));
+            }
+        }
+    }, [historico]);
+
+    const buscarEmLote = useCallback(async (visitanteIds) => {
+        const novos = visitanteIds.filter(id => historico[id] === undefined);
+        if (novos.length === 0) return;
+        await Promise.all(novos.map(id => buscarDecisao(id)));
+    }, [buscarDecisao, historico]);
+
+    return { historico, buscarDecisao, buscarEmLote };
+}
+
+/* ── Pessoa Selector ── */
 function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholder, textPrimary, textSecondary, isDark, labelKey = "nome" }) {
     const [busca, setBusca] = useState("");
     const filtrados = items.filter(p => (p[labelKey] ?? p.nomeCompleto ?? "").toLowerCase().includes(busca.toLowerCase()));
-
     const inputStyle = {
         width: "100%", background: isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)",
         border: `1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"}`,
         color: textPrimary, padding: "10px 14px 10px 36px", borderRadius: 8, outline: "none",
         fontFamily: "'EB Garamond',serif", fontSize: 14, boxSizing: "border-box",
     };
-
     if (loading) return (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: textSecondary, fontFamily: "'EB Garamond',serif", fontSize: 13 }}>
             <Loader2 size={16} style={{ animation: "spin 1s linear infinite", color: IEQ.red }} /> Carregando...
         </div>
     );
     if (erro) return <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 13, color: IEQ.redLight, padding: "12px 0" }}>{erro}</p>;
-
     return (
         <div>
             <div style={{ position: "relative", marginBottom: 10 }}>
@@ -150,13 +209,7 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
                                  onMouseLeave={e => { if (!sel) e.currentTarget.style.background = "transparent"; }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{
-                                        width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                                        background: isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.08)",
-                                        display: "flex", alignItems: "center", justifyContent: "center",
-                                        fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700,
-                                        color: sel ? IEQ.red : textSecondary,
-                                    }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, background: isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.08)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, color: sel ? IEQ.red : textSecondary }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div>
@@ -182,12 +235,7 @@ function PessoaBloco({ label, nome, cor, textPrimary, textSecondary }) {
     if (!nome) return null;
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{
-                width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
-                background: `${cor}18`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 700, color: cor,
-            }}>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, background: `${cor}18`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 700, color: cor }}>
                 {nome.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -198,36 +246,37 @@ function PessoaBloco({ label, nome, cor, textPrimary, textSecondary }) {
     );
 }
 
+/* ══════════════════════════════════════════════════════════════
+   COMPONENTE PRINCIPAL
+══════════════════════════════════════════════════════════════ */
 export default function Missao70Lider({ celulaId, isDark = true }) {
     const [missoes, setMissoes]       = useState([]);
     const [loading, setLoading]       = useState(true);
     const [expandedId, setExpandedId] = useState(null);
-
     const [busca, setBusca]           = useState("");
     const [dataInicio, setDataInicio] = useState("");
     const [dataFim, setDataFim]       = useState("");
-
+    const [toast, setToast]           = useState(null);
     const [modalCriar, setModalCriar]         = useState(false);
     const [modalVisitante, setModalVisitante] = useState(false);
     const [modalEncontro, setModalEncontro]   = useState(false);
     const [modalCancelar, setModalCancelar]   = useState(false);
     const [targetId, setTargetId]             = useState(null);
     const [targetNome, setTargetNome]         = useState("");
-
-    const [fCriar, setFCriar] = useState({
-        nome: "", endereco: "", nomeAnfitriao: "", telefoneContato: "",
-        liderId: null, auxiliarId: null,
-    });
+    const [fCriar, setFCriar] = useState({ nome: "", endereco: "", nomeAnfitriao: "", telefoneContato: "", liderId: null, auxiliarId: null });
     const [visitanteSelecionado, setVisitanteSelecionado] = useState(null);
     const [fEnc, setFEnc] = useState({
         data: new Date().toISOString().split("T")[0],
-        numeroSemana: 1, observacoes: "", decisoesPorVisitante: [],
+        numeroSemana: 1,
+        observacoes: "",
+        /* lista apenas para exibir as decisões — sem edição */
+        visitantesInfo: [],
     });
     const [submitting, setSubmitting] = useState(false);
 
     const membrosHook    = useMembros(celulaId);
-    // ← ALTERADO: passa celulaId para buscar só visitantes desta célula
     const visitantesHook = useVisitantes(celulaId);
+    const { historico: historicoDecisoes, buscarEmLote } = useHistoricoDecisoes();
 
     const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
     const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
@@ -241,6 +290,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
         @keyframes m70fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
         @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)} }
         .m70-card-anim{animation:m70fadeUp .45s ease both}
         .m70-card{transition:border-color .25s,box-shadow .25s}
         .m70-card:hover{border-color:rgba(253,184,19,.4)!important;box-shadow:0 8px 28px rgba(253,184,19,.08)}
@@ -264,23 +314,31 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
         input[type="date"].m70-input::-webkit-calendar-picker-indicator{filter:${isDark ? "invert(1) opacity(0.4)" : "opacity(0.5)"};cursor:pointer}
         @media(min-width:500px){.m70-stats{grid-template-columns:repeat(4,1fr)!important}}
         @media(min-width:600px){.m70-filters-grid{grid-template-columns:1fr 1fr!important}}
+        .m70-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:12px;font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.14em;display:flex;align-items:center;gap:8px;white-space:nowrap;animation:toastIn .3s ease forwards;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+        .m70-toast.success{background:rgba(122,158,126,.95);color:#fff;border:1px solid rgba(122,158,126,.5)}
+        .m70-toast.error{background:rgba(200,16,46,.9);color:#fff;border:1px solid rgba(200,16,46,.5)}
     `;
+
+    const showToast = (msg, tipo = "success") => { setToast({ msg, tipo }); setTimeout(() => setToast(null), 3500); };
 
     const carregar = useCallback(async () => {
         try {
             setLoading(true);
             const url = celulaId ? `/api/missao70?celulaId=${celulaId}` : "/api/missao70";
             const res = await api.get(url);
-            setMissoes(Array.isArray(res.data) ? res.data : res.data?.content ?? []);
+            const lista = Array.isArray(res.data) ? res.data : res.data?.content ?? [];
+            setMissoes(lista);
+            const todosIds = lista.flatMap(m => (m.visitantes || []).map(v => v.id).filter(Boolean));
+            const idsUnicos = [...new Set(todosIds)];
+            if (idsUnicos.length > 0) buscarEmLote(idsUnicos);
         } catch (err) { console.error(err); setMissoes([]); }
         finally { setLoading(false); }
-    }, [celulaId]);
+    }, [celulaId, buscarEmLote]);
 
     useEffect(() => { carregar(); }, [carregar]);
 
     const missoesFiltradas = missoes.filter(m => {
-        const textoOk = (m.nome ?? "").toLowerCase().includes(busca.toLowerCase()) ||
-            (m.endereco ?? "").toLowerCase().includes(busca.toLowerCase());
+        const textoOk = (m.nome ?? "").toLowerCase().includes(busca.toLowerCase()) || (m.endereco ?? "").toLowerCase().includes(busca.toLowerCase());
         const dataStr  = m.dataInicio ?? null;
         const dataCasa = dataStr ? new Date(dataStr) : null;
         const inicioOk = !dataInicio || (dataCasa && dataCasa >= new Date(dataInicio));
@@ -288,9 +346,8 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
         return textoOk && inicioOk && fimOk;
     });
 
-    const temFiltro = busca || dataInicio || dataFim;
-    const limpar    = () => { setBusca(""); setDataInicio(""); setDataFim(""); };
-
+    const temFiltro       = busca || dataInicio || dataFim;
+    const limpar          = () => { setBusca(""); setDataInicio(""); setDataFim(""); };
     const totalMissoes    = missoes.length;
     const ativas          = missoes.filter(m => (m.status || "").toLowerCase().includes("ativ")).length;
     const totalVisitantes = missoes.reduce((s, m) => s + (m.visitantes || []).length, 0);
@@ -305,43 +362,38 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
     const abrirModalVisitante = (id) => {
         setTargetId(id);
         setVisitanteSelecionado(null);
-        visitantesHook.buscar(); // já busca filtrado pela célula
+        visitantesHook.buscar();
         setModalVisitante(true);
     };
 
+    /* ── Abre modal de encontro — só leitura de decisão ── */
     const abrirModalEncontro = (missao) => {
         setTargetId(missao.id);
-        const visitantesDaMissao = (missao.visitantes ?? []).map(v => ({
-            visitanteId:   v.id,
-            visitanteNome: v.nome ?? `#${v.id}`,
-            aceitouJesus:  false,
-            reconciliacao: false,
-            desejoBatismo: false,
-        }));
+
+        /* monta lista informativa dos visitantes com a decisão atual do banco */
+        const visitantesInfo = (missao.visitantes ?? []).map(v => {
+            const decisao =
+                historicoDecisoes[v.id] !== undefined
+                    ? historicoDecisoes[v.id]
+                    : (v.decisaoEspiritual ?? null);
+            return {
+                visitanteId:   v.id,
+                visitanteNome: v.nome ?? `#${v.id}`,
+                decisao,
+            };
+        });
+
         const realizados = missao.encontrosRealizados ?? 0;
         setFEnc({
             data: new Date().toISOString().split("T")[0],
             numeroSemana: Math.min(realizados + 1, TOTAL_SEMANAS),
             observacoes: "",
-            decisoesPorVisitante: visitantesDaMissao,
+            visitantesInfo,
         });
         setModalEncontro(true);
     };
 
-    const abrirModalCancelar = (id, nome) => {
-        setTargetId(id);
-        setTargetNome(nome || "");
-        setModalCancelar(true);
-    };
-
-    const toggleDecisao = (visitanteId, campo) => {
-        setFEnc(f => ({
-            ...f,
-            decisoesPorVisitante: f.decisoesPorVisitante.map(d =>
-                d.visitanteId === visitanteId ? { ...d, [campo]: !d[campo] } : d
-            ),
-        }));
-    };
+    const abrirModalCancelar = (id, nome) => { setTargetId(id); setTargetNome(nome || ""); setModalCancelar(true); };
 
     const criarMissao = async () => {
         if (!fCriar.nome.trim())          return alert("Informe o nome da Missão 70.");
@@ -349,17 +401,16 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
         setSubmitting(true);
         try {
             await api.post("/api/missao70", {
-                nome:            fCriar.nome.trim(),
-                nomeAnfitriao:   fCriar.nomeAnfitriao.trim(),
-                endereco:        fCriar.endereco.trim(),
+                nome: fCriar.nome.trim(),
+                nomeAnfitriao: fCriar.nomeAnfitriao.trim(),
+                endereco: fCriar.endereco.trim(),
                 telefoneContato: fCriar.telefoneContato.trim(),
-                dataInicio:      new Date().toISOString().split("T")[0],
-                celulaId:        celulaId ?? null,
-                liderId:         fCriar.liderId ?? null,
-                auxiliarId:      fCriar.auxiliarId ?? null,
+                dataInicio: new Date().toISOString().split("T")[0],
+                celulaId: celulaId ?? null,
+                liderId: fCriar.liderId ?? null,
+                auxiliarId: fCriar.auxiliarId ?? null,
             });
-            setModalCriar(false);
-            carregar();
+            setModalCriar(false); carregar();
         } catch (err) { alert(err.response?.data?.message || "Erro ao criar Missão 70."); }
         finally { setSubmitting(false); }
     };
@@ -369,32 +420,36 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
         setSubmitting(true);
         try {
             await api.post(`/api/missao70/${targetId}/visitantes/${visitanteSelecionado.id}`);
-            setModalVisitante(false);
-            setVisitanteSelecionado(null);
-            carregar();
+            setModalVisitante(false); setVisitanteSelecionado(null); carregar();
         } catch (err) { alert(err.response?.data?.message || "Erro ao adicionar visitante."); }
         finally { setSubmitting(false); }
     };
 
+    /* ── Registra semana — sem decisões, só data/semana/observações ── */
     const registrarEncontro = async () => {
         if (!fEnc.data) return alert("Informe a data.");
         setSubmitting(true);
         try {
-            const decisoes = fEnc.decisoesPorVisitante.flatMap(d => {
-                const lista = [];
-                if (d.aceitouJesus)  lista.push({ visitanteId: d.visitanteId, tipoDecisao: "ACEITOU_JESUS" });
-                if (d.reconciliacao) lista.push({ visitanteId: d.visitanteId, tipoDecisao: "RECONCILIOU" });
-                if (d.desejoBatismo) lista.push({ visitanteId: d.visitanteId, tipoDecisao: "BATISMO_AGUAS" });
-                return lista;
-            });
             await api.post(`/api/missao70/${targetId}/encontros`, {
                 dataEncontro: fEnc.data,
                 numeroSemana: fEnc.numeroSemana,
                 observacoes:  fEnc.observacoes,
-                decisoes,
+                decisoes:     [],
             });
+
+            if (celulaId) {
+                try {
+                    await api.put(`/metas/celula/${celulaId}/recalcular`);
+                    showToast("✦ Semana registrada e metas atualizadas!", "success");
+                } catch {
+                    showToast("Semana salva, mas falha ao atualizar metas.", "error");
+                }
+            } else {
+                showToast("✦ Semana registrada com sucesso!", "success");
+            }
+
             setModalEncontro(false);
-            setFEnc({ data: new Date().toISOString().split("T")[0], numeroSemana: 1, observacoes: "", decisoesPorVisitante: [] });
+            setFEnc({ data: new Date().toISOString().split("T")[0], numeroSemana: 1, observacoes: "", visitantesInfo: [] });
             carregar();
         } catch (err) { alert(err.response?.data?.message || "Erro ao registrar encontro."); }
         finally { setSubmitting(false); }
@@ -402,11 +457,8 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
     const cancelarMissao = async () => {
         setSubmitting(true);
-        try {
-            await api.patch(`/api/missao70/${targetId}/cancelar`);
-            setModalCancelar(false);
-            carregar();
-        } catch (err) { alert(err.response?.data?.message || "Erro ao cancelar."); }
+        try { await api.patch(`/api/missao70/${targetId}/cancelar`); setModalCancelar(false); carregar(); }
+        catch (err) { alert(err.response?.data?.message || "Erro ao cancelar."); }
         finally { setSubmitting(false); }
     };
 
@@ -422,7 +474,9 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             <style>{globalCss}</style>
 
-            {/* Cabeçalho */}
+            {toast && <div className={`m70-toast ${toast.tipo}`}>{toast.tipo === "success" ? "✦" : "✕"} {toast.msg}</div>}
+
+            {/* ── Cabeçalho ── */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                     <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(253,184,19,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -436,7 +490,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                 <button className="m70-btn-primary" onClick={abrirModalCriar}><Plus size={14} /> NOVA MISSÃO</button>
             </div>
 
-            {/* Stats */}
+            {/* ── Stats ── */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 12 }} className="m70-stats">
                 {[
                     { label: "TOTAL",      value: totalMissoes,    color: textPrimary,   sub: "missões"      },
@@ -452,14 +506,13 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                 ))}
             </div>
 
-            {/* Lista */}
+            {/* ── Lista ── */}
             <div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
                     <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".18em", color: textPrimary, margin: 0 }}>LISTA DE MISSÕES</p>
-                    <button className="m70-btn-ghost" onClick={carregar}>↻ ATUALIZAR</button>
+                    <button className="m70-btn-ghost" onClick={carregar}>↺ ATUALIZAR</button>
                 </div>
 
-                {/* Filtros */}
                 <div style={{ ...ieqCard, padding: "16px 18px", marginBottom: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                         <p style={{ fontFamily: "'Cinzel',serif", fontSize: "8.5px", letterSpacing: ".18em", color: textSecondary, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
@@ -469,9 +522,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                     </div>
                     <div style={{ position: "relative" }}>
                         <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: textSecondary, pointerEvents: "none" }} />
-                        <input className="m70-input" style={{ ...inputStyle, paddingLeft: 36, fontSize: 14 }}
-                               placeholder="Buscar por nome ou endereço..."
-                               value={busca} onChange={e => setBusca(e.target.value)} />
+                        <input className="m70-input" style={{ ...inputStyle, paddingLeft: 36, fontSize: 14 }} placeholder="Buscar por nome ou endereço..." value={busca} onChange={e => setBusca(e.target.value)} />
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10 }} className="m70-filters-grid">
                         <div>
@@ -485,14 +536,11 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                     </div>
                     {temFiltro && (
                         <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: textSecondary, margin: 0 }}>
-                            {missoesFiltradas.length === 0
-                                ? "Nenhuma missão encontrada com os filtros aplicados."
-                                : `${missoesFiltradas.length} missão(ões) encontrada(s).`}
+                            {missoesFiltradas.length === 0 ? "Nenhuma missão encontrada com os filtros aplicados." : `${missoesFiltradas.length} missão(ões) encontrada(s).`}
                         </p>
                     )}
                 </div>
 
-                {/* Cards */}
                 {missoes.length === 0 ? (
                     <div style={{ ...ieqCard, textAlign: "center", padding: "56px 24px" }}>
                         <Flame size={36} style={{ color: textSecondary, marginBottom: 14 }} />
@@ -515,39 +563,22 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                     return (
                         <motion.div key={m.id} className="m70-card-anim m70-card"
-                                    style={{
-                                        ...ieqCard, marginBottom: 10, overflow: "hidden",
-                                        animationDelay: `${i * 0.06}s`,
-                                        borderColor: concluida ? "rgba(122,158,126,.4)" : isOpen ? "rgba(253,184,19,.45)" : cardBorder,
-                                    }}
+                                    style={{ ...ieqCard, marginBottom: 10, overflow: "hidden", animationDelay: `${i * 0.06}s`, borderColor: concluida ? "rgba(122,158,126,.4)" : isOpen ? "rgba(253,184,19,.45)" : cardBorder }}
                                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                         >
-                            {/* Header */}
                             <div onClick={() => setExpandedId(isOpen ? null : m.id)}
                                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", cursor: "pointer", gap: 12, flexWrap: "wrap" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                                    <div style={{
-                                        width: 42, height: 42, borderRadius: 10, flexShrink: 0,
-                                        background: concluida ? "rgba(122,158,126,.15)" : "linear-gradient(135deg,rgba(253,184,19,.18),rgba(200,16,46,.12))",
-                                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
-                                    }}>
-                                        {concluida ? "🏆" : "🔥"}
+                                    <div style={{ width: 42, height: 42, borderRadius: 10, flexShrink: 0, background: concluida ? "rgba(122,158,126,.15)" : "linear-gradient(135deg,rgba(253,184,19,.18),rgba(200,16,46,.12))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+                                        {concluida ? "✅" : "🔥"}
                                     </div>
                                     <div>
-                                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: ".1em", color: textPrimary, margin: 0 }}>
-                                            {m.nome || "Missão " + m.id}
-                                        </p>
-                                        <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: textSecondary, margin: "2px 0 0" }}>
-                                            {m.endereco || "Endereço não informado"}
-                                        </p>
+                                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: ".1em", color: textPrimary, margin: 0 }}>{m.nome || "Missão " + m.id}</p>
+                                        <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: textSecondary, margin: "2px 0 0" }}>{m.endereco || "Endereço não informado"}</p>
                                     </div>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-                                    <div style={{
-                                        textAlign: "center", width: 44, height: 44, borderRadius: "50%",
-                                        border: `2px solid ${concluida ? "#7A9E7E" : "rgba(253,184,19,.5)"}`,
-                                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                                    }}>
+                                    <div style={{ textAlign: "center", width: 44, height: 44, borderRadius: "50%", border: `2px solid ${concluida ? "#7A9E7E" : "rgba(253,184,19,.5)"}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                                         <span style={{ fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 700, color: concluida ? "#7A9E7E" : IEQ.yellow, lineHeight: 1 }}>{restantes}</span>
                                         <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 9, color: textSecondary, lineHeight: 1, marginTop: 2 }}>sem.</span>
                                     </div>
@@ -570,12 +601,10 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                             {concluida && (
                                 <div style={{ margin: "12px 20px 4px", padding: "16px 20px", borderRadius: 10, background: isDark ? "rgba(122,158,126,.1)" : "rgba(122,158,126,.07)", border: "1px solid rgba(122,158,126,.35)", display: "flex", alignItems: "center", gap: 14 }}>
-                                    <div style={{ fontSize: 28, flexShrink: 0 }}>🏆</div>
+                                    <div style={{ fontSize: 28, flexShrink: 0 }}>🎉</div>
                                     <div>
                                         <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".18em", color: "#7A9E7E", margin: "0 0 4px" }}>MISSÃO CONCLUÍDA!</p>
-                                        <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 13, color: textSecondary, margin: 0 }}>
-                                            Todas as {TOTAL_SEMANAS} semanas foram realizadas com sucesso.
-                                        </p>
+                                        <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 13, color: textSecondary, margin: 0 }}>Todas as {TOTAL_SEMANAS} semanas foram realizadas com sucesso.</p>
                                     </div>
                                 </div>
                             )}
@@ -583,30 +612,21 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             <div style={{ padding: "10px 20px 4px" }}>
                                 <div style={{ display: "flex", gap: 5 }}>
                                     {Array.from({ length: TOTAL_SEMANAS }, (_, idx) => (
-                                        <div key={idx} style={{
-                                            flex: 1, height: 5, borderRadius: 99,
-                                            background: idx < realizados
-                                                ? (concluida ? "#7A9E7E" : idx < realizados - 1 ? "#C48C00" : IEQ.yellow)
-                                                : (isDark ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)"),
-                                            transition: "background .3s",
-                                        }} />
+                                        <div key={idx} style={{ flex: 1, height: 5, borderRadius: 99, background: idx < realizados ? (concluida ? "#7A9E7E" : idx < realizados - 1 ? "#C48C00" : IEQ.yellow) : (isDark ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)"), transition: "background .3s" }} />
                                     ))}
                                 </div>
-                                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 11, color: textSecondary, margin: "4px 0 0" }}>
-                                    Semana {realizados} de {TOTAL_SEMANAS}
-                                </p>
+                                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 11, color: textSecondary, margin: "4px 0 0" }}>Semana {realizados} de {TOTAL_SEMANAS}</p>
                             </div>
 
                             <div style={{ display: "flex", gap: 8, padding: "10px 20px", flexWrap: "wrap" }}>
                                 {!cancelada && !concluida && <button className="m70-btn-sage"  onClick={() => abrirModalVisitante(m.id)}>+ VISITANTE</button>}
-                                {!cancelada && !concluida && <button className="m70-btn-ghost" onClick={() => abrirModalEncontro(m)}>📋 SEMANA</button>}
+                                {!cancelada && !concluida && <button className="m70-btn-ghost" onClick={() => abrirModalEncontro(m)}>✦ SEMANA</button>}
                                 {!cancelada              && <button className="m70-btn-danger" onClick={() => abrirModalCancelar(m.id, m.nome)}>✕ CANCELAR</button>}
                             </div>
 
                             <AnimatePresence>
                                 {isOpen && (
-                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .3 }}
-                                                style={{ overflow: "hidden" }}>
+                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .3 }} style={{ overflow: "hidden" }}>
                                         <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 14, borderTop: `1px solid ${isDark ? "rgba(253,184,19,.1)" : "rgba(253,184,19,.12)"}` }}>
 
                                             {m.nomeAnfitriao && (
@@ -626,28 +646,36 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             <PessoaBloco label="AUXILIAR" nome={m.auxiliarNome} cor="#7A9E7E"       textPrimary={textPrimary} textSecondary={textSecondary} />
 
                                             <div>
-                                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: "8.5px", letterSpacing: ".2em", color: textSecondary, margin: "0 0 10px" }}>
-                                                    👥 VISITANTES ({visitantes.length})
-                                                </p>
+                                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: "8.5px", letterSpacing: ".2em", color: textSecondary, margin: "0 0 10px" }}>✦ VISITANTES ({visitantes.length})</p>
                                                 {visitantes.length ? (
                                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                                                        {visitantes.map((v) => (
-                                                            <div key={v.id} style={{ background: isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.07)", border: `1px solid ${isDark ? "rgba(253,184,19,.2)" : "rgba(253,184,19,.18)"}`, borderRadius: 99, padding: "5px 14px", fontFamily: "'EB Garamond',serif", fontSize: 13, color: textPrimary, display: "flex", alignItems: "center", gap: 6 }}>
-                                                                <span>👤</span><span>{v.nome ?? `#${v.id}`}</span>
-                                                            </div>
-                                                        ))}
+                                                        {visitantes.map((v) => {
+                                                            const decisao = historicoDecisoes[v.id] !== undefined
+                                                                ? historicoDecisoes[v.id]
+                                                                : (v.decisaoEspiritual ?? null);
+                                                            const temDecisao = decisao && decisao !== "NENHUMA";
+                                                            return (
+                                                                <div key={v.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                                                    <div style={{ background: isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.07)", border: `1px solid ${isDark ? "rgba(253,184,19,.2)" : "rgba(253,184,19,.18)"}`, borderRadius: 99, padding: "5px 14px", fontFamily: "'EB Garamond',serif", fontSize: 13, color: textPrimary, display: "flex", alignItems: "center", gap: 6 }}>
+                                                                        <span>✦</span><span>{v.nome ?? `#${v.id}`}</span>
+                                                                    </div>
+                                                                    {temDecisao && (
+                                                                        <div style={{ paddingLeft: 8 }}>
+                                                                            <BadgeDecisao decisao={decisao} />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 ) : <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 13, color: textSecondary }}>Nenhum visitante cadastrado ainda.</p>}
                                             </div>
 
                                             <div>
-                                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: "8.5px", letterSpacing: ".2em", color: textSecondary, margin: "0 0 10px" }}>
-                                                    📋 SEMANAS ({realizados}/{TOTAL_SEMANAS})
-                                                </p>
+                                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: "8.5px", letterSpacing: ".2em", color: textSecondary, margin: "0 0 10px" }}>✦ SEMANAS ({realizados}/{TOTAL_SEMANAS})</p>
                                                 {realizados > 0
                                                     ? <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSecondary, margin: 0 }}>
-                                                        {realizados} semana{realizados !== 1 ? "s" : ""} registrada{realizados !== 1 ? "s" : ""}.
-                                                        {restantes > 0 ? ` Faltam ${restantes}.` : " Missão concluída!"}
+                                                        {realizados} semana{realizados !== 1 ? "s" : ""} registrada{realizados !== 1 ? "s" : ""}. {restantes > 0 ? `Faltam ${restantes}.` : "Missão concluída!"}
                                                     </p>
                                                     : <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 13, color: textSecondary }}>Nenhuma semana registrada.</p>
                                                 }
@@ -661,52 +689,41 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                 })}
             </div>
 
-            {/* MODAIS */}
+            {/* ════════════ MODAIS ════════════ */}
             <AnimatePresence>
 
-                {/* CRIAR MISSÃO */}
+                {/* ── CRIAR MISSÃO ── */}
                 {modalCriar && (
-                    <IEQModal open={modalCriar} onClose={() => setModalCriar(false)} title="NOVA MISSÃO 70"
-                              isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
+                    <IEQModal open={modalCriar} onClose={() => setModalCriar(false)} title="NOVA MISSÃO 70" isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
                         <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                                 <div>
                                     <p style={labelStyle}>NOME DA MISSÃO *</p>
-                                    <input className="m70-input" style={inputStyle} placeholder="Missão Rua das Flores"
-                                           value={fCriar.nome} onChange={e => setFCriar(f => ({ ...f, nome: e.target.value }))} />
+                                    <input className="m70-input" style={inputStyle} placeholder="Missão Rua das Flores" value={fCriar.nome} onChange={e => setFCriar(f => ({ ...f, nome: e.target.value }))} />
                                 </div>
                                 <div>
                                     <p style={labelStyle}>NOME DO ANFITRIÃO *</p>
-                                    <input className="m70-input" style={inputStyle} placeholder="João Silva"
-                                           value={fCriar.nomeAnfitriao} onChange={e => setFCriar(f => ({ ...f, nomeAnfitriao: e.target.value }))} />
+                                    <input className="m70-input" style={inputStyle} placeholder="João Silva" value={fCriar.nomeAnfitriao} onChange={e => setFCriar(f => ({ ...f, nomeAnfitriao: e.target.value }))} />
                                 </div>
                             </div>
                             <div>
                                 <p style={labelStyle}>ENDEREÇO</p>
-                                <input className="m70-input" style={inputStyle} placeholder="Rua, número, bairro"
-                                       value={fCriar.endereco} onChange={e => setFCriar(f => ({ ...f, endereco: e.target.value }))} />
+                                <input className="m70-input" style={inputStyle} placeholder="Rua, número, bairro" value={fCriar.endereco} onChange={e => setFCriar(f => ({ ...f, endereco: e.target.value }))} />
                             </div>
                             <div>
                                 <p style={labelStyle}>TELEFONE DE CONTATO</p>
-                                <input className="m70-input" style={inputStyle} placeholder="(71) 9 0000-0000"
-                                       value={fCriar.telefoneContato} onChange={e => setFCriar(f => ({ ...f, telefoneContato: e.target.value }))} />
+                                <input className="m70-input" style={inputStyle} placeholder="(71) 9 0000-0000" value={fCriar.telefoneContato} onChange={e => setFCriar(f => ({ ...f, telefoneContato: e.target.value }))} />
                             </div>
                             <div>
                                 <p style={labelStyle}>LÍDER (MEMBRO DA CÉLULA)</p>
-                                <PessoaSelector
-                                    items={membrosHook.membros} loading={membrosHook.loading} erro={membrosHook.erro}
-                                    selectedId={fCriar.liderId} onSelect={p => setFCriar(f => ({ ...f, liderId: p.id }))}
-                                    placeholder="Pesquisar líder..." textPrimary={textPrimary} textSecondary={textSecondary} isDark={isDark} />
+                                <PessoaSelector items={membrosHook.membros} loading={membrosHook.loading} erro={membrosHook.erro} selectedId={fCriar.liderId} onSelect={p => setFCriar(f => ({ ...f, liderId: p.id }))} placeholder="Pesquisar líder..." textPrimary={textPrimary} textSecondary={textSecondary} isDark={isDark} />
                             </div>
                             <div>
                                 <p style={labelStyle}>AUXILIAR (MEMBRO DA CÉLULA)</p>
-                                <PessoaSelector
-                                    items={membrosHook.membros} loading={membrosHook.loading} erro={membrosHook.erro}
-                                    selectedId={fCriar.auxiliarId} onSelect={p => setFCriar(f => ({ ...f, auxiliarId: p.id }))}
-                                    placeholder="Pesquisar auxiliar..." textPrimary={textPrimary} textSecondary={textSecondary} isDark={isDark} />
+                                <PessoaSelector items={membrosHook.membros} loading={membrosHook.loading} erro={membrosHook.erro} selectedId={fCriar.auxiliarId} onSelect={p => setFCriar(f => ({ ...f, auxiliarId: p.id }))} placeholder="Pesquisar auxiliar..." textPrimary={textPrimary} textSecondary={textSecondary} isDark={isDark} />
                             </div>
                             <div style={{ background: isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.07)", border: "1px solid rgba(253,184,19,.25)", borderRadius: 10, padding: "14px 16px", display: "flex", alignItems: "flex-start", gap: 12 }}>
-                                <span style={{ fontSize: 20, flexShrink: 0 }}>🔥</span>
+                                <span style={{ fontSize: 20, flexShrink: 0 }}>✦</span>
                                 <div>
                                     <p style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: ".15em", color: IEQ.yellow, margin: "0 0 4px" }}>O QUE É A MISSÃO 70?</p>
                                     <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSecondary, margin: 0, lineHeight: 1.5 }}>
@@ -724,29 +741,15 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                     </IEQModal>
                 )}
 
-                {/* ADICIONAR VISITANTE — só da célula */}
+                {/* ── ADICIONAR VISITANTE ── */}
                 {modalVisitante && (
-                    <IEQModal open={modalVisitante} onClose={() => setModalVisitante(false)} title="ADICIONAR VISITANTE"
-                              isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
+                    <IEQModal open={modalVisitante} onClose={() => setModalVisitante(false)} title="ADICIONAR VISITANTE" isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
                         <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
-                            {/* aviso de escopo */}
                             <div style={{ background: isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.06)", border: "1px solid rgba(253,184,19,.2)", borderRadius: 8, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
                                 <Flame size={14} color={IEQ.yellow} style={{ flexShrink: 0 }} />
-                                <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: textSecondary, margin: 0 }}>
-                                    Exibindo apenas visitantes cadastrados nesta célula.
-                                </p>
+                                <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: textSecondary, margin: 0 }}>Exibindo apenas visitantes cadastrados nesta célula.</p>
                             </div>
-                            <PessoaSelector
-                                items={visitantesHook.visitantes}
-                                loading={visitantesHook.loading}
-                                erro={visitantesHook.erro}
-                                selectedId={visitanteSelecionado?.id}
-                                onSelect={setVisitanteSelecionado}
-                                placeholder="Pesquisar visitante da célula..."
-                                textPrimary={textPrimary}
-                                textSecondary={textSecondary}
-                                isDark={isDark}
-                            />
+                            <PessoaSelector items={visitantesHook.visitantes} loading={visitantesHook.loading} erro={visitantesHook.erro} selectedId={visitanteSelecionado?.id} onSelect={setVisitanteSelecionado} placeholder="Pesquisar visitante da célula..." textPrimary={textPrimary} textSecondary={textSecondary} isDark={isDark} />
                         </div>
                         <div style={{ display: "flex", gap: 10, padding: "0 24px 24px" }}>
                             <button className="m70-btn-ghost" style={{ flex: 1 }} onClick={() => setModalVisitante(false)}>CANCELAR</button>
@@ -757,90 +760,77 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                     </IEQModal>
                 )}
 
-                {/* REGISTRAR SEMANA */}
+                {/* ── REGISTRAR SEMANA — sem edição de decisão ── */}
                 {modalEncontro && (
-                    <IEQModal open={modalEncontro} onClose={() => setModalEncontro(false)} title="REGISTRAR SEMANA"
-                              isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
+                    <IEQModal open={modalEncontro} onClose={() => setModalEncontro(false)} title="REGISTRAR SEMANA" isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
                         <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+                            {/* data + número semana */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                                 <div>
                                     <p style={labelStyle}>DATA *</p>
-                                    <input className="m70-input" style={inputStyle} type="date"
-                                           value={fEnc.data} onChange={e => setFEnc(f => ({ ...f, data: e.target.value }))} />
+                                    <input className="m70-input" style={inputStyle} type="date" value={fEnc.data} onChange={e => setFEnc(f => ({ ...f, data: e.target.value }))} />
                                 </div>
                                 <div>
                                     <p style={labelStyle}>NÚMERO DA SEMANA</p>
-                                    <select className="m70-input" style={inputStyle}
-                                            value={fEnc.numeroSemana} onChange={e => setFEnc(f => ({ ...f, numeroSemana: Number(e.target.value) }))}>
-                                        {Array.from({ length: TOTAL_SEMANAS }, (_, i) => (
-                                            <option key={i + 1} value={i + 1}>Semana {i + 1}</option>
-                                        ))}
+                                    <select className="m70-input" style={inputStyle} value={fEnc.numeroSemana} onChange={e => setFEnc(f => ({ ...f, numeroSemana: Number(e.target.value) }))}>
+                                        {Array.from({ length: TOTAL_SEMANAS }, (_, i) => <option key={i + 1} value={i + 1}>Semana {i + 1}</option>)}
                                     </select>
                                 </div>
                             </div>
+
+                            {/* observação geral */}
                             <div>
                                 <p style={labelStyle}>OBSERVAÇÕES</p>
-                                <textarea className="m70-input" style={{ ...inputStyle, minHeight: 70, resize: "vertical" }}
-                                          placeholder="Comentários sobre o encontro..."
-                                          value={fEnc.observacoes} onChange={e => setFEnc(f => ({ ...f, observacoes: e.target.value }))} />
-                            </div>
-                            <div>
-                                <p style={labelStyle}>DECISÕES POR VISITANTE</p>
-                                {fEnc.decisoesPorVisitante.length === 0 ? (
-                                    <div style={{ border: `1px dashed ${isDark ? "rgba(253,184,19,.25)" : "rgba(253,184,19,.2)"}`, borderRadius: 10, padding: "24px 16px", textAlign: "center" }}>
-                                        <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 13, color: textSecondary, margin: 0, lineHeight: 1.6 }}>
-                                            Nenhum visitante nesta missão.<br />Adicione visitantes antes de registrar decisões.
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                                        {fEnc.decisoesPorVisitante.map(d => (
-                                            <div key={d.visitanteId} style={{ borderRadius: 10, border: `1px solid ${isDark ? "rgba(253,184,19,.15)" : "rgba(253,184,19,.12)"}`, background: isDark ? "rgba(253,184,19,.03)" : "rgba(253,184,19,.02)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                                    <div style={{ width: 30, height: 30, borderRadius: "50%", flexShrink: 0, background: isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.1)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cinzel',serif", fontSize: 10, fontWeight: 700, color: IEQ.yellow }}>
-                                                        {d.visitanteNome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
-                                                    </div>
-                                                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".1em", color: textPrimary, margin: 0 }}>{d.visitanteNome}</p>
-                                                </div>
-                                                <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingLeft: 40 }}>
-                                                    {[
-                                                        { key: "aceitouJesus",  emoji: "✝️", label: "Aceitou Jesus",     color: "#7A9E7E"     },
-                                                        { key: "reconciliacao", emoji: "🕊️", label: "Reconciliação",     color: IEQ.blueLight },
-                                                        { key: "desejoBatismo", emoji: "💧", label: "Desejo de Batismo", color: IEQ.yellow    },
-                                                    ].map(({ key, emoji, label, color }) => {
-                                                        const checked = d[key];
-                                                        return (
-                                                            <label key={key} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", padding: "7px 10px", borderRadius: 8, background: checked ? `${color}18` : "transparent", border: `1px solid ${checked ? color + "50" : "transparent"}`, transition: "all .15s" }}>
-                                                                <input type="checkbox" checked={checked} onChange={() => toggleDecisao(d.visitanteId, key)} style={{ width: 15, height: 15, accentColor: color, cursor: "pointer", flexShrink: 0 }} />
-                                                                <span style={{ fontSize: 14 }}>{emoji}</span>
-                                                                <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: checked ? color : textPrimary, fontWeight: checked ? 600 : 400, transition: "color .15s" }}>{label}</span>
-                                                                {checked && <CheckCircle2 size={13} color={color} style={{ marginLeft: "auto", flexShrink: 0 }} />}
-                                                            </label>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                <textarea
+                                    className="m70-input"
+                                    style={{ ...inputStyle, minHeight: 80, resize: "vertical", fontSize: 14 }}
+                                    placeholder="Comentários sobre o encontro desta semana..."
+                                    value={fEnc.observacoes}
+                                    onChange={e => setFEnc(f => ({ ...f, observacoes: e.target.value }))}
+                                />
                             </div>
 
-                            {fEnc.decisoesPorVisitante.some(d => d.aceitouJesus || d.reconciliacao || d.desejoBatismo) && (
-                                <div style={{ background: isDark ? "rgba(122,158,126,.08)" : "rgba(122,158,126,.06)", border: "1px solid rgba(122,158,126,.25)", borderRadius: 10, padding: "12px 16px" }}>
-                                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: "8px", letterSpacing: ".2em", color: "#7A9E7E", margin: "0 0 8px" }}>RESUMO DAS DECISÕES</p>
-                                    {fEnc.decisoesPorVisitante.filter(d => d.aceitouJesus || d.reconciliacao || d.desejoBatismo).map(d => (
-                                        <div key={d.visitanteId} style={{ marginBottom: 6 }}>
-                                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textPrimary, margin: "0 0 2px", fontWeight: 500 }}>{d.visitanteNome}</p>
-                                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                                                {d.aceitouJesus  && <span style={{ fontFamily: "'Cinzel',serif", fontSize: "8px", letterSpacing: ".1em", color: "#7A9E7E"     }}>✝️ ACEITOU JESUS</span>}
-                                                {d.reconciliacao && <span style={{ fontFamily: "'Cinzel',serif", fontSize: "8px", letterSpacing: ".1em", color: IEQ.blueLight }}>🕊️ RECONCILIAÇÃO</span>}
-                                                {d.desejoBatismo && <span style={{ fontFamily: "'Cinzel',serif", fontSize: "8px", letterSpacing: ".1em", color: IEQ.yellow    }}>💧 BATISMO</span>}
-                                            </div>
-                                        </div>
-                                    ))}
+                            {/* visitantes — somente exibição das decisões */}
+                            {fEnc.visitantesInfo.length > 0 && (
+                                <div>
+                                    <p style={labelStyle}>VISITANTES PRESENTES</p>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                        {fEnc.visitantesInfo.map(v => {
+                                            const temDecisao = v.decisao && v.decisao !== "NENHUMA";
+                                            return (
+                                                <div key={v.visitanteId} style={{
+                                                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                                                    padding: "10px 14px", borderRadius: 8,
+                                                    background: isDark ? "rgba(253,184,19,.03)" : "rgba(253,184,19,.02)",
+                                                    border: `1px solid ${isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.1)"}`,
+                                                    gap: 10, flexWrap: "wrap",
+                                                }}>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                                        <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, background: isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.1)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cinzel',serif", fontSize: 9, fontWeight: 700, color: IEQ.yellow }}>
+                                                            {v.visitanteNome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
+                                                        </div>
+                                                        <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: textPrimary, margin: 0 }}>{v.visitanteNome}</p>
+                                                    </div>
+                                                    {temDecisao
+                                                        ? <BadgeDecisao decisao={v.decisao} />
+                                                        : <span style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: textSecondary }}>sem decisão registrada</span>
+                                                    }
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    {/* aviso de edição */}
+                                    <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 8, background: isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)", border: `1px solid ${isDark ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)"}`, display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ fontSize: 13, flexShrink: 0 }}>ℹ️</span>
+                                        <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: textSecondary, margin: 0 }}>
+                                            Para alterar a decisão espiritual de um visitante, acesse o <strong style={{ color: textPrimary }}>cadastro do visitante</strong>.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
                         </div>
+
                         <div style={{ display: "flex", gap: 10, padding: "0 24px 24px" }}>
                             <button className="m70-btn-ghost" style={{ flex: 1 }} onClick={() => setModalEncontro(false)}>CANCELAR</button>
                             <button className="m70-btn-blue" style={{ flex: 2, justifyContent: "center" }} onClick={registrarEncontro} disabled={submitting}>
@@ -850,10 +840,9 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                     </IEQModal>
                 )}
 
-                {/* CANCELAR */}
+                {/* ── CANCELAR MISSÃO ── */}
                 {modalCancelar && (
-                    <IEQModal open={modalCancelar} onClose={() => setModalCancelar(false)} title="CANCELAR MISSÃO"
-                              isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
+                    <IEQModal open={modalCancelar} onClose={() => setModalCancelar(false)} title="CANCELAR MISSÃO" isDark={isDark} textPrimary={textPrimary} textSecondary={textSecondary}>
                         <div style={{ padding: "16px 24px 20px" }}>
                             <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 15, color: textPrimary, lineHeight: 1.6 }}>
                                 Tem certeza que deseja cancelar <strong>"{targetNome}"</strong>? Esta ação não poderá ser desfeita facilmente.
@@ -868,7 +857,6 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         </div>
                     </IEQModal>
                 )}
-
             </AnimatePresence>
         </div>
     );
