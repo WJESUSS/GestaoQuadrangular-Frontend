@@ -131,6 +131,20 @@ const STATIC_CSS = `
 
 export default function SecretariaPage() {
   const [moduloAtivo,   setModuloAtivo]   = useState("MEMBROS");
+
+  // Intercepta o botão voltar do celular (Android/PWA)
+  useEffect(() => {
+    if (moduloAtivo !== "MEMBROS") {
+      window.history.pushState({ modulo: moduloAtivo }, "");
+    }
+
+    const handlePopState = () => {
+      setModuloAtivo("MEMBROS");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [moduloAtivo]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
   const [menuOpen,      setMenuOpen]      = useState(false);

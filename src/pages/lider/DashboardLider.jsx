@@ -709,10 +709,10 @@ export default function DashboardLider() {
 
                 <motion.div
                     key="home"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -20, transition: { duration: .15 } }}
-                    transition={{ duration: .4, staggerChildren: .07 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, transition: { duration: .2 } }}
+                    transition={{ duration: .3 }}
                     style={{ display: "flex", flexDirection: "column", gap: 24 }}
                 >
 
@@ -895,9 +895,10 @@ export default function DashboardLider() {
                 <motion.div
                     key="content"
                     className="tab-in"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20, transition: { duration: .15 } }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, transition: { duration: .2 } }}
+                    transition={{ duration: .3 }}
                 >
                   {abaAtiva === "metas"       && <TelaMetasLider        celula={celula}       isDark={isDark} />}
                   {abaAtiva === "relatorio"   && <TelaRelatorio          celula={celula}       isDark={isDark} />}
