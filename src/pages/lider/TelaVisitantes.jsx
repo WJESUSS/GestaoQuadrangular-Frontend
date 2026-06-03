@@ -36,18 +36,18 @@ function QuadrangularCross({ size = 28 }) {
 }
 
 const listaOrigens = [
-  { id: "CONVITE",       label: "Convite",      emoji: "🤝" },
-  { id: "CASA_DE_PAZ",   label: "Casa de Paz",  emoji: "🏠" },
-  { id: "EVENTO",        label: "Evento",       emoji: "🎉" },
-  { id: "MISSAO_70",     label: "Missão 70",    emoji: "✌️" },
+  { id: "CONVITE",       label: "Convite",      emoji: "?" },
+  { id: "CASA_DE_PAZ",   label: "Casa de Paz",  emoji: "?" },
+  { id: "EVENTO",        label: "Evento",       emoji: "⛺" },
+  { id: "MISSAO_70",     label: "Missão 70",    emoji: "👥" },
   { id: "REDES_SOCIAIS", label: "Social",       emoji: "📱" },
-  { id: "CELULA",        label: "Célula",       emoji: "🔥" },
+  { id: "CELULA",        label: "Célula",       emoji: "🏠" },
 ];
 
 const textoDecisao = {
   NENHUMA: "Nenhuma decisão",
-  ACEITOU_JESUS: "Aceitou a Jesus ✝️",
-  RECONCILIOU: "Reconciliou 🙏",
+  ACEITOU_JESUS: "Aceitou a Jesus 🙌",
+  RECONCILIOU: "Reconciliou 🤝",
   BATISMO_AGUAS: "Decidiu pelo Batismo 💧"
 };
 
@@ -264,7 +264,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     .spin-icon  { animation:spin 1s linear infinite; }
     .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); margin:6px 0; }
 
-    /* ── MODAL RESPONSIVO ── */
+    /* MODAL RESPONSIVO */
 
     /* Desktop: modal centralizado flutuante */
     .ieq-modal-overlay {
@@ -282,30 +282,32 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
       border-radius:14px;
     }
 
-    /* Mobile (≤ 600px): modal como bottom-sheet cobrindo a tela toda */
+    /* Mobile (max-width: 600px): Modal Ocupando 100% da tela */
     @media (max-width:600px) {
       .ieq-modal-overlay {
-        align-items:flex-end;
-        padding:0;
+        align-items: flex-start;
+        padding: 0;
       }
       .ieq-modal-box {
-        max-width:100%;
-        width:100%;
-        /* ocupa até 96% da altura — suficiente para ver tudo sem rolar */
-        max-height:100vh;
-        height:92vh;
-        padding:28px 20px 36px;
-        border-radius:20px 20px 0 0;
-        animation:slideUp .32s cubic-bezier(.22,.68,0,1.2);
-        /* barra de "alça" visual */
+        max-width: 100%;
+        width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        padding: 24px 20px;
+        border-radius: 0; /* Remove bordas arredondadas para preencher totalmente */
+        display: flex;
+        flex-direction: column;
+        animation: slideUp 0.3s cubic-bezier(0.1, 0.76, 0.55, 0.94);
       }
+      /* Remove a barra visual do topo (alça de arrastar) já que agora é tela cheia */
       .ieq-modal-box::before {
-        content:'';
-        display:block;
-        width:40px; height:4px;
-        border-radius:2px;
-        background:rgba(200,16,46,.3);
-        margin:0 auto 20px;
+        display: none;
+      }
+      /* Faz o formulário interno rolar caso falte espaço vertical */
+      .ieq-modal-box form {
+        overflow-y: auto;
+        flex: 1;
+        padding-right: 4px;
       }
       /* Campos lado-a-lado viram coluna única no mobile */
       .ieq-two-col {
@@ -315,13 +317,13 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
       .ieq-modal-header h2 {
         font-size:12px !important;
       }
-      /* Botões de ação no rodapé ficam fixos */
+      /* Botões de ação fixados no rodapé */
       .ieq-modal-actions {
-        position:sticky;
-        bottom:0;
-        background:${isDark ? "rgba(17,10,13,.98)" : "rgba(255,255,255,.98)"};
-        padding:14px 0 0;
-        margin-top:8px;
+        position: sticky;
+        bottom: 0;
+        background: ${isDark ? "#110A0D" : "#ffffff"};
+        padding: 14px 0 0;
+        margin-top: auto; /* Força o rodapé a ficar na parte de baixo */
       }
     }
 
@@ -494,7 +496,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                            placeholder="Nome completo" />
                   </div>
 
-                  {/* Grid 2 colunas → 1 coluna no mobile via classe ieq-two-col */}
+                  {/* Grid 2 colunas */}
                   <div className="ieq-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                     <div>
                       <label className="ieq-label">WHATSAPP</label>
@@ -545,9 +547,9 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                           value={formVisitante.decisaoEspiritual}
                           onChange={e => setFormVisitante({ ...formVisitante, decisaoEspiritual: e.target.value })}
                       >
-                        <option value="NENHUMA">Nenhuma decisão pendente</option>
-                        <option value="ACEITOU_JESUS">Aceitou a Jesus ✝️</option>
-                        <option value="RECONCILIOU">Reconciliou 🙏</option>
+                        <option value="NENHUMA">Nenhuma decisão permanente</option>
+                        <option value="ACEITOU_JESUS">Aceitou a Jesus 🙌</option>
+                        <option value="RECONCILIOU">Reconciliou 🤝</option>
                         <option value="BATISMO_AGUAS">Decidiu pelo Batismo 💧</option>
                       </select>
                     </div>
@@ -573,7 +575,43 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
 
                   <div className="divider" />
 
-                  {/* Botão salvar — sticky no mobile */}
+                  {/* Bloco de Remoção Interno (Modo Edição) */}
+                  {editando && (
+                      <div style={{ marginTop: 4, marginBottom: 12 }}>
+                        {!confirmandoDeletar ? (
+                            <button type="button" className="ieq-btn-danger" onClick={() => setConfirmandoDeletar(true)}>
+                              <Trash2 size={15} /> REMOVER VISITANTE
+                            </button>
+                        ) : (
+                            <div className="ieq-confirm-box">
+                              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                                <AlertTriangle size={18} style={{ color: IEQ.red, flexShrink: 0 }} />
+                                <div>
+                                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: IEQ.red, margin: "0 0 3px" }}>CONFIRMAR REMOÇÃO</p>
+                                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: ts, margin: 0 }}>
+                                    Deseja remover <strong style={{ color: tp }}>{visitanteSelecionado?.nome}</strong>? Esta ação não pode ser desfeita.
+                                  </p>
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", gap: 10 }}>
+                                <button type="button" className="ieq-btn-cancel"
+                                        onClick={() => setConfirmandoDeletar(false)} disabled={deletando}>
+                                  CANCELAR
+                                </button>
+                                <button type="button" className="ieq-btn-danger-confirm"
+                                        onClick={handleDeletar} disabled={deletando}>
+                                  {deletando
+                                      ? <><Loader2 size={15} className="spin-icon" /> ...</>
+                                      : <><Trash2 size={15} /> SIM</>
+                                  }
+                                </button>
+                              </div>
+                            </div>
+                        )}
+                      </div>
+                  )}
+
+                  {/* Botão salvar fixado no rodapé do mobile */}
                   <div className="ieq-modal-actions">
                     <button type="submit" className="ieq-btn-primary full" disabled={loading}>
                       {loading
@@ -583,42 +621,6 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                     </button>
                   </div>
                 </form>
-
-                {/* Bloco de Remoção (Modo Edição) */}
-                {editando && (
-                    <div style={{ marginTop: 12 }}>
-                      {!confirmandoDeletar ? (
-                          <button type="button" className="ieq-btn-danger" onClick={() => setConfirmandoDeletar(true)}>
-                            <Trash2 size={15} /> REMOVER VISITANTE
-                          </button>
-                      ) : (
-                          <div className="ieq-confirm-box">
-                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                              <AlertTriangle size={18} style={{ color: IEQ.red, flexShrink: 0 }} />
-                              <div>
-                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: IEQ.red, margin: "0 0 3px" }}>CONFIRMAR REMOÇÃO</p>
-                                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: ts, margin: 0 }}>
-                                  Deseja remover <strong style={{ color: tp }}>{visitanteSelecionado?.nome}</strong>? Esta ação não pode ser desfeita.
-                                </p>
-                              </div>
-                            </div>
-                            <div style={{ display: "flex", gap: 10 }}>
-                              <button type="button" className="ieq-btn-cancel"
-                                      onClick={() => setConfirmandoDeletar(false)} disabled={deletando}>
-                                CANCELAR
-                              </button>
-                              <button type="button" className="ieq-btn-danger-confirm"
-                                      onClick={handleDeletar} disabled={deletando}>
-                                {deletando
-                                    ? <><Loader2 size={15} className="spin-icon" /> REMOVENDO...</>
-                                    : <><Trash2 size={15} /> SIM, REMOVER</>
-                                }
-                              </button>
-                            </div>
-                          </div>
-                      )}
-                    </div>
-                )}
 
               </div>
             </div>
