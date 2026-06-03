@@ -436,6 +436,20 @@ const STATIC_CSS = `
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function DashboardLider() {
   const [abaAtiva,               setAbaAtiva]               = useState("home");
+
+  // Intercepta o botão voltar do celular (Android/PWA)
+  useEffect(() => {
+    if (abaAtiva !== "home") {
+      window.history.pushState({ aba: abaAtiva }, "");
+    }
+
+    const handlePopState = () => {
+      setAbaAtiva("home");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [abaAtiva]);
   const [celula,                 setCelula]                 = useState(null);
   const [membros,                setMembros]                = useState([]);
   const [usuarioLogado,          setUsuarioLogado]          = useState(null);
