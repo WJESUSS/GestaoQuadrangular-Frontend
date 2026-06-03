@@ -413,7 +413,7 @@ const STATIC_CSS = `
   @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
   .spin-icon { animation: spin 1s linear infinite; }
-  .tab-in    { animation: tabIn .28s ease both; }
+  .tab-in    { }  /* animação gerenciada pelo framer-motion */
   .fade-up   { animation: fadeUp .5s ease both; }
 
   /* ── Divider ── */
@@ -704,15 +704,14 @@ export default function DashboardLider() {
           </AnimatePresence>
 
           {/* ── CONTEÚDO POR ABA ────────────────────────────────────── */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="sync">
             {abaAtiva === "home" ? (
 
                 <motion.div
                     key="home"
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, transition: { duration: .2 } }}
-                    transition={{ duration: .3 }}
+                    animate={{ opacity: 1, transition: { duration: .35, ease: "easeOut" } }}
+                    exit={{ opacity: 0, transition: { duration: .25, ease: "easeIn" } }}
                     style={{ display: "flex", flexDirection: "column", gap: 24 }}
                 >
 
@@ -896,9 +895,8 @@ export default function DashboardLider() {
                     key="content"
                     className="tab-in"
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, transition: { duration: .2 } }}
-                    transition={{ duration: .3 }}
+                    animate={{ opacity: 1, transition: { duration: .35, ease: "easeOut" } }}
+                    exit={{ opacity: 0, transition: { duration: .25, ease: "easeIn" } }}
                 >
                   {abaAtiva === "metas"       && <TelaMetasLider        celula={celula}       isDark={isDark} />}
                   {abaAtiva === "relatorio"   && <TelaRelatorio          celula={celula}       isDark={isDark} />}
