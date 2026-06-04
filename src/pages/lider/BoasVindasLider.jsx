@@ -135,21 +135,30 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                 onClick={onClose}
                 style={{
                     position: "fixed",
-                    inset: 0,
-                    background: isDark ? "rgba(10,6,8,.92)" : "rgba(0,0,0,.78)",
-                    backdropFilter: "blur(24px)",
-                    zIndex: 50,
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: "100%",
+                    height: "100%",
+                    background: isDark ? "rgba(10,6,8,.95)" : "rgba(0,0,0,.82)",
+                    WebkitBackdropFilter: "blur(16px)",
+                    backdropFilter: "blur(16px)",
+                    zIndex: 9999,
                     overflowY: "auto",
+                    overflowX: "hidden",
+                    WebkitOverflowScrolling: "touch",
                 }}
             >
-                {/* Wrapper interno — sobe o card para o topo com espaço confortável */}
+                {/* Wrapper interno — sobe o card */}
                 <div
                     style={{
-                        minHeight: "100%",
+                        minHeight: "100vh",
                         display: "flex",
                         alignItems: "flex-start",
                         justifyContent: "center",
-                        padding: "40px 20px 40px",
+                        padding: "20px 16px 40px",
+                        boxSizing: "border-box",
                     }}
                 >
                     {/* CARD PRINCIPAL */}
