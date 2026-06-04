@@ -17,23 +17,23 @@ import {
   Sun, Moon, CheckCircle2, Home, Flame,
 } from "lucide-react";
 
-/* ─── Paleta idêntica ao Login ─────────────────────────────────────── */
+/* ─── Paleta ──────────────────────────────────────────────────────────── */
 const BRAND = {
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  redLight:  "#E8294A",
-  yellow:    "#FDB813",
-  yellowDark:"#C48C00",
-  blue:      "#003DA5",
-  blueLight: "#1A56C4",
-  blueDark:  "#002470",
-  dark:      "#0A0608",
-  stone:     "#1A1416",
-  light:     "#F5F0EB",
-  muted:     "#8A7F7A",
+  red:        "#C8102E",
+  redDark:    "#9B0B1E",
+  redLight:   "#E8294A",
+  yellow:     "#FDB813",
+  yellowDark: "#C48C00",
+  blue:       "#003DA5",
+  blueLight:  "#1A56C4",
+  blueDark:   "#002470",
+  dark:       "#0A0608",
+  stone:      "#1A1416",
+  light:      "#F5F0EB",
+  muted:      "#8A7F7A",
 };
 
-/* ─── Logo ─────────────────────────────────────────────────────────── */
+/* ─── Logo ────────────────────────────────────────────────────────────── */
 function IEQCross({ size = 36, src = "/quadrangular.png" }) {
   return (
       <img
@@ -52,34 +52,49 @@ function IEQCross({ size = 36, src = "/quadrangular.png" }) {
   );
 }
 
-/* ─── Chave boas-vindas ─────────────────────────────────────────────── */
+/* ─── Chave boas-vindas ───────────────────────────────────────────────── */
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
-/* ─── CSS estático — CORRIGIDO para Android ────────────────────────── */
 /*
-  CORREÇÕES APLICADAS:
-  1. Removido `backdrop-filter: blur()` de todos os cards — causa artefato
-     visual (glitch/ruído) em WebView Android com GPUs mais antigas.
-     Compensado aumentando a opacidade do background para .99.
-
-  2. `.grid-bg`, `.glow-red`, `.glow-blue` trocados de `position: fixed`
-     para `position: absolute` — evita problemas de compositing/layer
-     no WebView Android que causavam o glitch na parte inferior da tela.
-
-  3. `.ieq-root` mantém `position: relative` e `overflow-x: hidden`
-     para conter os elementos absolutos corretamente.
-
-  4. Modais mantêm `position: fixed` (necessário para overlay), mas
-     o `backdrop-filter` do overlay foi removido e substituído por
-     background sólido semitransparente.
-
-  5. NOVO FIX: `.members-grid` mudado de `grid` para `flex` com
-     `flex-direction: column` para evitar sobreposição em Android.
-     Todos os `.member-row-*` agora com `width: 100%` e `min-width: 0`.
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  CORREÇÕES ANDROID – GLITCH / ARTEFATO VISUAL                       ║
+  ║                                                                      ║
+  ║  1. TODOS os backdrop-filter: blur() removidos. Essa propriedade     ║
+  ║     causa glitch em WebView Android com GPUs Adreno 3xx/4xx.        ║
+  ║                                                                      ║
+  ║  2. .grid-bg / .glow-red / .glow-blue: position fixed → absolute.   ║
+  ║     Fixed cria stacking context de compositing que corrompe o        ║
+  ║     frame buffer em WebViews antigos.                                ║
+  ║                                                                      ║
+  ║  3. .ieq-root: adicionado isolation: isolate + contain: layout       ║
+  ║     style + translateZ(0). Isola o contexto de compositing e        ║
+  ║     força uma única camada raiz estável.                             ║
+  ║                                                                      ║
+  ║  4. .members-grid: trocado display:grid por display:flex +           ║
+  ║     flex-direction:column + contain: layout style + translateZ(0).   ║
+  ║     Evita que o recycling de células vaze pixels entre frames.       ║
+  ║                                                                      ║
+  ║  5. .member-row-*: width:100% + min-width:0 para evitar overflow     ║
+  ║     horizontal que disparava relayout e artefato.                    ║
+  ║                                                                      ║
+  ║  6. .modal-overlay: backdrop-filter removido, opacidade aumentada    ║
+  ║     para compensar visualmente.                                      ║
+  ║                                                                      ║
+  ║  7. motion.div nas abas: willChange restrito a "opacity" (não        ║
+  ║     "transform, opacity"), pois transform cria camada extra de       ║
+  ║     compositing desnecessária.                                       ║
+  ║                                                                      ║
+  ║  8. Card membros: overflow:hidden trocado por overflow:clip.         ║
+  ║     hidden cria stacking context; clip não cria.                     ║
+  ║                                                                      ║
+  ║  9. Opacidades de rgba() elevadas para ≥ 0.99 em backgrounds de     ║
+  ║     cards, evitando compositing de camadas semi-transparentes.       ║
+  ╚══════════════════════════════════════════════════════════════════════╝
 */
 const STATIC_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── Raiz ──────────────────────────────────────────────────────────── */
   .ieq-root {
     font-family: 'Manrope', sans-serif;
     min-height: 100vh;
@@ -87,11 +102,17 @@ const STATIC_CSS = `
     overflow-x: hidden;
     padding-bottom: 80px;
     transition: background .4s;
+
+    /* FIX 3: isola o contexto de compositing Android */
+    isolation: isolate;
+    contain: layout style;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
-  /* ── Fundo decorativo — CORRIGIDO: absolute em vez de fixed ── */
+  /* ── Fundo decorativo ─ position: absolute (FIX 2) ────────────────── */
   .grid-bg {
-    position: absolute;        /* FIX: era fixed — causava glitch Android */
+    position: absolute;       /* era: fixed */
     inset: 0;
     pointer-events: none;
     z-index: 0;
@@ -102,7 +123,7 @@ const STATIC_CSS = `
     background-size: 60px 60px;
   }
   .glow-red {
-    position: absolute;        /* FIX: era fixed */
+    position: absolute;       /* era: fixed */
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 900px; height: 900px; border-radius: 50%;
@@ -110,21 +131,21 @@ const STATIC_CSS = `
     pointer-events: none; z-index: 0;
   }
   .glow-blue {
-    position: absolute;        /* FIX: era fixed */
+    position: absolute;       /* era: fixed */
     top: 20%; right: 5%;
     width: 500px; height: 500px; border-radius: 50%;
     background: radial-gradient(circle, rgba(0,61,165,.08) 0%, transparent 70%);
     pointer-events: none; z-index: 0;
   }
 
-  /* Conteúdo */
+  /* ── Conteúdo ──────────────────────────────────────────────────────── */
   .ieq-content {
     position: relative; z-index: 10;
     max-width: 1200px; margin: 0 auto;
     padding: 32px 24px 0;
   }
 
-  /* ── Header ── */
+  /* ── Header ────────────────────────────────────────────────────────── */
   .ieq-header {
     display: flex; align-items: center;
     justify-content: space-between;
@@ -132,7 +153,7 @@ const STATIC_CSS = `
     flex-wrap: wrap; gap: 16px;
   }
 
-  /* Badge */
+  /* ── Badge ─────────────────────────────────────────────────────────── */
   .badge {
     display: inline-flex; align-items: center; gap: 7px;
     background: rgba(253,184,19,.07);
@@ -148,7 +169,7 @@ const STATIC_CSS = `
     animation: pulse 2s ease-in-out infinite;
   }
 
-  /* Avatar líder */
+  /* ── Avatar líder ──────────────────────────────────────────────────── */
   .lider-avatar-wrap {
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
@@ -166,7 +187,7 @@ const STATIC_CSS = `
   }
   .lider-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-  /* ── Botões ── */
+  /* ── Botões ────────────────────────────────────────────────────────── */
   .btn-primary {
     border: none; border-radius: 6px; cursor: pointer;
     font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700;
@@ -220,35 +241,37 @@ const STATIC_CSS = `
   }
   .btn-ghost-light:hover { border-color: #C8102E; background: rgba(200,16,46,.12); }
 
-  /* ── Cards — CORRIGIDO: sem backdrop-filter ── */
+  /* ── Cards ─ SEM backdrop-filter (FIX 1) ──────────────────────────── */
   .card-dark {
-    background: rgba(26,20,22,.99);  /* FIX: era .96 com backdrop-filter blur(24px) */
+    background: rgba(26,20,22,.99);
     border: 1px solid rgba(253,184,19,.13);
     border-radius: 12px;
-    /* backdrop-filter: blur(24px); ← REMOVIDO — glitch Android */
+    /* backdrop-filter REMOVIDO – causa glitch Android */
     box-shadow: 0 2px 1px rgba(0,0,0,.04), 0 8px 32px rgba(0,0,0,.18),
                 0 0 0 1px rgba(253,184,19,.07);
   }
   .card-light {
-    background: rgba(255,255,255,.99);  /* FIX: era .96 com backdrop-filter blur(24px) */
+    background: rgba(255,255,255,.99);
     border: 1px solid rgba(200,16,46,.15);
     border-radius: 12px;
-    /* backdrop-filter: blur(24px); ← REMOVIDO — glitch Android */
+    /* backdrop-filter REMOVIDO */
     box-shadow: 0 2px 1px rgba(0,0,0,.02), 0 8px 32px rgba(0,0,0,.08),
                 0 0 0 1px rgba(200,16,46,.06);
   }
 
-  /* ── KPI hero ── */
+  /* ── KPI hero ──────────────────────────────────────────────────────── */
   .kpi-hero-dark {
     background: linear-gradient(135deg, #1A1416, #0A0608);
     border: 1px solid rgba(253,184,19,.13);
-    border-radius: 12px; position: relative; overflow: hidden;
+    border-radius: 12px; position: relative;
+    overflow: clip;           /* FIX 8: era hidden */
     padding: 36px 40px;
   }
   .kpi-hero-light {
     background: linear-gradient(135deg, #003DA5, #002470);
     border: none;
-    border-radius: 12px; position: relative; overflow: hidden;
+    border-radius: 12px; position: relative;
+    overflow: clip;           /* FIX 8 */
     padding: 36px 40px;
   }
   .kpi-hero-stripes {
@@ -260,7 +283,7 @@ const STATIC_CSS = `
     background-size: 40px 40px;
   }
 
-  /* ── Separador decorativo ── */
+  /* ── Separador decorativo ──────────────────────────────────────────── */
   .section-divider {
     display: flex; align-items: center; gap: 12px;
     margin: 8px 0 28px;
@@ -273,17 +296,17 @@ const STATIC_CSS = `
     background: #FDB813;
   }
 
-  /* ── Menu grid ── */
+  /* ── Menu grid ─────────────────────────────────────────────────────── */
   .menu-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
-  @media (min-width: 640px) { .menu-grid { grid-template-columns: repeat(4, 1fr); } }
-  @media (min-width: 900px) { .menu-grid { grid-template-columns: repeat(7, 1fr); } }
+  @media (min-width: 640px)  { .menu-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 900px)  { .menu-grid { grid-template-columns: repeat(7, 1fr); } }
 
   .menu-card-dark {
-    background: rgba(26,20,22,.99);  /* FIX: sem backdrop-filter */
+    background: rgba(26,20,22,.99);
     border: 1px solid rgba(253,184,19,.10);
     border-radius: 10px; padding: 20px 12px;
     cursor: pointer;
@@ -291,7 +314,7 @@ const STATIC_CSS = `
     transition: all .3s; text-align: center;
   }
   .menu-card-light {
-    background: rgba(255,255,255,.99);  /* FIX: sem backdrop-filter */
+    background: rgba(255,255,255,.99);
     border: 1px solid rgba(200,16,46,.10);
     border-radius: 10px; padding: 20px 12px;
     cursor: pointer;
@@ -319,46 +342,53 @@ const STATIC_CSS = `
     text-transform: uppercase; margin: 0;
   }
 
-  /* ── KPI grid ── */
+  /* ── KPI grid ──────────────────────────────────────────────────────── */
   .kpi-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
   @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
 
-  /* ── Membros — CORRIGIDO PARA MOBILE ── */
+  /* ── Membros ─ CORRIGIDO ANDROID (FIX 4 + 5) ──────────────────────── */
   .members-grid {
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     width: 100%;
+    /* FIX 4: isola o contexto para evitar ghosting de itens */
+    contain: layout style;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   .member-row-dark {
-    display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     padding: 12px 14px;
     background: rgba(255,255,255,.03);
     border: 1px solid rgba(253,184,19,.08);
-    border-radius: 8px; 
-    transition: all .2s; 
+    border-radius: 8px;
+    transition: border-color .2s;
     gap: 10px;
-    min-width: 0;
-    width: 100%;
+    min-width: 0;    /* FIX 5 */
+    width: 100%;     /* FIX 5 */
+    flex-shrink: 0;  /* FIX 5: evita compressão que causa sobreposição */
   }
   .member-row-light {
-    display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     padding: 12px 14px;
     background: rgba(200,16,46,.03);
     border: 1px solid rgba(200,16,46,.08);
-    border-radius: 8px; 
-    transition: all .2s; 
+    border-radius: 8px;
+    transition: border-color .2s;
     gap: 10px;
-    min-width: 0;
-    width: 100%;
+    min-width: 0;    /* FIX 5 */
+    width: 100%;     /* FIX 5 */
+    flex-shrink: 0;  /* FIX 5 */
   }
-  .member-row-dark:hover, .member-row-light:hover { border-color: #C8102E; }
+  .member-row-dark:hover  { border-color: #C8102E; }
+  .member-row-light:hover { border-color: #C8102E; }
 
   .member-avatar {
     width: 34px; height: 34px; border-radius: 6px; flex-shrink: 0;
@@ -368,17 +398,17 @@ const STATIC_CSS = `
     font-weight: 800; font-size: 13px;
   }
   .member-name {
-    font-family: 'Manrope', sans-serif; 
-    font-size: 14px; 
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
     font-weight: 500;
-    overflow: hidden; 
-    text-overflow: ellipsis; 
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
     min-width: 0;
   }
 
-  /* ── Inputs ── */
+  /* ── Inputs ────────────────────────────────────────────────────────── */
   .ieq-input {
     width: 100%;
     border-radius: 6px; outline: none;
@@ -387,12 +417,12 @@ const STATIC_CSS = `
     transition: border-color .2s, box-shadow .2s, background .2s;
   }
   .ieq-input-dark {
-    background: rgba(255,255,255,.06);  /* FIX: ligeiramente mais opaco */
+    background: rgba(255,255,255,.07);
     border: 1px solid rgba(253,184,19,.12);
     color: #F5F0EB;
   }
   .ieq-input-light {
-    background: rgba(0,0,0,.04);        /* FIX: ligeiramente mais opaco */
+    background: rgba(0,0,0,.05);
     border: 1px solid rgba(200,16,46,.14);
     color: #0A0608;
   }
@@ -400,24 +430,24 @@ const STATIC_CSS = `
     border-color: #C8102E;
     box-shadow: 0 0 0 3px rgba(200,16,46,.14);
   }
-  .ieq-input-dark::placeholder { color: rgba(245,240,235,.22); }
+  .ieq-input-dark::placeholder  { color: rgba(245,240,235,.22); }
   .ieq-input-light::placeholder { color: rgba(10,6,8,.22); }
 
-  /* ── Progresso ── */
+  /* ── Progresso ─────────────────────────────────────────────────────── */
   .progress-track {
     height: 6px; border-radius: 99px; overflow: hidden;
   }
   .progress-track-dark  { background: rgba(255,255,255,.08); }
   .progress-track-light { background: rgba(255,255,255,.15); }
 
-  /* ── Label de seção ── */
+  /* ── Label de seção ────────────────────────────────────────────────── */
   .section-label {
     font-family: 'Manrope', sans-serif;
     font-size: 10px; font-weight: 800;
     letter-spacing: .2em; text-transform: uppercase;
   }
 
-  /* ── Rodapé ── */
+  /* ── Rodapé ────────────────────────────────────────────────────────── */
   .ieq-footer {
     text-align: center;
     font-family: 'Manrope', sans-serif;
@@ -425,7 +455,7 @@ const STATIC_CSS = `
     padding: 8px 0;
   }
 
-  /* ── Modal — CORRIGIDO: overlay sem backdrop-filter ── */
+  /* ── Modal ─ overlay SEM backdrop-filter (FIX 6) ──────────────────── */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 50;
     display: flex; align-items: flex-end; justify-content: center;
@@ -437,21 +467,22 @@ const STATIC_CSS = `
     position: relative; z-index: 10;
     width: 100%; max-height: 90vh;
     display: flex; flex-direction: column;
-    border-radius: 16px 16px 0 0; overflow: hidden;
+    border-radius: 16px 16px 0 0;
+    overflow: clip;           /* FIX 8 */
   }
   @media (min-width: 520px) {
     .modal-box { border-radius: 12px; max-height: calc(100vh - 24px); }
   }
 
-  /* Overlay do modal — CORRIGIDO: sem backdrop-filter, bg mais sólido */
+  /* FIX 6: backdrop-filter REMOVIDO do overlay */
   .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(10,6,8,.90);   /* FIX: era .85 com backdrop-filter blur(16px) */
-    /* backdrop-filter: blur(16px); ← REMOVIDO */
+    background: rgba(10,6,8,.92);   /* mais opaco para compensar sem blur */
+    /* backdrop-filter REMOVIDO */
     z-index: 0;
   }
 
-  /* ── Alerta aprovação ── */
+  /* ── Alerta aprovação ──────────────────────────────────────────────── */
   .alert-aprovado {
     margin-bottom: 28px; padding: 16px 24px; border-radius: 10px;
     background: linear-gradient(135deg, #003DA5, #002470);
@@ -460,7 +491,7 @@ const STATIC_CSS = `
     font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   }
 
-  /* ── Animações ── */
+  /* ── Animações ─────────────────────────────────────────────────────── */
   @keyframes pulse  { 0%,100%{opacity:.18;} 50%{opacity:.06;} }
   @keyframes spin   { to { transform: rotate(360deg); } }
   @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -468,14 +499,14 @@ const STATIC_CSS = `
   .spin-icon { animation: spin 1s linear infinite; }
   .fade-up   { animation: fadeUp .5s ease both; }
 
-  /* ── Divider ── */
+  /* ── Divider ───────────────────────────────────────────────────────── */
   .divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(200,16,46,.2), transparent);
     margin: 8px 0;
   }
 
-  /* ── Mobile ── */
+  /* ── Mobile ────────────────────────────────────────────────────────── */
   @media (max-width: 599px) {
     .ieq-content { padding: 20px 14px 0 !important; }
     .kpi-hero-dark, .kpi-hero-light { padding: 24px 20px !important; }
@@ -485,15 +516,13 @@ const STATIC_CSS = `
   }
 `;
 
-/* ══════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════ */
 export default function DashboardLider() {
   const [abaAtiva,               setAbaAtiva]               = useState("home");
 
   useEffect(() => {
-    if (abaAtiva !== "home") {
-      window.history.pushState({ aba: abaAtiva }, "");
-    }
-    const handlePopState = () => { setAbaAtiva("home"); };
+    if (abaAtiva !== "home") window.history.pushState({ aba: abaAtiva }, "");
+    const handlePopState = () => setAbaAtiva("home");
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [abaAtiva]);
@@ -513,14 +542,13 @@ export default function DashboardLider() {
 
   const dark = isDark;
 
-  const bg          = dark ? BRAND.dark  : BRAND.light;
-  const cardClass   = dark ? "card-dark" : "card-light";
-  const txtPrimary  = dark ? BRAND.light : BRAND.dark;
-  const txtSub      = dark ? "rgba(245,240,235,.5)" : "rgba(10,6,8,.45)";
-  const btnGhost    = dark ? "btn-ghost-dark" : "btn-ghost-light";
-  const inputClass  = dark ? "ieq-input ieq-input-dark" : "ieq-input ieq-input-light";
-  const memberRow   = dark ? "member-row-dark" : "member-row-light";
-  const menuCard    = dark ? "menu-card-dark" : "menu-card-light";
+  const bg        = dark ? BRAND.dark  : BRAND.light;
+  const cardClass = dark ? "card-dark" : "card-light";
+  const txtPrimary= dark ? BRAND.light : BRAND.dark;
+  const txtSub    = dark ? "rgba(245,240,235,.5)" : "rgba(10,6,8,.45)";
+  const btnGhost  = dark ? "btn-ghost-dark" : "btn-ghost-light";
+  const memberRow = dark ? "member-row-dark" : "member-row-light";
+  const menuCard  = dark ? "menu-card-dark"  : "menu-card-light";
 
   useEffect(() => { localStorage.setItem("theme", dark ? "dark" : "light"); }, [dark]);
 
@@ -544,7 +572,8 @@ export default function DashboardLider() {
       setUsuarioLogado(resUsuario.data);
       if (celulaData?.id) {
         const resM = await api.get(`/celulas/${celulaData.id}/membros`);
-        const unique = arr => arr.filter((item, i, self) => i === self.findIndex(t => t.id === item.id));
+        const unique = arr =>
+            arr.filter((item, i, self) => i === self.findIndex(t => t.id === item.id));
         setMembros(unique(resM.data || []));
       }
       if (!isSilent) {
@@ -574,7 +603,9 @@ export default function DashboardLider() {
     if (!motivoMultiplicacao.trim()) return alert("O motivo é obrigatório.");
     setSolicitandoMulti(true);
     try {
-      await api.post(`/celulas/${celula.id}/solicitar-multiplicacao`, { motivo: motivoMultiplicacao.trim() });
+      await api.post(`/celulas/${celula.id}/solicitar-multiplicacao`, {
+        motivo: motivoMultiplicacao.trim(),
+      });
       alert("Solicitação enviada com sucesso!");
       setShowModalMultiplicacao(false);
       setMotivoMultiplicacao("");
@@ -583,7 +614,9 @@ export default function DashboardLider() {
     finally { setSolicitandoMulti(false); }
   };
 
-  const { qtdMembros, atingiuMeta, isAnalise, isAprovado, podeSolicitar, porcentagemMeta } = useMemo(() => {
+  const {
+    qtdMembros, atingiuMeta, isAnalise, isAprovado, podeSolicitar, porcentagemMeta,
+  } = useMemo(() => {
     const qtdMembros      = membros.length;
     const atingiuMeta     = qtdMembros >= 8;
     const statusMulti     = celula?.statusMultiplicacao || "NORMAL";
@@ -596,17 +629,25 @@ export default function DashboardLider() {
 
   /* ── Loading ─────────────────────────────────────────────────────── */
   if (loading) return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: bg }}>
+      <div style={{
+        minHeight: "100vh", display: "flex",
+        alignItems: "center", justifyContent: "center",
+        background: bg,
+        isolation: "isolate",         /* FIX 3 na tela de loading */
+      }}>
         <style>{STATIC_CSS}</style>
         <div className="grid-bg" />
         <div className="glow-red" />
         <div style={{ textAlign: "center", position: "relative", zIndex: 10 }}>
-          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+          <div style={{
+            position: "relative", display: "inline-flex",
+            alignItems: "center", justifyContent: "center", marginBottom: 20,
+          }}>
             <div className="pulse-ring" style={{ width: 80, height: 80 }} />
             <div className="pulse-ring" style={{ width: 64, height: 64, animationDelay: "1s" }} />
             <div style={{
               width: 54, height: 54, borderRadius: "50%",
-              background: dark ? "rgba(26,20,22,.99)" : "#fff",  /* FIX: .9 → .99 */
+              background: dark ? "rgba(26,20,22,.99)" : "#fff",
               border: "1px solid rgba(200,16,46,.25)",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
@@ -622,7 +663,7 @@ export default function DashboardLider() {
       </div>
   );
 
-  /* ── RENDER PRINCIPAL ─────────────────────────────────────────────── */
+  /* ── RENDER PRINCIPAL ────────────────────────────────────────────── */
   return (
       <div className="ieq-root" style={{ background: bg, color: txtPrimary }}>
         <style>{`
@@ -630,7 +671,7 @@ export default function DashboardLider() {
         ${STATIC_CSS}
       `}</style>
 
-        {/* Fundo — agora position: absolute (corrigido) */}
+        {/* Fundo decorativo – position: absolute (FIX 2) */}
         <div className="grid-bg" />
         <div className="glow-red" />
         <div className="glow-blue" />
@@ -655,12 +696,13 @@ export default function DashboardLider() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: .45 }}
+              style={{ willChange: "opacity" }}  /* FIX 7: restrito a opacity */
           >
             <div style={{ display: "flex", alignItems: "center", gap: 18, minWidth: 0, flex: 1 }}>
               <div className="lider-avatar-wrap" style={{ flexShrink: 0 }}>
                 <div className="pulse-ring" style={{ width: 76, height: 76 }} />
                 <div className="pulse-ring" style={{ width: 62, height: 62, animationDelay: "1s" }} />
-                <div className="lider-avatar" style={{ background: dark ? "rgba(26,20,22,.99)" : "#fff" }}>  {/* FIX: .9 → .99 */}
+                <div className="lider-avatar" style={{ background: dark ? "rgba(26,20,22,.99)" : "#fff" }}>
                   {usuarioLogado?.fotoPerfil
                       ? <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome || "Líder"} />
                       : <IEQCross size={38} />
@@ -706,7 +748,12 @@ export default function DashboardLider() {
               <button className={btnGhost} onClick={() => setIsDark(!isDark)} style={{ padding: "10px 12px" }}>
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-              <button className={btnGhost} onClick={() => setShowBoasVindas(true)} style={{ padding: "10px 12px" }} title="Ver boas-vindas">
+              <button
+                  className={btnGhost}
+                  onClick={() => setShowBoasVindas(true)}
+                  style={{ padding: "10px 12px" }}
+                  title="Ver boas-vindas"
+              >
                 <Sparkles size={18} />
               </button>
               {abaAtiva !== "home" && (
@@ -733,12 +780,15 @@ export default function DashboardLider() {
           </span>
           </div>
 
-          {/* ── ALERTA APROVAÇÃO ── */}
+          {/* Alerta aprovação */}
           <AnimatePresence>
             {isAprovado && (
                 <motion.div
                     className="alert-aprovado"
-                    initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, y: -16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{ willChange: "opacity" }}  /* FIX 7 */
                 >
                   <Sparkles size={18} style={{ color: BRAND.yellow, flexShrink: 0 }} />
                   Multiplicação aprovada! Organize os membros para a nova célula.
@@ -746,7 +796,7 @@ export default function DashboardLider() {
             )}
           </AnimatePresence>
 
-          {/* ── CONTEÚDO POR ABA ── */}
+          {/* ── CONTEÚDO POR ABA ─────────────────────────────────── */}
           <AnimatePresence mode="sync">
             {abaAtiva === "home" ? (
 
@@ -755,10 +805,10 @@ export default function DashboardLider() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { duration: .35, ease: "easeOut" } }}
                     exit={{ opacity: 0, transition: { duration: .25, ease: "easeIn" } }}
-                    style={{ display: "flex", flexDirection: "column", gap: 24 }}
+                    style={{ display: "flex", flexDirection: "column", gap: 24, willChange: "opacity" }}  /* FIX 7 */
                 >
 
-                  {/* ── KPI GRID ── */}
+                  {/* ── KPI GRID ────────────────────────────────────── */}
                   <div className="kpi-grid">
 
                     {/* Card hero membros */}
@@ -799,9 +849,16 @@ export default function DashboardLider() {
                             </div>
                             <div className={`progress-track ${dark ? "progress-track-dark" : "progress-track-light"}`}>
                               <motion.div
-                                  initial={{ width: 0 }} animate={{ width: `${porcentagemMeta}%` }}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${porcentagemMeta}%` }}
                                   transition={{ duration: 1.2, ease: "easeOut" }}
-                                  style={{ height: "100%", borderRadius: 99, background: atingiuMeta ? BRAND.yellow : `linear-gradient(90deg, ${BRAND.red}, ${BRAND.yellow})` }}
+                                  style={{
+                                    height: "100%", borderRadius: 99,
+                                    background: atingiuMeta
+                                        ? BRAND.yellow
+                                        : `linear-gradient(90deg, ${BRAND.red}, ${BRAND.yellow})`,
+                                    willChange: "width",  /* FIX 7: só width aqui */
+                                  }}
                               />
                             </div>
                           </div>
@@ -814,17 +871,24 @@ export default function DashboardLider() {
                       <div>
                         <div style={{
                           width: 48, height: 48, borderRadius: 10, marginBottom: 18,
-                          background: isAprovado ? "rgba(0,61,165,.12)" : isAnalise ? "rgba(253,184,19,.12)" : "rgba(200,16,46,.1)",
+                          background: isAprovado
+                              ? "rgba(0,61,165,.12)"
+                              : isAnalise ? "rgba(253,184,19,.12)" : "rgba(200,16,46,.1)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           color: isAprovado ? BRAND.blue : isAnalise ? BRAND.yellowDark : BRAND.red,
                         }}>
-                          {isAprovado ? <CheckCircle2 size={22} /> : isAnalise ? <Loader2 size={22} className="spin-icon" /> : <Target size={22} />}
+                          {isAprovado
+                              ? <CheckCircle2 size={22} />
+                              : isAnalise ? <Loader2 size={22} className="spin-icon" /> : <Target size={22} />}
                         </div>
                         <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: txtPrimary, margin: 0 }}>
                           Ação Pastoral
                         </p>
                         <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: txtSub, marginTop: 4 }}>
-                          {isAnalise ? "Em análise" : isAprovado ? "Liberado" : atingiuMeta ? "Pode solicitar" : "Aguardando meta"}
+                          {isAnalise   ? "Em análise"
+                              : isAprovado ? "Liberado"
+                                  : atingiuMeta ? "Pode solicitar"
+                                      :              "Aguardando meta"}
                         </p>
                       </div>
                       <div style={{ marginTop: 20 }}>
@@ -853,16 +917,16 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* ── MENU ── */}
+                  {/* ── MENU ────────────────────────────────────────── */}
                   <div className="menu-grid">
                     {[
-                      { icon: <Target     size={20} />, title: "Metas",       desc: "Objetivos",   aba: "metas",       color: BRAND.red      },
-                      { icon: <Target     size={20} />, title: "Discipulado", desc: "Acompanhar",  aba: "discipulado", color: BRAND.blue     },
-                      { icon: <TrendingUp size={20} />, title: "Frequência",  desc: "Relatórios",  aba: "relatorio",   color: BRAND.red      },
-                      { icon: <Plus       size={20} />, title: "Fichas",      desc: "Secretaria",  aba: "fichas",      color: BRAND.redDark  },
-                      { icon: <Users      size={20} />, title: "Visitantes",  desc: "Novas Vidas", aba: "visitantes",  color: BRAND.yellow   },
-                      { icon: <Home       size={20} />, title: "Casas de Paz",desc: "Evangelismo", aba: "casas",       color: BRAND.blue     },
-                      { icon: <Flame      size={20} />, title: "Missão 70",   desc: "Evangelismo", aba: "missao70",    color: BRAND.yellow   },
+                      { icon: <Target     size={20} />, title: "Metas",        desc: "Objetivos",   aba: "metas",       color: BRAND.red     },
+                      { icon: <Target     size={20} />, title: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: BRAND.blue    },
+                      { icon: <TrendingUp size={20} />, title: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: BRAND.red     },
+                      { icon: <Plus       size={20} />, title: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: BRAND.redDark },
+                      { icon: <Users      size={20} />, title: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: BRAND.yellow  },
+                      { icon: <Home       size={20} />, title: "Casas de Paz", desc: "Evangelismo", aba: "casas",       color: BRAND.blue    },
+                      { icon: <Flame      size={20} />, title: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: BRAND.yellow  },
                     ].map(({ icon, title, desc, aba, color }) => (
                         <motion.div
                             key={aba}
@@ -870,20 +934,21 @@ export default function DashboardLider() {
                             whileHover={{ y: -5 }}
                             whileTap={{ scale: .96 }}
                             onClick={() => setAbaAtiva(aba)}
+                            style={{ willChange: "transform" }}
                         >
                           <div className="menu-icon-wrap" style={{ background: `${color}18`, color }}>
                             {icon}
                           </div>
                           <div>
                             <p className="menu-title" style={{ color: txtPrimary }}>{title}</p>
-                            <p className="menu-desc" style={{ color: txtSub }}>{desc}</p>
+                            <p className="menu-desc"  style={{ color: txtSub   }}>{desc}</p>
                           </div>
                         </motion.div>
                     ))}
                   </div>
 
-                  {/* ── MEMBROS — CORRIGIDO ── */}
-                  <div className={cardClass} style={{ overflow: "hidden" }}>
+                  {/* ── MEMBROS ─ overflow:clip (FIX 8) ─────────────── */}
+                  <div className={cardClass} style={{ overflow: "clip" }}>
                     <div style={{
                       padding: "24px 28px",
                       borderBottom: `1px solid ${dark ? "rgba(253,184,19,.1)" : "rgba(200,16,46,.1)"}`,
@@ -903,6 +968,7 @@ export default function DashboardLider() {
                       </button>
                     </div>
 
+                    {/* FIX 4: members-grid com contain + translateZ */}
                     <div className="members-grid">
                       {membros.map(m => (
                           <div key={m.id} className={memberRow}>
@@ -912,7 +978,11 @@ export default function DashboardLider() {
                             </div>
                             <button
                                 onClick={() => removerMembro(m.id, m.nome)}
-                                style={{ background: "none", border: "none", cursor: "pointer", color: txtSub, padding: 6, borderRadius: 6, transition: "color .2s", flexShrink: 0 }}
+                                style={{
+                                  background: "none", border: "none", cursor: "pointer",
+                                  color: txtSub, padding: 6, borderRadius: 6,
+                                  transition: "color .2s", flexShrink: 0,
+                                }}
                                 onMouseEnter={e => e.currentTarget.style.color = BRAND.red}
                                 onMouseLeave={e => e.currentTarget.style.color = txtSub}
                             >
@@ -932,25 +1002,28 @@ export default function DashboardLider() {
                 </motion.div>
 
             ) : (
+
                 <motion.div
                     key="content"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { duration: .35, ease: "easeOut" } }}
                     exit={{ opacity: 0, transition: { duration: .25, ease: "easeIn" } }}
+                    style={{ willChange: "opacity" }}  /* FIX 7 */
                 >
-                  {abaAtiva === "metas"       && <TelaMetasLider        celula={celula}       isDark={isDark} />}
-                  {abaAtiva === "relatorio"   && <TelaRelatorio          celula={celula}       isDark={isDark} />}
-                  {abaAtiva === "discipulado" && <RelatorioDiscipulado   membros={membros}     isDark={isDark} />}
-                  {abaAtiva === "visitantes"  && <TelaVisitantes         celulaId={celula?.id} isDark={isDark} />}
-                  {abaAtiva === "fichas"      && <TelaFichas             celula={celula}       isDark={isDark} />}
-                  {abaAtiva === "casas"       && <CasasDePazLider        celulaId={celula?.id} isDark={isDark} />}
-                  {abaAtiva === "missao70"    && <Missao70Lider          celulaId={celula?.id} isDark={isDark} />}
+                  {abaAtiva === "metas"       && <TelaMetasLider       celula={celula}       isDark={isDark} />}
+                  {abaAtiva === "relatorio"   && <TelaRelatorio         celula={celula}       isDark={isDark} />}
+                  {abaAtiva === "discipulado" && <RelatorioDiscipulado  membros={membros}     isDark={isDark} />}
+                  {abaAtiva === "visitantes"  && <TelaVisitantes        celulaId={celula?.id} isDark={isDark} />}
+                  {abaAtiva === "fichas"      && <TelaFichas            celula={celula}       isDark={isDark} />}
+                  {abaAtiva === "casas"       && <CasasDePazLider       celulaId={celula?.id} isDark={isDark} />}
+                  {abaAtiva === "missao70"    && <Missao70Lider         celulaId={celula?.id} isDark={isDark} />}
                 </motion.div>
+
             )}
           </AnimatePresence>
         </div>
 
-        {/* ── MODAIS ── */}
+        {/* ── MODAIS ───────────────────────────────────────────────────── */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="modal-backdrop">
@@ -958,10 +1031,14 @@ export default function DashboardLider() {
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     onClick={() => setShowModalAddMembro(false)}
                     className="modal-overlay"
+                    style={{ willChange: "opacity" }}  /* FIX 7 */
                 />
                 <motion.div
-                    initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
-                    className={`${cardClass} modal-box`} style={{ maxWidth: 480 }}
+                    initial={{ y: 80, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 80, opacity: 0 }}
+                    className={`${cardClass} modal-box`}
+                    style={{ maxWidth: 480, willChange: "opacity, transform" }}
                 >
                   <ModalBuscarMembro
                       celulaId={celula?.id}
@@ -979,11 +1056,14 @@ export default function DashboardLider() {
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="modal-overlay"
+                    style={{ willChange: "opacity" }}  /* FIX 7 */
                 />
                 <motion.div
-                    initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
+                    initial={{ y: 80, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 80, opacity: 0 }}
                     className={`${cardClass} modal-box`}
-                    style={{ maxWidth: 440, padding: "36px 28px", overflowY: "auto" }}
+                    style={{ maxWidth: 440, padding: "36px 28px", overflowY: "auto", willChange: "opacity, transform" }}
                 >
                   {/* Topo modal */}
                   <div style={{ textAlign: "center", marginBottom: 24 }}>
@@ -1018,10 +1098,19 @@ export default function DashboardLider() {
                   />
 
                   <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
-                    <button className={dark ? "btn-ghost-dark" : "btn-ghost-light"} style={{ flex: 1 }} onClick={() => setShowModalMultiplicacao(false)}>
+                    <button
+                        className={dark ? "btn-ghost-dark" : "btn-ghost-light"}
+                        style={{ flex: 1 }}
+                        onClick={() => setShowModalMultiplicacao(false)}
+                    >
                       Cancelar
                     </button>
-                    <button className="btn-blue" style={{ flex: 2 }} onClick={solicitarMultiplicacao} disabled={solicitandoMulti}>
+                    <button
+                        className="btn-blue"
+                        style={{ flex: 2 }}
+                        onClick={solicitarMultiplicacao}
+                        disabled={solicitandoMulti}
+                    >
                       {solicitandoMulti ? <Loader2 size={16} className="spin-icon" /> : "Enviar Plano"}
                     </button>
                   </div>
@@ -1033,7 +1122,7 @@ export default function DashboardLider() {
   );
 }
 
-/* ── Modal Buscar Membro ──────────────────────────────────────────────── */
+/* ─── Modal Buscar Membro ─────────────────────────────────────────────── */
 function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
   const [busca,      setBusca]      = useState("");
   const [membrosSem, setMembrosSem] = useState([]);
@@ -1111,7 +1200,11 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
                 {m.nome}
               </span>
                 </div>
-                <button className="btn-primary" style={{ fontSize: 9, padding: "7px 13px", letterSpacing: ".1em", flexShrink: 0 }} onClick={() => vincular(m.id)}>
+                <button
+                    className="btn-primary"
+                    style={{ fontSize: 9, padding: "7px 13px", letterSpacing: ".1em", flexShrink: 0 }}
+                    onClick={() => vincular(m.id)}
+                >
                   Vincular
                 </button>
               </div>
