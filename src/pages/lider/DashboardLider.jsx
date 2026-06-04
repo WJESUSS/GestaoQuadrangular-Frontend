@@ -33,7 +33,7 @@ const BRAND = {
   muted:     "#8A7F7A",
 };
 
-/* ─── Logo (igual ao Login) ─────────────────────────────────────────── */
+/* ─── Logo ─────────────────────────────────────────────────────────── */
 function IEQCross({ size = 36, src = "/quadrangular.png" }) {
   return (
       <img
@@ -55,11 +55,27 @@ function IEQCross({ size = 36, src = "/quadrangular.png" }) {
 /* ─── Chave boas-vindas ─────────────────────────────────────────────── */
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
-/* ─── CSS estático ──────────────────────────────────────────────────── */
+/* ─── CSS estático — CORRIGIDO para Android ────────────────────────── */
+/*
+  CORREÇÕES APLICADAS:
+  1. Removido `backdrop-filter: blur()` de todos os cards — causa artefato
+     visual (glitch/ruído) em WebView Android com GPUs mais antigas.
+     Compensado aumentando a opacidade do background para .99.
+
+  2. `.grid-bg`, `.glow-red`, `.glow-blue` trocados de `position: fixed`
+     para `position: absolute` — evita problemas de compositing/layer
+     no WebView Android que causavam o glitch na parte inferior da tela.
+
+  3. `.ieq-root` mantém `position: relative` e `overflow-x: hidden`
+     para conter os elementos absolutos corretamente.
+
+  4. Modais mantêm `position: fixed` (necessário para overlay), mas
+     o `backdrop-filter` do overlay foi removido e substituído por
+     background sólido semitransparente.
+*/
 const STATIC_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Tipografia (idêntica ao Login) */
   .ieq-root {
     font-family: 'Manrope', sans-serif;
     min-height: 100vh;
@@ -69,23 +85,29 @@ const STATIC_CSS = `
     transition: background .4s;
   }
 
-  /* Grade decorativa */
+  /* ── Fundo decorativo — CORRIGIDO: absolute em vez de fixed ── */
   .grid-bg {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    position: absolute;        /* FIX: era fixed — causava glitch Android */
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    min-height: 100%;
     background-image:
       linear-gradient(rgba(253,184,19,.04) 1px, transparent 1px),
       linear-gradient(90deg, rgba(253,184,19,.04) 1px, transparent 1px);
     background-size: 60px 60px;
   }
   .glow-red {
-    position: fixed; top: 50%; left: 50%;
+    position: absolute;        /* FIX: era fixed */
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 900px; height: 900px; border-radius: 50%;
     background: radial-gradient(circle, rgba(200,16,46,.10) 0%, transparent 68%);
     pointer-events: none; z-index: 0;
   }
   .glow-blue {
-    position: fixed; top: 20%; right: 5%;
+    position: absolute;        /* FIX: era fixed */
+    top: 20%; right: 5%;
     width: 500px; height: 500px; border-radius: 50%;
     background: radial-gradient(circle, rgba(0,61,165,.08) 0%, transparent 70%);
     pointer-events: none; z-index: 0;
@@ -106,7 +128,7 @@ const STATIC_CSS = `
     flex-wrap: wrap; gap: 16px;
   }
 
-  /* Badge (idêntico ao Login) */
+  /* Badge */
   .badge {
     display: inline-flex; align-items: center; gap: 7px;
     background: rgba(253,184,19,.07);
@@ -140,7 +162,7 @@ const STATIC_CSS = `
   }
   .lider-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-  /* ── Botões (idênticos ao Login) ── */
+  /* ── Botões ── */
   .btn-primary {
     border: none; border-radius: 6px; cursor: pointer;
     font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700;
@@ -155,6 +177,7 @@ const STATIC_CSS = `
     box-shadow: 0 8px 28px rgba(200,16,46,.35);
   }
   .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+
   .btn-blue {
     border: none; border-radius: 6px; cursor: pointer;
     font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700;
@@ -168,6 +191,7 @@ const STATIC_CSS = `
     opacity: .88; transform: translateY(-2px);
     box-shadow: 0 8px 28px rgba(0,61,165,.35);
   }
+
   .btn-ghost-dark {
     background: rgba(255,255,255,.04);
     border: 1px solid rgba(200,16,46,.2);
@@ -179,6 +203,7 @@ const STATIC_CSS = `
     padding: 11px 16px; transition: all .25s;
   }
   .btn-ghost-dark:hover { border-color: #C8102E; background: rgba(200,16,46,.1); }
+
   .btn-ghost-light {
     background: rgba(200,16,46,.06);
     border: 1px solid rgba(200,16,46,.18);
@@ -191,20 +216,20 @@ const STATIC_CSS = `
   }
   .btn-ghost-light:hover { border-color: #C8102E; background: rgba(200,16,46,.12); }
 
-  /* ── Cards ── */
+  /* ── Cards — CORRIGIDO: sem backdrop-filter ── */
   .card-dark {
-    background: rgba(26,20,22,.96);
+    background: rgba(26,20,22,.99);  /* FIX: era .96 com backdrop-filter blur(24px) */
     border: 1px solid rgba(253,184,19,.13);
     border-radius: 12px;
-    backdrop-filter: blur(24px);
+    /* backdrop-filter: blur(24px); ← REMOVIDO — glitch Android */
     box-shadow: 0 2px 1px rgba(0,0,0,.04), 0 8px 32px rgba(0,0,0,.18),
                 0 0 0 1px rgba(253,184,19,.07);
   }
   .card-light {
-    background: rgba(255,255,255,.96);
+    background: rgba(255,255,255,.99);  /* FIX: era .96 com backdrop-filter blur(24px) */
     border: 1px solid rgba(200,16,46,.15);
     border-radius: 12px;
-    backdrop-filter: blur(24px);
+    /* backdrop-filter: blur(24px); ← REMOVIDO — glitch Android */
     box-shadow: 0 2px 1px rgba(0,0,0,.02), 0 8px 32px rgba(0,0,0,.08),
                 0 0 0 1px rgba(200,16,46,.06);
   }
@@ -231,7 +256,7 @@ const STATIC_CSS = `
     background-size: 40px 40px;
   }
 
-  /* ── Separador decorativo (idêntico ao Login) ── */
+  /* ── Separador decorativo ── */
   .section-divider {
     display: flex; align-items: center; gap: 12px;
     margin: 8px 0 28px;
@@ -254,7 +279,7 @@ const STATIC_CSS = `
   @media (min-width: 900px) { .menu-grid { grid-template-columns: repeat(7, 1fr); } }
 
   .menu-card-dark {
-    background: rgba(26,20,22,.96);
+    background: rgba(26,20,22,.99);  /* FIX: sem backdrop-filter */
     border: 1px solid rgba(253,184,19,.10);
     border-radius: 10px; padding: 20px 12px;
     cursor: pointer;
@@ -262,7 +287,7 @@ const STATIC_CSS = `
     transition: all .3s; text-align: center;
   }
   .menu-card-light {
-    background: rgba(255,255,255,.95);
+    background: rgba(255,255,255,.99);  /* FIX: sem backdrop-filter */
     border: 1px solid rgba(200,16,46,.10);
     border-radius: 10px; padding: 20px 12px;
     cursor: pointer;
@@ -331,7 +356,7 @@ const STATIC_CSS = `
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
-  /* ── Inputs (idênticos ao Login) ── */
+  /* ── Inputs ── */
   .ieq-input {
     width: 100%;
     border-radius: 6px; outline: none;
@@ -340,12 +365,12 @@ const STATIC_CSS = `
     transition: border-color .2s, box-shadow .2s, background .2s;
   }
   .ieq-input-dark {
-    background: rgba(255,255,255,.04);
+    background: rgba(255,255,255,.06);  /* FIX: ligeiramente mais opaco */
     border: 1px solid rgba(253,184,19,.12);
     color: #F5F0EB;
   }
   .ieq-input-light {
-    background: rgba(0,0,0,.03);
+    background: rgba(0,0,0,.04);        /* FIX: ligeiramente mais opaco */
     border: 1px solid rgba(200,16,46,.14);
     color: #0A0608;
   }
@@ -378,7 +403,7 @@ const STATIC_CSS = `
     padding: 8px 0;
   }
 
-  /* ── Modal ── */
+  /* ── Modal — CORRIGIDO: overlay sem backdrop-filter ── */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 50;
     display: flex; align-items: flex-end; justify-content: center;
@@ -396,6 +421,14 @@ const STATIC_CSS = `
     .modal-box { border-radius: 12px; max-height: calc(100vh - 24px); }
   }
 
+  /* Overlay do modal — CORRIGIDO: sem backdrop-filter, bg mais sólido */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10,6,8,.90);   /* FIX: era .85 com backdrop-filter blur(16px) */
+    /* backdrop-filter: blur(16px); ← REMOVIDO */
+    z-index: 0;
+  }
+
   /* ── Alerta aprovação ── */
   .alert-aprovado {
     margin-bottom: 28px; padding: 16px 24px; border-radius: 10px;
@@ -408,12 +441,9 @@ const STATIC_CSS = `
   /* ── Animações ── */
   @keyframes pulse  { 0%,100%{opacity:.18;} 50%{opacity:.06;} }
   @keyframes spin   { to { transform: rotate(360deg); } }
-  @keyframes tabIn  { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
-  @keyframes slideDown { from{opacity:0;transform:translateY(-7px)} to{opacity:1;transform:translateY(0)} }
   @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
   .spin-icon { animation: spin 1s linear infinite; }
-  .tab-in    { }  /* animação gerenciada pelo framer-motion */
   .fade-up   { animation: fadeUp .5s ease both; }
 
   /* ── Divider ── */
@@ -437,19 +467,15 @@ const STATIC_CSS = `
 export default function DashboardLider() {
   const [abaAtiva,               setAbaAtiva]               = useState("home");
 
-  // Intercepta o botão voltar do celular (Android/PWA)
   useEffect(() => {
     if (abaAtiva !== "home") {
       window.history.pushState({ aba: abaAtiva }, "");
     }
-
-    const handlePopState = () => {
-      setAbaAtiva("home");
-    };
-
+    const handlePopState = () => { setAbaAtiva("home"); };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [abaAtiva]);
+
   const [celula,                 setCelula]                 = useState(null);
   const [membros,                setMembros]                = useState([]);
   const [usuarioLogado,          setUsuarioLogado]          = useState(null);
@@ -465,7 +491,6 @@ export default function DashboardLider() {
 
   const dark = isDark;
 
-  /* cores contextuais */
   const bg          = dark ? BRAND.dark  : BRAND.light;
   const cardClass   = dark ? "card-dark" : "card-light";
   const txtPrimary  = dark ? BRAND.light : BRAND.dark;
@@ -559,7 +584,7 @@ export default function DashboardLider() {
             <div className="pulse-ring" style={{ width: 64, height: 64, animationDelay: "1s" }} />
             <div style={{
               width: 54, height: 54, borderRadius: "50%",
-              background: dark ? "rgba(26,20,22,.9)" : "#fff",
+              background: dark ? "rgba(26,20,22,.99)" : "#fff",  /* FIX: .9 → .99 */
               border: "1px solid rgba(200,16,46,.25)",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
@@ -583,7 +608,7 @@ export default function DashboardLider() {
         ${STATIC_CSS}
       `}</style>
 
-        {/* Fundo */}
+        {/* Fundo — agora position: absolute (corrigido) */}
         <div className="grid-bg" />
         <div className="glow-red" />
         <div className="glow-blue" />
@@ -609,13 +634,11 @@ export default function DashboardLider() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: .45 }}
           >
-            {/* Identidade */}
             <div style={{ display: "flex", alignItems: "center", gap: 18, minWidth: 0, flex: 1 }}>
-              {/* Avatar com anel pulsante (idêntico ao Login) */}
               <div className="lider-avatar-wrap" style={{ flexShrink: 0 }}>
                 <div className="pulse-ring" style={{ width: 76, height: 76 }} />
                 <div className="pulse-ring" style={{ width: 62, height: 62, animationDelay: "1s" }} />
-                <div className="lider-avatar" style={{ background: dark ? "rgba(26,20,22,.9)" : "#fff" }}>
+                <div className="lider-avatar" style={{ background: dark ? "rgba(26,20,22,.99)" : "#fff" }}>  {/* FIX: .9 → .99 */}
                   {usuarioLogado?.fotoPerfil
                       ? <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome || "Líder"} />
                       : <IEQCross size={38} />
@@ -624,7 +647,6 @@ export default function DashboardLider() {
               </div>
 
               <div style={{ minWidth: 0 }}>
-                {/* Título Playfair (idêntico ao Login) */}
                 <h1 style={{
                   fontFamily: "'Playfair Display', serif",
                   fontSize: "clamp(22px, 4vw, 28px)",
@@ -657,7 +679,6 @@ export default function DashboardLider() {
               </div>
             </div>
 
-            {/* Ações do header */}
             <div className="header-actions" style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
               <SinoAniversariantes isDark={isDark} celulaId={celula?.id} />
               <button className={btnGhost} onClick={() => setIsDark(!isDark)} style={{ padding: "10px 12px" }}>
@@ -675,7 +696,7 @@ export default function DashboardLider() {
             </div>
           </motion.header>
 
-          {/* Separador decorativo (idêntico ao Login) */}
+          {/* Separador decorativo */}
           <div className="section-divider">
             <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${BRAND.yellow})` }} />
             <div className="section-divider-dot" />
@@ -690,7 +711,7 @@ export default function DashboardLider() {
           </span>
           </div>
 
-          {/* ── ALERTA APROVAÇÃO ────────────────────────────────────── */}
+          {/* ── ALERTA APROVAÇÃO ── */}
           <AnimatePresence>
             {isAprovado && (
                 <motion.div
@@ -703,7 +724,7 @@ export default function DashboardLider() {
             )}
           </AnimatePresence>
 
-          {/* ── CONTEÚDO POR ABA ────────────────────────────────────── */}
+          {/* ── CONTEÚDO POR ABA ── */}
           <AnimatePresence mode="sync">
             {abaAtiva === "home" ? (
 
@@ -715,7 +736,7 @@ export default function DashboardLider() {
                     style={{ display: "flex", flexDirection: "column", gap: 24 }}
                 >
 
-                  {/* ── KPI GRID ─────────────────────────────────────── */}
+                  {/* ── KPI GRID ── */}
                   <div className="kpi-grid">
 
                     {/* Card hero membros */}
@@ -810,16 +831,16 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* ── MENU ─────────────────────────────────────────── */}
+                  {/* ── MENU ── */}
                   <div className="menu-grid">
                     {[
-                      { icon: <Target    size={20} />, title: "Metas",       desc: "Objetivos",   aba: "metas",       color: BRAND.red      },
-                      { icon: <Target    size={20} />, title: "Discipulado", desc: "Acompanhar",  aba: "discipulado", color: BRAND.blue     },
+                      { icon: <Target     size={20} />, title: "Metas",       desc: "Objetivos",   aba: "metas",       color: BRAND.red      },
+                      { icon: <Target     size={20} />, title: "Discipulado", desc: "Acompanhar",  aba: "discipulado", color: BRAND.blue     },
                       { icon: <TrendingUp size={20} />, title: "Frequência",  desc: "Relatórios",  aba: "relatorio",   color: BRAND.red      },
-                      { icon: <Plus      size={20} />, title: "Fichas",      desc: "Secretaria",  aba: "fichas",      color: BRAND.redDark  },
-                      { icon: <Users     size={20} />, title: "Visitantes",  desc: "Novas Vidas", aba: "visitantes",  color: BRAND.yellow   },
-                      { icon: <Home      size={20} />, title: "Casas de Paz",desc: "Evangelismo", aba: "casas",       color: BRAND.blue     },
-                      { icon: <Flame     size={20} />, title: "Missão 70",   desc: "Evangelismo", aba: "missao70",    color: BRAND.yellow   },
+                      { icon: <Plus       size={20} />, title: "Fichas",      desc: "Secretaria",  aba: "fichas",      color: BRAND.redDark  },
+                      { icon: <Users      size={20} />, title: "Visitantes",  desc: "Novas Vidas", aba: "visitantes",  color: BRAND.yellow   },
+                      { icon: <Home       size={20} />, title: "Casas de Paz",desc: "Evangelismo", aba: "casas",       color: BRAND.blue     },
+                      { icon: <Flame      size={20} />, title: "Missão 70",   desc: "Evangelismo", aba: "missao70",    color: BRAND.yellow   },
                     ].map(({ icon, title, desc, aba, color }) => (
                         <motion.div
                             key={aba}
@@ -839,9 +860,8 @@ export default function DashboardLider() {
                     ))}
                   </div>
 
-                  {/* ── MEMBROS ──────────────────────────────────────── */}
+                  {/* ── MEMBROS ── */}
                   <div className={cardClass} style={{ overflow: "hidden" }}>
-                    {/* Cabeçalho */}
                     <div style={{
                       padding: "24px 28px",
                       borderBottom: `1px solid ${dark ? "rgba(253,184,19,.1)" : "rgba(200,16,46,.1)"}`,
@@ -861,7 +881,6 @@ export default function DashboardLider() {
                       </button>
                     </div>
 
-                    {/* Lista */}
                     <div className="members-grid">
                       {membros.map(m => (
                           <div key={m.id} className={memberRow}>
@@ -893,7 +912,6 @@ export default function DashboardLider() {
             ) : (
                 <motion.div
                     key="content"
-                    className="tab-in"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { duration: .35, ease: "easeOut" } }}
                     exit={{ opacity: 0, transition: { duration: .25, ease: "easeIn" } }}
@@ -910,14 +928,15 @@ export default function DashboardLider() {
           </AnimatePresence>
         </div>
 
-        {/* ── MODAIS ───────────────────────────────────────────────────── */}
+        {/* ── MODAIS ── */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="modal-backdrop">
+                {/* FIX: overlay sem backdrop-filter — era blur(16px) */}
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     onClick={() => setShowModalAddMembro(false)}
-                    style={{ position: "fixed", inset: 0, background: "rgba(10,6,8,.85)", backdropFilter: "blur(16px)", zIndex: 0 }}
+                    className="modal-overlay"
                 />
                 <motion.div
                     initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
@@ -936,9 +955,10 @@ export default function DashboardLider() {
 
           {showModalMultiplicacao && (
               <div className="modal-backdrop">
+                {/* FIX: overlay sem backdrop-filter */}
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    style={{ position: "fixed", inset: 0, background: "rgba(10,6,8,.85)", backdropFilter: "blur(16px)", zIndex: 0 }}
+                    className="modal-overlay"
                 />
                 <motion.div
                     initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
@@ -952,7 +972,7 @@ export default function DashboardLider() {
                       <div className="pulse-ring" style={{ width: 58, height: 58, animationDelay: "1s" }} />
                       <div style={{
                         width: 50, height: 50, borderRadius: "50%",
-                        background: dark ? "rgba(26,20,22,.9)" : "#fff",
+                        background: dark ? "rgba(26,20,22,.99)" : "#fff",  /* FIX: .9 → .99 */
                         border: "1px solid rgba(200,16,46,.25)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
@@ -1021,7 +1041,6 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
 
   return (
       <div style={{ padding: "22px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-        {/* Cabeçalho */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexShrink: 0 }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: txtPrimary, margin: 0 }}>
             Vincular Membro
@@ -1031,7 +1050,6 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
           </button>
         </div>
 
-        {/* Campo busca */}
         <div style={{ position: "relative", marginBottom: 14, flexShrink: 0 }}>
           <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: BRAND.red, opacity: .6 }} />
           <input
@@ -1042,7 +1060,6 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
           />
         </div>
 
-        {/* Lista */}
         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }}>
           {loading ? (
               <div style={{ textAlign: "center", paddingTop: 28 }}>
@@ -1054,7 +1071,7 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     padding: "10px 12px", gap: 8,
-                    background: isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.04)",
+                    background: isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.04)",  /* FIX: .03 → .04 */
                     border: `1px solid ${isDark ? "rgba(253,184,19,.08)" : "rgba(200,16,46,.08)"}`,
                     borderRadius: 8, flexShrink: 0, transition: "border-color .2s",
                   }}
