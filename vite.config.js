@@ -11,6 +11,8 @@ export default defineConfig({
     cors: true,
   },
   build: {
+    sourcemap: false,
+    cssMinify: true,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {

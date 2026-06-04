@@ -17,14 +17,11 @@ RUN yarn build
 
 
 # -------- Runtime --------
-FROM node:20-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN npm install -g serve
+EXPOSE 80
 
-COPY --from=build /app/dist ./dist
-
-EXPOSE 5173
-
-CMD ["serve", "-s", "dist", "-l", "5173"]
+CMD ["nginx", "-g", "daemon off;"]

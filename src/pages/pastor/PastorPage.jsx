@@ -514,7 +514,7 @@ Pastores Renato e Jaci Soares 🙏 🤍`
                 className="sino-panel"
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  position: "absolute", top: 48, right: 0,
+                  position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
                   width: 344,
                   background: panelBg,
                   border: `1px solid ${borderC}`,

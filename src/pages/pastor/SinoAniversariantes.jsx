@@ -161,7 +161,7 @@ export default function SinoAniversariantes({ isDark = false }) {
                         ref={panelRef}
                         style={{
                             position: "absolute",
-                            top: 52, right: 0,
+                            top: 52, left: "50%", transform: "translateX(-50%)",
                             width: "min(380px, calc(100vw - 32px))",
                             background: isDark ? "rgba(17,10,13,.98)" : "#fff",
                             border: "1px solid rgba(200,16,46,.35)",
