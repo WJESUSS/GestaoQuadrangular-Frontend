@@ -142,14 +142,14 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                     overflowY: "auto",
                 }}
             >
-                {/* Wrapper interno — centraliza verticalmente quando cabe, scroll quando não cabe */}
+                {/* Wrapper interno — sobe o card para o topo com espaço confortável */}
                 <div
                     style={{
                         minHeight: "100%",
                         display: "flex",
-                        alignItems: "center",
+                        alignItems: "flex-start",
                         justifyContent: "center",
-                        padding: "20px",
+                        padding: "40px 20px 40px",
                     }}
                 >
                     {/* CARD PRINCIPAL */}
