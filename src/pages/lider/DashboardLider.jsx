@@ -72,6 +72,10 @@ const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
   4. Modais mantêm `position: fixed` (necessário para overlay), mas
      o `backdrop-filter` do overlay foi removido e substituído por
      background sólido semitransparente.
+
+  5. NOVO FIX: `.members-grid` mudado de `grid` para `flex` com
+     `flex-direction: column` para evitar sobreposição em Android.
+     Todos os `.member-row-*` agora com `width: 100%` e `min-width: 0`.
 */
 const STATIC_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -319,28 +323,40 @@ const STATIC_CSS = `
   .kpi-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
   @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
 
-  /* ── Membros ── */
+  /* ── Membros — CORRIGIDO PARA MOBILE ── */
   .members-grid {
     padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 10px;
+    width: 100%;
   }
-  @media (max-width: 599px) { .members-grid { grid-template-columns: 1fr; } }
 
   .member-row-dark {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 11px 14px;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    padding: 12px 14px;
     background: rgba(255,255,255,.03);
     border: 1px solid rgba(253,184,19,.08);
-    border-radius: 8px; transition: all .2s; gap: 8px;
+    border-radius: 8px; 
+    transition: all .2s; 
+    gap: 10px;
+    min-width: 0;
+    width: 100%;
   }
   .member-row-light {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 11px 14px;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    padding: 12px 14px;
     background: rgba(200,16,46,.03);
     border: 1px solid rgba(200,16,46,.08);
-    border-radius: 8px; transition: all .2s; gap: 8px;
+    border-radius: 8px; 
+    transition: all .2s; 
+    gap: 10px;
+    min-width: 0;
+    width: 100%;
   }
   .member-row-dark:hover, .member-row-light:hover { border-color: #C8102E; }
 
@@ -352,8 +368,14 @@ const STATIC_CSS = `
     font-weight: 800; font-size: 13px;
   }
   .member-name {
-    font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 500;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: 'Manrope', sans-serif; 
+    font-size: 14px; 
+    font-weight: 500;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
   }
 
   /* ── Inputs ── */
@@ -860,7 +882,7 @@ export default function DashboardLider() {
                     ))}
                   </div>
 
-                  {/* ── MEMBROS ── */}
+                  {/* ── MEMBROS — CORRIGIDO ── */}
                   <div className={cardClass} style={{ overflow: "hidden" }}>
                     <div style={{
                       padding: "24px 28px",
@@ -932,7 +954,6 @@ export default function DashboardLider() {
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="modal-backdrop">
-                {/* FIX: overlay sem backdrop-filter — era blur(16px) */}
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     onClick={() => setShowModalAddMembro(false)}
@@ -955,7 +976,6 @@ export default function DashboardLider() {
 
           {showModalMultiplicacao && (
               <div className="modal-backdrop">
-                {/* FIX: overlay sem backdrop-filter */}
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="modal-overlay"
@@ -972,7 +992,7 @@ export default function DashboardLider() {
                       <div className="pulse-ring" style={{ width: 58, height: 58, animationDelay: "1s" }} />
                       <div style={{
                         width: 50, height: 50, borderRadius: "50%",
-                        background: dark ? "rgba(26,20,22,.99)" : "#fff",  /* FIX: .9 → .99 */
+                        background: dark ? "rgba(26,20,22,.99)" : "#fff",
                         border: "1px solid rgba(200,16,46,.25)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
@@ -1071,7 +1091,7 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     padding: "10px 12px", gap: 8,
-                    background: isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.04)",  /* FIX: .03 → .04 */
+                    background: isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.04)",
                     border: `1px solid ${isDark ? "rgba(253,184,19,.08)" : "rgba(200,16,46,.08)"}`,
                     borderRadius: 8, flexShrink: 0, transition: "border-color .2s",
                   }}
