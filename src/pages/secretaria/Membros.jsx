@@ -7,7 +7,7 @@ import {
   CreditCard, Heart, ChevronRight, Users,
 } from "lucide-react";
 
-/* ─── Tokens ─── */
+/* ??? Tokens ??? */
 const IEQ = {
   red: "#C8102E", redDark: "#8B0B1F",
   yellow: "#FDB813", blue: "#003DA5", blueDark: "#002470",
@@ -34,12 +34,52 @@ const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"
 const formInicial = {
   nome: "", email: "", telefone: "", endereco: "", cpf: "",
   estadoCivil: "SOLTEIRO", dataNascimento: "", dataConversao: "",
-  dataBatismo: "", status: "ATIVO",
+  dataBatismo: "", status: "ATIVO", celulaId: null,
 };
 
-/* ══════════════════════════════════════════
+// ✅ HELPER: Converter data ISO para YYYY-MM-DD
+function formatarDataInput(dataISO) {
+  if (!dataISO) return "";
+  try {
+    // Se vier em formato ISO (2000-05-15T00:00:00), pega só a data
+    if (typeof dataISO === "string" && dataISO.includes("T")) {
+      return dataISO.split("T")[0];
+    }
+    // Se vier em formato YYYY-MM-DD, retorna igual
+    if (typeof dataISO === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dataISO)) {
+      return dataISO;
+    }
+    return "";
+  } catch {
+    return "";
+  }
+}
+
+// ✅ HELPER: Validar e preparar dados antes de enviar
+function prepararFormParaEnvio(form) {
+  const dados = { ...form };
+
+  // Se celulaId for null/undefined/0, remove do payload
+  if (!dados.celulaId) {
+    delete dados.celulaId;
+  }
+
+  // Não enviar campos vazios de data (deixa como null ou remove)
+  if (!dados.dataNascimento) dados.dataNascimento = null;
+  if (!dados.dataConversao) dados.dataConversao = null;
+  if (!dados.dataBatismo) dados.dataBatismo = null;
+
+  // Nome é obrigatório
+  if (!dados.nome || dados.nome.trim() === "") {
+    throw new Error("Nome completo é obrigatório");
+  }
+
+  return dados;
+}
+
+/* ??????????????????????????????????????????
    MODAL
-══════════════════════════════════════════ */
+?????????????????????????????????????????? */
 function MembroModal({
                        isDark, editandoId, form, setForm,
                        onSalvar, onExcluir, onFechar,
@@ -116,9 +156,13 @@ function MembroModal({
       background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)"};
       border: 1px solid ${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"};
     }
+    .mf-error {
+      padding: 12px 14px; border-radius: 8px;
+      background: rgba(200,16,46,.1); border: 1px solid rgba(200,16,46,.3);
+      color: ${IEQ.red}; font-family: 'EB Garamond', serif; font-size: 13px;
+    }
   `;
 
-  /* Badge de célula — usa nomeCelula e nomeLider direto do membro */
   const renderCelulaBadge = () => {
     if (!editandoId) return null;
 
@@ -197,7 +241,6 @@ function MembroModal({
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.28 }}
         >
-          {/* Header */}
           <div className="mf-header">
             <button
                 onClick={onFechar}
@@ -224,20 +267,16 @@ function MembroModal({
             </div>
           </div>
 
-          {/* Body */}
           <form className="mf-body" onSubmit={onSalvar}>
 
-            {/* Badge de célula */}
             {renderCelulaBadge()}
 
-            {/* Nome */}
             <div>
               <label className="mf-label">NOME COMPLETO *</label>
               <input required className="mf-field"
                      value={form.nome} onChange={e => f({ nome: e.target.value })} />
             </div>
 
-            {/* CPF + Whatsapp */}
             <div className="mf-grid2">
               <div>
                 <label className="mf-label">CPF</label>
@@ -251,21 +290,18 @@ function MembroModal({
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="mf-label">E-MAIL</label>
               <input type="email" className="mf-field"
                      value={form.email} onChange={e => f({ email: e.target.value })} />
             </div>
 
-            {/* Endereço */}
             <div>
               <label className="mf-label">ENDEREÇO</label>
               <input className="mf-field"
                      value={form.endereco} onChange={e => f({ endereco: e.target.value })} />
             </div>
 
-            {/* Nascimento + Estado Civil */}
             <div className="mf-grid2">
               <div>
                 <label className="mf-label">NASCIMENTO</label>
@@ -282,7 +318,6 @@ function MembroModal({
               </div>
             </div>
 
-            {/* Status */}
             <div>
               <label className="mf-label">STATUS</label>
               <select className="mf-field"
@@ -291,7 +326,6 @@ function MembroModal({
               </select>
             </div>
 
-            {/* Jornada espiritual */}
             <div className="mf-spiritual">
               <p style={{
                 display: "flex", alignItems: "center", gap: 6,
@@ -314,7 +348,6 @@ function MembroModal({
               </div>
             </div>
 
-            {/* Ações */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 4 }}>
               <button type="submit" className="mf-btn-save">
                 {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
@@ -334,9 +367,9 @@ function MembroModal({
   return createPortal(content, document.body);
 }
 
-/* ══════════════════════════════════════════
+/* ??????????????????????????????????????????
    COMPONENTE PRINCIPAL
-══════════════════════════════════════════ */
+?????????????????????????????????????????? */
 export default function Membros({ isDark = false }) {
   const [membros,        setMembros]        = useState([]);
   const [loading,        setLoading]        = useState(true);
@@ -346,7 +379,6 @@ export default function Membros({ isDark = false }) {
   const [filtro,         setFiltro]         = useState("");
   const [form,           setForm]           = useState(formInicial);
 
-  // Dados de célula vindos direto do membro selecionado
   const [nomeCelula, setNomeCelula] = useState(null);
   const [nomeLider,  setNomeLider]  = useState(null);
 
@@ -381,7 +413,6 @@ export default function Membros({ isDark = false }) {
     @media(min-width:900px) { .ieq-grid-m { grid-template-columns: repeat(3,1fr); } }
   `;
 
-  /* ── API ── */
   const listar = useCallback(async () => {
     setLoading(true);
     try {
@@ -398,7 +429,6 @@ export default function Membros({ isDark = false }) {
 
   useEffect(() => { listar(); }, [listar]);
 
-  /* ── Handlers ── */
   const abrirNovo = () => {
     setEditandoId(null);
     setStatusOriginal(null);
@@ -411,20 +441,22 @@ export default function Membros({ isDark = false }) {
   const abrirEdicao = (m) => {
     setEditandoId(m.id);
     setStatusOriginal(m.status);
-    // Pega célula e líder direto do objeto — sem chamada extra à API
     setNomeCelula(m.nomeCelula ?? null);
-    setNomeLider(m.nomeLider  ?? null);
+    setNomeLider(m.nomeLider ?? null);
+
+    // ✅ CORRIGIDO: Usar formatarDataInput para garantir formato correto
     setForm({
-      nome:           m.nome           ?? "",
-      email:          m.email          ?? "",
-      telefone:       m.telefone       ?? "",
-      endereco:       m.endereco       ?? "",
-      cpf:            m.cpf            ?? "",
-      estadoCivil:    m.estadoCivil    ?? "SOLTEIRO",
-      status:         m.status         ?? "ATIVO",
-      dataNascimento: m.dataNascimento ? m.dataNascimento.split("T")[0] : "",
-      dataConversao:  m.dataConversao  ? m.dataConversao.split("T")[0]  : "",
-      dataBatismo:    m.dataBatismo    ? m.dataBatismo.split("T")[0]    : "",
+      nome:           m.nome ?? "",
+      email:          m.email ?? "",
+      telefone:       m.telefone ?? "",
+      endereco:       m.endereco ?? "",
+      cpf:            m.cpf ?? "",
+      estadoCivil:    m.estadoCivil ?? "SOLTEIRO",
+      status:         m.status ?? "ATIVO",
+      celulaId:       m.celulaId ?? null,
+      dataNascimento: formatarDataInput(m.dataNascimento),
+      dataConversao:  formatarDataInput(m.dataConversao),
+      dataBatismo:    formatarDataInput(m.dataBatismo),
     });
     setIsModalOpen(true);
   };
@@ -438,33 +470,67 @@ export default function Membros({ isDark = false }) {
 
   const salvar = async (e) => {
     e.preventDefault();
+
     try {
+      // ✅ CORRIGIDO: Preparar dados antes de enviar
+      const dados = prepararFormParaEnvio(form);
+
       if (editandoId) {
+        // Se status mudou, avisar antes
         if (form.status !== statusOriginal) {
-          if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) return;
-          await api.put(`/membros/${editandoId}/status`, null, { params: { status: form.status } });
+          if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) {
+            return;
+          }
+          // Chamar endpoint específico de status
+          await api.put(`/membros/${editandoId}/status`, null, {
+            params: { status: form.status }
+          });
         }
-        await api.put(`/membros/${editandoId}`, form);
+
+        // ✅ CORRIGIDO: Enviar dados preparados
+        const response = await api.put(`/membros/${editandoId}`, dados);
+        console.log("✅ Membro atualizado:", response.data);
+
       } else {
-        await api.post("/membros", form);
+        const response = await api.post("/membros", dados);
+        console.log("✅ Membro criado:", response.data);
       }
+
       fecharModal();
       listar();
+
     } catch (err) {
-      console.error("Erro ao salvar:", err);
-      alert("Erro ao salvar dados.");
+      // ✅ CORRIGIDO: Mostrar erro real ao usuário
+      const mensagem = err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Erro desconhecido ao salvar";
+
+      console.error("❌ Erro ao salvar:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message,
+      });
+
+      alert(`Erro ao salvar:\n\n${mensagem}`);
     }
   };
 
   const excluir = async () => {
     if (!window.confirm("Excluir permanentemente?")) return;
+
     try {
       await api.delete(`/membros/${editandoId}`);
+      console.log("✅ Membro excluído");
       fecharModal();
       listar();
     } catch (err) {
-      console.error("Erro ao excluir:", err);
-      alert("Erro ao excluir membro.");
+      const mensagem = err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message;
+
+      console.error("❌ Erro ao excluir:", err);
+      alert(`Erro ao excluir:\n\n${mensagem}`);
     }
   };
 
@@ -478,7 +544,6 @@ export default function Membros({ isDark = false }) {
       <div style={{ padding: "24px 20px", fontFamily: "'EB Garamond',serif", color: textPrimary }}>
         <style>{baseStyles}</style>
 
-        {/* Header */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -509,7 +574,6 @@ export default function Membros({ isDark = false }) {
             </button>
           </div>
 
-          {/* Busca — também filtra por célula */}
           <div style={{ position: "relative" }}>
             <Search size={15} style={{
               position: "absolute", left: 14, top: "50%",
@@ -525,7 +589,6 @@ export default function Membros({ isDark = false }) {
           </div>
         </div>
 
-        {/* Lista */}
         {loading ? (
             <div style={{ textAlign: "center", padding: "48px 0" }}>
               <Loader2 size={30} className="spin-icon" style={{ color: IEQ.blue, display: "inline-block" }} />
@@ -583,7 +646,6 @@ export default function Membros({ isDark = false }) {
                         borderTop: `1px solid ${border}`, paddingTop: 12,
                         display: "flex", flexDirection: "column", gap: 6,
                       }}>
-                        {/* Célula */}
                         {m.nomeCelula && (
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <Users size={13} style={{ color: "#C48C00", flexShrink: 0 }} />
@@ -617,7 +679,6 @@ export default function Membros({ isDark = false }) {
             </motion.div>
         )}
 
-        {/* Modal */}
         <AnimatePresence>
           {isModalOpen && (
               <MembroModal
