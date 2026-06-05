@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import api from "../../services/api.js";
 import {
@@ -16,10 +15,10 @@ const IEQ = {
 
 const COLUNAS = [
   { campo: "escolaBiblica", label: "EBQ",        emoji: "📖" },
-  { campo: "quartaNoite",   label: "4ª Noite",   emoji: "🌙" },
-  { campo: "quintaNoite",   label: "5ª Noite",   emoji: "🌙" },
-  { campo: "domingoManha",  label: "Dom. Manhã", emoji: "☀️" },
-  { campo: "domingoNoite",  label: "Dom. Noite", emoji: "🌙" },
+  { campo: "quartaNoite",   label: "4ª Noite",   emoji: "🕐" },
+  { campo: "quintaNoite",   label: "5ª Noite",   emoji: "🕐" },
+  { campo: "domingoManha",  label: "Dom. Manhã", emoji: "🌅" },
+  { campo: "domingoNoite",  label: "Dom. Noite", emoji: "🕐" },
 ];
 
 const HISTORICO_LIMITE = 3;
@@ -64,9 +63,9 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════
+/* ??????????????????????????????????????????
    COMPONENTE: Toast de Sucesso Animado (Discipulado)
-══════════════════════════════════════════════════════ */
+?????????????????????????????????????????? */
 function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modoEdicao, onClose }) {
   const [saindo, setSaindo] = useState(false);
 
@@ -214,9 +213,9 @@ function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modo
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ?????????????????????????????????????????????????????????????????????????????
 // ABA HISTÓRICO
-// ─────────────────────────────────────────────────────────────────────────────
+// ?????????????????????????????????????????????????????????????????????????????
 function AbaHistorico({ isDark, onVerDetalhe }) {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -313,9 +312,9 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ?????????????????????????????????????????????????????????????????????????????
 // DETALHE HISTÓRICO
-// ─────────────────────────────────────────────────────────────────────────────
+// ?????????????????????????????????????????????????????????????????????????????
 function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
   const [detalhe, setDetalhe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -420,9 +419,9 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ?????????????????????????????????????????????????????????????????????????????
 // COMPONENTE PRINCIPAL
-// ─────────────────────────────────────────────────────────────────────────────
+// ?????????????????????????????????????????????????????????????????????????????
 export default function RelatorioDiscipulado({ isDark = false }) {
   const [aba, setAba] = useState("relatorio");
   const [detalheItem, setDetalheItem] = useState(null);
@@ -620,6 +619,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     }
   }, [membros]);
 
+  // ✅ FUNÇÃO CORRIGIDA: enviarRelatorio com celulaId obrigatório
   const enviarRelatorio = async () => {
     setErro("");
     if (!inicio || !fim || !celula?.id || presencas.length === 0) return setErro("Verifique os dados.");
@@ -632,7 +632,13 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     const eraEdicao = modoEdicao;
 
     try {
-      const payload = presencas.map(({nomeMembro, membroId, ...rest}) => ({membroId: Number(membroId), ...rest}));
+      // ✅ CORRIGIDO: Adiciona celulaId obrigatório ao payload
+      const payload = presencas.map(({nomeMembro, membroId, ...rest}) => ({
+        membroId: Number(membroId),
+        celulaId: celula?.id,
+        ...rest
+      }));
+
       if (modoEdicao && relatorioExistente?.id) {
         await api.put(`/discipulado/relatorio-semanal/${relatorioExistente.id}?inicio=${inicio}&fim=${fim}`, payload);
       } else {
@@ -656,7 +662,13 @@ export default function RelatorioDiscipulado({ isDark = false }) {
         modoEdicao: eraEdicao
       });
     } catch (e) {
-      setErro(e?.response?.data?.message || "Erro no envio.");
+      const mensagemErro = e?.response?.data?.message || "Erro no envio.";
+      console.error("❌ Erro ao enviar relatório:", {
+        status: e?.response?.status,
+        data: e?.response?.data,
+        message: e?.message,
+      });
+      setErro(mensagemErro);
     } finally {
       setEnviando(false);
     }
@@ -674,7 +686,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     @keyframes fadeIn   { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     @keyframes slideDown{ from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
     @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:.35} }
-    /* ── Toast de sucesso ── */
+    /* 🎉 Toast de sucesso 🎉 */
     @keyframes ieqOverlayIn  { from{opacity:0} to{opacity:1} }
     @keyframes ieqOverlayOut { from{opacity:1} to{opacity:0} }
     @keyframes ieqToastIn    { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
@@ -741,7 +753,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
         <style>{globalStyles}</style>
         <div className="ieq-bg-stripe"/>
 
-        {/* ══ TOAST DE SUCESSO ANIMADO ══ */}
+        {/* 🎉 TOAST DE SUCESSO ANIMADO 🎉 */}
         {toastSucesso && (
             <ToastSucessoDiscipulado
                 totalPresencas={toastSucesso.totalPresencas}
@@ -766,7 +778,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
           {rascunhoCarregado && (
               <div className="ieq-toast"
                    style={{background: `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, color: "#fff"}}>
-                <Save size={15}/> RASCUNHO RESTAURADO — suas marcações anteriores foram recuperadas automaticamente
+                <Save size={15}/> RASCUNHO RESTAURADO → suas marcações anteriores foram recuperadas automaticamente
               </div>
           )}
 
@@ -1129,7 +1141,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
             letterSpacing: ".15em",
             color: ts
           }}>
-            © IEQ PITUAÇÚ — SISTEMA SEGURO — {new Date().getFullYear()}
+            © IEQ PITUAÇÚ · SISTEMA SEGURO · {new Date().getFullYear()}
           </p>
         </div>
       </div>
