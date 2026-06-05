@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../../services/api.js";
 import { Bell, Cake, CheckCircle2, X, Send } from "lucide-react";
+import {createPortal} from "react-dom";
 
 const IEQ = {
     red: "#C8102E",
@@ -113,17 +114,29 @@ export default function SinoAniversariantes({ isDark = false }) {
 
     return (
         <>
-            {isMobile && open && (
+            {!isMobile && open && createPortal(
                 <div
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={() => setOpen(false)}
+                    ref={panelRef}
                     style={{
-                        position: "fixed", inset: 0,
-                        background: "rgba(10,6,8,.55)",
-                        backdropFilter: "blur(4px)",
-                        zIndex: 998,
+                        position: "fixed",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",  // 👈 centraliza horizontal E vertical
+                        width: "min(380px, calc(100vw - 32px))",
+                        background: isDark ? "rgba(17,10,13,.98)" : "#fff",
+                        border: "1px solid rgba(200,16,46,.35)",
+                        borderRadius: 16,
+                        boxShadow: isDark
+                            ? "0 20px 50px rgba(0,0,0,.8)"
+                            : "0 15px 40px rgba(200,16,46,.2)",
+                        zIndex: 9999,
+                        overflow: "hidden",
+                        maxHeight: "80vh",
                     }}
-                />
+                >
+                    {conteudo}
+                </div>,
+                document.body
             )}
 
             <div ref={btnRef} style={{ position: "relative", display: "inline-flex" }}>

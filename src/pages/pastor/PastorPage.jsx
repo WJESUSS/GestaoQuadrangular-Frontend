@@ -22,7 +22,7 @@ import {
   Cake, Bell, Send, Check, X,
 } from "lucide-react";
 
-/* ??? Paleta IEQ ??????????????????????????????????????????????????? */
+/* ─── Paleta IEQ ─────────────────────────────────────────────────── */
 const IEQ = {
   red:        "#C8102E",
   redDark:    "#9B0B1E",
@@ -37,7 +37,7 @@ const IEQ = {
   stone:      "#1A1416",
 };
 
-/* ??? Nav items ???????????????????????????????????????????????????? */
+/* ─── Nav items ──────────────────────────────────────────────────── */
 const NAV_ITEMS = [
   { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",    color: IEQ.blueLight,  end: true  },
   { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",   color: IEQ.red                   },
@@ -62,7 +62,7 @@ const PAGE_TITLES = {
   "missao70":          "Missão 70 – Evangelismo",
 };
 
-/* ??? Logo IEQ ????????????????????????????????????????????????????? */
+/* ─── Logo IEQ ───────────────────────────────────────────────────── */
 function IEQCross({ size = 300, src = "/quadrangular.png" }) {
   return (
       <img
@@ -77,14 +77,14 @@ function IEQCross({ size = 300, src = "/quadrangular.png" }) {
   );
 }
 
-/* ??? CSS global ??????????????????????????????????????????????????? */
+/* ─── CSS global ─────────────────────────────────────────────────── */
 const buildCSS = (dark) => {
   const bg     = dark ? IEQ.dark  : "#F0EAE8";
   const txt    = dark ? IEQ.light : IEQ.dark;
   const sub    = dark ? "rgba(245,240,235,.45)" : "rgba(10,6,8,.42)";
   const border = dark ? "rgba(200,16,46,.16)"   : "rgba(200,16,46,.13)";
   const hdrBg  = dark ? "rgba(17,10,13,.97)"    : "rgba(255,255,255,.94)";
-  const navBg  = dark ? "rgba(12,6,9,.98)"       : "rgba(255,255,255,.97)";
+  const navBg  = dark ? "rgba(12,6,9,.98)"      : "rgba(255,255,255,.97)";
 
   return `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cinzel:wght@400;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap');
@@ -98,7 +98,7 @@ const buildCSS = (dark) => {
     @keyframes shimmer     { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
     @keyframes tabSlide    { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
 
-    /* ?? Sino de aniversários ?? */
+    /* ── Sino de aniversários ── */
     @keyframes badgePulse {
       0%,100% { transform:scale(1); box-shadow:0 0 0 0 rgba(200,16,46,0); }
       50%     { transform:scale(1.18); box-shadow:0 0 0 5px rgba(200,16,46,.18); }
@@ -175,7 +175,7 @@ const buildCSS = (dark) => {
       background-size: 60px 60px;
     }
 
-    /* ?? HEADER ?? */
+    /* ── HEADER ── */
     .pr-header {
       position: sticky; top: 0; z-index: 50;
       background: ${hdrBg};
@@ -269,7 +269,7 @@ const buildCSS = (dark) => {
     }
     @media(max-width:600px) { .pr-header-line { top: 56px; } }
 
-    /* ?? NAV ?? */
+    /* ── NAV ── */
     .pr-nav {
       position: sticky; top: 66px; z-index: 40;
       background: ${navBg};
@@ -334,7 +334,7 @@ const buildCSS = (dark) => {
       background: ${IEQ.red}; box-shadow: 0 0 6px ${IEQ.red};
     }
 
-    /* ?? MAIN ?? */
+    /* ── MAIN ── */
     .pr-main { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; z-index: 1; }
     .pr-content {
       flex: 1; overflow-y: auto; padding: 24px 18px 40px;
@@ -373,12 +373,19 @@ const buildCSS = (dark) => {
       background: ${IEQ.yellow}; box-shadow: 0 0 6px ${IEQ.yellow};
     }
     .tab-animate { animation: tabSlide .22s ease both; }
+
+    /* ── Scrollbar do painel sino ── */
+    .sino-scroll::-webkit-scrollbar { width: 4px; }
+    .sino-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sino-scroll::-webkit-scrollbar-thumb {
+      background: rgba(200,16,46,.25); border-radius: 4px;
+    }
   `;
 };
 
-/* ???????????????????????????????????????????????????????????????????
+/* ─────────────────────────────────────────────────────────────────────
    SINO DE ANIVERSARIANTES
-??????????????????????????????????????????????????????????????????? */
+───────────────────────────────────────────────────────────────────── */
 const CORES_SINO = [
   { bg: "rgba(200,16,46,.12)",  text: "#9B0B1E" },
   { bg: "rgba(0,61,165,.10)",   text: "#002470" },
@@ -423,58 +430,37 @@ function SinoPastor({ isDark }) {
   const subClr  = isDark ? "rgba(245,240,235,.45)" : "rgba(10,6,8,.45)";
   const borderC = "rgba(200,16,46,.22)";
 
-  // ? SIMPLIFICADO: usa o link que vem do backend
   const abrirWhatsApp = (m, id) => {
     try {
-      console.log("📱 Objeto recebido:", m);
-
-      // Se o backend retornar link, usa
       if (m.link) {
         window.open(m.link, "_blank");
-        console.log("✅ Usando link do backend");
         setEnviados(prev => ({ ...prev, [id]: true }));
         return;
       }
 
-      // Caso contrário, monta aqui
-      console.log("⚠️ Montando link no frontend...");
-
-      // Garante que o telefone está limpo
       let telefoneLimpo = (m.telefone || "").replace(/\D/g, "");
-
       if (!telefoneLimpo) {
-        console.error("❌ Telefone vazio!", m);
         alert("❌ Telefone não disponível para " + m.nome);
         return;
       }
 
       const ddi = telefoneLimpo.startsWith("55") ? "" : "55";
-
       const mensagem = encodeURIComponent(
-          `🎂 Paz seja contigo minha ovelhinha 🙏! Feliz Aniversário ${m.nome}!
-
-Que Deus abençoe sua vida,
-lhe conceda saúde, paz e prosperidade.
-
-Com carinho,
-Pastores Renato e Jaci Soares 🙏 🤍`
+          `🎂 Paz seja contigo minha ovelhinha 🙏! Feliz Aniversário ${m.nome}!\n\nQue Deus abençoe sua vida,\nlhe conceda saúde, paz e prosperidade.\n\nCom carinho,\nPastores Renato e Jaci Soares 🙏 🤍`
       );
 
-      const link = `https://wa.me/${ddi}${telefoneLimpo}?text=${mensagem}`;
-
-      console.log("✅ Link montado:", link);
-      window.open(link, "_blank");
+      window.open(`https://wa.me/${ddi}${telefoneLimpo}?text=${mensagem}`, "_blank");
       setEnviados(prev => ({ ...prev, [id]: true }));
-
     } catch (error) {
       console.error("❌ Erro:", error);
       alert("Erro ao abrir WhatsApp");
     }
   };
+
   return (
       <div ref={ref} style={{ position: "relative" }}>
 
-        {/* ?? Botão sino ?? */}
+        {/* ── Botão sino ── */}
         <button
             className="pr-icon-btn"
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); setOpen(o => !o); }}
@@ -508,21 +494,26 @@ Pastores Renato e Jaci Soares 🙏 🤍`
           )}
         </button>
 
-        {/* ?? Painel dropdown ?? */}
+        {/* ── Painel dropdown centralizado e responsivo ── */}
         {open && (
             <div
                 className="sino-panel"
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
-                  width: 344,
+                  /* Centralizado na viewport, responsivo em mobile */
+                  position: "fixed",
+                  top: 72,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "min(344px, calc(100vw - 24px))",   /* ← nunca estoura a tela */
                   background: panelBg,
                   border: `1px solid ${borderC}`,
                   borderRadius: 16,
                   boxShadow: isDark
                       ? "0 16px 48px rgba(0,0,0,.6)"
                       : "0 8px 32px rgba(200,16,46,.14)",
-                  zIndex: 300, overflow: "hidden",
+                  zIndex: 300,
+                  overflow: "hidden",
                 }}
             >
               {/* Cabeçalho */}
@@ -538,20 +529,27 @@ Pastores Renato e Jaci Soares 🙏 🤍`
                     background: "rgba(200,16,46,.1)",
                     border: "1px solid rgba(200,16,46,.22)",
                     display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
                   }}>
                     <Cake size={16} color="#C8102E" />
                   </div>
                   <div>
-                    <p style={{ fontFamily: "'Cinzel', serif", fontSize: 11, fontWeight: 700, letterSpacing: ".12em", color: "#C8102E" }}>
+                    <p style={{
+                      fontFamily: "'Cinzel', serif", fontSize: 11, fontWeight: 700,
+                      letterSpacing: ".12em", color: "#C8102E",
+                    }}>
                       ANIVERSARIANTES
                     </p>
-                    <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: subClr, marginTop: 2 }}>
+                    <p style={{
+                      fontFamily: "'Manrope', sans-serif", fontSize: 11,
+                      color: subClr, marginTop: 2,
+                    }}>
                       {temHoje ? `🎂 ${hoje.length} hoje!` : "Que Deus abençoe!"}
                     </p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
                   {["hoje", "semana"].map(t => (
                       <button
                           key={t}
@@ -582,12 +580,16 @@ Pastores Renato e Jaci Soares 🙏 🤍`
                 </div>
               </div>
 
-              {/* Lista */}
-              <div style={{
-                maxHeight: 320, overflowY: "auto",
-                padding: "10px 10px",
-                display: "flex", flexDirection: "column", gap: 6,
-              }}>
+              {/* Lista – altura máxima responsiva */}
+              <div
+                  className="sino-scroll"
+                  style={{
+                    maxHeight: "min(320px, calc(100dvh - 180px))",   /* ← não estoura em telas pequenas */
+                    overflowY: "auto",
+                    padding: "10px 10px",
+                    display: "flex", flexDirection: "column", gap: 6,
+                  }}
+              >
                 {loading ? (
                     <p style={{
                       textAlign: "center", padding: "28px 0",
@@ -648,13 +650,16 @@ Pastores Renato e Jaci Soares 🙏 🤍`
                           }}>
                             {m.nome}
                           </p>
-                          <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: subClr, marginTop: 1 }}>
+                          <p style={{
+                            fontFamily: "'Manrope', sans-serif", fontSize: 11,
+                            color: subClr, marginTop: 1,
+                          }}>
                             📱 {m.telefone}
                           </p>
                           {isToday && (
                               <span style={{
-                                fontFamily: "'Cinzel', serif", fontSize: 8, fontWeight: 700, letterSpacing: ".08em",
-                                padding: "2px 7px", borderRadius: 5,
+                                fontFamily: "'Cinzel', serif", fontSize: 8, fontWeight: 700,
+                                letterSpacing: ".08em", padding: "2px 7px", borderRadius: 5,
                                 background: "rgba(200,16,46,.1)", color: "#C8102E",
                                 border: "1px solid rgba(200,16,46,.22)",
                                 marginTop: 4, display: "inline-block",
@@ -666,10 +671,7 @@ Pastores Renato e Jaci Soares 🙏 🤍`
 
                         {/* Botão WhatsApp */}
                         <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              abrirWhatsApp(m, m.id);
-                            }}
+                            onClick={(e) => { e.stopPropagation(); abrirWhatsApp(m, m.id); }}
                             title={enviado ? "Enviado!" : "Enviar parabéns no WhatsApp"}
                             style={{
                               width: 34, height: 34, borderRadius: 9, flexShrink: 0,
@@ -680,7 +682,10 @@ Pastores Renato e Jaci Soares 🙏 🤍`
                               transition: "all .18s",
                             }}
                         >
-                          {enviado ? <Check size={15} color="#059669" /> : <Send size={15} color="#25D366" />}
+                          {enviado
+                              ? <Check size={15} color="#059669" />
+                              : <Send  size={15} color="#25D366" />
+                          }
                         </button>
                       </div>
                   );
@@ -702,9 +707,9 @@ Pastores Renato e Jaci Soares 🙏 🤍`
   );
 }
 
-/* ???????????????????????????????????????????????????????????????????
+/* ─────────────────────────────────────────────────────────────────────
    COMPONENTE PRINCIPAL – PastorPage
-??????????????????????????????????????????????????????????????????? */
+───────────────────────────────────────────────────────────────────── */
 export default function PastorPage() {
   const [celulas,       setCelulas]       = useState([]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
@@ -741,7 +746,7 @@ export default function PastorPage() {
   const getPageTitle   = () => PAGE_TITLES[getPageSegment()] || PAGE_TITLES["pastor"];
   const css = buildCSS(isDark);
 
-  /* ?? Tela de loading ?? */
+  /* ── Tela de loading ── */
   if (loading) return (
       <div className="pr-loading" style={{ background: isDark ? IEQ.dark : "#F0EAE8" }}>
         <style>{css}</style>
@@ -775,14 +780,14 @@ export default function PastorPage() {
       <div className="pr-root">
         <style key={isDark ? "dark" : "light"}>{css}</style>
 
-        {/* ?? Fundo ?? */}
+        {/* ── Fundo ── */}
         <div className="pr-grid-bg" />
         <div className="pr-stripes" />
         <div className="pr-glow-r" />
         <div className="pr-glow-b" />
         <div className="pr-glow-y" />
 
-        {/* ?????????????????? HEADER ?????????????????? */}
+        {/* ════════════ HEADER ════════════ */}
         <header className="pr-header">
           <div className="pr-hdr-left">
 
@@ -863,7 +868,7 @@ export default function PastorPage() {
         {/* Linha gradiente decorativa */}
         <div className="pr-header-line" />
 
-        {/* ?????????????????? NAV ?????????????????? */}
+        {/* ════════════ NAV ════════════ */}
         <nav className="pr-nav" aria-label="Navegação pastoral">
           <div className="pr-nav-inner">
             {NAV_ITEMS.map(({ to, icon: Icon, label, color, end, alert }) => (
@@ -907,7 +912,7 @@ export default function PastorPage() {
           </div>
         </nav>
 
-        {/* ?????????????????? CONTEÚDO ?????????????????? */}
+        {/* ════════════ CONTEÚDO ════════════ */}
         <main className="pr-main">
           <section className="pr-content">
             <AnimatePresence mode="wait" initial={false}>
