@@ -9,6 +9,18 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     cors: true,
+    proxy: {
+      '/auth': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     sourcemap: false,
@@ -22,8 +34,8 @@ export default defineConfig({
           'charts':       ['recharts'],
           'pdf':          ['jspdf', 'jspdf-autotable'],
           'icons':        ['lucide-react'],
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 })

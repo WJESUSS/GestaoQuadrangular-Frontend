@@ -17,7 +17,6 @@ import {
   Sun, Moon, CheckCircle2, Home, Flame,
 } from "lucide-react";
 
-/* ─── Paleta ──────────────────────────────────────────────────────────── */
 const BRAND = {
   red:        "#C8102E",
   redDark:    "#9B0B1E",
@@ -33,7 +32,6 @@ const BRAND = {
   muted:      "#8A7F7A",
 };
 
-/* ─── Logo ────────────────────────────────────────────────────────────── */
 function IEQCross({ size = 36, src = "/quadrangular.png" }) {
   return (
       <img
@@ -52,49 +50,11 @@ function IEQCross({ size = 36, src = "/quadrangular.png" }) {
   );
 }
 
-/* ─── Chave boas-vindas ───────────────────────────────────────────────── */
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
-/*
-  ╔══════════════════════════════════════════════════════════════════════╗
-  ║  CORREÇÕES ANDROID – GLITCH / ARTEFATO VISUAL                       ║
-  ║                                                                      ║
-  ║  1. TODOS os backdrop-filter: blur() removidos. Essa propriedade     ║
-  ║     causa glitch em WebView Android com GPUs Adreno 3xx/4xx.        ║
-  ║                                                                      ║
-  ║  2. .grid-bg / .glow-red / .glow-blue: position fixed → absolute.   ║
-  ║     Fixed cria stacking context de compositing que corrompe o        ║
-  ║     frame buffer em WebViews antigos.                                ║
-  ║                                                                      ║
-  ║  3. .ieq-root: adicionado isolation: isolate + contain: layout       ║
-  ║     style + translateZ(0). Isola o contexto de compositing e        ║
-  ║     força uma única camada raiz estável.                             ║
-  ║                                                                      ║
-  ║  4. .members-grid: trocado display:grid por display:flex +           ║
-  ║     flex-direction:column + contain: layout style + translateZ(0).   ║
-  ║     Evita que o recycling de células vaze pixels entre frames.       ║
-  ║                                                                      ║
-  ║  5. .member-row-*: width:100% + min-width:0 para evitar overflow     ║
-  ║     horizontal que disparava relayout e artefato.                    ║
-  ║                                                                      ║
-  ║  6. .modal-overlay: backdrop-filter removido, opacidade aumentada    ║
-  ║     para compensar visualmente.                                      ║
-  ║                                                                      ║
-  ║  7. motion.div nas abas: willChange restrito a "opacity" (não        ║
-  ║     "transform, opacity"), pois transform cria camada extra de       ║
-  ║     compositing desnecessária.                                       ║
-  ║                                                                      ║
-  ║  8. Card membros: overflow:hidden trocado por overflow:clip.         ║
-  ║     hidden cria stacking context; clip não cria.                     ║
-  ║                                                                      ║
-  ║  9. Opacidades de rgba() elevadas para ≥ 0.99 em backgrounds de     ║
-  ║     cards, evitando compositing de camadas semi-transparentes.       ║
-  ╚══════════════════════════════════════════════════════════════════════╝
-*/
 const STATIC_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Raiz ──────────────────────────────────────────────────────────── */
   .ieq-root {
     font-family: 'Manrope', sans-serif;
     min-height: 100vh;
@@ -102,17 +62,14 @@ const STATIC_CSS = `
     overflow-x: hidden;
     padding-bottom: 80px;
     transition: background .4s;
-
-    /* FIX 3: isola o contexto de compositing Android */
     isolation: isolate;
     contain: layout style;
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }
 
-  /* ── Fundo decorativo ─ position: absolute (FIX 2) ────────────────── */
   .grid-bg {
-    position: absolute;       /* era: fixed */
+    position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
@@ -123,7 +80,7 @@ const STATIC_CSS = `
     background-size: 60px 60px;
   }
   .glow-red {
-    position: absolute;       /* era: fixed */
+    position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 900px; height: 900px; border-radius: 50%;
@@ -131,21 +88,19 @@ const STATIC_CSS = `
     pointer-events: none; z-index: 0;
   }
   .glow-blue {
-    position: absolute;       /* era: fixed */
+    position: absolute;
     top: 20%; right: 5%;
     width: 500px; height: 500px; border-radius: 50%;
     background: radial-gradient(circle, rgba(0,61,165,.08) 0%, transparent 70%);
     pointer-events: none; z-index: 0;
   }
 
-  /* ── Conteúdo ──────────────────────────────────────────────────────── */
   .ieq-content {
     position: relative; z-index: 10;
     max-width: 1200px; margin: 0 auto;
     padding: 32px 24px 0;
   }
 
-  /* ── Header ────────────────────────────────────────────────────────── */
   .ieq-header {
     display: flex; align-items: center;
     justify-content: space-between;
@@ -153,7 +108,6 @@ const STATIC_CSS = `
     flex-wrap: wrap; gap: 16px;
   }
 
-  /* ── Badge ─────────────────────────────────────────────────────────── */
   .badge {
     display: inline-flex; align-items: center; gap: 7px;
     background: rgba(253,184,19,.07);
@@ -169,7 +123,6 @@ const STATIC_CSS = `
     animation: pulse 2s ease-in-out infinite;
   }
 
-  /* ── Avatar líder ──────────────────────────────────────────────────── */
   .lider-avatar-wrap {
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
@@ -187,7 +140,6 @@ const STATIC_CSS = `
   }
   .lider-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-  /* ── Botões ────────────────────────────────────────────────────────── */
   .btn-primary {
     border: none; border-radius: 6px; cursor: pointer;
     font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700;
@@ -241,12 +193,10 @@ const STATIC_CSS = `
   }
   .btn-ghost-light:hover { border-color: #C8102E; background: rgba(200,16,46,.12); }
 
-  /* ── Cards ─ SEM backdrop-filter (FIX 1) ──────────────────────────── */
   .card-dark {
     background: rgba(26,20,22,.99);
     border: 1px solid rgba(253,184,19,.13);
     border-radius: 12px;
-    /* backdrop-filter REMOVIDO – causa glitch Android */
     box-shadow: 0 2px 1px rgba(0,0,0,.04), 0 8px 32px rgba(0,0,0,.18),
                 0 0 0 1px rgba(253,184,19,.07);
   }
@@ -254,24 +204,22 @@ const STATIC_CSS = `
     background: rgba(255,255,255,.99);
     border: 1px solid rgba(200,16,46,.15);
     border-radius: 12px;
-    /* backdrop-filter REMOVIDO */
     box-shadow: 0 2px 1px rgba(0,0,0,.02), 0 8px 32px rgba(0,0,0,.08),
                 0 0 0 1px rgba(200,16,46,.06);
   }
 
-  /* ── KPI hero ──────────────────────────────────────────────────────── */
   .kpi-hero-dark {
     background: linear-gradient(135deg, #1A1416, #0A0608);
     border: 1px solid rgba(253,184,19,.13);
     border-radius: 12px; position: relative;
-    overflow: clip;           /* FIX 8: era hidden */
+    overflow: clip;
     padding: 36px 40px;
   }
   .kpi-hero-light {
     background: linear-gradient(135deg, #003DA5, #002470);
     border: none;
     border-radius: 12px; position: relative;
-    overflow: clip;           /* FIX 8 */
+    overflow: clip;
     padding: 36px 40px;
   }
   .kpi-hero-stripes {
@@ -283,7 +231,6 @@ const STATIC_CSS = `
     background-size: 40px 40px;
   }
 
-  /* ── Separador decorativo ──────────────────────────────────────────── */
   .section-divider {
     display: flex; align-items: center; gap: 12px;
     margin: 8px 0 28px;
@@ -296,7 +243,6 @@ const STATIC_CSS = `
     background: #FDB813;
   }
 
-  /* ── Menu grid ─────────────────────────────────────────────────────── */
   .menu-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -342,18 +288,15 @@ const STATIC_CSS = `
     text-transform: uppercase; margin: 0;
   }
 
-  /* ── KPI grid ──────────────────────────────────────────────────────── */
   .kpi-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
   @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
 
-  /* ── Membros ─ CORRIGIDO ANDROID (FIX 4 + 5) ──────────────────────── */
   .members-grid {
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    /* FIX 4: isola o contexto para evitar ghosting de itens */
     contain: layout style;
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
@@ -369,9 +312,9 @@ const STATIC_CSS = `
     border-radius: 8px;
     transition: border-color .2s;
     gap: 10px;
-    min-width: 0;    /* FIX 5 */
-    width: 100%;     /* FIX 5 */
-    flex-shrink: 0;  /* FIX 5: evita compressão que causa sobreposição */
+    min-width: 0;
+    width: 100%;
+    flex-shrink: 0;
   }
   .member-row-light {
     display: flex;
@@ -383,9 +326,9 @@ const STATIC_CSS = `
     border-radius: 8px;
     transition: border-color .2s;
     gap: 10px;
-    min-width: 0;    /* FIX 5 */
-    width: 100%;     /* FIX 5 */
-    flex-shrink: 0;  /* FIX 5 */
+    min-width: 0;
+    width: 100%;
+    flex-shrink: 0;
   }
   .member-row-dark:hover  { border-color: #C8102E; }
   .member-row-light:hover { border-color: #C8102E; }
@@ -408,7 +351,6 @@ const STATIC_CSS = `
     min-width: 0;
   }
 
-  /* ── Inputs ────────────────────────────────────────────────────────── */
   .ieq-input {
     width: 100%;
     border-radius: 6px; outline: none;
@@ -433,21 +375,18 @@ const STATIC_CSS = `
   .ieq-input-dark::placeholder  { color: rgba(245,240,235,.22); }
   .ieq-input-light::placeholder { color: rgba(10,6,8,.22); }
 
-  /* ── Progresso ─────────────────────────────────────────────────────── */
   .progress-track {
     height: 6px; border-radius: 99px; overflow: hidden;
   }
   .progress-track-dark  { background: rgba(255,255,255,.08); }
   .progress-track-light { background: rgba(255,255,255,.15); }
 
-  /* ── Label de seção ────────────────────────────────────────────────── */
   .section-label {
     font-family: 'Manrope', sans-serif;
     font-size: 10px; font-weight: 800;
     letter-spacing: .2em; text-transform: uppercase;
   }
 
-  /* ── Rodapé ────────────────────────────────────────────────────────── */
   .ieq-footer {
     text-align: center;
     font-family: 'Manrope', sans-serif;
@@ -455,7 +394,6 @@ const STATIC_CSS = `
     padding: 8px 0;
   }
 
-  /* ── Modal ─ overlay SEM backdrop-filter (FIX 6) ──────────────────── */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 50;
     display: flex; align-items: flex-end; justify-content: center;
@@ -468,21 +406,18 @@ const STATIC_CSS = `
     width: 100%; max-height: 90vh;
     display: flex; flex-direction: column;
     border-radius: 16px 16px 0 0;
-    overflow: clip;           /* FIX 8 */
+    overflow: clip;
   }
   @media (min-width: 520px) {
     .modal-box { border-radius: 12px; max-height: calc(100vh - 24px); }
   }
 
-  /* FIX 6: backdrop-filter REMOVIDO do overlay */
   .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(10,6,8,.92);   /* mais opaco para compensar sem blur */
-    /* backdrop-filter REMOVIDO */
+    background: rgba(10,6,8,.92);
     z-index: 0;
   }
 
-  /* ── Alerta aprovação ──────────────────────────────────────────────── */
   .alert-aprovado {
     margin-bottom: 28px; padding: 16px 24px; border-radius: 10px;
     background: linear-gradient(135deg, #003DA5, #002470);
@@ -491,7 +426,6 @@ const STATIC_CSS = `
     font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   }
 
-  /* ── Animações ─────────────────────────────────────────────────────── */
   @keyframes pulse  { 0%,100%{opacity:.18;} 50%{opacity:.06;} }
   @keyframes spin   { to { transform: rotate(360deg); } }
   @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -499,14 +433,12 @@ const STATIC_CSS = `
   .spin-icon { animation: spin 1s linear infinite; }
   .fade-up   { animation: fadeUp .5s ease both; }
 
-  /* ── Divider ───────────────────────────────────────────────────────── */
   .divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(200,16,46,.2), transparent);
     margin: 8px 0;
   }
 
-  /* ── Mobile ────────────────────────────────────────────────────────── */
   @media (max-width: 599px) {
     .ieq-content { padding: 20px 14px 0 !important; }
     .kpi-hero-dark, .kpi-hero-light { padding: 24px 20px !important; }
@@ -516,7 +448,6 @@ const STATIC_CSS = `
   }
 `;
 
-/* ═══════════════════════════════════════════════════════════════════════ */
 export default function DashboardLider() {
   const [abaAtiva,               setAbaAtiva]               = useState("home");
 
@@ -627,13 +558,12 @@ export default function DashboardLider() {
     return { qtdMembros, atingiuMeta, isAnalise, isAprovado, podeSolicitar, porcentagemMeta };
   }, [membros, celula]);
 
-  /* ── Loading ─────────────────────────────────────────────────────── */
   if (loading) return (
       <div style={{
         minHeight: "100vh", display: "flex",
         alignItems: "center", justifyContent: "center",
         background: bg,
-        isolation: "isolate",         /* FIX 3 na tela de loading */
+        isolation: "isolate",
       }}>
         <style>{STATIC_CSS}</style>
         <div className="grid-bg" />
@@ -663,7 +593,6 @@ export default function DashboardLider() {
       </div>
   );
 
-  /* ── RENDER PRINCIPAL ────────────────────────────────────────────── */
   return (
       <div className="ieq-root" style={{ background: bg, color: txtPrimary }}>
         <style>{`
@@ -671,12 +600,10 @@ export default function DashboardLider() {
         ${STATIC_CSS}
       `}</style>
 
-        {/* Fundo decorativo – position: absolute (FIX 2) */}
         <div className="grid-bg" />
         <div className="glow-red" />
         <div className="glow-blue" />
 
-        {/* Boas-vindas */}
         <AnimatePresence>
           {showBoasVindas && !loading && (
               <BoasVindasLider
@@ -690,13 +617,12 @@ export default function DashboardLider() {
 
         <div className="ieq-content">
 
-          {/* ── HEADER ─────────────────────────────────────────────── */}
           <motion.header
               className="ieq-header"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: .45 }}
-              style={{ willChange: "opacity" }}  /* FIX 7: restrito a opacity */
+              style={{ willChange: "opacity" }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 18, minWidth: 0, flex: 1 }}>
               <div className="lider-avatar-wrap" style={{ flexShrink: 0 }}>
@@ -765,22 +691,19 @@ export default function DashboardLider() {
             </div>
           </motion.header>
 
-          {/* Separador decorativo */}
           <div className="section-divider">
             <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${BRAND.yellow})` }} />
             <div className="section-divider-dot" />
             <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${BRAND.yellow})` }} />
           </div>
 
-          {/* Badge sistema */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
-          <span className="badge">
-            <span className="badge-dot" />
-            Sistema Exclusivo IEQ Pituaçu
-          </span>
+            <span className="badge">
+              <span className="badge-dot" />
+              Sistema Exclusivo IEQ Pituaçu
+            </span>
           </div>
 
-          {/* Alerta aprovação */}
           <AnimatePresence>
             {isAprovado && (
                 <motion.div
@@ -788,7 +711,7 @@ export default function DashboardLider() {
                     initial={{ opacity: 0, y: -16 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    style={{ willChange: "opacity" }}  /* FIX 7 */
+                    style={{ willChange: "opacity" }}
                 >
                   <Sparkles size={18} style={{ color: BRAND.yellow, flexShrink: 0 }} />
                   Multiplicação aprovada! Organize os membros para a nova célula.
@@ -796,7 +719,6 @@ export default function DashboardLider() {
             )}
           </AnimatePresence>
 
-          {/* ── CONTEÚDO POR ABA ─────────────────────────────────── */}
           <AnimatePresence mode="sync">
             {abaAtiva === "home" ? (
 
@@ -805,19 +727,16 @@ export default function DashboardLider() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { duration: .35, ease: "easeOut" } }}
                     exit={{ opacity: 0, transition: { duration: .25, ease: "easeIn" } }}
-                    style={{ display: "flex", flexDirection: "column", gap: 24, willChange: "opacity" }}  /* FIX 7 */
+                    style={{ display: "flex", flexDirection: "column", gap: 24, willChange: "opacity" }}
                 >
 
-                  {/* ── KPI GRID ────────────────────────────────────── */}
                   <div className="kpi-grid">
-
-                    {/* Card hero membros */}
                     <div className={dark ? "kpi-hero-dark" : "kpi-hero-light"}>
                       <div className="kpi-hero-stripes" />
                       <div style={{ position: "relative", zIndex: 1 }}>
-                    <span className="badge" style={{ marginBottom: 20, display: "inline-flex" }}>
-                      <TrendingUp size={10} /> Indicadores de Crescimento
-                    </span>
+                        <span className="badge" style={{ marginBottom: 20, display: "inline-flex" }}>
+                          <TrendingUp size={10} /> Indicadores de Crescimento
+                        </span>
                         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 24 }}>
                           <div>
                             <p className="big-number" style={{
@@ -857,7 +776,7 @@ export default function DashboardLider() {
                                     background: atingiuMeta
                                         ? BRAND.yellow
                                         : `linear-gradient(90deg, ${BRAND.red}, ${BRAND.yellow})`,
-                                    willChange: "width",  /* FIX 7: só width aqui */
+                                    willChange: "width",
                                   }}
                               />
                             </div>
@@ -866,7 +785,6 @@ export default function DashboardLider() {
                       </div>
                     </div>
 
-                    {/* Card ação pastoral */}
                     <div className={cardClass} style={{ padding: 30, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>
                         <div style={{
@@ -917,7 +835,6 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  {/* ── MENU ────────────────────────────────────────── */}
                   <div className="menu-grid">
                     {[
                       { icon: <Target     size={20} />, title: "Metas",        desc: "Objetivos",   aba: "metas",       color: BRAND.red     },
@@ -947,7 +864,6 @@ export default function DashboardLider() {
                     ))}
                   </div>
 
-                  {/* ── MEMBROS ─ overflow:clip (FIX 8) ─────────────── */}
                   <div className={cardClass} style={{ overflow: "clip" }}>
                     <div style={{
                       padding: "24px 28px",
@@ -968,7 +884,6 @@ export default function DashboardLider() {
                       </button>
                     </div>
 
-                    {/* FIX 4: members-grid com contain + translateZ */}
                     <div className="members-grid">
                       {membros.map(m => (
                           <div key={m.id} className={memberRow}>
@@ -993,7 +908,8 @@ export default function DashboardLider() {
                     </div>
                   </div>
 
-                  <HistoricoRelatorios celulaId={celula?.id} />
+                  {/* ✅ CORREÇÃO: isDark passado corretamente para o HistoricoRelatorios */}
+                  <HistoricoRelatorios isDark={isDark} celulaId={celula?.id} />
 
                   <div className="divider" />
                   <p className="ieq-footer" style={{ color: dark ? "rgba(245,240,235,.15)" : "rgba(10,6,8,.18)" }}>
@@ -1008,7 +924,7 @@ export default function DashboardLider() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { duration: .35, ease: "easeOut" } }}
                     exit={{ opacity: 0, transition: { duration: .25, ease: "easeIn" } }}
-                    style={{ willChange: "opacity" }}  /* FIX 7 */
+                    style={{ willChange: "opacity" }}
                 >
                   {abaAtiva === "metas"       && <TelaMetasLider       celula={celula}       isDark={isDark} />}
                   {abaAtiva === "relatorio"   && <TelaRelatorio         celula={celula}       isDark={isDark} />}
@@ -1023,7 +939,6 @@ export default function DashboardLider() {
           </AnimatePresence>
         </div>
 
-        {/* ── MODAIS ───────────────────────────────────────────────────── */}
         <AnimatePresence>
           {showModalAddMembro && (
               <div className="modal-backdrop">
@@ -1031,7 +946,7 @@ export default function DashboardLider() {
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     onClick={() => setShowModalAddMembro(false)}
                     className="modal-overlay"
-                    style={{ willChange: "opacity" }}  /* FIX 7 */
+                    style={{ willChange: "opacity" }}
                 />
                 <motion.div
                     initial={{ y: 80, opacity: 0 }}
@@ -1056,7 +971,7 @@ export default function DashboardLider() {
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="modal-overlay"
-                    style={{ willChange: "opacity" }}  /* FIX 7 */
+                    style={{ willChange: "opacity" }}
                 />
                 <motion.div
                     initial={{ y: 80, opacity: 0 }}
@@ -1065,7 +980,6 @@ export default function DashboardLider() {
                     className={`${cardClass} modal-box`}
                     style={{ maxWidth: 440, padding: "36px 28px", overflowY: "auto", willChange: "opacity, transform" }}
                 >
-                  {/* Topo modal */}
                   <div style={{ textAlign: "center", marginBottom: 24 }}>
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
                       <div className="pulse-ring" style={{ width: 72, height: 72 }} />
@@ -1122,7 +1036,6 @@ export default function DashboardLider() {
   );
 }
 
-/* ─── Modal Buscar Membro ─────────────────────────────────────────────── */
 function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
   const [busca,      setBusca]      = useState("");
   const [membrosSem, setMembrosSem] = useState([]);
@@ -1197,8 +1110,8 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, txtPrimary, txtSub }) {
                     {m.nome?.charAt(0).toUpperCase()}
                   </div>
                   <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: txtPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {m.nome}
-              </span>
+                    {m.nome}
+                  </span>
                 </div>
                 <button
                     className="btn-primary"

@@ -484,7 +484,10 @@ function handleLogout() {
 }
 
 // ── Painel de Usuários ───────────────────────────────────────────────────────
-function PainelUsuarios({ isDark, usuarios, pendentes, loading, aprovando, uploadandoFoto, carregarUsuarios, abrirEdicao, deletarUsuario, alternarStatus, aprovarAlteracao, rejeitarAlteracao, abrirSeletorFoto, removerFoto, adicionarUsuario, form, setForm, sending }) {
+function PainelUsuarios({ isDark, usuarios: usuariosProp, pendentes, loading, aprovando, uploadandoFoto, carregarUsuarios, abrirEdicao, deletarUsuario, alternarStatus, aprovarAlteracao, rejeitarAlteracao, abrirSeletorFoto, removerFoto, adicionarUsuario, form, setForm, sending }) {
+  // ✅ CORREÇÃO: garante que usuarios sempre é um array, independente do que a API retornar
+  const usuarios = Array.isArray(usuariosProp) ? usuariosProp : [];
+
   const bg      = isDark ? IEQ.dark      : "#F0EAE8";
   const cardBg  = isDark ? "rgba(26,20,22,.97)" : "rgba(255,255,255,.95)";
   const txt     = isDark ? IEQ.light     : IEQ.dark;
@@ -721,8 +724,22 @@ export default function AdminUsers() {
         api.get("usuarios/com-alteracao-pendente"),
         api.get("celulas"),
       ]);
-      setUsuarios(ru.data);
-      setPendentes(new Set(rp.data.map(u => u.id)));
+
+      // ✅ CORREÇÃO PRINCIPAL: normaliza a resposta da API para sempre ser um array
+      // Suporta: array direto [], objeto paginado { content: [] }, ou { usuarios: [] }
+      const dadosUsuarios = ru.data;
+      const listaUsuarios = Array.isArray(dadosUsuarios)
+          ? dadosUsuarios
+          : dadosUsuarios?.content ?? dadosUsuarios?.usuarios ?? dadosUsuarios?.data ?? [];
+      setUsuarios(listaUsuarios);
+
+      // Normaliza pendentes também
+      const dadosPendentes = rp.data;
+      const listaPendentes = Array.isArray(dadosPendentes)
+          ? dadosPendentes
+          : dadosPendentes?.content ?? dadosPendentes?.usuarios ?? [];
+      setPendentes(new Set(listaPendentes.map(u => u.id)));
+
       setCelulas(rc.data || []);
       if (rc.data?.length > 0 && !celulaAdmin) setCelulaAdmin(rc.data[0]);
     } catch (err) {
