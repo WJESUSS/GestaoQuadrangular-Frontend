@@ -28,12 +28,14 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'motion':       ['framer-motion'],
-          'charts':       ['recharts'],
-          'pdf':          ['jspdf', 'jspdf-autotable'],
-          'icons':        ['lucide-react'],
+        manualChunks(id) {
+          if (id.includes('framer-motion'))            return 'motion'
+          if (id.includes('recharts'))                 return 'charts'
+          if (id.includes('jspdf'))                    return 'pdf'
+          if (id.includes('lucide-react'))             return 'icons'
+          if (id.includes('react-router-dom') ||
+              id.includes('react-dom') ||
+              id.includes('/react/'))                  return 'react-vendor'
         },
       },
     },
