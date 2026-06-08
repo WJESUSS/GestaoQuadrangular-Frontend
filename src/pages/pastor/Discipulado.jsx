@@ -16,12 +16,14 @@ const IEQ = {
 };
 
 const COLUNAS = [
-  { campo: "escolaBiblica", label: "EBD"        },
-  { campo: "quartaNoite",   label: "4ª Noite"   },
-  { campo: "quintaNoite",   label: "5ª Noite"   },
-  { campo: "domingoManha",  label: "Dom. Manhã" },
-  { campo: "domingoNoite",  label: "Dom. Noite" },
+  { campo: "escolaBiblica", label: "EBD", justField: "justEscolaBiblica" },
+  { campo: "quartaNoite",   label: "4ª Noite", justField: "justQuartaNoite" },
+  { campo: "quintaNoite",   label: "5ª Noite", justField: "justQuintaNoite" },
+  { campo: "domingoManha",  label: "Dom. Manhã", justField: "justDomingoManha" },
+  { campo: "domingoNoite",  label: "Dom. Noite", justField: "justDomingoNoite" },
 ];
+
+const EMOJIS_JUST = { "Trabalho": "💼", "Doença": "🤒", "Viagem": "✈️", "Outro": "📝" };
 
 function getToken() {
   return localStorage.getItem("token")?.replace(/"/g, "").trim() || "";
@@ -53,13 +55,45 @@ function QuadrangularCross({ size = 28 }) {
   );
 }
 
-// ── Helpers de presença para o PDF ──────────────────────────────────────────
-// jsPDF não suporta unicode especial (✓ ✗) — usamos texto simples com cor
-function presTexto(val) { return val ? "PRESENTE" : "FALTOU"; }
-function presStyle(val) {
-  return val
-      ? { textColor: [22, 163, 74],  fontStyle: "bold" }   // verde
-      : { textColor: [200, 16, 46],  fontStyle: "normal" }; // vermelho
+// ── Componente para exibir a célula de presença com justificativa ──────────
+function CelulaPresenca({ membro, coluna, isDark }) {
+  const marcado = membro[coluna.campo];
+  const justval = membro[coluna.justField];
+  const temJust = !marcado && justval;
+
+  const textSec = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+
+  return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 4px" }}>
+        {/* Ícone de presença */}
+        {marcado ? (
+            <CheckCircle2 size={18} style={{ color: "#16a34a" }} />
+        ) : (
+            <X size={16} style={{ color: isDark ? "rgba(255,255,255,.15)" : "rgba(26,10,13,.15)" }} />
+        )}
+
+        {/* Justificativa (só aparece se não marcado E tem justificativa) */}
+        {temJust && (
+            <div style={{
+              fontSize: "9px",
+              color: IEQ.yellow,
+              fontFamily: "'Cinzel',serif",
+              textAlign: "center",
+              lineHeight: 1.2,
+              padding: "4px 6px",
+              background: isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.1)",
+              borderRadius: "6px",
+              border: "1px solid rgba(253,184,19,.3)",
+              maxWidth: "80px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}>
+              {EMOJIS_JUST[justval] || "📝"} {justval}
+            </div>
+        )}
+      </div>
+  );
 }
 
 export default function Discipulado({ isDark = false }) {
@@ -172,10 +206,10 @@ export default function Discipulado({ isDark = false }) {
   function obterSemanaAtual() {
     const hoje   = new Date();
     const domingo = new Date(hoje);
-    domingo.setDate(hoje.getDate() - hoje.getDay()); // recua até domingo
+    domingo.setDate(hoje.getDate() - hoje.getDay());
 
     const sabado = new Date(domingo);
-    sabado.setDate(domingo.getDate() + 6); // domingo + 6 = sábado
+    sabado.setDate(domingo.getDate() + 6);
 
     return {
       inicio: domingo.toISOString().split("T")[0],
@@ -222,11 +256,10 @@ export default function Discipulado({ isDark = false }) {
     return ok && periodo;
   }), [relatorios, termoBusca, dataInicioFiltro, dataFimFiltro]);
 
-  // ── PDF Individual ───────────────────────────────────────────────────────
+  // ── PDF Individual COM JUSTIFICATIVAS ───────────────────────────────────
   const gerarPDFIndividual = (rel) => {
     const doc = new jsPDF();
 
-    // Cabeçalho
     doc.setFillColor(139, 11, 31);
     doc.rect(0, 0, 210, 36, "F");
     doc.setFontSize(16); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
@@ -235,74 +268,45 @@ export default function Discipulado({ isDark = false }) {
     doc.text(`Celula: ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}`, 14, 22);
     doc.text(`Periodo: ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 14, 29);
 
-    // Resumo
-    const total    = rel.presencas?.length || 0;
-    const presentes = (campo) => rel.presencas?.filter(p => p[campo]).length || 0;
-
     doc.setTextColor(0); doc.setFontSize(9); doc.setFont("helvetica", "bold");
-    doc.text("RESUMO DE PRESENCAS:", 14, 44);
+    doc.text("LISTA DE PRESENCAS E JUSTIFICATIVAS:", 14, 44);
+
+    const corposTabela = rel.presencas?.map(p => {
+      const row = [p.nomeMembro];
+      COLUNAS.forEach(col => {
+        const marcado = p[col.campo];
+        const just = p[col.justField];
+        if (marcado) {
+          row.push("✓");
+        } else if (just) {
+          row.push(`✗ (${just})`);
+        } else {
+          row.push("✗");
+        }
+      });
+      const totalP = COLUNAS.filter(c => p[c.campo]).length;
+      row.push(`${totalP}/${COLUNAS.length}`);
+      return row;
+    }) || [];
 
     autoTable(doc, {
       startY: 48,
-      head: [["Culto", "Presentes", "Faltas", "% Presenca"]],
-      body: COLUNAS.map(c => {
-        const p = presentes(c.campo);
-        const f = total - p;
-        const pct = total > 0 ? Math.round((p / total) * 100) : 0;
-        return [c.label, p, f, `${pct}%`];
-      }),
-      headStyles: { fillColor: [139, 11, 31], textColor: 255, fontStyle: "bold", fontSize: 9 },
-      bodyStyles: { fontSize: 9 },
-      columnStyles: {
-        1: { halign: "center", textColor: [22, 163, 74], fontStyle: "bold" },
-        2: { halign: "center", textColor: [200, 16, 46] },
-        3: { halign: "center", fontStyle: "bold" },
-      },
-      theme: "grid",
-      margin: { left: 14, right: 14 },
-    });
-
-    // Lista de membros
-    const afterResumo = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(0);
-    doc.text("LISTA DE PRESENCAS POR MEMBRO:", 14, afterResumo);
-
-    autoTable(doc, {
-      startY: afterResumo + 4,
-      head: [["Membro", "EBD", "4a Noite", "5a Noite", "Dom. Manha", "Dom. Noite", "Total"]],
-      body: rel.presencas?.map(p => {
-        const campos = COLUNAS.map(c => p[c.campo]);
-        const totalP = campos.filter(Boolean).length;
-        return [
-          p.nomeMembro,
-          ...campos.map(v => presTexto(v)),
-          `${totalP}/${COLUNAS.length}`,
-        ];
-      }) || [],
-      headStyles: { fillColor: [0, 36, 112], textColor: 255, fontStyle: "bold", fontSize: 8 },
+      head: [["Membro", ...COLUNAS.map(c => c.label), "Total"]],
+      body: corposTabela,
+      headStyles: { fillColor: [139, 11, 31], textColor: 255, fontStyle: "bold", fontSize: 8 },
       bodyStyles: { fontSize: 8 },
-      // Colore cada célula de presença individualmente
-      didParseCell(data) {
-        if (data.section === "body" && data.column.index >= 1 && data.column.index <= 5) {
-          const val = data.cell.raw;
-          if (val === "PRESENTE") {
-            data.cell.styles.textColor = [22, 163, 74];
-            data.cell.styles.fontStyle = "bold";
-          } else if (val === "FALTOU") {
-            data.cell.styles.textColor = [200, 16, 46];
-          }
-          data.cell.styles.halign = "center";
-        }
-        if (data.section === "body" && data.column.index === 6) {
-          data.cell.styles.halign = "center";
-          data.cell.styles.fontStyle = "bold";
-        }
+      columnStyles: {
+        1: { halign: "center" },
+        2: { halign: "center" },
+        3: { halign: "center" },
+        4: { halign: "center" },
+        5: { halign: "center" },
+        6: { halign: "center", fontStyle: "bold" },
       },
       theme: "grid",
       margin: { left: 14, right: 14 },
     });
 
-    // Rodapé
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -314,12 +318,11 @@ export default function Discipulado({ isDark = false }) {
     doc.save(`Relatorio_${rel.nomeCelula}_${rel.dataInicio}.pdf`);
   };
 
-  // ── PDF Geral ────────────────────────────────────────────────────────────
+  // ── PDF Geral COM JUSTIFICATIVAS ────────────────────────────────────────
   const gerarPDFGeral = () => {
     if (!filtrados.length) return;
     const doc = new jsPDF("l", "mm", "a4");
 
-    // Capa
     doc.setFillColor(139, 11, 31);
     doc.rect(0, 0, 297, 40, "F");
     doc.setFontSize(18); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
@@ -333,41 +336,42 @@ export default function Discipulado({ isDark = false }) {
     filtrados.forEach((rel, idx) => {
       if (y > 170) { doc.addPage(); y = 20; }
 
-      // Título da célula
       doc.setFillColor(0, 36, 112);
       doc.roundedRect(14, y - 4, 269, 10, 2, 2, "F");
       doc.setFontSize(10); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
-      doc.text(`${idx + 1}. ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}  |  ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 17, y + 3);
+      doc.text(`${idx + 1}. ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}`, 17, y + 3);
+
+      const corposTabela = rel.presencas?.map(p => {
+        const row = [p.nomeMembro];
+        COLUNAS.forEach(col => {
+          const marcado = p[col.campo];
+          const just = p[col.justField];
+          if (marcado) {
+            row.push("✓");
+          } else if (just) {
+            row.push(`✗ (${just})`);
+          } else {
+            row.push("✗");
+          }
+        });
+        const totalP = COLUNAS.filter(c => p[c.campo]).length;
+        row.push(`${totalP}/${COLUNAS.length}`);
+        return row;
+      }) || [];
 
       autoTable(doc, {
         startY: y + 8,
-        head: [["Membro", "EBD", "4a Noite", "5a Noite", "Dom. Manha", "Dom. Noite", "Total"]],
-        body: rel.presencas?.map(p => {
-          const campos = COLUNAS.map(c => p[c.campo]);
-          const totalP = campos.filter(Boolean).length;
-          return [
-            p.nomeMembro,
-            ...campos.map(v => presTexto(v)),
-            `${totalP}/${COLUNAS.length}`,
-          ];
-        }) || [],
+        head: [["Membro", ...COLUNAS.map(c => c.label.substring(0, 6)), "Total"]],
+        body: corposTabela,
         headStyles: { fillColor: [139, 11, 31], textColor: 255, fontSize: 7, fontStyle: "bold" },
         bodyStyles: { fontSize: 7 },
-        didParseCell(data) {
-          if (data.section === "body" && data.column.index >= 1 && data.column.index <= 5) {
-            const val = data.cell.raw;
-            if (val === "PRESENTE") {
-              data.cell.styles.textColor = [22, 163, 74];
-              data.cell.styles.fontStyle = "bold";
-            } else if (val === "FALTOU") {
-              data.cell.styles.textColor = [200, 16, 46];
-            }
-            data.cell.styles.halign = "center";
-          }
-          if (data.section === "body" && data.column.index === 6) {
-            data.cell.styles.halign = "center";
-            data.cell.styles.fontStyle = "bold";
-          }
+        columnStyles: {
+          1: { halign: "center" },
+          2: { halign: "center" },
+          3: { halign: "center" },
+          4: { halign: "center" },
+          5: { halign: "center" },
+          6: { halign: "center", fontStyle: "bold" },
         },
         theme: "grid",
         margin: { left: 14, right: 14 },
@@ -376,7 +380,6 @@ export default function Discipulado({ isDark = false }) {
       y = doc.lastAutoTable.finalY + 14;
     });
 
-    // Rodapé em todas as páginas
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -437,11 +440,11 @@ export default function Discipulado({ isDark = false }) {
           {erro && (
               <div className="sd-erro">
                 <p style={{ color:"#ff6666", fontWeight:"bold", margin:"0 0 12px", fontSize:14 }}>
-                  ERRO AO CARREGAR
+                  ❌ ERRO AO CARREGAR RELATÓRIOS
                 </p>
-                <p className="sd-erro-row">Status HTTP: {erro.status}</p>
-                <p className="sd-erro-row">Resposta: {erro.msg}</p>
-                <p className="sd-erro-row">URL: {erro.url}</p>
+                <p className="sd-erro-row"><strong>Status:</strong> {erro.status}</p>
+                <p className="sd-erro-row"><strong>Resposta:</strong> {erro.msg}</p>
+                <p className="sd-erro-row"><strong>URL:</strong> {erro.url}</p>
               </div>
           )}
 
@@ -530,7 +533,7 @@ export default function Discipulado({ isDark = false }) {
           )}
         </div>
 
-        {/* Modal */}
+        {/* Modal COM JUSTIFICATIVAS */}
         <AnimatePresence>
           {relatorioSelecionado && (
               <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
@@ -568,30 +571,20 @@ export default function Discipulado({ isDark = false }) {
                         <thead>
                         <tr>
                           <th>MEMBRO</th>
-                          {COLUNAS.map(c => <th key={c.campo} style={{ textAlign:"center" }}>{c.label}</th>)}
-                          <th style={{ textAlign:"center" }}>TOTAL</th>
+                          {COLUNAS.map(c => <th key={c.campo} style={{ textAlign:"center", minWidth:"90px" }}>{c.label}</th>)}
                         </tr>
                         </thead>
                         <tbody>
-                        {relatorioSelecionado.presencas?.map((p, i) => {
-                          const totalP = COLUNAS.filter(c => p[c.campo]).length;
-                          return (
-                              <tr key={i}>
-                                <td>{p.nomeMembro}</td>
-                                {COLUNAS.map(col => (
-                                    <td key={col.campo} style={{ textAlign:"center" }}>
-                                      {p[col.campo]
-                                          ? <CheckCircle2 size={18} style={{ color:"#16a34a", margin:"0 auto" }} />
-                                          : <X size={16} style={{ color: isDark ? "rgba(255,255,255,.15)" : "rgba(26,10,13,.15)", margin:"0 auto" }} />}
-                                    </td>
-                                ))}
-                                <td style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700,
-                                  color: totalP === COLUNAS.length ? "#16a34a" : totalP === 0 ? IEQ.red : textPrimary }}>
-                                  {totalP}/{COLUNAS.length}
-                                </td>
-                              </tr>
-                          );
-                        })}
+                        {relatorioSelecionado.presencas?.map((p, i) => (
+                            <tr key={i}>
+                              <td>{p.nomeMembro}</td>
+                              {COLUNAS.map(col => (
+                                  <td key={col.campo} style={{ textAlign:"center" }}>
+                                    <CelulaPresenca membro={p} coluna={col} isDark={isDark} />
+                                  </td>
+                              ))}
+                            </tr>
+                        ))}
                         </tbody>
                       </table>
                     </div>

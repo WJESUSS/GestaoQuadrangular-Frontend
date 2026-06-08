@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../services/api.js";
 import {
   Calendar, BookOpen, Loader2, ChevronDown,
   UserCheck, ClipboardCheck, Trophy, Users2, CheckCircle2,
-  Edit3, ArrowLeft, AlertTriangle, History, Lock,
+  Edit3, ArrowLeft, AlertTriangle, History, Lock, XCircle, Ban,
 } from "lucide-react";
 
 const IEQ = {
@@ -16,21 +15,21 @@ const IEQ = {
 };
 
 const DECISAO_CONFIG = {
-  ACEITOU_JESUS: {
-    label: "Aceitou Jesus",
-    cor: "#185FA5", bg: "#E6F1FB", borda: "#B5D4F4",
-    icone: "✝️",
-  },
-  RECONCILIOU: {
-    label: "Reconciliou",
-    cor: "#854F0B", bg: "#FAEEDA", borda: "#FAC775",
-    icone: "🙏",
-  },
-  BATISMO_AGUAS: {
-    label: "Deseja Batismo",
-    cor: "#0F6E56", bg: "#E1F5EE", borda: "#9FE1CB",
-    icone: "💧",
-  },
+  ACEITOU_JESUS: { label: "Aceitou Jesus", cor: "#185FA5", bg: "#E6F1FB", borda: "#B5D4F4", icone: "✝️" },
+  RECONCILIOU:   { label: "Reconciliou",   cor: "#854F0B", bg: "#FAEEDA", borda: "#FAC775", icone: "🙏" },
+  BATISMO_AGUAS: { label: "Deseja Batismo",cor: "#0F6E56", bg: "#E1F5EE", borda: "#9FE1CB", icone: "💧" },
+};
+
+// ─── Mapa de motivos PT-BR ───────────────────────────────────────────────────
+const MOTIVO_LABELS = {
+  AUSENCIA_LIDER:      { label: "Ausência do líder",        icone: "👤" },
+  PROBLEMA_CLIMATICO:  { label: "Problema climático",       icone: "🌧️" },
+  EVENTO_IGREJA:       { label: "Evento da igreja",         icone: "⛪" },
+  PROBLEMA_SAUDE:      { label: "Problema de saúde",        icone: "🏥" },
+  LOCAL_INDISPONIVEL:  { label: "Local indisponível",       icone: "🔒" },
+  VIAGEM_MEMBROS:      { label: "Viagem dos membros",       icone: "✈️" },
+  CANCELADA_PASTOR:    { label: "Cancelada pelo pastor",    icone: "✋" },
+  OUTRO:               { label: "Outro motivo",             icone: "📋" },
 };
 
 const draftKey = (celulaId) => `ieq_relatorio_draft_${celulaId}`;
@@ -80,17 +79,16 @@ function dispararAtualizacaoMetas(celulaId) {
   );
 }
 
-function BadgeDecisao({ decisao, isDark }) {
+// ─── Badge de decisão ────────────────────────────────────────────────────────
+function BadgeDecisao({ decisao }) {
   const cfg = DECISAO_CONFIG[decisao];
   if (!cfg) return null;
   return (
       <span style={{
         display: "inline-flex", alignItems: "center", gap: 4,
-        padding: "2px 9px", borderRadius: 99,
-        fontSize: 11, fontWeight: 600,
+        padding: "2px 9px", borderRadius: 99, fontSize: 11, fontWeight: 600,
         fontFamily: "'EB Garamond', serif",
-        background: cfg.bg, color: cfg.cor,
-        border: `1px solid ${cfg.borda}`,
+        background: cfg.bg, color: cfg.cor, border: `1px solid ${cfg.borda}`,
         whiteSpace: "nowrap", flexShrink: 0,
       }}>
       {cfg.icone} {cfg.label}
@@ -99,34 +97,40 @@ function BadgeDecisao({ decisao, isDark }) {
   );
 }
 
+// ─── Badge de "Não realizada" para o histórico ───────────────────────────────
+function BadgeNaoRealizada({ motivo }) {
+  const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
+  return (
+      <span style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        padding: "3px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600,
+        fontFamily: "'Cinzel', serif", letterSpacing: ".1em",
+        background: "rgba(253,184,19,.15)", color: "#C48C00",
+        border: "1px solid rgba(253,184,19,.4)",
+        whiteSpace: "nowrap",
+      }}>
+      <Ban size={10} /> NÃO REALIZADA · {cfg.icone} {cfg.label.toUpperCase()}
+    </span>
+  );
+}
+
 function DecisaoReadOnly({ decisao, isDark, ts, tp }) {
   const cfg = decisao && decisao !== "NENHUMA" ? DECISAO_CONFIG[decisao] : null;
   return (
       <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "10px 14px", borderRadius: 8,
+        display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8,
         background: isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.02)",
         border: `1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`,
       }}>
         <Lock size={13} style={{ color: isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)", flexShrink: 0 }} />
         {cfg ? (
-            <span style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              fontFamily: "'EB Garamond',serif", fontSize: 14,
-              color: cfg.cor, fontWeight: 600,
-            }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "'EB Garamond',serif", fontSize: 14, color: cfg.cor, fontWeight: 600 }}>
           {cfg.icone} {cfg.label}
         </span>
         ) : (
-            <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, fontStyle: "italic" }}>
-          Sem decisão registrada
-        </span>
+            <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, fontStyle: "italic" }}>Sem decisão registrada</span>
         )}
-        <span style={{
-          marginLeft: "auto", fontFamily: "'Cinzel',serif", fontSize: 7.5,
-          letterSpacing: ".14em",
-          color: isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.25)",
-        }}>
+        <span style={{ marginLeft: "auto", fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".14em", color: isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.25)" }}>
         SOMENTE LEITURA
       </span>
       </div>
@@ -153,13 +157,11 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
+// ─── Toast de sucesso (célula realizada) ─────────────────────────────────────
 function ToastSucesso({ total, onClose }) {
   const [saindo, setSaindo] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => {
-      setSaindo(true);
-      setTimeout(() => { if (onClose) onClose(); }, 450);
-    }, 4800);
+    const t = setTimeout(() => { setSaindo(true); setTimeout(() => { if (onClose) onClose(); }, 450); }, 4800);
     return () => clearTimeout(t);
   }, [onClose]);
   return (
@@ -194,18 +196,55 @@ function ToastSucesso({ total, onClose }) {
   );
 }
 
+// ─── Toast de sucesso (célula NÃO realizada) ─────────────────────────────────
+function ToastNaoRealizada({ motivo, onClose }) {
+  const [saindo, setSaindo] = useState(false);
+  const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
+  useEffect(() => {
+    const t = setTimeout(() => { setSaindo(true); setTimeout(() => { if (onClose) onClose(); }, 450); }, 4800);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 300,
+        display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px",
+        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
+        animation: saindo ? "ieqOverlayOut .45s ease forwards" : "ieqOverlayIn .3s ease forwards",
+      }}>
+        <div style={{
+          background: "linear-gradient(160deg, #7a5200 0%, #5c3d00 60%, #3d2800 100%)",
+          borderRadius: 22, padding: "32px 40px 28px",
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
+          minWidth: 300, maxWidth: 380, width: "100%",
+          boxShadow: "0 16px 60px rgba(196,140,0,.4)",
+          animation: saindo ? "ieqToastOut .45s cubic-bezier(.4,0,.6,1) forwards" : "ieqToastIn .55s cubic-bezier(.34,1.56,.64,1) forwards",
+        }}>
+          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "rgba(255,255,255,.12)", border: "2px solid rgba(253,184,19,.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>
+            {cfg.icone}
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 14, fontWeight: 700, letterSpacing: ".18em", color: IEQ.yellow, margin: "0 0 8px" }}>REGISTRADO</p>
+            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 17, color: "rgba(255,255,255,.82)", lineHeight: 1.55, margin: 0 }}>
+              Ausência de célula registrada.<br /><em>Deus conhece cada circunstância.</em>
+            </p>
+          </div>
+          <div style={{ background: "rgba(253,184,19,.15)", border: "1px solid rgba(253,184,19,.35)", borderRadius: 20, padding: "6px 14px", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: IEQ.yellow, display: "flex", alignItems: "center", gap: 6 }}>
+            <Ban size={11} /> {cfg.label.toUpperCase()}
+          </div>
+        </div>
+      </div>
+  );
+}
+
 function SeletorReferenciaBiblica({ value, onChange, isDark }) {
   const [inputVal, setInputVal] = useState(value || "");
   const [sugestoes, setSugestoes] = useState([]);
   const [aberto, setAberto] = useState(false);
   const inputRef = useRef(null);
-
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
-  useEffect(() => {
-    if (value !== inputVal) setInputVal(value || "");
-  }, [value]);
+  useEffect(() => { if (value !== inputVal) setInputVal(value || ""); }, [value]);
 
   const gerarSugestoes = (texto) => {
     if (!texto.trim()) { setSugestoes([]); return; }
@@ -219,10 +258,7 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
 
   const handleChange = (e) => {
     const val = e.target.value;
-    setInputVal(val);
-    onChange(val);
-    gerarSugestoes(val);
-    setAberto(true);
+    setInputVal(val); onChange(val); gerarSugestoes(val); setAberto(true);
   };
 
   return (
@@ -233,12 +269,9 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
         </label>
         <div style={{ position: "relative" }}>
           <input
-              ref={inputRef}
-              className="ieq-input"
-              type="text"
+              ref={inputRef} className="ieq-input" type="text"
               placeholder="Ex: João 3:16 ou A fé que move..."
-              value={inputVal}
-              onChange={handleChange}
+              value={inputVal} onChange={handleChange}
               onFocus={() => { if (inputVal.trim()) { gerarSugestoes(inputVal); setAberto(true); } }}
               onBlur={() => setTimeout(() => setAberto(false), 160)}
               autoComplete="off"
@@ -270,6 +303,54 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
 }
 
 /* =============================================================
+   SELETOR DE MOTIVO — célula não realizada
+============================================================= */
+function SeletorMotivo({ value, onChange, isDark }) {
+  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
+  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+
+  return (
+      <div>
+        <label className="ieq-label">
+          <Ban size={11} style={{ display: "inline", marginRight: 6 }} />
+          MOTIVO DA NÃO REALIZAÇÃO
+        </label>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {Object.entries(MOTIVO_LABELS).map(([key, { label, icone }]) => {
+            const selecionado = value === key;
+            return (
+                <button
+                    key={key}
+                    onClick={() => onChange(key)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      padding: "13px 14px", borderRadius: 10, border: "none", cursor: "pointer",
+                      textAlign: "left", transition: "all .2s",
+                      background: selecionado
+                          ? `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`
+                          : (isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)"),
+                      boxShadow: selecionado ? "0 4px 16px rgba(253,184,19,.3)" : "none",
+                      outline: selecionado ? "none" : `1px solid ${isDark ? "rgba(253,184,19,.15)" : "rgba(253,184,19,.25)"}`,
+                    }}
+                >
+                  <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{icone}</span>
+                  <span style={{
+                    fontFamily: "'EB Garamond',serif", fontSize: 14, lineHeight: 1.3,
+                    color: selecionado ? IEQ.dark : tp,
+                    fontWeight: selecionado ? 600 : 400,
+                  }}>{label}</span>
+                  {selecionado && (
+                      <CheckCircle2 size={14} style={{ color: IEQ.dark, marginLeft: "auto", flexShrink: 0 }} />
+                  )}
+                </button>
+            );
+          })}
+        </div>
+      </div>
+  );
+}
+
+/* =============================================================
    TELA EDITAR RELATÓRIO
 ============================================================= */
 function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false }) {
@@ -282,10 +363,10 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const [sucesso, setSucesso] = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
+  const [relatorioRealizada, setRelatorioRealizada] = useState(true);
+  const [motivoNaoRealizacao, setMotivoNaoRealizacao] = useState(null);
 
-  const [form, setForm] = useState({
-    dataReuniao: "", estudo: "", selecionadosKeys: [],
-  });
+  const [form, setForm] = useState({ dataReuniao: "", estudo: "", selecionadosKeys: [] });
 
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
@@ -300,13 +381,15 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       setNomeCelula(rel.nomeCelula || "");
       setNomeLider(rel.nomeLider || "");
       setCelulaId(rel.celulaId);
+      setRelatorioRealizada(rel.realizada !== false);
+      setMotivoNaoRealizacao(rel.motivoNaoRealizacao || null);
 
       const [resMembros, resVisitantes] = await Promise.all([
         api.get(`/celulas/${rel.celulaId}/membros`, { headers }),
         api.get(`/visitantes/celula/${rel.celulaId}/ativos`, { headers }),
       ]);
 
-      const membros = (resMembros.data || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO", uKey: `MEMBRO-${m.id}` }));
+      const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
       const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
       setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
 
@@ -316,22 +399,16 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             try {
               const res = await api.get(`/visitantes/${v.id}`, { headers });
               decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
-            } catch {
-              decisoesMap[v.id] = null;
-            }
+            } catch { decisoesMap[v.id] = null; }
           })
       );
       setDecisoesVisitantes(decisoesMap);
 
       const keysPresentes = [
-        ...(rel.membrosPresentes || []).map(m => `MEMBRO-${m.id}`),
+        ...(rel.membrosPresentes  || []).map(m => `MEMBRO-${m.id}`),
         ...(rel.visitantesPresentes || []).map(v => `VISITANTE-${v.id}`),
       ];
-      setForm({
-        dataReuniao: normalizarData(rel.dataReuniao),
-        estudo: rel.estudo || "",
-        selecionadosKeys: keysPresentes,
-      });
+      setForm({ dataReuniao: normalizarData(rel.dataReuniao), estudo: rel.estudo || "", selecionadosKeys: keysPresentes });
     } catch (err) {
       console.error("Erro ao carregar relatório:", err);
       alert("Não foi possível carregar o relatório.");
@@ -345,9 +422,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
     setProcessingIds(prev => new Set(prev).add(uKey));
     setForm(prev => ({
       ...prev,
-      selecionadosKeys: isMarcado
-          ? prev.selecionadosKeys.filter(k => k !== uKey)
-          : [...prev.selecionadosKeys, uKey],
+      selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
     }));
     setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
   };
@@ -357,28 +432,28 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const total = membrosPresentes + visitantesPresentes;
 
   const handleSalvar = async () => {
-    if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+    if (relatorioRealizada && !form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+    if (!relatorioRealizada && !motivoNaoRealizacao) return alert("Selecione o motivo da não realização.");
     try {
       setSalvando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const payload = {
-        celulaId: Number(celulaId),
-        dataReuniao: normalizarData(form.dataReuniao),
-        estudo: form.estudo.trim(),
-        membrosPresentesIds: form.selecionadosKeys
-            .filter(k => k.startsWith("MEMBRO-"))
-            .map(k => Number(k.replace("MEMBRO-", ""))),
-        // ✅ FIX: preserva a decisão existente do banco ao editar
-        visitantesPresentes: form.selecionadosKeys
-            .filter(k => k.startsWith("VISITANTE-"))
-            .map(k => {
+      const payload = relatorioRealizada
+          ? {
+            celulaId: Number(celulaId),
+            dataReuniao: normalizarData(form.dataReuniao),
+            estudo: form.estudo.trim(),
+            membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
+            visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => {
               const id = Number(k.replace("VISITANTE-", ""));
-              return {
-                id,
-                decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA",
-              };
+              return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
             }),
-      };
+          }
+          : {
+            celulaId: Number(celulaId),
+            dataReuniao: normalizarData(form.dataReuniao),
+            realizada: false,
+            motivoNaoRealizacao,
+          };
       await api.put(`/relatorios/${relatorioId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
       setSucesso(true);
       setTimeout(() => { setSucesso(false); if (onSalvo) onSalvo(); }, 2200);
@@ -395,6 +470,8 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
         </div>
       </div>
   );
+
+  const podeSalvar = relatorioRealizada ? form.estudo.trim() : motivoNaoRealizacao;
 
   return (
       <div style={{ minHeight: "100vh", position: "relative", paddingBottom: 120 }}>
@@ -443,128 +520,195 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </div>
           </div>
 
-          {/* Formulário */}
-          <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div>
-                <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
-                <input className="ieq-input" type="date"
-                       style={{ colorScheme: isDark ? "dark" : "light" }}
-                       value={form.dataReuniao}
-                       onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
-              </div>
-              <div>
-                <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
-              </div>
-            </div>
-          </div>
+          {/* Toggle realizada / não realizada */}
+          <ToggleRealizacao realizada={relatorioRealizada} onChange={setRelatorioRealizada} isDark={isDark} />
 
-          {/* KPIs */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
-            {[
-              { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red  },
-              { label: "VISITANTES", val: visitantesPresentes, color: IEQ.blue },
-              { label: "TOTAL",      val: total, color: IEQ.yellow, highlight: true },
-            ].map(({ label, val, color, highlight }) => (
-                <div key={label} className="ieq-kpi" style={highlight ? { background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border: "none" } : {}}>
-                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: highlight ? "rgba(255,255,255,.6)" : ts, margin: "0 0 6px" }}>{label}</p>
-                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 38, fontWeight: 700, color: highlight ? "#fff" : color, margin: 0, lineHeight: 1 }}>{val}</p>
-                </div>
-            ))}
-          </div>
-
-          {/* Chamada */}
-          <div className="ieq-card" style={{ overflow: "hidden", marginBottom: 16 }}>
-            <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
-              <Users2 size={18} style={{ color: IEQ.red }} />
-              <span style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".16em", color: tp }}>CHAMADA</span>
-              <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: ts, marginLeft: "auto" }}>{pessoas.length} PESSOAS</span>
-            </div>
-            <div style={{ maxHeight: "55vh", overflowY: "auto" }}>
-              {pessoas.map((pessoa) => {
-                const marcado     = form.selecionadosKeys.includes(pessoa.uKey);
-                const isVisitante = pessoa.tipo === "VISITANTE";
-                const processing  = processingIds.has(pessoa.uKey);
-                const decisao     = isVisitante ? (decisoesVisitantes[pessoa.id] ?? null) : null;
-                const temDecisao  = decisao && decisao !== "NENHUMA";
-
-                return (
-                    <div key={pessoa.uKey} className="ieq-person-row" style={{ background: marcado ? (isDark ? "rgba(200,16,46,.07)" : "rgba(200,16,46,.05)") : "transparent" }}>
-                      <button
-                          onClick={() => alternarPresenca(pessoa.uKey)}
-                          disabled={processing}
-                          style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", transition: "all .2s" }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0 }}>
-                          <div style={{
-                            width: 44, height: 44, borderRadius: 8, flexShrink: 0,
-                            background: marcado ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark ? "rgba(255,255,255,.06)" : "rgba(200,16,46,.08)"),
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            color: marcado ? "#fff" : (isDark ? IEQ.offWhite : "#1A0A0D"),
-                            fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 16, transition: "all .3s",
-                          }}>
-                            {processing ? <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> : pessoa.nome.charAt(0)}
-                          </div>
-                          <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
-                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: marcado ? 600 : 400, color: marcado ? tp : ts, margin: 0 }}>{pessoa.nome}</p>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 3 }}>
-                              <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".15em", color: isVisitante ? IEQ.yellow : IEQ.red }}>{pessoa.tipo}</span>
-                              {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} isDark={isDark} />}
-                            </div>
-                          </div>
-                        </div>
-                        <div style={{
-                          width: 26, height: 26, borderRadius: 6, flexShrink: 0,
-                          border: `2px solid ${marcado ? IEQ.red : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)")}`,
-                          background: marcado ? IEQ.red : "transparent",
-                          display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s",
-                        }}>
-                          {marcado && <CheckCircle2 size={14} style={{ color: "#fff" }} />}
-                        </div>
-                      </button>
-
-                      {marcado && isVisitante && (
-                          <div style={{ padding: "0 24px 16px 82px" }}>
-                            <div className="ieq-card" style={{ padding: "12px 16px" }}>
-                              <label style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: ts, marginBottom: 8 }}>
-                                <Lock size={10} /> DECISÃO ESPIRITUAL
-                              </label>
-                              <DecisaoReadOnly decisao={decisao} isDark={isDark} ts={ts} tp={tp} />
-                              {temDecisao && (
-                                  <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: ts, margin: "8px 0 0" }}>
-                                    Para alterar a decisão, acesse o cadastro do visitante.
-                                  </p>
-                              )}
-                            </div>
-                          </div>
-                      )}
+          {relatorioRealizada ? (
+              <>
+                {/* Formulário */}
+                <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    <div>
+                      <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
+                      <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
+                             value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
                     </div>
-                );
-              })}
-            </div>
-          </div>
+                    <div>
+                      <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* KPIs */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+                  {[
+                    { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red  },
+                    { label: "VISITANTES", val: visitantesPresentes, color: IEQ.blue },
+                    { label: "TOTAL",      val: total, color: IEQ.yellow, highlight: true },
+                  ].map(({ label, val, color, highlight }) => (
+                      <div key={label} className="ieq-kpi" style={highlight ? { background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border: "none" } : {}}>
+                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: highlight ? "rgba(255,255,255,.6)" : ts, margin: "0 0 6px" }}>{label}</p>
+                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 38, fontWeight: 700, color: highlight ? "#fff" : color, margin: 0, lineHeight: 1 }}>{val}</p>
+                      </div>
+                  ))}
+                </div>
+
+                {/* Chamada */}
+                <ListaChamada pessoas={pessoas} form={form} setForm={setForm} processingIds={processingIds} setProcessingIds={setProcessingIds} decisoesVisitantes={decisoesVisitantes} isDark={isDark} tp={tp} ts={ts} />
+              </>
+          ) : (
+              /* Painel de motivo */
+              <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
+                <div style={{ marginBottom: 20 }}>
+                  <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
+                  <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
+                         value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
+                </div>
+                <SeletorMotivo value={motivoNaoRealizacao} onChange={setMotivoNaoRealizacao} isDark={isDark} />
+              </div>
+          )}
         </div>
 
         {/* Botão fixo */}
         <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)" : "linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)" }}>
           <div style={{ maxWidth: 720, margin: "0 auto" }}>
             <button
-                onClick={handleSalvar}
-                disabled={salvando || !form.estudo.trim()}
+                onClick={handleSalvar} disabled={salvando || !podeSalvar}
                 style={{
                   width: "100%", padding: "17px 0", borderRadius: 10, border: "none",
-                  background: (salvando || !form.estudo.trim()) ? "rgba(200,16,46,.3)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
-                  color: "#fff", cursor: (salvando || !form.estudo.trim()) ? "not-allowed" : "pointer",
+                  background: (salvando || !podeSalvar) ? "rgba(200,16,46,.3)" : (relatorioRealizada ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`),
+                  color: (relatorioRealizada || salvando || !podeSalvar) ? "#fff" : IEQ.dark,
+                  cursor: (salvando || !podeSalvar) ? "not-allowed" : "pointer",
                   fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".22em",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all .25s",
                 }}
             >
               {salvando
                   ? <><Loader2 size={17} style={{ animation: "spin 1s linear infinite" }} /> SALVANDO...</>
-                  : <><ClipboardCheck size={17} /> SALVAR ALTERAÇÕES ({total} PRESENTES)</>
+                  : relatorioRealizada
+                      ? <><ClipboardCheck size={17} /> SALVAR ALTERAÇÕES ({total} PRESENTES)</>
+                      : <><Ban size={17} /> SALVAR — CÉLULA NÃO REALIZADA</>
               }
             </button>
           </div>
+        </div>
+      </div>
+  );
+}
+
+/* =============================================================
+   TOGGLE — Realizada / Não Realizada (componente reutilizável)
+============================================================= */
+function ToggleRealizacao({ realizada, onChange, isDark }) {
+  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
+  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  return (
+      <div className="ieq-card" style={{ padding: "6px", marginBottom: 16, display: "flex", gap: 6 }}>
+        {[
+          { val: true,  label: "CÉLULA REALIZADA",     icon: <CheckCircle2 size={13} /> },
+          { val: false, label: "CÉLULA NÃO REALIZADA", icon: <Ban size={13} /> },
+        ].map(({ val, label, icon }) => {
+          const ativo = realizada === val;
+          return (
+              <button key={String(val)} onClick={() => onChange(val)} style={{
+                flex: 1, padding: "12px 8px", borderRadius: 8, border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em",
+                transition: "all .25s",
+                background: ativo
+                    ? (val ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`)
+                    : "transparent",
+                color: ativo ? (val ? "#fff" : IEQ.dark) : ts,
+              }}>
+                {icon} {label}
+              </button>
+          );
+        })}
+      </div>
+  );
+}
+
+/* =============================================================
+   LISTA DE CHAMADA (componente extraído para reutilizar)
+============================================================= */
+function ListaChamada({ pessoas, form, setForm, processingIds, setProcessingIds, decisoesVisitantes, isDark, tp, ts }) {
+  const alternarPresenca = (uKey) => {
+    const isMarcado = form.selecionadosKeys.includes(uKey);
+    setProcessingIds(prev => new Set(prev).add(uKey));
+    setForm(prev => ({
+      ...prev,
+      selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
+    }));
+    setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
+  };
+
+  return (
+      <div className="ieq-card" style={{ overflow: "hidden", marginBottom: 16 }}>
+        <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
+          <Users2 size={18} style={{ color: IEQ.red }} />
+          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".16em", color: tp }}>CHAMADA</span>
+          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: ts, marginLeft: "auto" }}>{pessoas.length} PESSOAS</span>
+        </div>
+        <div style={{ maxHeight: "55vh", overflowY: "auto" }}>
+          {pessoas.map((pessoa) => {
+            const marcado     = form.selecionadosKeys.includes(pessoa.uKey);
+            const isVisitante = pessoa.tipo === "VISITANTE";
+            const processing  = processingIds.has(pessoa.uKey);
+            const decisao     = isVisitante ? (decisoesVisitantes[pessoa.id] ?? null) : null;
+            const temDecisao  = decisao && decisao !== "NENHUMA";
+
+            return (
+                <div key={pessoa.uKey} className="ieq-person-row" style={{ background: marcado ? (isDark ? "rgba(200,16,46,.07)" : "rgba(200,16,46,.05)") : "transparent" }}>
+                  <button
+                      onClick={() => alternarPresenca(pessoa.uKey)} disabled={processing}
+                      style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", transition: "all .2s" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 8, flexShrink: 0,
+                        background: marcado ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark ? "rgba(255,255,255,.06)" : "rgba(200,16,46,.08)"),
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: marcado ? "#fff" : (isDark ? IEQ.offWhite : "#1A0A0D"),
+                        fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 16, transition: "all .3s",
+                      }}>
+                        {processing ? <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> : pessoa.nome.charAt(0)}
+                      </div>
+                      <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: marcado ? 600 : 400, color: marcado ? tp : ts, margin: 0 }}>{pessoa.nome}</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 3 }}>
+                          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".15em", color: isVisitante ? IEQ.yellow : IEQ.red }}>{pessoa.tipo}</span>
+                          {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{
+                      width: 26, height: 26, borderRadius: 6, flexShrink: 0,
+                      border: `2px solid ${marcado ? IEQ.red : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)")}`,
+                      background: marcado ? IEQ.red : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s",
+                    }}>
+                      {marcado && <CheckCircle2 size={14} style={{ color: "#fff" }} />}
+                    </div>
+                  </button>
+
+                  {marcado && isVisitante && (
+                      <div style={{ padding: "0 24px 16px 82px" }}>
+                        <div className="ieq-card" style={{ padding: "12px 16px" }}>
+                          <label style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: ts, marginBottom: 8 }}>
+                            <Lock size={10} /> DECISÃO ESPIRITUAL
+                          </label>
+                          <DecisaoReadOnly decisao={decisao} isDark={isDark} ts={ts} tp={tp} />
+                          {temDecisao && (
+                              <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: ts, margin: "8px 0 0" }}>
+                                Para alterar a decisão, acesse o cadastro do visitante.
+                              </p>
+                          )}
+                        </div>
+                      </div>
+                  )}
+                </div>
+            );
+          })}
         </div>
       </div>
   );
@@ -586,7 +730,12 @@ export default function TelaRelatorio({ isDark = false }) {
   const [processingIds, setProcessingIds] = useState(new Set());
   const [rascunhoCarregado, setRascunhoCarregado] = useState(false);
   const [toastSucesso, setToastSucesso] = useState(null);
+  const [toastNaoRealizada, setToastNaoRealizada] = useState(null);
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
+
+  // ── Estado do toggle ──────────────────────────────────────────────────────
+  const [celulaRealizada, setCelulaRealizada] = useState(true);
+  const [motivoNaoRealizacao, setMotivoNaoRealizacao] = useState(null);
 
   const prontoParaSalvar = useRef(false);
 
@@ -604,8 +753,7 @@ export default function TelaRelatorio({ isDark = false }) {
     try {
       localStorage.setItem(draftKey(form.celulaId), JSON.stringify({
         dataReuniao: form.dataReuniao, estudo: form.estudo,
-        selecionadosKeys: form.selecionadosKeys,
-        salvoEm: new Date().toISOString(),
+        selecionadosKeys: form.selecionadosKeys, salvoEm: new Date().toISOString(),
       }));
     } catch (err) { console.warn("Não foi possível salvar rascunho:", err); }
   }, [form]);
@@ -635,9 +783,7 @@ export default function TelaRelatorio({ isDark = false }) {
             try {
               const res = await api.get(`/visitantes/${v.id}`, { headers });
               decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
-            } catch {
-              decisoesMap[v.id] = null;
-            }
+            } catch { decisoesMap[v.id] = null; }
           })
       );
       setDecisoesVisitantes(decisoesMap);
@@ -679,23 +825,34 @@ export default function TelaRelatorio({ isDark = false }) {
 
   useEffect(() => { if (modo === "historico") carregarHistorico(); }, [modo, carregarHistorico]);
 
-  const alternarPresenca = (uKey) => {
-    const isMarcado = form.selecionadosKeys.includes(uKey);
-    setProcessingIds(prev => new Set(prev).add(uKey));
-    setForm(prev => ({
-      ...prev,
-      selecionadosKeys: isMarcado
-          ? prev.selecionadosKeys.filter(k => k !== uKey)
-          : [...prev.selecionadosKeys, uKey],
-    }));
-    setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
-  };
-
   const membrosPresentes    = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).length;
   const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
   const total = membrosPresentes + visitantesPresentes;
 
+  // ── Submit principal ──────────────────────────────────────────────────────
   const handleSubmit = async () => {
+    // ── Célula NÃO realizada ──────────────────────────────────────────────
+    if (!celulaRealizada) {
+      if (!motivoNaoRealizacao) return alert("Selecione o motivo da não realização.");
+      try {
+        setEnviando(true);
+        const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+        await api.post("/relatorios/nao-realizada", {
+          celulaId: Number(form.celulaId),
+          dataReuniao: form.dataReuniao,
+          motivoNaoRealizacao,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+
+        setToastNaoRealizada({ motivo: motivoNaoRealizacao });
+        setMotivoNaoRealizacao(null);
+        setCelulaRealizada(true);
+      } catch (err) {
+        alert(err.response?.data?.message || "Erro ao registrar ausência de célula.");
+      } finally { setEnviando(false); }
+      return;
+    }
+
+    // ── Célula realizada — verificação de duplicata ───────────────────────
     if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
 
     try {
@@ -713,26 +870,16 @@ export default function TelaRelatorio({ isDark = false }) {
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const totalEnviado = total;
 
-      const payload = {
+      await api.post("/relatorios", {
         celulaId: Number(form.celulaId),
         dataReuniao: form.dataReuniao,
         estudo: form.estudo.trim(),
-        membrosPresentesIds: form.selecionadosKeys
-            .filter(k => k.startsWith("MEMBRO-"))
-            .map(k => Number(k.replace("MEMBRO-", ""))),
-        // ✅ FIX: preserva a decisão existente do banco ao criar novo relatório
-        visitantesPresentes: form.selecionadosKeys
-            .filter(k => k.startsWith("VISITANTE-"))
-            .map(k => {
-              const id = Number(k.replace("VISITANTE-", ""));
-              return {
-                id,
-                decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA",
-              };
-            }),
-      };
-
-      await api.post("/relatorios", payload, { headers: { Authorization: `Bearer ${token}` } });
+        membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
+        visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => {
+          const id = Number(k.replace("VISITANTE-", ""));
+          return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
+        }),
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
       try {
         await api.put(`/metas/celula/${form.celulaId}/recalcular`, {}, { headers: { Authorization: `Bearer ${token}` } });
@@ -753,6 +900,9 @@ export default function TelaRelatorio({ isDark = false }) {
   const nomeUsuarioLider = celula?.nomeLider || celula?.lider?.nome || celula?.usuario?.nome || "Líder";
   const tp = isDark ? IEQ.offWhite : "#1A0A0D";
   const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+
+  // ── Botão principal habilitado? ───────────────────────────────────────────
+  const podoEnviar = celulaRealizada ? form.estudo.trim() : motivoNaoRealizacao;
 
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
@@ -817,7 +967,8 @@ export default function TelaRelatorio({ isDark = false }) {
         <style>{globalStyles}</style>
         <div className="ieq-bg-stripe" />
 
-        {toastSucesso && <ToastSucesso total={toastSucesso.total} onClose={() => setToastSucesso(null)} />}
+        {toastSucesso    && <ToastSucesso     total={toastSucesso.total}       onClose={() => setToastSucesso(null)} />}
+        {toastNaoRealizada && <ToastNaoRealizada motivo={toastNaoRealizada.motivo} onClose={() => setToastNaoRealizada(null)} />}
 
         {/* Modal duplicado */}
         {modalDuplicado && (
@@ -860,7 +1011,7 @@ export default function TelaRelatorio({ isDark = false }) {
             ))}
           </div>
 
-          {/* ABA HISTÓRICO */}
+          {/* ── ABA HISTÓRICO ─────────────────────────────────────────────────── */}
           {modo === "historico" && (
               <div className="ieq-card" style={{ overflow: "hidden" }}>
                 <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
@@ -872,25 +1023,36 @@ export default function TelaRelatorio({ isDark = false }) {
                 ) : historico.length === 0 ? (
                     <div style={{ padding: 40, textAlign: "center" }}><p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".16em", color: ts }}>NENHUM RELATÓRIO ENCONTRADO</p></div>
                 ) : (
-                    historico.map(rel => (
-                        <div key={rel.id} className="ieq-hist-card">
-                          <div>
-                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: tp, margin: "0 0 4px" }}>
-                              {rel.dataReuniao ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "?"}
-                            </p>
-                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "0 0 6px" }}>{rel.estudo || "Sem referência"}</p>
-                            <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".12em", color: IEQ.red }}>{rel.totalPresentes || 0} PRESENTES</span>
+                    historico.map(rel => {
+                      const naoRealizada = rel.realizada === false;
+                      return (
+                          <div key={rel.id} className="ieq-hist-card" style={{ background: naoRealizada ? (isDark ? "rgba(253,184,19,.04)" : "rgba(253,184,19,.05)") : "transparent" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: tp, margin: "0 0 4px" }}>
+                                {rel.dataReuniao ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "?"}
+                              </p>
+                              {naoRealizada ? (
+                                  <div style={{ marginBottom: 6 }}>
+                                    <BadgeNaoRealizada motivo={rel.motivoNaoRealizacao} />
+                                  </div>
+                              ) : (
+                                  <>
+                                    <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "0 0 6px" }}>{rel.estudo || "Sem referência"}</p>
+                                    <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".12em", color: IEQ.red }}>{rel.totalPresentes || 0} PRESENTES</span>
+                                  </>
+                              )}
+                            </div>
+                            <button className="ieq-edit-btn" onClick={() => { setRelatorioEditId(rel.id); setModo("editar"); }}>
+                              <Edit3 size={12} /> EDITAR
+                            </button>
                           </div>
-                          <button className="ieq-edit-btn" onClick={() => { setRelatorioEditId(rel.id); setModo("editar"); }}>
-                            <Edit3 size={12} /> EDITAR
-                          </button>
-                        </div>
-                    ))
+                      );
+                    })
                 )}
               </div>
           )}
 
-          {/* ABA NOVO RELATÓRIO */}
+          {/* ── ABA NOVO RELATÓRIO ────────────────────────────────────────────── */}
           {modo === "novo" && (
               <>
                 {rascunhoCarregado && (
@@ -927,106 +1089,57 @@ export default function TelaRelatorio({ isDark = false }) {
                   </div>
                 </div>
 
-                {/* Formulário */}
-                <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                    <div>
-                      <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
-                      <input className="ieq-input" type="date"
-                             style={{ colorScheme: isDark ? "dark" : "light" }}
-                             value={form.dataReuniao}
-                             onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
-                    </div>
-                    <div>
-                      <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
-                    </div>
-                  </div>
-                </div>
+                {/* ── TOGGLE REALIZADA / NÃO REALIZADA ── */}
+                <ToggleRealizacao realizada={celulaRealizada} onChange={setCelulaRealizada} isDark={isDark} />
 
-                {/* KPIs */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
-                  {[
-                    { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red  },
-                    { label: "VISITANTES", val: visitantesPresentes, color: IEQ.blue },
-                    { label: "TOTAL",      val: total, color: IEQ.yellow, highlight: true },
-                  ].map(({ label, val, color, highlight }) => (
-                      <div key={label} className="ieq-kpi" style={highlight ? { background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border: "none" } : {}}>
-                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: highlight ? "rgba(255,255,255,.6)" : ts, margin: "0 0 6px" }}>{label}</p>
-                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 38, fontWeight: 700, color: highlight ? "#fff" : color, margin: 0, lineHeight: 1 }}>{val}</p>
-                      </div>
-                  ))}
-                </div>
-
-                {/* Chamada */}
-                <div className="ieq-card" style={{ overflow: "hidden", marginBottom: 16 }}>
-                  <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
-                    <Users2 size={18} style={{ color: IEQ.red }} />
-                    <span style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".16em", color: tp }}>CHAMADA</span>
-                    <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: ts, marginLeft: "auto" }}>{pessoas.length} PESSOAS</span>
-                  </div>
-                  <div style={{ maxHeight: "55vh", overflowY: "auto" }}>
-                    {pessoas.map((pessoa) => {
-                      const marcado     = form.selecionadosKeys.includes(pessoa.uKey);
-                      const isVisitante = pessoa.tipo === "VISITANTE";
-                      const processing  = processingIds.has(pessoa.uKey);
-                      const decisao     = isVisitante ? (decisoesVisitantes[pessoa.id] ?? null) : null;
-                      const temDecisao  = decisao && decisao !== "NENHUMA";
-
-                      return (
-                          <div key={pessoa.uKey} className="ieq-person-row" style={{ background: marcado ? (isDark ? "rgba(200,16,46,.07)" : "rgba(200,16,46,.05)") : "transparent" }}>
-                            <button
-                                onClick={() => alternarPresenca(pessoa.uKey)}
-                                disabled={processing}
-                                style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", transition: "all .2s" }}
-                            >
-                              <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0 }}>
-                                <div style={{
-                                  width: 44, height: 44, borderRadius: 8, flexShrink: 0,
-                                  background: marcado ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark ? "rgba(255,255,255,.06)" : "rgba(200,16,46,.08)"),
-                                  display: "flex", alignItems: "center", justifyContent: "center",
-                                  color: marcado ? "#fff" : (isDark ? IEQ.offWhite : "#1A0A0D"),
-                                  fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 16, transition: "all .3s",
-                                }}>
-                                  {processing ? <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> : pessoa.nome.charAt(0)}
-                                </div>
-                                <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
-                                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: marcado ? 600 : 400, color: marcado ? tp : ts, margin: 0 }}>{pessoa.nome}</p>
-                                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 3 }}>
-                                    <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".15em", color: isVisitante ? IEQ.yellow : IEQ.red }}>{pessoa.tipo}</span>
-                                    {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} isDark={isDark} />}
-                                  </div>
-                                </div>
-                              </div>
-                              <div style={{
-                                width: 26, height: 26, borderRadius: 6, flexShrink: 0,
-                                border: `2px solid ${marcado ? IEQ.red : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)")}`,
-                                background: marcado ? IEQ.red : "transparent",
-                                display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s",
-                              }}>
-                                {marcado && <CheckCircle2 size={14} style={{ color: "#fff" }} />}
-                              </div>
-                            </button>
-
-                            {marcado && isVisitante && (
-                                <div style={{ padding: "0 24px 16px 82px" }}>
-                                  <div className="ieq-card" style={{ padding: "12px 16px" }}>
-                                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: ts, marginBottom: 8 }}>
-                                      <Lock size={10} /> DECISÃO ESPIRITUAL
-                                    </label>
-                                    <DecisaoReadOnly decisao={decisao} isDark={isDark} ts={ts} tp={tp} />
-                                    {temDecisao && (
-                                        <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: ts, margin: "8px 0 0" }}>
-                                          Para alterar a decisão, acesse o cadastro do visitante.
-                                        </p>
-                                    )}
-                                  </div>
-                                </div>
-                            )}
+                {celulaRealizada ? (
+                    <>
+                      {/* Formulário */}
+                      <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                          <div>
+                            <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
+                            <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
+                                   value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
                           </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                          <div>
+                            <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* KPIs */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+                        {[
+                          { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red  },
+                          { label: "VISITANTES", val: visitantesPresentes, color: IEQ.blue },
+                          { label: "TOTAL",      val: total, color: IEQ.yellow, highlight: true },
+                        ].map(({ label, val, color, highlight }) => (
+                            <div key={label} className="ieq-kpi" style={highlight ? { background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border: "none" } : {}}>
+                              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: highlight ? "rgba(255,255,255,.6)" : ts, margin: "0 0 6px" }}>{label}</p>
+                              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 38, fontWeight: 700, color: highlight ? "#fff" : color, margin: 0, lineHeight: 1 }}>{val}</p>
+                            </div>
+                        ))}
+                      </div>
+
+                      {/* Chamada */}
+                      <ListaChamada
+                          pessoas={pessoas} form={form} setForm={setForm}
+                          processingIds={processingIds} setProcessingIds={setProcessingIds}
+                          decisoesVisitantes={decisoesVisitantes} isDark={isDark} tp={tp} ts={ts}
+                      />
+                    </>
+                ) : (
+                    /* ── PAINEL DE MOTIVO ── */
+                    <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
+                      <div style={{ marginBottom: 20 }}>
+                        <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
+                        <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
+                               value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
+                      </div>
+                      <SeletorMotivo value={motivoNaoRealizacao} onChange={setMotivoNaoRealizacao} isDark={isDark} />
+                    </div>
+                )}
               </>
           )}
         </div>
@@ -1036,19 +1149,25 @@ export default function TelaRelatorio({ isDark = false }) {
             <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)" : "linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)" }}>
               <div style={{ maxWidth: 720, margin: "0 auto" }}>
                 <button
-                    onClick={handleSubmit}
-                    disabled={enviando || !form.estudo.trim()}
+                    onClick={handleSubmit} disabled={enviando || !podoEnviar}
                     style={{
                       width: "100%", padding: "17px 0", borderRadius: 10, border: "none",
-                      background: (enviando || !form.estudo.trim()) ? "rgba(200,16,46,.3)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
-                      color: "#fff", cursor: (enviando || !form.estudo.trim()) ? "not-allowed" : "pointer",
+                      background: (enviando || !podoEnviar)
+                          ? "rgba(200,16,46,.3)"
+                          : celulaRealizada
+                              ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`
+                              : `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`,
+                      color: (!celulaRealizada && !enviando && podoEnviar) ? IEQ.dark : "#fff",
+                      cursor: (enviando || !podoEnviar) ? "not-allowed" : "pointer",
                       fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".22em",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all .25s",
                     }}
                 >
                   {enviando
                       ? <><Loader2 size={17} style={{ animation: "spin 1s linear infinite" }} /> ENVIANDO...</>
-                      : <><ClipboardCheck size={17} /> FINALIZAR RELATÓRIO ({total})</>
+                      : celulaRealizada
+                          ? <><ClipboardCheck size={17} /> FINALIZAR RELATÓRIO ({total})</>
+                          : <><Ban size={17} /> REGISTRAR AUSÊNCIA DE CÉLULA</>
                   }
                 </button>
               </div>

@@ -14,12 +14,15 @@ const IEQ = {
 };
 
 const COLUNAS = [
-  { campo: "escolaBiblica", label: "EBQ",        emoji: "📖" },
-  { campo: "quartaNoite",   label: "4ª Noite",   emoji: "🕐" },
-  { campo: "quintaNoite",   label: "5ª Noite",   emoji: "🕐" },
-  { campo: "domingoManha",  label: "Dom. Manhã", emoji: "🌅" },
-  { campo: "domingoNoite",  label: "Dom. Noite", emoji: "🕐" },
+  { campo: "escolaBiblica", label: "EBQ",          emoji: "📚", justField: "justEscolaBiblica" },
+  { campo: "quartaNoite",   label: "QUARTA NOITE",  emoji: "🌙", justField: "justQuartaNoite"   },
+  { campo: "quintaNoite",   label: "QUINTA NOITE",  emoji: "⭐", justField: "justQuintaNoite"   },
+  { campo: "domingoManha",  label: "Dom. Manhã",    emoji: "🌅", justField: "justDomingoManha"  },
+  { campo: "domingoNoite",  label: "Dom. Noite",    emoji: "🌟", justField: "justDomingoNoite"  },
 ];
+
+const JUSTIFICATIVAS = ["Trabalho", "Doença", "Viagem", "Outro"];
+const EMOJIS_JUST = { "Trabalho": "💼", "Doença": "🤒", "Viagem": "✈️", "Outro": "📝" };
 
 const HISTORICO_LIMITE = 3;
 
@@ -63,9 +66,158 @@ function QuadrangularCross({ size = 32 }) {
   );
 }
 
-/* ??????????????????????????????????????????
-   COMPONENTE: Toast de Sucesso Animado (Discipulado)
-?????????????????????????????????????????? */
+/* ──────────────────────────────────────────
+   MODAL DE JUSTIFICATIVA
+─────────────────────────────────────────── */
+function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalvar, onFechar }) {
+  const [selecionado, setSelecionado] = useState(valorAtual || "");
+
+  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
+  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+
+  // Fechar com Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === "Escape") onFechar(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onFechar]);
+
+  return (
+      <div
+          onClick={onFechar}
+          style={{
+            position: "fixed", inset: 0, zIndex: 500,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "0 20px",
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(8px)",
+            animation: "ieqOverlayIn .2s ease forwards",
+          }}
+      >
+        <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: isDark ? "#110A0D" : "#fff",
+              border: `1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.18)"}`,
+              borderRadius: 20,
+              padding: "32px 28px",
+              width: "100%",
+              maxWidth: 370,
+              display: "flex",
+              flexDirection: "column",
+              gap: 22,
+              animation: "ieqToastIn .3s cubic-bezier(.34,1.56,.64,1) forwards",
+              boxShadow: isDark
+                  ? "0 24px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(200,16,46,.08)"
+                  : "0 24px 80px rgba(0,0,0,.12), 0 0 0 1px rgba(200,16,46,.06)",
+            }}
+        >
+          {/* Header */}
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              margin: "0 auto 16px",
+              fontSize: 24,
+              boxShadow: "0 6px 20px rgba(200,16,46,.3)",
+            }}>
+              📋
+            </div>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".2em", color: IEQ.red, margin: "0 0 8px" }}>
+              JUSTIFICATIVA DE FALTA
+            </p>
+            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 17, fontWeight: 600, color: tp, margin: "0 0 4px" }}>
+              {nomeMembro}
+            </p>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".14em", color: ts, margin: 0 }}>
+              {labelCulto.toUpperCase()}
+            </p>
+          </div>
+
+          {/* Divisor */}
+          <div style={{ height: 1, background: `linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent)` }}/>
+
+          {/* Chips grid */}
+          <div>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".16em", color: ts, margin: "0 0 14px", textAlign: "center" }}>
+              SELECIONE O MOTIVO DA AUSÊNCIA
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {JUSTIFICATIVAS.map((opcao) => {
+                const sel = selecionado === opcao;
+                return (
+                    <button
+                        key={opcao}
+                        onClick={() => setSelecionado(sel ? "" : opcao)}
+                        style={{
+                          padding: "16px 10px",
+                          borderRadius: 13,
+                          border: sel
+                              ? `1.5px solid ${IEQ.yellow}`
+                              : `1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"}`,
+                          background: sel
+                              ? (isDark ? "rgba(253,184,19,.15)" : "rgba(253,184,19,.1)")
+                              : (isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.03)"),
+                          cursor: "pointer",
+                          display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                          transition: "all .18s",
+                          transform: sel ? "scale(1.04)" : "scale(1)",
+                          boxShadow: sel ? `0 4px 16px rgba(253,184,19,.2)` : "none",
+                        }}
+                    >
+                      <span style={{ fontSize: 24 }}>{EMOJIS_JUST[opcao]}</span>
+                      <span style={{
+                        fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".12em",
+                        fontWeight: sel ? 700 : 400,
+                        color: sel ? IEQ.yellow : tp,
+                      }}>
+                    {opcao.toUpperCase()}
+                  </span>
+                    </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Ações */}
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+                onClick={onFechar}
+                style={{
+                  flex: 1, padding: "13px 0", borderRadius: 10,
+                  background: "none",
+                  border: `1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"}`,
+                  cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: 9,
+                  letterSpacing: ".14em", color: ts,
+                  transition: "all .15s",
+                }}
+            >
+              CANCELAR
+            </button>
+            <button
+                onClick={() => { onSalvar(selecionado); onFechar(); }}
+                style={{
+                  flex: 2, padding: "13px 0", borderRadius: 10,
+                  background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
+                  border: "none", cursor: "pointer",
+                  fontFamily: "'Cinzel',serif", fontSize: 9,
+                  letterSpacing: ".14em", color: "#fff", fontWeight: 700,
+                  boxShadow: "0 4px 16px rgba(200,16,46,.3)",
+                  transition: "all .15s",
+                }}
+            >
+              CONFIRMAR
+            </button>
+          </div>
+        </div>
+      </div>
+  );
+}
+
+/* ──────────────────────────────────────────
+   TOAST DE SUCESSO
+─────────────────────────────────────────── */
 function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modoEdicao, onClose }) {
   const [saindo, setSaindo] = useState(false);
 
@@ -101,25 +253,18 @@ function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modo
               ? "ieqToastOut .45s cubic-bezier(.4,0,.6,1) forwards"
               : "ieqToastIn .55s cubic-bezier(.34,1.56,.64,1) forwards",
         }}>
-          {/* Confetes */}
           <div style={{ display: "flex", gap: 10, marginBottom: 16, height: 32, alignItems: "flex-end" }}>
             {confettiCores.map((cor, i) => (
                 <div key={i} style={{
-                  width: i % 3 === 0 ? 12 : 8,
-                  height: i % 3 === 0 ? 12 : 8,
-                  borderRadius: i % 2 === 0 ? "50%" : 2,
-                  background: cor,
-                  opacity: 0,
-                  animation: `ieqConfetti 1.4s ease ${0.04 + i * 0.06}s forwards`,
+                  width: i % 3 === 0 ? 12 : 8, height: i % 3 === 0 ? 12 : 8,
+                  borderRadius: i % 2 === 0 ? "50%" : 2, background: cor,
+                  opacity: 0, animation: `ieqConfetti 1.4s ease ${0.04 + i * 0.06}s forwards`,
                 }} />
             ))}
           </div>
-
-          {/* Card principal */}
           <div style={{
             background: `linear-gradient(160deg, ${corPrincipal1} 0%, ${corPrincipal2} 60%, ${corPrincipal3} 100%)`,
-            borderRadius: 22,
-            padding: "32px 40px 28px",
+            borderRadius: 22, padding: "32px 40px 28px",
             display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
             minWidth: 300, maxWidth: 390, width: "100%",
             boxShadow: modoEdicao
@@ -127,80 +272,38 @@ function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modo
                 : "0 16px 60px rgba(13,110,58,.5), 0 0 0 1px rgba(255,255,255,.08)",
             position: "relative", overflow: "hidden",
           }}>
-            {/* Brilhos internos decorativos */}
             <div style={{ position:"absolute", top:-40, right:-40, width:160, height:160, borderRadius:"50%", background:"rgba(255,255,255,.04)", pointerEvents:"none" }}/>
             <div style={{ position:"absolute", bottom:-20, left:-20, width:100, height:100, borderRadius:"50%", background:"rgba(253,184,19,.06)", pointerEvents:"none" }}/>
-
-            {/* Ícone com anéis pulsantes */}
             <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
               <div style={{ position:"absolute", inset:-8, borderRadius:"50%", border:"2px solid rgba(255,255,255,.25)", animation:"ieqRingPulse 2s ease-out forwards" }}/>
               <div style={{ position:"absolute", inset:-16, borderRadius:"50%", border:"1.5px solid rgba(255,255,255,.12)", animation:"ieqRingPulse 2s ease-out .3s forwards" }}/>
-              <div style={{
-                width:68, height:68, borderRadius:"50%",
-                background:"rgba(255,255,255,.18)", border:"2px solid rgba(255,255,255,.35)",
-                display:"flex", alignItems:"center", justifyContent:"center",
-              }}>
-                {modoEdicao
-                    ? <Edit3 size={30} style={{ color:"#fff" }}/>
-                    : <CheckCircle2 size={32} style={{ color:"#fff" }}/>
-                }
+              <div style={{ width:68, height:68, borderRadius:"50%", background:"rgba(255,255,255,.18)", border:"2px solid rgba(255,255,255,.35)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                {modoEdicao ? <Edit3 size={30} style={{ color:"#fff" }}/> : <CheckCircle2 size={32} style={{ color:"#fff" }}/>}
               </div>
             </div>
-
-            {/* Cruz IEQ decorativa */}
-            <div style={{ marginTop:-6, marginBottom:-6 }}>
-              <QuadrangularCross size={22}/>
-            </div>
-
-            {/* Título */}
+            <div style={{ marginTop:-6, marginBottom:-6 }}><QuadrangularCross size={22}/></div>
             <div style={{ textAlign:"center" }}>
               <p style={{ fontFamily:"'Cinzel',serif", fontSize:18, fontWeight:700, letterSpacing:".18em", color:"#fff", margin:"0 0 8px" }}>
                 {modoEdicao ? "ATUALIZADO!" : "GLÓRIA A DEUS!"}
               </p>
               <p style={{ fontFamily:"'EB Garamond',serif", fontSize:18, color:"rgba(255,255,255,.82)", lineHeight:1.55, margin:0 }}>
-                {modoEdicao
-                    ? <>Relatório de discipulado<br /><em>atualizado com sucesso!</em></>
-                    : <>Relatório de discipulado enviado.<br /><em>O Senhor viu cada presença!</em></>
-                }
+                {modoEdicao ? <>Relatório de discipulado<br /><em>atualizado com sucesso!</em></> : <>Relatório de discipulado enviado.<br /><em>O Senhor viu cada presença!</em></>}
               </p>
             </div>
-
-            {/* Divisor */}
             <div style={{ width:"100%", height:1, background:"linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)" }}/>
-
-            {/* Pills de informação */}
             <div style={{ display:"flex", gap:8, flexWrap:"wrap", justifyContent:"center" }}>
-              <div style={{
-                background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.2)",
-                borderRadius:20, padding:"6px 14px",
-                fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em",
-                color:"rgba(255,255,255,.92)", display:"flex", alignItems:"center", gap:6,
-              }}>
+              <div style={{ background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.2)", borderRadius:20, padding:"6px 14px", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:"rgba(255,255,255,.92)", display:"flex", alignItems:"center", gap:6 }}>
                 <Users2 size={12}/> {totalPresencas} PRESENÇAS
               </div>
-              <div style={{
-                background: porcentagem >= 60 ? "rgba(253,184,19,.2)" : "rgba(200,16,46,.15)",
-                border: `1px solid ${porcentagem >= 60 ? "rgba(253,184,19,.35)" : "rgba(200,16,46,.3)"}`,
-                borderRadius:20, padding:"6px 14px",
-                fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em",
-                color: porcentagem >= 60 ? IEQ.yellow : "rgba(255,255,255,.85)",
-                display:"flex", alignItems:"center", gap:6,
-              }}>
+              <div style={{ background: porcentagem >= 60 ? "rgba(253,184,19,.2)" : "rgba(200,16,46,.15)", border: `1px solid ${porcentagem >= 60 ? "rgba(253,184,19,.35)" : "rgba(200,16,46,.3)"}`, borderRadius:20, padding:"6px 14px", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color: porcentagem >= 60 ? IEQ.yellow : "rgba(255,255,255,.85)", display:"flex", alignItems:"center", gap:6 }}>
                 <CheckCircle2 size={12}/> {porcentagem}% FREQ.
               </div>
               {nomeCelula && (
-                  <div style={{
-                    background:"rgba(255,255,255,.08)", border:"1px solid rgba(255,255,255,.15)",
-                    borderRadius:20, padding:"6px 14px",
-                    fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em",
-                    color:"rgba(255,255,255,.75)", display:"flex", alignItems:"center", gap:6,
-                  }}>
+                  <div style={{ background:"rgba(255,255,255,.08)", border:"1px solid rgba(255,255,255,.15)", borderRadius:20, padding:"6px 14px", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color:"rgba(255,255,255,.75)", display:"flex", alignItems:"center", gap:6 }}>
                     <UserCheck size={12}/> {nomeCelula.toUpperCase()}
                   </div>
               )}
             </div>
-
-            {/* Versículo */}
             <p style={{ fontFamily:"'EB Garamond',serif", fontStyle:"italic", fontSize:14, color:"rgba(255,255,255,.5)", textAlign:"center", margin:0, lineHeight:1.5 }}>
               "Ide, portanto, e fazei discípulos de todas as nações."
             </p>
@@ -213,9 +316,9 @@ function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modo
   );
 }
 
-// ?????????????????????????????????????????????????????????????????????????????
-// ABA HISTÓRICO
-// ?????????????????????????????????????????????????????????????????????????????
+/* ──────────────────────────────────────────
+   ABA HISTÓRICO
+─────────────────────────────────────────── */
 function AbaHistorico({ isDark, onVerDetalhe }) {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -236,19 +339,15 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
         <Loader2 size={24} style={{ color: IEQ.red, animation:"spin 1s linear infinite" }}/>
       </div>
   );
-
   if (erro) return (
       <div style={{ padding:"20px", textAlign:"center", color: IEQ.red, fontFamily:"'Cinzel',serif", fontSize:11 }}>
         {erro.toUpperCase()}
       </div>
   );
-
   if (historico.length === 0) return (
       <div style={{ padding:"48px 0", textAlign:"center" }}>
         <History size={40} style={{ color: ts, marginBottom:12 }}/>
-        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".18em", color:ts }}>
-          NENHUM RELATÓRIO ENVIADO AINDA
-        </p>
+        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".18em", color:ts }}>NENHUM RELATÓRIO ENVIADO AINDA</p>
       </div>
   );
 
@@ -257,30 +356,20 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
   return (
       <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
         <div style={{ padding:"0 4px" }}>
-          <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".16em", color:ts }}>
-            ÚLTIMAS {slice.length} SEMANA{slice.length !== 1 ? "S" : ""} REGISTRADA{slice.length !== 1 ? "S" : ""}
-          </span>
+        <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".16em", color:ts }}>
+          ÚLTIMAS {slice.length} SEMANA{slice.length !== 1 ? "S" : ""} REGISTRADA{slice.length !== 1 ? "S" : ""}
+        </span>
         </div>
-
         {slice.map((item) => {
           const totalPossivel  = item.totalPossivel ?? (item.totalMembros ?? 0) * COLUNAS.length;
           const totalPresencas = item.totalPresencas ?? 0;
           const pct = totalPossivel > 0 ? Math.round((totalPresencas / totalPossivel) * 100) : 0;
-
           return (
-              <div key={item.id} style={{
-                background: isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)",
-                border: `1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"}`,
-                borderRadius:12, padding:"18px 22px",
-                display:"flex", alignItems:"center", justifyContent:"space-between", gap:16,
-                animation:"fadeIn .4s ease both",
-              }}>
+              <div key={item.id} style={{ background: isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)", border: `1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"}`, borderRadius:12, padding:"18px 22px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, animation:"fadeIn .4s ease both" }}>
                 <div style={{ flex:1 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
                     <Calendar size={13} style={{ color: IEQ.red }}/>
-                    <span style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".14em", color:tp, fontWeight:700 }}>
-                      {item.inicio} → {item.fim}
-                    </span>
+                    <span style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".14em", color:tp, fontWeight:700 }}>{item.inicio} → {item.fim}</span>
                   </div>
                   <div style={{ display:"flex", gap:16, alignItems:"center" }}>
                     <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, color:ts }}>{item.totalMembros ?? "?"} MEMBROS</span>
@@ -291,18 +380,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                     <div style={{ height:"100%", width:`${pct}%`, borderRadius:99, background: pct > 60 ? IEQ.yellow : `linear-gradient(90deg,${IEQ.red},${IEQ.blue})`, transition:"width .4s ease" }}/>
                   </div>
                 </div>
-                <button
-                    onClick={() => onVerDetalhe(item)}
-                    style={{
-                      background:"none", border:`1px solid ${isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.25)"}`,
-                      borderRadius:8, padding:"8px 14px", cursor:"pointer",
-                      display:"flex", alignItems:"center", gap:6,
-                      fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color: IEQ.red,
-                      transition:"all .2s",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(200,16,46,.08)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "none"}
-                >
+                <button onClick={() => onVerDetalhe(item)} style={{ background:"none", border:`1px solid ${isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.25)"}`, borderRadius:8, padding:"8px 14px", cursor:"pointer", display:"flex", alignItems:"center", gap:6, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color: IEQ.red, transition:"all .2s" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(200,16,46,.08)"} onMouseLeave={e => e.currentTarget.style.background = "none"}>
                   <Eye size={13}/> VER
                 </button>
               </div>
@@ -312,9 +390,9 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
   );
 }
 
-// ?????????????????????????????????????????????????????????????????????????????
-// DETALHE HISTÓRICO
-// ?????????????????????????????????????????????????????????????????????????????
+/* ──────────────────────────────────────────
+   DETALHE HISTÓRICO
+─────────────────────────────────────────── */
 function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
   const [detalhe, setDetalhe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -346,20 +424,10 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
             </button>
             <div>
               <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color: IEQ.red, margin:0 }}>RELATÓRIO</p>
-              <p style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, color:tp, margin:"4px 0 0" }}>
-                {item.inicio} → {item.fim}
-              </p>
+              <p style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, color:tp, margin:"4px 0 0" }}>{item.inicio} → {item.fim}</p>
             </div>
           </div>
-          <button
-              onClick={() => onEditar(item, detalhe)}
-              style={{
-                background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`,
-                border:"none", borderRadius:8, padding:"10px 18px", cursor:"pointer",
-                display:"flex", alignItems:"center", gap:8,
-                fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:"#fff",
-              }}
-          >
+          <button onClick={() => onEditar(item, detalhe)} style={{ background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border:"none", borderRadius:8, padding:"10px 18px", cursor:"pointer", display:"flex", alignItems:"center", gap:8, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:"#fff" }}>
             <Edit3 size={13}/> EDITAR
           </button>
         </div>
@@ -368,12 +436,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
             <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:10, color:ts }}>SEM DADOS DE PRESENÇAS</p>
         ) : (
             <div className="ieq-card" style={{ overflow:"hidden" }}>
-              <div style={{
-                display:"grid", gridTemplateColumns:"1fr repeat(5,60px)",
-                padding:"12px 22px", gap:8,
-                borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`,
-                background: isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.03)",
-              }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr repeat(5,60px)", padding:"12px 22px", gap:8, borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, background: isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.03)" }}>
                 <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".16em", color:ts }}>MEMBRO</span>
                 {COLUNAS.map(({ label }) => (
                     <div key={label} style={{ textAlign:"center" }}>
@@ -385,31 +448,29 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                 const nome  = p.nomeMembro ?? p.nome ?? "?";
                 const total = COLUNAS.filter(c => p[c.campo]).length;
                 return (
-                    <div key={p.membroId ?? i} style={{
-                      display:"grid", gridTemplateColumns:"1fr repeat(5,60px)",
-                      padding:"14px 22px", gap:8, alignItems:"center",
-                      borderBottom: i < presencas.length - 1
-                          ? `1px solid ${isDark ? "rgba(200,16,46,.06)" : "rgba(200,16,46,.05)"}` : "none",
-                    }}>
-                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                        <div style={{
-                          width:34, height:34, borderRadius:6,
-                          background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`,
-                          display:"flex", alignItems:"center", justifyContent:"center",
-                          fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:13, color:"#fff",
-                        }}>{nome.charAt(0)}</div>
-                        <div>
-                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:15, fontWeight:600, color:tp, margin:0 }}>{nome}</p>
-                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, color:ts, margin:"2px 0 0" }}>{total}/{COLUNAS.length} PRESENÇAS</p>
-                        </div>
-                      </div>
-                      {COLUNAS.map(({ campo, emoji }) => (
-                          <div key={campo} style={{ display:"flex", justifyContent:"center" }}>
-                            <span style={{ fontSize:18, filter: p[campo] ? "none" : "grayscale(1)", opacity: p[campo] ? 1 : 0.25 }}>
-                              {p[campo] ? "✅" : emoji}
-                            </span>
+                    <div key={p.membroId ?? i} style={{ borderBottom: i < presencas.length - 1 ? `1px solid ${isDark ? "rgba(200,16,46,.06)" : "rgba(200,16,46,.05)"}` : "none" }}>
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr repeat(5,60px)", padding:"14px 22px", gap:8, alignItems:"center" }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                          <div style={{ width:34, height:34, borderRadius:6, background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:13, color:"#fff" }}>{nome.charAt(0)}</div>
+                          <div>
+                            <p style={{ fontFamily:"'EB Garamond',serif", fontSize:15, fontWeight:600, color:tp, margin:0 }}>{nome}</p>
+                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, color:ts, margin:"2px 0 0" }}>{total}/{COLUNAS.length} PRESENÇAS</p>
                           </div>
-                      ))}
+                        </div>
+                        {COLUNAS.map(({ campo, emoji, justField }) => (
+                            <div key={campo} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
+                      <span style={{ fontSize:18, filter: p[campo] ? "none" : "grayscale(1)", opacity: p[campo] ? 1 : 0.25 }}>
+                        {p[campo] ? "✅" : emoji}
+                      </span>
+                              {/* Justificativa no histórico (somente leitura) */}
+                              {!p[campo] && p[justField] && (
+                                  <div style={{ fontSize:8, color:ts, fontFamily:"'Cinzel',serif", textAlign:"center", lineHeight:1.3, padding:"2px 6px", background: isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.1)", borderRadius:99, border:"1px solid rgba(253,184,19,.2)" }}>
+                                    {p[justField]}
+                                  </div>
+                              )}
+                            </div>
+                        ))}
+                      </div>
                     </div>
                 );
               })}
@@ -419,9 +480,9 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
   );
 }
 
-// ?????????????????????????????????????????????????????????????????????????????
-// COMPONENTE PRINCIPAL
-// ?????????????????????????????????????????????????????????????????????????????
+/* ══════════════════════════════════════════
+   COMPONENTE PRINCIPAL
+══════════════════════════════════════════ */
 export default function RelatorioDiscipulado({ isDark = false }) {
   const [aba, setAba] = useState("relatorio");
   const [detalheItem, setDetalheItem] = useState(null);
@@ -438,22 +499,26 @@ export default function RelatorioDiscipulado({ isDark = false }) {
   const [verificandoExistente, setVerificandoExistente] = useState(false);
   const [relatorioExistente, setRelatorioExistente] = useState(null);
   const [modoEdicao, setModoEdicao] = useState(false);
-
-  /* Estado do toast animado */
   const [toastSucesso, setToastSucesso] = useState(null);
-  // null | { totalPresencas, porcentagem, nomeCelula, modoEdicao }
+
+  // ─── Estado do modal de justificativa ───
+  const [modalJust, setModalJust] = useState(null);
+  // modalJust = { membroIndex, campo, justField, nomeMembro, labelCulto, valorAtual }
 
   const celulaIdRef = useRef(null);
-  const inicioRef = useRef("");
-  const fimRef = useRef("");
+  const inicioRef   = useRef("");
+  const fimRef      = useRef("");
   const carregouRef = useRef(false);
-  const saveTimer = useRef(null);
+  const saveTimer   = useRef(null);
 
+  /* ─── helpers de inicialização ─── */
   const inicializarPresencas = useCallback((lista) =>
       lista.map(m => ({
         membroId: m.id, nomeMembro: m.nome,
         escolaBiblica: false, quartaNoite: false,
         quintaNoite: false, domingoManha: false, domingoNoite: false,
+        justEscolaBiblica: "", justQuartaNoite: "",
+        justQuintaNoite: "", justDomingoManha: "", justDomingoNoite: "",
       })), []);
 
   const agendarSave = useCallback((novasPresencas, novoFim) => {
@@ -489,10 +554,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     setErro("");
     try {
       const res = await api.get("/celulas/minha-celula");
-      if (!res.data) {
-        setErro("Célula não vinculada.");
-        return;
-      }
+      if (!res.data) { setErro("Célula não vinculada."); return; }
       const celData = res.data;
       setCelula(celData);
       celulaIdRef.current = celData.id;
@@ -500,17 +562,19 @@ export default function RelatorioDiscipulado({ isDark = false }) {
       setMembros(lista);
       const semana = obterSemanaAtual();
       inicioRef.current = semana.inicio;
-      fimRef.current = semana.fim;
+      fimRef.current    = semana.fim;
 
       const draft = lsDraftLoad(draftKey(celData.id, semana.inicio));
       if (draft?.presencas) {
-        const idsAtuais = new Set(lista.map(m => m.id));
+        const idsAtuais   = new Set(lista.map(m => m.id));
         const idsRascunho = new Set(draft.presencas.map(p => p.membroId));
-        const filtradas = draft.presencas.filter(p => idsAtuais.has(p.membroId));
+        const filtradas   = draft.presencas.filter(p => idsAtuais.has(p.membroId));
         const novos = lista.filter(m => !idsRascunho.has(m.id)).map(m => ({
           membroId: m.id, nomeMembro: m.nome,
           escolaBiblica: false, quartaNoite: false,
           quintaNoite: false, domingoManha: false, domingoNoite: false,
+          justEscolaBiblica: "", justQuartaNoite: "",
+          justQuintaNoite: "", justDomingoManha: "", justDomingoNoite: "",
         }));
         setPresencas([...filtradas, ...novos]);
         const fimSalvo = draft.fim || semana.fim;
@@ -532,9 +596,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     }
   }, [inicializarPresencas, verificarExistente]);
 
-  useEffect(() => {
-    carregarDados();
-  }, [carregarDados]);
+  useEffect(() => { carregarDados(); }, [carregarDados]);
 
   const handleInicioChange = useCallback(async (novoInicio) => {
     carregouRef.current = false;
@@ -544,15 +606,11 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     if (draft?.presencas) {
       setPresencas(draft.presencas);
       const f = draft.fim || fimRef.current;
-      setFim(f);
-      fimRef.current = f;
+      setFim(f); fimRef.current = f;
       setRascunhoCarregado(true);
       setTimeout(() => setRascunhoCarregado(false), 5000);
     } else {
-      setMembros(prev => {
-        setPresencas(inicializarPresencas(prev));
-        return prev;
-      });
+      setMembros(prev => { setPresencas(inicializarPresencas(prev)); return prev; });
     }
     carregouRef.current = true;
     await verificarExistente(novoInicio, fimRef.current);
@@ -561,42 +619,54 @@ export default function RelatorioDiscipulado({ isDark = false }) {
   const handleFimChange = useCallback((novoFim) => {
     setFim(novoFim);
     fimRef.current = novoFim;
-    setPresencas(prev => {
-      agendarSave(prev, novoFim);
-      return prev;
-    });
+    setPresencas(prev => { agendarSave(prev, novoFim); return prev; });
   }, [agendarSave]);
 
+  /* ─── alternar presença ─── */
   const alterarPresenca = useCallback((index, campo) => {
     setPresencas(prev => {
       const novo = [...prev];
       if (!novo[index]) return prev;
-      novo[index] = {...novo[index], [campo]: !novo[index][campo]};
+      const marcando = !novo[index][campo];
+      const justField = COLUNAS.find(c => c.campo === campo)?.justField;
+      novo[index] = {
+        ...novo[index],
+        [campo]: marcando,
+        ...(justField && marcando ? { [justField]: "" } : {}),
+      };
       agendarSave(novo, fimRef.current);
       return novo;
     });
   }, [agendarSave]);
 
+  /* ─── alterar justificativa via modal ─── */
+  const alterarJustificativa = useCallback((index, justField, valor) => {
+    setPresencas(prev => {
+      const novo = [...prev];
+      if (!novo[index]) return prev;
+      novo[index] = { ...novo[index], [justField]: valor };
+      agendarSave(novo, fimRef.current);
+      return novo;
+    });
+  }, [agendarSave]);
+
+  /* ─── abrir modal de justificativa ─── */
+  const abrirModalJust = useCallback((membroIndex, campo, justField, nomeMembro, labelCulto) => {
+    const valorAtual = presencas[membroIndex]?.[justField] ?? "";
+    setModalJust({ membroIndex, campo, justField, nomeMembro, labelCulto, valorAtual });
+  }, [presencas]);
+
   const stats = useMemo(() => {
-    const totalGeral = presencas.reduce((acc, p) => acc + COLUNAS.filter(c => p[c.campo]).length, 0);
+    const totalGeral    = presencas.reduce((acc, p) => acc + COLUNAS.filter(c => p[c.campo]).length, 0);
     const totalPossivel = presencas.length * COLUNAS.length;
-    const porcentagem = totalPossivel > 0 ? Math.round((totalGeral / totalPossivel) * 100) : 0;
-    return {totalGeral, porcentagem};
+    const porcentagem   = totalPossivel > 0 ? Math.round((totalGeral / totalPossivel) * 100) : 0;
+    return { totalGeral, porcentagem };
   }, [presencas]);
 
   const entrarModoEdicao = useCallback(async (item, detalhePreCarregado) => {
-    setErro("");
-    setModoEdicao(true);
-    setAba("relatorio");
-    setDetalheItem(null);
-    if (item.inicio) {
-      setInicio(item.inicio);
-      inicioRef.current = item.inicio;
-    }
-    if (item.fim) {
-      setFim(item.fim);
-      fimRef.current = item.fim;
-    }
+    setErro(""); setModoEdicao(true); setAba("relatorio"); setDetalheItem(null);
+    if (item.inicio) { setInicio(item.inicio); inicioRef.current = item.inicio; }
+    if (item.fim)    { setFim(item.fim);        fimRef.current    = item.fim;   }
     setRelatorioExistente(item);
     try {
       const detalhe = detalhePreCarregado
@@ -605,11 +675,13 @@ export default function RelatorioDiscipulado({ isDark = false }) {
       const merged = membros.map(m => {
         const found = pArr.find(p => (p.membroId ?? p.id) === m.id);
         return found
-            ? {...found, membroId: m.id, nomeMembro: m.nome}
+            ? { ...found, membroId: m.id, nomeMembro: m.nome }
             : {
               membroId: m.id, nomeMembro: m.nome,
               escolaBiblica: false, quartaNoite: false,
-              quintaNoite: false, domingoManha: false, domingoNoite: false
+              quintaNoite: false, domingoManha: false, domingoNoite: false,
+              justEscolaBiblica: "", justQuartaNoite: "",
+              justQuintaNoite: "", justDomingoManha: "", justDomingoNoite: "",
             };
       });
       setPresencas(merged);
@@ -619,24 +691,30 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     }
   }, [membros]);
 
-  // ✅ FUNÇÃO CORRIGIDA: enviarRelatorio com celulaId obrigatório
   const enviarRelatorio = async () => {
     setErro("");
     if (!inicio || !fim || !celula?.id || presencas.length === 0) return setErro("Verifique os dados.");
     setEnviando(true);
 
-    /* Captura stats antes de limpar */
     const totalEnviado = stats.totalGeral;
-    const pctEnviado = stats.porcentagem;
-    const nomeCell = celula?.nome || "";
-    const eraEdicao = modoEdicao;
+    const pctEnviado   = stats.porcentagem;
+    const nomeCell     = celula?.nome || "";
+    const eraEdicao    = modoEdicao;
 
     try {
-      // ✅ CORRIGIDO: Adiciona celulaId obrigatório ao payload
-      const payload = presencas.map(({nomeMembro, membroId, ...rest}) => ({
-        membroId: Number(membroId),
-        celulaId: celula?.id,
-        ...rest
+      const payload = presencas.map(({ nomeMembro, membroId, ...rest }) => ({
+        membroId:  Number(membroId),
+        celulaId:  celula?.id,
+        escolaBiblica:     rest.escolaBiblica,
+        quartaNoite:       rest.quartaNoite,
+        quintaNoite:       rest.quintaNoite,
+        domingoManha:      rest.domingoManha,
+        domingoNoite:      rest.domingoNoite,
+        justEscolaBiblica: rest.justEscolaBiblica || null,
+        justQuartaNoite:   rest.justQuartaNoite   || null,
+        justQuintaNoite:   rest.justQuintaNoite   || null,
+        justDomingoManha:  rest.justDomingoManha  || null,
+        justDomingoNoite:  rest.justDomingoNoite  || null,
       }));
 
       if (modoEdicao && relatorioExistente?.id) {
@@ -647,27 +725,13 @@ export default function RelatorioDiscipulado({ isDark = false }) {
       lsDraftRemove(draftKey(celula.id, inicio));
       setModoEdicao(false);
       carregouRef.current = false;
-      setMembros(prev => {
-        setPresencas(inicializarPresencas(prev));
-        return prev;
-      });
+      setMembros(prev => { setPresencas(inicializarPresencas(prev)); return prev; });
       carregouRef.current = true;
       await verificarExistente(inicio, fim);
-
-      /* Exibe o toast animado */
-      setToastSucesso({
-        totalPresencas: totalEnviado,
-        porcentagem: pctEnviado,
-        nomeCelula: nomeCell,
-        modoEdicao: eraEdicao
-      });
+      setToastSucesso({ totalPresencas: totalEnviado, porcentagem: pctEnviado, nomeCelula: nomeCell, modoEdicao: eraEdicao });
     } catch (e) {
       const mensagemErro = e?.response?.data?.message || "Erro no envio.";
-      console.error("❌ Erro ao enviar relatório:", {
-        status: e?.response?.status,
-        data: e?.response?.data,
-        message: e?.message,
-      });
+      console.error("❌ Erro ao enviar relatório:", { status: e?.response?.status, data: e?.response?.data, message: e?.message });
       setErro(mensagemErro);
     } finally {
       setEnviando(false);
@@ -680,13 +744,12 @@ export default function RelatorioDiscipulado({ isDark = false }) {
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
     * { box-sizing:border-box; }
-    @keyframes stripe   { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-    @keyframes pulse    { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
-    @keyframes spin     { to{transform:rotate(360deg)} }
-    @keyframes fadeIn   { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes slideDown{ from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:.35} }
-    /* 🎉 Toast de sucesso 🎉 */
+    @keyframes stripe    { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+    @keyframes pulse     { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
+    @keyframes spin      { to{transform:rotate(360deg)} }
+    @keyframes fadeIn    { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes blink     { 0%,100%{opacity:1} 50%{opacity:.35} }
     @keyframes ieqOverlayIn  { from{opacity:0} to{opacity:1} }
     @keyframes ieqOverlayOut { from{opacity:1} to{opacity:0} }
     @keyframes ieqToastIn    { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
@@ -730,30 +793,48 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
     .spin-icon  { animation:spin 1s linear infinite; }
     .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); }
+
+    /* ── Botão de justificativa (falta marcada) ── */
+    .ieq-just-btn {
+      margin-top: 6px;
+      padding: 4px 8px;
+      border-radius: 99px;
+      border: 1px solid rgba(253,184,19,.3);
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 7px;
+      letter-spacing: .1em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .ieq-just-btn:hover {
+      border-color: rgba(253,184,19,.6);
+      background: rgba(253,184,19,.08);
+    }
+    .ieq-just-btn-filled {
+      border-color: rgba(253,184,19,.65) !important;
+      background: ${isDark ? "rgba(253,184,19,.15)" : "rgba(253,184,19,.12)"} !important;
+      color: ${IEQ.yellow} !important;
+    }
   `;
 
   if (loading) return (
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "64px 0",
-        gap: 14
-      }}>
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"64px 0", gap:14 }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap'); @keyframes spin{to{transform:rotate(360deg)}}`}</style>
         <QuadrangularCross size={40}/>
-        <p style={{fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".2em", color: IEQ.red}}>CARREGANDO
-          MEMBROS...</p>
+        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:IEQ.red }}>CARREGANDO MEMBROS...</p>
       </div>
   );
 
   return (
-      <div style={{position: "relative", paddingBottom: 48}}>
+      <div style={{ position:"relative", paddingBottom:48 }}>
         <style>{globalStyles}</style>
         <div className="ieq-bg-stripe"/>
 
-        {/* 🎉 TOAST DE SUCESSO ANIMADO 🎉 */}
         {toastSucesso && (
             <ToastSucessoDiscipulado
                 totalPresencas={toastSucesso.totalPresencas}
@@ -764,92 +845,54 @@ export default function RelatorioDiscipulado({ isDark = false }) {
             />
         )}
 
-        <div style={{
-          position: "relative",
-          zIndex: 1,
-          maxWidth: 800,
-          margin: "0 auto",
-          padding: "0 16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 16
-        }}>
+        {/* ─── MODAL DE JUSTIFICATIVA ─── */}
+        {modalJust && (
+            <ModalJustificativa
+                isDark={isDark}
+                nomeMembro={modalJust.nomeMembro}
+                labelCulto={modalJust.labelCulto}
+                valorAtual={modalJust.valorAtual}
+                onSalvar={(valor) => alterarJustificativa(modalJust.membroIndex, modalJust.justField, valor)}
+                onFechar={() => setModalJust(null)}
+            />
+        )}
+
+        <div style={{ position:"relative", zIndex:1, maxWidth:800, margin:"0 auto", padding:"0 16px", display:"flex", flexDirection:"column", gap:16 }}>
 
           {rascunhoCarregado && (
-              <div className="ieq-toast"
-                   style={{background: `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, color: "#fff"}}>
+              <div className="ieq-toast" style={{ background:`linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, color:"#fff" }}>
                 <Save size={15}/> RASCUNHO RESTAURADO → suas marcações anteriores foram recuperadas automaticamente
               </div>
           )}
 
           {/* Header */}
-          <div className="ieq-card" style={{padding: "28px 32px"}}>
-            <div style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 16
-            }}>
-              <div style={{display: "flex", alignItems: "center", gap: 18}}>
-                <div style={{
-                  position: "relative",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}>
-                  <div className="pulse-ring" style={{width: 64, height: 64}}/>
-                  <div style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: "50%",
-                    background: isDark ? "#1A0A0D" : "#fff",
-                    border: "1px solid rgba(200,16,46,.3)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}>
+          <div className="ieq-card" style={{ padding:"28px 32px" }}>
+            <div style={{ display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:16 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:18 }}>
+                <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+                  <div className="pulse-ring" style={{ width:64, height:64 }}/>
+                  <div style={{ width:48, height:48, borderRadius:"50%", background: isDark ? "#1A0A0D" : "#fff", border:"1px solid rgba(200,16,46,.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                     <QuadrangularCross size={28}/>
                   </div>
                 </div>
                 <div>
-                  <div style={{display: "flex", alignItems: "center", gap: 6, marginBottom: 6}}>
-                    <UserCheck size={14} style={{color: IEQ.red}}/>
-                    <span style={{
-                      fontFamily: "'Cinzel',serif",
-                      fontSize: 9,
-                      letterSpacing: ".2em",
-                      color: IEQ.red
-                    }}>DISCIPULADO</span>
+                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
+                    <UserCheck size={14} style={{ color:IEQ.red }}/>
+                    <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:IEQ.red }}>DISCIPULADO</span>
                   </div>
-                  <h2 style={{
-                    fontFamily: "'Cinzel',serif",
-                    fontSize: 18,
-                    fontWeight: 700,
-                    letterSpacing: ".12em",
-                    color: tp,
-                    margin: 0
-                  }}>
+                  <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:18, fontWeight:700, letterSpacing:".12em", color:tp, margin:0 }}>
                     {celula?.nome?.toUpperCase() || "CÉLULA"}
                   </h2>
-                  <div style={{marginTop: 6, height: 18}}>
+                  <div style={{ marginTop:6, height:18 }}>
                     {salvouAgora && <span className="ieq-saved-badge"><Save size={10}/> RASCUNHO SALVO</span>}
                   </div>
                 </div>
               </div>
-              <div style={{display: "flex", gap: 8}}>
-                <button className={`ieq-tab ${aba === "relatorio" ? "ieq-tab-active" : "ieq-tab-inactive"}`}
-                        onClick={() => {
-                          setAba("relatorio");
-                          setDetalheItem(null);
-                        }}>
+              <div style={{ display:"flex", gap:8 }}>
+                <button className={`ieq-tab ${aba === "relatorio" ? "ieq-tab-active" : "ieq-tab-inactive"}`} onClick={() => { setAba("relatorio"); setDetalheItem(null); }}>
                   <UserCheck size={13}/> RELATÓRIO
                 </button>
-                <button className={`ieq-tab ${aba === "historico" ? "ieq-tab-active" : "ieq-tab-inactive"}`}
-                        onClick={() => {
-                          setAba("historico");
-                          setDetalheItem(null);
-                        }}>
+                <button className={`ieq-tab ${aba === "historico" ? "ieq-tab-active" : "ieq-tab-inactive"}`} onClick={() => { setAba("historico"); setDetalheItem(null); }}>
                   <History size={13}/> HISTÓRICO
                 </button>
               </div>
@@ -859,59 +902,29 @@ export default function RelatorioDiscipulado({ isDark = false }) {
           {/* ABA HISTÓRICO */}
           {aba === "historico" && (
               detalheItem
-                  ? <DetalheHistorico item={detalheItem} isDark={isDark} onVoltar={() => setDetalheItem(null)}
-                                      onEditar={(item, detalhe) => entrarModoEdicao(item, detalhe)}/>
+                  ? <DetalheHistorico item={detalheItem} isDark={isDark} onVoltar={() => setDetalheItem(null)} onEditar={(item, detalhe) => entrarModoEdicao(item, detalhe)}/>
                   : <AbaHistorico isDark={isDark} onVerDetalhe={setDetalheItem}/>
           )}
 
           {/* ABA RELATÓRIO */}
           {aba === "relatorio" && (
               <>
-                <div className="ieq-card"
-                     style={{padding: "16px 24px", display: "flex", alignItems: "center", gap: 10}}>
-                  <Calendar size={14} style={{color: IEQ.red}}/>
-                  <input type="date" className="ieq-input-date" value={inicio}
-                         onChange={e => handleInicioChange(e.target.value)}/>
-                  <span style={{color: ts, fontFamily: "'Cinzel',serif", fontSize: 10}}>→</span>
-                  <input type="date" className="ieq-input-date" value={fim}
-                         onChange={e => handleFimChange(e.target.value)}/>
-                  {verificandoExistente && <Loader2 size={13} style={{
-                    color: IEQ.red,
-                    animation: "spin 1s linear infinite",
-                    marginLeft: "auto"
-                  }}/>}
+                <div className="ieq-card" style={{ padding:"16px 24px", display:"flex", alignItems:"center", gap:10 }}>
+                  <Calendar size={14} style={{ color:IEQ.red }}/>
+                  <input type="date" className="ieq-input-date" value={inicio} onChange={e => handleInicioChange(e.target.value)}/>
+                  <span style={{ color:ts, fontFamily:"'Cinzel',serif", fontSize:10 }}>→</span>
+                  <input type="date" className="ieq-input-date" value={fim} onChange={e => handleFimChange(e.target.value)}/>
+                  {verificandoExistente && <Loader2 size={13} style={{ color:IEQ.red, animation:"spin 1s linear infinite", marginLeft:"auto" }}/>}
                 </div>
 
                 {relatorioExistente && !modoEdicao && (
                     <div className="ieq-warning-banner">
-                      <AlertTriangle size={18} style={{color: IEQ.yellow, flexShrink: 0}}/>
-                      <div style={{flex: 1}}>
-                        <p style={{
-                          fontFamily: "'Cinzel',serif",
-                          fontSize: 10,
-                          letterSpacing: ".16em",
-                          color: IEQ.yellow,
-                          margin: 0,
-                          fontWeight: 700
-                        }}>RELATÓRIO JÁ ENVIADO PARA ESTA SEMANA</p>
-                        <p style={{fontFamily: "'Cinzel',serif", fontSize: 9, color: ts, margin: "4px 0 0"}}>Um
-                          relatório já foi registrado para o período selecionado.</p>
+                      <AlertTriangle size={18} style={{ color:IEQ.yellow, flexShrink:0 }}/>
+                      <div style={{ flex:1 }}>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".16em", color:IEQ.yellow, margin:0, fontWeight:700 }}>RELATÓRIO JÁ ENVIADO PARA ESTA SEMANA</p>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, color:ts, margin:"4px 0 0" }}>Um relatório já foi registrado para o período selecionado.</p>
                       </div>
-                      <button onClick={() => entrarModoEdicao(relatorioExistente, null)} style={{
-                        background: `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`,
-                        border: "none",
-                        borderRadius: 8,
-                        padding: "10px 18px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 7,
-                        fontFamily: "'Cinzel',serif",
-                        fontSize: 9,
-                        letterSpacing: ".14em",
-                        color: "#000",
-                        fontWeight: 700
-                      }}>
+                      <button onClick={() => entrarModoEdicao(relatorioExistente, null)} style={{ background:`linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`, border:"none", borderRadius:8, padding:"10px 18px", cursor:"pointer", display:"flex", alignItems:"center", gap:7, fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:"#000", fontWeight:700 }}>
                         <Edit3 size={13}/> EDITAR RELATÓRIO
                       </button>
                     </div>
@@ -919,228 +932,153 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
                 {modoEdicao && (
                     <div className="ieq-edit-banner">
-                      <Edit3 size={16} style={{color: IEQ.blueLight, flexShrink: 0}}/>
-                      <div style={{flex: 1}}>
-                        <p style={{
-                          fontFamily: "'Cinzel',serif",
-                          fontSize: 10,
-                          letterSpacing: ".16em",
-                          color: IEQ.blueLight,
-                          margin: 0,
-                          fontWeight: 700
-                        }}>MODO EDIÇÃO ATIVO</p>
-                        <p style={{fontFamily: "'Cinzel',serif", fontSize: 9, color: ts, margin: "4px 0 0"}}>Você está
-                          editando um relatório já enviado. As alterações substituirão o envio anterior.</p>
+                      <Edit3 size={16} style={{ color:IEQ.blueLight, flexShrink:0 }}/>
+                      <div style={{ flex:1 }}>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".16em", color:IEQ.blueLight, margin:0, fontWeight:700 }}>MODO EDIÇÃO ATIVO</p>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, color:ts, margin:"4px 0 0" }}>Você está editando um relatório já enviado. As alterações substituirão o envio anterior.</p>
                       </div>
-                      <button onClick={() => {
-                        setModoEdicao(false);
-                        setMembros(prev => {
-                          setPresencas(inicializarPresencas(prev));
-                          return prev;
-                        });
-                      }} style={{
-                        background: "none",
-                        border: `1px solid rgba(0,61,165,.3)`,
-                        borderRadius: 8,
-                        padding: "8px 14px",
-                        cursor: "pointer",
-                        fontFamily: "'Cinzel',serif",
-                        fontSize: 9,
-                        color: IEQ.blueLight
-                      }}>
+                      <button onClick={() => { setModoEdicao(false); setMembros(prev => { setPresencas(inicializarPresencas(prev)); return prev; }); }} style={{ background:"none", border:`1px solid rgba(0,61,165,.3)`, borderRadius:8, padding:"8px 14px", cursor:"pointer", fontFamily:"'Cinzel',serif", fontSize:9, color:IEQ.blueLight }}>
                         CANCELAR
                       </button>
                     </div>
                 )}
 
-                <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12}}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
                   {[
-                    {label: "MEMBROS", val: membros.length, color: IEQ.red},
-                    {label: "PRESENÇAS", val: stats.totalGeral, color: IEQ.blue},
-                    {
-                      label: "FREQUÊNCIA",
-                      val: `${stats.porcentagem}%`,
-                      color: stats.porcentagem > 60 ? IEQ.yellow : IEQ.red,
-                      highlight: stats.porcentagem > 60
-                    },
-                  ].map(({label, val, color, highlight}) => (
-                      <div key={label} className="ieq-kpi" style={highlight ? {
-                        background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`,
-                        border: "none"
-                      } : {}}>
-                        <p style={{
-                          fontFamily: "'Cinzel',serif",
-                          fontSize: 8.5,
-                          letterSpacing: ".18em",
-                          color: highlight ? "rgba(255,255,255,.55)" : ts,
-                          margin: "0 0 6px"
-                        }}>{label}</p>
-                        <p style={{
-                          fontFamily: "'Cinzel',serif",
-                          fontSize: 36,
-                          fontWeight: 700,
-                          color: highlight ? "#fff" : color,
-                          margin: 0,
-                          lineHeight: 1
-                        }}>{val}</p>
+                    { label:"MEMBROS",    val: membros.length,          color: IEQ.red },
+                    { label:"PRESENÇAS",  val: stats.totalGeral,        color: IEQ.blue },
+                    { label:"FREQUÊNCIA", val: `${stats.porcentagem}%`, color: stats.porcentagem > 60 ? IEQ.yellow : IEQ.red, highlight: stats.porcentagem > 60 },
+                  ].map(({ label, val, color, highlight }) => (
+                      <div key={label} className="ieq-kpi" style={highlight ? { background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border:"none" } : {}}>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".18em", color: highlight ? "rgba(255,255,255,.55)" : ts, margin:"0 0 6px" }}>{label}</p>
+                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:36, fontWeight:700, color: highlight ? "#fff" : color, margin:0, lineHeight:1 }}>{val}</p>
                       </div>
                   ))}
                 </div>
 
-                {erro && <div className="ieq-alert" style={{
-                  background: "rgba(200,16,46,.08)",
-                  border: `1px solid rgba(200,16,46,.3)`,
-                  color: IEQ.red
-                }}>{erro.toUpperCase()}</div>}
+                {erro && <div className="ieq-alert" style={{ background:"rgba(200,16,46,.08)", border:`1px solid rgba(200,16,46,.3)`, color:IEQ.red }}>{erro.toUpperCase()}</div>}
 
-                <div className="ieq-card" style={{
-                  overflow: "hidden",
-                  opacity: (relatorioExistente && !modoEdicao) ? 0.4 : 1,
-                  pointerEvents: (relatorioExistente && !modoEdicao) ? "none" : "auto",
-                  transition: "opacity .3s"
-                }}>
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr repeat(5,60px)",
-                    padding: "14px 24px",
-                    gap: 8,
-                    alignItems: "center",
-                    borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`,
-                    background: isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.03)"
-                  }}>
-                    <span style={{
-                      fontFamily: "'Cinzel',serif",
-                      fontSize: 9,
-                      letterSpacing: ".16em",
-                      color: ts
-                    }}>MEMBRO</span>
-                    {COLUNAS.map(({label, emoji}) => (
-                        <div key={label} style={{textAlign: "center"}}>
-                          <div style={{fontSize: 14, lineHeight: 1}}>{emoji}</div>
-                          <p style={{
-                            fontFamily: "'Cinzel',serif",
-                            fontSize: 7.5,
-                            letterSpacing: ".1em",
-                            color: ts,
-                            margin: "4px 0 0"
-                          }}>{label.toUpperCase()}</p>
+                {/* ── TABELA DE MEMBROS ── */}
+                <div className="ieq-card" style={{ overflow:"hidden", opacity:(relatorioExistente && !modoEdicao) ? 0.4 : 1, pointerEvents:(relatorioExistente && !modoEdicao) ? "none" : "auto", transition:"opacity .3s" }}>
+
+                  {/* Cabeçalho */}
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr repeat(5,1fr)", padding:"14px 24px", gap:8, alignItems:"center", borderBottom:`1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, background: isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.03)" }}>
+                    <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".16em", color:ts }}>MEMBRO</span>
+                    {COLUNAS.map(({ label, emoji }) => (
+                        <div key={label} style={{ textAlign:"center" }}>
+                          <div style={{ fontSize:14, lineHeight:1 }}>{emoji}</div>
+                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:7.5, letterSpacing:".1em", color:ts, margin:"4px 0 0" }}>{label.toUpperCase()}</p>
                         </div>
                     ))}
                   </div>
 
+                  {/* Linhas de membros */}
                   {membros.map((m, i) => {
-                    const p = presencas[i];
+                    const p     = presencas[i];
                     const total = p ? COLUNAS.filter(c => p[c.campo]).length : 0;
-                    const pct = Math.round((total / COLUNAS.length) * 100);
+                    const pct   = Math.round((total / COLUNAS.length) * 100);
+
                     return (
                         <div key={m.id} className="ieq-member-block">
-                          <div style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginBottom: 14
-                          }}>
-                            <div style={{display: "flex", alignItems: "center", gap: 12}}>
-                              <div className="ieq-avatar"
-                                   style={{background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`}}>{m.nome.charAt(0)}</div>
+
+                          {/* Nome + badge */}
+                          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                              <div className="ieq-avatar" style={{ background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` }}>{m.nome.charAt(0)}</div>
                               <div>
-                                <p style={{
-                                  fontFamily: "'EB Garamond',serif",
-                                  fontSize: 16,
-                                  fontWeight: 600,
-                                  color: tp,
-                                  margin: 0
-                                }}>{m.nome}</p>
-                                <p style={{
-                                  fontFamily: "'Cinzel',serif",
-                                  fontSize: 8,
-                                  letterSpacing: ".12em",
-                                  color: ts,
-                                  margin: "2px 0 0"
-                                }}>ID #{m.id}</p>
+                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:16, fontWeight:600, color:tp, margin:0 }}>{m.nome}</p>
+                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".12em", color:ts, margin:"2px 0 0" }}>ID #{m.id}</p>
                               </div>
                             </div>
-                            <div style={{
-                              padding: "5px 14px",
-                              borderRadius: 99,
-                              background: total === COLUNAS.length ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark ? "rgba(255,255,255,.05)" : "rgba(200,16,46,.06)"),
-                              border: `1px solid ${total === COLUNAS.length ? IEQ.red : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)")}`
-                            }}>
-                              <span style={{
-                                fontFamily: "'Cinzel',serif",
-                                fontSize: 9,
-                                letterSpacing: ".14em",
-                                color: total === COLUNAS.length ? "#fff" : ts
-                              }}>{total}/{COLUNAS.length}</span>
+                            <div style={{ padding:"5px 14px", borderRadius:99, background: total === COLUNAS.length ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark ? "rgba(255,255,255,.05)" : "rgba(200,16,46,.06)"), border:`1px solid ${total === COLUNAS.length ? IEQ.red : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)")}` }}>
+                              <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color: total === COLUNAS.length ? "#fff" : ts }}>{total}/{COLUNAS.length}</span>
                             </div>
                           </div>
-                          <div style={{
-                            height: 4,
-                            borderRadius: 99,
-                            background: isDark ? "rgba(255,255,255,.06)" : "rgba(200,16,46,.08)",
-                            marginBottom: 14,
-                            overflow: "hidden"
-                          }}>
-                            <div style={{
-                              height: "100%",
-                              borderRadius: 99,
-                              width: `${pct}%`,
-                              background: pct === 100 ? IEQ.yellow : `linear-gradient(90deg,${IEQ.red},${IEQ.blue})`,
-                              transition: "width .4s ease"
-                            }}/>
+
+                          {/* Barra de progresso */}
+                          <div style={{ height:4, borderRadius:99, background: isDark ? "rgba(255,255,255,.06)" : "rgba(200,16,46,.08)", marginBottom:14, overflow:"hidden" }}>
+                            <div style={{ height:"100%", borderRadius:99, width:`${pct}%`, background: pct === 100 ? IEQ.yellow : `linear-gradient(90deg,${IEQ.red},${IEQ.blue})`, transition:"width .4s ease" }}/>
                           </div>
-                          <div style={{display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8}}>
-                            {COLUNAS.map(({campo, label, emoji}) => {
-                              const marcado = p?.[campo];
+
+                          {/* ── Grid de botões de presença ── */}
+                          <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8 }}>
+                            {COLUNAS.map(({ campo, label, emoji, justField }) => {
+                              const marcado  = p?.[campo];
+                              const justVal  = p?.[justField] ?? "";
+                              const temJust  = !marcado && !!justVal;
+
                               return (
-                                  <button key={campo} className="ieq-presence-btn"
-                                          onClick={() => alterarPresenca(i, campo)} style={{
-                                    borderColor: marcado ? IEQ.red : (isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"),
-                                    background: marcado ? (isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.07)") : (isDark ? "rgba(255,255,255,.02)" : "rgba(0,0,0,.02)"),
-                                    transform: marcado ? "scale(1.04)" : "scale(1)"
-                                  }}>
-                                    <span style={{
-                                      fontSize: 18,
-                                      filter: marcado ? "none" : "grayscale(1)",
-                                      opacity: marcado ? 1 : 0.4,
-                                      transition: "all .2s"
-                                    }}>{marcado ? "✅" : emoji}</span>
-                                    <span style={{
-                                      fontFamily: "'Cinzel',serif",
-                                      fontSize: 7.5,
-                                      letterSpacing: ".1em",
-                                      color: marcado ? IEQ.red : ts,
-                                      fontWeight: 700
-                                    }}>{label.toUpperCase()}</span>
-                                  </button>
+                                  <div key={campo} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:0 }}>
+
+                                    {/* Botão de presença */}
+                                    <button
+                                        className="ieq-presence-btn"
+                                        onClick={() => alterarPresenca(i, campo)}
+                                        style={{
+                                          borderColor: marcado ? IEQ.red : (isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"),
+                                          background: marcado
+                                              ? (isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.07)")
+                                              : (isDark ? "rgba(255,255,255,.02)" : "rgba(0,0,0,.02)"),
+                                          transform: marcado ? "scale(1.04)" : "scale(1)",
+                                          width: "100%",
+                                        }}
+                                    >
+                                      <span style={{ fontSize:18, filter: marcado ? "none" : "grayscale(1)", opacity: marcado ? 1 : 0.4, transition:"all .2s" }}>
+                                        {marcado ? "✅" : emoji}
+                                      </span>
+                                      <span style={{ fontFamily:"'Cinzel',serif", fontSize:7.5, letterSpacing:".1em", color: marcado ? IEQ.red : ts, fontWeight:700 }}>
+                                        {label.toUpperCase()}
+                                      </span>
+                                    </button>
+
+                                    {/* Botão de justificativa — só aparece quando NÃO está marcado */}
+                                    {!marcado && (
+                                        <button
+                                            className={`ieq-just-btn${temJust ? " ieq-just-btn-filled" : ""}`}
+                                            style={{
+                                              color: temJust ? IEQ.yellow : ts,
+                                            }}
+                                            onClick={() => abrirModalJust(i, campo, justField, m.nome, label)}
+                                        >
+                                          {temJust ? (
+                                              <>{EMOJIS_JUST[justVal] || "📝"} {justVal.toUpperCase()}</>
+                                          ) : (
+                                              <>📋 MOTIVO</>
+                                          )}
+                                        </button>
+                                    )}
+
+                                  </div>
                               );
                             })}
                           </div>
+
                         </div>
                     );
                   })}
                 </div>
 
-                <button className="ieq-btn-submit" onClick={enviarRelatorio}
-                        disabled={enviando || loading || membros.length === 0 || (relatorioExistente && !modoEdicao)}
-                        style={{
-                          background: modoEdicao ? `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})` : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
-                          boxShadow: modoEdicao ? "0 8px 24px rgba(0,61,165,.25)" : "0 8px 24px rgba(200,16,46,.25)"
-                        }}>
-                  {enviando ? <><Loader2 size={17} className="spin-icon"/> PROCESSANDO...</> : modoEdicao ? <><Edit3
-                      size={17}/> SALVAR ALTERAÇÕES</> : <><CheckCircle2 size={17}/> FINALIZAR RELATÓRIO DA SEMANA</>}
+                <button
+                    className="ieq-btn-submit"
+                    onClick={enviarRelatorio}
+                    disabled={enviando || loading || membros.length === 0 || (relatorioExistente && !modoEdicao)}
+                    style={{
+                      background: modoEdicao ? `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})` : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
+                      boxShadow: modoEdicao ? "0 8px 24px rgba(0,61,165,.25)" : "0 8px 24px rgba(200,16,46,.25)"
+                    }}
+                >
+                  {enviando
+                      ? <><Loader2 size={17} className="spin-icon"/> PROCESSANDO...</>
+                      : modoEdicao
+                          ? <><Edit3 size={17}/> SALVAR ALTERAÇÕES</>
+                          : <><CheckCircle2 size={17}/> FINALIZAR RELATÓRIO DA SEMANA</>
+                  }
                 </button>
               </>
           )}
 
           <div className="divider"/>
-          <p style={{
-            textAlign: "center",
-            fontFamily: "'Cinzel',serif",
-            fontSize: 9,
-            letterSpacing: ".15em",
-            color: ts
-          }}>
+          <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".15em", color:ts }}>
             © IEQ PITUAÇÚ · SISTEMA SEGURO · {new Date().getFullYear()}
           </p>
         </div>

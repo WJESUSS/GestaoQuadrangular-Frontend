@@ -36,12 +36,12 @@ function QuadrangularCross({ size = 28 }) {
 }
 
 const listaOrigens = [
-  { id: "CONVITE",       label: "Convite",      emoji: "?" },
-  { id: "CASA_DE_PAZ",   label: "Casa de Paz",  emoji: "?" },
+  { id: "CONVITE",       label: "Convite",      emoji: "🤝" },
+  { id: "CASA_DE_PAZ",   label: "Casa de Paz",  emoji: "🏠" },
   { id: "EVENTO",        label: "Evento",       emoji: "⛺" },
   { id: "MISSAO_70",     label: "Missão 70",    emoji: "👥" },
   { id: "REDES_SOCIAIS", label: "Social",       emoji: "📱" },
-  { id: "CELULA",        label: "Célula",       emoji: "🏠" },
+  { id: "CELULA",        label: "Célula",       emoji: "✝️" },
 ];
 
 const textoDecisao = {
@@ -91,22 +91,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
   }, [carregarVisitantes]);
 
   const handleMudarOrigem = (origemId) => {
-    let novaDecisao = formVisitante.decisaoEspiritual;
-
-    if (origemId === "CASA_DE_PAZ" || origemId === "MISSAO_70") {
-      novaDecisao = "ACEITOU_JESUS";
-    } else if (
-        formVisitante.decisaoEspiritual === "ACEITOU_JESUS" &&
-        (formVisitante.origem === "CASA_DE_PAZ" || formVisitante.origem === "MISSAO_70")
-    ) {
-      novaDecisao = "NENHUMA";
-    }
-
-    setFormVisitante({
-      ...formVisitante,
-      origem: origemId,
-      decisaoEspiritual: novaDecisao
-    });
+    setFormVisitante({ ...formVisitante, origem: origemId });
   };
 
   const handleSalvar = async (e) => {
