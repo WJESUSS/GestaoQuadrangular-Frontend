@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
   Plus, X, User, Phone, Trash2, Loader2, Search,
-  CreditCard, Heart, ChevronRight, Users,
+  CreditCard, Heart, ChevronRight, Users, CalendarDays,
 } from "lucide-react";
 
-/* ??? Tokens ??? */
+/* ─── Tokens ─────────────────────────────────────────────────────────── */
 const IEQ = {
   red: "#C8102E", redDark: "#8B0B1F",
   yellow: "#FDB813", blue: "#003DA5", blueDark: "#002470",
@@ -37,49 +37,142 @@ const formInicial = {
   dataBatismo: "", status: "ATIVO", celulaId: null,
 };
 
-// ✅ HELPER: Converter data ISO para YYYY-MM-DD
+/* ─── Helpers ─────────────────────────────────────────────────────────── */
+
+/** ISO/YYYY-MM-DD → YYYY-MM-DD (para o state interno) */
 function formatarDataInput(dataISO) {
   if (!dataISO) return "";
   try {
-    // Se vier em formato ISO (2000-05-15T00:00:00), pega só a data
-    if (typeof dataISO === "string" && dataISO.includes("T")) {
-      return dataISO.split("T")[0];
-    }
-    // Se vier em formato YYYY-MM-DD, retorna igual
-    if (typeof dataISO === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dataISO)) {
-      return dataISO;
-    }
+    if (typeof dataISO === "string" && dataISO.includes("T")) return dataISO.split("T")[0];
+    if (typeof dataISO === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dataISO)) return dataISO;
     return "";
-  } catch {
-    return "";
-  }
+  } catch { return ""; }
 }
 
-// ✅ HELPER: Validar e preparar dados antes de enviar
+/** DD/MM/AAAA → YYYY-MM-DD */
+function brParaIso(br) {
+  const m = br.replace(/\D/g, "");
+  if (m.length !== 8) return "";
+  const d = m.slice(0, 2), mo = m.slice(2, 4), y = m.slice(4, 8);
+  if (+d < 1 || +d > 31 || +mo < 1 || +mo > 12) return "";
+  return `${y}-${mo}-${d}`;
+}
+
+/** YYYY-MM-DD → DD/MM/AAAA */
+function isoParaBr(iso) {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+  const [y, mo, d] = iso.split("-");
+  return `${d}/${mo}/${y}`;
+}
+
+/** Aplica máscara DD/MM/AAAA enquanto o usuário digita */
+function mascaraData(valor) {
+  const nums = valor.replace(/\D/g, "").slice(0, 8);
+  if (nums.length <= 2) return nums;
+  if (nums.length <= 4) return `${nums.slice(0,2)}/${nums.slice(2)}`;
+  return `${nums.slice(0,2)}/${nums.slice(2,4)}/${nums.slice(4)}`;
+}
+
 function prepararFormParaEnvio(form) {
   const dados = { ...form };
-
-  // Se celulaId for null/undefined/0, remove do payload
-  if (!dados.celulaId) {
-    delete dados.celulaId;
-  }
-
-  // Não enviar campos vazios de data (deixa como null ou remove)
+  if (!dados.celulaId) delete dados.celulaId;
   if (!dados.dataNascimento) dados.dataNascimento = null;
-  if (!dados.dataConversao) dados.dataConversao = null;
-  if (!dados.dataBatismo) dados.dataBatismo = null;
-
-  // Nome é obrigatório
-  if (!dados.nome || dados.nome.trim() === "") {
-    throw new Error("Nome completo é obrigatório");
-  }
-
+  if (!dados.dataConversao)  dados.dataConversao  = null;
+  if (!dados.dataBatismo)    dados.dataBatismo    = null;
+  if (!dados.nome || dados.nome.trim() === "") throw new Error("Nome completo é obrigatório");
   return dados;
 }
 
-/* ??????????????????????????????????????????
-   MODAL
-?????????????????????????????????????????? */
+/* ─── DateInput ──────────────────────────────────────────────────────── */
+/**
+ * Campo de data híbrido:
+ *  • O usuário pode digitar no formato DD/MM/AAAA
+ *  • Ou clicar no ícone de calendário para abrir o seletor nativo
+ *
+ * Props:
+ *   value       – string no formato YYYY-MM-DD (igual ao state do form)
+ *   onChange    – função chamada com YYYY-MM-DD quando muda
+ *   className   – classe CSS extra (ex.: "mf-field")
+ *   isDark      – bool para cor do ícone
+ */
+function DateInput({ value, onChange, className = "", isDark = false, ...rest }) {
+  // Texto visível para o usuário (DD/MM/AAAA)
+  const [texto, setTexto] = useState(isoParaBr(value));
+  const nativeRef = useRef(null);
+
+  // Sincroniza quando o value externo muda (ex: ao abrir edição)
+  useEffect(() => {
+    setTexto(isoParaBr(value));
+  }, [value]);
+
+  const handleTexto = (e) => {
+    const mascarado = mascaraData(e.target.value);
+    setTexto(mascarado);
+    const iso = brParaIso(mascarado);
+    // Emite para o pai: ISO se válido, "" se não
+    onChange(iso || (mascarado === "" ? "" : ""));
+  };
+
+  const handleNative = (e) => {
+    const iso = e.target.value; // YYYY-MM-DD
+    onChange(iso);
+    setTexto(isoParaBr(iso));
+  };
+
+  const abrirCalendario = () => {
+    if (nativeRef.current) {
+      nativeRef.current.showPicker?.();
+      nativeRef.current.click();
+    }
+  };
+
+  return (
+      <div style={{ position: "relative" }}>
+        {/* Campo de texto visível */}
+        <input
+            {...rest}
+            className={className}
+            value={texto}
+            onChange={handleTexto}
+            placeholder="DD/MM/AAAA"
+            inputMode="numeric"
+            maxLength={10}
+            style={{ paddingRight: 38, ...(rest.style || {}) }}
+        />
+
+        {/* Ícone de calendário — abre o native picker */}
+        <button
+            type="button"
+            onClick={abrirCalendario}
+            title="Abrir calendário"
+            style={{
+              position: "absolute", right: 10, top: "50%",
+              transform: "translateY(-50%)",
+              background: "none", border: "none", cursor: "pointer",
+              padding: 2, display: "flex", alignItems: "center", justifyContent: "center",
+              color: isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.4)",
+            }}
+        >
+          <CalendarDays size={16} />
+        </button>
+
+        {/* Input nativo invisível — só para o picker funcionar */}
+        <input
+            ref={nativeRef}
+            type="date"
+            value={value || ""}
+            onChange={handleNative}
+            tabIndex={-1}
+            style={{
+              position: "absolute", opacity: 0, pointerEvents: "none",
+              top: 0, left: 0, width: "100%", height: "100%",
+            }}
+        />
+      </div>
+  );
+}
+
+/* ─── Modal ───────────────────────────────────────────────────────────── */
 function MembroModal({
                        isDark, editandoId, form, setForm,
                        onSalvar, onExcluir, onFechar,
@@ -94,7 +187,6 @@ function MembroModal({
   const f = v => setForm(p => ({ ...p, ...v }));
 
   const css = `
-    @keyframes spin { to { transform: rotate(360deg) } }
     .mf-wrap {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; flex-direction: column;
@@ -156,16 +248,10 @@ function MembroModal({
       background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)"};
       border: 1px solid ${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"};
     }
-    .mf-error {
-      padding: 12px 14px; border-radius: 8px;
-      background: rgba(200,16,46,.1); border: 1px solid rgba(200,16,46,.3);
-      color: ${IEQ.red}; font-family: 'EB Garamond', serif; font-size: 13px;
-    }
   `;
 
   const renderCelulaBadge = () => {
     if (!editandoId) return null;
-
     if (nomeCelula) {
       return (
           <div className="mf-celula-badge">
@@ -178,23 +264,14 @@ function MembroModal({
               <Users size={15} style={{ color: "#C48C00" }} />
             </div>
             <div>
-              <p style={{
-                fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em",
-                color: "#C48C00", margin: "0 0 2px", textTransform: "uppercase",
-              }}>
+              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em", color: "#C48C00", margin: "0 0 2px", textTransform: "uppercase" }}>
                 CÉLULA VINCULADA
               </p>
-              <p style={{
-                fontFamily: "'EB Garamond',serif", fontSize: 15, fontWeight: 600,
-                color: textPrimary, margin: "0 0 2px",
-              }}>
+              <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 15, fontWeight: 600, color: textPrimary, margin: "0 0 2px" }}>
                 {nomeCelula}
               </p>
               {nomeLider && (
-                  <p style={{
-                    fontFamily: "'EB Garamond',serif", fontSize: 12,
-                    color: textSec, margin: 0,
-                  }}>
+                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: textSec, margin: 0 }}>
                     Líder: {nomeLider}
                   </p>
               )}
@@ -202,7 +279,6 @@ function MembroModal({
           </div>
       );
     }
-
     return (
         <div className="mf-celula-badge-empty">
           <div style={{
@@ -214,16 +290,10 @@ function MembroModal({
             <Users size={15} style={{ color: textSec }} />
           </div>
           <div>
-            <p style={{
-              fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em",
-              color: textSec, margin: "0 0 2px", textTransform: "uppercase",
-            }}>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em", color: textSec, margin: "0 0 2px", textTransform: "uppercase" }}>
               CÉLULA VINCULADA
             </p>
-            <p style={{
-              fontFamily: "'EB Garamond',serif", fontSize: 14, fontStyle: "italic",
-              color: textSec, margin: 0,
-            }}>
+            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, fontStyle: "italic", color: textSec, margin: 0 }}>
               Nenhuma célula cadastrada
             </p>
           </div>
@@ -253,10 +323,7 @@ function MembroModal({
               <X size={18} /> VOLTAR
             </button>
             <div style={{ textAlign: "right" }}>
-              <h2 style={{
-                fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700,
-                letterSpacing: ".14em", color: textPrimary, margin: 0,
-              }}>
+              <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: ".14em", color: textPrimary, margin: 0 }}>
                 {editandoId ? "EDITAR PERFIL" : "NOVO CADASTRO"}
               </h2>
               <div style={{
@@ -305,8 +372,13 @@ function MembroModal({
             <div className="mf-grid2">
               <div>
                 <label className="mf-label">NASCIMENTO</label>
-                <input type="date" className="mf-field"
-                       value={form.dataNascimento} onChange={e => f({ dataNascimento: e.target.value })} />
+                {/* ✅ DateInput híbrido: digita OU calendário */}
+                <DateInput
+                    className="mf-field"
+                    isDark={isDark}
+                    value={form.dataNascimento}
+                    onChange={v => f({ dataNascimento: v })}
+                />
               </div>
               <div>
                 <label className="mf-label">ESTADO CIVIL</label>
@@ -337,13 +409,23 @@ function MembroModal({
               <div className="mf-grid2">
                 <div>
                   <label className="mf-label">DATA CONVERSÃO</label>
-                  <input type="date" className="mf-field"
-                         value={form.dataConversao} onChange={e => f({ dataConversao: e.target.value })} />
+                  {/* ✅ DateInput híbrido */}
+                  <DateInput
+                      className="mf-field"
+                      isDark={isDark}
+                      value={form.dataConversao}
+                      onChange={v => f({ dataConversao: v })}
+                  />
                 </div>
                 <div>
                   <label className="mf-label">DATA BATISMO</label>
-                  <input type="date" className="mf-field"
-                         value={form.dataBatismo} onChange={e => f({ dataBatismo: e.target.value })} />
+                  {/* ✅ DateInput híbrido */}
+                  <DateInput
+                      className="mf-field"
+                      isDark={isDark}
+                      value={form.dataBatismo}
+                      onChange={v => f({ dataBatismo: v })}
+                  />
                 </div>
               </div>
             </div>
@@ -367,9 +449,7 @@ function MembroModal({
   return createPortal(content, document.body);
 }
 
-/* ??????????????????????????????????????????
-   COMPONENTE PRINCIPAL
-?????????????????????????????????????????? */
+/* ─── Componente Principal ───────────────────────────────────────────── */
 export default function Membros({ isDark = false }) {
   const [membros,        setMembros]        = useState([]);
   const [loading,        setLoading]        = useState(true);
@@ -378,9 +458,8 @@ export default function Membros({ isDark = false }) {
   const [statusOriginal, setStatusOriginal] = useState(null);
   const [filtro,         setFiltro]         = useState("");
   const [form,           setForm]           = useState(formInicial);
-
-  const [nomeCelula, setNomeCelula] = useState(null);
-  const [nomeLider,  setNomeLider]  = useState(null);
+  const [nomeCelula,     setNomeCelula]     = useState(null);
+  const [nomeLider,      setNomeLider]      = useState(null);
 
   const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
@@ -430,21 +509,14 @@ export default function Membros({ isDark = false }) {
   useEffect(() => { listar(); }, [listar]);
 
   const abrirNovo = () => {
-    setEditandoId(null);
-    setStatusOriginal(null);
-    setNomeCelula(null);
-    setNomeLider(null);
-    setForm(formInicial);
-    setIsModalOpen(true);
+    setEditandoId(null); setStatusOriginal(null);
+    setNomeCelula(null); setNomeLider(null);
+    setForm(formInicial); setIsModalOpen(true);
   };
 
   const abrirEdicao = (m) => {
-    setEditandoId(m.id);
-    setStatusOriginal(m.status);
-    setNomeCelula(m.nomeCelula ?? null);
-    setNomeLider(m.nomeLider ?? null);
-
-    // ✅ CORRIGIDO: Usar formatarDataInput para garantir formato correto
+    setEditandoId(m.id); setStatusOriginal(m.status);
+    setNomeCelula(m.nomeCelula ?? null); setNomeLider(m.nomeLider ?? null);
     setForm({
       nome:           m.nome ?? "",
       email:          m.email ?? "",
@@ -462,73 +534,38 @@ export default function Membros({ isDark = false }) {
   };
 
   const fecharModal = () => {
-    setIsModalOpen(false);
-    setEditandoId(null);
-    setNomeCelula(null);
-    setNomeLider(null);
+    setIsModalOpen(false); setEditandoId(null);
+    setNomeCelula(null); setNomeLider(null);
   };
 
   const salvar = async (e) => {
     e.preventDefault();
-
     try {
-      // ✅ CORRIGIDO: Preparar dados antes de enviar
       const dados = prepararFormParaEnvio(form);
-
       if (editandoId) {
-        // Se status mudou, avisar antes
         if (form.status !== statusOriginal) {
-          if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) {
-            return;
-          }
-          // Chamar endpoint específico de status
-          await api.put(`/membros/${editandoId}/status`, null, {
-            params: { status: form.status }
-          });
+          if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) return;
+          await api.put(`/membros/${editandoId}/status`, null, { params: { status: form.status } });
         }
-
-        // ✅ CORRIGIDO: Enviar dados preparados
-        const response = await api.put(`/membros/${editandoId}`, dados);
-        console.log("✅ Membro atualizado:", response.data);
-
+        await api.put(`/membros/${editandoId}`, dados);
       } else {
-        const response = await api.post("/membros", dados);
-        console.log("✅ Membro criado:", response.data);
+        await api.post("/membros", dados);
       }
-
-      fecharModal();
-      listar();
-
+      fecharModal(); listar();
     } catch (err) {
-      // ✅ CORRIGIDO: Mostrar erro real ao usuário
-      const mensagem = err.response?.data?.message ||
-          err.response?.data?.error ||
-          err.message ||
-          "Erro desconhecido ao salvar";
-
-      console.error("❌ Erro ao salvar:", {
-        status: err.response?.status,
-        data: err.response?.data,
-        message: err.message,
-      });
-
+      const mensagem = err.response?.data?.message || err.response?.data?.error || err.message || "Erro desconhecido ao salvar";
+      console.error("❌ Erro ao salvar:", err);
       alert(`Erro ao salvar:\n\n${mensagem}`);
     }
   };
 
   const excluir = async () => {
     if (!window.confirm("Excluir permanentemente?")) return;
-
     try {
       await api.delete(`/membros/${editandoId}`);
-      console.log("✅ Membro excluído");
-      fecharModal();
-      listar();
+      fecharModal(); listar();
     } catch (err) {
-      const mensagem = err.response?.data?.message ||
-          err.response?.data?.error ||
-          err.message;
-
+      const mensagem = err.response?.data?.message || err.response?.data?.error || err.message;
       console.error("❌ Erro ao excluir:", err);
       alert(`Erro ao excluir:\n\n${mensagem}`);
     }
@@ -554,14 +591,8 @@ export default function Membros({ isDark = false }) {
                 <User size={20} />
               </div>
               <div>
-                <h3 style={{
-                  fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700,
-                  letterSpacing: ".16em", color: textPrimary, margin: 0,
-                }}>MEMBRESIA</h3>
-                <p style={{
-                  fontFamily: "'Cinzel',serif", fontSize: 9,
-                  letterSpacing: ".18em", color: textSec, margin: 0,
-                }}>{membros.length} REGISTROS</p>
+                <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, letterSpacing: ".16em", color: textPrimary, margin: 0 }}>MEMBRESIA</h3>
+                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".18em", color: textSec, margin: 0 }}>{membros.length} REGISTROS</p>
               </div>
             </div>
             <button onClick={abrirNovo} style={{
@@ -575,10 +606,7 @@ export default function Membros({ isDark = false }) {
           </div>
 
           <div style={{ position: "relative" }}>
-            <Search size={15} style={{
-              position: "absolute", left: 14, top: "50%",
-              transform: "translateY(-50%)", color: IEQ.red, opacity: .6,
-            }} />
+            <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: IEQ.red, opacity: .6 }} />
             <input
                 className="ieq-field"
                 style={{ paddingLeft: 42 }}
@@ -592,16 +620,12 @@ export default function Membros({ isDark = false }) {
         {loading ? (
             <div style={{ textAlign: "center", padding: "48px 0" }}>
               <Loader2 size={30} className="spin-icon" style={{ color: IEQ.blue, display: "inline-block" }} />
-              <p style={{
-                fontFamily: "'Cinzel',serif", fontSize: 9,
-                letterSpacing: ".2em", color: textSec, marginTop: 12,
-              }}>CARREGANDO...</p>
+              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".2em", color: textSec, marginTop: 12 }}>CARREGANDO...</p>
             </div>
         ) : (
             <motion.div
                 className="ieq-grid-m"
-                initial="hidden"
-                animate="visible"
+                initial="hidden" animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: .05 } } }}
             >
               {membrosFiltrados.map(m => {
@@ -642,27 +666,18 @@ export default function Membros({ isDark = false }) {
                         <ChevronRight size={15} style={{ color: textSec, flexShrink: 0 }} />
                       </div>
 
-                      <div style={{
-                        borderTop: `1px solid ${border}`, paddingTop: 12,
-                        display: "flex", flexDirection: "column", gap: 6,
-                      }}>
+                      <div style={{ borderTop: `1px solid ${border}`, paddingTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
                         {m.nomeCelula && (
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <Users size={13} style={{ color: "#C48C00", flexShrink: 0 }} />
-                              <span style={{
-                                fontFamily: "'EB Garamond',serif", fontSize: 13, color: "#C48C00",
-                                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                              }}>
+                              <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: "#C48C00", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {m.nomeCelula}
                       </span>
                             </div>
                         )}
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <CreditCard size={13} style={{ color: textSec, flexShrink: 0 }} />
-                          <span style={{
-                            fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec,
-                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                          }}>
+                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {m.cpf || "CPF não informado"}
                     </span>
                         </div>
@@ -689,8 +704,6 @@ export default function Membros({ isDark = false }) {
                   onSalvar={salvar}
                   onExcluir={excluir}
                   onFechar={fecharModal}
-                  estadoCivilOptions={estadoCivilOptions}
-                  statusOptions={statusOptions}
                   nomeCelula={nomeCelula}
                   nomeLider={nomeLider}
               />
