@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import api from "../../services/api.js";
 import { Bell, Cake, CheckCircle2, X, Send } from "lucide-react";
 
@@ -38,6 +39,7 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
     const [semana,   setSemana]   = useState([]);
     const [loading,  setLoading]  = useState(true);
     const [marcados, setMarcados] = useState(new Set());
+    const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
 
     const btnRef   = useRef(null);
     const panelRef = useRef(null);
@@ -58,28 +60,20 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
         return `${fmt(seg)} a ${fmt(dom)}`;
     })();
 
-    useEffect(() => {
-        (async () => {
-            setLoading(true);
-            try {
-                // 🎯 Se tem celulaId, busca apenas dessa célula. Senão, busca geral
-                const endpoint = celulaId
-                    ? `/api/aniversariantes/celula/${celulaId}`
-                    : "/api/aniversariantes";
+    // Calcula posição do botão para ancorar o painel logo abaixo e centralizado
+    const calcPos = () => {
+        if (!btnRef.current) return;
+        const r = btnRef.current.getBoundingClientRect();
+        setPanelPos({
+            top:  r.bottom + 8,
+            left: r.left + r.width / 2,
+        });
+    };
 
-                const [rH, rS] = await Promise.all([
-                    api.get(`${endpoint}/hoje`),
-                    api.get(`${endpoint}/semana`),
-                ]);
-                setHoje(Array.isArray(rH.data) ? rH.data : []);
-                setSemana(Array.isArray(rS.data) ? rS.data : []);
-            } catch (err) {
-                console.error("Erro ao carregar aniversariantes:", err);
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, [celulaId]); // ✅ Recarrega se celulaId mudar
+    const handleOpen = () => {
+        calcPos();
+        setOpen(o => !o);
+    };
 
     useEffect(() => {
         if (!open || isMobile) return;
@@ -96,6 +90,27 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
         document.body.style.overflow = (isMobile && open) ? "hidden" : "";
         return () => { document.body.style.overflow = ""; };
     }, [isMobile, open]);
+
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+            try {
+                const endpoint = celulaId
+                    ? `/api/aniversariantes/celula/${celulaId}`
+                    : "/api/aniversariantes";
+                const [rH, rS] = await Promise.all([
+                    api.get(`${endpoint}/hoje`),
+                    api.get(`${endpoint}/semana`),
+                ]);
+                setHoje(Array.isArray(rH.data) ? rH.data : []);
+                setSemana(Array.isArray(rS.data) ? rS.data : []);
+            } catch (err) {
+                console.error("Erro ao carregar aniversariantes:", err);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [celulaId]);
 
     const marcarComoFeito = (id) =>
         setMarcados(prev => new Set([...prev, id]));
@@ -118,22 +133,10 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
 
     return (
         <>
-            {isMobile && open && (
-                <div
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={() => setOpen(false)}
-                    style={{
-                        position: "fixed", inset: 0,
-                        background: "rgba(10,6,8,.55)",
-                        backdropFilter: "blur(4px)",
-                        zIndex: 998,
-                    }}
-                />
-            )}
-
+            {/* Botão sino */}
             <div ref={btnRef} style={{ position: "relative", display: "inline-flex" }}>
                 <button
-                    onClick={() => setOpen(o => !o)}
+                    onClick={handleOpen}
                     style={{
                         padding: "10px 14px",
                         background: open || temHoje ? "rgba(200,16,46,.14)" : "transparent",
@@ -160,13 +163,47 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                         </span>
                     )}
                 </button>
+            </div>
 
-                {!isMobile && open && (
+            {/* Portal — renderiza direto no body, fora de qualquer contexto de empilhamento */}
+            {open && createPortal(
+                <>
+                    {/* Overlay (mobile e desktop) */}
+                    <div
+                        onClick={() => setOpen(false)}
+                        style={{
+                            position: "fixed", inset: 0,
+                            background: isMobile ? "rgba(10,6,8,.55)" : "transparent",
+                            backdropFilter: isMobile ? "blur(4px)" : "none",
+                            zIndex: 99998,
+                        }}
+                    />
+
+                    {/* Painel */}
                     <div
                         ref={panelRef}
-                        style={{
-                            position: "absolute",
-                            top: 52, left: "50%", transform: "translateX(-50%)",
+                        onClick={(e) => e.stopPropagation()}
+                        style={isMobile ? {
+                            // Bottom sheet no mobile
+                            position: "fixed",
+                            bottom: 0, left: 0, right: 0,
+                            width: "100%",
+                            maxHeight: "85dvh",
+                            borderRadius: "20px 20px 0 0",
+                            background: isDark ? "rgba(17,10,13,.99)" : "#fff",
+                            border: "1px solid rgba(200,16,46,.35)",
+                            borderBottom: "none",
+                            boxShadow: "0 -8px 40px rgba(0,0,0,.3)",
+                            zIndex: 99999,
+                            overflow: "hidden",
+                            display: "flex",
+                            flexDirection: "column",
+                        } : {
+                            // Dropdown desktop — centralizado no botão
+                            position: "fixed",
+                            top:  panelPos.top,
+                            left: panelPos.left,
+                            transform: "translateX(-50%)",
                             width: "min(380px, calc(100vw - 32px))",
                             background: isDark ? "rgba(17,10,13,.98)" : "#fff",
                             border: "1px solid rgba(200,16,46,.35)",
@@ -174,42 +211,24 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                             boxShadow: isDark
                                 ? "0 20px 50px rgba(0,0,0,.8)"
                                 : "0 15px 40px rgba(200,16,46,.2)",
-                            zIndex: 500,
+                            zIndex: 99999,
                             overflow: "hidden",
+                            maxHeight: "calc(100vh - 90px)",
+                            display: "flex",
+                            flexDirection: "column",
                         }}
                     >
+                        {isMobile && (
+                            <div style={{
+                                width: 36, height: 4, borderRadius: 2,
+                                background: "rgba(200,16,46,.3)",
+                                margin: "10px auto 0", flexShrink: 0,
+                            }} />
+                        )}
                         {conteudo}
                     </div>
-                )}
-            </div>
-
-            {isMobile && open && (
-                <div
-                    ref={panelRef}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    style={{
-                        position: "fixed",
-                        bottom: 0, left: 0, right: 0,
-                        width: "100%",
-                        maxHeight: "85dvh",
-                        borderRadius: "20px 20px 0 0",
-                        background: isDark ? "rgba(17,10,13,.99)" : "#fff",
-                        border: "1px solid rgba(200,16,46,.35)",
-                        borderBottom: "none",
-                        boxShadow: "0 -8px 40px rgba(0,0,0,.3)",
-                        zIndex: 999,
-                        overflow: "hidden",
-                        display: "flex",
-                        flexDirection: "column",
-                    }}
-                >
-                    <div style={{
-                        width: 36, height: 4, borderRadius: 2,
-                        background: "rgba(200,16,46,.3)",
-                        margin: "10px auto 0", flexShrink: 0,
-                    }} />
-                    {conteudo}
-                </div>
+                </>,
+                document.body
             )}
         </>
     );
@@ -317,7 +336,6 @@ function PainelConteudo({
                                 transition: "opacity .25s",
                             }}
                         >
-                            {/* Avatar */}
                             <div style={{
                                 width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
                                 background: cor.bg, color: cor.text,
@@ -327,7 +345,6 @@ function PainelConteudo({
                                 {initials(m.nome)}
                             </div>
 
-                            {/* Info */}
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{
                                     margin: 0, fontWeight: 600, fontSize: 14,
@@ -341,7 +358,6 @@ function PainelConteudo({
                                 </p>
                             </div>
 
-                            {/* 🎁 <a> nativo em vez de window.open – não branqueia no mobile */}
                             {marcado ? (
                                 <div style={{
                                     width: 40, height: 40, borderRadius: 10, flexShrink: 0,

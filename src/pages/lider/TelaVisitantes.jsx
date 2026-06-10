@@ -6,52 +6,266 @@ import {
   Flame
 } from "lucide-react";
 
-/* Cores Oficiais IEQ */
-const IEQ = {
-  red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
-  yellow: "#FDB813", yellowDark: "#C48C00",
-  blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
-  white: "#FFFFFF", offWhite: "#F5F0E8",
-  dark: "#0A0608", darkCard: "#110A0D",
+/* ─── Design tokens AURA ────────────────────────────────────────────────── */
+const AURA = {
+  gold:      "#C9A96E",
+  goldLight: "#E8D5A3",
+  dark:      "#0A0A0F",
+  red:       "#C8102E",
+  redDark:   "#9B0B1E",
+  blue:      "#003DA5",
+  blueDark:  "#002470",
+  yellow:    "#FDB813",
+  yellowDark:"#C48C00",
 };
 
-function QuadrangularCross({ size = 28 }) {
-  return (
-      <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
-        <defs>
-          <linearGradient id="gVV" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={IEQ.redLight} /><stop offset="100%" stopColor={IEQ.redDark} />
-          </linearGradient>
-          <linearGradient id="gHV" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={IEQ.blueDark} /><stop offset="50%" stopColor={IEQ.blueLight} /><stop offset="100%" stopColor={IEQ.blueDark} />
-          </linearGradient>
-          <filter id="glowV"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <rect x="38" y="4"  width="24" height="92" rx="3" fill="url(#gVV)" filter="url(#glowV)" />
-        <rect x="4"  y="38" width="92" height="24" rx="3" fill="url(#gHV)" filter="url(#glowV)" />
-        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowV)" />
-        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
-      </svg>
-  );
+function theme(isDark) {
+  return {
+    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "rgba(255,255,255,.97)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+    borderInput: isDark ? "rgba(201,169,110,.18)"  : "rgba(201,169,110,.28)",
+    text:        isDark ? "#F5F0E8"                : "#1A1008",
+    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
+    textMuted:   isDark ? "#6B6658"                : "#9A9080",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+  };
 }
 
 const listaOrigens = [
-  { id: "CONVITE",       label: "Convite",      emoji: "🤝" },
-  { id: "CASA_DE_PAZ",   label: "Casa de Paz",  emoji: "🏠" },
-  { id: "EVENTO",        label: "Evento",       emoji: "⛺" },
-  { id: "MISSAO_70",     label: "Missão 70",    emoji: "👥" },
-  { id: "REDES_SOCIAIS", label: "Social",       emoji: "📱" },
-  { id: "CELULA",        label: "Célula",       emoji: "✝️" },
+  { id:"CONVITE",       label:"Convite",     emoji:"🤝" },
+  { id:"CASA_DE_PAZ",   label:"Casa de Paz", emoji:"🏠" },
+  { id:"EVENTO",        label:"Evento",      emoji:"⛺" },
+  { id:"MISSAO_70",     label:"Missão 70",   emoji:"👥" },
+  { id:"REDES_SOCIAIS", label:"Social",      emoji:"📱" },
+  { id:"CELULA",        label:"Célula",      emoji:"✝️" },
 ];
 
 const textoDecisao = {
-  NENHUMA: "Nenhuma decisão",
+  NENHUMA:       "Nenhuma decisão",
   ACEITOU_JESUS: "Aceitou a Jesus 🙌",
-  RECONCILIOU: "Reconciliou 🤝",
-  BATISMO_AGUAS: "Decidiu pelo Batismo 💧"
+  RECONCILIOU:   "Reconciliou 🤝",
+  BATISMO_AGUAS: "Decidiu pelo Batismo 💧",
 };
 
+function makeStyles(t, isDark) {
+  return `
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+    * { box-sizing: border-box; }
+
+    @keyframes tv-spin   { to { transform: rotate(360deg); } }
+    @keyframes tv-fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes tv-stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+    @keyframes tv-pulse  { 0%,100%{opacity:.35} 50%{opacity:.08} }
+    @keyframes tv-slideUp{ from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
+
+    .tv-root {
+      font-family: 'Inter', sans-serif;
+      background: ${t.bg};
+      color: ${t.text};
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: 48px;
+    }
+    .tv-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%);
+    }
+    .tv-stripe {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(-55deg,
+        ${isDark?"rgba(201,169,110,.03)":"rgba(201,169,110,.04)"} 0 10px, transparent 10px 20px);
+      background-size: 60px 60px;
+      animation: tv-stripe 10s linear infinite;
+    }
+    .tv-content {
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto; padding: 0 16px;
+    }
+
+    /* ── Card ── */
+    .tv-card {
+      background: ${t.bgEl};
+      border: 1px solid ${t.border};
+      border-radius: 20px;
+      backdrop-filter: blur(24px);
+      position: relative;
+    }
+    .tv-card::before {
+      content: '';
+      position: absolute; top:0; left:0; right:0; height:1px;
+      background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+      border-radius: 20px 20px 0 0;
+    }
+
+    /* ── Visitor card ── */
+    .tv-visitor-card {
+      background: ${t.bgEl};
+      border: 1px solid ${t.border};
+      border-radius: 20px; padding: 22px;
+      transition: all .35s cubic-bezier(.4,0,.2,1);
+      animation: tv-fadeIn .5s ease both;
+      position: relative;
+    }
+    .tv-visitor-card::before {
+      content: '';
+      position: absolute; top:0; left:0; right:0; height:1px;
+      background: linear-gradient(90deg, transparent, rgba(201,169,110,.15), transparent);
+      border-radius: 20px 20px 0 0;
+    }
+    .tv-visitor-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(201,169,110,.45);
+      box-shadow: 0 16px 40px rgba(0,0,0,${isDark?".4":".1"});
+    }
+
+    /* ── Inputs ── */
+    .tv-input {
+      width: 100%;
+      background: ${t.bgInput};
+      border: 1px solid ${t.borderInput};
+      color: ${t.text};
+      padding: 12px 16px;
+      border-radius: 12px; outline: none;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
+      transition: all .25s;
+      color-scheme: ${isDark?"dark":"light"};
+    }
+    .tv-input:focus { border-color: ${AURA.gold}; box-shadow: 0 0 0 3px rgba(201,169,110,.1); }
+    .tv-input::placeholder { color: ${t.placeholder}; }
+    .tv-input option { background: ${isDark?"#0A0A0F":"#fff"}; color: ${t.text}; }
+
+    .tv-label {
+      display: block; margin-bottom: 6px;
+      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: ${AURA.gold};
+    }
+
+    /* ── Botões ── */
+    .tv-btn-primary {
+      display: flex; align-items: center; gap: 7px;
+      padding: 11px 20px; border-radius: 100px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      transition: all .3s; box-shadow: 0 6px 22px rgba(200,16,46,.22);
+    }
+    .tv-btn-primary:hover:not(:disabled) { transform: translateY(-2px); opacity: .9; }
+    .tv-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    .tv-btn-danger {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      width: 100%; padding: 13px; border-radius: 100px; cursor: pointer;
+      background: transparent; border: 1px solid rgba(200,16,46,.3);
+      color: ${AURA.red}; font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      transition: all .25s;
+    }
+    .tv-btn-danger:hover:not(:disabled) { background: rgba(200,16,46,.08); border-color: ${AURA.red}; }
+    .tv-btn-danger:disabled { opacity: .5; cursor: not-allowed; }
+
+    .tv-btn-danger-confirm {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 13px; border-radius: 100px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #7A0B1A, ${AURA.redDark});
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      transition: all .25s;
+    }
+    .tv-btn-danger-confirm:hover:not(:disabled) { filter: brightness(1.15); }
+    .tv-btn-danger-confirm:disabled { opacity: .5; cursor: not-allowed; }
+
+    .tv-btn-cancel {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 13px; border-radius: 100px; cursor: pointer;
+      background: ${isDark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)"};
+      border: 1px solid ${t.border};
+      color: ${t.textSec}; font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      transition: all .25s;
+    }
+    .tv-btn-cancel:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+
+    /* ── Modal ── */
+    .tv-modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+      background: rgba(10,10,15,.88); backdrop-filter: blur(8px);
+    }
+    .tv-modal-box {
+      width: 100%; max-width: 520px; max-height: 90vh;
+      overflow-y: auto; position: relative;
+      background: ${t.bgEl}; border: 1px solid ${t.border};
+      border-radius: 24px; padding: 32px 28px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.4);
+    }
+    .tv-modal-box::before {
+      content: '';
+      position: absolute; top:0; left:0; right:0; height:1px;
+      background: linear-gradient(90deg, transparent, rgba(201,169,110,.25), transparent);
+      border-radius: 24px 24px 0 0;
+    }
+
+    /* ── Confirm box ── */
+    .tv-confirm-box {
+      background: ${isDark?"rgba(155,11,30,.1)":"rgba(200,16,46,.05)"};
+      border: 1px solid rgba(200,16,46,.25);
+      border-radius: 16px; padding: 18px;
+    }
+
+    /* ── Origin buttons ── */
+    .tv-origin-btn {
+      padding: 8px 14px; border-radius: 100px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .1em;
+      border: 1px solid; transition: all .2s; text-transform: uppercase;
+    }
+
+    /* ── Modal actions (sticky on mobile) ── */
+    .tv-modal-actions {
+      position: sticky; bottom: 0;
+      background: ${t.bgEl};
+      padding: 14px 0 0; margin-top: 4px;
+    }
+
+    /* ── Divider ── */
+    .tv-divider { height:1px; background: linear-gradient(90deg,transparent,${t.border},transparent); margin: 8px 0; }
+
+    /* ── Pulse ring ── */
+    .tv-pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(201,169,110,.25); animation: tv-pulse 3s ease-in-out infinite; }
+
+    /* ── Grid cards ── */
+    .tv-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .tv-modal-overlay { align-items: flex-end; padding: 0; }
+      .tv-modal-box {
+        max-width: 100%; width: 100%; height: 95vh; max-height: 95vh;
+        border-radius: 24px 24px 0 0; padding: 28px 20px;
+        display: flex; flex-direction: column;
+        animation: tv-slideUp .3s cubic-bezier(.1,.76,.55,.94);
+      }
+      .tv-modal-box form { overflow-y: auto; flex: 1; padding-right: 4px; }
+      .tv-two-col { grid-template-columns: 1fr !important; }
+      .tv-page-header { flex-direction: column !important; align-items: flex-start !important; }
+      .tv-page-header .tv-btn-primary { width: 100% !important; justify-content: center !important; }
+      .tv-cards-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 480px) {
+      .tv-modal-actions { position: sticky; bottom: 0; padding: 12px 0 0; }
+    }
+  `;
+}
+
 export default function TelaVisitantes({ celulaId, isDark = false }) {
+  const t = theme(isDark);
   const [loading,              setLoading]              = useState(false);
   const [visitantes,           setVisitantes]           = useState([]);
   const [busca,                setBusca]                = useState("");
@@ -62,14 +276,14 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
   const [deletando,            setDeletando]            = useState(false);
 
   const estadoInicial = {
-    nome: "", telefone: "", email: "",
+    nome:"", telefone:"", email:"",
     dataPrimeiraVisita: new Date().toISOString().split("T")[0],
-    origem: "CONVITE", responsavelAcompanhamento: "", decisaoEspiritual: "NENHUMA", ativo: true,
+    origem:"CONVITE", responsavelAcompanhamento:"", decisaoEspiritual:"NENHUMA", ativo:true,
   };
   const [formVisitante, setFormVisitante] = useState(estadoInicial);
 
   const getHeaders = () => {
-    const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+    const token = localStorage.getItem("token")?.replace(/"/g,"").trim();
     return { Authorization: `Bearer ${token}` };
   };
 
@@ -79,20 +293,11 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
       setLoading(true);
       const res = await api.get(`/visitantes/celula/${celulaId}/ativos`, { headers: getHeaders() });
       setVisitantes(res.data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   }, [celulaId]);
 
-  useEffect(() => {
-    carregarVisitantes();
-  }, [carregarVisitantes]);
-
-  const handleMudarOrigem = (origemId) => {
-    setFormVisitante({ ...formVisitante, origem: origemId });
-  };
+  useEffect(() => { carregarVisitantes(); }, [carregarVisitantes]);
 
   const handleSalvar = async (e) => {
     e.preventDefault();
@@ -104,13 +309,9 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
       } else {
         await api.post("/visitantes", payload, { headers: getHeaders() });
       }
-      fecharModal();
-      carregarVisitantes();
-    } catch {
-      alert("Erro ao salvar dados.");
-    } finally {
-      setLoading(false);
-    }
+      fecharModal(); carregarVisitantes();
+    } catch { alert("Erro ao salvar dados."); }
+    finally { setLoading(false); }
   };
 
   const handleDeletar = async () => {
@@ -118,330 +319,142 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
     try {
       setDeletando(true);
       await api.delete(`/visitantes/${visitanteSelecionado.id}`, { headers: getHeaders() });
-      fecharModal();
-      carregarVisitantes();
-    } catch {
-      alert("Erro ao remover visitante.");
-    } finally {
-      setDeletando(false);
-    }
+      fecharModal(); carregarVisitantes();
+    } catch { alert("Erro ao remover visitante."); }
+    finally { setDeletando(false); }
   };
 
   const abrirModal = (v = null) => {
     setConfirmandoDeletar(false);
-    if (v) {
-      setEditando(true);
-      setVisitanteSelecionado(v);
-      setFormVisitante({ ...v, decisaoEspiritual: v.decisaoEspiritual || "NENHUMA" });
-    } else {
-      setEditando(false);
-      setFormVisitante(estadoInicial);
-    }
+    if (v) { setEditando(true); setVisitanteSelecionado(v); setFormVisitante({ ...v, decisaoEspiritual: v.decisaoEspiritual || "NENHUMA" }); }
+    else   { setEditando(false); setFormVisitante(estadoInicial); }
     setModalAberto(true);
   };
 
-  const fecharModal = () => {
-    setModalAberto(false);
-    setConfirmandoDeletar(false);
-    setFormVisitante(estadoInicial);
-  };
-
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-
-  const selectOptionBg    = isDark ? "#1A0A0D" : "#ffffff";
-  const selectOptionColor = isDark ? IEQ.offWhite : "#1A0A0D";
-
-  const globalStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-    * { box-sizing:border-box; }
-    @keyframes stripe  { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-    @keyframes pulse   { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
-    @keyframes spin    { to{transform:rotate(360deg)} }
-    @keyframes fadeIn  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes slideUp { from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
-    @keyframes shakeIn { 0%{opacity:0;transform:scale(.95)} 60%{transform:scale(1.02)} 100%{opacity:1;transform:scale(1)} }
-    
-    .ieq-bg-stripe {
-      position:fixed; inset:0; pointer-events:none; z-index:0;
-      background:repeating-linear-gradient(-55deg,
-        ${isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.05)"} 0 10px,transparent 10px 20px,
-        ${isDark ? "rgba(253,184,19,.03)" : "rgba(253,184,19,.04)"} 20px 30px,transparent 30px 40px);
-      background-size:60px 60px; animation:stripe 8s linear infinite;
-    }
-    .ieq-card {
-      background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
-      border-radius:14px; backdrop-filter:blur(24px);
-    }
-    .ieq-visitor-card {
-      background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"};
-      border-radius:12px; padding:22px; transition:all .3s; animation:fadeIn .5s ease both;
-    }
-    .ieq-visitor-card:hover { transform:translateY(-5px); border-color:${IEQ.red}; box-shadow:0 16px 40px rgba(200,16,46,.12); }
-    .ieq-input {
-      width:100%;
-      background:${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"};
-      color:${tp}; padding:12px 16px; border-radius:8px; outline:none;
-      font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
-      color-scheme:${isDark ? "dark" : "light"};
-    }
-    .ieq-input:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
-    .ieq-input::placeholder { color:${ts}; }
-    .ieq-input option {
-      background:${selectOptionBg};
-      color:${selectOptionColor};
-    }
-    .ieq-label {
-      display:block; margin-bottom:6px;
-      font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.18em; color:${IEQ.red};
-    }
-    .ieq-btn-primary {
-      background:linear-gradient(135deg,${IEQ.redDark},${IEQ.red}); color:#fff;
-      border:none; border-radius:8px; padding:13px 24px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
-      display:flex; align-items:center; gap:8px; transition:all .25s;
-    }
-    .ieq-btn-primary:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
-    .ieq-btn-primary:disabled { opacity:.5; cursor:not-allowed; }
-    .ieq-btn-primary.full { width:100%; justify-content:center; }
-    
-    .ieq-btn-danger {
-      background:transparent; border:1px solid rgba(200,16,46,.35); color:${IEQ.red};
-      border-radius:8px; padding:13px 24px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
-      display:flex; align-items:center; gap:8px; transition:all .25s; width:100%; justify-content:center;
-    }
-    .ieq-btn-danger:hover:not(:disabled) { background:rgba(200,16,46,.08); border-color:${IEQ.red}; transform:translateY(-1px); }
-    .ieq-btn-danger:disabled { opacity:.5; cursor:not-allowed; }
-    
-    .ieq-btn-danger-confirm {
-      background:linear-gradient(135deg,#7A0B1A,${IEQ.redDark}); color:#fff;
-      border:none; border-radius:8px; padding:13px 24px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
-      display:flex; align-items:center; gap:8px; transition:all .25s; flex:1; justify-content:center;
-    }
-    .ieq-btn-danger-confirm:hover:not(:disabled) { filter:brightness(1.15); }
-    .ieq-btn-danger-confirm:disabled { opacity:.5; cursor:not-allowed; }
-    
-    .ieq-btn-cancel {
-      background:${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.05)"};
-      border:1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}; color:${ts};
-      border-radius:8px; padding:13px 24px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.18em;
-      display:flex; align-items:center; gap:8px; transition:all .25s; flex:1; justify-content:center;
-    }
-    .ieq-btn-cancel:hover { background:${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.08)"}; }
-    
-    .ieq-confirm-box {
-      background:${isDark ? "rgba(139,11,31,.12)" : "rgba(200,16,46,.06)"};
-      border:1px solid rgba(200,16,46,.3); border-radius:10px;
-      padding:20px; animation:shakeIn .3s ease both;
-    }
-    .ieq-origin-btn {
-      padding:8px 14px; border-radius:8px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.12em;
-      border:1px solid; transition:all .2s;
-    }
-    .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
-    .spin-icon  { animation:spin 1s linear infinite; }
-    .divider    { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); margin:6px 0; }
-
-    /* MODAL RESPONSIVO */
-
-    /* Desktop: modal centralizado flutuante */
-    .ieq-modal-overlay {
-      position:fixed; inset:0; z-index:1000;
-      display:flex; align-items:center; justify-content:center;
-      padding:16px;
-      background:rgba(10,6,8,.85); backdrop-filter:blur(16px);
-    }
-    .ieq-modal-box {
-      width:100%; max-width:520px;
-      padding:40px 36px;
-      max-height:90vh; overflow-y:auto;
-      position:relative;
-      animation:fadeIn .3s ease;
-      border-radius:14px;
-    }
-
-    /* Mobile (max-width: 600px): Modal Ocupando 100% da tela */
-    @media (max-width:600px) {
-      .ieq-modal-overlay {
-        align-items: flex-start;
-        padding: 0;
-      }
-      .ieq-modal-box {
-        max-width: 100%;
-        width: 100%;
-        height: 100vh;
-        max-height: 100vh;
-        padding: 24px 20px;
-        border-radius: 0; /* Remove bordas arredondadas para preencher totalmente */
-        display: flex;
-        flex-direction: column;
-        animation: slideUp 0.3s cubic-bezier(0.1, 0.76, 0.55, 0.94);
-      }
-      /* Remove a barra visual do topo (alça de arrastar) já que agora é tela cheia */
-      .ieq-modal-box::before {
-        display: none;
-      }
-      /* Faz o formulário interno rolar caso falte espaço vertical */
-      .ieq-modal-box form {
-        overflow-y: auto;
-        flex: 1;
-        padding-right: 4px;
-      }
-      /* Campos lado-a-lado viram coluna única no mobile */
-      .ieq-two-col {
-        grid-template-columns:1fr !important;
-      }
-      /* Header do modal compacto */
-      .ieq-modal-header h2 {
-        font-size:12px !important;
-      }
-      /* Botões de ação fixados no rodapé */
-      .ieq-modal-actions {
-        position: sticky;
-        bottom: 0;
-        background: ${isDark ? "#110A0D" : "#ffffff"};
-        padding: 14px 0 0;
-        margin-top: auto; /* Força o rodapé a ficar na parte de baixo */
-      }
-    }
-
-    /* Header da página responsivo */
-    @media (max-width:600px) {
-      .ieq-page-header {
-        padding:20px 18px !important;
-        flex-direction:column !important;
-        align-items:flex-start !important;
-        gap:14px !important;
-      }
-      .ieq-page-header h1 {
-        font-size:16px !important;
-      }
-      .ieq-page-header .ieq-btn-primary {
-        width:100% !important;
-        justify-content:center !important;
-      }
-    }
-  `;
+  const fecharModal = () => { setModalAberto(false); setConfirmandoDeletar(false); setFormVisitante(estadoInicial); };
 
   const filtrados = visitantes.filter(v => v.nome.toLowerCase().includes(busca.toLowerCase()));
 
   return (
-      <div style={{ minHeight: "100vh", position: "relative", paddingBottom: 48 }}>
-        <style>{globalStyles}</style>
-        <div className="ieq-bg-stripe" />
+      <div className="tv-root">
+        <style>{makeStyles(t, isDark)}</style>
+        <div className="tv-glow" /><div className="tv-stripe" />
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "0 16px" }}>
+        <div className="tv-content" style={{ paddingTop:20 }}>
 
-          {/* Header */}
-          <div className="ieq-card ieq-page-header" style={{ padding: "28px 36px", marginBottom: 24, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                <div className="pulse-ring" style={{ width: 64, height: 64 }} />
-                <div style={{ width: 48, height: 48, borderRadius: "50%", background: isDark ? "#1A0A0D" : "#fff", border: "1px solid rgba(200,16,46,.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <QuadrangularCross size={28} />
+          {/* ── Header ── */}
+          <div className="tv-card tv-page-header" style={{ padding:"24px 28px", marginBottom:24, display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:16 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:18, minWidth:0 }}>
+              <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <div className="tv-pulse-ring" style={{ width:64, height:64 }} />
+                <div style={{ width:48, height:48, borderRadius:"50%",
+                  background: isDark?"rgba(18,18,26,.99)":"#fff",
+                  border:"1.5px solid rgba(201,169,110,.3)",
+                  display:"flex", alignItems:"center", justifyContent:"center", position:"relative", zIndex:1 }}>
+                  <img src="/quadrangular.png" alt="IEQ" style={{ width:32, height:32, borderRadius:"50%", objectFit:"cover" }} />
                 </div>
               </div>
-              <div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 99, background: "rgba(200,16,46,.1)", border: "1px solid rgba(200,16,46,.2)", marginBottom: 8 }}>
-                  <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: IEQ.red }}>GESTÃO DE NOVOS</span>
-                </div>
-                <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, letterSpacing: ".14em", color: tp, margin: 0 }}>VISITANTES</h1>
-                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: ts, margin: "2px 0 0" }}>Acompanhamento e Consolidação</p>
+              <div style={{ minWidth:0 }}>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:6,
+                padding:"4px 12px", borderRadius:100, marginBottom:8,
+                background:"rgba(201,169,110,.08)", border:"1px solid rgba(201,169,110,.2)",
+                fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:600, letterSpacing:".14em", color:AURA.gold, textTransform:"uppercase" }}>
+                Gestão de novos
+              </span>
+                <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(18px,5vw,24px)", fontWeight:600, color:t.text, margin:0 }}>Visitantes</h1>
+                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:300, color:t.textSec, margin:"2px 0 0" }}>Acompanhamento e consolidação</p>
               </div>
             </div>
-            <button className="ieq-btn-primary" onClick={() => abrirModal()}>
-              <Plus size={16} strokeWidth={3} /> NOVO VISITANTE
+            <button className="tv-btn-primary" onClick={() => abrirModal()}>
+              <Plus size={16} strokeWidth={3} /> Novo visitante
             </button>
           </div>
 
-          {/* Busca */}
-          <div style={{ position: "relative", marginBottom: 24 }}>
-            <Search size={18} style={{ position: "absolute", left: 18, top: "50%", transform: "translateY(-50%)", color: IEQ.red, opacity: .6 }} />
-            <input className="ieq-input" style={{ paddingLeft: 48, borderRadius: 10, fontSize: 15 }}
-                   placeholder="Pesquisar por nome do visitante..."
+          {/* ── Busca ── */}
+          <div style={{ position:"relative", marginBottom:24 }}>
+            <Search size={18} style={{ position:"absolute", left:16, top:"50%", transform:"translateY(-50%)", color:AURA.gold, opacity:.6, pointerEvents:"none" }} />
+            <input className="tv-input" style={{ paddingLeft:48, borderRadius:14 }}
+                   placeholder="Pesquisar por nome..."
                    value={busca} onChange={e => setBusca(e.target.value)} />
           </div>
 
-          {/* Grid de Conteúdo */}
+          {/* ── Grid ── */}
           {loading && visitantes.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "60px 0", color: ts }}>
-                <Loader2 size={40} style={{ color: IEQ.red, animation: "spin 1s linear infinite", margin: "0 auto 12px" }} />
-                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".2em" }}>CARREGANDO VISITANTES...</p>
+              <div style={{ textAlign:"center", padding:"60px 0", color:t.textMuted }}>
+                <Loader2 size={36} style={{ color:AURA.gold, animation:"tv-spin 1s linear infinite", margin:"0 auto 12px" }} />
+                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:10, fontWeight:600, letterSpacing:".2em", textTransform:"uppercase" }}>Carregando visitantes...</p>
+              </div>
+          ) : filtrados.length === 0 ? (
+              <div style={{ textAlign:"center", padding:"60px 0" }}>
+                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:300, fontStyle:"italic", color:t.textMuted }}>Nenhum visitante encontrado.</p>
               </div>
           ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 16 }}>
+              <div className="tv-cards-grid">
                 {filtrados.map((v) => (
-                    <div key={v.id} className="ieq-visitor-card">
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
-                        <div style={{
-                          width: 48, height: 48, borderRadius: 10,
-                          background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          color: "#fff", fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 20,
-                        }}>{v.nome.charAt(0)}</div>
-                        <div style={{ textAlign: "right" }}>
-                          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".12em", color: IEQ.red, background: "rgba(200,16,46,.1)", padding: "3px 10px", borderRadius: 4 }}>
-                            {v.origem?.replace("_", " ")}
-                          </span>
-                          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".1em", color: ts, marginTop: 6 }}>
+                    <div key={v.id} className="tv-visitor-card">
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
+                        <div style={{ width:46, height:46, borderRadius:14,
+                          background:`linear-gradient(135deg,${AURA.redDark},${AURA.blue})`,
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          color:"#fff", fontFamily:"'Playfair Display',serif", fontWeight:600, fontSize:20 }}>
+                          {v.nome.charAt(0)}
+                        </div>
+                        <div style={{ textAlign:"right" }}>
+                    <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:600, letterSpacing:".1em", textTransform:"uppercase",
+                      color:AURA.gold, background:"rgba(201,169,110,.1)", border:"1px solid rgba(201,169,110,.2)",
+                      padding:"3px 10px", borderRadius:100 }}>
+                      {v.origem?.replace("_"," ")}
+                    </span>
+                          <p style={{ fontFamily:"'Inter',sans-serif", fontSize:10, fontWeight:500, color:t.textMuted, marginTop:6 }}>
                             {new Date(v.dataPrimeiraVisita).toLocaleDateString("pt-BR")}
                           </p>
                         </div>
                       </div>
 
-                      <h3 style={{ fontFamily: "'EB Garamond',serif", fontSize: 18, fontWeight: 600, color: tp, margin: "0 0 12px" }}>{v.nome}</h3>
+                      <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:17, fontWeight:500, color:t.text, margin:"0 0 14px" }}>{v.nome}</h3>
 
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <div style={{ width: 30, height: 30, borderRadius: 6, background: "rgba(200,16,46,.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Phone size={13} style={{ color: IEQ.red }} />
+                      <div style={{ display:"flex", flexDirection:"column", gap:9, marginBottom:16 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                          <div style={{ width:32, height:32, borderRadius:9, background:"rgba(201,169,110,.08)", border:"1px solid rgba(201,169,110,.15)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                            <Phone size={13} style={{ color:AURA.gold }} />
                           </div>
-                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts }}>{v.telefone}</span>
+                          <span style={{ fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:300, color:t.textSec }}>{v.telefone}</span>
                         </div>
                         {v.email && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <div style={{ width: 30, height: 30, borderRadius: 6, background: "rgba(200,16,46,.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <Mail size={13} style={{ color: IEQ.red }} />
+                            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                              <div style={{ width:32, height:32, borderRadius:9, background:"rgba(201,169,110,.08)", border:"1px solid rgba(201,169,110,.15)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                                <Mail size={13} style={{ color:AURA.gold }} />
                               </div>
-                              <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.email}</span>
+                              <span style={{ fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:300, color:t.textSec, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{v.email}</span>
                             </div>
                         )}
-
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-                          <div style={{ width: 30, height: 30, borderRadius: 6, background: "rgba(253,184,19,.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Flame size={13} style={{ color: IEQ.yellowDark }} />
+                        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                          <div style={{ width:32, height:32, borderRadius:9, background:"rgba(253,184,19,.08)", border:"1px solid rgba(253,184,19,.2)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                            <Flame size={13} style={{ color:AURA.yellowDark }} />
                           </div>
-                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: tp, fontWeight: v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA" ? "600" : "normal" }}>
-                            {textoDecisao[v.decisaoEspiritual] || textoDecisao["NENHUMA"]}
-                          </span>
+                          <span style={{ fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight: v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA" ? 500 : 300, color:t.text }}>
+                      {textoDecisao[v.decisaoEspiritual] || textoDecisao["NENHUMA"]}
+                    </span>
                         </div>
                       </div>
 
-                      <div className="divider" />
+                      <div className="tv-divider" />
 
-                      {/* Card Footer */}
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 10 }}>
-                        <div>
-                          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".12em", color: ts, margin: "0 0 2px" }}>QUEM VAI CONSOLIDAR</p>
-                          <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: IEQ.red, fontWeight: 600, margin: 0 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:12 }}>
+                        <div style={{ minWidth:0, flex:1 }}>
+                          <p style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:600, letterSpacing:".1em", textTransform:"uppercase", color:t.textMuted, margin:"0 0 2px" }}>Consolidador</p>
+                          <p style={{ fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:500, color:AURA.gold, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                             {v.responsavelAcompanhamento || "Pendente"}
                           </p>
                         </div>
                         <button onClick={() => abrirModal(v)} style={{
-                          width: 36, height: 36, borderRadius: 8,
-                          background: "rgba(200,16,46,.08)", border: `1px solid rgba(200,16,46,.2)`,
-                          color: IEQ.red, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                          transition: "all .2s",
+                          flexShrink:0, width:36, height:36, borderRadius:10, marginLeft:12,
+                          background:"rgba(201,169,110,.08)", border:"1px solid rgba(201,169,110,.2)",
+                          color:AURA.gold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
+                          transition:"all .2s",
                         }}
-                                onMouseEnter={e => { e.currentTarget.style.background = IEQ.red; e.currentTarget.style.color = "#fff"; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(200,16,46,.08)"; e.currentTarget.style.color = IEQ.red; }}>
+                                onMouseEnter={e => { e.currentTarget.style.background=AURA.gold; e.currentTarget.style.color="#0A0A0F"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background="rgba(201,169,110,.08)"; e.currentTarget.style.color=AURA.gold; }}>
                           <ExternalLink size={16} />
                         </button>
                       </div>
@@ -451,87 +464,75 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
           )}
         </div>
 
-        {/* Modal de Cadastro / Edição */}
+        {/* ── Modal ── */}
         {modalAberto && (
-            <div className="ieq-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) fecharModal(); }}>
-              <div className="ieq-card ieq-modal-box">
+            <div className="tv-modal-overlay" onClick={e => { if (e.target===e.currentTarget) fecharModal(); }}>
+              <div className="tv-modal-box">
 
-                {/* Cabeçalho do modal */}
-                <div className="ieq-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+                {/* Header do modal */}
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:20 }}>
                   <div>
-                    <QuadrangularCross size={28} />
-                    <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 14, fontWeight: 700, letterSpacing: ".15em", color: tp, margin: "12px 0 4px" }}>
-                      {editando ? "EDITAR PERFIL" : "CADASTRAR VISITA"}
-                    </h2>
-                    <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: ts, margin: 0 }}>Insira os dados para o discipulado.</p>
+                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+                      <div style={{ width:36, height:36, borderRadius:10, background:"rgba(201,169,110,.1)", border:"1px solid rgba(201,169,110,.2)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                        <UserCheck size={18} style={{ color:AURA.gold }} />
+                      </div>
+                      <div>
+                        <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:500, color:t.text, margin:0 }}>
+                          {editando ? "Editar visitante" : "Novo visitante"}
+                        </h2>
+                        <p style={{ fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:300, color:t.textSec, margin:0 }}>Insira os dados para discipulado.</p>
+                      </div>
+                    </div>
                   </div>
-                  <button onClick={fecharModal} style={{ background: "none", border: "none", cursor: "pointer", color: ts, padding: 6, borderRadius: 6 }}>
+                  <button onClick={fecharModal} style={{ background:"none", border:"none", cursor:"pointer", color:t.textMuted, padding:6, borderRadius:8, display:"flex" }}>
                     <X size={22} />
                   </button>
                 </div>
 
-                <div className="divider" style={{ marginBottom: 20 }} />
+                <div className="tv-divider" style={{ marginBottom:20 }} />
 
-                <form onSubmit={handleSalvar} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <form onSubmit={handleSalvar} style={{ display:"flex", flexDirection:"column", gap:14 }}>
                   <div>
-                    <label className="ieq-label">NOME COMPLETO</label>
-                    <input className="ieq-input" required
-                           value={formVisitante.nome}
-                           onChange={e => setFormVisitante({ ...formVisitante, nome: e.target.value })}
+                    <label className="tv-label">Nome completo</label>
+                    <input className="tv-input" required value={formVisitante.nome}
+                           onChange={e => setFormVisitante({...formVisitante, nome:e.target.value})}
                            placeholder="Nome completo" />
                   </div>
 
-                  {/* Grid 2 colunas */}
-                  <div className="ieq-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                  <div className="tv-two-col" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
                     <div>
-                      <label className="ieq-label">WHATSAPP</label>
-                      <input className="ieq-input"
-                             value={formVisitante.telefone}
-                             onChange={e => setFormVisitante({ ...formVisitante, telefone: e.target.value })}
+                      <label className="tv-label">WhatsApp</label>
+                      <input className="tv-input" value={formVisitante.telefone}
+                             onChange={e => setFormVisitante({...formVisitante, telefone:e.target.value})}
                              placeholder="(00) 00000-0000" />
                     </div>
                     <div>
-                      <label className="ieq-label">DATA DA VISITA</label>
-                      <input className="ieq-input" type="date"
-                             style={{ colorScheme: isDark ? "dark" : "light" }}
+                      <label className="tv-label">Data da visita</label>
+                      <input className="tv-input" type="date"
                              value={formVisitante.dataPrimeiraVisita}
-                             onChange={e => setFormVisitante({ ...formVisitante, dataPrimeiraVisita: e.target.value })} />
+                             onChange={e => setFormVisitante({...formVisitante, dataPrimeiraVisita:e.target.value})} />
                     </div>
                   </div>
 
-                  {/* Campo: QUEM CONVIDOU */}
                   <div>
-                    <label className="ieq-label">QUEM CONVIDOU?</label>
-                    <div style={{ position: "relative" }}>
-                      <UserCheck size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: IEQ.red }} />
-                      <input
-                          className="ieq-input"
-                          style={{ paddingLeft: 42 }}
-                          value={formVisitante.responsavelAcompanhamento}
-                          onChange={e => setFormVisitante({ ...formVisitante, responsavelAcompanhamento: e.target.value })}
-                          placeholder="Nome do líder ou membro"
-                      />
+                    <label className="tv-label">Quem convidou?</label>
+                    <div style={{ position:"relative" }}>
+                      <UserCheck size={16} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:AURA.gold, pointerEvents:"none" }} />
+                      <input className="tv-input" style={{ paddingLeft:42 }}
+                             value={formVisitante.responsavelAcompanhamento}
+                             onChange={e => setFormVisitante({...formVisitante, responsavelAcompanhamento:e.target.value})}
+                             placeholder="Nome do líder ou membro" />
                     </div>
                   </div>
 
-                  {/* Campo: DECISÃO ESPIRITUAL */}
                   <div>
-                    <label className="ieq-label">DECISÃO ESPIRITUAL</label>
-                    <div style={{ position: "relative" }}>
-                      <Flame size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: IEQ.yellowDark, pointerEvents: "none", zIndex: 1 }} />
-                      <select
-                          className="ieq-input"
-                          style={{
-                            paddingLeft: 42,
-                            appearance: "none",
-                            cursor: "pointer",
-                            colorScheme: isDark ? "dark" : "light",
-                            background: isDark ? "#1A0A0D" : "#ffffff",
-                            color: tp,
-                          }}
-                          value={formVisitante.decisaoEspiritual}
-                          onChange={e => setFormVisitante({ ...formVisitante, decisaoEspiritual: e.target.value })}
-                      >
+                    <label className="tv-label">Decisão espiritual</label>
+                    <div style={{ position:"relative" }}>
+                      <Flame size={16} style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:AURA.yellowDark, pointerEvents:"none", zIndex:1 }} />
+                      <select className="tv-input" style={{ paddingLeft:42, appearance:"none", cursor:"pointer",
+                        background: isDark?"#0A0A0F":"#fff", color:t.text }}
+                              value={formVisitante.decisaoEspiritual}
+                              onChange={e => setFormVisitante({...formVisitante, decisaoEspiritual:e.target.value})}>
                         <option value="NENHUMA">Nenhuma decisão permanente</option>
                         <option value="ACEITOU_JESUS">Aceitou a Jesus 🙌</option>
                         <option value="RECONCILIOU">Reconciliou 🤝</option>
@@ -540,55 +541,49 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                     </div>
                   </div>
 
-                  {/* Campo: ORIGEM DA VISITA */}
                   <div>
-                    <label className="ieq-label">ORIGEM DA VISITA</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
-                      {listaOrigens.map(item => (
-                          <button key={item.id} type="button" className="ieq-origin-btn"
-                                  onClick={() => handleMudarOrigem(item.id)}
-                                  style={{
-                                    background: formVisitante.origem === item.id ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : "rgba(200,16,46,.06)",
-                                    borderColor: formVisitante.origem === item.id ? IEQ.red : "rgba(200,16,46,.2)",
-                                    color: formVisitante.origem === item.id ? "#fff" : ts,
-                                  }}>
-                            {item.emoji} {item.label.toUpperCase()}
-                          </button>
-                      ))}
+                    <label className="tv-label">Origem da visita</label>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:4 }}>
+                      {listaOrigens.map(item => {
+                        const sel = formVisitante.origem === item.id;
+                        return (
+                            <button key={item.id} type="button" className="tv-origin-btn"
+                                    onClick={() => setFormVisitante({...formVisitante, origem:item.id})}
+                                    style={{
+                                      background: sel ? `linear-gradient(135deg,${AURA.redDark},${AURA.red})` : "transparent",
+                                      borderColor: sel ? AURA.red : t.border,
+                                      color: sel ? "#fff" : t.textSec,
+                                    }}>
+                              {item.emoji} {item.label}
+                            </button>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  <div className="divider" />
+                  <div className="tv-divider" />
 
-                  {/* Bloco de Remoção Interno (Modo Edição) */}
                   {editando && (
-                      <div style={{ marginTop: 4, marginBottom: 12 }}>
+                      <div style={{ marginBottom:8 }}>
                         {!confirmandoDeletar ? (
-                            <button type="button" className="ieq-btn-danger" onClick={() => setConfirmandoDeletar(true)}>
-                              <Trash2 size={15} /> REMOVER VISITANTE
+                            <button type="button" className="tv-btn-danger" onClick={() => setConfirmandoDeletar(true)}>
+                              <Trash2 size={15} /> Remover visitante
                             </button>
                         ) : (
-                            <div className="ieq-confirm-box">
-                              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                                <AlertTriangle size={18} style={{ color: IEQ.red, flexShrink: 0 }} />
+                            <div className="tv-confirm-box">
+                              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
+                                <AlertTriangle size={18} style={{ color:AURA.red, flexShrink:0 }} />
                                 <div>
-                                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: IEQ.red, margin: "0 0 3px" }}>CONFIRMAR REMOÇÃO</p>
-                                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: ts, margin: 0 }}>
-                                    Deseja remover <strong style={{ color: tp }}>{visitanteSelecionado?.nome}</strong>? Esta ação não pode ser desfeita.
+                                  <p style={{ fontFamily:"'Inter',sans-serif", fontSize:10, fontWeight:600, letterSpacing:".12em", textTransform:"uppercase", color:AURA.red, margin:"0 0 3px" }}>Confirmar remoção</p>
+                                  <p style={{ fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:300, color:t.textSec, margin:0 }}>
+                                    Remover <strong style={{ color:t.text, fontWeight:500 }}>{visitanteSelecionado?.nome}</strong>? Esta ação não pode ser desfeita.
                                   </p>
                                 </div>
                               </div>
-                              <div style={{ display: "flex", gap: 10 }}>
-                                <button type="button" className="ieq-btn-cancel"
-                                        onClick={() => setConfirmandoDeletar(false)} disabled={deletando}>
-                                  CANCELAR
-                                </button>
-                                <button type="button" className="ieq-btn-danger-confirm"
-                                        onClick={handleDeletar} disabled={deletando}>
-                                  {deletando
-                                      ? <><Loader2 size={15} className="spin-icon" /> ...</>
-                                      : <><Trash2 size={15} /> SIM</>
-                                  }
+                              <div style={{ display:"flex", gap:10 }}>
+                                <button type="button" className="tv-btn-cancel" onClick={() => setConfirmandoDeletar(false)} disabled={deletando}>Cancelar</button>
+                                <button type="button" className="tv-btn-danger-confirm" onClick={handleDeletar} disabled={deletando}>
+                                  {deletando ? <><Loader2 size={15} style={{ animation:"tv-spin 1s linear infinite" }} /> Removendo...</> : <><Trash2 size={15} /> Confirmar</>}
                                 </button>
                               </div>
                             </div>
@@ -596,17 +591,14 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                       </div>
                   )}
 
-                  {/* Botão salvar fixado no rodapé do mobile */}
-                  <div className="ieq-modal-actions">
-                    <button type="submit" className="ieq-btn-primary full" disabled={loading}>
-                      {loading
-                          ? <><Loader2 size={16} className="spin-icon" /> SALVANDO...</>
-                          : (editando ? "ATUALIZAR DADOS" : "FINALIZAR CADASTRO")
-                      }
+                  <div className="tv-modal-actions">
+                    <button type="submit" className="tv-btn-primary" disabled={loading}
+                            style={{ width:"100%", justifyContent:"center", padding:"14px" }}>
+                      {loading ? <><Loader2 size={16} style={{ animation:"tv-spin 1s linear infinite" }} /> Salvando...</>
+                          : editando ? "Atualizar dados" : "Finalizar cadastro"}
                     </button>
                   </div>
                 </form>
-
               </div>
             </div>
         )}

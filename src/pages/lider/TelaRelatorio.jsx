@@ -1,35 +1,49 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import api from "../../services/api.js";
 import {
   Calendar, BookOpen, Loader2, ChevronDown,
   UserCheck, ClipboardCheck, Trophy, Users2, CheckCircle2,
-  Edit3, ArrowLeft, AlertTriangle, History, Lock, XCircle, Ban,
+  Edit3, ArrowLeft, AlertTriangle, History, Lock,
 } from "lucide-react";
 
-const IEQ = {
-  red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
-  yellow: "#FDB813", yellowDark: "#C48C00",
-  blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
-  white: "#FFFFFF", offWhite: "#F5F0E8",
-  dark: "#0A0608", darkCard: "#110A0D",
+/* ─── Tokens AURA (idênticos ao DashboardLider) ──────────────────────── */
+const AURA = {
+  gold:      "#C9A96E",
+  goldLight: "#E8D5A3",
+  dark:      "#0A0A0F",
+  darkEl:    "#12121A",
+  light:     "#F5F0E8",
+  red:       "#C8102E",
+  redDark:   "#9B0B1E",
+  blue:      "#003DA5",
+  blueDark:  "#002470",
+  yellow:    "#FDB813",
 };
 
+function theme(isDark) {
+  return {
+    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
+    text:        isDark ? "#F5F0E8"                : "#1A1008",
+    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
+    textMuted:   isDark ? "#6B6658"                : "#9A9080",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+    optionBg:    isDark ? "#12121A"                : "#F0EAE0",
+    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
+  };
+}
+
+/* ─── Constantes de domínio ──────────────────────────────────────────── */
 const DECISAO_CONFIG = {
-  ACEITOU_JESUS: { label: "Aceitou Jesus", cor: "#185FA5", bg: "#E6F1FB", borda: "#B5D4F4", icone: "✝️" },
-  RECONCILIOU:   { label: "Reconciliou",   cor: "#854F0B", bg: "#FAEEDA", borda: "#FAC775", icone: "🙏" },
-  BATISMO_AGUAS: { label: "Deseja Batismo",cor: "#0F6E56", bg: "#E1F5EE", borda: "#9FE1CB", icone: "💧" },
-};
-
-// ─── Mapa de motivos PT-BR ───────────────────────────────────────────────────
-const MOTIVO_LABELS = {
-  AUSENCIA_LIDER:      { label: "Ausência do líder",        icone: "👤" },
-  PROBLEMA_CLIMATICO:  { label: "Problema climático",       icone: "🌧️" },
-  EVENTO_IGREJA:       { label: "Evento da igreja",         icone: "⛪" },
-  PROBLEMA_SAUDE:      { label: "Problema de saúde",        icone: "🏥" },
-  LOCAL_INDISPONIVEL:  { label: "Local indisponível",       icone: "🔒" },
-  VIAGEM_MEMBROS:      { label: "Viagem dos membros",       icone: "✈️" },
-  CANCELADA_PASTOR:    { label: "Cancelada pelo pastor",    icone: "✋" },
-  OUTRO:               { label: "Outro motivo",             icone: "📋" },
+  ACEITOU_JESUS: { label: "Aceitou Jesus",    cor: AURA.blue,     bg: "rgba(0,61,165,.08)",  borda: "rgba(0,61,165,.25)",  icone: "✝️" },
+  RECONCILIOU:   { label: "Reconciliou",      cor: "#854F0B",     bg: "rgba(253,184,19,.1)", borda: "rgba(253,184,19,.3)", icone: "🙏" },
+  BATISMO_AGUAS: { label: "Deseja Batismo",   cor: "#0F6E56",     bg: "rgba(29,158,117,.08)",borda: "rgba(29,158,117,.3)", icone: "💧" },
 };
 
 const draftKey = (celulaId) => `ieq_relatorio_draft_${celulaId}`;
@@ -68,10 +82,7 @@ const TEMAS_FIXOS = [
   "Vitória pelo sangue do Cordeiro","Voltando ao primeiro amor",
 ];
 
-const normalizarData = (dataStr) => {
-  if (!dataStr) return "";
-  return String(dataStr).substring(0, 10);
-};
+const normalizarData = (d) => d ? String(d).substring(0, 10) : "";
 
 function dispararAtualizacaoMetas(celulaId) {
   window.dispatchEvent(
@@ -79,175 +90,438 @@ function dispararAtualizacaoMetas(celulaId) {
   );
 }
 
-// ─── Badge de decisão ────────────────────────────────────────────────────────
+/* ─── CSS Global AURA ────────────────────────────────────────────────── */
+function AuraStyles({ t, isDark }) {
+  return (
+      <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+      @keyframes aura-spin  { to { transform: rotate(360deg); } }
+      @keyframes aura-pulse { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+      @keyframes aura-blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+      @keyframes aura-fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes aura-toast-in { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
+      @keyframes aura-toast-out { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(.92) translateY(-18px)} }
+
+      .aura-spin   { animation: aura-spin  1s linear infinite; }
+      .aura-pulse  { animation: aura-pulse 3s ease-in-out infinite; }
+      .aura-blink  { animation: aura-blink 2s ease-in-out infinite; }
+
+      /* ── Base ── */
+      .aura-root {
+        font-family: 'Inter', sans-serif;
+        color: ${t.text};
+        min-height: 100vh;
+        position: relative;
+        padding-bottom: 120px;
+      }
+      .aura-glow {
+        position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        background:
+          radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
+          radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
+        transition: background .3s;
+      }
+      .aura-content {
+        position: relative; z-index: 1;
+        max-width: 760px; margin: 0 auto;
+        padding: 0 18px;
+      }
+      @media(max-width:420px) { .aura-content { padding: 0 14px; } }
+
+      /* ── Divider ── */
+      .aura-divider {
+        display: flex; align-items: center; gap: 10px; margin: 18px 0 22px;
+      }
+      .aura-divider::before {
+        content:''; flex:1; height:1px;
+        background: linear-gradient(to right, transparent, ${AURA.gold});
+      }
+      .aura-divider::after {
+        content:''; flex:1; height:1px;
+        background: linear-gradient(to left, transparent, ${AURA.gold});
+      }
+      .aura-divider-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
+
+      /* ── Badge ── */
+      .aura-badge {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: rgba(201,169,110,.07);
+        border: 1px solid rgba(201,169,110,.2);
+        border-radius: 100px; padding: 5px 14px;
+        font-size: 10px; font-weight: 500; letter-spacing: .1em;
+        text-transform: uppercase; color: ${AURA.gold};
+      }
+      .aura-badge-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
+
+      /* ── Tabs ── */
+      .aura-tabs {
+        display: flex; border-radius: 16px; overflow: hidden;
+        border: 1px solid ${t.border}; margin: 16px 0 24px;
+        backdrop-filter: blur(20px);
+      }
+      .aura-tab {
+        flex: 1; padding: 13px 16px; border: none; cursor: pointer;
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        transition: all .25s;
+      }
+      .aura-tab.active {
+        background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
+        color: #fff;
+      }
+      .aura-tab.inactive {
+        background: ${t.bgEl}; color: ${t.textMuted};
+      }
+      .aura-tab.inactive:hover { color: ${AURA.gold}; }
+
+      /* ── Card ── */
+      .aura-card {
+        background: ${t.bgEl};
+        border: 1px solid ${t.border};
+        border-radius: 20px; overflow: hidden;
+        backdrop-filter: blur(24px); position: relative;
+        margin-bottom: 16px;
+      }
+      .aura-card::before {
+        content:''; position:absolute; top:0; left:0; right:0; height:1px;
+        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+      }
+      .aura-card-head {
+        padding: 20px 24px;
+        border-bottom: 1px solid ${t.border};
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px;
+      }
+      .aura-card-head-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0;
+      }
+      .aura-card-head-sub {
+        font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0;
+      }
+
+      /* ── Hero banner ── */
+      .aura-hero {
+        border-radius: 20px; padding: 32px 32px 28px;
+        margin-bottom: 20px; position: relative; overflow: hidden;
+      }
+      .aura-hero-stripes {
+        position: absolute; inset: 0; pointer-events: none;
+        background-image: repeating-linear-gradient(
+          -55deg, rgba(255,255,255,.025) 0 8px, transparent 8px 16px
+        );
+      }
+      .aura-hero-inner { position: relative; z-index: 1; }
+
+      /* ── KPI Grid ── */
+      .aura-kpi-grid {
+        display: grid; grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px; margin-bottom: 16px;
+      }
+      @media(max-width:480px) { .aura-kpi-grid { grid-template-columns: 1fr; } }
+      .aura-kpi {
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 16px; padding: 20px 16px; text-align: center;
+        backdrop-filter: blur(20px);
+      }
+      .aura-kpi-label {
+        font-size: 9px; font-weight: 600; letter-spacing: .2em;
+        text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 8px;
+      }
+      .aura-kpi-num {
+        font-family: 'Playfair Display', serif;
+        font-size: 42px; font-weight: 600; line-height: 1; margin: 0;
+      }
+
+      /* ── Input / Textarea ── */
+      .aura-label {
+        display: block; margin-bottom: 7px;
+        font-size: 9px; font-weight: 600; letter-spacing: .18em;
+        text-transform: uppercase; color: ${AURA.gold};
+      }
+      .aura-input {
+        width: 100%; box-sizing: border-box;
+        background: ${t.bgInput}; border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 13px 16px;
+        border-radius: 13px; outline: none;
+        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
+        transition: all .25s; -webkit-appearance: none; appearance: none;
+      }
+      .aura-input:focus {
+        border-color: rgba(201,169,110,.5);
+        background: rgba(201,169,110,.04);
+        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+      }
+      .aura-input::placeholder { color: ${t.placeholder}; }
+
+      /* ── Pessoa row ── */
+      .aura-person-row {
+        border-bottom: 1px solid ${t.border};
+        transition: background .2s;
+      }
+      .aura-person-row:last-child { border-bottom: none; }
+
+      /* ── Alert ── */
+      .aura-alert-warn {
+        display: flex; align-items: center; gap: 12px;
+        background: rgba(253,184,19,.06);
+        border: 1px solid rgba(253,184,19,.22);
+        border-radius: 14px; padding: 14px 18px;
+        margin-bottom: 16px;
+        font-size: 11px; font-weight: 500; letter-spacing: .1em;
+        text-transform: uppercase; color: #c8a010;
+      }
+      .aura-alert-success {
+        display: flex; align-items: center; gap: 12px;
+        background: rgba(13,110,58,.08);
+        border: 1px solid rgba(13,110,58,.25);
+        border-radius: 14px; padding: 14px 18px;
+        margin-bottom: 16px;
+        font-size: 11px; font-weight: 500; letter-spacing: .1em;
+        text-transform: uppercase; color: #0d6e3a;
+        animation: aura-fadein .4s ease;
+      }
+      .aura-alert-info {
+        display: flex; align-items: center; gap: 12px;
+        background: rgba(0,61,165,.06);
+        border: 1px solid rgba(0,61,165,.2);
+        border-radius: 14px; padding: 12px 18px;
+        margin-bottom: 16px;
+        font-size: 11px; font-weight: 500; letter-spacing: .08em;
+        color: ${AURA.blue};
+      }
+
+      /* ── Toast overlay ── */
+      .aura-toast-overlay {
+        position: fixed; inset: 0; z-index: 400;
+        display: flex; align-items: center; justify-content: center; padding: 0 20px;
+        background: rgba(10,10,15,.75); backdrop-filter: blur(6px);
+        animation: aura-fadein .3s ease forwards;
+      }
+      .aura-toast-box {
+        background: linear-gradient(160deg, #0d6e3a 0%, #073d22 100%);
+        border: 1px solid rgba(201,169,110,.15);
+        border-radius: 24px; padding: 36px 44px 32px;
+        display: flex; flex-direction: column; align-items: center; gap: 20px;
+        min-width: 300px; max-width: 380px; width: 100%;
+        box-shadow: 0 24px 80px rgba(13,110,58,.5);
+        animation: aura-toast-in .55s cubic-bezier(.34,1.56,.64,1) forwards;
+      }
+      .aura-toast-icon {
+        width: 72px; height: 72px; border-radius: 50%;
+        background: rgba(255,255,255,.15);
+        border: 1.5px solid rgba(255,255,255,.3);
+        display: flex; align-items: center; justify-content: center;
+      }
+
+      /* ── Modal ── */
+      .aura-modal-overlay {
+        position: fixed; inset: 0; z-index: 300;
+        background: rgba(10,10,15,.82); backdrop-filter: blur(5px);
+        display: flex; align-items: center; justify-content: center; padding: 0 20px;
+      }
+      .aura-modal-box {
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 22px; padding: 32px 28px 26px;
+        max-width: 420px; width: 100%;
+        animation: aura-fadein .3s cubic-bezier(.34,1.56,.64,1);
+        box-shadow: 0 24px 80px rgba(0,0,0,.5);
+      }
+
+      /* ── Botões ── */
+      .aura-btn-primary {
+        display: flex; align-items: center; justify-content: center; gap: 9px;
+        width: 100%; padding: 17px 0; border-radius: 100px; border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
+        color: #fff; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .18em;
+        text-transform: uppercase; transition: all .3s;
+        box-shadow: 0 8px 28px rgba(0,61,165,.28);
+      }
+      .aura-btn-primary:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+      .aura-btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+      .aura-btn-red {
+        display: flex; align-items: center; justify-content: center; gap: 9px;
+        width: 100%; padding: 17px 0; border-radius: 100px; border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
+        color: #fff; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .18em;
+        text-transform: uppercase; transition: all .3s;
+        box-shadow: 0 8px 28px rgba(200,16,46,.28);
+      }
+      .aura-btn-red:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+      .aura-btn-red:disabled { opacity: .4; cursor: not-allowed; }
+
+      .aura-btn-ghost {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 11px 20px; border-radius: 100px;
+        border: 1px solid ${t.border}; cursor: pointer;
+        background: transparent; color: ${t.textSec};
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
+      }
+      .aura-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+
+      .aura-btn-back {
+        display: flex; align-items: center; gap: 8px;
+        padding: 10px 18px; border-radius: 100px;
+        border: 1px solid ${t.border}; cursor: pointer;
+        background: transparent; color: ${t.textSec};
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
+        margin-bottom: 20px;
+      }
+      .aura-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+
+      .aura-btn-edit {
+        display: flex; align-items: center; gap: 6px;
+        padding: 9px 16px; border-radius: 100px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
+        color: #0A0A0F; font-family: 'Inter', sans-serif;
+        font-size: 9px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; transition: all .25s;
+        box-shadow: 0 4px 14px rgba(201,169,110,.2); flex-shrink: 0;
+      }
+      .aura-btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,169,110,.3); }
+
+      /* ── Histórico ── */
+      .aura-hist-row {
+        padding: 18px 22px;
+        border-bottom: 1px solid ${t.border};
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px; transition: background .2s;
+      }
+      .aura-hist-row:last-child { border-bottom: none; }
+      .aura-hist-row:hover { background: rgba(201,169,110,.03); }
+
+      /* ── Section header ── */
+      .aura-section-hd {
+        display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+      }
+      .aura-section-icon {
+        width: 30px; height: 30px; border-radius: 9px;
+        background: rgba(201,169,110,.08);
+        border: 1px solid rgba(201,169,110,.18);
+        display: flex; align-items: center; justify-content: center;
+        color: ${AURA.gold}; flex-shrink: 0;
+      }
+      .aura-section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 15px; font-weight: 500; color: ${t.text};
+      }
+
+      /* ── Decisão badge ── */
+      .aura-decisao-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 3px 10px; border-radius: 100px;
+        font-size: 10px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+      }
+
+      /* ── Loading ── */
+      .aura-loading {
+        min-height: 60vh; display: flex;
+        align-items: center; justify-content: center;
+      }
+
+      /* ── Rascunho toast ── */
+      .aura-draft-toast {
+        display: flex; align-items: center; gap: 10px;
+        background: rgba(0,61,165,.08);
+        border: 1px solid rgba(0,61,165,.2);
+        border-radius: 14px; padding: 12px 18px;
+        margin-bottom: 14px;
+        font-size: 11px; font-weight: 500; letter-spacing: .08em;
+        color: ${AURA.blue};
+        animation: aura-fadein .4s ease;
+      }
+    `}</style>
+  );
+}
+
+/* ─── Logo IEQ ───────────────────────────────────────────────────────── */
+function IEQCross({ size = 36 }) {
+  return (
+      <img
+          src="/quadrangular.png"
+          alt="Logo IEQ"
+          style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
+      />
+  );
+}
+
+/* ─── Badge de decisão espiritual ────────────────────────────────────── */
 function BadgeDecisao({ decisao }) {
   const cfg = DECISAO_CONFIG[decisao];
   if (!cfg) return null;
   return (
-      <span style={{
-        display: "inline-flex", alignItems: "center", gap: 4,
-        padding: "2px 9px", borderRadius: 99, fontSize: 11, fontWeight: 600,
-        fontFamily: "'EB Garamond', serif",
-        background: cfg.bg, color: cfg.cor, border: `1px solid ${cfg.borda}`,
-        whiteSpace: "nowrap", flexShrink: 0,
-      }}>
+      <span className="aura-decisao-badge" style={{ background: cfg.bg, color: cfg.cor, border: `1px solid ${cfg.borda}` }}>
       {cfg.icone} {cfg.label}
-        <Lock size={9} style={{ marginLeft: 3, opacity: 0.6 }} />
+        <Lock size={8} style={{ opacity: .6 }} />
     </span>
   );
 }
 
-// ─── Badge de "Não realizada" para o histórico ───────────────────────────────
-function BadgeNaoRealizada({ motivo }) {
-  const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
-  return (
-      <span style={{
-        display: "inline-flex", alignItems: "center", gap: 5,
-        padding: "3px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600,
-        fontFamily: "'Cinzel', serif", letterSpacing: ".1em",
-        background: "rgba(253,184,19,.15)", color: "#C48C00",
-        border: "1px solid rgba(253,184,19,.4)",
-        whiteSpace: "nowrap",
-      }}>
-      <Ban size={10} /> NÃO REALIZADA · {cfg.icone} {cfg.label.toUpperCase()}
-    </span>
-  );
-}
-
-function DecisaoReadOnly({ decisao, isDark, ts, tp }) {
+/* ─── Decisão somente leitura ────────────────────────────────────────── */
+function DecisaoReadOnly({ decisao, t }) {
   const cfg = decisao && decisao !== "NENHUMA" ? DECISAO_CONFIG[decisao] : null;
   return (
       <div style={{
-        display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8,
-        background: isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.02)",
-        border: `1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`,
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "11px 15px", borderRadius: 13,
+        background: t.bgInput, border: `1px solid ${t.borderInput}`,
       }}>
-        <Lock size={13} style={{ color: isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)", flexShrink: 0 }} />
+        <Lock size={13} style={{ color: t.textMuted, flexShrink: 0 }} />
         {cfg ? (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "'EB Garamond',serif", fontSize: 14, color: cfg.cor, fontWeight: 600 }}>
+            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: cfg.cor }}>
           {cfg.icone} {cfg.label}
         </span>
         ) : (
-            <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, fontStyle: "italic" }}>Sem decisão registrada</span>
+            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+          Sem decisão registrada
+        </span>
         )}
-        <span style={{ marginLeft: "auto", fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".14em", color: isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.25)" }}>
-        SOMENTE LEITURA
+        <span style={{ marginLeft: "auto", fontSize: 8, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
+        Somente leitura
       </span>
       </div>
   );
 }
 
-function QuadrangularCross({ size = 32 }) {
-  return (
-      <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
-        <defs>
-          <linearGradient id="gVR" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={IEQ.redLight} /><stop offset="100%" stopColor={IEQ.redDark} />
-          </linearGradient>
-          <linearGradient id="gHR" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={IEQ.blueDark} /><stop offset="50%" stopColor={IEQ.blueLight} /><stop offset="100%" stopColor={IEQ.blueDark} />
-          </linearGradient>
-          <filter id="glowR"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <rect x="38" y="4" width="24" height="92" rx="3" fill="url(#gVR)" filter="url(#glowR)" />
-        <rect x="4" y="38" width="92" height="24" rx="3" fill="url(#gHR)" filter="url(#glowR)" />
-        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowR)" />
-        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
-      </svg>
-  );
-}
-
-// ─── Toast de sucesso (célula realizada) ─────────────────────────────────────
-function ToastSucesso({ total, onClose }) {
-  const [saindo, setSaindo] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => { setSaindo(true); setTimeout(() => { if (onClose) onClose(); }, 450); }, 4800);
-    return () => clearTimeout(t);
-  }, [onClose]);
-  return (
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 300,
-        display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px",
-        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
-        animation: saindo ? "ieqOverlayOut .45s ease forwards" : "ieqOverlayIn .3s ease forwards",
-      }}>
-        <div style={{
-          background: "linear-gradient(160deg, #0d6e3a 0%, #0a5530 60%, #073d22 100%)",
-          borderRadius: 22, padding: "32px 40px 28px",
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
-          minWidth: 300, maxWidth: 380, width: "100%",
-          boxShadow: "0 16px 60px rgba(13,110,58,.5)",
-          animation: saindo ? "ieqToastOut .45s cubic-bezier(.4,0,.6,1) forwards" : "ieqToastIn .55s cubic-bezier(.34,1.56,.64,1) forwards",
-        }}>
-          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "rgba(255,255,255,.18)", border: "2px solid rgba(255,255,255,.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <CheckCircle2 size={32} style={{ color: "#fff" }} />
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, letterSpacing: ".18em", color: "#fff", margin: "0 0 8px" }}>GLÓRIA A DEUS!</p>
-            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 18, color: "rgba(255,255,255,.82)", lineHeight: 1.55, margin: 0 }}>
-              Relatório enviado com sucesso.<br /><em>O Senhor viu cada presença!</em>
-            </p>
-          </div>
-          <div style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: 20, padding: "6px 14px", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: "rgba(255,255,255,.92)", display: "flex", alignItems: "center", gap: 6 }}>
-            <Users2 size={12} /> {total} PRESENTES
-          </div>
-        </div>
-      </div>
-  );
-}
-
-// ─── Toast de sucesso (célula NÃO realizada) ─────────────────────────────────
-function ToastNaoRealizada({ motivo, onClose }) {
-  const [saindo, setSaindo] = useState(false);
-  const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
-  useEffect(() => {
-    const t = setTimeout(() => { setSaindo(true); setTimeout(() => { if (onClose) onClose(); }, 450); }, 4800);
-    return () => clearTimeout(t);
-  }, [onClose]);
-  return (
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 300,
-        display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px",
-        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
-        animation: saindo ? "ieqOverlayOut .45s ease forwards" : "ieqOverlayIn .3s ease forwards",
-      }}>
-        <div style={{
-          background: "linear-gradient(160deg, #7a5200 0%, #5c3d00 60%, #3d2800 100%)",
-          borderRadius: 22, padding: "32px 40px 28px",
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
-          minWidth: 300, maxWidth: 380, width: "100%",
-          boxShadow: "0 16px 60px rgba(196,140,0,.4)",
-          animation: saindo ? "ieqToastOut .45s cubic-bezier(.4,0,.6,1) forwards" : "ieqToastIn .55s cubic-bezier(.34,1.56,.64,1) forwards",
-        }}>
-          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "rgba(255,255,255,.12)", border: "2px solid rgba(253,184,19,.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>
-            {cfg.icone}
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 14, fontWeight: 700, letterSpacing: ".18em", color: IEQ.yellow, margin: "0 0 8px" }}>REGISTRADO</p>
-            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 17, color: "rgba(255,255,255,.82)", lineHeight: 1.55, margin: 0 }}>
-              Ausência de célula registrada.<br /><em>Deus conhece cada circunstância.</em>
-            </p>
-          </div>
-          <div style={{ background: "rgba(253,184,19,.15)", border: "1px solid rgba(253,184,19,.35)", borderRadius: 20, padding: "6px 14px", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: IEQ.yellow, display: "flex", alignItems: "center", gap: 6 }}>
-            <Ban size={11} /> {cfg.label.toUpperCase()}
-          </div>
-        </div>
-      </div>
-  );
-}
-
-function SeletorReferenciaBiblica({ value, onChange, isDark }) {
+/* ─── Seletor referência bíblica ─────────────────────────────────────── */
+/* ─── Seletor referência bíblica com Portal ─────────────────────────── */
+function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
   const [inputVal, setInputVal] = useState(value || "");
   const [sugestoes, setSugestoes] = useState([]);
   const [aberto, setAberto] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const inputRef = useRef(null);
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const wrapperRef = useRef(null);
 
-  useEffect(() => { if (value !== inputVal) setInputVal(value || ""); }, [value]);
+  useEffect(() => {
+    if (value !== inputVal) setInputVal(value || "");
+  }, [value]);
+
+  const atualizarPosicao = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  };
 
   const gerarSugestoes = (texto) => {
-    if (!texto.trim()) { setSugestoes([]); return; }
+    if (!texto.trim()) {
+      setSugestoes([]);
+      return;
+    }
     const lower = texto.toLowerCase();
     const livrosMatch = BIBLIA.filter(l => l.nome.toLowerCase().includes(lower)).slice(0, 4).map(l => l.nome);
     const temasMatch = TEMAS_FIXOS.filter(t => t.toLowerCase().includes(lower)).slice(0, 10);
@@ -258,102 +532,144 @@ function SeletorReferenciaBiblica({ value, onChange, isDark }) {
 
   const handleChange = (e) => {
     const val = e.target.value;
-    setInputVal(val); onChange(val); gerarSugestoes(val); setAberto(true);
+    setInputVal(val);
+    onChange(val);
+    gerarSugestoes(val);
+    setAberto(true);
+    setTimeout(atualizarPosicao, 10);
   };
 
+  const selecionarSugestao = (s) => {
+    setInputVal(s);
+    onChange(s);
+    setSugestoes([]);
+    setAberto(false);
+  };
+
+  useEffect(() => {
+    if (aberto) {
+      atualizarPosicao();
+      window.addEventListener("resize", atualizarPosicao);
+      window.addEventListener("scroll", atualizarPosicao, true);
+    }
+    return () => {
+      window.removeEventListener("resize", atualizarPosicao);
+      window.removeEventListener("scroll", atualizarPosicao, true);
+    };
+  }, [aberto]);
+
   return (
-      <div>
-        <label className="ieq-label">
-          <BookOpen size={11} style={{ display: "inline", marginRight: 6 }} />
-          TEMA / REFERÊNCIA BÍBLICA
+      <div ref={wrapperRef} style={{ position: "relative" }}>
+        <label className="aura-label">
+          <BookOpen size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+          Tema / Referência Bíblica
         </label>
-        <div style={{ position: "relative" }}>
-          <input
-              ref={inputRef} className="ieq-input" type="text"
-              placeholder="Ex: João 3:16 ou A fé que move..."
-              value={inputVal} onChange={handleChange}
-              onFocus={() => { if (inputVal.trim()) { gerarSugestoes(inputVal); setAberto(true); } }}
-              onBlur={() => setTimeout(() => setAberto(false), 160)}
-              autoComplete="off"
-          />
-          {aberto && sugestoes.length > 0 && (
-              <div style={{
-                position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 200,
-                background: isDark ? "#1a0a0d" : "#fff",
-                border: `1px solid ${isDark ? "rgba(200,16,46,.3)" : "rgba(200,16,46,.22)"}`,
-                borderRadius: 10, maxHeight: 260, overflowY: "auto",
-                boxShadow: "0 8px 28px rgba(0,0,0,.22)",
-              }}>
-                {sugestoes.map((s, i) => (
-                    <button key={i} onMouseDown={() => { setInputVal(s); onChange(s); setSugestoes([]); setAberto(false); }}
-                            style={{
-                              width: "100%", background: "none", border: "none", cursor: "pointer",
-                              padding: "11px 16px", textAlign: "left",
-                              fontFamily: "'EB Garamond',serif", fontSize: 15,
-                              color: isDark ? IEQ.offWhite : "#1A0A0D",
-                              borderBottom: i < sugestoes.length - 1 ? `1px solid ${isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.07)"}` : "none",
-                            }}
-                    >{s}</button>
-                ))}
-              </div>
-          )}
+
+        <input
+            ref={inputRef}
+            className="aura-input"
+            type="text"
+            placeholder="Ex: João 3:16 ou A fé que move…"
+            value={inputVal}
+            onChange={handleChange}
+            onFocus={() => {
+              if (inputVal.trim()) {
+                gerarSugestoes(inputVal);
+                setAberto(true);
+              }
+            }}
+            onBlur={() => setTimeout(() => setAberto(false), 220)}
+            autoComplete="off"
+        />
+
+        {/* Portal para o dropdown */}
+        {aberto && sugestoes.length > 0 && createPortal(
+            <div style={{
+              position: "absolute",
+              top: position.top,
+              left: position.left,
+              width: position.width,
+              zIndex: 99999,
+              background: t.bgEl,
+              border: `1px solid ${t.border}`,
+              borderRadius: 14,
+              maxHeight: 300,
+              overflowY: "auto",
+              boxShadow: `0 25px 70px rgba(0,0,0,${isDark ? "0.75" : "0.3"})`,
+              backdropFilter: "blur(24px)",
+            }}>
+              {sugestoes.map((s, i) => (
+                  <button
+                      key={i}
+                      onMouseDown={() => selecionarSugestao(s)}
+                      style={{
+                        width: "100%",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "13px 16px",
+                        textAlign: "left",
+                        fontFamily: "'Inter',sans-serif",
+                        fontSize: 14,
+                        fontWeight: 300,
+                        color: t.text,
+                        borderBottom: i < sugestoes.length - 1 ? `1px solid ${t.border}` : "none",
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = isDark ? "rgba(201,169,110,.10)" : "rgba(201,169,110,.15)";
+                      }}
+                      onMouseLeave={e => e.currentTarget.style.background = "none"}
+                  >
+                    {s}
+                  </button>
+              ))}
+            </div>,
+            document.body
+        )}
+      </div>
+  );
+}
+
+/* ─── Toast de sucesso ───────────────────────────────────────────────── */
+function ToastSucesso({ total, onClose }) {
+  const [saindo, setSaindo] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSaindo(true);
+      setTimeout(() => { if (onClose) onClose(); }, 450);
+    }, 4800);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+      <div className="aura-toast-overlay" style={{ animation: saindo ? "aura-toast-out .45s ease forwards" : undefined }}>
+        <div className="aura-toast-box">
+          <div className="aura-toast-icon">
+            <CheckCircle2 size={34} style={{ color: "#fff" }} />
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: "0 0 8px", letterSpacing: ".02em" }}>
+              Glória a Deus!
+            </p>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: "rgba(255,255,255,.8)", lineHeight: 1.6, margin: 0 }}>
+              Relatório enviado com sucesso.<br />
+              <em>O Senhor viu cada presença.</em>
+            </p>
+          </div>
+          <span className="aura-badge" style={{ background: "rgba(255,255,255,.12)", borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.9)" }}>
+          <span className="aura-badge-dot" style={{ background: "#fff" }} />
+            {total} presentes
+        </span>
         </div>
       </div>
   );
 }
 
 /* =============================================================
-   SELETOR DE MOTIVO — célula não realizada
-============================================================= */
-function SeletorMotivo({ value, onChange, isDark }) {
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-
-  return (
-      <div>
-        <label className="ieq-label">
-          <Ban size={11} style={{ display: "inline", marginRight: 6 }} />
-          MOTIVO DA NÃO REALIZAÇÃO
-        </label>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {Object.entries(MOTIVO_LABELS).map(([key, { label, icone }]) => {
-            const selecionado = value === key;
-            return (
-                <button
-                    key={key}
-                    onClick={() => onChange(key)}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 10,
-                      padding: "13px 14px", borderRadius: 10, border: "none", cursor: "pointer",
-                      textAlign: "left", transition: "all .2s",
-                      background: selecionado
-                          ? `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`
-                          : (isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)"),
-                      boxShadow: selecionado ? "0 4px 16px rgba(253,184,19,.3)" : "none",
-                      outline: selecionado ? "none" : `1px solid ${isDark ? "rgba(253,184,19,.15)" : "rgba(253,184,19,.25)"}`,
-                    }}
-                >
-                  <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{icone}</span>
-                  <span style={{
-                    fontFamily: "'EB Garamond',serif", fontSize: 14, lineHeight: 1.3,
-                    color: selecionado ? IEQ.dark : tp,
-                    fontWeight: selecionado ? 600 : 400,
-                  }}>{label}</span>
-                  {selecionado && (
-                      <CheckCircle2 size={14} style={{ color: IEQ.dark, marginLeft: "auto", flexShrink: 0 }} />
-                  )}
-                </button>
-            );
-          })}
-        </div>
-      </div>
-  );
-}
-
-/* =============================================================
-   TELA EDITAR RELATÓRIO
+   TELA EDITAR RELATÓRIO (design AURA)
 ============================================================= */
 function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false }) {
+  const t = theme(isDark);
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [pessoas, setPessoas] = useState([]);
@@ -363,13 +679,8 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const [sucesso, setSucesso] = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
-  const [relatorioRealizada, setRelatorioRealizada] = useState(true);
-  const [motivoNaoRealizacao, setMotivoNaoRealizacao] = useState(null);
 
   const [form, setForm] = useState({ dataReuniao: "", estudo: "", selecionadosKeys: [] });
-
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
   const carregarDados = useCallback(async () => {
     try {
@@ -381,31 +692,27 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       setNomeCelula(rel.nomeCelula || "");
       setNomeLider(rel.nomeLider || "");
       setCelulaId(rel.celulaId);
-      setRelatorioRealizada(rel.realizada !== false);
-      setMotivoNaoRealizacao(rel.motivoNaoRealizacao || null);
 
       const [resMembros, resVisitantes] = await Promise.all([
         api.get(`/celulas/${rel.celulaId}/membros`, { headers }),
         api.get(`/visitantes/celula/${rel.celulaId}/ativos`, { headers }),
       ]);
 
-      const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
+      const membros = (resMembros.data || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
       const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
       setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
 
       const decisoesMap = {};
-      await Promise.all(
-          (resVisitantes.data || []).map(async (v) => {
-            try {
-              const res = await api.get(`/visitantes/${v.id}`, { headers });
-              decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
-            } catch { decisoesMap[v.id] = null; }
-          })
-      );
+      await Promise.all((resVisitantes.data || []).map(async (v) => {
+        try {
+          const res = await api.get(`/visitantes/${v.id}`, { headers });
+          decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
+        } catch { decisoesMap[v.id] = null; }
+      }));
       setDecisoesVisitantes(decisoesMap);
 
       const keysPresentes = [
-        ...(rel.membrosPresentes  || []).map(m => `MEMBRO-${m.id}`),
+        ...(rel.membrosPresentes   || []).map(m => `MEMBRO-${m.id}`),
         ...(rel.visitantesPresentes || []).map(v => `VISITANTE-${v.id}`),
       ];
       setForm({ dataReuniao: normalizarData(rel.dataReuniao), estudo: rel.estudo || "", selecionadosKeys: keysPresentes });
@@ -422,7 +729,9 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
     setProcessingIds(prev => new Set(prev).add(uKey));
     setForm(prev => ({
       ...prev,
-      selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
+      selecionadosKeys: isMarcado
+          ? prev.selecionadosKeys.filter(k => k !== uKey)
+          : [...prev.selecionadosKeys, uKey],
     }));
     setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
   };
@@ -432,28 +741,20 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const total = membrosPresentes + visitantesPresentes;
 
   const handleSalvar = async () => {
-    if (relatorioRealizada && !form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
-    if (!relatorioRealizada && !motivoNaoRealizacao) return alert("Selecione o motivo da não realização.");
+    if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
     try {
       setSalvando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const payload = relatorioRealizada
-          ? {
-            celulaId: Number(celulaId),
-            dataReuniao: normalizarData(form.dataReuniao),
-            estudo: form.estudo.trim(),
-            membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
-            visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => {
-              const id = Number(k.replace("VISITANTE-", ""));
-              return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
-            }),
-          }
-          : {
-            celulaId: Number(celulaId),
-            dataReuniao: normalizarData(form.dataReuniao),
-            realizada: false,
-            motivoNaoRealizacao,
-          };
+      const payload = {
+        celulaId: Number(celulaId),
+        dataReuniao: normalizarData(form.dataReuniao),
+        estudo: form.estudo.trim(),
+        membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
+        visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => {
+          const id = Number(k.replace("VISITANTE-", ""));
+          return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
+        }),
+      };
       await api.put(`/relatorios/${relatorioId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
       setSucesso(true);
       setTimeout(() => { setSucesso(false); if (onSalvo) onSalvo(); }, 2200);
@@ -463,131 +764,129 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   };
 
   if (loading) return (
-      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="aura-loading">
         <div style={{ textAlign: "center" }}>
-          <QuadrangularCross size={40} />
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".2em", color: IEQ.red, marginTop: 14 }}>CARREGANDO RELATÓRIO...</p>
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+            <div className="aura-pulse" style={{ width: 72, height: 72, position: "absolute", border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
+            <div style={{ width: 52, height: 52, borderRadius: "50%", background: t.bgEl, border: `1.5px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+              <IEQCross size={36} />
+            </div>
+          </div>
+          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>
+            Carregando…
+          </p>
         </div>
       </div>
   );
 
-  const podeSalvar = relatorioRealizada ? form.estudo.trim() : motivoNaoRealizacao;
-
   return (
-      <div style={{ minHeight: "100vh", position: "relative", paddingBottom: 120 }}>
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
-          <div style={{ paddingTop: 20, paddingBottom: 8 }}>
-            <button onClick={onVoltar} style={{ background: "none", border: `1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"}`, color: tp, padding: "9px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".15em", display: "flex", alignItems: "center", gap: 8 }}>
-              <ArrowLeft size={13} /> VOLTAR
-            </button>
-          </div>
+      <div style={{ position: "relative" }}>
+        <AuraStyles t={t} isDark={isDark} />
+        <div className="aura-glow" />
+        <div className="aura-content" style={{ paddingTop: 20 }}>
+
+          <button className="aura-btn-back" onClick={onVoltar}>
+            <ArrowLeft size={13} /> Voltar
+          </button>
 
           {sucesso && (
-              <div style={{ marginBottom: 12, animation: "fadeIn .4s ease", background: "linear-gradient(135deg,#0d6e3a,#0a5530)", borderRadius: 10, padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".16em", color: "#fff" }}>
-                <CheckCircle2 size={16} /> RELATÓRIO ATUALIZADO COM SUCESSO!
+              <div className="aura-alert-success">
+                <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
+                Relatório atualizado com sucesso!
               </div>
           )}
 
-          <div style={{ marginBottom: 12, background: "linear-gradient(135deg,rgba(253,184,19,.15),rgba(196,140,0,.1))", border: "1px solid rgba(253,184,19,.3)", borderRadius: 10, padding: "13px 18px", display: "flex", alignItems: "center", gap: 10 }}>
-            <AlertTriangle size={16} style={{ color: IEQ.yellow, flexShrink: 0 }} />
-            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: IEQ.yellowDark, margin: 0 }}>
-              MODO EDIÇÃO — Você está alterando um relatório já enviado.
-            </p>
+          <div className="aura-alert-warn">
+            <AlertTriangle size={15} style={{ flexShrink: 0, color: AURA.yellow }} />
+            Modo edição — você está alterando um relatório já enviado.
           </div>
 
-          {/* Cabeçalho */}
-          <div style={{ padding: "36px 40px 32px", marginBottom: 24, background: isDark ? "linear-gradient(135deg,#1A0A0D,#0A0608)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`, borderRadius: 14, position: "relative", overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)", backgroundSize: "40px 40px" }} />
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-                <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {/* Hero */}
+          <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})` }}>
+            <div className="aura-hero-stripes" />
+            <div className="aura-hero-inner">
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,.12)", border: "1.5px solid rgba(255,255,255,.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Edit3 size={22} style={{ color: "#fff" }} />
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".22em", color: "rgba(255,255,255,.5)", margin: 0 }}>EDITANDO RELATÓRIO #{relatorioId}</p>
-                  <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: "#fff", margin: "4px 0 0", letterSpacing: ".1em" }}>{nomeCelula.toUpperCase()}</h1>
+                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>
+                    Editando Relatório #{relatorioId}
+                  </p>
+                  <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0, letterSpacing: ".02em" }}>
+                    {nomeCelula}
+                  </h2>
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 8, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <UserCheck size={18} style={{ color: "#fff" }} />
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <UserCheck size={16} style={{ color: "#fff" }} />
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: "rgba(255,255,255,.5)", margin: 0 }}>LÍDER RESPONSÁVEL</p>
-                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: 600, color: "#fff", margin: 0 }}>{nomeLider}</p>
+                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 2px" }}>Líder</p>
+                  <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: "#fff", margin: 0 }}>{nomeLider}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Toggle realizada / não realizada */}
-          <ToggleRealizacao realizada={relatorioRealizada} onChange={setRelatorioRealizada} isDark={isDark} />
-
-          {relatorioRealizada ? (
-              <>
-                {/* Formulário */}
-                <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                    <div>
-                      <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
-                      <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
-                             value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
-                    </div>
-                    <div>
-                      <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* KPIs */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
-                  {[
-                    { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red  },
-                    { label: "VISITANTES", val: visitantesPresentes, color: IEQ.blue },
-                    { label: "TOTAL",      val: total, color: IEQ.yellow, highlight: true },
-                  ].map(({ label, val, color, highlight }) => (
-                      <div key={label} className="ieq-kpi" style={highlight ? { background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border: "none" } : {}}>
-                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: highlight ? "rgba(255,255,255,.6)" : ts, margin: "0 0 6px" }}>{label}</p>
-                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 38, fontWeight: 700, color: highlight ? "#fff" : color, margin: 0, lineHeight: 1 }}>{val}</p>
-                      </div>
-                  ))}
-                </div>
-
-                {/* Chamada */}
-                <ListaChamada pessoas={pessoas} form={form} setForm={setForm} processingIds={processingIds} setProcessingIds={setProcessingIds} decisoesVisitantes={decisoesVisitantes} isDark={isDark} tp={tp} ts={ts} />
-              </>
-          ) : (
-              /* Painel de motivo */
-              <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
-                <div style={{ marginBottom: 20 }}>
-                  <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
-                  <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
-                         value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
-                </div>
-                <SeletorMotivo value={motivoNaoRealizacao} onChange={setMotivoNaoRealizacao} isDark={isDark} />
+          {/* Form */}
+          <div className="aura-card" style={{ padding: "22px 24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
+              <div>
+                <label className="aura-label">
+                  <Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+                  Data da Reunião
+                </label>
+                <input
+                    className="aura-input"
+                    type="date"
+                    style={{ colorScheme: isDark ? "dark" : "light" }}
+                    value={form.dataReuniao}
+                    onChange={e => setForm({ ...form, dataReuniao: e.target.value })}
+                />
               </div>
-          )}
+              <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
+            </div>
+          </div>
+
+          {/* KPIs */}
+          <div className="aura-kpi-grid">
+            <div className="aura-kpi">
+              <p className="aura-kpi-label">Membros</p>
+              <p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p>
+            </div>
+            <div className="aura-kpi">
+              <p className="aura-kpi-label">Visitantes</p>
+              <p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p>
+            </div>
+            <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue})`, border: "none" }}>
+              <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
+              <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
+            </div>
+          </div>
+
+          {/* Chamada */}
+          <PessoasList pessoas={pessoas} form={form} processingIds={processingIds} alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes} t={t} isDark={isDark} />
+
+          <div style={{ height: 100 }} />
         </div>
 
         {/* Botão fixo */}
-        <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)" : "linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)" }}>
-          <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, width: "100%",
+          padding: "16px 24px", zIndex: 50,
+          background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)",
+        }}>
+          <div style={{ maxWidth: 760, margin: "0 auto" }}>
             <button
-                onClick={handleSalvar} disabled={salvando || !podeSalvar}
-                style={{
-                  width: "100%", padding: "17px 0", borderRadius: 10, border: "none",
-                  background: (salvando || !podeSalvar) ? "rgba(200,16,46,.3)" : (relatorioRealizada ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`),
-                  color: (relatorioRealizada || salvando || !podeSalvar) ? "#fff" : IEQ.dark,
-                  cursor: (salvando || !podeSalvar) ? "not-allowed" : "pointer",
-                  fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".22em",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all .25s",
-                }}
+                className="aura-btn-red"
+                onClick={handleSalvar}
+                disabled={salvando || !form.estudo.trim()}
             >
               {salvando
-                  ? <><Loader2 size={17} style={{ animation: "spin 1s linear infinite" }} /> SALVANDO...</>
-                  : relatorioRealizada
-                      ? <><ClipboardCheck size={17} /> SALVAR ALTERAÇÕES ({total} PRESENTES)</>
-                      : <><Ban size={17} /> SALVAR — CÉLULA NÃO REALIZADA</>
+                  ? <><Loader2 size={16} className="aura-spin" /> Salvando…</>
+                  : <><ClipboardCheck size={16} /> Salvar Alterações ({total} presentes)</>
               }
             </button>
           </div>
@@ -596,60 +895,21 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   );
 }
 
-/* =============================================================
-   TOGGLE — Realizada / Não Realizada (componente reutilizável)
-============================================================= */
-function ToggleRealizacao({ realizada, onChange, isDark }) {
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+/* ─── Lista de chamada (reutilizável) ────────────────────────────────── */
+function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesVisitantes, t, isDark }) {
   return (
-      <div className="ieq-card" style={{ padding: "6px", marginBottom: 16, display: "flex", gap: 6 }}>
-        {[
-          { val: true,  label: "CÉLULA REALIZADA",     icon: <CheckCircle2 size={13} /> },
-          { val: false, label: "CÉLULA NÃO REALIZADA", icon: <Ban size={13} /> },
-        ].map(({ val, label, icon }) => {
-          const ativo = realizada === val;
-          return (
-              <button key={String(val)} onClick={() => onChange(val)} style={{
-                flex: 1, padding: "12px 8px", borderRadius: 8, border: "none", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em",
-                transition: "all .25s",
-                background: ativo
-                    ? (val ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`)
-                    : "transparent",
-                color: ativo ? (val ? "#fff" : IEQ.dark) : ts,
-              }}>
-                {icon} {label}
-              </button>
-          );
-        })}
-      </div>
-  );
-}
-
-/* =============================================================
-   LISTA DE CHAMADA (componente extraído para reutilizar)
-============================================================= */
-function ListaChamada({ pessoas, form, setForm, processingIds, setProcessingIds, decisoesVisitantes, isDark, tp, ts }) {
-  const alternarPresenca = (uKey) => {
-    const isMarcado = form.selecionadosKeys.includes(uKey);
-    setProcessingIds(prev => new Set(prev).add(uKey));
-    setForm(prev => ({
-      ...prev,
-      selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
-    }));
-    setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
-  };
-
-  return (
-      <div className="ieq-card" style={{ overflow: "hidden", marginBottom: 16 }}>
-        <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
-          <Users2 size={18} style={{ color: IEQ.red }} />
-          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".16em", color: tp }}>CHAMADA</span>
-          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: ts, marginLeft: "auto" }}>{pessoas.length} PESSOAS</span>
+      <div className="aura-card" style={{ overflow: "hidden" }}>
+        <div className="aura-card-head">
+          <div>
+            <h3 className="aura-card-head-title">Chamada</h3>
+            <p className="aura-card-head-sub">{pessoas.length} pessoas</p>
+          </div>
+          <span className="aura-badge">
+          <span className="aura-badge-dot aura-blink" />
+          Ao vivo
+        </span>
         </div>
-        <div style={{ maxHeight: "55vh", overflowY: "auto" }}>
+        <div style={{ maxHeight: "58vh", overflowY: "auto" }}>
           {pessoas.map((pessoa) => {
             const marcado     = form.selecionadosKeys.includes(pessoa.uKey);
             const isVisitante = pessoa.tipo === "VISITANTE";
@@ -658,49 +918,75 @@ function ListaChamada({ pessoas, form, setForm, processingIds, setProcessingIds,
             const temDecisao  = decisao && decisao !== "NENHUMA";
 
             return (
-                <div key={pessoa.uKey} className="ieq-person-row" style={{ background: marcado ? (isDark ? "rgba(200,16,46,.07)" : "rgba(200,16,46,.05)") : "transparent" }}>
+                <div
+                    key={pessoa.uKey}
+                    className="aura-person-row"
+                    style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}
+                >
                   <button
-                      onClick={() => alternarPresenca(pessoa.uKey)} disabled={processing}
-                      style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", transition: "all .2s" }}
+                      onClick={() => alternarPresenca(pessoa.uKey)}
+                      disabled={processing}
+                      style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 22px", transition: "all .2s" }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+                      {/* Avatar */}
                       <div style={{
-                        width: 44, height: 44, borderRadius: 8, flexShrink: 0,
-                        background: marcado ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})` : (isDark ? "rgba(255,255,255,.06)" : "rgba(200,16,46,.08)"),
+                        width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+                        background: marcado
+                            ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`
+                            : isDark ? "rgba(255,255,255,.05)" : "rgba(201,169,110,.08)",
+                        border: marcado ? "none" : `1px solid ${t.border}`,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        color: marcado ? "#fff" : (isDark ? IEQ.offWhite : "#1A0A0D"),
-                        fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 16, transition: "all .3s",
+                        color: marcado ? "#fff" : AURA.gold,
+                        fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 16,
+                        transition: "all .3s",
                       }}>
-                        {processing ? <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> : pessoa.nome.charAt(0)}
+                        {processing ? <Loader2 size={17} className="aura-spin" /> : pessoa.nome.charAt(0)}
                       </div>
+
                       <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
-                        <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: marcado ? 600 : 400, color: marcado ? tp : ts, margin: 0 }}>{pessoa.nome}</p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 3 }}>
-                          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".15em", color: isVisitante ? IEQ.yellow : IEQ.red }}>{pessoa.tipo}</span>
+                        <p style={{
+                          fontFamily: "'Inter',sans-serif", fontSize: 14,
+                          fontWeight: marcado ? 500 : 300,
+                          color: marcado ? t.text : t.textSec,
+                          margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        }}>
+                          {pessoa.nome}
+                        </p>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
+                      <span style={{
+                        fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase",
+                        color: isVisitante ? AURA.yellow : AURA.gold,
+                      }}>
+                        {pessoa.tipo}
+                      </span>
                           {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
                         </div>
                       </div>
                     </div>
+
+                    {/* Checkbox AURA */}
                     <div style={{
-                      width: 26, height: 26, borderRadius: 6, flexShrink: 0,
-                      border: `2px solid ${marcado ? IEQ.red : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)")}`,
-                      background: marcado ? IEQ.red : "transparent",
+                      width: 26, height: 26, borderRadius: 8, flexShrink: 0,
+                      border: `2px solid ${marcado ? AURA.gold : t.border}`,
+                      background: marcado ? `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})` : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s",
                     }}>
-                      {marcado && <CheckCircle2 size={14} style={{ color: "#fff" }} />}
+                      {marcado && <CheckCircle2 size={14} style={{ color: "#0A0A0F" }} />}
                     </div>
                   </button>
 
+                  {/* Decisão espiritual do visitante */}
                   {marcado && isVisitante && (
-                      <div style={{ padding: "0 24px 16px 82px" }}>
-                        <div className="ieq-card" style={{ padding: "12px 16px" }}>
-                          <label style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: ts, marginBottom: 8 }}>
-                            <Lock size={10} /> DECISÃO ESPIRITUAL
+                      <div style={{ padding: "0 22px 16px 76px" }}>
+                        <div className="aura-card" style={{ padding: "12px 16px", marginBottom: 0 }}>
+                          <label className="aura-label" style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                            <Lock size={9} /> Decisão Espiritual
                           </label>
-                          <DecisaoReadOnly decisao={decisao} isDark={isDark} ts={ts} tp={tp} />
+                          <DecisaoReadOnly decisao={decisao} t={t} />
                           {temDecisao && (
-                              <p style={{ fontFamily: "'EB Garamond',serif", fontStyle: "italic", fontSize: 12, color: ts, margin: "8px 0 0" }}>
-                                Para alterar a decisão, acesse o cadastro do visitante.
+                              <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "8px 0 0" }}>
+                                Para alterar, acesse o cadastro do visitante.
                               </p>
                           )}
                         </div>
@@ -715,9 +1001,10 @@ function ListaChamada({ pessoas, form, setForm, processingIds, setProcessingIds,
 }
 
 /* =============================================================
-   TELA PRINCIPAL — NOVO RELATÓRIO + HISTÓRICO
+   TELA PRINCIPAL — AURA
 ============================================================= */
 export default function TelaRelatorio({ isDark = false }) {
+  const t = theme(isDark);
   const [modo, setModo] = useState("novo");
   const [relatorioEditId, setRelatorioEditId] = useState(null);
   const [modalDuplicado, setModalDuplicado] = useState(null);
@@ -730,12 +1017,7 @@ export default function TelaRelatorio({ isDark = false }) {
   const [processingIds, setProcessingIds] = useState(new Set());
   const [rascunhoCarregado, setRascunhoCarregado] = useState(false);
   const [toastSucesso, setToastSucesso] = useState(null);
-  const [toastNaoRealizada, setToastNaoRealizada] = useState(null);
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
-
-  // ── Estado do toggle ──────────────────────────────────────────────────────
-  const [celulaRealizada, setCelulaRealizada] = useState(true);
-  const [motivoNaoRealizacao, setMotivoNaoRealizacao] = useState(null);
 
   const prontoParaSalvar = useRef(false);
 
@@ -745,9 +1027,11 @@ export default function TelaRelatorio({ isDark = false }) {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     })(),
-    estudo: "", selecionadosKeys: [],
+    estudo: "",
+    selecionadosKeys: [],
   });
 
+  /* rascunho */
   useEffect(() => {
     if (!prontoParaSalvar.current || !form.celulaId) return;
     try {
@@ -778,14 +1062,12 @@ export default function TelaRelatorio({ isDark = false }) {
       setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
 
       const decisoesMap = {};
-      await Promise.all(
-          (resVisitantes.data || []).map(async (v) => {
-            try {
-              const res = await api.get(`/visitantes/${v.id}`, { headers });
-              decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
-            } catch { decisoesMap[v.id] = null; }
-          })
-      );
+      await Promise.all((resVisitantes.data || []).map(async (v) => {
+        try {
+          const res = await api.get(`/visitantes/${v.id}`, { headers });
+          decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
+        } catch { decisoesMap[v.id] = null; }
+      }));
       setDecisoesVisitantes(decisoesMap);
 
       let restaurou = false;
@@ -825,36 +1107,24 @@ export default function TelaRelatorio({ isDark = false }) {
 
   useEffect(() => { if (modo === "historico") carregarHistorico(); }, [modo, carregarHistorico]);
 
+  const alternarPresenca = (uKey) => {
+    const isMarcado = form.selecionadosKeys.includes(uKey);
+    setProcessingIds(prev => new Set(prev).add(uKey));
+    setForm(prev => ({
+      ...prev,
+      selecionadosKeys: isMarcado
+          ? prev.selecionadosKeys.filter(k => k !== uKey)
+          : [...prev.selecionadosKeys, uKey],
+    }));
+    setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
+  };
+
   const membrosPresentes    = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).length;
   const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
   const total = membrosPresentes + visitantesPresentes;
 
-  // ── Submit principal ──────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    // ── Célula NÃO realizada ──────────────────────────────────────────────
-    if (!celulaRealizada) {
-      if (!motivoNaoRealizacao) return alert("Selecione o motivo da não realização.");
-      try {
-        setEnviando(true);
-        const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-        await api.post("/relatorios/nao-realizada", {
-          celulaId: Number(form.celulaId),
-          dataReuniao: form.dataReuniao,
-          motivoNaoRealizacao,
-        }, { headers: { Authorization: `Bearer ${token}` } });
-
-        setToastNaoRealizada({ motivo: motivoNaoRealizacao });
-        setMotivoNaoRealizacao(null);
-        setCelulaRealizada(true);
-      } catch (err) {
-        alert(err.response?.data?.message || "Erro ao registrar ausência de célula.");
-      } finally { setEnviando(false); }
-      return;
-    }
-
-    // ── Célula realizada — verificação de duplicata ───────────────────────
     if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
-
     try {
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const res = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
@@ -869,8 +1139,7 @@ export default function TelaRelatorio({ isDark = false }) {
       setEnviando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const totalEnviado = total;
-
-      await api.post("/relatorios", {
+      const payload = {
         celulaId: Number(form.celulaId),
         dataReuniao: form.dataReuniao,
         estudo: form.estudo.trim(),
@@ -879,13 +1148,12 @@ export default function TelaRelatorio({ isDark = false }) {
           const id = Number(k.replace("VISITANTE-", ""));
           return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
         }),
-      }, { headers: { Authorization: `Bearer ${token}` } });
-
+      };
+      await api.post("/relatorios", payload, { headers: { Authorization: `Bearer ${token}` } });
       try {
         await api.put(`/metas/celula/${form.celulaId}/recalcular`, {}, { headers: { Authorization: `Bearer ${token}` } });
         dispararAtualizacaoMetas(form.celulaId);
       } catch (err) { console.warn("Não foi possível recalcular metas:", err); }
-
       try { localStorage.removeItem(draftKey(form.celulaId)); } catch (_) {}
       prontoParaSalvar.current = false;
       setForm(f => ({ ...f, estudo: "", selecionadosKeys: [] }));
@@ -896,278 +1164,272 @@ export default function TelaRelatorio({ isDark = false }) {
     } finally { setEnviando(false); }
   };
 
-  const nomeCelula       = celula?.nome || "Carregando...";
-  const nomeUsuarioLider = celula?.nomeLider || celula?.lider?.nome || celula?.usuario?.nome || "Líder";
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const nomeCelula = celula?.nome || "Carregando…";
+  const nomeLider  = celula?.nomeLider || celula?.lider?.nome || celula?.usuario?.nome || "Líder";
 
-  // ── Botão principal habilitado? ───────────────────────────────────────────
-  const podoEnviar = celulaRealizada ? form.estudo.trim() : motivoNaoRealizacao;
-
-  const globalStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-    * { box-sizing:border-box; }
-    @keyframes stripe  { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-    @keyframes pulse   { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
-    @keyframes spin    { to{transform:rotate(360deg)} }
-    @keyframes fadeIn  { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes modalIn { from{opacity:0;transform:scale(.94) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    @keyframes ieqOverlayIn  { from{opacity:0} to{opacity:1} }
-    @keyframes ieqOverlayOut { from{opacity:1} to{opacity:0} }
-    @keyframes ieqToastIn    { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    @keyframes ieqToastOut   { from{opacity:1;transform:scale(1) translateY(0)} to{opacity:0;transform:scale(.92) translateY(-18px)} }
-    .ieq-bg-stripe { position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(-55deg,${isDark?"rgba(200,16,46,.04)":"rgba(200,16,46,.05)"} 0 10px,transparent 10px 20px,${isDark?"rgba(253,184,19,.03)":"rgba(253,184,19,.04)"} 20px 30px,transparent 30px 40px);background-size:60px 60px;animation:stripe 8s linear infinite; }
-    .ieq-card { background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};border-radius:14px;backdrop-filter:blur(24px); }
-    .ieq-input { width:100%;background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};color:${tp};padding:12px 16px;border-radius:8px;outline:none;font-family:'EB Garamond',serif;font-size:15px;transition:all .25s; }
-    .ieq-input:focus { border-color:${IEQ.red};box-shadow:0 0 0 3px rgba(200,16,46,.12); }
-    .ieq-input::placeholder { color:${ts}; }
-    .ieq-label { display:block;margin-bottom:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.18em;color:${IEQ.red}; }
-    .ieq-person-row { border-bottom:1px solid ${isDark?"rgba(200,16,46,.08)":"rgba(200,16,46,.07)"};transition:background .2s; }
-    .ieq-person-row:last-child { border-bottom:none; }
-    .ieq-kpi { background:${isDark?"rgba(17,10,13,.97)":"rgba(255,255,255,.92)"};border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};border-radius:12px;padding:20px;text-align:center; }
-    .ieq-toast { animation:fadeIn .35s ease;background:linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark});border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.16em;color:#fff;box-shadow:0 4px 20px rgba(0,61,165,.35); }
-    .pulse-ring { position:absolute;border-radius:50%;border:1px solid rgba(200,16,46,.35);animation:pulse 3s ease-in-out infinite; }
-    .ieq-tab { flex:1;padding:12px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.16em;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:7px; }
-    .ieq-hist-card { border-bottom:1px solid ${isDark?"rgba(200,16,46,.08)":"rgba(200,16,46,.07)"};padding:18px 20px;display:flex;align-items:center;justify-content:space-between;transition:background .2s; }
-    .ieq-hist-card:last-child { border-bottom:none; }
-    .ieq-edit-btn { display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.14em;background:linear-gradient(135deg,${IEQ.redDark},${IEQ.red});color:#fff;transition:opacity .2s; }
-    .ieq-edit-btn:hover { opacity:.85; }
-    .ieq-modal-overlay { position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:0 20px; }
-    .ieq-modal-box { background:${isDark?"#110A0D":"#fff"};border:1px solid rgba(253,184,19,.35);border-radius:16px;padding:28px 28px 24px;max-width:420px;width:100%;animation:modalIn .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.4); }
-    .ieq-modal-cancel { flex:1;padding:13px 0;border-radius:9px;border:1px solid ${isDark?"rgba(200,16,46,.25)":"rgba(200,16,46,.2)"};background:transparent;color:${tp};cursor:pointer;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.16em;transition:background .2s; }
-    .ieq-modal-confirm { flex:1;padding:13px 0;border-radius:9px;border:none;background:linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow});color:${IEQ.dark};cursor:pointer;font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.16em;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s; }
-  `;
-
+  /* ── Modo editar ── */
   if (modo === "editar" && relatorioEditId) {
     return (
-        <>
-          <style>{globalStyles}</style>
-          <div className="ieq-bg-stripe" />
-          <TelaEditarRelatorio
-              relatorioId={relatorioEditId} isDark={isDark}
-              onVoltar={() => { setModo("historico"); setRelatorioEditId(null); }}
-              onSalvo={() => { setModo("historico"); setRelatorioEditId(null); carregarHistorico(); }}
-          />
-        </>
+        <TelaEditarRelatorio
+            relatorioId={relatorioEditId}
+            isDark={isDark}
+            onVoltar={() => { setModo("historico"); setRelatorioEditId(null); }}
+            onSalvo={() => { setModo("historico"); setRelatorioEditId(null); carregarHistorico(); }}
+        />
     );
   }
 
+  /* ── Loading ── */
   if (loading) return (
-      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap'); @keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <div style={{ textAlign: "center" }}>
-          <QuadrangularCross size={40} />
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".2em", color: IEQ.red, marginTop: 14 }}>CARREGANDO...</p>
+      <div className="aura-loading">
+        <AuraStyles t={t} isDark={isDark} />
+        <div className="aura-glow" />
+        <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+            <div className="aura-pulse" style={{ width: 72, height: 72, position: "absolute", border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
+            <div style={{ width: 52, height: 52, borderRadius: "50%", background: t.bgEl, border: `1.5px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+              <IEQCross size={36} />
+            </div>
+          </div>
+          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>
+            Carregando…
+          </p>
         </div>
       </div>
   );
 
   return (
-      <div style={{ minHeight: "100vh", position: "relative", paddingBottom: 120 }}>
-        <style>{globalStyles}</style>
-        <div className="ieq-bg-stripe" />
+      <div className="aura-root">
+        <AuraStyles t={t} isDark={isDark} />
+        <div className="aura-glow" />
 
-        {toastSucesso    && <ToastSucesso     total={toastSucesso.total}       onClose={() => setToastSucesso(null)} />}
-        {toastNaoRealizada && <ToastNaoRealizada motivo={toastNaoRealizada.motivo} onClose={() => setToastNaoRealizada(null)} />}
+        {toastSucesso && <ToastSucesso total={toastSucesso.total} onClose={() => setToastSucesso(null)} />}
 
         {/* Modal duplicado */}
         {modalDuplicado && (
-            <div className="ieq-modal-overlay" onClick={() => setModalDuplicado(null)}>
-              <div className="ieq-modal-box" onClick={e => e.stopPropagation()}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", flexShrink: 0, background: "rgba(253,184,19,.15)", border: "1px solid rgba(253,184,19,.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <AlertTriangle size={22} style={{ color: IEQ.yellow }} />
+            <div className="aura-modal-overlay" onClick={() => setModalDuplicado(null)}>
+              <div className="aura-modal-box" onClick={e => e.stopPropagation()}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+                  <div style={{ width: 50, height: 50, borderRadius: "50%", flexShrink: 0, background: "rgba(253,184,19,.1)", border: "1px solid rgba(253,184,19,.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <AlertTriangle size={22} style={{ color: AURA.yellow }} />
                   </div>
                   <div>
-                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: ".2em", fontWeight: 700, color: tp, margin: 0 }}>RELATÓRIO JÁ ENVIADO</p>
-                    <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "3px 0 0" }}>
+                    <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontWeight: 500, color: t.text, margin: "0 0 3px" }}>
+                      Relatório já enviado
+                    </p>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>
                       {new Date(normalizarData(modalDuplicado.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                     </p>
                   </div>
                 </div>
-                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, color: ts, lineHeight: 1.65, margin: "0 0 16px" }}>
-                  Já existe um relatório para esta data. Deseja <strong style={{ color: tp }}>editar o relatório existente</strong>?
+                <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${AURA.gold}, transparent)`, margin: "0 0 18px" }} />
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.textSec, lineHeight: 1.65, margin: "0 0 20px" }}>
+                  Já existe um relatório para esta data. Deseja <strong style={{ color: t.text, fontWeight: 500 }}>editar o existente</strong>?
                 </p>
                 <div style={{ display: "flex", gap: 10 }}>
-                  <button className="ieq-modal-cancel" onClick={() => setModalDuplicado(null)}>CANCELAR</button>
-                  <button className="ieq-modal-confirm" onClick={() => { const id = modalDuplicado.relatorioId; setModalDuplicado(null); setRelatorioEditId(id); setModo("editar"); }}>
-                    <Edit3 size={14} /> EDITAR EXISTENTE
+                  <button className="aura-btn-ghost" style={{ flex: 1 }} onClick={() => setModalDuplicado(null)}>
+                    Cancelar
+                  </button>
+                  <button
+                      className="aura-btn-primary"
+                      style={{ flex: 2 }}
+                      onClick={() => { const id = modalDuplicado.relatorioId; setModalDuplicado(null); setRelatorioEditId(id); setModo("editar"); }}
+                  >
+                    <Edit3 size={14} /> Editar Existente
                   </button>
                 </div>
               </div>
             </div>
         )}
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
-          {/* Abas */}
-          <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", margin: "16px 0", border: `1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"}` }}>
+        <div className="aura-content" style={{ paddingTop: 20 }}>
+
+          {/* ── Tabs ── */}
+          <div className="aura-tabs">
             {[
-              { key: "novo",      label: "NOVO RELATÓRIO", icon: <ClipboardCheck size={13} /> },
-              { key: "historico", label: "HISTÓRICO",       icon: <History size={13} /> },
+              { key: "novo",      label: "Novo Relatório", icon: <ClipboardCheck size={13} /> },
+              { key: "historico", label: "Histórico",      icon: <History size={13} /> },
             ].map(tab => (
-                <button key={tab.key} className="ieq-tab" onClick={() => setModo(tab.key)} style={{ background: modo === tab.key ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})` : (isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"), color: modo === tab.key ? "#fff" : ts }}>
+                <button
+                    key={tab.key}
+                    className={`aura-tab ${modo === tab.key ? "active" : "inactive"}`}
+                    onClick={() => setModo(tab.key)}
+                >
                   {tab.icon} {tab.label}
                 </button>
             ))}
           </div>
 
-          {/* ── ABA HISTÓRICO ─────────────────────────────────────────────────── */}
+          {/* ══ ABA HISTÓRICO ══ */}
           {modo === "historico" && (
-              <div className="ieq-card" style={{ overflow: "hidden" }}>
-                <div style={{ padding: "20px 24px", borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.08)"}`, display: "flex", alignItems: "center", gap: 10 }}>
-                  <History size={18} style={{ color: IEQ.red }} />
-                  <span style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".16em", color: tp }}>SEUS RELATÓRIOS</span>
+              <div className="aura-card" style={{ overflow: "hidden" }}>
+                <div className="aura-card-head">
+                  <div>
+                    <h3 className="aura-card-head-title">Seus Relatórios</h3>
+                    <p className="aura-card-head-sub">{historico.length} registros</p>
+                  </div>
+                  <span className="aura-badge"><Trophy size={10} /> Histórico</span>
                 </div>
                 {loadingHist ? (
-                    <div style={{ padding: 40, textAlign: "center" }}><Loader2 size={28} style={{ color: IEQ.red, animation: "spin 1s linear infinite" }} /></div>
+                    <div style={{ padding: 48, textAlign: "center" }}>
+                      <Loader2 size={28} className="aura-spin" style={{ color: AURA.gold, display: "inline-block" }} />
+                    </div>
                 ) : historico.length === 0 ? (
-                    <div style={{ padding: 40, textAlign: "center" }}><p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".16em", color: ts }}>NENHUM RELATÓRIO ENCONTRADO</p></div>
-                ) : (
-                    historico.map(rel => {
-                      const naoRealizada = rel.realizada === false;
-                      return (
-                          <div key={rel.id} className="ieq-hist-card" style={{ background: naoRealizada ? (isDark ? "rgba(253,184,19,.04)" : "rgba(253,184,19,.05)") : "transparent" }}>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".14em", color: tp, margin: "0 0 4px" }}>
-                                {rel.dataReuniao ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "?"}
-                              </p>
-                              {naoRealizada ? (
-                                  <div style={{ marginBottom: 6 }}>
-                                    <BadgeNaoRealizada motivo={rel.motivoNaoRealizacao} />
-                                  </div>
-                              ) : (
-                                  <>
-                                    <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: ts, margin: "0 0 6px" }}>{rel.estudo || "Sem referência"}</p>
-                                    <span style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".12em", color: IEQ.red }}>{rel.totalPresentes || 0} PRESENTES</span>
-                                  </>
-                              )}
-                            </div>
-                            <button className="ieq-edit-btn" onClick={() => { setRelatorioEditId(rel.id); setModo("editar"); }}>
-                              <Edit3 size={12} /> EDITAR
-                            </button>
-                          </div>
-                      );
-                    })
-                )}
+                    <div style={{ padding: 48, textAlign: "center" }}>
+                      <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+                        Nenhum relatório encontrado.
+                      </p>
+                    </div>
+                ) : historico.map(rel => (
+                    <div key={rel.id} className="aura-hist-row">
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                          <div style={{ width: 7, height: 7, borderRadius: "50%", background: AURA.gold, flexShrink: 0 }} />
+                          <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 500, color: t.text, margin: 0 }}>
+                            {rel.dataReuniao
+                                ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+                                : "—"
+                            }
+                          </p>
+                        </div>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "0 0 5px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {rel.estudo || "Sem referência"}
+                        </p>
+                        <span className="aura-badge" style={{ fontSize: 9, padding: "3px 10px" }}>
+                    <Users2 size={9} /> {rel.totalPresentes || 0} presentes
+                  </span>
+                      </div>
+                      <button className="aura-btn-edit" onClick={() => { setRelatorioEditId(rel.id); setModo("editar"); }}>
+                        <Edit3 size={12} /> Editar
+                      </button>
+                    </div>
+                ))}
               </div>
           )}
 
-          {/* ── ABA NOVO RELATÓRIO ────────────────────────────────────────────── */}
+          {/* ══ ABA NOVO RELATÓRIO ══ */}
           {modo === "novo" && (
               <>
                 {rascunhoCarregado && (
-                    <div style={{ marginBottom: 12 }}>
-                      <div className="ieq-toast"><CheckCircle2 size={15} /> RASCUNHO RESTAURADO — suas marcações anteriores foram recuperadas</div>
+                    <div className="aura-draft-toast">
+                      <CheckCircle2 size={14} style={{ flexShrink: 0 }} />
+                      Rascunho restaurado — suas marcações anteriores foram recuperadas.
                     </div>
                 )}
 
-                {/* Cabeçalho azul */}
-                <div style={{ padding: "40px 40px 36px", marginBottom: 24, background: isDark ? "linear-gradient(135deg,#1A0A0D,#0A0608)" : `linear-gradient(135deg,${IEQ.blue},${IEQ.blueDark})`, borderRadius: 14, position: "relative", overflow: "hidden" }}>
-                  <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(-55deg,rgba(255,255,255,.03) 0 10px,transparent 10px 20px)", backgroundSize: "40px 40px" }} />
-                  <div style={{ position: "relative", zIndex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                {/* Hero banner azul */}
+                <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` }}>
+                  <div className="aura-hero-stripes" />
+                  <div className="aura-hero-inner">
+                    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+                      {/* Logo com rings */}
                       <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                        <div className="pulse-ring" style={{ width: 64, height: 64 }} />
-                        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <QuadrangularCross size={28} />
+                        <div className="aura-pulse" style={{ width: 66, height: 66, position: "absolute", border: "1px solid rgba(201,169,110,.35)", borderRadius: "50%" }} />
+                        <div style={{ width: 50, height: 50, borderRadius: "50%", background: "rgba(255,255,255,.1)", border: "1.5px solid rgba(255,255,255,.25)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                          <IEQCross size={34} />
                         </div>
                       </div>
                       <div>
-                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".22em", color: "rgba(255,255,255,.5)", margin: 0 }}>RELATÓRIO SEMANAL</p>
-                        <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: "#fff", margin: "4px 0 0", letterSpacing: ".1em" }}>{nomeCelula.toUpperCase()}</h1>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>
+                          Relatório Semanal
+                        </p>
+                        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0, letterSpacing: ".02em" }}>
+                          {nomeCelula}
+                        </h2>
                       </div>
                     </div>
+
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 38, height: 38, borderRadius: 8, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <UserCheck size={18} style={{ color: "#fff" }} />
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <UserCheck size={16} style={{ color: "#fff" }} />
                       </div>
                       <div>
-                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: "rgba(255,255,255,.5)", margin: 0 }}>LÍDER RESPONSÁVEL</p>
-                        <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 16, fontWeight: 600, color: "#fff", margin: 0 }}>{nomeUsuarioLider}</p>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 2px" }}>Líder Responsável</p>
+                        <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: "#fff", margin: 0 }}>{nomeLider}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* ── TOGGLE REALIZADA / NÃO REALIZADA ── */}
-                <ToggleRealizacao realizada={celulaRealizada} onChange={setCelulaRealizada} isDark={isDark} />
-
-                {celulaRealizada ? (
-                    <>
-                      {/* Formulário */}
-                      <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                          <div>
-                            <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
-                            <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
-                                   value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
-                          </div>
-                          <div>
-                            <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} isDark={isDark} />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* KPIs */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
-                        {[
-                          { label: "MEMBROS",    val: membrosPresentes,    color: IEQ.red  },
-                          { label: "VISITANTES", val: visitantesPresentes, color: IEQ.blue },
-                          { label: "TOTAL",      val: total, color: IEQ.yellow, highlight: true },
-                        ].map(({ label, val, color, highlight }) => (
-                            <div key={label} className="ieq-kpi" style={highlight ? { background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, border: "none" } : {}}>
-                              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: highlight ? "rgba(255,255,255,.6)" : ts, margin: "0 0 6px" }}>{label}</p>
-                              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 38, fontWeight: 700, color: highlight ? "#fff" : color, margin: 0, lineHeight: 1 }}>{val}</p>
-                            </div>
-                        ))}
-                      </div>
-
-                      {/* Chamada */}
-                      <ListaChamada
-                          pessoas={pessoas} form={form} setForm={setForm}
-                          processingIds={processingIds} setProcessingIds={setProcessingIds}
-                          decisoesVisitantes={decisoesVisitantes} isDark={isDark} tp={tp} ts={ts}
+                {/* Form */}
+                <div className="aura-card" style={{ padding: "22px 24px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
+                    <div>
+                      <label className="aura-label">
+                        <Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+                        Data da Reunião
+                      </label>
+                      <input
+                          className="aura-input"
+                          type="date"
+                          style={{ colorScheme: isDark ? "dark" : "light" }}
+                          value={form.dataReuniao}
+                          onChange={e => setForm({ ...form, dataReuniao: e.target.value })}
                       />
-                    </>
-                ) : (
-                    /* ── PAINEL DE MOTIVO ── */
-                    <div className="ieq-card" style={{ padding: "26px 28px", marginBottom: 16 }}>
-                      <div style={{ marginBottom: 20 }}>
-                        <label className="ieq-label"><Calendar size={11} style={{ display: "inline", marginRight: 6 }} />DATA DA REUNIÃO</label>
-                        <input className="ieq-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
-                               value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
-                      </div>
-                      <SeletorMotivo value={motivoNaoRealizacao} onChange={setMotivoNaoRealizacao} isDark={isDark} />
                     </div>
-                )}
+                    <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
+                  </div>
+                </div>
+
+                {/* Divider com badge */}
+                <div className="aura-divider"><div className="aura-divider-dot" /></div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
+              <span className="aura-badge">
+                <span className="aura-badge-dot aura-blink" />
+                Presença em Tempo Real
+              </span>
+                </div>
+
+                {/* KPIs */}
+                <div className="aura-kpi-grid">
+                  <div className="aura-kpi">
+                    <p className="aura-kpi-label">Membros</p>
+                    <p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p>
+                  </div>
+                  <div className="aura-kpi">
+                    <p className="aura-kpi-label">Visitantes</p>
+                    <p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p>
+                  </div>
+                  <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`, border: "none" }}>
+                    <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
+                    <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
+                  </div>
+                </div>
+
+                {/* Chamada */}
+                <PessoasList
+                    pessoas={pessoas}
+                    form={form}
+                    processingIds={processingIds}
+                    alternarPresenca={alternarPresenca}
+                    decisoesVisitantes={decisoesVisitantes}
+                    t={t}
+                    isDark={isDark}
+                />
+
+                <div style={{ height: 100 }} />
               </>
           )}
         </div>
 
         {/* Botão fixo */}
         {modo === "novo" && (
-            <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,6,8,1) 60%,transparent)" : "linear-gradient(to top,rgba(240,234,232,1) 60%,transparent)" }}>
-              <div style={{ maxWidth: 720, margin: "0 auto" }}>
+            <div style={{
+              position: "fixed", bottom: 0, left: 0, width: "100%",
+              padding: "16px 24px", zIndex: 50,
+              background: isDark
+                  ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)"
+                  : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)",
+            }}>
+              <div style={{ maxWidth: 760, margin: "0 auto" }}>
                 <button
-                    onClick={handleSubmit} disabled={enviando || !podoEnviar}
-                    style={{
-                      width: "100%", padding: "17px 0", borderRadius: 10, border: "none",
-                      background: (enviando || !podoEnviar)
-                          ? "rgba(200,16,46,.3)"
-                          : celulaRealizada
-                              ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`
-                              : `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`,
-                      color: (!celulaRealizada && !enviando && podoEnviar) ? IEQ.dark : "#fff",
-                      cursor: (enviando || !podoEnviar) ? "not-allowed" : "pointer",
-                      fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".22em",
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all .25s",
-                    }}
+                    className="aura-btn-primary"
+                    onClick={handleSubmit}
+                    disabled={enviando || !form.estudo.trim()}
                 >
                   {enviando
-                      ? <><Loader2 size={17} style={{ animation: "spin 1s linear infinite" }} /> ENVIANDO...</>
-                      : celulaRealizada
-                          ? <><ClipboardCheck size={17} /> FINALIZAR RELATÓRIO ({total})</>
-                          : <><Ban size={17} /> REGISTRAR AUSÊNCIA DE CÉLULA</>
+                      ? <><Loader2 size={16} className="aura-spin" /> Enviando…</>
+                      : <><ClipboardCheck size={16} /> Finalizar Relatório ({total} presentes)</>
                   }
                 </button>
               </div>
