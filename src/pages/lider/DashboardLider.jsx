@@ -696,12 +696,10 @@ export default function DashboardLider() {
               </div>
               <div className="dl-title-block">
                 <p className="dl-eyebrow">Painel do Líder</p>
-                <h1 className="dl-title">IEQ <span>Pituaçu</span></h1>
+
                 <p className="dl-subtitle" style={{ fontSize: 13, fontWeight: 500, color: t.textSec }}>
-                  📍 Célula{" "}
-                  <strong style={{ color: t.text, fontWeight: 600 }}>
-                    {celula?.nome?.toUpperCase() || "—"}
-                  </strong>
+     {" "}
+
                 </p>
                 <p className="dl-subtitle" style={{ fontSize: 12, fontWeight: 400, color: t.textMuted }}>
                   👤 {usuarioLogado?.nome || ""}
@@ -731,7 +729,10 @@ export default function DashboardLider() {
           <div className="dl-badge-center">
             <span className="dl-badge">
               <span className="dl-badge-dot dl-blink" />
-              Sistema Exclusivo IEQ Pituaçu
+   <h1 className="dl-title"><span>CÉLULA</span></h1>
+                  <strong style={{ color: t.text, fontWeight: 600 }}>
+                    {celula?.nome?.toUpperCase() || "—"}
+                  </strong>
             </span>
           </div>
 
