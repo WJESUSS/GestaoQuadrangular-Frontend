@@ -5,6 +5,7 @@ import api from "../../services/api.js";
 import {
   Plus, X, User, Phone, Trash2, Loader2, Search,
   CreditCard, Heart, ChevronRight, Users, CalendarDays,
+  MapPin, BookOpen, Briefcase, Cross, Star, FileText,
 } from "lucide-react";
 
 /* ─── Tokens ─────────────────────────────────────────────────────────── */
@@ -29,17 +30,52 @@ const estadoCivilOptions = [
   { value: "VIUVO",         label: "Viúvo(a)"      },
   { value: "UNIAO_ESTAVEL", label: "União Estável" },
 ];
+
 const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"];
 
+const grauEscolaridadeOptions = [
+  { value: "",                          label: "Não informado"               },
+  { value: "EDUCACAO_INFANTIL",         label: "Educação Infantil"           },
+  { value: "ENSINO_FUNDAMENTAL_I",      label: "Ensino Fundamental I (1-5º)" },
+  { value: "ENSINO_FUNDAMENTAL_II",     label: "Ensino Fundamental II (6-9º)"},
+  { value: "ENSINO_MEDIO",              label: "Ensino Médio"                },
+  { value: "ENSINO_MEDIO_INCOMPLETO",   label: "Ensino Médio Incompleto"     },
+  { value: "TECNICO",                   label: "Técnico"                     },
+  { value: "SUPERIOR_INCOMPLETO",       label: "Superior Incompleto"         },
+  { value: "SUPERIOR_COMPLETO",         label: "Superior Completo"           },
+  { value: "POS_GRADUACAO",             label: "Pós-Graduação / MBA"         },
+  { value: "MESTRADO",                  label: "Mestrado"                    },
+  { value: "DOUTORADO",                 label: "Doutorado"                   },
+];
+
+const tipoArrolamentoOptions = [
+  { value: "",                  label: "Não informado"    },
+  { value: "PROFISSAO_DE_FE",   label: "Profissão de Fé" },
+  { value: "TRANSFERENCIA",     label: "Transferência"   },
+];
+
 const formInicial = {
-  nome: "", email: "", telefone: "", endereco: "", cpf: "",
-  estadoCivil: "SOLTEIRO", dataNascimento: "", dataConversao: "",
-  dataBatismo: "", status: "ATIVO", celulaId: null,
+  nome: "", email: "", telefone: "", cpf: "", rg: "",
+  estadoCivil: "SOLTEIRO", status: "ATIVO",
+  dataNascimento: "", dataConversao: "", dataBatismo: "",
+  celulaId: null,
+  /* Filiação */
+  nomeMae: "", nomePai: "", "nomeCônjuge": "", naturalidade: "",
+  /* Escolaridade / profissão */
+  grauEscolaridade: "", curso: "", profissao: "",
+  /* Endereço detalhado */
+  endereco: "", numero: "", bairro: "", cidade: "", cep: "",
+  /* Espiritual */
+  pertenceOutraReligiao: false, qualReligiao: "",
+  batizadoNasAguas: false, dataBatizadoNasAguas: "", igrejaBatizadoNasAguas: "",
+  batizadoEspiritoSanto: false,
+  /* Arrolamento */
+  tipoArrolamento: "", jurisdicaoArrolamento: "", arroladoPor: "",
+  /* Outros */
+  observacoes: "",
 };
 
-/* ─── Helpers ─────────────────────────────────────────────────────────── */
-
-/** ISO/YYYY-MM-DD → YYYY-MM-DD (para o state interno) */
+/* ─── Helpers de Data ─────────────────────────────────────────────────── */
 function formatarDataInput(dataISO) {
   if (!dataISO) return "";
   try {
@@ -49,7 +85,6 @@ function formatarDataInput(dataISO) {
   } catch { return ""; }
 }
 
-/** DD/MM/AAAA → YYYY-MM-DD */
 function brParaIso(br) {
   const m = br.replace(/\D/g, "");
   if (m.length !== 8) return "";
@@ -58,14 +93,12 @@ function brParaIso(br) {
   return `${y}-${mo}-${d}`;
 }
 
-/** YYYY-MM-DD → DD/MM/AAAA */
 function isoParaBr(iso) {
   if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
   const [y, mo, d] = iso.split("-");
   return `${d}/${mo}/${y}`;
 }
 
-/** Aplica máscara DD/MM/AAAA enquanto o usuário digita */
 function mascaraData(valor) {
   const nums = valor.replace(/\D/g, "").slice(0, 8);
   if (nums.length <= 2) return nums;
@@ -75,46 +108,32 @@ function mascaraData(valor) {
 
 function prepararFormParaEnvio(form) {
   const dados = { ...form };
-  if (!dados.celulaId) delete dados.celulaId;
-  if (!dados.dataNascimento) dados.dataNascimento = null;
-  if (!dados.dataConversao)  dados.dataConversao  = null;
-  if (!dados.dataBatismo)    dados.dataBatismo    = null;
+  if (!dados.celulaId)             delete dados.celulaId;
+  if (!dados.dataNascimento)       dados.dataNascimento       = null;
+  if (!dados.dataConversao)        dados.dataConversao        = null;
+  if (!dados.dataBatismo)          dados.dataBatismo          = null;
+  if (!dados.dataBatizadoNasAguas) dados.dataBatizadoNasAguas = null;
+  if (!dados.tipoArrolamento)      dados.tipoArrolamento      = null;
   if (!dados.nome || dados.nome.trim() === "") throw new Error("Nome completo é obrigatório");
   return dados;
 }
 
 /* ─── DateInput ──────────────────────────────────────────────────────── */
-/**
- * Campo de data híbrido:
- *  • O usuário pode digitar no formato DD/MM/AAAA
- *  • Ou clicar no ícone de calendário para abrir o seletor nativo
- *
- * Props:
- *   value       – string no formato YYYY-MM-DD (igual ao state do form)
- *   onChange    – função chamada com YYYY-MM-DD quando muda
- *   className   – classe CSS extra (ex.: "mf-field")
- *   isDark      – bool para cor do ícone
- */
 function DateInput({ value, onChange, className = "", isDark = false, ...rest }) {
-  // Texto visível para o usuário (DD/MM/AAAA)
   const [texto, setTexto] = useState(isoParaBr(value));
   const nativeRef = useRef(null);
 
-  // Sincroniza quando o value externo muda (ex: ao abrir edição)
-  useEffect(() => {
-    setTexto(isoParaBr(value));
-  }, [value]);
+  useEffect(() => { setTexto(isoParaBr(value)); }, [value]);
 
   const handleTexto = (e) => {
     const mascarado = mascaraData(e.target.value);
     setTexto(mascarado);
     const iso = brParaIso(mascarado);
-    // Emite para o pai: ISO se válido, "" se não
     onChange(iso || (mascarado === "" ? "" : ""));
   };
 
   const handleNative = (e) => {
-    const iso = e.target.value; // YYYY-MM-DD
+    const iso = e.target.value;
     onChange(iso);
     setTexto(isoParaBr(iso));
   };
@@ -128,7 +147,6 @@ function DateInput({ value, onChange, className = "", isDark = false, ...rest })
 
   return (
       <div style={{ position: "relative" }}>
-        {/* Campo de texto visível */}
         <input
             {...rest}
             className={className}
@@ -139,8 +157,6 @@ function DateInput({ value, onChange, className = "", isDark = false, ...rest })
             maxLength={10}
             style={{ paddingRight: 38, ...(rest.style || {}) }}
         />
-
-        {/* Ícone de calendário — abre o native picker */}
         <button
             type="button"
             onClick={abrirCalendario}
@@ -155,8 +171,6 @@ function DateInput({ value, onChange, className = "", isDark = false, ...rest })
         >
           <CalendarDays size={16} />
         </button>
-
-        {/* Input nativo invisível — só para o picker funcionar */}
         <input
             ref={nativeRef}
             type="date"
@@ -172,6 +186,53 @@ function DateInput({ value, onChange, className = "", isDark = false, ...rest })
   );
 }
 
+/* ─── SectionTitle ──────────────────────────────────────────────────── */
+function SectionTitle({ icon: Icon, label, color, isDark }) {
+  return (
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "10px 14px", borderRadius: 8,
+        background: isDark ? `${color}12` : `${color}0D`,
+        border: `1px solid ${color}30`,
+        marginBottom: 2,
+      }}>
+        <Icon size={13} style={{ color, flexShrink: 0 }} />
+        <span style={{
+          fontFamily: "'Cinzel',serif", fontSize: 8.5, fontWeight: 700,
+          letterSpacing: ".2em", color, textTransform: "uppercase",
+        }}>
+        {label}
+      </span>
+      </div>
+  );
+}
+
+/* ─── CheckRow ──────────────────────────────────────────────────────── */
+function CheckRow({ label, checked, onChange, isDark, textSec }) {
+  return (
+      <label style={{
+        display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
+        padding: "8px 2px",
+      }}>
+        <div
+            onClick={onChange}
+            style={{
+              width: 20, height: 20, borderRadius: 5, flexShrink: 0,
+              border: `2px solid ${checked ? IEQ.blue : (isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)")}`,
+              background: checked ? IEQ.blue : "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all .18s",
+            }}
+        >
+          {checked && <span style={{ color: "#fff", fontSize: 12, lineHeight: 1 }}>✓</span>}
+        </div>
+        <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: textSec }}>
+        {label}
+      </span>
+      </label>
+  );
+}
+
 /* ─── Modal ───────────────────────────────────────────────────────────── */
 function MembroModal({
                        isDark, editandoId, form, setForm,
@@ -183,6 +244,7 @@ function MembroModal({
   const bg          = isDark ? "#0f0a0c" : "#ffffff";
   const border      = isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.14)";
   const inputBg     = isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)";
+  const sectionBg   = isDark ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.018)";
 
   const f = v => setForm(p => ({ ...p, ...v }));
 
@@ -201,7 +263,7 @@ function MembroModal({
       flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       padding: 20px 20px max(20px, env(safe-area-inset-bottom, 20px));
-      display: flex; flex-direction: column; gap: 14px;
+      display: flex; flex-direction: column; gap: 10px;
     }
     .mf-field {
       width: 100%; box-sizing: border-box;
@@ -214,12 +276,28 @@ function MembroModal({
     }
     .mf-field:focus { border-color: ${IEQ.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.1); }
     .mf-field::placeholder { color: ${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.28)"}; }
+    textarea.mf-field { resize: vertical; min-height: 80px; }
+    select.mf-field { color: ${textPrimary}; }
+    select.mf-field option {
+      background: ${isDark ? "#1a0e11" : "#ffffff"};
+      color: ${isDark ? IEQ.offWhite : "#1A0A0D"};
+    }
     .mf-label {
       font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: .2em;
       text-transform: uppercase; color: ${textSec}; display: block; margin-bottom: 5px;
     }
     .mf-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media(max-width:380px) { .mf-grid2 { grid-template-columns: 1fr; } }
+    .mf-grid3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+    @media(max-width:400px) {
+      .mf-grid2 { grid-template-columns: 1fr; }
+      .mf-grid3 { grid-template-columns: 1fr; }
+    }
+    .mf-section {
+      padding: 14px; border-radius: 10px;
+      background: ${sectionBg};
+      border: 1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)"};
+      display: flex; flex-direction: column; gap: 12px;
+    }
     .mf-btn-save {
       width: 100%; padding: 14px; border-radius: 8px; border: none; cursor: pointer;
       background: linear-gradient(135deg, ${IEQ.blueDark}, ${IEQ.blue});
@@ -230,11 +308,6 @@ function MembroModal({
       color: ${IEQ.red}; font-family: 'Cinzel', serif;
       font-size: 9px; font-weight: 700; letter-spacing: .14em;
       display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .mf-spiritual {
-      padding: 14px; border-radius: 10px;
-      background: ${isDark ? "rgba(0,61,165,.08)" : "rgba(0,61,165,.05)"};
-      border: 1px solid ${isDark ? "rgba(0,61,165,.2)" : "rgba(0,61,165,.12)"};
     }
     .mf-celula-badge {
       display: flex; align-items: center; gap: 10px;
@@ -250,6 +323,7 @@ function MembroModal({
     }
   `;
 
+  /* Célula badge */
   const renderCelulaBadge = () => {
     if (!editandoId) return null;
     if (nomeCelula) {
@@ -311,6 +385,7 @@ function MembroModal({
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.28 }}
         >
+          {/* Header */}
           <div className="mf-header">
             <button
                 onClick={onFechar}
@@ -338,98 +413,342 @@ function MembroModal({
 
             {renderCelulaBadge()}
 
-            <div>
-              <label className="mf-label">NOME COMPLETO *</label>
-              <input required className="mf-field"
-                     value={form.nome} onChange={e => f({ nome: e.target.value })} />
+            {/* ── 1. IDENTIFICAÇÃO ── */}
+            <SectionTitle icon={User} label="Identificação" color={IEQ.blue} isDark={isDark} />
+            <div className="mf-section">
+              <div>
+                <label className="mf-label">NOME COMPLETO *</label>
+                <input required className="mf-field"
+                       value={form.nome} onChange={e => f({ nome: e.target.value })} />
+              </div>
+
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">CPF</label>
+                  <input className="mf-field" placeholder="000.000.000-00"
+                         value={form.cpf} onChange={e => f({ cpf: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mf-label">RG</label>
+                  <input className="mf-field" placeholder="0000000"
+                         value={form.rg} onChange={e => f({ rg: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">NASCIMENTO</label>
+                  <DateInput className="mf-field" isDark={isDark}
+                             value={form.dataNascimento} onChange={v => f({ dataNascimento: v })} />
+                </div>
+                <div>
+                  <label className="mf-label">NATURALIDADE</label>
+                  <input className="mf-field" placeholder="Cidade/UF"
+                         value={form.naturalidade} onChange={e => f({ naturalidade: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">ESTADO CIVIL</label>
+                  <select className="mf-field"
+                          value={form.estadoCivil} onChange={e => f({ estadoCivil: e.target.value })}>
+                    {estadoCivilOptions.map(o =>
+                        <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mf-label">STATUS</label>
+                  <select className="mf-field"
+                          value={form.status} onChange={e => f({ status: e.target.value })}>
+                    {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">WHATSAPP</label>
+                  <input className="mf-field"
+                         value={form.telefone} onChange={e => f({ telefone: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mf-label">E-MAIL</label>
+                  <input type="email" className="mf-field"
+                         value={form.email} onChange={e => f({ email: e.target.value })} />
+                </div>
+              </div>
             </div>
 
-            <div className="mf-grid2">
-              <div>
-                <label className="mf-label">CPF</label>
-                <input className="mf-field" placeholder="000.000.000-00"
-                       value={form.cpf} onChange={e => f({ cpf: e.target.value })} />
+            {/* ── 2. FILIAÇÃO ── */}
+            <SectionTitle icon={Users} label="Filiação & Família" color="#7C3AED" isDark={isDark} />
+            <div className="mf-section">
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">NOME DA MÃE</label>
+                  <input className="mf-field"
+                         value={form.nomeMae} onChange={e => f({ nomeMae: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mf-label">NOME DO PAI</label>
+                  <input className="mf-field"
+                         value={form.nomePai} onChange={e => f({ nomePai: e.target.value })} />
+                </div>
               </div>
               <div>
-                <label className="mf-label">WHATSAPP</label>
+                <label className="mf-label">NOME DO CÔNJUGE</label>
                 <input className="mf-field"
-                       value={form.telefone} onChange={e => f({ telefone: e.target.value })} />
+                       value={form["nomeCônjuge"]} onChange={e => f({ "nomeCônjuge": e.target.value })} />
               </div>
             </div>
 
-            <div>
-              <label className="mf-label">E-MAIL</label>
-              <input type="email" className="mf-field"
-                     value={form.email} onChange={e => f({ email: e.target.value })} />
-            </div>
-
-            <div>
-              <label className="mf-label">ENDEREÇO</label>
-              <input className="mf-field"
-                     value={form.endereco} onChange={e => f({ endereco: e.target.value })} />
-            </div>
-
-            <div className="mf-grid2">
+            {/* ── 3. ENDEREÇO ── */}
+            <SectionTitle icon={MapPin} label="Endereço" color="#059669" isDark={isDark} />
+            <div className="mf-section">
+              {/* CEP com busca automática */}
               <div>
-                <label className="mf-label">NASCIMENTO</label>
-                {/* ✅ DateInput híbrido: digita OU calendário */}
-                <DateInput
-                    className="mf-field"
-                    isDark={isDark}
-                    value={form.dataNascimento}
-                    onChange={v => f({ dataNascimento: v })}
-                />
+                <label className="mf-label">CEP</label>
+                <div style={{ position: "relative" }}>
+                  <input
+                      className="mf-field"
+                      placeholder="00000-000"
+                      inputMode="numeric"
+                      maxLength={9}
+                      value={form.cep}
+                      onChange={e => {
+                        const nums = e.target.value.replace(/\D/g, "").slice(0, 8);
+                        const masked = nums.length > 5 ? `${nums.slice(0,5)}-${nums.slice(5)}` : nums;
+                        // Atualiza CEP e limpa status de busca
+                        setForm(p => ({ ...p, cep: masked, _cepStatus: nums.length === 8 ? "buscando" : "" }));
+                        if (nums.length === 8) {
+                          fetch(`https://viacep.com.br/ws/${nums}/json/`)
+                              .then(r => r.json())
+                              .then(d => {
+                                if (!d.erro) {
+                                  // Usa callback para garantir estado mais recente
+                                  setForm(p => ({
+                                    ...p,
+                                    endereco: d.logradouro || p.endereco,
+                                    bairro:   d.bairro     || p.bairro,
+                                    cidade:   d.localidade || p.cidade,
+                                    _cepStatus: "ok",
+                                  }));
+                                } else {
+                                  setForm(p => ({ ...p, _cepStatus: "erro" }));
+                                }
+                              })
+                              .catch(() => setForm(p => ({ ...p, _cepStatus: "erro" })));
+                        }
+                      }}
+                      style={{ paddingRight: 38 }}
+                  />
+                  {/* Ícone de status da busca */}
+                  {form._cepStatus === "buscando" ? (
+                      <Loader2 size={15} style={{
+                        position: "absolute", right: 12, top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#059669", animation: "spin 1s linear infinite",
+                      }} />
+                  ) : form._cepStatus === "ok" ? (
+                      <span style={{
+                        position: "absolute", right: 10, top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#059669", fontSize: 16, pointerEvents: "none",
+                      }}>✓</span>
+                  ) : form._cepStatus === "erro" ? (
+                      <span style={{
+                        position: "absolute", right: 10, top: "50%",
+                        transform: "translateY(-50%)",
+                        color: IEQ.red, fontSize: 13, pointerEvents: "none",
+                      }}>CEP não encontrado</span>
+                  ) : (
+                      <MapPin size={15} style={{
+                        position: "absolute", right: 12, top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#059669", opacity: 0.4, pointerEvents: "none",
+                      }} />
+                  )}
+                </div>
+                <p style={{
+                  fontFamily: "'EB Garamond',serif", fontSize: 12,
+                  color: form._cepStatus === "ok"
+                      ? "#059669"
+                      : isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)",
+                  margin: "4px 0 0 2px",
+                }}>
+                  {form._cepStatus === "ok"
+                      ? "✓ Endereço preenchido automaticamente"
+                      : "Digite o CEP para preencher o endereço automaticamente"}
+                </p>
+              </div>
+              {/* Rua + Número */}
+              <div className="mf-grid3">
+                <div>
+                  <label className="mf-label">LOGRADOURO</label>
+                  <input className="mf-field" placeholder="Rua, Av..."
+                         value={form.endereco} onChange={e => f({ endereco: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mf-label">Nº</label>
+                  <input className="mf-field"
+                         value={form.numero} onChange={e => f({ numero: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mf-label">UF / ESTADO</label>
+                  <input className="mf-field" placeholder="Ex: BA"
+                         value={form.uf ?? ""} onChange={e => f({ uf: e.target.value })} maxLength={2} />
+                </div>
+              </div>
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">BAIRRO</label>
+                  <input className="mf-field"
+                         value={form.bairro} onChange={e => f({ bairro: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mf-label">CIDADE</label>
+                  <input className="mf-field"
+                         value={form.cidade} onChange={e => f({ cidade: e.target.value })} />
+                </div>
+              </div>
+            </div>
+
+            {/* ── 4. ESCOLARIDADE & PROFISSÃO ── */}
+            <SectionTitle icon={BookOpen} label="Escolaridade & Profissão" color="#D97706" isDark={isDark} />
+            <div className="mf-section">
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">GRAU DE ESCOLARIDADE</label>
+                  <select className="mf-field"
+                          value={form.grauEscolaridade} onChange={e => f({ grauEscolaridade: e.target.value })}>
+                    {grauEscolaridadeOptions.map(o =>
+                        <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mf-label">CURSO</label>
+                  <input className="mf-field" placeholder="Ex: Administração"
+                         value={form.curso} onChange={e => f({ curso: e.target.value })} />
+                </div>
               </div>
               <div>
-                <label className="mf-label">ESTADO CIVIL</label>
-                <select className="mf-field"
-                        value={form.estadoCivil} onChange={e => f({ estadoCivil: e.target.value })}>
-                  {estadoCivilOptions.map(o =>
-                      <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
+                <label className="mf-label">PROFISSÃO</label>
+                <input className="mf-field"
+                       value={form.profissao} onChange={e => f({ profissao: e.target.value })} />
               </div>
             </div>
 
-            <div>
-              <label className="mf-label">STATUS</label>
-              <select className="mf-field"
-                      value={form.status} onChange={e => f({ status: e.target.value })}>
-                {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-
-            <div className="mf-spiritual">
-              <p style={{
-                display: "flex", alignItems: "center", gap: 6,
-                fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".16em",
-                color: IEQ.blue, margin: "0 0 12px",
-              }}>
-                <Heart size={12} /> JORNADA ESPIRITUAL
-              </p>
+            {/* ── 5. JORNADA ESPIRITUAL ── */}
+            <SectionTitle icon={Heart} label="Jornada Espiritual" color={IEQ.blue} isDark={isDark} />
+            <div className="mf-section">
               <div className="mf-grid2">
                 <div>
                   <label className="mf-label">DATA CONVERSÃO</label>
-                  {/* ✅ DateInput híbrido */}
-                  <DateInput
-                      className="mf-field"
-                      isDark={isDark}
-                      value={form.dataConversao}
-                      onChange={v => f({ dataConversao: v })}
-                  />
+                  <DateInput className="mf-field" isDark={isDark}
+                             value={form.dataConversao} onChange={v => f({ dataConversao: v })} />
                 </div>
                 <div>
-                  <label className="mf-label">DATA BATISMO</label>
-                  {/* ✅ DateInput híbrido */}
-                  <DateInput
-                      className="mf-field"
-                      isDark={isDark}
-                      value={form.dataBatismo}
-                      onChange={v => f({ dataBatismo: v })}
-                  />
+                  <label className="mf-label">DATA BATISMO (E. Santo)</label>
+                  <DateInput className="mf-field" isDark={isDark}
+                             value={form.dataBatismo} onChange={v => f({ dataBatismo: v })} />
+                </div>
+              </div>
+
+              {/* Outra religião */}
+              <CheckRow
+                  label="Pertence (ou pertenceu) a outra religião?"
+                  checked={!!form.pertenceOutraReligiao}
+                  onChange={() => f({ pertenceOutraReligiao: !form.pertenceOutraReligiao, qualReligiao: !form.pertenceOutraReligiao ? form.qualReligiao : "" })}
+                  isDark={isDark} textSec={textSec}
+              />
+              <AnimatePresence>
+                {form.pertenceOutraReligiao && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }} style={{ overflow: "hidden" }}
+                    >
+                      <label className="mf-label">QUAL RELIGIÃO?</label>
+                      <input className="mf-field"
+                             value={form.qualReligiao} onChange={e => f({ qualReligiao: e.target.value })} />
+                    </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Batismo nas águas */}
+              <CheckRow
+                  label="Batizado(a) nas águas?"
+                  checked={!!form.batizadoNasAguas}
+                  onChange={() => f({ batizadoNasAguas: !form.batizadoNasAguas })}
+                  isDark={isDark} textSec={textSec}
+              />
+              <AnimatePresence>
+                {form.batizadoNasAguas && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }} style={{ overflow: "hidden", display: "flex", flexDirection: "column", gap: 10 }}
+                    >
+                      <div className="mf-grid2">
+                        <div>
+                          <label className="mf-label">DATA DO BATISMO NAS ÁGUAS</label>
+                          <DateInput className="mf-field" isDark={isDark}
+                                     value={form.dataBatizadoNasAguas} onChange={v => f({ dataBatizadoNasAguas: v })} />
+                        </div>
+                        <div>
+                          <label className="mf-label">NA IGREJA</label>
+                          <input className="mf-field"
+                                 value={form.igrejaBatizadoNasAguas} onChange={e => f({ igrejaBatizadoNasAguas: e.target.value })} />
+                        </div>
+                      </div>
+                    </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Batismo Espírito Santo */}
+              <CheckRow
+                  label="Batizado(a) no Espírito Santo?"
+                  checked={!!form.batizadoEspiritoSanto}
+                  onChange={() => f({ batizadoEspiritoSanto: !form.batizadoEspiritoSanto })}
+                  isDark={isDark} textSec={textSec}
+              />
+            </div>
+
+            {/* ── 6. ARROLAMENTO ── */}
+            <SectionTitle icon={Star} label="Arrolamento" color={IEQ.red} isDark={isDark} />
+            <div className="mf-section">
+              <div>
+                <label className="mf-label">ARROLADO POR</label>
+                <select className="mf-field"
+                        value={form.tipoArrolamento} onChange={e => f({ tipoArrolamento: e.target.value })}>
+                  {tipoArrolamentoOptions.map(o =>
+                      <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div className="mf-grid2">
+                <div>
+                  <label className="mf-label">NOME DE QUEM ARROLOU</label>
+                  <input className="mf-field"
+                         value={form.arroladoPor} onChange={e => f({ arroladoPor: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mf-label">JURISDIÇÃO</label>
+                  <input className="mf-field" placeholder="Ex: Sede, Região Norte..."
+                         value={form.jurisdicaoArrolamento} onChange={e => f({ jurisdicaoArrolamento: e.target.value })} />
                 </div>
               </div>
             </div>
 
+            {/* ── 7. OBSERVAÇÕES ── */}
+            <SectionTitle icon={FileText} label="Observações" color={textSec} isDark={isDark} />
+            <div className="mf-section">
+              <div>
+                <label className="mf-label">OBSERVAÇÕES GERAIS</label>
+                <textarea className="mf-field"
+                          value={form.observacoes} onChange={e => f({ observacoes: e.target.value })}
+                          placeholder="Informações adicionais..." />
+              </div>
+            </div>
+
+            {/* ── Botões ── */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 4 }}>
               <button type="submit" className="mf-btn-save">
                 {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
@@ -518,17 +837,45 @@ export default function Membros({ isDark = false }) {
     setEditandoId(m.id); setStatusOriginal(m.status);
     setNomeCelula(m.nomeCelula ?? null); setNomeLider(m.nomeLider ?? null);
     setForm({
-      nome:           m.nome ?? "",
-      email:          m.email ?? "",
-      telefone:       m.telefone ?? "",
-      endereco:       m.endereco ?? "",
-      cpf:            m.cpf ?? "",
-      estadoCivil:    m.estadoCivil ?? "SOLTEIRO",
-      status:         m.status ?? "ATIVO",
-      celulaId:       m.celulaId ?? null,
-      dataNascimento: formatarDataInput(m.dataNascimento),
-      dataConversao:  formatarDataInput(m.dataConversao),
-      dataBatismo:    formatarDataInput(m.dataBatismo),
+      nome:                   m.nome ?? "",
+      email:                  m.email ?? "",
+      telefone:               m.telefone ?? "",
+      cpf:                    m.cpf ?? "",
+      rg:                     m.rg ?? "",
+      estadoCivil:            m.estadoCivil ?? "SOLTEIRO",
+      status:                 m.status ?? "ATIVO",
+      celulaId:               m.celulaId ?? null,
+      dataNascimento:         formatarDataInput(m.dataNascimento),
+      dataConversao:          formatarDataInput(m.dataConversao),
+      dataBatismo:            formatarDataInput(m.dataBatismo),
+      /* Filiação */
+      nomeMae:                m.nomeMae ?? "",
+      nomePai:                m.nomePai ?? "",
+      "nomeCônjuge":          m["nomeCônjuge"] ?? "",
+      naturalidade:           m.naturalidade ?? "",
+      /* Escolaridade */
+      grauEscolaridade:       m.grauEscolaridade ?? "",
+      curso:                  m.curso ?? "",
+      profissao:              m.profissao ?? "",
+      /* Endereço */
+      endereco:               m.endereco ?? "",
+      numero:                 m.numero ?? "",
+      bairro:                 m.bairro ?? "",
+      cidade:                 m.cidade ?? "",
+      cep:                    m.cep ?? "",
+      /* Espiritual */
+      pertenceOutraReligiao:  m.pertenceOutraReligiao ?? false,
+      qualReligiao:           m.qualReligiao ?? "",
+      batizadoNasAguas:       m.batizadoNasAguas ?? false,
+      dataBatizadoNasAguas:   formatarDataInput(m.dataBatizadoNasAguas),
+      igrejaBatizadoNasAguas: m.igrejaBatizadoNasAguas ?? "",
+      batizadoEspiritoSanto:  m.batizadoEspiritoSanto ?? false,
+      /* Arrolamento */
+      tipoArrolamento:        m.tipoArrolamento ?? "",
+      jurisdicaoArrolamento:  m.jurisdicaoArrolamento ?? "",
+      arroladoPor:            m.arroladoPor ?? "",
+      /* Outros */
+      observacoes:            m.observacoes ?? "",
     });
     setIsModalOpen(true);
   };
@@ -553,7 +900,7 @@ export default function Membros({ isDark = false }) {
       }
       fecharModal(); listar();
     } catch (err) {
-      const mensagem = err.response?.data?.message || err.response?.data?.error || err.message || "Erro desconhecido ao salvar";
+      const mensagem = err.response?.data?.message || err.response?.data?.error || err.message || "Erro desconhecido";
       console.error("❌ Erro ao salvar:", err);
       alert(`Erro ao salvar:\n\n${mensagem}`);
     }
@@ -570,17 +917,19 @@ export default function Membros({ isDark = false }) {
       alert(`Erro ao excluir:\n\n${mensagem}`);
     }
   };
-
-  const membrosFiltrados = membros.filter(m =>
-      m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
-      m.cpf?.includes(filtro) ||
-      m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
-  );
+  const membrosFiltrados = membros
+      .filter(m =>
+          m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
+          m.cpf?.includes(filtro) ||
+          m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
+      )
+      .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" }));
 
   return (
       <div style={{ padding: "24px 20px", fontFamily: "'EB Garamond',serif", color: textPrimary }}>
         <style>{baseStyles}</style>
 
+        {/* Header */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -617,6 +966,7 @@ export default function Membros({ isDark = false }) {
           </div>
         </div>
 
+        {/* Cards */}
         {loading ? (
             <div style={{ textAlign: "center", padding: "48px 0" }}>
               <Loader2 size={30} className="spin-icon" style={{ color: IEQ.blue, display: "inline-block" }} />
@@ -675,9 +1025,17 @@ export default function Membros({ isDark = false }) {
                       </span>
                             </div>
                         )}
+                        {m.profissao && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <Briefcase size={13} style={{ color: textSec, flexShrink: 0 }} />
+                              <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {m.profissao}
+                      </span>
+                            </div>
+                        )}
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <CreditCard size={13} style={{ color: textSec, flexShrink: 0 }} />
-                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec }}>
                       {m.cpf || "CPF não informado"}
                     </span>
                         </div>
