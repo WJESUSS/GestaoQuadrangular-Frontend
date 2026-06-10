@@ -197,9 +197,10 @@ function GlobalStyles({ t, isDark }) {
         display: inline-flex; align-items: center; gap: 7px;
         background: rgba(201,169,110,.07);
         border: 1px solid rgba(201,169,110,.2);
-        border-radius: 100px; padding: 5px 14px;
+        border-radius: 100px; padding: 8px 18px;
         font-size: 10px; font-weight: 500; letter-spacing: .1em;
         text-transform: uppercase; color: ${AURA.gold};
+        white-space: nowrap;
       }
       .dl-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: ${AURA.gold}; }
       .dl-badge-center { display: flex; justify-content: center; margin-bottom: 24px; }
@@ -685,7 +686,7 @@ export default function DashboardLider() {
           >
             <div className="dl-header-left">
               <div className="dl-avatar-wrap">
-                <div className="dl-ring dl-pulse" style={{ width: 70, height: 70 }} />
+                <div className="dl-ring dl-pulse" style={{ width: 50, height: 70 }} />
                 <div className="dl-ring dl-pulse" style={{ width: 56, height: 56, animationDelay: ".9s" }} />
                 <div className="dl-avatar">
                   {usuarioLogado?.fotoPerfil
@@ -698,7 +699,7 @@ export default function DashboardLider() {
                 <p className="dl-eyebrow">Painel do Líder</p>
 
                 <p className="dl-subtitle" style={{ fontSize: 13, fontWeight: 500, color: t.textSec }}>
-     {" "}
+                  {" "}
 
                 </p>
                 <p className="dl-subtitle" style={{ fontSize: 12, fontWeight: 400, color: t.textMuted }}>
@@ -729,10 +730,9 @@ export default function DashboardLider() {
           <div className="dl-badge-center">
             <span className="dl-badge">
               <span className="dl-badge-dot dl-blink" />
-   <h1 className="dl-title"><span>CÉLULA</span></h1>
-                  <strong style={{ color: t.text, fontWeight: 600 }}>
-                    {celula?.nome?.toUpperCase() || "—"}
-                  </strong>
+              <strong style={{ color: t.text, fontWeight: 600 }}>
+                {celula?.nome?.toUpperCase() || "—"}
+              </strong>
             </span>
           </div>
 
