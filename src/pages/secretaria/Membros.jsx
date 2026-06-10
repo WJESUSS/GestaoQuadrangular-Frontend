@@ -7,42 +7,19 @@ import {
   CreditCard, Heart, ChevronRight, Users, CalendarDays,
 } from "lucide-react";
 
-/* ─── Tokens AURA ─────────────────────────────────────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  lightEl:   "#EDE8DF",
+/* ─── Tokens ─────────────────────────────────────────────────────────── */
+const IEQ = {
+  red: "#C8102E", redDark: "#8B0B1F",
+  yellow: "#FDB813", blue: "#003DA5", blueDark: "#002470",
+  offWhite: "#F5F0E8",
 };
 
-// Retorna tokens contextuais baseado no tema
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"              : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.9)"    : "rgba(255,255,255,.92)",
-    bgInput:     isDark ? "rgba(255,255,255,.03)": "rgba(0,0,0,.03)",
-    border:      isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.14)": "rgba(201,169,110,.25)",
-    text:        isDark ? "#F5F0E8"              : "#1A1008",
-    textSec:     isDark ? "#9A9588"              : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"              : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)": "rgba(201,169,110,.08)",
-    glow2:       isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
-    headerBg:    isDark ? "rgba(10,10,15,.95)"   : "rgba(245,240,232,.95)",
-    cardHover:   isDark ? "rgba(201,169,110,.2)" : "rgba(201,169,110,.35)",
-    placeholder: isDark ? "rgba(154,149,136,.35)": "rgba(107,94,74,.35)",
-    optionBg:    isDark ? "#12121A"              : "#F0EAE0",
-  };
-}
-
 const STATUS_COLORS = {
-  ATIVO:       { bg: "rgba(201,169,110,.1)",  text: AURA.gold,  border: "rgba(201,169,110,.3)"  },
-  INATIVO:     { bg: "rgba(255,80,80,.08)",   text: "#e07070",  border: "rgba(255,80,80,.25)"   },
-  AFASTADO:    { bg: "rgba(155,155,255,.08)", text: "#9090dd",  border: "rgba(155,155,255,.25)" },
-  TRANSFERIDO: { bg: "rgba(100,180,255,.08)", text: "#70b8e8",  border: "rgba(100,180,255,.25)" },
-  FALECIDO:    { bg: "rgba(100,100,100,.08)", text: "#888",     border: "rgba(100,100,100,.2)"  },
+  ATIVO:       { bg: "rgba(5,150,105,.12)",  text: "#059669", border: "rgba(5,150,105,.3)"   },
+  INATIVO:     { bg: "rgba(200,16,46,.1)",   text: IEQ.red,   border: "rgba(200,16,46,.3)"   },
+  AFASTADO:    { bg: "rgba(253,184,19,.12)", text: "#C48C00", border: "rgba(253,184,19,.35)" },
+  TRANSFERIDO: { bg: "rgba(0,61,165,.1)",    text: IEQ.blue,  border: "rgba(0,61,165,.3)"    },
+  FALECIDO:    { bg: "rgba(100,100,100,.1)", text: "#666",    border: "rgba(100,100,100,.3)" },
 };
 
 const estadoCivilOptions = [
@@ -61,6 +38,8 @@ const formInicial = {
 };
 
 /* ─── Helpers ─────────────────────────────────────────────────────────── */
+
+/** ISO/YYYY-MM-DD → YYYY-MM-DD (para o state interno) */
 function formatarDataInput(dataISO) {
   if (!dataISO) return "";
   try {
@@ -69,24 +48,31 @@ function formatarDataInput(dataISO) {
     return "";
   } catch { return ""; }
 }
+
+/** DD/MM/AAAA → YYYY-MM-DD */
 function brParaIso(br) {
   const m = br.replace(/\D/g, "");
   if (m.length !== 8) return "";
-  const d = m.slice(0,2), mo = m.slice(2,4), y = m.slice(4,8);
-  if (+d<1||+d>31||+mo<1||+mo>12) return "";
+  const d = m.slice(0, 2), mo = m.slice(2, 4), y = m.slice(4, 8);
+  if (+d < 1 || +d > 31 || +mo < 1 || +mo > 12) return "";
   return `${y}-${mo}-${d}`;
 }
+
+/** YYYY-MM-DD → DD/MM/AAAA */
 function isoParaBr(iso) {
   if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
-  const [y,mo,d] = iso.split("-");
+  const [y, mo, d] = iso.split("-");
   return `${d}/${mo}/${y}`;
 }
+
+/** Aplica máscara DD/MM/AAAA enquanto o usuário digita */
 function mascaraData(valor) {
-  const nums = valor.replace(/\D/g,"").slice(0,8);
-  if (nums.length<=2) return nums;
-  if (nums.length<=4) return `${nums.slice(0,2)}/${nums.slice(2)}`;
+  const nums = valor.replace(/\D/g, "").slice(0, 8);
+  if (nums.length <= 2) return nums;
+  if (nums.length <= 4) return `${nums.slice(0,2)}/${nums.slice(2)}`;
   return `${nums.slice(0,2)}/${nums.slice(2,4)}/${nums.slice(4)}`;
 }
+
 function prepararFormParaEnvio(form) {
   const dados = { ...form };
   if (!dados.celulaId) delete dados.celulaId;
@@ -98,143 +84,218 @@ function prepararFormParaEnvio(form) {
 }
 
 /* ─── DateInput ──────────────────────────────────────────────────────── */
-function DateInput({ value, onChange, className = "", ...rest }) {
+/**
+ * Campo de data híbrido:
+ *  • O usuário pode digitar no formato DD/MM/AAAA
+ *  • Ou clicar no ícone de calendário para abrir o seletor nativo
+ *
+ * Props:
+ *   value       – string no formato YYYY-MM-DD (igual ao state do form)
+ *   onChange    – função chamada com YYYY-MM-DD quando muda
+ *   className   – classe CSS extra (ex.: "mf-field")
+ *   isDark      – bool para cor do ícone
+ */
+function DateInput({ value, onChange, className = "", isDark = false, ...rest }) {
+  // Texto visível para o usuário (DD/MM/AAAA)
   const [texto, setTexto] = useState(isoParaBr(value));
   const nativeRef = useRef(null);
-  useEffect(() => { setTexto(isoParaBr(value)); }, [value]);
+
+  // Sincroniza quando o value externo muda (ex: ao abrir edição)
+  useEffect(() => {
+    setTexto(isoParaBr(value));
+  }, [value]);
+
   const handleTexto = (e) => {
     const mascarado = mascaraData(e.target.value);
     setTexto(mascarado);
-    onChange(brParaIso(mascarado) || (mascarado === "" ? "" : ""));
+    const iso = brParaIso(mascarado);
+    // Emite para o pai: ISO se válido, "" se não
+    onChange(iso || (mascarado === "" ? "" : ""));
   };
-  const handleNative = (e) => { onChange(e.target.value); setTexto(isoParaBr(e.target.value)); };
-  const abrirCalendario = () => { nativeRef.current?.showPicker?.(); nativeRef.current?.click(); };
+
+  const handleNative = (e) => {
+    const iso = e.target.value; // YYYY-MM-DD
+    onChange(iso);
+    setTexto(isoParaBr(iso));
+  };
+
+  const abrirCalendario = () => {
+    if (nativeRef.current) {
+      nativeRef.current.showPicker?.();
+      nativeRef.current.click();
+    }
+  };
+
   return (
       <div style={{ position: "relative" }}>
-        <input {...rest} className={className} value={texto} onChange={handleTexto}
-               placeholder="DD/MM/AAAA" inputMode="numeric" maxLength={10}
-               style={{ paddingRight: 38, ...(rest.style || {}) }} />
-        <button type="button" onClick={abrirCalendario} title="Abrir calendário"
-                style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)",
-                  background:"none", border:"none", cursor:"pointer", padding:2,
-                  display:"flex", alignItems:"center", color:"rgba(201,169,110,.5)" }}>
-          <CalendarDays size={15} />
+        {/* Campo de texto visível */}
+        <input
+            {...rest}
+            className={className}
+            value={texto}
+            onChange={handleTexto}
+            placeholder="DD/MM/AAAA"
+            inputMode="numeric"
+            maxLength={10}
+            style={{ paddingRight: 38, ...(rest.style || {}) }}
+        />
+
+        {/* Ícone de calendário — abre o native picker */}
+        <button
+            type="button"
+            onClick={abrirCalendario}
+            title="Abrir calendário"
+            style={{
+              position: "absolute", right: 10, top: "50%",
+              transform: "translateY(-50%)",
+              background: "none", border: "none", cursor: "pointer",
+              padding: 2, display: "flex", alignItems: "center", justifyContent: "center",
+              color: isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.4)",
+            }}
+        >
+          <CalendarDays size={16} />
         </button>
-        <input ref={nativeRef} type="date" value={value || ""} onChange={handleNative}
-               tabIndex={-1} style={{ position:"absolute", opacity:0, pointerEvents:"none", inset:0 }} />
+
+        {/* Input nativo invisível — só para o picker funcionar */}
+        <input
+            ref={nativeRef}
+            type="date"
+            value={value || ""}
+            onChange={handleNative}
+            tabIndex={-1}
+            style={{
+              position: "absolute", opacity: 0, pointerEvents: "none",
+              top: 0, left: 0, width: "100%", height: "100%",
+            }}
+        />
       </div>
   );
 }
 
 /* ─── Modal ───────────────────────────────────────────────────────────── */
-function MembroModal({ isDark, editandoId, form, setForm, onSalvar, onExcluir, onFechar, nomeCelula, nomeLider }) {
-  const t = theme(isDark);
+function MembroModal({
+                       isDark, editandoId, form, setForm,
+                       onSalvar, onExcluir, onFechar,
+                       nomeCelula, nomeLider,
+                     }) {
+  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
+  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const bg          = isDark ? "#0f0a0c" : "#ffffff";
+  const border      = isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.14)";
+  const inputBg     = isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)";
+
   const f = v => setForm(p => ({ ...p, ...v }));
 
   const css = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
     .mf-wrap {
-      position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column;
-      background:${t.bg}; font-family:'Inter',sans-serif; color:${t.text};
-    }
-    .mf-wrap::before {
-      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
-      background:
-        radial-gradient(ellipse at 20% 0%, ${t.glow1} 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 100%, ${t.glow2} 0%, transparent 55%);
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column;
+      background: ${bg}; font-family: 'EB Garamond', serif; color: ${textPrimary};
     }
     .mf-header {
-      position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between;
-      padding:18px 22px; border-bottom:1px solid ${t.border}; flex-shrink:0;
-      background:${t.headerBg}; backdrop-filter:blur(20px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid ${border};
+      flex-shrink: 0; background: ${bg};
     }
     .mf-body {
-      flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
-      padding:24px 22px max(24px, env(safe-area-inset-bottom,24px));
-      display:flex; flex-direction:column; gap:16px; position:relative; z-index:1;
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding: 20px 20px max(20px, env(safe-area-inset-bottom, 20px));
+      display: flex; flex-direction: column; gap: 14px;
     }
     .mf-field {
-      width:100%; box-sizing:border-box; background:${t.bgInput};
-      border:1px solid ${t.borderInput}; color:${t.text}; padding:12px 16px;
-      border-radius:12px; outline:none; font-family:'Inter',sans-serif; font-size:14px; font-weight:300;
-      transition:border-color .25s, box-shadow .25s, background .25s; -webkit-appearance:none; appearance:none;
+      width: 100%; box-sizing: border-box;
+      background: ${inputBg};
+      border: 1px solid ${isDark ? "rgba(200,16,46,.22)" : "rgba(200,16,46,.18)"};
+      color: ${textPrimary}; padding: 11px 14px; border-radius: 8px;
+      outline: none; font-family: 'EB Garamond', serif; font-size: 15px;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none; appearance: none;
     }
-    .mf-field:focus { border-color:rgba(201,169,110,.5); background:rgba(201,169,110,.04); box-shadow:0 0 0 3px rgba(201,169,110,.08); }
-    .mf-field::placeholder { color:${t.placeholder}; }
-    .mf-field option { background:${t.optionBg}; color:${t.text}; }
+    .mf-field:focus { border-color: ${IEQ.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.1); }
+    .mf-field::placeholder { color: ${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.28)"}; }
     .mf-label {
-      font-family:'Inter',sans-serif; font-size:10px; font-weight:500; letter-spacing:.18em;
-      text-transform:uppercase; color:rgba(201,169,110,.6); display:block; margin-bottom:6px;
+      font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: .2em;
+      text-transform: uppercase; color: ${textSec}; display: block; margin-bottom: 5px;
     }
-    .mf-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    @media(max-width:380px) { .mf-grid2 { grid-template-columns:1fr; } }
-    .mf-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(201,169,110,.15),transparent); margin:4px 0; }
+    .mf-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media(max-width:380px) { .mf-grid2 { grid-template-columns: 1fr; } }
     .mf-btn-save {
-      width:100%; padding:15px; border-radius:100px; border:none; cursor:pointer;
-      background:linear-gradient(135deg,#C9A96E,#E8D5A3); color:#0A0A0F;
-      font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
-      transition:all .35s cubic-bezier(.4,0,.2,1); box-shadow:0 8px 32px rgba(201,169,110,.25);
+      width: 100%; padding: 14px; border-radius: 8px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, ${IEQ.blueDark}, ${IEQ.blue});
+      color: #fff; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: .16em;
     }
-    .mf-btn-save:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(201,169,110,.35); }
     .mf-btn-del {
-      width:100%; padding:11px; border:1px solid rgba(255,80,80,.2); cursor:pointer;
-      background:rgba(255,80,80,.04); color:rgba(255,120,120,.7); border-radius:100px;
-      font-family:'Inter',sans-serif; font-size:11px; font-weight:500; letter-spacing:.14em; text-transform:uppercase;
-      display:flex; align-items:center; justify-content:center; gap:7px; transition:all .3s;
+      width: 100%; padding: 10px; border: none; cursor: pointer; background: none;
+      color: ${IEQ.red}; font-family: 'Cinzel', serif;
+      font-size: 9px; font-weight: 700; letter-spacing: .14em;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
     }
-    .mf-btn-del:hover { background:rgba(255,80,80,.08); border-color:rgba(255,80,80,.4); color:#e07070; }
     .mf-spiritual {
-      padding:18px; border-radius:16px;
-      background:${isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)"};
-      border:1px solid ${isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.18)"};
-      position:relative; overflow:hidden;
-    }
-    .mf-spiritual::before {
-      content:''; position:absolute; top:0; left:0; right:0; height:1px;
-      background:linear-gradient(90deg,transparent,rgba(201,169,110,.3),transparent);
+      padding: 14px; border-radius: 10px;
+      background: ${isDark ? "rgba(0,61,165,.08)" : "rgba(0,61,165,.05)"};
+      border: 1px solid ${isDark ? "rgba(0,61,165,.2)" : "rgba(0,61,165,.12)"};
     }
     .mf-celula-badge {
-      display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:16px;
-      background:rgba(201,169,110,.05); border:1px solid rgba(201,169,110,.18); position:relative; overflow:hidden;
-    }
-    .mf-celula-badge::before {
-      content:''; position:absolute; top:0; left:0; right:0; height:1px;
-      background:linear-gradient(90deg,transparent,rgba(201,169,110,.35),transparent);
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 10px;
+      background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(253,184,19,.08)"};
+      border: 1px solid ${isDark ? "rgba(253,184,19,.25)" : "rgba(253,184,19,.3)"};
     }
     .mf-celula-badge-empty {
-      display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:16px;
-      background:${isDark ? "rgba(255,255,255,.02)" : "rgba(0,0,0,.03)"};
-      border:1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.08)"};
-    }
-    .mf-section-title {
-      display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif;
-      font-size:10px; font-weight:500; letter-spacing:.18em; text-transform:uppercase;
-      color:${AURA.gold}; margin:0 0 14px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 10px;
+      background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)"};
+      border: 1px solid ${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"};
     }
   `;
 
   const renderCelulaBadge = () => {
     if (!editandoId) return null;
-    if (nomeCelula) return (
-        <div className="mf-celula-badge">
-          <div style={{ width:36,height:36,borderRadius:10,flexShrink:0,background:"rgba(201,169,110,.1)",border:"1px solid rgba(201,169,110,.25)",display:"flex",alignItems:"center",justifyContent:"center" }}>
-            <Users size={16} style={{ color:AURA.gold }} />
+    if (nomeCelula) {
+      return (
+          <div className="mf-celula-badge">
+            <div style={{
+              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+              background: `linear-gradient(135deg, ${IEQ.yellow}55, ${IEQ.yellow}22)`,
+              border: `1px solid ${IEQ.yellow}88`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Users size={15} style={{ color: "#C48C00" }} />
+            </div>
+            <div>
+              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em", color: "#C48C00", margin: "0 0 2px", textTransform: "uppercase" }}>
+                CÉLULA VINCULADA
+              </p>
+              <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 15, fontWeight: 600, color: textPrimary, margin: "0 0 2px" }}>
+                {nomeCelula}
+              </p>
+              {nomeLider && (
+                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: textSec, margin: 0 }}>
+                    Líder: {nomeLider}
+                  </p>
+              )}
+            </div>
           </div>
-          <div>
-            <p style={{ fontFamily:"'Inter',sans-serif",fontSize:9,fontWeight:600,letterSpacing:".18em",color:"rgba(201,169,110,.6)",margin:"0 0 3px",textTransform:"uppercase" }}>CÉLULA VINCULADA</p>
-            <p style={{ fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:500,color:t.text,margin:"0 0 2px" }}>{nomeCelula}</p>
-            {nomeLider && <p style={{ fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:300,color:t.textSec,margin:0 }}>Líder: {nomeLider}</p>}
-          </div>
-        </div>
-    );
+      );
+    }
     return (
         <div className="mf-celula-badge-empty">
-          <div style={{ width:36,height:36,borderRadius:10,flexShrink:0,background:isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.04)",border:`1px solid ${isDark?"rgba(255,255,255,.08)":"rgba(0,0,0,.08)"}`,display:"flex",alignItems:"center",justifyContent:"center" }}>
-            <Users size={16} style={{ color:t.textMuted }} />
+          <div style={{
+            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+            background: isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)",
+            border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Users size={15} style={{ color: textSec }} />
           </div>
           <div>
-            <p style={{ fontFamily:"'Inter',sans-serif",fontSize:9,fontWeight:500,letterSpacing:".18em",color:t.textMuted,margin:"0 0 3px",textTransform:"uppercase" }}>CÉLULA VINCULADA</p>
-            <p style={{ fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:300,fontStyle:"italic",color:t.textMuted,margin:0 }}>Nenhuma célula cadastrada</p>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em", color: textSec, margin: "0 0 2px", textTransform: "uppercase" }}>
+              CÉLULA VINCULADA
+            </p>
+            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, fontStyle: "italic", color: textSec, margin: 0 }}>
+              Nenhuma célula cadastrada
+            </p>
           </div>
         </div>
     );
@@ -243,126 +304,240 @@ function MembroModal({ isDark, editandoId, form, setForm, onSalvar, onExcluir, o
   const content = (
       <>
         <style>{css}</style>
-        <motion.div className="mf-wrap" initial={{ x:"100%" }} animate={{ x:0 }} exit={{ x:"100%" }} transition={{ type:"tween",duration:0.28 }}>
+        <motion.div
+            className="mf-wrap"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "tween", duration: 0.28 }}
+        >
           <div className="mf-header">
-            <button onClick={onFechar} style={{ background:"none",border:"none",cursor:"pointer",color:t.textMuted,display:"flex",alignItems:"center",gap:8,fontFamily:"'Inter',sans-serif",fontSize:11,fontWeight:500,letterSpacing:".14em",textTransform:"uppercase" }}>
-              <X size={17} /> Voltar
+            <button
+                onClick={onFechar}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  color: textSec, display: "flex", alignItems: "center", gap: 6,
+                  fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em",
+                }}
+            >
+              <X size={18} /> VOLTAR
             </button>
-            <div style={{ textAlign:"right" }}>
-              <p style={{ fontFamily:"'Inter',sans-serif",fontSize:9,fontWeight:500,letterSpacing:".2em",color:"rgba(201,169,110,.55)",margin:"0 0 3px",textTransform:"uppercase" }}>
-                {editandoId ? "Editar" : "Novo"}
-              </p>
-              <h2 style={{ fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:500,color:t.text,margin:0,letterSpacing:".04em" }}>
-                {editandoId ? "Perfil do Membro" : "Cadastro"}
+            <div style={{ textAlign: "right" }}>
+              <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: ".14em", color: textPrimary, margin: 0 }}>
+                {editandoId ? "EDITAR PERFIL" : "NOVO CADASTRO"}
               </h2>
+              <div style={{
+                height: 2, width: 32,
+                background: `linear-gradient(90deg,${IEQ.blue},${IEQ.yellow})`,
+                borderRadius: 99, marginTop: 5, marginLeft: "auto",
+              }} />
             </div>
           </div>
 
           <form className="mf-body" onSubmit={onSalvar}>
+
             {renderCelulaBadge()}
-            <div><label className="mf-label">Nome Completo *</label><input required className="mf-field" value={form.nome} onChange={e=>f({nome:e.target.value})} /></div>
-            <div className="mf-grid2">
-              <div><label className="mf-label">CPF</label><input className="mf-field" placeholder="000.000.000-00" value={form.cpf} onChange={e=>f({cpf:e.target.value})} /></div>
-              <div><label className="mf-label">WhatsApp</label><input className="mf-field" value={form.telefone} onChange={e=>f({telefone:e.target.value})} /></div>
+
+            <div>
+              <label className="mf-label">NOME COMPLETO *</label>
+              <input required className="mf-field"
+                     value={form.nome} onChange={e => f({ nome: e.target.value })} />
             </div>
-            <div><label className="mf-label">E-mail</label><input type="email" className="mf-field" value={form.email} onChange={e=>f({email:e.target.value})} /></div>
-            <div><label className="mf-label">Endereço</label><input className="mf-field" value={form.endereco} onChange={e=>f({endereco:e.target.value})} /></div>
+
             <div className="mf-grid2">
-              <div><label className="mf-label">Nascimento</label><DateInput className="mf-field" value={form.dataNascimento} onChange={v=>f({dataNascimento:v})} /></div>
               <div>
-                <label className="mf-label">Estado Civil</label>
-                <select className="mf-field" value={form.estadoCivil} onChange={e=>f({estadoCivil:e.target.value})}>
-                  {estadoCivilOptions.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+                <label className="mf-label">CPF</label>
+                <input className="mf-field" placeholder="000.000.000-00"
+                       value={form.cpf} onChange={e => f({ cpf: e.target.value })} />
+              </div>
+              <div>
+                <label className="mf-label">WHATSAPP</label>
+                <input className="mf-field"
+                       value={form.telefone} onChange={e => f({ telefone: e.target.value })} />
+              </div>
+            </div>
+
+            <div>
+              <label className="mf-label">E-MAIL</label>
+              <input type="email" className="mf-field"
+                     value={form.email} onChange={e => f({ email: e.target.value })} />
+            </div>
+
+            <div>
+              <label className="mf-label">ENDEREÇO</label>
+              <input className="mf-field"
+                     value={form.endereco} onChange={e => f({ endereco: e.target.value })} />
+            </div>
+
+            <div className="mf-grid2">
+              <div>
+                <label className="mf-label">NASCIMENTO</label>
+                {/* ✅ DateInput híbrido: digita OU calendário */}
+                <DateInput
+                    className="mf-field"
+                    isDark={isDark}
+                    value={form.dataNascimento}
+                    onChange={v => f({ dataNascimento: v })}
+                />
+              </div>
+              <div>
+                <label className="mf-label">ESTADO CIVIL</label>
+                <select className="mf-field"
+                        value={form.estadoCivil} onChange={e => f({ estadoCivil: e.target.value })}>
+                  {estadoCivilOptions.map(o =>
+                      <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
             </div>
+
             <div>
-              <label className="mf-label">Status</label>
-              <select className="mf-field" value={form.status} onChange={e=>f({status:e.target.value})}>
-                {statusOptions.map(s=><option key={s} value={s}>{s}</option>)}
+              <label className="mf-label">STATUS</label>
+              <select className="mf-field"
+                      value={form.status} onChange={e => f({ status: e.target.value })}>
+                {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-            <div className="mf-divider" />
+
             <div className="mf-spiritual">
-              <p className="mf-section-title"><Heart size={13} /> Jornada Espiritual</p>
+              <p style={{
+                display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".16em",
+                color: IEQ.blue, margin: "0 0 12px",
+              }}>
+                <Heart size={12} /> JORNADA ESPIRITUAL
+              </p>
               <div className="mf-grid2">
-                <div><label className="mf-label">Data Conversão</label><DateInput className="mf-field" value={form.dataConversao} onChange={v=>f({dataConversao:v})} /></div>
-                <div><label className="mf-label">Data Batismo</label><DateInput className="mf-field" value={form.dataBatismo} onChange={v=>f({dataBatismo:v})} /></div>
+                <div>
+                  <label className="mf-label">DATA CONVERSÃO</label>
+                  {/* ✅ DateInput híbrido */}
+                  <DateInput
+                      className="mf-field"
+                      isDark={isDark}
+                      value={form.dataConversao}
+                      onChange={v => f({ dataConversao: v })}
+                  />
+                </div>
+                <div>
+                  <label className="mf-label">DATA BATISMO</label>
+                  {/* ✅ DateInput híbrido */}
+                  <DateInput
+                      className="mf-field"
+                      isDark={isDark}
+                      value={form.dataBatismo}
+                      onChange={v => f({ dataBatismo: v })}
+                  />
+                </div>
               </div>
             </div>
-            <div style={{ display:"flex",flexDirection:"column",gap:10,paddingTop:6 }}>
-              <button type="submit" className="mf-btn-save">{editandoId ? "Salvar Alterações" : "Confirmar Cadastro"}</button>
-              {editandoId && <button type="button" className="mf-btn-del" onClick={onExcluir}><Trash2 size={13} /> Excluir Registro</button>}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 4 }}>
+              <button type="submit" className="mf-btn-save">
+                {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
+              </button>
+              {editandoId && (
+                  <button type="button" className="mf-btn-del" onClick={onExcluir}>
+                    <Trash2 size={13} /> EXCLUIR REGISTRO
+                  </button>
+              )}
             </div>
+
           </form>
         </motion.div>
       </>
   );
+
   return createPortal(content, document.body);
 }
 
 /* ─── Componente Principal ───────────────────────────────────────────── */
 export default function Membros({ isDark = false }) {
-  const [membros, setMembros] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editandoId, setEditandoId] = useState(null);
+  const [membros,        setMembros]        = useState([]);
+  const [loading,        setLoading]        = useState(true);
+  const [isModalOpen,    setIsModalOpen]    = useState(false);
+  const [editandoId,     setEditandoId]     = useState(null);
   const [statusOriginal, setStatusOriginal] = useState(null);
-  const [filtro, setFiltro] = useState("");
-  const [form, setForm] = useState(formInicial);
-  const [nomeCelula, setNomeCelula] = useState(null);
-  const [nomeLider, setNomeLider] = useState(null);
+  const [filtro,         setFiltro]         = useState("");
+  const [form,           setForm]           = useState(formInicial);
+  const [nomeCelula,     setNomeCelula]     = useState(null);
+  const [nomeLider,      setNomeLider]      = useState(null);
 
-  const t = theme(isDark);
+  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
+  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
+  const border      = isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)";
+  const inputBg     = isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)";
 
   const baseStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
-    @keyframes spin { to { transform:rotate(360deg) } }
-    .spin-icon { animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .spin-icon { animation: spin 1s linear infinite; }
     .ieq-field {
-      width:100%; box-sizing:border-box; background:${t.bgInput};
-      border:1px solid ${t.borderInput}; color:${t.text}; padding:12px 16px;
-      border-radius:12px; outline:none; font-family:'Inter',sans-serif; font-size:14px; font-weight:300; transition:all .25s;
+      width: 100%; box-sizing: border-box;
+      background: ${inputBg};
+      border: 1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"};
+      color: ${textPrimary}; padding: 11px 14px; border-radius: 8px;
+      outline: none; font-family: 'EB Garamond', serif; font-size: 15px; transition: all .25s;
     }
-    .ieq-field:focus { border-color:rgba(201,169,110,.5); background:rgba(201,169,110,.04); box-shadow:0 0 0 3px rgba(201,169,110,.08); }
-    .ieq-field::placeholder { color:${t.placeholder}; }
+    .ieq-field:focus { border-color: ${IEQ.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.12); }
+    .ieq-field::placeholder { color: ${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.3)"}; }
     .ieq-member-card {
-      background:${t.bgEl}; border:1px solid ${t.border}; border-radius:20px;
-      padding:20px; cursor:pointer; transition:all .4s cubic-bezier(.4,0,.2,1);
-      backdrop-filter:blur(24px); position:relative; overflow:hidden;
+      background: ${cardBg}; border: 1px solid ${border}; border-radius: 12px;
+      padding: 18px; cursor: pointer; transition: all .3s; backdrop-filter: blur(24px);
     }
-    .ieq-member-card::before {
-      content:''; position:absolute; top:0; left:0; right:0; height:2px;
-      background:linear-gradient(90deg,#C9A96E,transparent); opacity:0; transition:opacity .4s;
+    .ieq-member-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(200,16,46,.12); border-color: ${IEQ.red};
     }
-    .ieq-member-card:hover { transform:translateY(-6px); border-color:${t.cardHover}; box-shadow:0 20px 60px rgba(0,0,0,.${isDark?"4":"15"}); }
-    .ieq-member-card:hover::before { opacity:1; }
-    .ieq-grid-m { display:grid; grid-template-columns:1fr; gap:14px; }
-    @media(min-width:560px) { .ieq-grid-m { grid-template-columns:repeat(2,1fr); } }
-    @media(min-width:900px) { .ieq-grid-m { grid-template-columns:repeat(3,1fr); } }
+    .ieq-grid-m { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media(min-width:560px) { .ieq-grid-m { grid-template-columns: repeat(2,1fr); } }
+    @media(min-width:900px) { .ieq-grid-m { grid-template-columns: repeat(3,1fr); } }
   `;
 
   const listar = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get("/membros");
+      const res  = await api.get("/membros");
       const data = Array.isArray(res.data) ? res.data : res.data.content || [];
       setMembros(data);
-    } catch (err) { console.error("Erro ao listar membros:", err); setMembros([]); }
-    finally { setLoading(false); }
+    } catch (err) {
+      console.error("Erro ao listar membros:", err);
+      setMembros([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { listar(); }, [listar]);
 
-  const abrirNovo = () => { setEditandoId(null); setStatusOriginal(null); setNomeCelula(null); setNomeLider(null); setForm(formInicial); setIsModalOpen(true); };
+  const abrirNovo = () => {
+    setEditandoId(null); setStatusOriginal(null);
+    setNomeCelula(null); setNomeLider(null);
+    setForm(formInicial); setIsModalOpen(true);
+  };
+
   const abrirEdicao = (m) => {
-    setEditandoId(m.id); setStatusOriginal(m.status); setNomeCelula(m.nomeCelula??null); setNomeLider(m.nomeLider??null);
-    setForm({ nome:m.nome??"", email:m.email??"", telefone:m.telefone??"", endereco:m.endereco??"", cpf:m.cpf??"",
-      estadoCivil:m.estadoCivil??"SOLTEIRO", status:m.status??"ATIVO", celulaId:m.celulaId??null,
-      dataNascimento:formatarDataInput(m.dataNascimento), dataConversao:formatarDataInput(m.dataConversao), dataBatismo:formatarDataInput(m.dataBatismo) });
+    setEditandoId(m.id); setStatusOriginal(m.status);
+    setNomeCelula(m.nomeCelula ?? null); setNomeLider(m.nomeLider ?? null);
+    setForm({
+      nome:           m.nome ?? "",
+      email:          m.email ?? "",
+      telefone:       m.telefone ?? "",
+      endereco:       m.endereco ?? "",
+      cpf:            m.cpf ?? "",
+      estadoCivil:    m.estadoCivil ?? "SOLTEIRO",
+      status:         m.status ?? "ATIVO",
+      celulaId:       m.celulaId ?? null,
+      dataNascimento: formatarDataInput(m.dataNascimento),
+      dataConversao:  formatarDataInput(m.dataConversao),
+      dataBatismo:    formatarDataInput(m.dataBatismo),
+    });
     setIsModalOpen(true);
   };
-  const fecharModal = () => { setIsModalOpen(false); setEditandoId(null); setNomeCelula(null); setNomeLider(null); };
+
+  const fecharModal = () => {
+    setIsModalOpen(false); setEditandoId(null);
+    setNomeCelula(null); setNomeLider(null);
+  };
+
   const salvar = async (e) => {
     e.preventDefault();
     try {
@@ -370,17 +545,30 @@ export default function Membros({ isDark = false }) {
       if (editandoId) {
         if (form.status !== statusOriginal) {
           if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) return;
-          await api.put(`/membros/${editandoId}/status`, null, { params:{ status:form.status } });
+          await api.put(`/membros/${editandoId}/status`, null, { params: { status: form.status } });
         }
         await api.put(`/membros/${editandoId}`, dados);
-      } else { await api.post("/membros", dados); }
+      } else {
+        await api.post("/membros", dados);
+      }
       fecharModal(); listar();
-    } catch (err) { alert(`Erro ao salvar:\n\n${err.response?.data?.message||err.message||"Erro desconhecido"}`); }
+    } catch (err) {
+      const mensagem = err.response?.data?.message || err.response?.data?.error || err.message || "Erro desconhecido ao salvar";
+      console.error("❌ Erro ao salvar:", err);
+      alert(`Erro ao salvar:\n\n${mensagem}`);
+    }
   };
+
   const excluir = async () => {
     if (!window.confirm("Excluir permanentemente?")) return;
-    try { await api.delete(`/membros/${editandoId}`); fecharModal(); listar(); }
-    catch (err) { alert(`Erro ao excluir:\n\n${err.response?.data?.message||err.message}`); }
+    try {
+      await api.delete(`/membros/${editandoId}`);
+      fecharModal(); listar();
+    } catch (err) {
+      const mensagem = err.response?.data?.message || err.response?.data?.error || err.message;
+      console.error("❌ Erro ao excluir:", err);
+      alert(`Erro ao excluir:\n\n${mensagem}`);
+    }
   };
 
   const membrosFiltrados = membros.filter(m =>
@@ -390,90 +578,135 @@ export default function Membros({ isDark = false }) {
   );
 
   return (
-      <div style={{ padding:"28px 22px", fontFamily:"'Inter',sans-serif", color:t.text, minHeight:"100%", background:t.bg, position:"relative", transition:"background .3s, color .3s" }}>
-        <div style={{ position:"fixed",inset:0,pointerEvents:"none",zIndex:0,
-          background:`radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%)`,
-          transition:"background .3s" }} />
+      <div style={{ padding: "24px 20px", fontFamily: "'EB Garamond',serif", color: textPrimary }}>
         <style>{baseStyles}</style>
-        <div style={{ position:"relative",zIndex:1 }}>
-          {/* Header */}
-          <div style={{ display:"flex",flexDirection:"column",gap:16,marginBottom:28 }}>
-            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
-              <div style={{ display:"flex",alignItems:"center",gap:14 }}>
-                <div style={{ width:46,height:46,borderRadius:14,background:"rgba(201,169,110,.1)",border:"1px solid rgba(201,169,110,.2)",display:"flex",alignItems:"center",justifyContent:"center" }}>
-                  <User size={20} style={{ color:AURA.gold }} />
-                </div>
-                <div>
-                  <p style={{ fontFamily:"'Inter',sans-serif",fontSize:10,fontWeight:500,letterSpacing:".2em",color:"rgba(201,169,110,.55)",margin:"0 0 3px",textTransform:"uppercase" }}>Gestão</p>
-                  <h3 style={{ fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:500,color:t.text,margin:0 }}>Membresia</h3>
-                </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: 10, background: `${IEQ.blue}22`,
+                display: "flex", alignItems: "center", justifyContent: "center", color: IEQ.blue,
+              }}>
+                <User size={20} />
               </div>
-              <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-                <div style={{ padding:"6px 14px",borderRadius:100,background:"rgba(201,169,110,.07)",border:"1px solid rgba(201,169,110,.18)" }}>
-                  <span style={{ fontFamily:"'Inter',sans-serif",fontSize:11,fontWeight:500,color:AURA.gold,letterSpacing:".1em" }}>{membros.length} registros</span>
-                </div>
-                <button onClick={abrirNovo} style={{ display:"flex",alignItems:"center",gap:8,padding:"11px 22px",borderRadius:100,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#C9A96E,#E8D5A3)",color:"#0A0A0F",fontFamily:"'Inter',sans-serif",fontSize:11,fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",boxShadow:"0 8px 28px rgba(201,169,110,.25)",transition:"all .35s" }}>
-                  <Plus size={14} /> Novo Membro
-                </button>
+              <div>
+                <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, letterSpacing: ".16em", color: textPrimary, margin: 0 }}>MEMBRESIA</h3>
+                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".18em", color: textSec, margin: 0 }}>{membros.length} REGISTROS</p>
               </div>
             </div>
-            <div style={{ position:"relative" }}>
-              <Search size={15} style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:AURA.gold,opacity:.5 }} />
-              <input className="ieq-field" style={{ paddingLeft:46 }} placeholder="Buscar por nome, CPF ou célula…" value={filtro} onChange={e=>setFiltro(e.target.value)} />
-            </div>
+            <button onClick={abrirNovo} style={{
+              display: "flex", alignItems: "center", gap: 8, padding: "11px 20px",
+              borderRadius: 8, border: "none", cursor: "pointer",
+              background: `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
+              color: "#fff", fontFamily: "'Cinzel',serif", fontSize: 10, fontWeight: 700, letterSpacing: ".16em",
+            }}>
+              <Plus size={15} /> NOVO MEMBRO
+            </button>
           </div>
 
-          {loading ? (
-              <div style={{ textAlign:"center",padding:"64px 0" }}>
-                <Loader2 size={28} className="spin-icon" style={{ color:AURA.gold,display:"inline-block",opacity:.7 }} />
-                <p style={{ fontFamily:"'Inter',sans-serif",fontSize:10,fontWeight:500,letterSpacing:".22em",textTransform:"uppercase",color:t.textMuted,marginTop:14 }}>Carregando…</p>
-              </div>
-          ) : (
-              <motion.div className="ieq-grid-m" initial="hidden" animate="visible" variants={{ hidden:{},visible:{ transition:{ staggerChildren:.05 } } }}>
-                {membrosFiltrados.map(m => {
-                  const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
-                  return (
-                      <motion.div key={m.id} className="ieq-member-card"
-                                  variants={{ hidden:{opacity:0,y:16},visible:{opacity:1,y:0} }}
-                                  onClick={() => abrirEdicao(m)}>
-                        <div style={{ display:"flex",alignItems:"center",gap:13,marginBottom:16 }}>
-                          <div style={{ width:46,height:46,borderRadius:14,flexShrink:0,background:"linear-gradient(135deg,rgba(201,169,110,.15),rgba(201,169,110,.05))",border:"1px solid rgba(201,169,110,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Playfair Display',serif",fontWeight:600,fontSize:18,color:AURA.gold }}>
-                            {m.nome?.charAt(0).toUpperCase()}
-                          </div>
-                          <div style={{ minWidth:0,flex:1 }}>
-                            <h4 style={{ fontFamily:"'Playfair Display',serif",fontSize:15,fontWeight:500,color:t.text,margin:"0 0 6px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{m.nome}</h4>
-                            <span style={{ display:"inline-flex",alignItems:"center",padding:"3px 10px",borderRadius:100,background:sc.bg,color:sc.text,border:`1px solid ${sc.border}`,fontFamily:"'Inter',sans-serif",fontSize:9,fontWeight:600,letterSpacing:".14em",textTransform:"uppercase" }}>{m.status}</span>
-                          </div>
-                          <ChevronRight size={14} style={{ color:"rgba(201,169,110,.3)",flexShrink:0 }} />
-                        </div>
-                        <div style={{ height:1,background:`linear-gradient(90deg,rgba(201,169,110,.15),transparent)`,marginBottom:14 }} />
-                        <div style={{ display:"flex",flexDirection:"column",gap:7 }}>
-                          {m.nomeCelula && (
-                              <div style={{ display:"flex",alignItems:"center",gap:9 }}>
-                                <Users size={12} style={{ color:"rgba(201,169,110,.55)",flexShrink:0 }} />
-                                <span style={{ fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:300,color:"rgba(201,169,110,.8)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{m.nomeCelula}</span>
-                              </div>
-                          )}
-                          <div style={{ display:"flex",alignItems:"center",gap:9 }}>
-                            <CreditCard size={12} style={{ color:t.textMuted,flexShrink:0 }} />
-                            <span style={{ fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:300,color:t.textSec,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{m.cpf||"CPF não informado"}</span>
-                          </div>
-                          <div style={{ display:"flex",alignItems:"center",gap:9 }}>
-                            <Phone size={12} style={{ color:t.textMuted,flexShrink:0 }} />
-                            <span style={{ fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:300,color:t.textSec }}>{m.telefone||"Sem telefone"}</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                  );
-                })}
-              </motion.div>
-          )}
+          <div style={{ position: "relative" }}>
+            <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: IEQ.red, opacity: .6 }} />
+            <input
+                className="ieq-field"
+                style={{ paddingLeft: 42 }}
+                placeholder="Buscar por nome, CPF ou célula..."
+                value={filtro}
+                onChange={e => setFiltro(e.target.value)}
+            />
+          </div>
         </div>
+
+        {loading ? (
+            <div style={{ textAlign: "center", padding: "48px 0" }}>
+              <Loader2 size={30} className="spin-icon" style={{ color: IEQ.blue, display: "inline-block" }} />
+              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".2em", color: textSec, marginTop: 12 }}>CARREGANDO...</p>
+            </div>
+        ) : (
+            <motion.div
+                className="ieq-grid-m"
+                initial="hidden" animate="visible"
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: .05 } } }}
+            >
+              {membrosFiltrados.map(m => {
+                const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
+                return (
+                    <motion.div
+                        key={m.id}
+                        className="ieq-member-card"
+                        variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
+                        onClick={() => abrirEdicao(m)}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                        <div style={{
+                          width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                          background: `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "#fff", fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 16,
+                        }}>
+                          {m.nome?.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <h4 style={{
+                            fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700,
+                            letterSpacing: ".1em", color: textPrimary, margin: "0 0 5px",
+                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>
+                            {m.nome?.toUpperCase()}
+                          </h4>
+                          <span style={{
+                            display: "inline-flex", alignItems: "center",
+                            padding: "2px 10px", borderRadius: 99,
+                            background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`,
+                            fontFamily: "'Cinzel',serif", fontSize: 8, fontWeight: 700, letterSpacing: ".14em",
+                          }}>
+                      {m.status}
+                    </span>
+                        </div>
+                        <ChevronRight size={15} style={{ color: textSec, flexShrink: 0 }} />
+                      </div>
+
+                      <div style={{ borderTop: `1px solid ${border}`, paddingTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
+                        {m.nomeCelula && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <Users size={13} style={{ color: "#C48C00", flexShrink: 0 }} />
+                              <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: "#C48C00", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {m.nomeCelula}
+                      </span>
+                            </div>
+                        )}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <CreditCard size={13} style={{ color: textSec, flexShrink: 0 }} />
+                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {m.cpf || "CPF não informado"}
+                    </span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <Phone size={13} style={{ color: textSec, flexShrink: 0 }} />
+                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec }}>
+                      {m.telefone || "Sem telefone"}
+                    </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                );
+              })}
+            </motion.div>
+        )}
+
         <AnimatePresence>
           {isModalOpen && (
-              <MembroModal isDark={isDark} editandoId={editandoId} form={form} setForm={setForm}
-                           onSalvar={salvar} onExcluir={excluir} onFechar={fecharModal}
-                           nomeCelula={nomeCelula} nomeLider={nomeLider} />
+              <MembroModal
+                  isDark={isDark}
+                  editandoId={editandoId}
+                  form={form}
+                  setForm={setForm}
+                  onSalvar={salvar}
+                  onExcluir={excluir}
+                  onFechar={fecharModal}
+                  nomeCelula={nomeCelula}
+                  nomeLider={nomeLider}
+              />
           )}
         </AnimatePresence>
       </div>
