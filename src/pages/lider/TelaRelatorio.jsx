@@ -5,9 +5,10 @@ import {
   Calendar, BookOpen, Loader2, ChevronDown,
   UserCheck, ClipboardCheck, Trophy, Users2, CheckCircle2,
   Edit3, ArrowLeft, AlertTriangle, History, Lock,
+  XCircle, Briefcase, Plane, HeartPulse, HelpCircle,
 } from "lucide-react";
 
-/* ─── Tokens AURA (idênticos ao DashboardLider) ──────────────────────── */
+/* ─── Tokens AURA ──────────────────────────────────────────────────── */
 const AURA = {
   gold:      "#C9A96E",
   goldLight: "#E8D5A3",
@@ -39,11 +40,18 @@ function theme(isDark) {
   };
 }
 
-/* ─── Constantes de domínio ──────────────────────────────────────────── */
+/* ─── Justificativas de falta ────────────────────────────────────────── */
+const JUSTIFICATIVAS = [
+  { value: "TRABALHO", label: "Trabalho",  icon: <Briefcase  size={12} />, cor: "#6366F1", bg: "rgba(99,102,241,.08)",  borda: "rgba(99,102,241,.25)"  },
+  { value: "VIAGEM",   label: "Viagem",    icon: <Plane      size={12} />, cor: "#0891B2", bg: "rgba(8,145,178,.08)",   borda: "rgba(8,145,178,.25)"   },
+  { value: "DOENCA",   label: "Doença",    icon: <HeartPulse size={12} />, cor: "#DC2626", bg: "rgba(220,38,38,.08)",   borda: "rgba(220,38,38,.25)"   },
+  { value: "OUTROS",   label: "Outros",    icon: <HelpCircle size={12} />, cor: "#D97706", bg: "rgba(217,119,6,.08)",   borda: "rgba(217,119,6,.25)"   },
+];
+
 const DECISAO_CONFIG = {
-  ACEITOU_JESUS: { label: "Aceitou Jesus",    cor: AURA.blue,     bg: "rgba(0,61,165,.08)",  borda: "rgba(0,61,165,.25)",  icone: "✝️" },
-  RECONCILIOU:   { label: "Reconciliou",      cor: "#854F0B",     bg: "rgba(253,184,19,.1)", borda: "rgba(253,184,19,.3)", icone: "🙏" },
-  BATISMO_AGUAS: { label: "Deseja Batismo",   cor: "#0F6E56",     bg: "rgba(29,158,117,.08)",borda: "rgba(29,158,117,.3)", icone: "💧" },
+  ACEITOU_JESUS: { label: "Aceitou Jesus",  cor: AURA.blue,  bg: "rgba(0,61,165,.08)",  borda: "rgba(0,61,165,.25)",  icone: "✝️" },
+  RECONCILIOU:   { label: "Reconciliou",    cor: "#854F0B",  bg: "rgba(253,184,19,.1)", borda: "rgba(253,184,19,.3)", icone: "🙏" },
+  BATISMO_AGUAS: { label: "Deseja Batismo", cor: "#0F6E56",  bg: "rgba(29,158,117,.08)",borda: "rgba(29,158,117,.3)", icone: "💧" },
 };
 
 const draftKey = (celulaId) => `ieq_relatorio_draft_${celulaId}`;
@@ -85,35 +93,30 @@ const TEMAS_FIXOS = [
 const normalizarData = (d) => d ? String(d).substring(0, 10) : "";
 
 function dispararAtualizacaoMetas(celulaId) {
-  window.dispatchEvent(
-      new CustomEvent("ieq:metas:recalculadas", { detail: { celulaId: Number(celulaId) } })
-  );
+  window.dispatchEvent(new CustomEvent("ieq:metas:recalculadas", { detail: { celulaId: Number(celulaId) } }));
 }
 
-/* ─── CSS Global AURA ────────────────────────────────────────────────── */
+/* ─── CSS Global AURA ─────────────────────────────────────────────────── */
 function AuraStyles({ t, isDark }) {
   return (
       <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
-      @keyframes aura-spin  { to { transform: rotate(360deg); } }
-      @keyframes aura-pulse { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
-      @keyframes aura-blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
-      @keyframes aura-fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-      @keyframes aura-toast-in { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
+      @keyframes aura-spin    { to { transform: rotate(360deg); } }
+      @keyframes aura-pulse   { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+      @keyframes aura-blink   { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+      @keyframes aura-fadein  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes aura-toast-in  { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
       @keyframes aura-toast-out { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(.92) translateY(-18px)} }
+      @keyframes aura-just-in  { from{opacity:0;max-height:0} to{opacity:1;max-height:60px} }
 
       .aura-spin   { animation: aura-spin  1s linear infinite; }
       .aura-pulse  { animation: aura-pulse 3s ease-in-out infinite; }
       .aura-blink  { animation: aura-blink 2s ease-in-out infinite; }
 
-      /* ── Base ── */
       .aura-root {
-        font-family: 'Inter', sans-serif;
-        color: ${t.text};
-        min-height: 100vh;
-        position: relative;
-        padding-bottom: 120px;
+        font-family: 'Inter', sans-serif; color: ${t.text};
+        min-height: 100vh; position: relative; padding-bottom: 120px;
       }
       .aura-glow {
         position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -124,37 +127,24 @@ function AuraStyles({ t, isDark }) {
       }
       .aura-content {
         position: relative; z-index: 1;
-        max-width: 760px; margin: 0 auto;
-        padding: 0 18px;
+        max-width: 760px; margin: 0 auto; padding: 0 18px;
       }
       @media(max-width:420px) { .aura-content { padding: 0 14px; } }
 
-      /* ── Divider ── */
-      .aura-divider {
-        display: flex; align-items: center; gap: 10px; margin: 18px 0 22px;
-      }
-      .aura-divider::before {
-        content:''; flex:1; height:1px;
-        background: linear-gradient(to right, transparent, ${AURA.gold});
-      }
-      .aura-divider::after {
-        content:''; flex:1; height:1px;
-        background: linear-gradient(to left, transparent, ${AURA.gold});
-      }
+      .aura-divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 22px; }
+      .aura-divider::before { content:''; flex:1; height:1px; background: linear-gradient(to right, transparent, ${AURA.gold}); }
+      .aura-divider::after  { content:''; flex:1; height:1px; background: linear-gradient(to left, transparent, ${AURA.gold}); }
       .aura-divider-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
-      /* ── Badge ── */
       .aura-badge {
         display: inline-flex; align-items: center; gap: 7px;
-        background: rgba(201,169,110,.07);
-        border: 1px solid rgba(201,169,110,.2);
+        background: rgba(201,169,110,.07); border: 1px solid rgba(201,169,110,.2);
         border-radius: 100px; padding: 5px 14px;
         font-size: 10px; font-weight: 500; letter-spacing: .1em;
         text-transform: uppercase; color: ${AURA.gold};
       }
       .aura-badge-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
-      /* ── Tabs ── */
       .aura-tabs {
         display: flex; border-radius: 16px; overflow: hidden;
         border: 1px solid ${t.border}; margin: 16px 0 24px;
@@ -167,75 +157,44 @@ function AuraStyles({ t, isDark }) {
         display: flex; align-items: center; justify-content: center; gap: 8px;
         transition: all .25s;
       }
-      .aura-tab.active {
-        background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
-        color: #fff;
-      }
-      .aura-tab.inactive {
-        background: ${t.bgEl}; color: ${t.textMuted};
-      }
+      .aura-tab.active   { background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff; }
+      .aura-tab.inactive { background: ${t.bgEl}; color: ${t.textMuted}; }
       .aura-tab.inactive:hover { color: ${AURA.gold}; }
 
-      /* ── Card ── */
       .aura-card {
-        background: ${t.bgEl};
-        border: 1px solid ${t.border};
+        background: ${t.bgEl}; border: 1px solid ${t.border};
         border-radius: 20px; overflow: hidden;
-        backdrop-filter: blur(24px); position: relative;
-        margin-bottom: 16px;
+        backdrop-filter: blur(24px); position: relative; margin-bottom: 16px;
       }
       .aura-card::before {
         content:''; position:absolute; top:0; left:0; right:0; height:1px;
         background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
       }
       .aura-card-head {
-        padding: 20px 24px;
-        border-bottom: 1px solid ${t.border};
+        padding: 20px 24px; border-bottom: 1px solid ${t.border};
         display: flex; align-items: center; justify-content: space-between;
         flex-wrap: wrap; gap: 12px;
       }
-      .aura-card-head-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0;
-      }
-      .aura-card-head-sub {
-        font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0;
-      }
+      .aura-card-head-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; }
+      .aura-card-head-sub   { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0; }
 
-      /* ── Hero banner ── */
-      .aura-hero {
-        border-radius: 20px; padding: 32px 32px 28px;
-        margin-bottom: 20px; position: relative; overflow: hidden;
-      }
+      .aura-hero { border-radius: 20px; padding: 32px 32px 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
       .aura-hero-stripes {
         position: absolute; inset: 0; pointer-events: none;
-        background-image: repeating-linear-gradient(
-          -55deg, rgba(255,255,255,.025) 0 8px, transparent 8px 16px
-        );
+        background-image: repeating-linear-gradient(-55deg, rgba(255,255,255,.025) 0 8px, transparent 8px 16px);
       }
       .aura-hero-inner { position: relative; z-index: 1; }
 
-      /* ── KPI Grid ── */
-      .aura-kpi-grid {
-        display: grid; grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px; margin-bottom: 16px;
-      }
+      .aura-kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
       @media(max-width:480px) { .aura-kpi-grid { grid-template-columns: 1fr; } }
       .aura-kpi {
         background: ${t.bgEl}; border: 1px solid ${t.border};
         border-radius: 16px; padding: 20px 16px; text-align: center;
         backdrop-filter: blur(20px);
       }
-      .aura-kpi-label {
-        font-size: 9px; font-weight: 600; letter-spacing: .2em;
-        text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 8px;
-      }
-      .aura-kpi-num {
-        font-family: 'Playfair Display', serif;
-        font-size: 42px; font-weight: 600; line-height: 1; margin: 0;
-      }
+      .aura-kpi-label { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 8px; }
+      .aura-kpi-num   { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; line-height: 1; margin: 0; }
 
-      /* ── Input / Textarea ── */
       .aura-label {
         display: block; margin-bottom: 7px;
         font-size: 9px; font-weight: 600; letter-spacing: .18em;
@@ -244,56 +203,55 @@ function AuraStyles({ t, isDark }) {
       .aura-input {
         width: 100%; box-sizing: border-box;
         background: ${t.bgInput}; border: 1px solid ${t.borderInput};
-        color: ${t.text}; padding: 13px 16px;
-        border-radius: 13px; outline: none;
+        color: ${t.text}; padding: 13px 16px; border-radius: 13px; outline: none;
         font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .aura-input:focus {
-        border-color: rgba(201,169,110,.5);
-        background: rgba(201,169,110,.04);
+        border-color: rgba(201,169,110,.5); background: rgba(201,169,110,.04);
         box-shadow: 0 0 0 3px rgba(201,169,110,.08);
       }
       .aura-input::placeholder { color: ${t.placeholder}; }
 
-      /* ── Pessoa row ── */
-      .aura-person-row {
-        border-bottom: 1px solid ${t.border};
-        transition: background .2s;
-      }
+      .aura-person-row { border-bottom: 1px solid ${t.border}; transition: background .2s; }
       .aura-person-row:last-child { border-bottom: none; }
 
-      /* ── Alert ── */
+      /* Painel de justificativa — versão compacta em pílulas */
+      .aura-just-panel {
+        animation: aura-just-in .2s ease forwards;
+        padding: 0 22px 12px 76px;
+        display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      }
+      .aura-just-btn {
+        display: flex; align-items: center; gap: 5px;
+        padding: 5px 11px; border-radius: 100px;
+        border: 1px solid; cursor: pointer;
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500;
+        transition: all .15s; background: transparent; line-height: 1.4;
+      }
+      .aura-just-btn:hover { filter: brightness(1.1); }
+
       .aura-alert-warn {
         display: flex; align-items: center; gap: 12px;
-        background: rgba(253,184,19,.06);
-        border: 1px solid rgba(253,184,19,.22);
-        border-radius: 14px; padding: 14px 18px;
-        margin-bottom: 16px;
+        background: rgba(253,184,19,.06); border: 1px solid rgba(253,184,19,.22);
+        border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;
         font-size: 11px; font-weight: 500; letter-spacing: .1em;
         text-transform: uppercase; color: #c8a010;
       }
       .aura-alert-success {
         display: flex; align-items: center; gap: 12px;
-        background: rgba(13,110,58,.08);
-        border: 1px solid rgba(13,110,58,.25);
-        border-radius: 14px; padding: 14px 18px;
-        margin-bottom: 16px;
+        background: rgba(13,110,58,.08); border: 1px solid rgba(13,110,58,.25);
+        border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;
         font-size: 11px; font-weight: 500; letter-spacing: .1em;
-        text-transform: uppercase; color: #0d6e3a;
-        animation: aura-fadein .4s ease;
+        text-transform: uppercase; color: #0d6e3a; animation: aura-fadein .4s ease;
       }
       .aura-alert-info {
         display: flex; align-items: center; gap: 12px;
-        background: rgba(0,61,165,.06);
-        border: 1px solid rgba(0,61,165,.2);
-        border-radius: 14px; padding: 12px 18px;
-        margin-bottom: 16px;
-        font-size: 11px; font-weight: 500; letter-spacing: .08em;
-        color: ${AURA.blue};
+        background: rgba(0,61,165,.06); border: 1px solid rgba(0,61,165,.2);
+        border-radius: 14px; padding: 12px 18px; margin-bottom: 16px;
+        font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue};
       }
 
-      /* ── Toast overlay ── */
       .aura-toast-overlay {
         position: fixed; inset: 0; z-index: 400;
         display: flex; align-items: center; justify-content: center; padding: 0 20px;
@@ -302,8 +260,8 @@ function AuraStyles({ t, isDark }) {
       }
       .aura-toast-box {
         background: linear-gradient(160deg, #0d6e3a 0%, #073d22 100%);
-        border: 1px solid rgba(201,169,110,.15);
-        border-radius: 24px; padding: 36px 44px 32px;
+        border: 1px solid rgba(201,169,110,.15); border-radius: 24px;
+        padding: 36px 44px 32px;
         display: flex; flex-direction: column; align-items: center; gap: 20px;
         min-width: 300px; max-width: 380px; width: 100%;
         box-shadow: 0 24px 80px rgba(13,110,58,.5);
@@ -311,12 +269,10 @@ function AuraStyles({ t, isDark }) {
       }
       .aura-toast-icon {
         width: 72px; height: 72px; border-radius: 50%;
-        background: rgba(255,255,255,.15);
-        border: 1.5px solid rgba(255,255,255,.3);
+        background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.3);
         display: flex; align-items: center; justify-content: center;
       }
 
-      /* ── Modal ── */
       .aura-modal-overlay {
         position: fixed; inset: 0; z-index: 300;
         background: rgba(10,10,15,.82); backdrop-filter: blur(5px);
@@ -330,29 +286,24 @@ function AuraStyles({ t, isDark }) {
         box-shadow: 0 24px 80px rgba(0,0,0,.5);
       }
 
-      /* ── Botões ── */
       .aura-btn-primary {
         display: flex; align-items: center; justify-content: center; gap: 9px;
-        width: 100%; padding: 17px 0; border-radius: 100px; border: none;
-        cursor: pointer;
+        width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
         color: #fff; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .18em;
-        text-transform: uppercase; transition: all .3s;
-        box-shadow: 0 8px 28px rgba(0,61,165,.28);
+        font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+        transition: all .3s; box-shadow: 0 8px 28px rgba(0,61,165,.28);
       }
       .aura-btn-primary:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
       .aura-btn-primary:disabled { opacity: .4; cursor: not-allowed; }
 
       .aura-btn-red {
         display: flex; align-items: center; justify-content: center; gap: 9px;
-        width: 100%; padding: 17px 0; border-radius: 100px; border: none;
-        cursor: pointer;
+        width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
         color: #fff; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .18em;
-        text-transform: uppercase; transition: all .3s;
-        box-shadow: 0 8px 28px rgba(200,16,46,.28);
+        font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+        transition: all .3s; box-shadow: 0 8px 28px rgba(200,16,46,.28);
       }
       .aura-btn-red:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
       .aura-btn-red:disabled { opacity: .4; cursor: not-allowed; }
@@ -373,8 +324,7 @@ function AuraStyles({ t, isDark }) {
         border: 1px solid ${t.border}; cursor: pointer;
         background: transparent; color: ${t.textSec};
         font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
-        letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
-        margin-bottom: 20px;
+        letter-spacing: .14em; text-transform: uppercase; transition: all .3s; margin-bottom: 20px;
       }
       .aura-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
 
@@ -383,90 +333,69 @@ function AuraStyles({ t, isDark }) {
         padding: 9px 16px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
         color: #0A0A0F; font-family: 'Inter', sans-serif;
-        font-size: 9px; font-weight: 600; letter-spacing: .14em;
-        text-transform: uppercase; transition: all .25s;
-        box-shadow: 0 4px 14px rgba(201,169,110,.2); flex-shrink: 0;
+        font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+        transition: all .25s; box-shadow: 0 4px 14px rgba(201,169,110,.2); flex-shrink: 0;
       }
       .aura-btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,169,110,.3); }
 
-      /* ── Histórico ── */
       .aura-hist-row {
-        padding: 18px 22px;
-        border-bottom: 1px solid ${t.border};
+        padding: 18px 22px; border-bottom: 1px solid ${t.border};
         display: flex; align-items: center; justify-content: space-between;
         gap: 12px; transition: background .2s;
       }
       .aura-hist-row:last-child { border-bottom: none; }
       .aura-hist-row:hover { background: rgba(201,169,110,.03); }
 
-      /* ── Section header ── */
-      .aura-section-hd {
-        display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-      }
-      .aura-section-icon {
-        width: 30px; height: 30px; border-radius: 9px;
-        background: rgba(201,169,110,.08);
-        border: 1px solid rgba(201,169,110,.18);
-        display: flex; align-items: center; justify-content: center;
-        color: ${AURA.gold}; flex-shrink: 0;
-      }
-      .aura-section-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 15px; font-weight: 500; color: ${t.text};
-      }
-
-      /* ── Decisão badge ── */
       .aura-decisao-badge {
         display: inline-flex; align-items: center; gap: 5px;
         padding: 3px 10px; border-radius: 100px;
         font-size: 10px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
       }
-
-      /* ── Loading ── */
-      .aura-loading {
-        min-height: 60vh; display: flex;
-        align-items: center; justify-content: center;
-      }
-
-      /* ── Rascunho toast ── */
+      .aura-loading { min-height: 60vh; display: flex; align-items: center; justify-content: center; }
       .aura-draft-toast {
         display: flex; align-items: center; gap: 10px;
-        background: rgba(0,61,165,.08);
-        border: 1px solid rgba(0,61,165,.2);
-        border-radius: 14px; padding: 12px 18px;
-        margin-bottom: 14px;
-        font-size: 11px; font-weight: 500; letter-spacing: .08em;
-        color: ${AURA.blue};
+        background: rgba(0,61,165,.08); border: 1px solid rgba(0,61,165,.2);
+        border-radius: 14px; padding: 12px 18px; margin-bottom: 14px;
+        font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue};
         animation: aura-fadein .4s ease;
       }
     `}</style>
   );
 }
 
-/* ─── Logo IEQ ───────────────────────────────────────────────────────── */
 function IEQCross({ size = 36 }) {
   return (
-      <img
-          src="/quadrangular.png"
-          alt="Logo IEQ"
-          style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
-      />
+      <img src="/quadrangular.png" alt="Logo IEQ"
+           style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }} />
   );
 }
 
-/* ─── Badge de decisão espiritual ────────────────────────────────────── */
 function BadgeDecisao({ decisao }) {
   const cfg = DECISAO_CONFIG[decisao];
   if (!cfg) return null;
   return (
       <span className="aura-decisao-badge" style={{ background: cfg.bg, color: cfg.cor, border: `1px solid ${cfg.borda}` }}>
-      {cfg.icone} {cfg.label}
-        <Lock size={8} style={{ opacity: .6 }} />
+      {cfg.icone} {cfg.label} <Lock size={8} style={{ opacity: .6 }} />
     </span>
   );
 }
 
-/* ─── Decisão somente leitura ────────────────────────────────────────── */
+function BadgeJustificativa({ valor }) {
+  const cfg = JUSTIFICATIVAS.find(j => j.value === valor);
+  if (!cfg) return null;
+  return (
+      <span style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        padding: "3px 10px", borderRadius: 100,
+        background: cfg.bg, color: cfg.cor,
+        border: `1px solid ${cfg.borda}`,
+        fontSize: 10, fontWeight: 600,
+      }}>
+      {cfg.icon} {cfg.label}
+    </span>
+  );
+}
+
 function DecisaoReadOnly({ decisao, t }) {
   const cfg = decisao && decisao !== "NENHUMA" ? DECISAO_CONFIG[decisao] : null;
   return (
@@ -476,15 +405,10 @@ function DecisaoReadOnly({ decisao, t }) {
         background: t.bgInput, border: `1px solid ${t.borderInput}`,
       }}>
         <Lock size={13} style={{ color: t.textMuted, flexShrink: 0 }} />
-        {cfg ? (
-            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: cfg.cor }}>
-          {cfg.icone} {cfg.label}
-        </span>
-        ) : (
-            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
-          Sem decisão registrada
-        </span>
-        )}
+        {cfg
+            ? <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: cfg.cor }}>{cfg.icone} {cfg.label}</span>
+            : <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Sem decisão registrada</span>
+        }
         <span style={{ marginLeft: "auto", fontSize: 8, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
         Somente leitura
       </span>
@@ -493,7 +417,6 @@ function DecisaoReadOnly({ decisao, t }) {
 }
 
 /* ─── Seletor referência bíblica ─────────────────────────────────────── */
-/* ─── Seletor referência bíblica com Portal ─────────────────────────── */
 function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
   const [inputVal, setInputVal] = useState(value || "");
   const [sugestoes, setSugestoes] = useState([]);
@@ -502,29 +425,20 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    if (value !== inputVal) setInputVal(value || "");
-  }, [value]);
+  useEffect(() => { if (value !== inputVal) setInputVal(value || ""); }, [value]);
 
   const atualizarPosicao = () => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      });
+      setPosition({ top: rect.bottom + window.scrollY + 8, left: rect.left + window.scrollX, width: rect.width });
     }
   };
 
   const gerarSugestoes = (texto) => {
-    if (!texto.trim()) {
-      setSugestoes([]);
-      return;
-    }
+    if (!texto.trim()) { setSugestoes([]); return; }
     const lower = texto.toLowerCase();
     const livrosMatch = BIBLIA.filter(l => l.nome.toLowerCase().includes(lower)).slice(0, 4).map(l => l.nome);
-    const temasMatch = TEMAS_FIXOS.filter(t => t.toLowerCase().includes(lower)).slice(0, 10);
+    const temasMatch  = TEMAS_FIXOS.filter(t => t.toLowerCase().includes(lower)).slice(0, 10);
     const todas = [...new Set([...livrosMatch, ...temasMatch])];
     if (texto.trim() && !todas.some(s => s.toLowerCase() === lower)) todas.unshift(texto.trim());
     setSugestoes(todas.slice(0, 12));
@@ -532,19 +446,11 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
 
   const handleChange = (e) => {
     const val = e.target.value;
-    setInputVal(val);
-    onChange(val);
-    gerarSugestoes(val);
-    setAberto(true);
+    setInputVal(val); onChange(val); gerarSugestoes(val); setAberto(true);
     setTimeout(atualizarPosicao, 10);
   };
 
-  const selecionarSugestao = (s) => {
-    setInputVal(s);
-    onChange(s);
-    setSugestoes([]);
-    setAberto(false);
-  };
+  const selecionarSugestao = (s) => { setInputVal(s); onChange(s); setSugestoes([]); setAberto(false); };
 
   useEffect(() => {
     if (aberto) {
@@ -552,10 +458,7 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
       window.addEventListener("resize", atualizarPosicao);
       window.addEventListener("scroll", atualizarPosicao, true);
     }
-    return () => {
-      window.removeEventListener("resize", atualizarPosicao);
-      window.removeEventListener("scroll", atualizarPosicao, true);
-    };
+    return () => { window.removeEventListener("resize", atualizarPosicao); window.removeEventListener("scroll", atualizarPosicao, true); };
   }, [aberto]);
 
   return (
@@ -564,64 +467,32 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
           <BookOpen size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
           Tema / Referência Bíblica
         </label>
-
-        <input
-            ref={inputRef}
-            className="aura-input"
-            type="text"
-            placeholder="Ex: João 3:16 ou A fé que move…"
-            value={inputVal}
-            onChange={handleChange}
-            onFocus={() => {
-              if (inputVal.trim()) {
-                gerarSugestoes(inputVal);
-                setAberto(true);
-              }
-            }}
-            onBlur={() => setTimeout(() => setAberto(false), 220)}
-            autoComplete="off"
+        <input ref={inputRef} className="aura-input" type="text"
+               placeholder="Ex: João 3:16 ou A fé que move…"
+               value={inputVal} onChange={handleChange}
+               onFocus={() => { if (inputVal.trim()) { gerarSugestoes(inputVal); setAberto(true); } }}
+               onBlur={() => setTimeout(() => setAberto(false), 220)}
+               autoComplete="off"
         />
-
-        {/* Portal para o dropdown */}
         {aberto && sugestoes.length > 0 && createPortal(
             <div style={{
-              position: "absolute",
-              top: position.top,
-              left: position.left,
-              width: position.width,
-              zIndex: 99999,
-              background: t.bgEl,
-              border: `1px solid ${t.border}`,
-              borderRadius: 14,
-              maxHeight: 300,
-              overflowY: "auto",
+              position: "absolute", top: position.top, left: position.left, width: position.width,
+              zIndex: 99999, background: t.bgEl, border: `1px solid ${t.border}`,
+              borderRadius: 14, maxHeight: 300, overflowY: "auto",
               boxShadow: `0 25px 70px rgba(0,0,0,${isDark ? "0.75" : "0.3"})`,
               backdropFilter: "blur(24px)",
             }}>
               {sugestoes.map((s, i) => (
-                  <button
-                      key={i}
-                      onMouseDown={() => selecionarSugestao(s)}
-                      style={{
-                        width: "100%",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "13px 16px",
-                        textAlign: "left",
-                        fontFamily: "'Inter',sans-serif",
-                        fontSize: 14,
-                        fontWeight: 300,
-                        color: t.text,
-                        borderBottom: i < sugestoes.length - 1 ? `1px solid ${t.border}` : "none",
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = isDark ? "rgba(201,169,110,.10)" : "rgba(201,169,110,.15)";
-                      }}
-                      onMouseLeave={e => e.currentTarget.style.background = "none"}
-                  >
-                    {s}
-                  </button>
+                  <button key={i} onMouseDown={() => selecionarSugestao(s)}
+                          style={{
+                            width: "100%", background: "none", border: "none", cursor: "pointer",
+                            padding: "13px 16px", textAlign: "left",
+                            fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text,
+                            borderBottom: i < sugestoes.length - 1 ? `1px solid ${t.border}` : "none",
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(201,169,110,.10)" : "rgba(201,169,110,.15)"}
+                          onMouseLeave={e => e.currentTarget.style.background = "none"}
+                  >{s}</button>
               ))}
             </div>,
             document.body
@@ -634,269 +505,59 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
 function ToastSucesso({ total, onClose }) {
   const [saindo, setSaindo] = useState(false);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSaindo(true);
-      setTimeout(() => { if (onClose) onClose(); }, 450);
-    }, 4800);
+    const timer = setTimeout(() => { setSaindo(true); setTimeout(() => { if (onClose) onClose(); }, 450); }, 4800);
     return () => clearTimeout(timer);
   }, [onClose]);
 
   return (
       <div className="aura-toast-overlay" style={{ animation: saindo ? "aura-toast-out .45s ease forwards" : undefined }}>
         <div className="aura-toast-box">
-          <div className="aura-toast-icon">
-            <CheckCircle2 size={34} style={{ color: "#fff" }} />
-          </div>
+          <div className="aura-toast-icon"><CheckCircle2 size={34} style={{ color: "#fff" }} /></div>
           <div style={{ textAlign: "center" }}>
-            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: "0 0 8px", letterSpacing: ".02em" }}>
-              Glória a Deus!
-            </p>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: "0 0 8px", letterSpacing: ".02em" }}>Glória a Deus!</p>
             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: "rgba(255,255,255,.8)", lineHeight: 1.6, margin: 0 }}>
-              Relatório enviado com sucesso.<br />
-              <em>O Senhor viu cada presença.</em>
+              Relatório enviado com sucesso.<br /><em>O Senhor viu cada presença.</em>
             </p>
           </div>
           <span className="aura-badge" style={{ background: "rgba(255,255,255,.12)", borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.9)" }}>
-          <span className="aura-badge-dot" style={{ background: "#fff" }} />
-            {total} presentes
+          <span className="aura-badge-dot" style={{ background: "#fff" }} /> {total} presentes
         </span>
         </div>
       </div>
   );
 }
 
-/* =============================================================
-   TELA EDITAR RELATÓRIO (design AURA)
-============================================================= */
-function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false }) {
-  const t = theme(isDark);
-  const [loading, setLoading] = useState(true);
-  const [salvando, setSalvando] = useState(false);
-  const [pessoas, setPessoas] = useState([]);
-  const [nomeCelula, setNomeCelula] = useState("");
-  const [nomeLider, setNomeLider] = useState("");
-  const [celulaId, setCelulaId] = useState(null);
-  const [sucesso, setSucesso] = useState(false);
-  const [processingIds, setProcessingIds] = useState(new Set());
-  const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
-
-  const [form, setForm] = useState({ dataReuniao: "", estudo: "", selecionadosKeys: [] });
-
-  const carregarDados = useCallback(async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const headers = { Authorization: `Bearer ${token}` };
-      const resRelatorio = await api.get(`/relatorios/${relatorioId}`, { headers });
-      const rel = resRelatorio.data;
-      setNomeCelula(rel.nomeCelula || "");
-      setNomeLider(rel.nomeLider || "");
-      setCelulaId(rel.celulaId);
-
-      const [resMembros, resVisitantes] = await Promise.all([
-        api.get(`/celulas/${rel.celulaId}/membros`, { headers }),
-        api.get(`/visitantes/celula/${rel.celulaId}/ativos`, { headers }),
-      ]);
-
-      const membros = (resMembros.data || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
-      const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
-      setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
-
-      const decisoesMap = {};
-      await Promise.all((resVisitantes.data || []).map(async (v) => {
-        try {
-          const res = await api.get(`/visitantes/${v.id}`, { headers });
-          decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
-        } catch { decisoesMap[v.id] = null; }
-      }));
-      setDecisoesVisitantes(decisoesMap);
-
-      const keysPresentes = [
-        ...(rel.membrosPresentes   || []).map(m => `MEMBRO-${m.id}`),
-        ...(rel.visitantesPresentes || []).map(v => `VISITANTE-${v.id}`),
-      ];
-      setForm({ dataReuniao: normalizarData(rel.dataReuniao), estudo: rel.estudo || "", selecionadosKeys: keysPresentes });
-    } catch (err) {
-      console.error("Erro ao carregar relatório:", err);
-      alert("Não foi possível carregar o relatório.");
-    } finally { setLoading(false); }
-  }, [relatorioId]);
-
-  useEffect(() => { carregarDados(); }, [carregarDados]);
-
-  const alternarPresenca = (uKey) => {
-    const isMarcado = form.selecionadosKeys.includes(uKey);
-    setProcessingIds(prev => new Set(prev).add(uKey));
-    setForm(prev => ({
-      ...prev,
-      selecionadosKeys: isMarcado
-          ? prev.selecionadosKeys.filter(k => k !== uKey)
-          : [...prev.selecionadosKeys, uKey],
-    }));
-    setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
-  };
-
-  const membrosPresentes    = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).length;
-  const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
-  const total = membrosPresentes + visitantesPresentes;
-
-  const handleSalvar = async () => {
-    if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
-    try {
-      setSalvando(true);
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const payload = {
-        celulaId: Number(celulaId),
-        dataReuniao: normalizarData(form.dataReuniao),
-        estudo: form.estudo.trim(),
-        membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
-        visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => {
-          const id = Number(k.replace("VISITANTE-", ""));
-          return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
-        }),
-      };
-      await api.put(`/relatorios/${relatorioId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
-      setSucesso(true);
-      setTimeout(() => { setSucesso(false); if (onSalvo) onSalvo(); }, 2200);
-    } catch (err) {
-      alert(err.response?.data?.message || "Erro ao salvar alterações.");
-    } finally { setSalvando(false); }
-  };
-
-  if (loading) return (
-      <div className="aura-loading">
-        <div style={{ textAlign: "center" }}>
-          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            <div className="aura-pulse" style={{ width: 72, height: 72, position: "absolute", border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
-            <div style={{ width: 52, height: 52, borderRadius: "50%", background: t.bgEl, border: `1.5px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-              <IEQCross size={36} />
-            </div>
-          </div>
-          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>
-            Carregando…
-          </p>
-        </div>
-      </div>
-  );
-
+/* ─── Painel de justificativa de falta (compacto) ────────────────────── */
+function PainelJustificativa({ membroId, justificativas, onSelecionar, t }) {
+  const atual = justificativas[membroId] || null;
   return (
-      <div style={{ position: "relative" }}>
-        <AuraStyles t={t} isDark={isDark} />
-        <div className="aura-glow" />
-        <div className="aura-content" style={{ paddingTop: 20 }}>
-
-          <button className="aura-btn-back" onClick={onVoltar}>
-            <ArrowLeft size={13} /> Voltar
-          </button>
-
-          {sucesso && (
-              <div className="aura-alert-success">
-                <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
-                Relatório atualizado com sucesso!
-              </div>
-          )}
-
-          <div className="aura-alert-warn">
-            <AlertTriangle size={15} style={{ flexShrink: 0, color: AURA.yellow }} />
-            Modo edição — você está alterando um relatório já enviado.
-          </div>
-
-          {/* Hero */}
-          <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})` }}>
-            <div className="aura-hero-stripes" />
-            <div className="aura-hero-inner">
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,.12)", border: "1.5px solid rgba(255,255,255,.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Edit3 size={22} style={{ color: "#fff" }} />
-                </div>
-                <div>
-                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>
-                    Editando Relatório #{relatorioId}
-                  </p>
-                  <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0, letterSpacing: ".02em" }}>
-                    {nomeCelula}
-                  </h2>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <UserCheck size={16} style={{ color: "#fff" }} />
-                </div>
-                <div>
-                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 2px" }}>Líder</p>
-                  <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: "#fff", margin: 0 }}>{nomeLider}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Form */}
-          <div className="aura-card" style={{ padding: "22px 24px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
-              <div>
-                <label className="aura-label">
-                  <Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
-                  Data da Reunião
-                </label>
-                <input
-                    className="aura-input"
-                    type="date"
-                    style={{ colorScheme: isDark ? "dark" : "light" }}
-                    value={form.dataReuniao}
-                    onChange={e => setForm({ ...form, dataReuniao: e.target.value })}
-                />
-              </div>
-              <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
-            </div>
-          </div>
-
-          {/* KPIs */}
-          <div className="aura-kpi-grid">
-            <div className="aura-kpi">
-              <p className="aura-kpi-label">Membros</p>
-              <p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p>
-            </div>
-            <div className="aura-kpi">
-              <p className="aura-kpi-label">Visitantes</p>
-              <p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p>
-            </div>
-            <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue})`, border: "none" }}>
-              <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
-              <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
-            </div>
-          </div>
-
-          {/* Chamada */}
-          <PessoasList pessoas={pessoas} form={form} processingIds={processingIds} alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes} t={t} isDark={isDark} />
-
-          <div style={{ height: 100 }} />
-        </div>
-
-        {/* Botão fixo */}
-        <div style={{
-          position: "fixed", bottom: 0, left: 0, width: "100%",
-          padding: "16px 24px", zIndex: 50,
-          background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)",
-        }}>
-          <div style={{ maxWidth: 760, margin: "0 auto" }}>
-            <button
-                className="aura-btn-red"
-                onClick={handleSalvar}
-                disabled={salvando || !form.estudo.trim()}
-            >
-              {salvando
-                  ? <><Loader2 size={16} className="aura-spin" /> Salvando…</>
-                  : <><ClipboardCheck size={16} /> Salvar Alterações ({total} presentes)</>
-              }
-            </button>
-          </div>
-        </div>
+      <div className="aura-just-panel">
+        <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginRight: 2 }}>
+          Falta:
+        </span>
+        {JUSTIFICATIVAS.map(j => {
+          const ativo = atual === j.value;
+          return (
+              <button
+                  key={j.value}
+                  className="aura-just-btn"
+                  onClick={() => onSelecionar(membroId, ativo ? null : j.value)}
+                  style={{
+                    borderColor: ativo ? j.cor : j.borda,
+                    color: ativo ? "#fff" : j.cor,
+                    background: ativo ? j.cor : "transparent",
+                  }}
+              >
+                {j.icon} {j.label}
+              </button>
+          );
+        })}
       </div>
   );
 }
 
-/* ─── Lista de chamada (reutilizável) ────────────────────────────────── */
-function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesVisitantes, t, isDark }) {
+/* ─── Lista de chamada ───────────────────────────────────────────────── */
+function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesVisitantes, justificativas, onJustificativa, t, isDark }) {
   return (
       <div className="aura-card" style={{ overflow: "hidden" }}>
         <div className="aura-card-head">
@@ -904,29 +565,32 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
             <h3 className="aura-card-head-title">Chamada</h3>
             <p className="aura-card-head-sub">{pessoas.length} pessoas</p>
           </div>
-          <span className="aura-badge">
-          <span className="aura-badge-dot aura-blink" />
-          Ao vivo
-        </span>
+          <span className="aura-badge"><span className="aura-badge-dot aura-blink" />Ao vivo</span>
         </div>
         <div style={{ maxHeight: "58vh", overflowY: "auto" }}>
           {pessoas.map((pessoa) => {
             const marcado     = form.selecionadosKeys.includes(pessoa.uKey);
             const isVisitante = pessoa.tipo === "VISITANTE";
+            const isMembro    = pessoa.tipo === "MEMBRO";
             const processing  = processingIds.has(pessoa.uKey);
             const decisao     = isVisitante ? (decisoesVisitantes[pessoa.id] ?? null) : null;
             const temDecisao  = decisao && decisao !== "NENHUMA";
+            const ausente     = !marcado;
+            const justAtual   = isMembro && ausente ? justificativas[pessoa.id] : null;
 
             return (
-                <div
-                    key={pessoa.uKey}
-                    className="aura-person-row"
-                    style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}
-                >
+                <div key={pessoa.uKey} className="aura-person-row"
+                     style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}>
+
+                  {/* Linha principal */}
                   <button
                       onClick={() => alternarPresenca(pessoa.uKey)}
                       disabled={processing}
-                      style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 22px", transition: "all .2s" }}
+                      style={{
+                        width: "100%", background: "none", border: "none", cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "15px 22px", transition: "all .2s",
+                      }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
                       {/* Avatar */}
@@ -954,18 +618,17 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                           {pessoa.nome}
                         </p>
                         <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
-                      <span style={{
-                        fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase",
-                        color: isVisitante ? AURA.yellow : AURA.gold,
-                      }}>
+                      <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
                         {pessoa.tipo}
                       </span>
                           {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
+                          {/* Badge de justificativa na linha (quando ausente e tem justificativa) */}
+                          {isMembro && ausente && justAtual && <BadgeJustificativa valor={justAtual} />}
                         </div>
                       </div>
                     </div>
 
-                    {/* Checkbox AURA */}
+                    {/* Checkbox */}
                     <div style={{
                       width: 26, height: 26, borderRadius: 8, flexShrink: 0,
                       border: `2px solid ${marcado ? AURA.gold : t.border}`,
@@ -976,7 +639,17 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                     </div>
                   </button>
 
-                  {/* Decisão espiritual do visitante */}
+                  {/* Painel de justificativa — aparece só para MEMBROS AUSENTES */}
+                  {isMembro && ausente && (
+                      <PainelJustificativa
+                          membroId={pessoa.id}
+                          justificativas={justificativas}
+                          onSelecionar={onJustificativa}
+                          t={t}
+                      />
+                  )}
+
+                  {/* Decisão espiritual — aparece só para VISITANTES PRESENTES */}
                   {marcado && isVisitante && (
                       <div style={{ padding: "0 22px 16px 76px" }}>
                         <div className="aura-card" style={{ padding: "12px 16px", marginBottom: 0 }}>
@@ -1001,32 +674,246 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
 }
 
 /* =============================================================
-   TELA PRINCIPAL — AURA
+   TELA EDITAR RELATÓRIO
+============================================================= */
+function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false }) {
+  const t = theme(isDark);
+  const [loading, setLoading]   = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [pessoas, setPessoas]   = useState([]);
+  const [nomeCelula, setNomeCelula] = useState("");
+  const [nomeLider, setNomeLider]   = useState("");
+  const [celulaId, setCelulaId]     = useState(null);
+  const [sucesso, setSucesso]       = useState(false);
+  const [processingIds, setProcessingIds] = useState(new Set());
+  const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
+  const [justificativas, setJustificativas] = useState({});
+
+  const [form, setForm] = useState({ dataReuniao: "", estudo: "", selecionadosKeys: [] });
+
+  const carregarDados = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+      const headers = { Authorization: `Bearer ${token}` };
+      const resRel = await api.get(`/relatorios/${relatorioId}`, { headers });
+      const rel = resRel.data;
+      setNomeCelula(rel.nomeCelula || ""); setNomeLider(rel.nomeLider || ""); setCelulaId(rel.celulaId);
+
+      const [resMembros, resVisitantes] = await Promise.all([
+        api.get(`/celulas/${rel.celulaId}/membros`, { headers }),
+        api.get(`/visitantes/celula/${rel.celulaId}/ativos`, { headers }),
+      ]);
+      const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
+      const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
+      setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
+
+      const decisoesMap = {};
+      await Promise.all((resVisitantes.data || []).map(async v => {
+        try { const r = await api.get(`/visitantes/${v.id}`, { headers }); decisoesMap[v.id] = r.data?.decisaoEspiritual ?? null; }
+        catch { decisoesMap[v.id] = null; }
+      }));
+      setDecisoesVisitantes(decisoesMap);
+
+      const keysPresentes = [
+        ...(rel.membrosPresentes    || []).map(m => `MEMBRO-${m.id}`),
+        ...(rel.visitantesPresentes || []).map(v => `VISITANTE-${v.id}`),
+      ];
+      setForm({ dataReuniao: normalizarData(rel.dataReuniao), estudo: rel.estudo || "", selecionadosKeys: keysPresentes });
+
+      // Restaurar justificativas dos ausentes
+      const justMap = {};
+      (rel.membrosAusentes || []).forEach(m => { if (m.justificativaFalta) justMap[m.id] = m.justificativaFalta; });
+      setJustificativas(justMap);
+    } catch (err) {
+      console.error("Erro ao carregar relatório:", err);
+      alert("Não foi possível carregar o relatório.");
+    } finally { setLoading(false); }
+  }, [relatorioId]);
+
+  useEffect(() => { carregarDados(); }, [carregarDados]);
+
+  const alternarPresenca = (uKey) => {
+    const isMarcado = form.selecionadosKeys.includes(uKey);
+    setProcessingIds(prev => new Set(prev).add(uKey));
+    setForm(prev => ({
+      ...prev,
+      selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
+    }));
+    // Se estava ausente e voltou a marcar presente, remove justificativa
+    if (!isMarcado && uKey.startsWith("MEMBRO-")) {
+      const id = Number(uKey.replace("MEMBRO-", ""));
+      setJustificativas(prev => { const n = { ...prev }; delete n[id]; return n; });
+    }
+    setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
+  };
+
+  const handleJustificativa = (membroId, valor) => {
+    setJustificativas(prev => {
+      if (!valor) { const n = { ...prev }; delete n[membroId]; return n; }
+      return { ...prev, [membroId]: valor };
+    });
+  };
+
+  const membrosPresentes    = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).length;
+  const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
+  const total = membrosPresentes + visitantesPresentes;
+
+  const handleSalvar = async () => {
+    if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+    try {
+      setSalvando(true);
+      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+
+      // Montar membros ausentes com justificativa
+      const todosMembrosIds = pessoas.filter(p => p.tipo === "MEMBRO").map(p => p.id);
+      const membrosPresentesIds = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", "")));
+      const membrosAusentes = todosMembrosIds
+          .filter(id => !membrosPresentesIds.includes(id) && justificativas[id])
+          .map(id => ({ membroId: id, justificativa: justificativas[id] }));
+
+      const payload = {
+        celulaId: Number(celulaId),
+        dataReuniao: normalizarData(form.dataReuniao),
+        estudo: form.estudo.trim(),
+        membrosPresentesIds,
+        visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => {
+          const id = Number(k.replace("VISITANTE-", ""));
+          return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
+        }),
+        membrosAusentes,
+      };
+      await api.put(`/relatorios/${relatorioId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+      setSucesso(true);
+      setTimeout(() => { setSucesso(false); if (onSalvo) onSalvo(); }, 2200);
+    } catch (err) {
+      alert(err.response?.data?.message || "Erro ao salvar alterações.");
+    } finally { setSalvando(false); }
+  };
+
+  if (loading) return (
+      <div className="aura-loading">
+        <div style={{ textAlign: "center" }}>
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+            <div className="aura-pulse" style={{ width: 72, height: 72, position: "absolute", border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
+            <div style={{ width: 52, height: 52, borderRadius: "50%", background: t.bgEl, border: `1.5px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+              <IEQCross size={36} />
+            </div>
+          </div>
+          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>Carregando…</p>
+        </div>
+      </div>
+  );
+
+  return (
+      <div style={{ position: "relative" }}>
+        <AuraStyles t={t} isDark={isDark} />
+        <div className="aura-glow" />
+        <div className="aura-content" style={{ paddingTop: 20 }}>
+          <button className="aura-btn-back" onClick={onVoltar}><ArrowLeft size={13} /> Voltar</button>
+
+          {sucesso && (
+              <div className="aura-alert-success"><CheckCircle2 size={16} style={{ flexShrink: 0 }} />Relatório atualizado com sucesso!</div>
+          )}
+          <div className="aura-alert-warn">
+            <AlertTriangle size={15} style={{ flexShrink: 0, color: AURA.yellow }} />
+            Modo edição — você está alterando um relatório já enviado.
+          </div>
+
+          {/* Hero */}
+          <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})` }}>
+            <div className="aura-hero-stripes" />
+            <div className="aura-hero-inner">
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,.12)", border: "1.5px solid rgba(255,255,255,.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Edit3 size={22} style={{ color: "#fff" }} />
+                </div>
+                <div>
+                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>Editando Relatório #{relatorioId}</p>
+                  <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0 }}>{nomeCelula}</h2>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <UserCheck size={16} style={{ color: "#fff" }} />
+                </div>
+                <div>
+                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 2px" }}>Líder</p>
+                  <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: "#fff", margin: 0 }}>{nomeLider}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="aura-card" style={{ padding: "22px 24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
+              <div>
+                <label className="aura-label"><Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />Data da Reunião</label>
+                <input className="aura-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
+                       value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
+              </div>
+              <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
+            </div>
+          </div>
+
+          {/* KPIs */}
+          <div className="aura-kpi-grid">
+            <div className="aura-kpi"><p className="aura-kpi-label">Membros</p><p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p></div>
+            <div className="aura-kpi"><p className="aura-kpi-label">Visitantes</p><p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p></div>
+            <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue})`, border: "none" }}>
+              <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
+              <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
+            </div>
+          </div>
+
+          <PessoasList pessoas={pessoas} form={form} processingIds={processingIds}
+                       alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes}
+                       justificativas={justificativas} onJustificativa={handleJustificativa} t={t} isDark={isDark} />
+
+          <div style={{ height: 100 }} />
+        </div>
+
+        {/* Botão fixo */}
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50,
+          background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)",
+        }}>
+          <div style={{ maxWidth: 760, margin: "0 auto" }}>
+            <button className="aura-btn-red" onClick={handleSalvar} disabled={salvando || !form.estudo.trim()}>
+              {salvando ? <><Loader2 size={16} className="aura-spin" /> Salvando…</> : <><ClipboardCheck size={16} /> Salvar Alterações ({total} presentes)</>}
+            </button>
+          </div>
+        </div>
+      </div>
+  );
+}
+
+/* =============================================================
+   TELA PRINCIPAL
 ============================================================= */
 export default function TelaRelatorio({ isDark = false }) {
   const t = theme(isDark);
   const [modo, setModo] = useState("novo");
   const [relatorioEditId, setRelatorioEditId] = useState(null);
-  const [modalDuplicado, setModalDuplicado] = useState(null);
-  const [celula, setCelula] = useState(null);
+  const [modalDuplicado, setModalDuplicado]   = useState(null);
+  const [celula, setCelula]   = useState(null);
   const [pessoas, setPessoas] = useState([]);
-  const [historico, setHistorico] = useState([]);
+  const [historico, setHistorico]   = useState([]);
   const [loadingHist, setLoadingHist] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
   const [rascunhoCarregado, setRascunhoCarregado] = useState(false);
   const [toastSucesso, setToastSucesso] = useState(null);
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
+  const [justificativas, setJustificativas] = useState({});
 
   const prontoParaSalvar = useRef(false);
 
   const [form, setForm] = useState({
     celulaId: null,
-    dataReuniao: (() => {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    })(),
+    dataReuniao: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })(),
     estudo: "",
     selecionadosKeys: [],
   });
@@ -1056,17 +943,14 @@ export default function TelaRelatorio({ isDark = false }) {
         api.get(`/celulas/${dadosCelula.id}/membros`, { headers }),
         api.get(`/visitantes/celula/${dadosCelula.id}/ativos`, { headers }),
       ]);
-
       const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
       const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
       setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
 
       const decisoesMap = {};
-      await Promise.all((resVisitantes.data || []).map(async (v) => {
-        try {
-          const res = await api.get(`/visitantes/${v.id}`, { headers });
-          decisoesMap[v.id] = res.data?.decisaoEspiritual ?? null;
-        } catch { decisoesMap[v.id] = null; }
+      await Promise.all((resVisitantes.data || []).map(async v => {
+        try { const r = await api.get(`/visitantes/${v.id}`, { headers }); decisoesMap[v.id] = r.data?.decisaoEspiritual ?? null; }
+        catch { decisoesMap[v.id] = null; }
       }));
       setDecisoesVisitantes(decisoesMap);
 
@@ -1076,14 +960,8 @@ export default function TelaRelatorio({ isDark = false }) {
         if (raw) {
           const draft = JSON.parse(raw);
           const hoje = new Date();
-          setForm({
-            celulaId: dadosCelula.id,
-            dataReuniao: draft.dataReuniao || `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`,
-            estudo: draft.estudo || "",
-            selecionadosKeys: draft.selecionadosKeys || [],
-          });
-          restaurou = true;
-          setRascunhoCarregado(true);
+          setForm({ celulaId: dadosCelula.id, dataReuniao: draft.dataReuniao || `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`, estudo: draft.estudo || "", selecionadosKeys: draft.selecionadosKeys || [] });
+          restaurou = true; setRascunhoCarregado(true);
           setTimeout(() => setRascunhoCarregado(false), 4000);
         }
       } catch (err) { console.warn("Erro ao ler rascunho:", err); }
@@ -1112,11 +990,21 @@ export default function TelaRelatorio({ isDark = false }) {
     setProcessingIds(prev => new Set(prev).add(uKey));
     setForm(prev => ({
       ...prev,
-      selecionadosKeys: isMarcado
-          ? prev.selecionadosKeys.filter(k => k !== uKey)
-          : [...prev.selecionadosKeys, uKey],
+      selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
     }));
+    // Se marcou presente, remove justificativa
+    if (!isMarcado && uKey.startsWith("MEMBRO-")) {
+      const id = Number(uKey.replace("MEMBRO-", ""));
+      setJustificativas(prev => { const n = { ...prev }; delete n[id]; return n; });
+    }
     setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
+  };
+
+  const handleJustificativa = (membroId, valor) => {
+    setJustificativas(prev => {
+      if (!valor) { const n = { ...prev }; delete n[membroId]; return n; }
+      return { ...prev, [membroId]: valor };
+    });
   };
 
   const membrosPresentes    = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).length;
@@ -1125,29 +1013,36 @@ export default function TelaRelatorio({ isDark = false }) {
 
   const handleSubmit = async () => {
     if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+
     try {
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const res = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
       const existente = (res.data || []).find(r => normalizarData(r.dataReuniao) === normalizarData(form.dataReuniao));
-      if (existente) {
-        setModalDuplicado({ relatorioId: existente.id, dataReuniao: existente.dataReuniao, estudo: existente.estudo || "Sem tema" });
-        return;
-      }
+      if (existente) { setModalDuplicado({ relatorioId: existente.id, dataReuniao: existente.dataReuniao, estudo: existente.estudo || "Sem tema" }); return; }
     } catch (err) { console.warn("Não foi possível verificar duplicata:", err); }
 
     try {
       setEnviando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const totalEnviado = total;
+
+      // Montar membros ausentes com justificativa
+      const todosMembrosIds = pessoas.filter(p => p.tipo === "MEMBRO").map(p => p.id);
+      const membrosPresentesIds = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", "")));
+      const membrosAusentes = todosMembrosIds
+          .filter(id => !membrosPresentesIds.includes(id) && justificativas[id])
+          .map(id => ({ membroId: id, justificativa: justificativas[id] }));
+
       const payload = {
         celulaId: Number(form.celulaId),
         dataReuniao: form.dataReuniao,
         estudo: form.estudo.trim(),
-        membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
+        membrosPresentesIds,
         visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => {
           const id = Number(k.replace("VISITANTE-", ""));
           return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" };
         }),
+        membrosAusentes,
       };
       await api.post("/relatorios", payload, { headers: { Authorization: `Bearer ${token}` } });
       try {
@@ -1157,6 +1052,7 @@ export default function TelaRelatorio({ isDark = false }) {
       try { localStorage.removeItem(draftKey(form.celulaId)); } catch (_) {}
       prontoParaSalvar.current = false;
       setForm(f => ({ ...f, estudo: "", selecionadosKeys: [] }));
+      setJustificativas({});
       setTimeout(() => { prontoParaSalvar.current = true; }, 0);
       setToastSucesso({ total: totalEnviado });
     } catch (err) {
@@ -1167,19 +1063,14 @@ export default function TelaRelatorio({ isDark = false }) {
   const nomeCelula = celula?.nome || "Carregando…";
   const nomeLider  = celula?.nomeLider || celula?.lider?.nome || celula?.usuario?.nome || "Líder";
 
-  /* ── Modo editar ── */
   if (modo === "editar" && relatorioEditId) {
     return (
-        <TelaEditarRelatorio
-            relatorioId={relatorioEditId}
-            isDark={isDark}
-            onVoltar={() => { setModo("historico"); setRelatorioEditId(null); }}
-            onSalvo={() => { setModo("historico"); setRelatorioEditId(null); carregarHistorico(); }}
-        />
+        <TelaEditarRelatorio relatorioId={relatorioEditId} isDark={isDark}
+                             onVoltar={() => { setModo("historico"); setRelatorioEditId(null); }}
+                             onSalvo={() => { setModo("historico"); setRelatorioEditId(null); carregarHistorico(); }} />
     );
   }
 
-  /* ── Loading ── */
   if (loading) return (
       <div className="aura-loading">
         <AuraStyles t={t} isDark={isDark} />
@@ -1191,9 +1082,7 @@ export default function TelaRelatorio({ isDark = false }) {
               <IEQCross size={36} />
             </div>
           </div>
-          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>
-            Carregando…
-          </p>
+          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>Carregando…</p>
         </div>
       </div>
   );
@@ -1202,7 +1091,6 @@ export default function TelaRelatorio({ isDark = false }) {
       <div className="aura-root">
         <AuraStyles t={t} isDark={isDark} />
         <div className="aura-glow" />
-
         {toastSucesso && <ToastSucesso total={toastSucesso.total} onClose={() => setToastSucesso(null)} />}
 
         {/* Modal duplicado */}
@@ -1214,9 +1102,7 @@ export default function TelaRelatorio({ isDark = false }) {
                     <AlertTriangle size={22} style={{ color: AURA.yellow }} />
                   </div>
                   <div>
-                    <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontWeight: 500, color: t.text, margin: "0 0 3px" }}>
-                      Relatório já enviado
-                    </p>
+                    <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontWeight: 500, color: t.text, margin: "0 0 3px" }}>Relatório já enviado</p>
                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>
                       {new Date(normalizarData(modalDuplicado.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                     </p>
@@ -1227,14 +1113,9 @@ export default function TelaRelatorio({ isDark = false }) {
                   Já existe um relatório para esta data. Deseja <strong style={{ color: t.text, fontWeight: 500 }}>editar o existente</strong>?
                 </p>
                 <div style={{ display: "flex", gap: 10 }}>
-                  <button className="aura-btn-ghost" style={{ flex: 1 }} onClick={() => setModalDuplicado(null)}>
-                    Cancelar
-                  </button>
-                  <button
-                      className="aura-btn-primary"
-                      style={{ flex: 2 }}
-                      onClick={() => { const id = modalDuplicado.relatorioId; setModalDuplicado(null); setRelatorioEditId(id); setModo("editar"); }}
-                  >
+                  <button className="aura-btn-ghost" style={{ flex: 1 }} onClick={() => setModalDuplicado(null)}>Cancelar</button>
+                  <button className="aura-btn-primary" style={{ flex: 2 }}
+                          onClick={() => { const id = modalDuplicado.relatorioId; setModalDuplicado(null); setRelatorioEditId(id); setModo("editar"); }}>
                     <Edit3 size={14} /> Editar Existente
                   </button>
                 </div>
@@ -1243,42 +1124,30 @@ export default function TelaRelatorio({ isDark = false }) {
         )}
 
         <div className="aura-content" style={{ paddingTop: 20 }}>
-
-          {/* ── Tabs ── */}
+          {/* Tabs */}
           <div className="aura-tabs">
             {[
               { key: "novo",      label: "Novo Relatório", icon: <ClipboardCheck size={13} /> },
               { key: "historico", label: "Histórico",      icon: <History size={13} /> },
             ].map(tab => (
-                <button
-                    key={tab.key}
-                    className={`aura-tab ${modo === tab.key ? "active" : "inactive"}`}
-                    onClick={() => setModo(tab.key)}
-                >
+                <button key={tab.key} className={`aura-tab ${modo === tab.key ? "active" : "inactive"}`} onClick={() => setModo(tab.key)}>
                   {tab.icon} {tab.label}
                 </button>
             ))}
           </div>
 
-          {/* ══ ABA HISTÓRICO ══ */}
+          {/* ══ HISTÓRICO ══ */}
           {modo === "historico" && (
               <div className="aura-card" style={{ overflow: "hidden" }}>
                 <div className="aura-card-head">
-                  <div>
-                    <h3 className="aura-card-head-title">Seus Relatórios</h3>
-                    <p className="aura-card-head-sub">{historico.length} registros</p>
-                  </div>
+                  <div><h3 className="aura-card-head-title">Seus Relatórios</h3><p className="aura-card-head-sub">{historico.length} registros</p></div>
                   <span className="aura-badge"><Trophy size={10} /> Histórico</span>
                 </div>
                 {loadingHist ? (
-                    <div style={{ padding: 48, textAlign: "center" }}>
-                      <Loader2 size={28} className="aura-spin" style={{ color: AURA.gold, display: "inline-block" }} />
-                    </div>
+                    <div style={{ padding: 48, textAlign: "center" }}><Loader2 size={28} className="aura-spin" style={{ color: AURA.gold, display: "inline-block" }} /></div>
                 ) : historico.length === 0 ? (
                     <div style={{ padding: 48, textAlign: "center" }}>
-                      <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
-                        Nenhum relatório encontrado.
-                      </p>
+                      <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Nenhum relatório encontrado.</p>
                     </div>
                 ) : historico.map(rel => (
                     <div key={rel.id} className="aura-hist-row">
@@ -1286,18 +1155,24 @@ export default function TelaRelatorio({ isDark = false }) {
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                           <div style={{ width: 7, height: 7, borderRadius: "50%", background: AURA.gold, flexShrink: 0 }} />
                           <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 500, color: t.text, margin: 0 }}>
-                            {rel.dataReuniao
-                                ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
-                                : "—"
-                            }
+                            {rel.dataReuniao ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "—"}
                           </p>
                         </div>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "0 0 5px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {rel.estudo || "Sem referência"}
                         </p>
-                        <span className="aura-badge" style={{ fontSize: 9, padding: "3px 10px" }}>
-                    <Users2 size={9} /> {rel.totalPresentes || 0} presentes
-                  </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <span className="aura-badge" style={{ fontSize: 9, padding: "3px 10px" }}>
+                      <Users2 size={9} /> {rel.totalPresentes || 0} presentes
+                    </span>
+                          {/* Badges de ausentes com justificativa no histórico */}
+                          {(rel.membrosAusentes || []).filter(m => m.justificativaFalta).slice(0, 3).map(m => (
+                              <BadgeJustificativa key={m.id} valor={m.justificativaFalta} />
+                          ))}
+                          {(rel.membrosAusentes || []).filter(m => m.justificativaFalta).length > 3 && (
+                              <span style={{ fontSize: 10, color: t.textMuted }}>+{(rel.membrosAusentes || []).filter(m => m.justificativaFalta).length - 3}</span>
+                          )}
+                        </div>
                       </div>
                       <button className="aura-btn-edit" onClick={() => { setRelatorioEditId(rel.id); setModo("editar"); }}>
                         <Edit3 size={12} /> Editar
@@ -1307,7 +1182,7 @@ export default function TelaRelatorio({ isDark = false }) {
               </div>
           )}
 
-          {/* ══ ABA NOVO RELATÓRIO ══ */}
+          {/* ══ NOVO RELATÓRIO ══ */}
           {modo === "novo" && (
               <>
                 {rascunhoCarregado && (
@@ -1317,12 +1192,11 @@ export default function TelaRelatorio({ isDark = false }) {
                     </div>
                 )}
 
-                {/* Hero banner azul */}
+                {/* Hero */}
                 <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` }}>
                   <div className="aura-hero-stripes" />
                   <div className="aura-hero-inner">
                     <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-                      {/* Logo com rings */}
                       <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                         <div className="aura-pulse" style={{ width: 66, height: 66, position: "absolute", border: "1px solid rgba(201,169,110,.35)", borderRadius: "50%" }} />
                         <div style={{ width: 50, height: 50, borderRadius: "50%", background: "rgba(255,255,255,.1)", border: "1.5px solid rgba(255,255,255,.25)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
@@ -1330,15 +1204,10 @@ export default function TelaRelatorio({ isDark = false }) {
                         </div>
                       </div>
                       <div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>
-                          Relatório Semanal
-                        </p>
-                        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0, letterSpacing: ".02em" }}>
-                          {nomeCelula}
-                        </h2>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>Relatório Semanal</p>
+                        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0 }}>{nomeCelula}</h2>
                       </div>
                     </div>
-
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <UserCheck size={16} style={{ color: "#fff" }} />
@@ -1355,57 +1224,32 @@ export default function TelaRelatorio({ isDark = false }) {
                 <div className="aura-card" style={{ padding: "22px 24px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
                     <div>
-                      <label className="aura-label">
-                        <Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
-                        Data da Reunião
-                      </label>
-                      <input
-                          className="aura-input"
-                          type="date"
-                          style={{ colorScheme: isDark ? "dark" : "light" }}
-                          value={form.dataReuniao}
-                          onChange={e => setForm({ ...form, dataReuniao: e.target.value })}
-                      />
+                      <label className="aura-label"><Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />Data da Reunião</label>
+                      <input className="aura-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }}
+                             value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
                     </div>
                     <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
                   </div>
                 </div>
 
-                {/* Divider com badge */}
                 <div className="aura-divider"><div className="aura-divider-dot" /></div>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
-              <span className="aura-badge">
-                <span className="aura-badge-dot aura-blink" />
-                Presença em Tempo Real
-              </span>
+                  <span className="aura-badge"><span className="aura-badge-dot aura-blink" />Presença em Tempo Real</span>
                 </div>
 
                 {/* KPIs */}
                 <div className="aura-kpi-grid">
-                  <div className="aura-kpi">
-                    <p className="aura-kpi-label">Membros</p>
-                    <p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p>
-                  </div>
-                  <div className="aura-kpi">
-                    <p className="aura-kpi-label">Visitantes</p>
-                    <p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p>
-                  </div>
+                  <div className="aura-kpi"><p className="aura-kpi-label">Membros</p><p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p></div>
+                  <div className="aura-kpi"><p className="aura-kpi-label">Visitantes</p><p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p></div>
                   <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`, border: "none" }}>
                     <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
                     <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
                   </div>
                 </div>
 
-                {/* Chamada */}
-                <PessoasList
-                    pessoas={pessoas}
-                    form={form}
-                    processingIds={processingIds}
-                    alternarPresenca={alternarPresenca}
-                    decisoesVisitantes={decisoesVisitantes}
-                    t={t}
-                    isDark={isDark}
-                />
+                <PessoasList pessoas={pessoas} form={form} processingIds={processingIds}
+                             alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes}
+                             justificativas={justificativas} onJustificativa={handleJustificativa} t={t} isDark={isDark} />
 
                 <div style={{ height: 100 }} />
               </>
@@ -1415,22 +1259,12 @@ export default function TelaRelatorio({ isDark = false }) {
         {/* Botão fixo */}
         {modo === "novo" && (
             <div style={{
-              position: "fixed", bottom: 0, left: 0, width: "100%",
-              padding: "16px 24px", zIndex: 50,
-              background: isDark
-                  ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)"
-                  : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)",
+              position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50,
+              background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)",
             }}>
               <div style={{ maxWidth: 760, margin: "0 auto" }}>
-                <button
-                    className="aura-btn-primary"
-                    onClick={handleSubmit}
-                    disabled={enviando || !form.estudo.trim()}
-                >
-                  {enviando
-                      ? <><Loader2 size={16} className="aura-spin" /> Enviando…</>
-                      : <><ClipboardCheck size={16} /> Finalizar Relatório ({total} presentes)</>
-                  }
+                <button className="aura-btn-primary" onClick={handleSubmit} disabled={enviando || !form.estudo.trim()}>
+                  {enviando ? <><Loader2 size={16} className="aura-spin" /> Enviando…</> : <><ClipboardCheck size={16} /> Finalizar Relatório ({total} presentes)</>}
                 </button>
               </div>
             </div>

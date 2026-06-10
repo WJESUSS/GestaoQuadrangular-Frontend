@@ -4,7 +4,7 @@ import {
   Download, Users, Calendar, BookOpen, AlertCircle,
   Loader2, Filter, ChevronDown, Sparkles, X,
   UserCheck, MessageSquare, TrendingUp, UserPlus, Ban, AlertTriangle,
-  Bell, BellRing, CheckCheck, Clock,
+  Bell, BellRing, CheckCheck, Clock, Briefcase, Plane, HeartPulse, HelpCircle, UserX,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import jsPDF from "jspdf";
@@ -29,8 +29,36 @@ const MOTIVO_LABELS = {
   OUTRO:              { label: "Outro motivo",           icone: "📋" },
 };
 
+// ── Justificativas de falta de membros (mesma taxonomia do líder) ─────────
+const JUSTIFICATIVAS = {
+  TRABALHO: { label: "Trabalho", icon: <Briefcase size={11} />, cor: "#6366F1", bg: "rgba(99,102,241,.1)",  borda: "rgba(99,102,241,.28)" },
+  VIAGEM:   { label: "Viagem",   icon: <Plane     size={11} />, cor: "#0891B2", bg: "rgba(8,145,178,.1)",   borda: "rgba(8,145,178,.28)" },
+  DOENCA:   { label: "Doença",   icon: <HeartPulse size={11} />, cor: "#DC2626", bg: "rgba(220,38,38,.1)",  borda: "rgba(220,38,38,.28)" },
+  OUTROS:   { label: "Outros",   icon: <HelpCircle size={11} />, cor: "#D97706", bg: "rgba(217,119,6,.1)",  borda: "rgba(217,119,6,.28)" },
+};
+
 function getMotivoLabel(motivo) {
   return MOTIVO_LABELS[motivo] || { label: motivo || "Não informado", icone: "📋" };
+}
+
+function getJustificativaInfo(valor) {
+  return JUSTIFICATIVAS[valor] || { label: valor || "Outro", icon: <HelpCircle size={11} />, cor: "#9A9080", bg: "rgba(154,144,128,.1)", borda: "rgba(154,144,128,.28)" };
+}
+
+function BadgeJustificativa({ valor }) {
+  const cfg = getJustificativaInfo(valor);
+  return (
+      <span style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        padding: "3px 9px", borderRadius: 99,
+        background: cfg.bg, color: cfg.cor,
+        border: `1px solid ${cfg.borda}`,
+        fontFamily: "'Cinzel',serif", fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em",
+        whiteSpace: "nowrap",
+      }}>
+      {cfg.icon} {cfg.label.toUpperCase()}
+    </span>
+  );
 }
 
 // ── Chave localStorage para notificações lidas ────────────────────────────
@@ -508,8 +536,9 @@ export default function RelatorioCelula({ isDark = false }) {
   const totais = useMemo(() => realizadas.reduce((acc, rel) => {
     const m = rel.membrosPresentes?.length || 0;
     const v = (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0);
-    return { membros: acc.membros + m, visitantes: acc.visitantes + v, geral: acc.geral + m + v };
-  }, { membros:0, visitantes:0, geral:0 }), [realizadas]);
+    const justificadas = (rel.membrosAusentes || []).filter(a => a.justificativaFalta).length;
+    return { membros: acc.membros + m, visitantes: acc.visitantes + v, geral: acc.geral + m + v, justificadas: acc.justificadas + justificadas };
+  }, { membros:0, visitantes:0, geral:0, justificadas:0 }), [realizadas]);
 
   useEffect(() => { carregarSemanaAtual(); }, []);
   useEffect(() => { carregarRelatorios();  }, [carregarRelatorios]);
@@ -526,12 +555,12 @@ export default function RelatorioCelula({ isDark = false }) {
     doc.text("Relatório Geral de Células", 14, 20);
     doc.setFontSize(9); doc.setTextColor(100);
     doc.text(
-        `Período: ${formatarDataLocal(dataInicio)} a ${formatarDataLocal(dataFim)}  |  Membros: ${totais.membros}  |  Visitantes: ${totais.visitantes}  |  Total: ${totais.geral}`,
+        `Período: ${formatarDataLocal(dataInicio)} a ${formatarDataLocal(dataFim)}  |  Membros: ${totais.membros}  |  Visitantes: ${totais.visitantes}  |  Total: ${totais.geral}  |  Faltas justificadas: ${totais.justificadas}`,
         14, 28
     );
     autoTable(doc, {
       startY: 34,
-      head: [["Célula", "Data", "Membros", "Visitas", "Total", "Estudo"]],
+      head: [["Célula", "Data", "Membros", "Visitas", "Total", "Estudo", "Faltas Just."]],
       body: realizadas.map(rel => [
         rel.nomeCelula,
         new Date(rel.dataReuniao).toLocaleDateString("pt-BR"),
@@ -539,10 +568,12 @@ export default function RelatorioCelula({ isDark = false }) {
         (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0),
         (rel.membrosPresentes?.length || 0) + (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0),
         rel.estudo || "N/A",
+        (rel.membrosAusentes || []).filter(a => a.justificativaFalta).length,
       ]),
       theme: "grid",
       headStyles: { fillColor: [0, 36, 112] },
     });
+
     if (naoRealizadas.length > 0) {
       const finalY = doc.lastAutoTable?.finalY || 60;
       doc.setFontSize(13); doc.setTextColor(139, 11, 31);
@@ -559,6 +590,31 @@ export default function RelatorioCelula({ isDark = false }) {
         headStyles: { fillColor: [196, 140, 0] },
       });
     }
+
+    // ── Faltas justificadas por célula ──────────────────────────────────
+    const faltasComJustificativa = realizadas.flatMap(rel =>
+        (rel.membrosAusentes || [])
+            .filter(a => a.justificativaFalta)
+            .map(a => [
+              rel.nomeCelula,
+              new Date(rel.dataReuniao).toLocaleDateString("pt-BR"),
+              a.nome || a.membroNome || `Membro #${a.membroId || a.id}`,
+              getJustificativaInfo(a.justificativaFalta).label,
+            ])
+    );
+    if (faltasComJustificativa.length > 0) {
+      const finalY2 = doc.lastAutoTable?.finalY || 60;
+      doc.setFontSize(13); doc.setTextColor(196, 140, 0);
+      doc.text("Faltas Justificadas", 14, finalY2 + 16);
+      autoTable(doc, {
+        startY: finalY2 + 22,
+        head: [["Célula", "Data", "Membro", "Justificativa"]],
+        body: faltasComJustificativa,
+        theme: "grid",
+        headStyles: { fillColor: [196, 140, 0] },
+      });
+    }
+
     const todasDecisoes = realizadas.flatMap(rel =>
         (rel.visitantesPresentes || [])
             .filter(v => v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA")
@@ -658,7 +714,7 @@ export default function RelatorioCelula({ isDark = false }) {
           </AnimatePresence>
 
           {/* KPIs */}
-          <div className="kpi-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:16, marginBottom:28 }}>
+          <div className="kpi-grid" style={{ display:"grid", gridTemplateColumns:"repeat(5, 1fr)", gap:16, marginBottom:28 }}>
             <div className="ieq-kpi-card">
               <div style={{ width:46, height:46, borderRadius:12, background:"rgba(200,16,46,.1)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                 <Users size={22} style={{ color:IEQ.red }} />
@@ -686,6 +742,16 @@ export default function RelatorioCelula({ isDark = false }) {
               <div>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:"rgba(255,255,255,.6)", margin:"0 0 2px" }}>TOTAL GERAL</p>
                 <p style={{ fontFamily:"'Cinzel',serif", fontSize:26, fontWeight:700, color:"#fff", margin:0 }}>{totais.geral}</p>
+              </div>
+            </div>
+
+            <div className="ieq-kpi-card">
+              <div style={{ width:46, height:46, borderRadius:12, background:"rgba(99,102,241,.1)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <UserX size={22} style={{ color:"#6366F1" }} />
+              </div>
+              <div>
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em", color:textSecondary, margin:"0 0 2px" }}>FALTAS JUSTIF.</p>
+                <p style={{ fontFamily:"'Cinzel',serif", fontSize:26, fontWeight:700, color:textPrimary, margin:0 }}>{totais.justificadas}</p>
               </div>
             </div>
 
@@ -776,6 +842,7 @@ export default function RelatorioCelula({ isDark = false }) {
                     const m = rel.membrosPresentes?.length || 0;
                     const v = (rel.visitantesPresentes?.length || 0) + (rel.quantidadeVisitantes || 0);
                     const decisoes = (rel.visitantesPresentes || []).filter(vt => vt.decisaoEspiritual && vt.decisaoEspiritual !== "NENHUMA");
+                    const ausentesJustificados = (rel.membrosAusentes || []).filter(a => a.justificativaFalta);
                     return (
                         <motion.div key={rel.id} initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:i * .04 }}
                                     className="ieq-rel-card" onClick={() => handleVerDetalhes(rel)}>
@@ -792,17 +859,25 @@ export default function RelatorioCelula({ isDark = false }) {
                             <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 8px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                               {rel.nomeCelula}
                             </h3>
-                            <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 10px", background:isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.05)", borderRadius:8, marginBottom: decisoes.length > 0 ? 10 : 16 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 10px", background:isDark ? "rgba(255,255,255,.03)" : "rgba(200,16,46,.05)", borderRadius:8, marginBottom: (decisoes.length > 0 || ausentesJustificados.length > 0) ? 10 : 16 }}>
                               <BookOpen size={12} style={{ color:IEQ.red, flexShrink:0 }} />
                               <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".1em", color:textSecondary, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                                 {rel.estudo || "SEM ESTUDO INFORMADO"}
                               </p>
                             </div>
                             {decisoes.length > 0 && (
-                                <div style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 10px", background:"rgba(253,184,19,.08)", border:"1px solid rgba(253,184,19,.2)", borderRadius:8, marginBottom:16 }}>
+                                <div style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 10px", background:"rgba(253,184,19,.08)", border:"1px solid rgba(253,184,19,.2)", borderRadius:8, marginBottom: ausentesJustificados.length > 0 ? 10 : 16 }}>
                                   <Sparkles size={11} style={{ color:IEQ.yellowDark, flexShrink:0 }} />
                                   <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".1em", color:IEQ.yellowDark, margin:0 }}>
                                     {decisoes.length} DECISÃO{decisoes.length > 1 ? "ÕES" : ""} ESPIRITUAL{decisoes.length > 1 ? "IS" : ""}
+                                  </p>
+                                </div>
+                            )}
+                            {ausentesJustificados.length > 0 && (
+                                <div style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 10px", background:"rgba(99,102,241,.08)", border:"1px solid rgba(99,102,241,.2)", borderRadius:8, marginBottom:16 }}>
+                                  <UserX size={11} style={{ color:"#6366F1", flexShrink:0 }} />
+                                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".1em", color:"#6366F1", margin:0 }}>
+                                    {ausentesJustificados.length} FALTA{ausentesJustificados.length > 1 ? "S" : ""} JUSTIFICADA{ausentesJustificados.length > 1 ? "S" : ""}
                                   </p>
                                 </div>
                             )}
@@ -847,6 +922,8 @@ export default function RelatorioCelula({ isDark = false }) {
             const motivo = naoRealizada ? getMotivoLabel(selectedRel.motivoNaoRealizacao) : null;
             const comDecisao = (selectedRel.visitantesPresentes || [])
                 .filter(v => v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA");
+            const ausentesJustificados = (selectedRel.membrosAusentes || []).filter(a => a.justificativaFalta);
+            const ausentesSemJustificativa = (selectedRel.membrosAusentes || []).filter(a => !a.justificativaFalta);
 
             return (
                 <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
@@ -882,6 +959,11 @@ export default function RelatorioCelula({ isDark = false }) {
                             {!naoRealizada && comDecisao.length > 0 && (
                                 <span style={{ marginLeft:10, background:"rgba(253,184,19,.25)", color:IEQ.yellow, padding:"2px 8px", borderRadius:99, fontSize:8 }}>
                             ✦ {comDecisao.length} DECISÃO{comDecisao.length > 1 ? "ÕES" : ""}
+                          </span>
+                            )}
+                            {!naoRealizada && ausentesJustificados.length > 0 && (
+                                <span style={{ marginLeft:10, background:"rgba(99,102,241,.25)", color:"#c7c9fb", padding:"2px 8px", borderRadius:99, fontSize:8 }}>
+                            ⊘ {ausentesJustificados.length} FALTA{ausentesJustificados.length > 1 ? "S" : ""} JUSTIF.
                           </span>
                             )}
                           </p>
@@ -943,6 +1025,39 @@ export default function RelatorioCelula({ isDark = false }) {
                                 </div>
                             )}
 
+                            {/* ── Faltas justificadas ──────────────────────────── */}
+                            {ausentesJustificados.length > 0 && (
+                                <div style={{ padding:"18px 20px", background: isDark ? "rgba(99,102,241,.06)" : "rgba(99,102,241,.07)", border:"1px solid rgba(99,102,241,.25)", borderRadius:14 }}>
+                                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+                                    <UserX size={15} style={{ color:"#6366F1" }} />
+                                    <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:"#6366F1", fontWeight:700 }}>
+                                FALTAS JUSTIFICADAS ({ausentesJustificados.length})
+                              </span>
+                                  </div>
+                                  <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                                    {ausentesJustificados.map((a, i) => (
+                                        <div key={i} style={{
+                                          display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:8,
+                                          padding:"12px 16px",
+                                          background: isDark ? "rgba(255,255,255,.04)" : "rgba(255,255,255,.75)",
+                                          border:`1px solid ${getJustificativaInfo(a.justificativaFalta).borda}`,
+                                          borderRadius:10,
+                                        }}>
+                                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                                            <div style={{ width:34, height:34, borderRadius:8, background:`${getJustificativaInfo(a.justificativaFalta).cor}18`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:14, color:getJustificativaInfo(a.justificativaFalta).cor }}>
+                                              {(a.nome || a.membroNome || "?").charAt(0)}
+                                            </div>
+                                            <span style={{ fontFamily:"'EB Garamond',serif", fontSize:16, fontWeight:600, color:textPrimary }}>
+                                        {a.nome || a.membroNome || `Membro #${a.membroId || a.id}`}
+                                      </span>
+                                          </div>
+                                          <BadgeJustificativa valor={a.justificativaFalta} />
+                                        </div>
+                                    ))}
+                                  </div>
+                                </div>
+                            )}
+
                             <div>
                               <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, margin:"0 0 14px" }}>
                                 MEMBROS PRESENTES ({selectedRel.membrosPresentes?.length || 0})
@@ -955,6 +1070,22 @@ export default function RelatorioCelula({ isDark = false }) {
                                 ))}
                               </div>
                             </div>
+
+                            {/* ── Demais ausentes (sem justificativa) ─────────────── */}
+                            {ausentesSemJustificativa.length > 0 && (
+                                <div>
+                                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".18em", color:textSecondary, margin:"0 0 14px" }}>
+                                    AUSENTES SEM JUSTIFICATIVA ({ausentesSemJustificativa.length})
+                                  </p>
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:8 }}>
+                                    {ausentesSemJustificativa.map((a, i) => (
+                                        <div key={i} style={{ padding:"10px 14px", background:isDark ? "rgba(255,255,255,.02)" : "rgba(0,0,0,.03)", border:`1px dashed ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`, borderRadius:8, fontFamily:"'EB Garamond',serif", fontSize:14, fontWeight:500, color:textSecondary }}>
+                                          {a.nome || a.membroNome || `Membro #${a.membroId || a.id}`}
+                                        </div>
+                                    ))}
+                                  </div>
+                                </div>
+                            )}
 
                             {selectedRel.visitantesPresentes?.length > 0 && (
                                 <div>
