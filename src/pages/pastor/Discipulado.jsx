@@ -25,10 +25,6 @@ const COLUNAS = [
 
 const EMOJIS_JUST = { "Trabalho": "💼", "Doença": "🤒", "Viagem": "✈️", "Outro": "📝" };
 
-function getToken() {
-  return localStorage.getItem("token")?.replace(/"/g, "").trim() || "";
-}
-
 function QuadrangularCross({ size = 28 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -55,24 +51,18 @@ function QuadrangularCross({ size = 28 }) {
   );
 }
 
-// ── Componente para exibir a célula de presença com justificativa ──────────
 function CelulaPresenca({ membro, coluna, isDark }) {
   const marcado = membro[coluna.campo];
   const justval = membro[coluna.justField];
   const temJust = !marcado && justval;
 
-  const textSec = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-
   return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 4px" }}>
-        {/* Ícone de presença */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "6px 2px" }}>
         {marcado ? (
             <CheckCircle2 size={18} style={{ color: "#16a34a" }} />
         ) : (
             <X size={16} style={{ color: isDark ? "rgba(255,255,255,.15)" : "rgba(26,10,13,.15)" }} />
         )}
-
-        {/* Justificativa (só aparece se não marcado E tem justificativa) */}
         {temJust && (
             <div style={{
               fontSize: "9px",
@@ -80,11 +70,11 @@ function CelulaPresenca({ membro, coluna, isDark }) {
               fontFamily: "'Cinzel',serif",
               textAlign: "center",
               lineHeight: 1.2,
-              padding: "4px 6px",
+              padding: "3px 5px",
               background: isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.1)",
               borderRadius: "6px",
               border: "1px solid rgba(253,184,19,.3)",
-              maxWidth: "80px",
+              maxWidth: "64px",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -168,49 +158,112 @@ export default function Discipulado({ isDark = false }) {
     }
     .sd-btn-ghost:hover { border-color:${IEQ.red}; }
     .sd-divider { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); margin:8px 0; }
+
+    /* ── MODAL ── */
     .sd-modal-overlay {
       position:fixed; inset:0; z-index:50;
       background:rgba(10,6,8,.85); backdrop-filter:blur(16px);
-      display:flex; align-items:center; justify-content:center; padding:16px;
+      display:flex; align-items:flex-end; justify-content:center;
+      padding:0;
     }
     .sd-modal-box {
       background:${isDark ? "rgba(17,10,13,.99)" : "rgba(255,255,255,.98)"};
       border:1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.15)"};
-      border-radius:20px; width:100%; max-width:860px;
-      max-height:90vh; display:flex; flex-direction:column; overflow:hidden;
+      border-radius:20px 20px 0 0;
+      width:100%; max-width:100%;
+      height:92vh; display:flex; flex-direction:column; overflow:hidden;
     }
-    .sd-table { width:100%; border-collapse:collapse; }
+    .sd-modal-header {
+      padding:16px 16px;
+      background:linear-gradient(135deg,${IEQ.redDark},${IEQ.red});
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:10px; flex-shrink:0;
+    }
+    .sd-modal-header-info { flex:1; min-width:0; }
+    .sd-modal-header-info h2 {
+      font-family:'Cinzel',serif; font-size:14px; font-weight:700;
+      letter-spacing:.1em; color:#fff; margin:0 0 4px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .sd-modal-header-info p {
+      font-family:'EB Garamond',serif; font-size:13px;
+      color:rgba(255,255,255,.7); margin:0;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .sd-modal-header-actions { display:flex; gap:8px; flex-shrink:0; }
+    .sd-modal-body {
+      flex:1; overflow-y:auto; overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+    }
+    .sd-table-wrapper {
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    /* ── TABELA ── */
+    .sd-table { width:100%; border-collapse:collapse; min-width:480px; }
     .sd-table th {
       font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.14em;
-      text-transform:uppercase; padding:14px 16px;
+      text-transform:uppercase; padding:12px 10px;
       background:${isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.05)"};
-      color:${textSec}; text-align:left;
+      color:${textSec}; text-align:left; white-space:nowrap;
     }
+    .sd-table th.center { text-align:center; }
     .sd-table td {
-      padding:12px 16px; font-family:'EB Garamond',serif; font-size:14px; color:${textPrimary};
+      padding:8px 10px; font-family:'EB Garamond',serif; font-size:14px; color:${textPrimary};
       border-bottom:1px solid ${isDark ? "rgba(255,255,255,.04)" : "rgba(200,16,46,.06)"};
     }
+    .sd-table td.nome {
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:120px;
+    }
     .sd-table tr:hover td { background:${isDark ? "rgba(200,16,46,.05)" : "rgba(200,16,46,.04)"}; }
+
     .sd-erro {
       background:#1a0000; border:2px solid #C8102E; border-radius:12px;
       padding:24px; margin-bottom:24px; font-family:monospace; font-size:12px;
       color:#fff; word-break:break-all;
     }
     .sd-erro-row { margin: 6px 0; line-height:1.6; }
+
+    /* ── DRAG INDICATOR ── */
+    .sd-drag-bar {
+      width:40px; height:4px; border-radius:2px;
+      background:rgba(255,255,255,.35); margin:10px auto 6px; flex-shrink:0;
+    }
+
+    @media (min-width:640px) {
+      .sd-modal-overlay {
+        align-items:center;
+        padding:16px;
+      }
+      .sd-modal-box {
+        border-radius:20px;
+        max-width:860px;
+        height:auto;
+        max-height:90vh;
+      }
+      .sd-drag-bar { display:none; }
+      .sd-modal-header { padding:20px 24px; }
+      .sd-modal-header-info h2 { font-size:16px; }
+      .sd-table th { padding:14px 14px; }
+      .sd-table td { padding:12px 14px; }
+      .sd-table td.nome { max-width:none; }
+    }
+
     @media (max-width:640px) {
       .sd-grid { grid-template-columns: 1fr !important; }
       .sd-filters-row { flex-direction: column !important; }
+      .sd-btn-ghost, .sd-btn-primary { padding:10px 14px; font-size:9px; }
     }
   `;
 
   function obterSemanaAtual() {
-    const hoje   = new Date();
+    const hoje    = new Date();
     const domingo = new Date(hoje);
     domingo.setDate(hoje.getDate() - hoje.getDay());
-
-    const sabado = new Date(domingo);
+    const sabado  = new Date(domingo);
     sabado.setDate(domingo.getDate() + 6);
-
     return {
       inicio: domingo.toISOString().split("T")[0],
       fim:    sabado.toISOString().split("T")[0],
@@ -248,7 +301,7 @@ export default function Discipulado({ isDark = false }) {
   }, []);
 
   const filtrados = useMemo(() => relatorios.filter(rel => {
-    const b = termoBusca.toLowerCase();
+    const b  = termoBusca.toLowerCase();
     const ok = !b || rel.nomeLider?.toLowerCase().includes(b) || rel.nomeCelula?.toLowerCase().includes(b);
     let periodo = true;
     if (dataInicioFiltro) periodo = periodo && rel.dataFim   >= dataInicioFiltro;
@@ -256,10 +309,8 @@ export default function Discipulado({ isDark = false }) {
     return ok && periodo;
   }), [relatorios, termoBusca, dataInicioFiltro, dataFimFiltro]);
 
-  // ── PDF Individual COM JUSTIFICATIVAS ───────────────────────────────────
   const gerarPDFIndividual = (rel) => {
     const doc = new jsPDF();
-
     doc.setFillColor(139, 11, 31);
     doc.rect(0, 0, 210, 36, "F");
     doc.setFontSize(16); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
@@ -267,46 +318,27 @@ export default function Discipulado({ isDark = false }) {
     doc.setFontSize(10); doc.setFont("helvetica", "normal");
     doc.text(`Celula: ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}`, 14, 22);
     doc.text(`Periodo: ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 14, 29);
-
     doc.setTextColor(0); doc.setFontSize(9); doc.setFont("helvetica", "bold");
     doc.text("LISTA DE PRESENCAS E JUSTIFICATIVAS:", 14, 44);
-
     const corposTabela = rel.presencas?.map(p => {
       const row = [p.nomeMembro];
       COLUNAS.forEach(col => {
         const marcado = p[col.campo];
-        const just = p[col.justField];
-        if (marcado) {
-          row.push("✓");
-        } else if (just) {
-          row.push(`✗ (${just})`);
-        } else {
-          row.push("✗");
-        }
+        const just    = p[col.justField];
+        row.push(marcado ? "✓" : just ? `✗ (${just})` : "✗");
       });
-      const totalP = COLUNAS.filter(c => p[c.campo]).length;
-      row.push(`${totalP}/${COLUNAS.length}`);
+      row.push(`${COLUNAS.filter(c => p[c.campo]).length}/${COLUNAS.length}`);
       return row;
     }) || [];
-
     autoTable(doc, {
       startY: 48,
       head: [["Membro", ...COLUNAS.map(c => c.label), "Total"]],
       body: corposTabela,
       headStyles: { fillColor: [139, 11, 31], textColor: 255, fontStyle: "bold", fontSize: 8 },
       bodyStyles: { fontSize: 8 },
-      columnStyles: {
-        1: { halign: "center" },
-        2: { halign: "center" },
-        3: { halign: "center" },
-        4: { halign: "center" },
-        5: { halign: "center" },
-        6: { halign: "center", fontStyle: "bold" },
-      },
-      theme: "grid",
-      margin: { left: 14, right: 14 },
+      columnStyles: { 1:{halign:"center"}, 2:{halign:"center"}, 3:{halign:"center"}, 4:{halign:"center"}, 5:{halign:"center"}, 6:{halign:"center",fontStyle:"bold"} },
+      theme: "grid", margin: { left: 14, right: 14 },
     });
-
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -314,15 +346,12 @@ export default function Discipulado({ isDark = false }) {
       doc.text(`IEQ Pituacu - Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 290);
       doc.text(`Pagina ${i} de ${pageCount}`, 185, 290, { align: "right" });
     }
-
     doc.save(`Relatorio_${rel.nomeCelula}_${rel.dataInicio}.pdf`);
   };
 
-  // ── PDF Geral COM JUSTIFICATIVAS ────────────────────────────────────────
   const gerarPDFGeral = () => {
     if (!filtrados.length) return;
     const doc = new jsPDF("l", "mm", "a4");
-
     doc.setFillColor(139, 11, 31);
     doc.rect(0, 0, 297, 40, "F");
     doc.setFontSize(18); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
@@ -330,56 +359,34 @@ export default function Discipulado({ isDark = false }) {
     doc.setFontSize(10); doc.setFont("helvetica", "normal");
     doc.text(`Periodo: ${formatarSemana(dataInicioFiltro, dataFimFiltro)}  |  Total de celulas: ${filtrados.length}`, 14, 26);
     doc.text(`Gerado em: ${new Date().toLocaleDateString("pt-BR")} as ${new Date().toLocaleTimeString("pt-BR")}`, 14, 33);
-
     let y = 50;
-
     filtrados.forEach((rel, idx) => {
       if (y > 170) { doc.addPage(); y = 20; }
-
       doc.setFillColor(0, 36, 112);
       doc.roundedRect(14, y - 4, 269, 10, 2, 2, "F");
       doc.setFontSize(10); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
       doc.text(`${idx + 1}. ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}`, 17, y + 3);
-
       const corposTabela = rel.presencas?.map(p => {
         const row = [p.nomeMembro];
         COLUNAS.forEach(col => {
           const marcado = p[col.campo];
-          const just = p[col.justField];
-          if (marcado) {
-            row.push("✓");
-          } else if (just) {
-            row.push(`✗ (${just})`);
-          } else {
-            row.push("✗");
-          }
+          const just    = p[col.justField];
+          row.push(marcado ? "✓" : just ? `✗ (${just})` : "✗");
         });
-        const totalP = COLUNAS.filter(c => p[c.campo]).length;
-        row.push(`${totalP}/${COLUNAS.length}`);
+        row.push(`${COLUNAS.filter(c => p[c.campo]).length}/${COLUNAS.length}`);
         return row;
       }) || [];
-
       autoTable(doc, {
         startY: y + 8,
         head: [["Membro", ...COLUNAS.map(c => c.label.substring(0, 6)), "Total"]],
         body: corposTabela,
         headStyles: { fillColor: [139, 11, 31], textColor: 255, fontSize: 7, fontStyle: "bold" },
         bodyStyles: { fontSize: 7 },
-        columnStyles: {
-          1: { halign: "center" },
-          2: { halign: "center" },
-          3: { halign: "center" },
-          4: { halign: "center" },
-          5: { halign: "center" },
-          6: { halign: "center", fontStyle: "bold" },
-        },
-        theme: "grid",
-        margin: { left: 14, right: 14 },
+        columnStyles: { 1:{halign:"center"}, 2:{halign:"center"}, 3:{halign:"center"}, 4:{halign:"center"}, 5:{halign:"center"}, 6:{halign:"center",fontStyle:"bold"} },
+        theme: "grid", margin: { left: 14, right: 14 },
       });
-
       y = doc.lastAutoTable.finalY + 14;
     });
-
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -387,7 +394,6 @@ export default function Discipulado({ isDark = false }) {
       doc.text(`IEQ Pituacu - Relatorio Geral`, 14, 205);
       doc.text(`Pagina ${i} de ${pageCount}`, 283, 205, { align: "right" });
     }
-
     doc.save("Relatorio_Geral_Discipulado.pdf");
   };
 
@@ -533,53 +539,64 @@ export default function Discipulado({ isDark = false }) {
           )}
         </div>
 
-        {/* Modal COM JUSTIFICATIVAS */}
+        {/* ── MODAL RESPONSIVO ── */}
         <AnimatePresence>
           {relatorioSelecionado && (
-              <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                          className="sd-modal-overlay" onClick={() => setRelatorioSelecionado(null)}>
-                <motion.div initial={{ scale:.9, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:.9, y:20 }}
-                            className="sd-modal-box" onClick={e => e.stopPropagation()}>
+              <motion.div
+                  initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                  className="sd-modal-overlay"
+                  onClick={() => setRelatorioSelecionado(null)}
+              >
+                <motion.div
+                    initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+                    transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                    className="sd-modal-box"
+                    onClick={e => e.stopPropagation()}
+                >
+                  {/* Drag bar (só aparece no mobile) */}
+                  <div className="sd-drag-bar" />
 
-                  <div style={{ padding:"24px 28px", background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
-                    display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                    <div>
-                      <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".14em", color:"#fff", margin:"0 0 4px" }}>
-                        {relatorioSelecionado.nomeCelula}
-                      </h2>
-                      <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:"rgba(255,255,255,.7)", margin:0 }}>
-                        {relatorioSelecionado.nomeLider} · {formatarSemana(relatorioSelecionado.dataInicio, relatorioSelecionado.dataFim)}
-                      </p>
+                  {/* Header */}
+                  <div className="sd-modal-header">
+                    <div className="sd-modal-header-info">
+                      <h2>{relatorioSelecionado.nomeCelula}</h2>
+                      <p>{relatorioSelecionado.nomeLider} · {formatarSemana(relatorioSelecionado.dataInicio, relatorioSelecionado.dataFim)}</p>
                     </div>
-                    <div style={{ display:"flex", gap:8 }}>
-                      <button onClick={() => gerarPDFIndividual(relatorioSelecionado)}
-                              style={{ background:"rgba(255,255,255,.15)", border:"none", color:"#fff", padding:"10px 14px",
-                                borderRadius:8, cursor:"pointer", display:"flex", alignItems:"center", gap:6,
-                                fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", fontWeight:700 }}>
+                    <div className="sd-modal-header-actions">
+                      <button
+                          onClick={() => gerarPDFIndividual(relatorioSelecionado)}
+                          style={{ background:"rgba(255,255,255,.15)", border:"none", color:"#fff", padding:"10px 14px",
+                            borderRadius:8, cursor:"pointer", display:"flex", alignItems:"center", gap:6,
+                            fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", fontWeight:700,
+                            whiteSpace:"nowrap" }}>
                         <Download size={14} /> PDF
                       </button>
-                      <button onClick={() => setRelatorioSelecionado(null)}
-                              style={{ background:"rgba(255,255,255,.15)", border:"none", color:"#fff", padding:10, borderRadius:8, cursor:"pointer" }}>
+                      <button
+                          onClick={() => setRelatorioSelecionado(null)}
+                          style={{ background:"rgba(255,255,255,.15)", border:"none", color:"#fff", padding:10, borderRadius:8, cursor:"pointer", flexShrink:0 }}>
                         <X size={18} />
                       </button>
                     </div>
                   </div>
 
-                  <div style={{ overflowY:"auto", flex:1, padding:4 }}>
-                    <div style={{ overflowX:"auto" }}>
+                  {/* Body com tabela scrollável */}
+                  <div className="sd-modal-body">
+                    <div className="sd-table-wrapper">
                       <table className="sd-table">
                         <thead>
                         <tr>
                           <th>MEMBRO</th>
-                          {COLUNAS.map(c => <th key={c.campo} style={{ textAlign:"center", minWidth:"90px" }}>{c.label}</th>)}
+                          {COLUNAS.map(c => (
+                              <th key={c.campo} className="center">{c.label}</th>
+                          ))}
                         </tr>
                         </thead>
                         <tbody>
                         {relatorioSelecionado.presencas?.map((p, i) => (
                             <tr key={i}>
-                              <td>{p.nomeMembro}</td>
+                              <td className="nome">{p.nomeMembro}</td>
                               {COLUNAS.map(col => (
-                                  <td key={col.campo} style={{ textAlign:"center" }}>
+                                  <td key={col.campo} style={{ textAlign:"center", padding:"4px 6px" }}>
                                     <CelulaPresenca membro={p} coluna={col} isDark={isDark} />
                                   </td>
                               ))}
