@@ -42,10 +42,10 @@ function theme(isDark) {
 
 /* ─── Justificativas de falta ────────────────────────────────────────── */
 const JUSTIFICATIVAS = [
-  { value: "TRABALHO", label: "Trabalho",  icon: <Briefcase  size={12} />, cor: "#6366F1", bg: "rgba(99,102,241,.08)",  borda: "rgba(99,102,241,.25)"  },
-  { value: "VIAGEM",   label: "Viagem",    icon: <Plane      size={12} />, cor: "#0891B2", bg: "rgba(8,145,178,.08)",   borda: "rgba(8,145,178,.25)"   },
-  { value: "DOENCA",   label: "Doença",    icon: <HeartPulse size={12} />, cor: "#DC2626", bg: "rgba(220,38,38,.08)",   borda: "rgba(220,38,38,.25)"   },
-  { value: "OUTROS",   label: "Outros",    icon: <HelpCircle size={12} />, cor: "#D97706", bg: "rgba(217,119,6,.08)",   borda: "rgba(217,119,6,.25)"   },
+  { value: "TRABALHO", label: "Trabalho",  icon: <Briefcase  size={13} />, cor: "#6366F1", bg: "rgba(99,102,241,.08)",  borda: "rgba(99,102,241,.25)"  },
+  { value: "VIAGEM",   label: "Viagem",    icon: <Plane      size={13} />, cor: "#0891B2", bg: "rgba(8,145,178,.08)",   borda: "rgba(8,145,178,.25)"   },
+  { value: "DOENCA",   label: "Doença",    icon: <HeartPulse size={13} />, cor: "#DC2626", bg: "rgba(220,38,38,.08)",   borda: "rgba(220,38,38,.25)"   },
+  { value: "OUTROS",   label: "Outros",    icon: <HelpCircle size={13} />, cor: "#D97706", bg: "rgba(217,119,6,.08)",   borda: "rgba(217,119,6,.25)"   },
 ];
 
 const DECISAO_CONFIG = {
@@ -108,7 +108,7 @@ function AuraStyles({ t, isDark }) {
       @keyframes aura-fadein  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
       @keyframes aura-toast-in  { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
       @keyframes aura-toast-out { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(.92) translateY(-18px)} }
-      @keyframes aura-just-in  { from{opacity:0;max-height:0} to{opacity:1;max-height:60px} }
+      @keyframes aura-just-in  { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
       .aura-spin   { animation: aura-spin  1s linear infinite; }
       .aura-pulse  { animation: aura-pulse 3s ease-in-out infinite; }
@@ -216,20 +216,25 @@ function AuraStyles({ t, isDark }) {
       .aura-person-row { border-bottom: 1px solid ${t.border}; transition: background .2s; }
       .aura-person-row:last-child { border-bottom: none; }
 
-      /* Painel de justificativa — versão compacta em pílulas */
+      /* Painel de justificativa */
       .aura-just-panel {
-        animation: aura-just-in .2s ease forwards;
-        padding: 0 22px 12px 76px;
-        display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+        animation: aura-just-in .25s ease forwards;
+        padding: 14px 22px 18px 76px;
+        border-top: 1px solid ${t.border};
       }
+      .aura-just-label {
+        font-size: 9px; font-weight: 600; letter-spacing: .18em;
+        text-transform: uppercase; color: ${t.textMuted}; margin-bottom: 10px;
+        display: flex; align-items: center; gap: 6px;
+      }
+      .aura-just-options { display: flex; flex-wrap: wrap; gap: 8px; }
       .aura-just-btn {
-        display: flex; align-items: center; gap: 5px;
-        padding: 5px 11px; border-radius: 100px;
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 100px;
         border: 1px solid; cursor: pointer;
-        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500;
-        transition: all .15s; background: transparent; line-height: 1.4;
+        font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+        transition: all .2s; background: transparent;
       }
-      .aura-just-btn:hover { filter: brightness(1.1); }
 
       .aura-alert-warn {
         display: flex; align-items: center; gap: 12px;
@@ -359,6 +364,14 @@ function AuraStyles({ t, isDark }) {
         font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue};
         animation: aura-fadein .4s ease;
       }
+
+      /* Botão X de justificar falta */
+      .aura-btn-justificar {
+        width: 34px; height: 34px; border-radius: 9px; border: none;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; cursor: pointer; transition: all .2s; margin-right: 16px;
+      }
+      .aura-btn-justificar:hover { background: rgba(220,38,38,.14) !important; color: #DC2626 !important; }
     `}</style>
   );
 }
@@ -527,37 +540,46 @@ function ToastSucesso({ total, onClose }) {
   );
 }
 
-/* ─── Painel de justificativa de falta (compacto) ────────────────────── */
+/* ─── Painel de justificativa de falta ───────────────────────────────── */
 function PainelJustificativa({ membroId, justificativas, onSelecionar, t }) {
   const atual = justificativas[membroId] || null;
   return (
       <div className="aura-just-panel">
-        <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginRight: 2 }}>
-          Falta:
-        </span>
-        {JUSTIFICATIVAS.map(j => {
-          const ativo = atual === j.value;
-          return (
-              <button
-                  key={j.value}
-                  className="aura-just-btn"
-                  onClick={() => onSelecionar(membroId, ativo ? null : j.value)}
-                  style={{
-                    borderColor: ativo ? j.cor : j.borda,
-                    color: ativo ? "#fff" : j.cor,
-                    background: ativo ? j.cor : "transparent",
-                  }}
-              >
-                {j.icon} {j.label}
-              </button>
-          );
-        })}
+        <p className="aura-just-label">
+          <XCircle size={10} style={{ color: t.textMuted }} />
+          Justificativa da falta (opcional)
+        </p>
+        <div className="aura-just-options">
+          {JUSTIFICATIVAS.map(j => {
+            const ativo = atual === j.value;
+            return (
+                <button
+                    key={j.value}
+                    className="aura-just-btn"
+                    onClick={() => onSelecionar(membroId, ativo ? null : j.value)}
+                    style={{
+                      borderColor: ativo ? j.cor : j.borda,
+                      color: ativo ? "#fff" : j.cor,
+                      background: ativo ? j.cor : j.bg,
+                      boxShadow: ativo ? `0 4px 14px ${j.bg}` : "none",
+                    }}
+                >
+                  {j.icon} {j.label}
+                </button>
+            );
+          })}
+        </div>
       </div>
   );
 }
 
 /* ─── Lista de chamada ───────────────────────────────────────────────── */
-function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesVisitantes, justificativas, onJustificativa, t, isDark }) {
+function PessoasList({
+                       pessoas, form, processingIds, alternarPresenca,
+                       decisoesVisitantes, justificativas, onJustificativa,
+                       justificandoIds, onToggleJustificando,
+                       t, isDark,
+                     }) {
   return (
       <div className="aura-card" style={{ overflow: "hidden" }}>
         <div className="aura-card-head">
@@ -577,70 +599,87 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
             const temDecisao  = decisao && decisao !== "NENHUMA";
             const ausente     = !marcado;
             const justAtual   = isMembro && ausente ? justificativas[pessoa.id] : null;
+            const justAberto  = isMembro && ausente && justificandoIds.has(pessoa.id);
 
             return (
                 <div key={pessoa.uKey} className="aura-person-row"
                      style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}>
 
-                  {/* Linha principal */}
-                  <button
-                      onClick={() => alternarPresenca(pessoa.uKey)}
-                      disabled={processing}
-                      style={{
-                        width: "100%", background: "none", border: "none", cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: "15px 22px", transition: "all .2s",
-                      }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
-                      {/* Avatar */}
-                      <div style={{
-                        width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-                        background: marcado
-                            ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`
-                            : isDark ? "rgba(255,255,255,.05)" : "rgba(201,169,110,.08)",
-                        border: marcado ? "none" : `1px solid ${t.border}`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        color: marcado ? "#fff" : AURA.gold,
-                        fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 16,
-                        transition: "all .3s",
-                      }}>
-                        {processing ? <Loader2 size={17} className="aura-spin" /> : pessoa.nome.charAt(0)}
-                      </div>
-
-                      <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
-                        <p style={{
-                          fontFamily: "'Inter',sans-serif", fontSize: 14,
-                          fontWeight: marcado ? 500 : 300,
-                          color: marcado ? t.text : t.textSec,
-                          margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  {/* ── Linha principal ── */}
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <button
+                        onClick={() => alternarPresenca(pessoa.uKey)}
+                        disabled={processing}
+                        style={{
+                          flex: 1, background: "none", border: "none", cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "15px 22px", transition: "all .2s",
+                        }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+                        {/* Avatar */}
+                        <div style={{
+                          width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+                          background: marcado
+                              ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`
+                              : isDark ? "rgba(255,255,255,.05)" : "rgba(201,169,110,.08)",
+                          border: marcado ? "none" : `1px solid ${t.border}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: marcado ? "#fff" : AURA.gold,
+                          fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 16,
+                          transition: "all .3s",
                         }}>
-                          {pessoa.nome}
-                        </p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
-                      <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
-                        {pessoa.tipo}
-                      </span>
-                          {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
-                          {/* Badge de justificativa na linha (quando ausente e tem justificativa) */}
-                          {isMembro && ausente && justAtual && <BadgeJustificativa valor={justAtual} />}
+                          {processing ? <Loader2 size={17} className="aura-spin" /> : pessoa.nome.charAt(0)}
+                        </div>
+
+                        <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
+                          <p style={{
+                            fontFamily: "'Inter',sans-serif", fontSize: 14,
+                            fontWeight: marcado ? 500 : 300,
+                            color: marcado ? t.text : t.textSec,
+                            margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>
+                            {pessoa.nome}
+                          </p>
+                          <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
+                        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
+                          {pessoa.tipo}
+                        </span>
+                            {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
+                            {isMembro && ausente && justAtual && <BadgeJustificativa valor={justAtual} />}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Checkbox */}
-                    <div style={{
-                      width: 26, height: 26, borderRadius: 8, flexShrink: 0,
-                      border: `2px solid ${marcado ? AURA.gold : t.border}`,
-                      background: marcado ? `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})` : "transparent",
-                      display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s",
-                    }}>
-                      {marcado && <CheckCircle2 size={14} style={{ color: "#0A0A0F" }} />}
-                    </div>
-                  </button>
+                      {/* Checkbox */}
+                      <div style={{
+                        width: 26, height: 26, borderRadius: 8, flexShrink: 0,
+                        border: `2px solid ${marcado ? AURA.gold : t.border}`,
+                        background: marcado ? `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})` : "transparent",
+                        display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s",
+                      }}>
+                        {marcado && <CheckCircle2 size={14} style={{ color: "#0A0A0F" }} />}
+                      </div>
+                    </button>
 
-                  {/* Painel de justificativa — aparece só para MEMBROS AUSENTES */}
-                  {isMembro && ausente && (
+                    {/* ── Botão X — justificar falta (só membros ausentes) ── */}
+                    {isMembro && ausente && (
+                        <button
+                            title="Justificar falta"
+                            className="aura-btn-justificar"
+                            onClick={() => onToggleJustificando(pessoa.id)}
+                            style={{
+                              background: justAberto ? "rgba(220,38,38,.18)" : "rgba(255,255,255,.04)",
+                              color: justAberto ? "#DC2626" : t.textMuted,
+                            }}
+                        >
+                          <XCircle size={16} />
+                        </button>
+                    )}
+                  </div>
+
+                  {/* ── Painel de justificativa — só ao clicar no X ── */}
+                  {justAberto && (
                       <PainelJustificativa
                           membroId={pessoa.id}
                           justificativas={justificativas}
@@ -649,7 +688,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                       />
                   )}
 
-                  {/* Decisão espiritual — aparece só para VISITANTES PRESENTES */}
+                  {/* ── Decisão espiritual — visitantes presentes ── */}
                   {marcado && isVisitante && (
                       <div style={{ padding: "0 22px 16px 76px" }}>
                         <div className="aura-card" style={{ padding: "12px 16px", marginBottom: 0 }}>
@@ -688,6 +727,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const [processingIds, setProcessingIds] = useState(new Set());
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
   const [justificativas, setJustificativas] = useState({});
+  const [justificandoIds, setJustificandoIds] = useState(new Set());
 
   const [form, setForm] = useState({ dataReuniao: "", estudo: "", selecionadosKeys: [] });
 
@@ -721,10 +761,13 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       ];
       setForm({ dataReuniao: normalizarData(rel.dataReuniao), estudo: rel.estudo || "", selecionadosKeys: keysPresentes });
 
-      // Restaurar justificativas dos ausentes
       const justMap = {};
       (rel.membrosAusentes || []).forEach(m => { if (m.justificativaFalta) justMap[m.id] = m.justificativaFalta; });
       setJustificativas(justMap);
+
+      // Abre automaticamente o painel para quem já tinha justificativa salva
+      const idsComJust = new Set(Object.keys(justMap).map(Number));
+      setJustificandoIds(idsComJust);
     } catch (err) {
       console.error("Erro ao carregar relatório:", err);
       alert("Não foi possível carregar o relatório.");
@@ -740,10 +783,10 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       ...prev,
       selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
     }));
-    // Se estava ausente e voltou a marcar presente, remove justificativa
     if (!isMarcado && uKey.startsWith("MEMBRO-")) {
       const id = Number(uKey.replace("MEMBRO-", ""));
       setJustificativas(prev => { const n = { ...prev }; delete n[id]; return n; });
+      setJustificandoIds(prev => { const n = new Set(prev); n.delete(id); return n; });
     }
     setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
   };
@@ -752,6 +795,14 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
     setJustificativas(prev => {
       if (!valor) { const n = { ...prev }; delete n[membroId]; return n; }
       return { ...prev, [membroId]: valor };
+    });
+  };
+
+  const handleToggleJustificando = (membroId) => {
+    setJustificandoIds(prev => {
+      const n = new Set(prev);
+      n.has(membroId) ? n.delete(membroId) : n.add(membroId);
+      return n;
     });
   };
 
@@ -765,7 +816,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       setSalvando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
 
-      // Montar membros ausentes com justificativa
       const todosMembrosIds = pessoas.filter(p => p.tipo === "MEMBRO").map(p => p.id);
       const membrosPresentesIds = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", "")));
       const membrosAusentes = todosMembrosIds
@@ -867,9 +917,13 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
             </div>
           </div>
 
-          <PessoasList pessoas={pessoas} form={form} processingIds={processingIds}
-                       alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes}
-                       justificativas={justificativas} onJustificativa={handleJustificativa} t={t} isDark={isDark} />
+          <PessoasList
+              pessoas={pessoas} form={form} processingIds={processingIds}
+              alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes}
+              justificativas={justificativas} onJustificativa={handleJustificativa}
+              justificandoIds={justificandoIds} onToggleJustificando={handleToggleJustificando}
+              t={t} isDark={isDark}
+          />
 
           <div style={{ height: 100 }} />
         </div>
@@ -908,6 +962,7 @@ export default function TelaRelatorio({ isDark = false }) {
   const [toastSucesso, setToastSucesso] = useState(null);
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
   const [justificativas, setJustificativas] = useState({});
+  const [justificandoIds, setJustificandoIds] = useState(new Set());
 
   const prontoParaSalvar = useRef(false);
 
@@ -992,10 +1047,10 @@ export default function TelaRelatorio({ isDark = false }) {
       ...prev,
       selecionadosKeys: isMarcado ? prev.selecionadosKeys.filter(k => k !== uKey) : [...prev.selecionadosKeys, uKey],
     }));
-    // Se marcou presente, remove justificativa
     if (!isMarcado && uKey.startsWith("MEMBRO-")) {
       const id = Number(uKey.replace("MEMBRO-", ""));
       setJustificativas(prev => { const n = { ...prev }; delete n[id]; return n; });
+      setJustificandoIds(prev => { const n = new Set(prev); n.delete(id); return n; });
     }
     setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
   };
@@ -1004,6 +1059,14 @@ export default function TelaRelatorio({ isDark = false }) {
     setJustificativas(prev => {
       if (!valor) { const n = { ...prev }; delete n[membroId]; return n; }
       return { ...prev, [membroId]: valor };
+    });
+  };
+
+  const handleToggleJustificando = (membroId) => {
+    setJustificandoIds(prev => {
+      const n = new Set(prev);
+      n.has(membroId) ? n.delete(membroId) : n.add(membroId);
+      return n;
     });
   };
 
@@ -1026,7 +1089,6 @@ export default function TelaRelatorio({ isDark = false }) {
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const totalEnviado = total;
 
-      // Montar membros ausentes com justificativa
       const todosMembrosIds = pessoas.filter(p => p.tipo === "MEMBRO").map(p => p.id);
       const membrosPresentesIds = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", "")));
       const membrosAusentes = todosMembrosIds
@@ -1053,6 +1115,7 @@ export default function TelaRelatorio({ isDark = false }) {
       prontoParaSalvar.current = false;
       setForm(f => ({ ...f, estudo: "", selecionadosKeys: [] }));
       setJustificativas({});
+      setJustificandoIds(new Set());
       setTimeout(() => { prontoParaSalvar.current = true; }, 0);
       setToastSucesso({ total: totalEnviado });
     } catch (err) {
@@ -1165,7 +1228,6 @@ export default function TelaRelatorio({ isDark = false }) {
                     <span className="aura-badge" style={{ fontSize: 9, padding: "3px 10px" }}>
                       <Users2 size={9} /> {rel.totalPresentes || 0} presentes
                     </span>
-                          {/* Badges de ausentes com justificativa no histórico */}
                           {(rel.membrosAusentes || []).filter(m => m.justificativaFalta).slice(0, 3).map(m => (
                               <BadgeJustificativa key={m.id} valor={m.justificativaFalta} />
                           ))}
@@ -1247,9 +1309,13 @@ export default function TelaRelatorio({ isDark = false }) {
                   </div>
                 </div>
 
-                <PessoasList pessoas={pessoas} form={form} processingIds={processingIds}
-                             alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes}
-                             justificativas={justificativas} onJustificativa={handleJustificativa} t={t} isDark={isDark} />
+                <PessoasList
+                    pessoas={pessoas} form={form} processingIds={processingIds}
+                    alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes}
+                    justificativas={justificativas} onJustificativa={handleJustificativa}
+                    justificandoIds={justificandoIds} onToggleJustificando={handleToggleJustificando}
+                    t={t} isDark={isDark}
+                />
 
                 <div style={{ height: 100 }} />
               </>
