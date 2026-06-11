@@ -34,37 +34,38 @@ const estadoCivilOptions = [
 const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"];
 
 const grauEscolaridadeOptions = [
-  { value: "",                          label: "Não informado"               },
-  { value: "EDUCACAO_INFANTIL",         label: "Educação Infantil"           },
-  { value: "ENSINO_FUNDAMENTAL_I",      label: "Ensino Fundamental I (1-5º)" },
-  { value: "ENSINO_FUNDAMENTAL_II",     label: "Ensino Fundamental II (6-9º)"},
-  { value: "ENSINO_MEDIO",              label: "Ensino Médio"                },
-  { value: "ENSINO_MEDIO_INCOMPLETO",   label: "Ensino Médio Incompleto"     },
-  { value: "TECNICO",                   label: "Técnico"                     },
-  { value: "SUPERIOR_INCOMPLETO",       label: "Superior Incompleto"         },
-  { value: "SUPERIOR_COMPLETO",         label: "Superior Completo"           },
-  { value: "POS_GRADUACAO",             label: "Pós-Graduação / MBA"         },
-  { value: "MESTRADO",                  label: "Mestrado"                    },
-  { value: "DOUTORADO",                 label: "Doutorado"                   },
+  { value: "",                        label: "Não informado"                },
+  { value: "EDUCACAO_INFANTIL",       label: "Educação Infantil"            },
+  { value: "ENSINO_FUNDAMENTAL_I",    label: "Ensino Fundamental I (1-5º)"  },
+  { value: "ENSINO_FUNDAMENTAL_II",   label: "Ensino Fundamental II (6-9º)" },
+  { value: "ENSINO_MEDIO",            label: "Ensino Médio"                 },
+  { value: "ENSINO_MEDIO_INCOMPLETO", label: "Ensino Médio Incompleto"      },
+  { value: "TECNICO",                 label: "Técnico"                      },
+  { value: "SUPERIOR_INCOMPLETO",     label: "Superior Incompleto"          },
+  { value: "SUPERIOR_COMPLETO",       label: "Superior Completo"            },
+  { value: "POS_GRADUACAO",           label: "Pós-Graduação / MBA"          },
+  { value: "MESTRADO",                label: "Mestrado"                     },
+  { value: "DOUTORADO",               label: "Doutorado"                    },
 ];
 
 const tipoArrolamentoOptions = [
-  { value: "",                  label: "Não informado"    },
-  { value: "PROFISSAO_DE_FE",   label: "Profissão de Fé" },
-  { value: "TRANSFERENCIA",     label: "Transferência"   },
+  { value: "",                label: "Não informado"    },
+  { value: "PROFISSAO_DE_FE", label: "Profissão de Fé" },
+  { value: "TRANSFERENCIA",   label: "Transferência"   },
 ];
 
+// ✅ nomeConjuge sem acento, uf adicionado
 const formInicial = {
   nome: "", email: "", telefone: "", cpf: "", rg: "",
   estadoCivil: "SOLTEIRO", status: "ATIVO",
   dataNascimento: "", dataConversao: "", dataBatismo: "",
   celulaId: null,
   /* Filiação */
-  nomeMae: "", nomePai: "", "nomeCônjuge": "", naturalidade: "",
+  nomeMae: "", nomePai: "", nomeConjuge: "", naturalidade: "",
   /* Escolaridade / profissão */
   grauEscolaridade: "", curso: "", profissao: "",
   /* Endereço detalhado */
-  endereco: "", numero: "", bairro: "", cidade: "", cep: "",
+  endereco: "", numero: "", bairro: "", cidade: "", cep: "", uf: "",
   /* Espiritual */
   pertenceOutraReligiao: false, qualReligiao: "",
   batizadoNasAguas: false, dataBatizadoNasAguas: "", igrejaBatizadoNasAguas: "",
@@ -210,10 +211,7 @@ function SectionTitle({ icon: Icon, label, color, isDark }) {
 /* ─── CheckRow ──────────────────────────────────────────────────────── */
 function CheckRow({ label, checked, onChange, isDark, textSec }) {
   return (
-      <label style={{
-        display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
-        padding: "8px 2px",
-      }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", padding: "8px 2px" }}>
         <div
             onClick={onChange}
             style={{
@@ -323,7 +321,6 @@ function MembroModal({
     }
   `;
 
-  /* Célula badge */
   const renderCelulaBadge = () => {
     if (!editandoId) return null;
     if (nomeCelula) {
@@ -421,7 +418,6 @@ function MembroModal({
                 <input required className="mf-field"
                        value={form.nome} onChange={e => f({ nome: e.target.value })} />
               </div>
-
               <div className="mf-grid2">
                 <div>
                   <label className="mf-label">CPF</label>
@@ -434,7 +430,6 @@ function MembroModal({
                          value={form.rg} onChange={e => f({ rg: e.target.value })} />
                 </div>
               </div>
-
               <div className="mf-grid2">
                 <div>
                   <label className="mf-label">NASCIMENTO</label>
@@ -447,7 +442,6 @@ function MembroModal({
                          value={form.naturalidade} onChange={e => f({ naturalidade: e.target.value })} />
                 </div>
               </div>
-
               <div className="mf-grid2">
                 <div>
                   <label className="mf-label">ESTADO CIVIL</label>
@@ -465,7 +459,6 @@ function MembroModal({
                   </select>
                 </div>
               </div>
-
               <div className="mf-grid2">
                 <div>
                   <label className="mf-label">WHATSAPP</label>
@@ -497,15 +490,15 @@ function MembroModal({
               </div>
               <div>
                 <label className="mf-label">NOME DO CÔNJUGE</label>
+                {/* ✅ nomeConjuge sem acento */}
                 <input className="mf-field"
-                       value={form["nomeCônjuge"]} onChange={e => f({ "nomeCônjuge": e.target.value })} />
+                       value={form.nomeConjuge} onChange={e => f({ nomeConjuge: e.target.value })} />
               </div>
             </div>
 
             {/* ── 3. ENDEREÇO ── */}
             <SectionTitle icon={MapPin} label="Endereço" color="#059669" isDark={isDark} />
             <div className="mf-section">
-              {/* CEP com busca automática */}
               <div>
                 <label className="mf-label">CEP</label>
                 <div style={{ position: "relative" }}>
@@ -518,19 +511,18 @@ function MembroModal({
                       onChange={e => {
                         const nums = e.target.value.replace(/\D/g, "").slice(0, 8);
                         const masked = nums.length > 5 ? `${nums.slice(0,5)}-${nums.slice(5)}` : nums;
-                        // Atualiza CEP e limpa status de busca
                         setForm(p => ({ ...p, cep: masked, _cepStatus: nums.length === 8 ? "buscando" : "" }));
                         if (nums.length === 8) {
                           fetch(`https://viacep.com.br/ws/${nums}/json/`)
                               .then(r => r.json())
                               .then(d => {
                                 if (!d.erro) {
-                                  // Usa callback para garantir estado mais recente
                                   setForm(p => ({
                                     ...p,
-                                    endereco: d.logradouro || p.endereco,
-                                    bairro:   d.bairro     || p.bairro,
-                                    cidade:   d.localidade || p.cidade,
+                                    endereco:   d.logradouro || p.endereco,
+                                    bairro:     d.bairro     || p.bairro,
+                                    cidade:     d.localidade || p.cidade,
+                                    uf:         d.uf         || p.uf,   // ✅ preenche UF automaticamente
                                     _cepStatus: "ok",
                                   }));
                                 } else {
@@ -542,38 +534,19 @@ function MembroModal({
                       }}
                       style={{ paddingRight: 38 }}
                   />
-                  {/* Ícone de status da busca */}
                   {form._cepStatus === "buscando" ? (
-                      <Loader2 size={15} style={{
-                        position: "absolute", right: 12, top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#059669", animation: "spin 1s linear infinite",
-                      }} />
+                      <Loader2 size={15} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#059669", animation: "spin 1s linear infinite" }} />
                   ) : form._cepStatus === "ok" ? (
-                      <span style={{
-                        position: "absolute", right: 10, top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#059669", fontSize: 16, pointerEvents: "none",
-                      }}>✓</span>
+                      <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#059669", fontSize: 16, pointerEvents: "none" }}>✓</span>
                   ) : form._cepStatus === "erro" ? (
-                      <span style={{
-                        position: "absolute", right: 10, top: "50%",
-                        transform: "translateY(-50%)",
-                        color: IEQ.red, fontSize: 13, pointerEvents: "none",
-                      }}>CEP não encontrado</span>
+                      <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: IEQ.red, fontSize: 13, pointerEvents: "none" }}>CEP não encontrado</span>
                   ) : (
-                      <MapPin size={15} style={{
-                        position: "absolute", right: 12, top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#059669", opacity: 0.4, pointerEvents: "none",
-                      }} />
+                      <MapPin size={15} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#059669", opacity: 0.4, pointerEvents: "none" }} />
                   )}
                 </div>
                 <p style={{
                   fontFamily: "'EB Garamond',serif", fontSize: 12,
-                  color: form._cepStatus === "ok"
-                      ? "#059669"
-                      : isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)",
+                  color: form._cepStatus === "ok" ? "#059669" : isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)",
                   margin: "4px 0 0 2px",
                 }}>
                   {form._cepStatus === "ok"
@@ -581,7 +554,7 @@ function MembroModal({
                       : "Digite o CEP para preencher o endereço automaticamente"}
                 </p>
               </div>
-              {/* Rua + Número */}
+
               <div className="mf-grid3">
                 <div>
                   <label className="mf-label">LOGRADOURO</label>
@@ -595,10 +568,12 @@ function MembroModal({
                 </div>
                 <div>
                   <label className="mf-label">UF / ESTADO</label>
+                  {/* ✅ uf sem acento */}
                   <input className="mf-field" placeholder="Ex: BA"
-                         value={form.uf ?? ""} onChange={e => f({ uf: e.target.value })} maxLength={2} />
+                         value={form.uf ?? ""} onChange={e => f({ uf: e.target.value.toUpperCase() })} maxLength={2} />
                 </div>
               </div>
+
               <div className="mf-grid2">
                 <div>
                   <label className="mf-label">BAIRRO</label>
@@ -654,7 +629,6 @@ function MembroModal({
                 </div>
               </div>
 
-              {/* Outra religião */}
               <CheckRow
                   label="Pertence (ou pertenceu) a outra religião?"
                   checked={!!form.pertenceOutraReligiao}
@@ -674,7 +648,6 @@ function MembroModal({
                 )}
               </AnimatePresence>
 
-              {/* Batismo nas águas */}
               <CheckRow
                   label="Batizado(a) nas águas?"
                   checked={!!form.batizadoNasAguas}
@@ -703,7 +676,6 @@ function MembroModal({
                 )}
               </AnimatePresence>
 
-              {/* Batismo Espírito Santo */}
               <CheckRow
                   label="Batizado(a) no Espírito Santo?"
                   checked={!!form.batizadoEspiritoSanto}
@@ -837,45 +809,46 @@ export default function Membros({ isDark = false }) {
     setEditandoId(m.id); setStatusOriginal(m.status);
     setNomeCelula(m.nomeCelula ?? null); setNomeLider(m.nomeLider ?? null);
     setForm({
-      nome:                   m.nome ?? "",
-      email:                  m.email ?? "",
-      telefone:               m.telefone ?? "",
-      cpf:                    m.cpf ?? "",
-      rg:                     m.rg ?? "",
-      estadoCivil:            m.estadoCivil ?? "SOLTEIRO",
-      status:                 m.status ?? "ATIVO",
-      celulaId:               m.celulaId ?? null,
+      nome:                   m.nome            ?? "",
+      email:                  m.email           ?? "",
+      telefone:               m.telefone        ?? "",
+      cpf:                    m.cpf             ?? "",
+      rg:                     m.rg              ?? "",
+      estadoCivil:            m.estadoCivil     ?? "SOLTEIRO",
+      status:                 m.status          ?? "ATIVO",
+      celulaId:               m.celulaId        ?? null,
       dataNascimento:         formatarDataInput(m.dataNascimento),
       dataConversao:          formatarDataInput(m.dataConversao),
       dataBatismo:            formatarDataInput(m.dataBatismo),
       /* Filiação */
-      nomeMae:                m.nomeMae ?? "",
-      nomePai:                m.nomePai ?? "",
-      "nomeCônjuge":          m["nomeCônjuge"] ?? "",
-      naturalidade:           m.naturalidade ?? "",
+      nomeMae:                m.nomeMae         ?? "",
+      nomePai:                m.nomePai         ?? "",
+      nomeConjuge:            m.nomeConjuge     ?? "",  // ✅ sem acento
+      naturalidade:           m.naturalidade    ?? "",
       /* Escolaridade */
-      grauEscolaridade:       m.grauEscolaridade ?? "",
-      curso:                  m.curso ?? "",
-      profissao:              m.profissao ?? "",
+      grauEscolaridade:       m.grauEscolaridade        ?? "",
+      curso:                  m.curso                   ?? "",
+      profissao:              m.profissao               ?? "",
       /* Endereço */
-      endereco:               m.endereco ?? "",
-      numero:                 m.numero ?? "",
-      bairro:                 m.bairro ?? "",
-      cidade:                 m.cidade ?? "",
-      cep:                    m.cep ?? "",
+      endereco:               m.endereco        ?? "",
+      numero:                 m.numero          ?? "",
+      bairro:                 m.bairro          ?? "",
+      cidade:                 m.cidade          ?? "",
+      cep:                    m.cep             ?? "",
+      uf:                     m.uf              ?? "",  // ✅ adicionado
       /* Espiritual */
-      pertenceOutraReligiao:  m.pertenceOutraReligiao ?? false,
-      qualReligiao:           m.qualReligiao ?? "",
-      batizadoNasAguas:       m.batizadoNasAguas ?? false,
+      pertenceOutraReligiao:  m.pertenceOutraReligiao  ?? false,
+      qualReligiao:           m.qualReligiao           ?? "",
+      batizadoNasAguas:       m.batizadoNasAguas       ?? false,
       dataBatizadoNasAguas:   formatarDataInput(m.dataBatizadoNasAguas),
       igrejaBatizadoNasAguas: m.igrejaBatizadoNasAguas ?? "",
-      batizadoEspiritoSanto:  m.batizadoEspiritoSanto ?? false,
+      batizadoEspiritoSanto:  m.batizadoEspiritoSanto  ?? false,
       /* Arrolamento */
-      tipoArrolamento:        m.tipoArrolamento ?? "",
-      jurisdicaoArrolamento:  m.jurisdicaoArrolamento ?? "",
-      arroladoPor:            m.arroladoPor ?? "",
+      tipoArrolamento:        m.tipoArrolamento        ?? "",
+      jurisdicaoArrolamento:  m.jurisdicaoArrolamento  ?? "",
+      arroladoPor:            m.arroladoPor            ?? "",
       /* Outros */
-      observacoes:            m.observacoes ?? "",
+      observacoes:            m.observacoes            ?? "",
     });
     setIsModalOpen(true);
   };
@@ -917,6 +890,7 @@ export default function Membros({ isDark = false }) {
       alert(`Erro ao excluir:\n\n${mensagem}`);
     }
   };
+
   const membrosFiltrados = membros
       .filter(m =>
           m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
