@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
@@ -6,22 +6,49 @@ import {
   Plus, X, User, Phone, Trash2, Loader2, Search,
   CreditCard, Heart, ChevronRight, Users, CalendarDays,
   MapPin, BookOpen, Briefcase, Cross, Star, FileText,
+  ArrowLeft, Eye, EyeOff, AlertCircle,
 } from "lucide-react";
 
-/* ─── Tokens ─────────────────────────────────────────────────────────── */
-const IEQ = {
-  red: "#C8102E", redDark: "#8B0B1F",
-  yellow: "#FDB813", blue: "#003DA5", blueDark: "#002470",
-  offWhite: "#F5F0E8",
+/* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
+const AURA = {
+  gold:      "#C9A96E",
+  goldLight: "#E8D5A3",
+  dark:      "#0A0A0F",
+  darkEl:    "#12121A",
+  light:     "#F5F0E8",
+  red:       "#C8102E",
+  redDark:   "#9B0B1E",
+  blue:      "#003DA5",
+  blueDark:  "#002470",
+  yellow:    "#FDB813",
 };
+
+function themeMembers(isDark) {
+  return {
+    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
+    text:        isDark ? "#F5F0E8"                : "#1A1008",
+    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
+    textMuted:   isDark ? "#6B6658"                : "#9A9080",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
+    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+  };
+}
 
 const STATUS_COLORS = {
   ATIVO:       { bg: "rgba(5,150,105,.12)",  text: "#059669", border: "rgba(5,150,105,.3)"   },
-  INATIVO:     { bg: "rgba(200,16,46,.1)",   text: IEQ.red,   border: "rgba(200,16,46,.3)"   },
+  INATIVO:     { bg: "rgba(200,16,46,.1)",   text: AURA.red,   border: "rgba(200,16,46,.3)"   },
   AFASTADO:    { bg: "rgba(253,184,19,.12)", text: "#C48C00", border: "rgba(253,184,19,.35)" },
-  TRANSFERIDO: { bg: "rgba(0,61,165,.1)",    text: IEQ.blue,  border: "rgba(0,61,165,.3)"    },
+  TRANSFERIDO: { bg: "rgba(0,61,165,.1)",    text: AURA.blue,  border: "rgba(0,61,165,.3)"    },
   FALECIDO:    { bg: "rgba(100,100,100,.1)", text: "#666",    border: "rgba(100,100,100,.3)" },
 };
+
+const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"];
 
 const estadoCivilOptions = [
   { value: "SOLTEIRO",      label: "Solteiro(a)"   },
@@ -30,8 +57,6 @@ const estadoCivilOptions = [
   { value: "VIUVO",         label: "Viúvo(a)"      },
   { value: "UNIAO_ESTAVEL", label: "União Estável" },
 ];
-
-const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"];
 
 const grauEscolaridadeOptions = [
   { value: "",                        label: "Não informado"                },
@@ -54,29 +79,22 @@ const tipoArrolamentoOptions = [
   { value: "TRANSFERENCIA",   label: "Transferência"   },
 ];
 
-// ✅ nomeConjuge sem acento, uf adicionado
 const formInicial = {
   nome: "", email: "", telefone: "", cpf: "", rg: "",
   estadoCivil: "SOLTEIRO", status: "ATIVO",
   dataNascimento: "", dataConversao: "", dataBatismo: "",
   celulaId: null,
-  /* Filiação */
   nomeMae: "", nomePai: "", nomeConjuge: "", naturalidade: "",
-  /* Escolaridade / profissão */
   grauEscolaridade: "", curso: "", profissao: "",
-  /* Endereço detalhado */
   endereco: "", numero: "", bairro: "", cidade: "", cep: "", uf: "",
-  /* Espiritual */
   pertenceOutraReligiao: false, qualReligiao: "",
   batizadoNasAguas: false, dataBatizadoNasAguas: "", igrejaBatizadoNasAguas: "",
   batizadoEspiritoSanto: false,
-  /* Arrolamento */
   tipoArrolamento: "", jurisdicaoArrolamento: "", arroladoPor: "",
-  /* Outros */
   observacoes: "",
 };
 
-/* ─── Helpers de Data ─────────────────────────────────────────────────── */
+/* ─── Helpers de Data ─────────────────────────────────────────────── */
 function formatarDataInput(dataISO) {
   if (!dataISO) return "";
   try {
@@ -119,7 +137,7 @@ function prepararFormParaEnvio(form) {
   return dados;
 }
 
-/* ─── DateInput ──────────────────────────────────────────────────────── */
+/* ─── DateInput ──────────────────────────────────────────────────── */
 function DateInput({ value, onChange, className = "", isDark = false, ...rest }) {
   const [texto, setTexto] = useState(isoParaBr(value));
   const nativeRef = useRef(null);
@@ -139,13 +157,6 @@ function DateInput({ value, onChange, className = "", isDark = false, ...rest })
     setTexto(isoParaBr(iso));
   };
 
-  const abrirCalendario = () => {
-    if (nativeRef.current) {
-      nativeRef.current.showPicker?.();
-      nativeRef.current.click();
-    }
-  };
-
   return (
       <div style={{ position: "relative" }}>
         <input
@@ -160,14 +171,14 @@ function DateInput({ value, onChange, className = "", isDark = false, ...rest })
         />
         <button
             type="button"
-            onClick={abrirCalendario}
+            onClick={() => nativeRef.current?.showPicker?.()}
             title="Abrir calendário"
             style={{
-              position: "absolute", right: 10, top: "50%",
+              position: "absolute", right: 12, top: "50%",
               transform: "translateY(-50%)",
               background: "none", border: "none", cursor: "pointer",
-              padding: 2, display: "flex", alignItems: "center", justifyContent: "center",
-              color: isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.4)",
+              padding: 0, display: "flex", alignItems: "center", justifyContent: "center",
+              color: AURA.gold,
             }}
         >
           <CalendarDays size={16} />
@@ -187,601 +198,774 @@ function DateInput({ value, onChange, className = "", isDark = false, ...rest })
   );
 }
 
-/* ─── SectionTitle ──────────────────────────────────────────────────── */
-function SectionTitle({ icon: Icon, label, color, isDark }) {
+/* ─── GlobalStyles ────────────────────────────────────────────────── */
+function GlobalStylesMembers({ t, isDark }) {
   return (
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "10px 14px", borderRadius: 8,
-        background: isDark ? `${color}12` : `${color}0D`,
-        border: `1px solid ${color}30`,
-        marginBottom: 2,
-      }}>
-        <Icon size={13} style={{ color, flexShrink: 0 }} />
-        <span style={{
-          fontFamily: "'Cinzel',serif", fontSize: 8.5, fontWeight: 700,
-          letterSpacing: ".2em", color, textTransform: "uppercase",
-        }}>
-        {label}
-      </span>
-      </div>
+      <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+      @keyframes dl-spin   { to { transform: rotate(360deg); } }
+      @keyframes dl-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+      @keyframes dl-blink  { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+      .dl-spin   { animation: dl-spin  1s linear infinite; }
+      .dl-pulse  { animation: dl-pulse 3s ease-in-out infinite; }
+      .dl-blink  { animation: dl-blink 2s ease-in-out infinite; }
+
+      .mem-root {
+        font-family: 'Inter', sans-serif;
+        background: ${t.bg};
+        color: ${t.text};
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+        padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
+        transition: background .3s, color .3s;
+      }
+      
+      .mem-glow {
+        position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        background:
+          radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
+          radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
+        transition: background .3s;
+      }
+      
+      .mem-content {
+        position: relative; z-index: 1;
+        max-width: 960px; margin: 0 auto;
+        padding: 20px 16px 0;
+      }
+      @media(max-width: 420px) { .mem-content { padding: 16px 12px 0; } }
+
+      .mem-header {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+      }
+      
+      .mem-header-left {
+        display: flex; align-items: center; gap: 12px; flex: 1;
+      }
+      
+      .mem-title-block {
+        flex: 1; min-width: 0;
+      }
+      
+      .mem-eyebrow {
+        font-size: 9px; font-weight: 500; letter-spacing: .2em;
+        text-transform: uppercase; color: rgba(201,169,110,.55);
+        margin: 0 0 3px;
+      }
+      
+      .mem-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(17px, 4vw, 22px);
+        font-weight: 500; color: ${t.text};
+        margin: 0; line-height: 1.2;
+      }
+      
+      .mem-btn-ico {
+        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
+        border: 1px solid ${t.border};
+        border-radius: 12px; width: 38px; height: 38px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        color: ${t.textMuted}; transition: all .25s; flex-shrink: 0;
+      }
+      .mem-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+
+      .mem-search-wrap {
+        position: relative; margin-bottom: 18px;
+      }
+      
+      .mem-search-icon {
+        position: absolute; left: 14px; top: 50%;
+        transform: translateY(-50%); color: ${AURA.gold}; opacity: .5;
+        pointer-events: none;
+      }
+      
+      .mem-input {
+        width: 100%; box-sizing: border-box;
+        background: ${t.bgInput}; border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 13px 16px 13px 44px;
+        border-radius: 13px; outline: none;
+        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
+        transition: all .25s; -webkit-appearance: none; appearance: none;
+      }
+      .mem-input:focus {
+        border-color: rgba(201,169,110,.5);
+        background: rgba(201,169,110,.04);
+        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+      }
+      .mem-input::placeholder { color: ${t.placeholder}; }
+
+      .mem-btn-gold {
+        display: flex; align-items: center; gap: 7px;
+        padding: 11px 20px; border-radius: 100px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
+        color: #0A0A0F; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; transition: all .35s;
+        box-shadow: 0 6px 22px rgba(201,169,110,.22); flex-shrink: 0;
+      }
+      .mem-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,169,110,.32); }
+
+      .mem-card {
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 16px; overflow: hidden; margin-bottom: 12px;
+        backdrop-filter: blur(24px); position: relative; cursor: pointer;
+        transition: all .35s cubic-bezier(.4,0,.2,1);
+      }
+      .mem-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+      }
+      .mem-card:active {
+        transform: scale(.98);
+        border-color: ${t.cardHover};
+        box-shadow: 0 8px 24px rgba(0,0,0,${isDark ? ".3" : ".1"});
+      }
+
+      .mem-card-inner {
+        padding: 16px 18px;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px;
+      }
+
+      .mem-card-avatar {
+        width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+        background: linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark});
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-family: 'Playfair Display', serif;
+        font-weight: 600; font-size: 18px;
+      }
+
+      .mem-card-content {
+        flex: 1; min-width: 0;
+      }
+
+      .mem-card-name {
+        font-size: 13px; font-weight: 500; color: ${t.text};
+        margin: 0 0 6px; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap;
+      }
+
+      .mem-card-meta {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      }
+
+      .mem-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 10px; border-radius: 6px;
+        font-size: 9px; font-weight: 600; letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+
+      .mem-card-arrow {
+        color: ${t.textMuted}; flex-shrink: 0;
+      }
+
+      .mem-grid {
+        display: flex; flex-direction: column; gap: 10px;
+      }
+
+      .mem-empty {
+        text-align: center; padding: 48px 20px;
+      }
+
+      .mem-empty-icon {
+        width: 64px; height: 64px; border-radius: 16px;
+        background: rgba(201,169,110,.1);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+        color: ${AURA.gold};
+      }
+
+      .mem-empty-text {
+        font-size: 13px; font-weight: 300; color: ${t.textMuted};
+        margin: 0;
+      }
+
+      .mem-loading {
+        min-height: 60vh; display: flex;
+        align-items: center; justify-content: center;
+      }
+
+      .mem-modal-backdrop {
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; align-items: flex-end; justify-content: center;
+      }
+      @media(min-width: 520px) {
+        .mem-modal-backdrop { align-items: center; padding: 16px; }
+      }
+      
+      .mem-modal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(10,10,15,.88); z-index: 0;
+        backdrop-filter: blur(4px);
+      }
+      
+      .mem-modal-box {
+        position: relative; z-index: 10;
+        width: 100%; max-height: 88vh;
+        display: flex; flex-direction: column;
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 24px 24px 0 0; overflow: hidden;
+      }
+      @media(min-width: 520px) {
+        .mem-modal-box {
+          border-radius: 24px; max-width: 520px;
+          max-height: calc(100vh - 32px);
+        }
+      }
+
+      .mem-modal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 22px; border-bottom: 1px solid ${t.border};
+        flex-shrink: 0;
+      }
+
+      .mem-modal-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 18px; font-weight: 500; color: ${t.text};
+        margin: 0;
+      }
+
+      .mem-modal-body {
+        flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding: 22px 20px;
+        display: flex; flex-direction: column; gap: 16px;
+      }
+
+      .mem-form-section {
+        padding: 16px; border-radius: 12px;
+        background: ${isDark ? "rgba(255,255,255,.02)" : "rgba(0,0,0,.02)"};
+        border: 1px solid ${t.border};
+        display: flex; flex-direction: column; gap: 12px;
+      }
+
+      .mem-form-label {
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; color: ${t.textSec};
+        display: block; margin-bottom: 6px;
+      }
+
+      .mem-form-field {
+        width: 100%; box-sizing: border-box;
+        background: ${t.bgInput};
+        border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 11px 14px; border-radius: 10px;
+        outline: none; font-family: 'Inter', sans-serif; font-size: 14px;
+        transition: all .25s; -webkit-appearance: none; appearance: none;
+      }
+      .mem-form-field:focus {
+        border-color: rgba(201,169,110,.5);
+        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+      }
+      .mem-form-field::placeholder { color: ${t.placeholder}; }
+      select.mem-form-field { color: ${t.text}; }
+      select.mem-form-field option {
+        background: ${isDark ? "#12121A" : "#F5F0E8"};
+        color: ${t.text};
+      }
+
+      .mem-form-grid2 {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      }
+      @media(max-width: 480px) { .mem-form-grid2 { grid-template-columns: 1fr; } }
+
+      .mem-form-textarea {
+        width: 100%; box-sizing: border-box; resize: vertical;
+        background: ${t.bgInput};
+        border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 12px 14px;
+        border-radius: 10px; outline: none; min-height: 100px;
+        font-family: 'Inter', sans-serif; font-size: 14px;
+        transition: all .25s;
+      }
+      .mem-form-textarea:focus {
+        border-color: rgba(201,169,110,.5);
+        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+      }
+
+      .mem-form-actions {
+        display: flex; gap: 10px; padding-top: 8px;
+      }
+
+      .mem-btn-save {
+        flex: 1; padding: 13px; border-radius: 10px; border: none;
+        background: linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark});
+        color: #fff; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; cursor: pointer; transition: all .3s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .mem-btn-save:hover { opacity: .9; transform: translateY(-1px); }
+
+      .mem-btn-delete {
+        flex: 1; padding: 13px; border-radius: 10px; border: none;
+        background: rgba(200,16,46,.12);
+        color: ${AURA.red}; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; cursor: pointer; transition: all .3s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .mem-btn-delete:hover { background: rgba(200,16,46,.2); }
+
+      .mem-section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 13px; font-weight: 500; color: ${t.text};
+        margin: 8px 0 0;
+      }
+
+      .mem-check-row {
+        display: flex; align-items: center; gap: 10px; padding: 8px 0;
+      }
+
+      .mem-checkbox {
+        width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+        border: 2px solid ${t.borderInput};
+        background: transparent;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all .2s;
+      }
+      .mem-checkbox.checked {
+        background: ${AURA.blue};
+        border-color: ${AURA.blue};
+        color: #fff;
+      }
+
+      .mem-checkbox-label {
+        font-family: 'Inter', sans-serif; font-size: 14px;
+        color: ${t.text}; cursor: pointer;
+      }
+    `}</style>
   );
 }
 
-/* ─── CheckRow ──────────────────────────────────────────────────────── */
-function CheckRow({ label, checked, onChange, isDark, textSec }) {
-  return (
-      <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", padding: "8px 2px" }}>
-        <div
-            onClick={onChange}
-            style={{
-              width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-              border: `2px solid ${checked ? IEQ.blue : (isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)")}`,
-              background: checked ? IEQ.blue : "transparent",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all .18s",
-            }}
-        >
-          {checked && <span style={{ color: "#fff", fontSize: 12, lineHeight: 1 }}>✓</span>}
-        </div>
-        <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: textSec }}>
-        {label}
-      </span>
-      </label>
-  );
-}
-
-/* ─── Modal ───────────────────────────────────────────────────────────── */
-function MembroModal({
-                       isDark, editandoId, form, setForm,
-                       onSalvar, onExcluir, onFechar,
-                       nomeCelula, nomeLider,
-                     }) {
-  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
-  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const bg          = isDark ? "#0f0a0c" : "#ffffff";
-  const border      = isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.14)";
-  const inputBg     = isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)";
-  const sectionBg   = isDark ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.018)";
+/* ─── Modal ───────────────────────────────────────────────────────── */
+function MembroModalRefatorado({
+                                 isDark, editandoId, form, setForm,
+                                 onSalvar, onExcluir, onFechar,
+                                 nomeCelula, nomeLider, loading
+                               }) {
+  const t = themeMembers(isDark);
 
   const f = v => setForm(p => ({ ...p, ...v }));
 
-  const css = `
-    .mf-wrap {
-      position: fixed; inset: 0; z-index: 9999;
-      display: flex; flex-direction: column;
-      background: ${bg}; font-family: 'EB Garamond', serif; color: ${textPrimary};
-    }
-    .mf-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px; border-bottom: 1px solid ${border};
-      flex-shrink: 0; background: ${bg};
-    }
-    .mf-body {
-      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      padding: 20px 20px max(20px, env(safe-area-inset-bottom, 20px));
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .mf-field {
-      width: 100%; box-sizing: border-box;
-      background: ${inputBg};
-      border: 1px solid ${isDark ? "rgba(200,16,46,.22)" : "rgba(200,16,46,.18)"};
-      color: ${textPrimary}; padding: 11px 14px; border-radius: 8px;
-      outline: none; font-family: 'EB Garamond', serif; font-size: 15px;
-      transition: border-color .2s, box-shadow .2s;
-      -webkit-appearance: none; appearance: none;
-    }
-    .mf-field:focus { border-color: ${IEQ.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.1); }
-    .mf-field::placeholder { color: ${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.28)"}; }
-    textarea.mf-field { resize: vertical; min-height: 80px; }
-    select.mf-field { color: ${textPrimary}; }
-    select.mf-field option {
-      background: ${isDark ? "#1a0e11" : "#ffffff"};
-      color: ${isDark ? IEQ.offWhite : "#1A0A0D"};
-    }
-    .mf-label {
-      font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: .2em;
-      text-transform: uppercase; color: ${textSec}; display: block; margin-bottom: 5px;
-    }
-    .mf-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .mf-grid3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
-    @media(max-width:400px) {
-      .mf-grid2 { grid-template-columns: 1fr; }
-      .mf-grid3 { grid-template-columns: 1fr; }
-    }
-    .mf-section {
-      padding: 14px; border-radius: 10px;
-      background: ${sectionBg};
-      border: 1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)"};
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    .mf-btn-save {
-      width: 100%; padding: 14px; border-radius: 8px; border: none; cursor: pointer;
-      background: linear-gradient(135deg, ${IEQ.blueDark}, ${IEQ.blue});
-      color: #fff; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: .16em;
-    }
-    .mf-btn-del {
-      width: 100%; padding: 10px; border: none; cursor: pointer; background: none;
-      color: ${IEQ.red}; font-family: 'Cinzel', serif;
-      font-size: 9px; font-weight: 700; letter-spacing: .14em;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .mf-celula-badge {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; border-radius: 10px;
-      background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(253,184,19,.08)"};
-      border: 1px solid ${isDark ? "rgba(253,184,19,.25)" : "rgba(253,184,19,.3)"};
-    }
-    .mf-celula-badge-empty {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; border-radius: 10px;
-      background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)"};
-      border: 1px solid ${isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"};
-    }
-  `;
-
-  const renderCelulaBadge = () => {
-    if (!editandoId) return null;
-    if (nomeCelula) {
-      return (
-          <div className="mf-celula-badge">
-            <div style={{
-              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-              background: `linear-gradient(135deg, ${IEQ.yellow}55, ${IEQ.yellow}22)`,
-              border: `1px solid ${IEQ.yellow}88`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <Users size={15} style={{ color: "#C48C00" }} />
-            </div>
-            <div>
-              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em", color: "#C48C00", margin: "0 0 2px", textTransform: "uppercase" }}>
-                CÉLULA VINCULADA
-              </p>
-              <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 15, fontWeight: 600, color: textPrimary, margin: "0 0 2px" }}>
-                {nomeCelula}
-              </p>
-              {nomeLider && (
-                  <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: textSec, margin: 0 }}>
-                    Líder: {nomeLider}
-                  </p>
-              )}
-            </div>
-          </div>
-      );
-    }
-    return (
-        <div className="mf-celula-badge-empty">
-          <div style={{
-            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-            background: isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)",
-            border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <Users size={15} style={{ color: textSec }} />
-          </div>
-          <div>
-            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".2em", color: textSec, margin: "0 0 2px", textTransform: "uppercase" }}>
-              CÉLULA VINCULADA
-            </p>
-            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, fontStyle: "italic", color: textSec, margin: 0 }}>
-              Nenhuma célula cadastrada
-            </p>
-          </div>
-        </div>
-    );
-  };
-
   const content = (
-      <>
-        <style>{css}</style>
+      <motion.div
+          className="mem-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onFechar}
+      >
         <motion.div
-            className="mf-wrap"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            className="mem-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onFechar}
+        />
+        <motion.div
+            className="mem-modal-box"
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
             transition={{ type: "tween", duration: 0.28 }}
+            onClick={e => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="mf-header">
+          <div className="mem-modal-header">
+            <h2 className="mem-modal-title">
+              {editandoId ? "Editar Perfil" : "Novo Membro"}
+            </h2>
             <button
                 onClick={onFechar}
                 style={{
                   background: "none", border: "none", cursor: "pointer",
-                  color: textSec, display: "flex", alignItems: "center", gap: 6,
-                  fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em",
+                  color: t.textMuted, display: "flex", padding: 0,
+                  transition: "color .2s"
                 }}
             >
-              <X size={18} /> VOLTAR
+              <X size={20} />
             </button>
-            <div style={{ textAlign: "right" }}>
-              <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: ".14em", color: textPrimary, margin: 0 }}>
-                {editandoId ? "EDITAR PERFIL" : "NOVO CADASTRO"}
-              </h2>
-              <div style={{
-                height: 2, width: 32,
-                background: `linear-gradient(90deg,${IEQ.blue},${IEQ.yellow})`,
-                borderRadius: 99, marginTop: 5, marginLeft: "auto",
-              }} />
-            </div>
           </div>
 
-          <form className="mf-body" onSubmit={onSalvar}>
+          <form className="mem-modal-body" onSubmit={onSalvar}>
 
-            {renderCelulaBadge()}
+            {nomeCelula && editandoId && (
+                <motion.div
+                    className="mem-form-section"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      background: `linear-gradient(135deg, ${AURA.gold}12, ${AURA.gold}08)`,
+                      border: `1px solid ${AURA.gold}40`,
+                    }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <Users size={16} style={{ color: AURA.gold, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: AURA.gold, margin: "0 0 2px" }}>
+                        CÉLULA VINCULADA
+                      </p>
+                      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 500, color: t.text, margin: 0 }}>
+                        {nomeCelula}
+                      </p>
+                      {nomeLider && (
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: t.textMuted, margin: "2px 0 0" }}>
+                            Líder: {nomeLider}
+                          </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+            )}
 
-            {/* ── 1. IDENTIFICAÇÃO ── */}
-            <SectionTitle icon={User} label="Identificação" color={IEQ.blue} isDark={isDark} />
-            <div className="mf-section">
-              <div>
-                <label className="mf-label">NOME COMPLETO *</label>
-                <input required className="mf-field"
-                       value={form.nome} onChange={e => f({ nome: e.target.value })} />
-              </div>
-              <div className="mf-grid2">
+            {/* ── Identificação ── */}
+            <div>
+              <p className="mem-section-title">Identificação</p>
+              <div className="mem-form-section">
                 <div>
-                  <label className="mf-label">CPF</label>
-                  <input className="mf-field" placeholder="000.000.000-00"
-                         value={form.cpf} onChange={e => f({ cpf: e.target.value })} />
+                  <label className="mem-form-label">NOME COMPLETO *</label>
+                  <input required className="mem-form-field"
+                         value={form.nome} onChange={e => f({ nome: e.target.value })} />
+                </div>
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">CPF</label>
+                    <input className="mem-form-field"
+                           value={form.cpf} onChange={e => f({ cpf: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">RG</label>
+                    <input className="mem-form-field"
+                           value={form.rg} onChange={e => f({ rg: e.target.value })} />
+                  </div>
+                </div>
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">NASCIMENTO</label>
+                    <DateInput className="mem-form-field" isDark={isDark}
+                               value={form.dataNascimento} onChange={v => f({ dataNascimento: v })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">ESTADO CIVIL</label>
+                    <select className="mem-form-field"
+                            value={form.estadoCivil} onChange={e => f({ estadoCivil: e.target.value })}>
+                      {estadoCivilOptions.map(o =>
+                          <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">WHATSAPP</label>
+                    <input className="mem-form-field"
+                           value={form.telefone} onChange={e => f({ telefone: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">E-MAIL</label>
+                    <input type="email" className="mem-form-field"
+                           value={form.email} onChange={e => f({ email: e.target.value })} />
+                  </div>
                 </div>
                 <div>
-                  <label className="mf-label">RG</label>
-                  <input className="mf-field" placeholder="0000000"
-                         value={form.rg} onChange={e => f({ rg: e.target.value })} />
-                </div>
-              </div>
-              <div className="mf-grid2">
-                <div>
-                  <label className="mf-label">NASCIMENTO</label>
-                  <DateInput className="mf-field" isDark={isDark}
-                             value={form.dataNascimento} onChange={v => f({ dataNascimento: v })} />
-                </div>
-                <div>
-                  <label className="mf-label">NATURALIDADE</label>
-                  <input className="mf-field" placeholder="Cidade/UF"
-                         value={form.naturalidade} onChange={e => f({ naturalidade: e.target.value })} />
-                </div>
-              </div>
-              <div className="mf-grid2">
-                <div>
-                  <label className="mf-label">ESTADO CIVIL</label>
-                  <select className="mf-field"
-                          value={form.estadoCivil} onChange={e => f({ estadoCivil: e.target.value })}>
-                    {estadoCivilOptions.map(o =>
-                        <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="mf-label">STATUS</label>
-                  <select className="mf-field"
+                  <label className="mem-form-label">STATUS</label>
+                  <select className="mem-form-field"
                           value={form.status} onChange={e => f({ status: e.target.value })}>
                     {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
-              <div className="mf-grid2">
-                <div>
-                  <label className="mf-label">WHATSAPP</label>
-                  <input className="mf-field"
-                         value={form.telefone} onChange={e => f({ telefone: e.target.value })} />
+            </div>
+
+            {/* ── Filiação ── */}
+            <div>
+              <p className="mem-section-title">Filiação & Família</p>
+              <div className="mem-form-section">
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">MÃE</label>
+                    <input className="mem-form-field"
+                           value={form.nomeMae} onChange={e => f({ nomeMae: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">PAI</label>
+                    <input className="mem-form-field"
+                           value={form.nomePai} onChange={e => f({ nomePai: e.target.value })} />
+                  </div>
                 </div>
                 <div>
-                  <label className="mf-label">E-MAIL</label>
-                  <input type="email" className="mf-field"
-                         value={form.email} onChange={e => f({ email: e.target.value })} />
+                  <label className="mem-form-label">CÔNJUGE</label>
+                  <input className="mem-form-field"
+                         value={form.nomeConjuge} onChange={e => f({ nomeConjuge: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mem-form-label">NATURALIDADE</label>
+                  <input className="mem-form-field"
+                         value={form.naturalidade} onChange={e => f({ naturalidade: e.target.value })} />
                 </div>
               </div>
             </div>
 
-            {/* ── 2. FILIAÇÃO ── */}
-            <SectionTitle icon={Users} label="Filiação & Família" color="#7C3AED" isDark={isDark} />
-            <div className="mf-section">
-              <div className="mf-grid2">
+            {/* ── Endereço ── */}
+            <div>
+              <p className="mem-section-title">Endereço</p>
+              <div className="mem-form-section">
                 <div>
-                  <label className="mf-label">NOME DA MÃE</label>
-                  <input className="mf-field"
-                         value={form.nomeMae} onChange={e => f({ nomeMae: e.target.value })} />
+                  <label className="mem-form-label">CEP</label>
+                  <input className="mem-form-field" placeholder="00000-000" inputMode="numeric"
+                         value={form.cep} onChange={e => {
+                    const nums = e.target.value.replace(/\D/g, "").slice(0, 8);
+                    const masked = nums.length > 5 ? `${nums.slice(0,5)}-${nums.slice(5)}` : nums;
+                    setForm(p => ({ ...p, cep: masked }));
+                    if (nums.length === 8) {
+                      fetch(`https://viacep.com.br/ws/${nums}/json/`)
+                          .then(r => r.json())
+                          .then(d => {
+                            if (!d.erro) {
+                              setForm(p => ({
+                                ...p,
+                                endereco: d.logradouro || p.endereco,
+                                bairro: d.bairro || p.bairro,
+                                cidade: d.localidade || p.cidade,
+                                uf: d.uf || p.uf,
+                              }));
+                            }
+                          })
+                          .catch(() => {});
+                    }
+                  }} />
+                </div>
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">LOGRADOURO</label>
+                    <input className="mem-form-field"
+                           value={form.endereco} onChange={e => f({ endereco: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">Nº</label>
+                    <input className="mem-form-field"
+                           value={form.numero} onChange={e => f({ numero: e.target.value })} />
+                  </div>
+                </div>
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">BAIRRO</label>
+                    <input className="mem-form-field"
+                           value={form.bairro} onChange={e => f({ bairro: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">UF</label>
+                    <input className="mem-form-field" placeholder="BA"
+                           value={form.uf ?? ""} onChange={e => f({ uf: e.target.value.toUpperCase() })} maxLength={2} />
+                  </div>
                 </div>
                 <div>
-                  <label className="mf-label">NOME DO PAI</label>
-                  <input className="mf-field"
-                         value={form.nomePai} onChange={e => f({ nomePai: e.target.value })} />
-                </div>
-              </div>
-              <div>
-                <label className="mf-label">NOME DO CÔNJUGE</label>
-                {/* ✅ nomeConjuge sem acento */}
-                <input className="mf-field"
-                       value={form.nomeConjuge} onChange={e => f({ nomeConjuge: e.target.value })} />
-              </div>
-            </div>
-
-            {/* ── 3. ENDEREÇO ── */}
-            <SectionTitle icon={MapPin} label="Endereço" color="#059669" isDark={isDark} />
-            <div className="mf-section">
-              <div>
-                <label className="mf-label">CEP</label>
-                <div style={{ position: "relative" }}>
-                  <input
-                      className="mf-field"
-                      placeholder="00000-000"
-                      inputMode="numeric"
-                      maxLength={9}
-                      value={form.cep}
-                      onChange={e => {
-                        const nums = e.target.value.replace(/\D/g, "").slice(0, 8);
-                        const masked = nums.length > 5 ? `${nums.slice(0,5)}-${nums.slice(5)}` : nums;
-                        setForm(p => ({ ...p, cep: masked, _cepStatus: nums.length === 8 ? "buscando" : "" }));
-                        if (nums.length === 8) {
-                          fetch(`https://viacep.com.br/ws/${nums}/json/`)
-                              .then(r => r.json())
-                              .then(d => {
-                                if (!d.erro) {
-                                  setForm(p => ({
-                                    ...p,
-                                    endereco:   d.logradouro || p.endereco,
-                                    bairro:     d.bairro     || p.bairro,
-                                    cidade:     d.localidade || p.cidade,
-                                    uf:         d.uf         || p.uf,   // ✅ preenche UF automaticamente
-                                    _cepStatus: "ok",
-                                  }));
-                                } else {
-                                  setForm(p => ({ ...p, _cepStatus: "erro" }));
-                                }
-                              })
-                              .catch(() => setForm(p => ({ ...p, _cepStatus: "erro" })));
-                        }
-                      }}
-                      style={{ paddingRight: 38 }}
-                  />
-                  {form._cepStatus === "buscando" ? (
-                      <Loader2 size={15} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#059669", animation: "spin 1s linear infinite" }} />
-                  ) : form._cepStatus === "ok" ? (
-                      <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#059669", fontSize: 16, pointerEvents: "none" }}>✓</span>
-                  ) : form._cepStatus === "erro" ? (
-                      <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: IEQ.red, fontSize: 13, pointerEvents: "none" }}>CEP não encontrado</span>
-                  ) : (
-                      <MapPin size={15} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#059669", opacity: 0.4, pointerEvents: "none" }} />
-                  )}
-                </div>
-                <p style={{
-                  fontFamily: "'EB Garamond',serif", fontSize: 12,
-                  color: form._cepStatus === "ok" ? "#059669" : isDark ? "rgba(245,240,232,.3)" : "rgba(26,10,13,.3)",
-                  margin: "4px 0 0 2px",
-                }}>
-                  {form._cepStatus === "ok"
-                      ? "✓ Endereço preenchido automaticamente"
-                      : "Digite o CEP para preencher o endereço automaticamente"}
-                </p>
-              </div>
-
-              <div className="mf-grid3">
-                <div>
-                  <label className="mf-label">LOGRADOURO</label>
-                  <input className="mf-field" placeholder="Rua, Av..."
-                         value={form.endereco} onChange={e => f({ endereco: e.target.value })} />
-                </div>
-                <div>
-                  <label className="mf-label">Nº</label>
-                  <input className="mf-field"
-                         value={form.numero} onChange={e => f({ numero: e.target.value })} />
-                </div>
-                <div>
-                  <label className="mf-label">UF / ESTADO</label>
-                  {/* ✅ uf sem acento */}
-                  <input className="mf-field" placeholder="Ex: BA"
-                         value={form.uf ?? ""} onChange={e => f({ uf: e.target.value.toUpperCase() })} maxLength={2} />
-                </div>
-              </div>
-
-              <div className="mf-grid2">
-                <div>
-                  <label className="mf-label">BAIRRO</label>
-                  <input className="mf-field"
-                         value={form.bairro} onChange={e => f({ bairro: e.target.value })} />
-                </div>
-                <div>
-                  <label className="mf-label">CIDADE</label>
-                  <input className="mf-field"
+                  <label className="mem-form-label">CIDADE</label>
+                  <input className="mem-form-field"
                          value={form.cidade} onChange={e => f({ cidade: e.target.value })} />
                 </div>
               </div>
             </div>
 
-            {/* ── 4. ESCOLARIDADE & PROFISSÃO ── */}
-            <SectionTitle icon={BookOpen} label="Escolaridade & Profissão" color="#D97706" isDark={isDark} />
-            <div className="mf-section">
-              <div className="mf-grid2">
+            {/* ── Escolaridade ── */}
+            <div>
+              <p className="mem-section-title">Escolaridade & Profissão</p>
+              <div className="mem-form-section">
                 <div>
-                  <label className="mf-label">GRAU DE ESCOLARIDADE</label>
-                  <select className="mf-field"
+                  <label className="mem-form-label">GRAU DE ESCOLARIDADE</label>
+                  <select className="mem-form-field"
                           value={form.grauEscolaridade} onChange={e => f({ grauEscolaridade: e.target.value })}>
                     {grauEscolaridadeOptions.map(o =>
                         <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label className="mf-label">CURSO</label>
-                  <input className="mf-field" placeholder="Ex: Administração"
-                         value={form.curso} onChange={e => f({ curso: e.target.value })} />
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">CURSO</label>
+                    <input className="mem-form-field"
+                           value={form.curso} onChange={e => f({ curso: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">PROFISSÃO</label>
+                    <input className="mem-form-field"
+                           value={form.profissao} onChange={e => f({ profissao: e.target.value })} />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="mf-label">PROFISSÃO</label>
-                <input className="mf-field"
-                       value={form.profissao} onChange={e => f({ profissao: e.target.value })} />
               </div>
             </div>
 
-            {/* ── 5. JORNADA ESPIRITUAL ── */}
-            <SectionTitle icon={Heart} label="Jornada Espiritual" color={IEQ.blue} isDark={isDark} />
-            <div className="mf-section">
-              <div className="mf-grid2">
-                <div>
-                  <label className="mf-label">DATA CONVERSÃO</label>
-                  <DateInput className="mf-field" isDark={isDark}
-                             value={form.dataConversao} onChange={v => f({ dataConversao: v })} />
+            {/* ── Espiritual ── */}
+            <div>
+              <p className="mem-section-title">Jornada Espiritual</p>
+              <div className="mem-form-section">
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">CONVERSÃO</label>
+                    <DateInput className="mem-form-field" isDark={isDark}
+                               value={form.dataConversao} onChange={v => f({ dataConversao: v })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">BATISMO (E. Santo)</label>
+                    <DateInput className="mem-form-field" isDark={isDark}
+                               value={form.dataBatismo} onChange={v => f({ dataBatismo: v })} />
+                  </div>
                 </div>
-                <div>
-                  <label className="mf-label">DATA BATISMO (E. Santo)</label>
-                  <DateInput className="mf-field" isDark={isDark}
-                             value={form.dataBatismo} onChange={v => f({ dataBatismo: v })} />
+
+                <div className="mem-check-row">
+                  <div
+                      className={`mem-checkbox ${form.pertenceOutraReligiao ? "checked" : ""}`}
+                      onClick={() => f({ pertenceOutraReligiao: !form.pertenceOutraReligiao, qualReligiao: !form.pertenceOutraReligiao ? form.qualReligiao : "" })}
+                  >
+                    {form.pertenceOutraReligiao && "✓"}
+                  </div>
+                  <label className="mem-checkbox-label">
+                    Pertence (ou pertenceu) a outra religião?
+                  </label>
                 </div>
-              </div>
 
-              <CheckRow
-                  label="Pertence (ou pertenceu) a outra religião?"
-                  checked={!!form.pertenceOutraReligiao}
-                  onChange={() => f({ pertenceOutraReligiao: !form.pertenceOutraReligiao, qualReligiao: !form.pertenceOutraReligiao ? form.qualReligiao : "" })}
-                  isDark={isDark} textSec={textSec}
-              />
-              <AnimatePresence>
-                {form.pertenceOutraReligiao && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }} style={{ overflow: "hidden" }}
-                    >
-                      <label className="mf-label">QUAL RELIGIÃO?</label>
-                      <input className="mf-field"
-                             value={form.qualReligiao} onChange={e => f({ qualReligiao: e.target.value })} />
-                    </motion.div>
-                )}
-              </AnimatePresence>
+                <AnimatePresence>
+                  {form.pertenceOutraReligiao && (
+                      <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          style={{ overflow: "hidden" }}
+                      >
+                        <label className="mem-form-label">QUAL RELIGIÃO?</label>
+                        <input className="mem-form-field"
+                               value={form.qualReligiao} onChange={e => f({ qualReligiao: e.target.value })} />
+                      </motion.div>
+                  )}
+                </AnimatePresence>
 
-              <CheckRow
-                  label="Batizado(a) nas águas?"
-                  checked={!!form.batizadoNasAguas}
-                  onChange={() => f({ batizadoNasAguas: !form.batizadoNasAguas })}
-                  isDark={isDark} textSec={textSec}
-              />
-              <AnimatePresence>
-                {form.batizadoNasAguas && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }} style={{ overflow: "hidden", display: "flex", flexDirection: "column", gap: 10 }}
-                    >
-                      <div className="mf-grid2">
+                <div className="mem-check-row">
+                  <div
+                      className={`mem-checkbox ${form.batizadoNasAguas ? "checked" : ""}`}
+                      onClick={() => f({ batizadoNasAguas: !form.batizadoNasAguas })}
+                  >
+                    {form.batizadoNasAguas && "✓"}
+                  </div>
+                  <label className="mem-checkbox-label">
+                    Batizado(a) nas águas?
+                  </label>
+                </div>
+
+                <AnimatePresence>
+                  {form.batizadoNasAguas && (
+                      <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          style={{ overflow: "hidden", display: "flex", flexDirection: "column", gap: 10 }}
+                      >
                         <div>
-                          <label className="mf-label">DATA DO BATISMO NAS ÁGUAS</label>
-                          <DateInput className="mf-field" isDark={isDark}
+                          <label className="mem-form-label">DATA DO BATISMO NAS ÁGUAS</label>
+                          <DateInput className="mem-form-field" isDark={isDark}
                                      value={form.dataBatizadoNasAguas} onChange={v => f({ dataBatizadoNasAguas: v })} />
                         </div>
                         <div>
-                          <label className="mf-label">NA IGREJA</label>
-                          <input className="mf-field"
+                          <label className="mem-form-label">NA IGREJA</label>
+                          <input className="mem-form-field"
                                  value={form.igrejaBatizadoNasAguas} onChange={e => f({ igrejaBatizadoNasAguas: e.target.value })} />
                         </div>
-                      </div>
-                    </motion.div>
-                )}
-              </AnimatePresence>
+                      </motion.div>
+                  )}
+                </AnimatePresence>
 
-              <CheckRow
-                  label="Batizado(a) no Espírito Santo?"
-                  checked={!!form.batizadoEspiritoSanto}
-                  onChange={() => f({ batizadoEspiritoSanto: !form.batizadoEspiritoSanto })}
-                  isDark={isDark} textSec={textSec}
-              />
-            </div>
-
-            {/* ── 6. ARROLAMENTO ── */}
-            <SectionTitle icon={Star} label="Arrolamento" color={IEQ.red} isDark={isDark} />
-            <div className="mf-section">
-              <div>
-                <label className="mf-label">ARROLADO POR</label>
-                <select className="mf-field"
-                        value={form.tipoArrolamento} onChange={e => f({ tipoArrolamento: e.target.value })}>
-                  {tipoArrolamentoOptions.map(o =>
-                      <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </div>
-              <div className="mf-grid2">
-                <div>
-                  <label className="mf-label">NOME DE QUEM ARROLOU</label>
-                  <input className="mf-field"
-                         value={form.arroladoPor} onChange={e => f({ arroladoPor: e.target.value })} />
-                </div>
-                <div>
-                  <label className="mf-label">JURISDIÇÃO</label>
-                  <input className="mf-field" placeholder="Ex: Sede, Região Norte..."
-                         value={form.jurisdicaoArrolamento} onChange={e => f({ jurisdicaoArrolamento: e.target.value })} />
+                <div className="mem-check-row">
+                  <div
+                      className={`mem-checkbox ${form.batizadoEspiritoSanto ? "checked" : ""}`}
+                      onClick={() => f({ batizadoEspiritoSanto: !form.batizadoEspiritoSanto })}
+                  >
+                    {form.batizadoEspiritoSanto && "✓"}
+                  </div>
+                  <label className="mem-checkbox-label">
+                    Batizado(a) no Espírito Santo?
+                  </label>
                 </div>
               </div>
             </div>
 
-            {/* ── 7. OBSERVAÇÕES ── */}
-            <SectionTitle icon={FileText} label="Observações" color={textSec} isDark={isDark} />
-            <div className="mf-section">
-              <div>
-                <label className="mf-label">OBSERVAÇÕES GERAIS</label>
-                <textarea className="mf-field"
+            {/* ── Arrolamento ── */}
+            <div>
+              <p className="mem-section-title">Arrolamento</p>
+              <div className="mem-form-section">
+                <div>
+                  <label className="mem-form-label">TIPO DE ARROLAMENTO</label>
+                  <select className="mem-form-field"
+                          value={form.tipoArrolamento} onChange={e => f({ tipoArrolamento: e.target.value })}>
+                    {tipoArrolamentoOptions.map(o =>
+                        <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div className="mem-form-grid2">
+                  <div>
+                    <label className="mem-form-label">ARROLADO POR</label>
+                    <input className="mem-form-field"
+                           value={form.arroladoPor} onChange={e => f({ arroladoPor: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mem-form-label">JURISDIÇÃO</label>
+                    <input className="mem-form-field"
+                           value={form.jurisdicaoArrolamento} onChange={e => f({ jurisdicaoArrolamento: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Observações ── */}
+            <div>
+              <p className="mem-section-title">Observações</p>
+              <div className="mem-form-section">
+                <label className="mem-form-label">OBSERVAÇÕES GERAIS</label>
+                <textarea className="mem-form-textarea"
                           value={form.observacoes} onChange={e => f({ observacoes: e.target.value })}
                           placeholder="Informações adicionais..." />
               </div>
             </div>
 
             {/* ── Botões ── */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 4 }}>
-              <button type="submit" className="mf-btn-save">
-                {editandoId ? "SALVAR ALTERAÇÕES" : "CONFIRMAR CADASTRO"}
+            <div className="mem-form-actions" style={{ paddingTop: 8 }}>
+              <button type="submit" className="mem-btn-save" disabled={loading}>
+                {loading ? (
+                    <><Loader2 size={14} className="dl-spin" /> Salvando...</>
+                ) : (
+                    <>{editandoId ? "Salvar" : "Cadastrar"}</>
+                )}
               </button>
               {editandoId && (
-                  <button type="button" className="mf-btn-del" onClick={onExcluir}>
-                    <Trash2 size={13} /> EXCLUIR REGISTRO
+                  <button type="button" className="mem-btn-delete" onClick={onExcluir} disabled={loading}>
+                    <Trash2 size={14} /> Excluir
                   </button>
               )}
             </div>
 
           </form>
         </motion.div>
-      </>
+      </motion.div>
   );
 
   return createPortal(content, document.body);
 }
 
-/* ─── Componente Principal ───────────────────────────────────────────── */
-export default function Membros({ isDark = false }) {
+/* ─── Componente Principal ──────────────────────────────────────── */
+export default function MembrosRefatorado({ isDark = false }) {
   const [membros,        setMembros]        = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [isModalOpen,    setIsModalOpen]    = useState(false);
   const [editandoId,     setEditandoId]     = useState(null);
-  const [statusOriginal, setStatusOriginal] = useState(null);
   const [filtro,         setFiltro]         = useState("");
   const [form,           setForm]           = useState(formInicial);
   const [nomeCelula,     setNomeCelula]     = useState(null);
   const [nomeLider,      setNomeLider]      = useState(null);
+  const [statusOriginal, setStatusOriginal] = useState(null);
+  const [salvando,       setSalvando]       = useState(false);
 
-  const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
-  const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-  const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
-  const border      = isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)";
-  const inputBg     = isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)";
-
-  const baseStyles = `
-    @keyframes spin { to { transform: rotate(360deg) } }
-    .spin-icon { animation: spin 1s linear infinite; }
-    .ieq-field {
-      width: 100%; box-sizing: border-box;
-      background: ${inputBg};
-      border: 1px solid ${isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"};
-      color: ${textPrimary}; padding: 11px 14px; border-radius: 8px;
-      outline: none; font-family: 'EB Garamond', serif; font-size: 15px; transition: all .25s;
-    }
-    .ieq-field:focus { border-color: ${IEQ.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.12); }
-    .ieq-field::placeholder { color: ${isDark ? "rgba(245,240,232,.25)" : "rgba(26,10,13,.3)"}; }
-    .ieq-member-card {
-      background: ${cardBg}; border: 1px solid ${border}; border-radius: 12px;
-      padding: 18px; cursor: pointer; transition: all .3s; backdrop-filter: blur(24px);
-    }
-    .ieq-member-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(200,16,46,.12); border-color: ${IEQ.red};
-    }
-    .ieq-grid-m { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media(min-width:560px) { .ieq-grid-m { grid-template-columns: repeat(2,1fr); } }
-    @media(min-width:900px) { .ieq-grid-m { grid-template-columns: repeat(3,1fr); } }
-  `;
+  const t = themeMembers(isDark);
 
   const listar = useCallback(async () => {
     setLoading(true);
@@ -820,34 +1004,28 @@ export default function Membros({ isDark = false }) {
       dataNascimento:         formatarDataInput(m.dataNascimento),
       dataConversao:          formatarDataInput(m.dataConversao),
       dataBatismo:            formatarDataInput(m.dataBatismo),
-      /* Filiação */
       nomeMae:                m.nomeMae         ?? "",
       nomePai:                m.nomePai         ?? "",
-      nomeConjuge:            m.nomeConjuge     ?? "",  // ✅ sem acento
+      nomeConjuge:            m.nomeConjuge     ?? "",
       naturalidade:           m.naturalidade    ?? "",
-      /* Escolaridade */
       grauEscolaridade:       m.grauEscolaridade        ?? "",
       curso:                  m.curso                   ?? "",
       profissao:              m.profissao               ?? "",
-      /* Endereço */
       endereco:               m.endereco        ?? "",
       numero:                 m.numero          ?? "",
       bairro:                 m.bairro          ?? "",
       cidade:                 m.cidade          ?? "",
       cep:                    m.cep             ?? "",
-      uf:                     m.uf              ?? "",  // ✅ adicionado
-      /* Espiritual */
+      uf:                     m.uf              ?? "",
       pertenceOutraReligiao:  m.pertenceOutraReligiao  ?? false,
       qualReligiao:           m.qualReligiao           ?? "",
       batizadoNasAguas:       m.batizadoNasAguas       ?? false,
       dataBatizadoNasAguas:   formatarDataInput(m.dataBatizadoNasAguas),
       igrejaBatizadoNasAguas: m.igrejaBatizadoNasAguas ?? "",
       batizadoEspiritoSanto:  m.batizadoEspiritoSanto  ?? false,
-      /* Arrolamento */
       tipoArrolamento:        m.tipoArrolamento        ?? "",
       jurisdicaoArrolamento:  m.jurisdicaoArrolamento  ?? "",
       arroladoPor:            m.arroladoPor            ?? "",
-      /* Outros */
       observacoes:            m.observacoes            ?? "",
     });
     setIsModalOpen(true);
@@ -860,11 +1038,15 @@ export default function Membros({ isDark = false }) {
 
   const salvar = async (e) => {
     e.preventDefault();
+    setSalvando(true);
     try {
       const dados = prepararFormParaEnvio(form);
       if (editandoId) {
         if (form.status !== statusOriginal) {
-          if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) return;
+          if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) {
+            setSalvando(false);
+            return;
+          }
           await api.put(`/membros/${editandoId}/status`, null, { params: { status: form.status } });
         }
         await api.put(`/membros/${editandoId}`, dados);
@@ -874,161 +1056,155 @@ export default function Membros({ isDark = false }) {
       fecharModal(); listar();
     } catch (err) {
       const mensagem = err.response?.data?.message || err.response?.data?.error || err.message || "Erro desconhecido";
-      console.error("❌ Erro ao salvar:", err);
       alert(`Erro ao salvar:\n\n${mensagem}`);
+    } finally {
+      setSalvando(false);
     }
   };
 
   const excluir = async () => {
     if (!window.confirm("Excluir permanentemente?")) return;
+    setSalvando(true);
     try {
       await api.delete(`/membros/${editandoId}`);
       fecharModal(); listar();
     } catch (err) {
       const mensagem = err.response?.data?.message || err.response?.data?.error || err.message;
-      console.error("❌ Erro ao excluir:", err);
       alert(`Erro ao excluir:\n\n${mensagem}`);
+    } finally {
+      setSalvando(false);
     }
   };
 
-  const membrosFiltrados = membros
-      .filter(m =>
-          m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
-          m.cpf?.includes(filtro) ||
-          m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
-      )
-      .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" }));
+  const membrosFiltrados = useMemo(() =>
+          membros
+              .filter(m =>
+                  m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
+                  m.cpf?.includes(filtro) ||
+                  m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
+              )
+              .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" })),
+      [membros, filtro]
+  );
 
   return (
-      <div style={{ padding: "24px 20px", fontFamily: "'EB Garamond',serif", color: textPrimary }}>
-        <style>{baseStyles}</style>
+      <div className="mem-root">
+        <GlobalStylesMembers t={t} isDark={isDark} />
+        <div className="mem-glow" />
 
-        {/* Header */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="mem-content">
+
+          {/* ── Header ── */}
+          <motion.header
+              className="mem-header"
+              initial={{ opacity: 0, y: -18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: .4 }}
+          >
+            <div className="mem-header-left">
               <div style={{
-                width: 42, height: 42, borderRadius: 10, background: `${IEQ.blue}22`,
-                display: "flex", alignItems: "center", justifyContent: "center", color: IEQ.blue,
+                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                background: `linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark})`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#fff", fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 16,
               }}>
                 <User size={20} />
               </div>
-              <div>
-                <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, letterSpacing: ".16em", color: textPrimary, margin: 0 }}>MEMBRESIA</h3>
-                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".18em", color: textSec, margin: 0 }}>{membros.length} REGISTROS</p>
+              <div className="mem-title-block">
+                <p className="mem-eyebrow">Gerenciamento</p>
+                <h1 className="mem-title">Membros</h1>
               </div>
             </div>
-            <button onClick={abrirNovo} style={{
-              display: "flex", alignItems: "center", gap: 8, padding: "11px 20px",
-              borderRadius: 8, border: "none", cursor: "pointer",
-              background: `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
-              color: "#fff", fontFamily: "'Cinzel',serif", fontSize: 10, fontWeight: 700, letterSpacing: ".16em",
-            }}>
-              <Plus size={15} /> NOVO MEMBRO
+            <button className="mem-btn-gold" onClick={abrirNovo}>
+              <Plus size={13} /> Novo
             </button>
-          </div>
+          </motion.header>
 
-          <div style={{ position: "relative" }}>
-            <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: IEQ.red, opacity: .6 }} />
+          {/* ── Busca ── */}
+          <motion.div
+              className="mem-search-wrap"
+              initial={{ opacity: 0, y: -14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: .4, delay: .08 }}
+          >
+            <Search className="mem-search-icon" size={16} />
             <input
-                className="ieq-field"
-                style={{ paddingLeft: 42 }}
-                placeholder="Buscar por nome, CPF ou célula..."
+                className="mem-input"
+                placeholder="Buscar por nome, CPF ou célula…"
                 value={filtro}
                 onChange={e => setFiltro(e.target.value)}
             />
-          </div>
+          </motion.div>
+
+          {/* ── Cards/Loading ── */}
+          {loading ? (
+              <div className="mem-loading">
+                <Loader2 size={28} className="dl-spin" style={{ color: AURA.gold }} />
+              </div>
+          ) : membrosFiltrados.length > 0 ? (
+              <motion.div
+                  className="mem-grid"
+                  initial="hidden" animate="visible"
+                  variants={{ hidden: {}, visible: { transition: { staggerChildren: .04 } } }}
+              >
+                {membrosFiltrados.map(m => {
+                  const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
+                  return (
+                      <motion.div
+                          key={m.id}
+                          className="mem-card"
+                          variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                          onClick={() => abrirEdicao(m)}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: .98 }}
+                      >
+                        <div className="mem-card-inner">
+                          <div className="mem-card-avatar">
+                            {m.nome?.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="mem-card-content">
+                            <p className="mem-card-name">{m.nome?.toUpperCase()}</p>
+                            <div className="mem-card-meta">
+                              <span className="mem-badge" style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>
+                                {m.status}
+                              </span>
+                              {m.profissao && (
+                                  <span className="mem-badge" style={{ background: `${AURA.gold}12`, color: AURA.gold, border: `1px solid ${AURA.gold}30` }}>
+                                    {m.profissao.slice(0, 12)}
+                                  </span>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="mem-card-arrow" size={18} />
+                        </div>
+                      </motion.div>
+                  );
+                })}
+              </motion.div>
+          ) : (
+              <motion.div
+                  className="mem-empty"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="mem-empty-icon">
+                  <Users size={32} />
+                </div>
+                <p className="mem-empty-text">
+                  {filtro ? "Nenhum membro encontrado." : "Nenhum membro cadastrado."}
+                </p>
+                <button className="mem-btn-gold" style={{ marginTop: 16 }} onClick={abrirNovo}>
+                  <Plus size={13} /> Adicionar Membro
+                </button>
+              </motion.div>
+          )}
+
         </div>
 
-        {/* Cards */}
-        {loading ? (
-            <div style={{ textAlign: "center", padding: "48px 0" }}>
-              <Loader2 size={30} className="spin-icon" style={{ color: IEQ.blue, display: "inline-block" }} />
-              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".2em", color: textSec, marginTop: 12 }}>CARREGANDO...</p>
-            </div>
-        ) : (
-            <motion.div
-                className="ieq-grid-m"
-                initial="hidden" animate="visible"
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: .05 } } }}
-            >
-              {membrosFiltrados.map(m => {
-                const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
-                return (
-                    <motion.div
-                        key={m.id}
-                        className="ieq-member-card"
-                        variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
-                        onClick={() => abrirEdicao(m)}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                        <div style={{
-                          width: 44, height: 44, borderRadius: 10, flexShrink: 0,
-                          background: `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          color: "#fff", fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 16,
-                        }}>
-                          {m.nome?.charAt(0).toUpperCase()}
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <h4 style={{
-                            fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700,
-                            letterSpacing: ".1em", color: textPrimary, margin: "0 0 5px",
-                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                          }}>
-                            {m.nome?.toUpperCase()}
-                          </h4>
-                          <span style={{
-                            display: "inline-flex", alignItems: "center",
-                            padding: "2px 10px", borderRadius: 99,
-                            background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`,
-                            fontFamily: "'Cinzel',serif", fontSize: 8, fontWeight: 700, letterSpacing: ".14em",
-                          }}>
-                      {m.status}
-                    </span>
-                        </div>
-                        <ChevronRight size={15} style={{ color: textSec, flexShrink: 0 }} />
-                      </div>
-
-                      <div style={{ borderTop: `1px solid ${border}`, paddingTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
-                        {m.nomeCelula && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <Users size={13} style={{ color: "#C48C00", flexShrink: 0 }} />
-                              <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: "#C48C00", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {m.nomeCelula}
-                      </span>
-                            </div>
-                        )}
-                        {m.profissao && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <Briefcase size={13} style={{ color: textSec, flexShrink: 0 }} />
-                              <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {m.profissao}
-                      </span>
-                            </div>
-                        )}
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <CreditCard size={13} style={{ color: textSec, flexShrink: 0 }} />
-                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec }}>
-                      {m.cpf || "CPF não informado"}
-                    </span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <Phone size={13} style={{ color: textSec, flexShrink: 0 }} />
-                          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSec }}>
-                      {m.telefone || "Sem telefone"}
-                    </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                );
-              })}
-            </motion.div>
-        )}
-
+        {/* ── Modal ── */}
         <AnimatePresence>
           {isModalOpen && (
-              <MembroModal
+              <MembroModalRefatorado
                   isDark={isDark}
                   editandoId={editandoId}
                   form={form}
@@ -1038,9 +1214,11 @@ export default function Membros({ isDark = false }) {
                   onFechar={fecharModal}
                   nomeCelula={nomeCelula}
                   nomeLider={nomeLider}
+                  loading={salvando}
               />
           )}
         </AnimatePresence>
+
       </div>
   );
 }
