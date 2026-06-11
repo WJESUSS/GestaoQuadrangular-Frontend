@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Users, UserPlus, Home, FileText, Building2, Sun, Moon, LogOut, Menu } from "lucide-react";
+import {
+  Users, UserPlus, Home, FileText, Building2,
+  Sun, Moon, LogOut, Menu, X, ChevronRight,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 
@@ -9,145 +12,442 @@ import Visitantes        from "./Visitante";
 import FichasEncontro    from "./FichasEncontro";
 import SecretariaCelulas from "./SecretariaCelulas";
 
-/* ─── Paleta IEQ ─────────────────────────────────────────────────────────── */
-const IEQ = {
-  red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
-  yellow: "#FDB813", yellowDark: "#C48C00",
-  blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
-  offWhite: "#F5F0E8", dark: "#0A0608", darkCard: "#110A0D",
+/* ─── Tokens (espelhados do DashboardLider) ──────────────────────────── */
+const AURA = {
+  gold:      "#C9A96E",
+  goldLight: "#E8D5A3",
+  dark:      "#0A0A0F",
+  darkEl:    "#12121A",
+  light:     "#F5F0E8",
+  red:       "#C8102E",
+  redDark:   "#9B0B1E",
+  blue:      "#003DA5",
+  blueDark:  "#002470",
+  yellow:    "#FDB813",
 };
 
+function theme(isDark) {
+  return {
+    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "rgba(255,255,255,.97)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+    text:        isDark ? "#F5F0E8"                : "#1A1008",
+    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
+    textMuted:   isDark ? "#6B6658"                : "#9A9080",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
+    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(245,240,232,.97)",
+    sidebarBg:   isDark ? "rgba(12,10,14,.98)"     : "rgba(252,248,242,.98)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+  };
+}
+
 const modulos = [
-  { id: "MEMBROS",           label: "Membros",    icon: <Users size={18}/>,     color: IEQ.blue      },
-  { id: "VISITANTES",        label: "Visitantes", icon: <UserPlus size={18}/>,  color: IEQ.red       },
-  { id: "CELULAS",           label: "Células",    icon: <Home size={18}/>,      color: "#059669"     },
-  { id: "FICHAS",            label: "Fichas",     icon: <FileText size={18}/>,  color: IEQ.yellow    },
-  { id: "SECRETARIACELULAS", label: "Secretaria", icon: <Building2 size={18}/>, color: IEQ.blueLight },
+  { id: "MEMBROS",           label: "Membros",    sub: "Gestão",      icon: <Users size={17}/>,     color: AURA.blue      },
+  { id: "VISITANTES",        label: "Visitantes", sub: "Novas Vidas", icon: <UserPlus size={17}/>,  color: AURA.red       },
+  { id: "CELULAS",           label: "Células",    sub: "Grupos",      icon: <Home size={17}/>,      color: "#059669"      },
+  { id: "FICHAS",            label: "Fichas",     sub: "Encontro",    icon: <FileText size={17}/>,  color: AURA.yellow    },
+  { id: "SECRETARIACELULAS", label: "Secretaria", sub: "Controle",    icon: <Building2 size={17}/>, color: "#7090e8"      },
 ];
 
-/* ─── CSS estático ───────────────────────────────────────────────────────── */
-const STATIC_CSS = `
-  * { box-sizing: border-box; }
-  @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-  @keyframes pulse  { 0%,100%{transform:scale(1);opacity:.45} 50%{transform:scale(1.12);opacity:.12} }
-  @keyframes spin   { to{transform:rotate(360deg)} }
+/* ─── CSS Global ─────────────────────────────────────────────────────── */
+function GlobalStyles({ t, isDark }) {
+  return (
+      <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
-  .sec-root {
-    --bg:       #F0EAE8;
-    --text:     #1A0A0D;
-    --text-sec: rgba(26,10,13,.45);
-    --card-bg:  rgba(255,255,255,.92);
-    --border:   rgba(200,16,46,.12);
-    --stripe-a: rgba(200,16,46,.06);
-    --stripe-b: rgba(253,184,19,.05);
-    --nav-idle: rgba(26,10,13,.45);
-    --nav-hover-bg: rgba(200,16,46,.06);
-  }
-  .sec-root.dark {
-    --bg:       #0A0608;
-    --text:     #F5F0E8;
-    --text-sec: rgba(245,240,232,.45);
-    --card-bg:  rgba(17,10,13,.97);
-    --border:   rgba(200,16,46,.15);
-    --stripe-a: rgba(200,16,46,.04);
-    --stripe-b: rgba(253,184,19,.03);
-    --nav-idle: rgba(245,240,232,.45);
-    --nav-hover-bg: rgba(200,16,46,.08);
-  }
+      @keyframes sec-spin  { to { transform: rotate(360deg); } }
+      @keyframes sec-pulse { 0%,100%{opacity:.25;transform:scale(1);} 50%{opacity:.06;transform:scale(1.1);} }
+      @keyframes sec-blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+      @keyframes sec-stripe{ 0%{background-position:0 0} 100%{background-position:80px 80px} }
 
-  .ieq-bg {
-    position:fixed; inset:0; pointer-events:none; z-index:0;
-    background: repeating-linear-gradient(-55deg,
-      var(--stripe-a) 0 10px, transparent 10px 20px,
-      var(--stripe-b) 20px 30px, transparent 30px 40px);
-    background-size:60px 60px; animation:stripe 8s linear infinite;
-    transition: background .35s;
-  }
+      *, *::before, *::after { box-sizing: border-box; }
 
-  .ieq-title {
-    font-family:'Cinzel',serif;
-    background:linear-gradient(90deg,#8B0B1F,#C8102E,#FDB813,#003DA5);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  }
+      .sec2-root {
+        font-family: 'Inter', sans-serif;
+        background: ${t.bg};
+        color: ${t.text};
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        position: relative;
+        overflow-x: hidden;
+        transition: background .4s, color .4s;
+        isolation: isolate;
+      }
 
-  .pulse-ring { position:absolute; border-radius:50%; border:1px solid rgba(200,16,46,.35); animation:pulse 3s ease-in-out infinite; }
-  .divider    { height:1px; background:linear-gradient(90deg,transparent,rgba(200,16,46,.2),transparent); margin:8px 0; }
+      /* Fundo animado */
+      .sec2-bg {
+        position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        background:
+          radial-gradient(ellipse at 10% 0%, ${t.glow1} 0%, transparent 55%),
+          radial-gradient(ellipse at 90% 100%, ${t.glow2} 0%, transparent 55%);
+        transition: background .4s;
+      }
+      .sec2-stripes {
+        position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5;
+        background-image: repeating-linear-gradient(
+          -55deg,
+          ${isDark ? "rgba(201,169,110,.025)" : "rgba(201,169,110,.04)"} 0 8px,
+          transparent 8px 16px,
+          ${isDark ? "rgba(200,16,46,.015)"   : "rgba(200,16,46,.02)"}   16px 24px,
+          transparent 24px 40px
+        );
+        background-size: 80px 80px;
+        animation: sec-stripe 12s linear infinite;
+      }
 
-  .ieq-sidebar {
-    position:fixed; inset:0; z-index:40;
-    transform:translateX(-100%); transition:transform .3s ease, background .35s;
-    background:var(--card-bg); border-right:1px solid var(--border);
-    backdrop-filter:blur(24px);
-    display:flex; flex-direction:column;
-    width:280px; padding:28px 20px;
-  }
-  .ieq-sidebar.open { transform:translateX(0); }
-  @media(min-width:768px) {
-    .ieq-sidebar { position:relative; transform:translateX(0) !important; width:260px; flex-shrink:0; }
-  }
+      /* ── SIDEBAR ── */
+      .sec2-sidebar {
+        position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
+        width: 270px;
+        background: ${t.sidebarBg};
+        border-right: 1px solid ${t.border};
+        backdrop-filter: blur(32px) saturate(1.6);
+        -webkit-backdrop-filter: blur(32px) saturate(1.6);
+        display: flex; flex-direction: column;
+        padding: 0;
+        transform: translateX(-100%);
+        transition: transform .32s cubic-bezier(.4,0,.2,1), box-shadow .32s;
+        will-change: transform;
+      }
+      .sec2-sidebar.open {
+        transform: translateX(0);
+        box-shadow: 24px 0 80px rgba(0,0,0,${isDark ? ".6" : ".18"});
+      }
+      @media (min-width: 768px) {
+        .sec2-sidebar {
+          position: sticky;
+          top: 0; height: 100vh; height: 100dvh;
+          transform: translateX(0) !important;
+          box-shadow: none !important;
+          flex-shrink: 0;
+        }
+      }
 
-  .ieq-nav-btn {
-    width:100%; display:flex; align-items:center; gap:12px;
-    padding:13px 16px; border-radius:10px; border:none; cursor:pointer;
-    font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.14em;
-    transition:all .25s; text-align:left;
-    background:transparent; color:var(--nav-idle);
-  }
-  .ieq-nav-btn:hover { background:var(--nav-hover-bg); color:var(--text); }
-  .ieq-nav-btn.active { background:linear-gradient(135deg,#8B0B1F,#C8102E); color:#fff; box-shadow:0 6px 18px rgba(200,16,46,.35); }
+      .sec2-sidebar-inner {
+        display: flex; flex-direction: column; flex: 1; overflow-y: auto;
+        padding: 28px 18px 24px;
+        /* Esconde scrollbar mas mantém scroll */
+        scrollbar-width: none;
+      }
+      .sec2-sidebar-inner::-webkit-scrollbar { display: none; }
 
-  .ieq-btn-ghost {
-    background:rgba(200,16,46,.06); color:var(--text);
-    border:1px solid rgba(200,16,46,.18);
-    border-radius:8px; font-family:'Cinzel',serif; font-size:10px; font-weight:700;
-    letter-spacing:.15em; cursor:pointer; transition:all .25s; padding:10px 14px;
-  }
-  .sec-root.dark .ieq-btn-ghost { background:rgba(255,255,255,.04); border-color:rgba(200,16,46,.2); }
-  .ieq-btn-ghost:hover { border-color:#C8102E; background:rgba(200,16,46,.1); }
+      /* ── BRAND no topo ── */
+      .sec2-brand {
+        display: flex; align-items: center; gap: 13px; margin-bottom: 28px;
+      }
+      .sec2-avatar-wrap {
+        position: relative; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .sec2-pulse-ring {
+        position: absolute; border-radius: 50%;
+        border: 1px solid rgba(201,169,110,.22);
+        animation: sec-pulse 3.2s ease-in-out infinite;
+      }
+      .sec2-avatar {
+        width: 48px; height: 48px; border-radius: 50%;
+        border: 1.5px solid rgba(201,169,110,.3);
+        background: ${isDark ? "rgba(18,18,26,.99)" : "#fff"};
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden; position: relative; z-index: 1;
+      }
+      .sec2-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .sec2-avatar-fallback {
+        font-family: 'Playfair Display', serif;
+        font-size: 18px; font-weight: 600; color: ${AURA.gold};
+      }
+      .sec2-brand-text { flex: 1; min-width: 0; }
+      .sec2-brand-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 15px; font-weight: 600; color: ${t.text};
+        margin: 0; line-height: 1.2; letter-spacing: .04em;
+        background: linear-gradient(90deg, ${AURA.redDark}, ${AURA.red}, ${AURA.yellow}, ${AURA.blue});
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .sec2-brand-sub {
+        font-size: 9px; font-weight: 600; letter-spacing: .22em;
+        text-transform: uppercase; color: ${t.textMuted}; margin: 3px 0 0;
+      }
+      .sec2-brand-user {
+        font-size: 11px; font-weight: 300; font-style: italic;
+        color: ${t.textSec}; margin: 4px 0 0;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
 
-  .ieq-badge {
-    display:inline-flex; align-items:center; gap:4px;
-    padding:3px 10px; border-radius:99px;
-    font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:.16em; border:1px solid;
-  }
+      /* Divider */
+      .sec2-divider {
+        display: flex; align-items: center; gap: 8px; margin: 0 0 18px;
+      }
+      .sec2-divider::before,
+      .sec2-divider::after {
+        content: ''; flex: 1; height: 1px;
+      }
+      .sec2-divider::before { background: linear-gradient(to right, transparent, rgba(201,169,110,.25)); }
+      .sec2-divider::after  { background: linear-gradient(to left,  transparent, rgba(201,169,110,.25)); }
+      .sec2-divider-dot { width: 4px; height: 4px; border-radius: 50%; background: ${AURA.gold}; }
 
-  .ieq-overlay { position:fixed; inset:0; z-index:39; background:rgba(10,6,8,.7); backdrop-filter:blur(4px); }
-  @media(min-width:768px) { .ieq-overlay { display:none !important; } }
-  @media(min-width:768px) { .desk-subheader { display:block !important; } header.mobile-header { display:none !important; } }
+      /* ── NAV ── */
+      .sec2-nav-label {
+        font-size: 8px; font-weight: 600; letter-spacing: .24em;
+        text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 10px 6px;
+      }
+      .sec2-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+      .sec2-nav-btn {
+        width: 100%; display: flex; align-items: center; gap: 12px;
+        padding: 12px 14px; border-radius: 12px; border: none; cursor: pointer;
+        font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+        letter-spacing: .02em; text-align: left; position: relative;
+        transition: all .26s cubic-bezier(.4,0,.2,1);
+        background: transparent; color: ${t.textMuted};
+      }
+      .sec2-nav-btn::before {
+        content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        width: 3px; height: 0; border-radius: 0 3px 3px 0;
+        background: var(--nav-accent, ${AURA.gold});
+        transition: height .26s cubic-bezier(.4,0,.2,1);
+      }
+      .sec2-nav-btn:hover {
+        background: ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.07)"};
+        color: ${t.text};
+      }
+      .sec2-nav-btn:hover::before { height: 22px; }
+      .sec2-nav-btn.active {
+        background: linear-gradient(135deg, ${AURA.redDark} 0%, ${AURA.red} 100%);
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(200,16,46,.3);
+      }
+      .sec2-nav-btn.active::before { display: none; }
+      .sec2-nav-icon-wrap {
+        width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        transition: background .26s;
+      }
+      .sec2-nav-btn.active .sec2-nav-icon-wrap {
+        background: rgba(255,255,255,.15);
+      }
+      .sec2-nav-text { flex: 1; min-width: 0; }
+      .sec2-nav-text-main { display: block; line-height: 1; }
+      .sec2-nav-text-sub  {
+        display: block; font-size: 9px; font-weight: 400; letter-spacing: .1em;
+        text-transform: uppercase; opacity: .55; margin-top: 2px;
+        transition: opacity .26s;
+      }
+      .sec2-nav-btn.active .sec2-nav-text-sub { opacity: .7; }
+      .sec2-nav-chevron { opacity: 0; transition: opacity .26s; }
+      .sec2-nav-btn.active .sec2-nav-chevron { opacity: .5; }
 
-  /* Avatar logo topo sidebar */
-  .sec-logo-avatar {
-    width:38px; height:38px; border-radius:50%; overflow:hidden;
-    border:2px solid rgba(200,16,46,.4);
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  }
-  .sec-logo-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
-  .sec-logo-avatar-fallback {
-    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
-    background:rgba(200,16,46,.08);
-    font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--text);
-  }
-`;
+      /* ── RODAPÉ SIDEBAR ── */
+      .sec2-sidebar-footer { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+      .sec2-user-chip {
+        display: flex; align-items: center; gap: 10px;
+        padding: 11px 13px; border-radius: 12px;
+        background: ${isDark ? "rgba(201,169,110,.05)" : "rgba(201,169,110,.07)"};
+        border: 1px solid rgba(201,169,110,.12);
+      }
+      .sec2-user-chip-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #059669; flex-shrink: 0;
+        animation: sec-blink 2.5s ease-in-out infinite;
+      }
+      .sec2-user-chip-name {
+        font-size: 11px; font-weight: 600; color: ${t.text};
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+      }
+      .sec2-user-chip-role {
+        font-size: 9px; color: ${t.textMuted}; letter-spacing: .1em;
+        text-transform: uppercase;
+      }
 
+      /* Botão sair elegante */
+      .sec2-btn-exit {
+        display: flex; align-items: center; justify-content: center; gap: 9px;
+        width: 100%; padding: 13px 18px; border-radius: 12px; border: none;
+        cursor: pointer; position: relative; overflow: hidden;
+        background: ${isDark
+          ? "linear-gradient(135deg, rgba(155,11,30,.22), rgba(200,16,46,.14))"
+          : "linear-gradient(135deg, rgba(155,11,30,.08), rgba(200,16,46,.06))"};
+        border: 1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"};
+        color: ${AURA.red};
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+        letter-spacing: .18em; text-transform: uppercase;
+        transition: all .3s cubic-bezier(.4,0,.2,1);
+      }
+      .sec2-btn-exit::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
+        opacity: 0; transition: opacity .3s;
+      }
+      .sec2-btn-exit:hover { color: #fff; border-color: transparent; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,16,46,.3); }
+      .sec2-btn-exit:hover::after { opacity: 1; }
+      .sec2-btn-exit > * { position: relative; z-index: 1; }
+      .sec2-btn-exit:active { transform: translateY(0); }
+
+      .sec2-copyright {
+        text-align: center; font-size: 8px; font-weight: 500;
+        letter-spacing: .16em; text-transform: uppercase;
+        color: ${isDark ? "rgba(245,240,232,.1)" : "rgba(26,16,8,.12)"};
+        margin-top: 10px;
+      }
+
+      /* ── OVERLAY MOBILE ── */
+      .sec2-overlay {
+        position: fixed; inset: 0; z-index: 49;
+        background: rgba(10,10,15,.75);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+      @media (min-width: 768px) { .sec2-overlay { display: none !important; } }
+
+      /* ── MAIN ── */
+      .sec2-main {
+        flex: 1; display: flex; flex-direction: column;
+        position: relative; z-index: 1; min-width: 0;
+        min-height: 100vh; min-height: 100dvh;
+      }
+
+      /* Mobile topbar */
+      .sec2-topbar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid ${t.border};
+        background: ${t.headerBg};
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        position: sticky; top: 0; z-index: 30;
+      }
+      @media (min-width: 768px) { .sec2-topbar { display: none !important; } }
+
+      /* Desktop header */
+      .sec2-deskhead {
+        display: none;
+        padding: 28px 32px 0;
+      }
+      @media (min-width: 768px) { .sec2-deskhead { display: block !important; } }
+
+      .sec2-deskhead-inner {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
+      }
+
+      /* Badge módulo */
+      .sec2-mod-badge {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 7px 16px; border-radius: 100px;
+        font-family: 'Inter', sans-serif;
+        font-size: 9px; font-weight: 600; letter-spacing: .16em;
+        text-transform: uppercase; border: 1px solid; white-space: nowrap;
+      }
+      .sec2-mod-badge-dot {
+        width: 5px; height: 5px; border-radius: 50%;
+        animation: sec-blink 2.5s ease-in-out infinite;
+      }
+
+      /* Botões utilitários */
+      .sec2-btn-icon {
+        width: 38px; height: 38px; border-radius: 11px; border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
+        border: 1px solid ${t.border}; color: ${t.textMuted};
+        transition: all .25s;
+      }
+      .sec2-btn-icon:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+
+      /* CONTENT */
+      .sec2-content {
+        flex: 1; padding: 24px 20px;
+        overflow-y: auto;
+        /* Safe area para iOS */
+        padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+      }
+      @media (min-width: 768px) { .sec2-content { padding: 24px 32px; } }
+
+      /* Card principal */
+      .sec2-card {
+        background: ${t.bgEl};
+        border: 1px solid ${t.border};
+        border-radius: 20px;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        min-height: 480px;
+        overflow: hidden;
+        position: relative;
+      }
+      .sec2-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+        pointer-events: none;
+      }
+
+      /* Título desktop */
+      .sec2-module-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(22px, 3vw, 28px);
+        font-weight: 500; color: ${t.text}; margin: 0;
+        letter-spacing: .02em;
+      }
+      .sec2-module-eyebrow {
+        font-size: 9px; font-weight: 600; letter-spacing: .22em;
+        text-transform: uppercase; color: rgba(201,169,110,.55); margin: 0 0 5px;
+      }
+
+      /* Status online badge */
+      .sec2-online {
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 100px;
+        background: rgba(5,150,105,.1); border: 1px solid rgba(5,150,105,.25);
+        color: #059669; font-size: 9px; font-weight: 600; letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+      .sec2-online-dot {
+        width: 6px; height: 6px; border-radius: 50%; background: #059669;
+        animation: sec-blink 2.5s ease-in-out infinite;
+      }
+
+      /* Menu hamburger animado */
+      @media (min-width: 768px) { .sec2-hamburger { display: none !important; } }
+    `}</style>
+  );
+}
+
+/* ─── Logo / Avatar ───────────────────────────────────────────────────── */
+function IEQAvatar({ usuario, size = 48 }) {
+  return (
+      <div style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden",
+        border: "1.5px solid rgba(201,169,110,.3)",
+        background: "rgba(18,18,26,.8)",
+        display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {usuario?.fotoPerfil ? (
+            <img src={usuario.fotoPerfil} alt={usuario.nome || "S"}
+                 style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+            <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 600,
+              fontSize: size * 0.36, color: AURA.gold }}>
+          {usuario?.nome?.charAt(0).toUpperCase() || "S"}
+        </span>
+        )}
+      </div>
+  );
+}
+
+/* ─── Componente Principal ────────────────────────────────────────────── */
 export default function SecretariaPage() {
   const [moduloAtivo,   setModuloAtivo]   = useState("MEMBROS");
-
-  // Intercepta o botão voltar do celular (Android/PWA)
-  useEffect(() => {
-    if (moduloAtivo !== "MEMBROS") {
-      window.history.pushState({ modulo: moduloAtivo }, "");
-    }
-
-    const handlePopState = () => {
-      setModuloAtivo("MEMBROS");
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [moduloAtivo]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
   const [menuOpen,      setMenuOpen]      = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+
+  /* Botão voltar Android/PWA */
+  useEffect(() => {
+    if (moduloAtivo !== "MEMBROS") window.history.pushState({ modulo: moduloAtivo }, "");
+    const handlePop = () => setModuloAtivo("MEMBROS");
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, [moduloAtivo]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -155,158 +455,225 @@ export default function SecretariaPage() {
   }, [isDark]);
 
   useEffect(() => {
-    api.get("/usuarios/me")
-        .then(res => setUsuarioLogado(res.data))
-        .catch(() => {});
+    api.get("/usuarios/me").then(r => setUsuarioLogado(r.data)).catch(() => {});
   }, []);
 
+  /* Fechar sidebar ao mudar módulo no mobile */
+  const trocarModulo = (id) => { setModuloAtivo(id); setMenuOpen(false); };
+
   const handleLogout = () => {
-    if (window.confirm("Deseja realmente sair do sistema?")) {
-      localStorage.removeItem("token");
-      window.location.href = "/";
-    }
+    localStorage.removeItem("token");
+    window.location.href = "/";
   };
 
+  const t = theme(isDark);
   const moduloInfo = useMemo(() => modulos.find(m => m.id === moduloAtivo), [moduloAtivo]);
 
   return (
-      <div className={`sec-root${isDark ? " dark" : ""}`} style={{ minHeight:"100vh", display:"flex", background:"var(--bg)", color:"var(--text)", fontFamily:"'EB Garamond',serif", position:"relative", transition:"background .5s" }}>
-        <style>{STATIC_CSS}</style>
-        <div className="ieq-bg" />
+      <div className="sec2-root">
+        <GlobalStyles t={t} isDark={isDark} />
+        <div className="sec2-bg" />
+        <div className="sec2-stripes" />
 
         {/* Overlay mobile */}
-        {menuOpen && <div className="ieq-overlay" onClick={() => setMenuOpen(false)} />}
+        <AnimatePresence>
+          {menuOpen && (
+              <motion.div
+                  className="sec2-overlay"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: .22 }}
+                  onClick={() => setMenuOpen(false)}
+              />
+          )}
+        </AnimatePresence>
 
-        {/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */}
-        <aside className={`ieq-sidebar${menuOpen ? " open" : ""}`}>
+        {/* ─── SIDEBAR ─────────────────────────────────────────────────── */}
+        <aside className={`sec2-sidebar${menuOpen ? " open" : ""}`}>
+          <div className="sec2-sidebar-inner">
 
-          {/* ─── Logo com foto no lugar da cruz ──────────────────────────────── */}
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:36 }}>
-            <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
-              <div className="pulse-ring" style={{ width:52, height:52 }} />
-              <div className="sec-logo-avatar">
-                {usuarioLogado?.fotoPerfil ? (
-                    <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome || "Secretaria"} />
-                ) : (
-                    <div className="sec-logo-avatar-fallback">
-                      {usuarioLogado?.nome?.charAt(0).toUpperCase() || "S"}
-                    </div>
+            {/* Brand */}
+            <div className="sec2-brand">
+              <div className="sec2-avatar-wrap">
+                <div className="sec2-pulse-ring" style={{ width: 58, height: 58 }} />
+                <div className="sec2-pulse-ring" style={{ width: 46, height: 46, animationDelay: ".9s" }} />
+                <div className="sec2-avatar">
+                  <IEQAvatar usuario={usuarioLogado} size={46} />
+                </div>
+              </div>
+              <div className="sec2-brand-text">
+                <h1 className="sec2-brand-title">IEQ Pituaçu</h1>
+                <p className="sec2-brand-sub">Secretaria</p>
+                {usuarioLogado?.nome && (
+                    <p className="sec2-brand-user">{usuarioLogado.nome}</p>
                 )}
               </div>
             </div>
-            <div>
-              <h1 className="ieq-title" style={{ fontSize:14, fontWeight:700, letterSpacing:".18em", margin:0 }}>IEQ PITUAÇU</h1>
-              <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".2em", color:"var(--text-sec)", margin:0 }}>SECRETARIA</p>
-              {usuarioLogado?.nome && (
-                  <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:"var(--text-sec)", margin:"3px 0 0", fontStyle:"italic" }}>
-                    {usuarioLogado.nome}
-                  </p>
-              )}
-            </div>
-          </div>
 
-          <div className="divider" style={{ marginBottom:16 }} />
+            <div className="sec2-divider"><div className="sec2-divider-dot" /></div>
 
-          {/* Nav */}
-          <nav style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
-            <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".22em", color:"var(--text-sec)", margin:"0 0 10px 6px" }}>MÓDULOS</p>
-            {modulos.map(m => (
-                <button
-                    key={m.id}
-                    className={`ieq-nav-btn${moduloAtivo === m.id ? " active" : ""}`}
-                    onClick={() => { setModuloAtivo(m.id); setMenuOpen(false); }}
-                >
-                  <span style={{ color: moduloAtivo === m.id ? "#fff" : m.color }}>{m.icon}</span>
-                  {m.label}
-                </button>
-            ))}
-          </nav>
+            {/* Nav */}
+            <p className="sec2-nav-label">Módulos</p>
+            <nav className="sec2-nav">
+              {modulos.map(m => (
+                  <button
+                      key={m.id}
+                      className={`sec2-nav-btn${moduloAtivo === m.id ? " active" : ""}`}
+                      style={{ "--nav-accent": m.color }}
+                      onClick={() => trocarModulo(m.id)}
+                  >
+                    <div
+                        className="sec2-nav-icon-wrap"
+                        style={{
+                          background: moduloAtivo === m.id
+                              ? "rgba(255,255,255,.15)"
+                              : isDark ? `${m.color}18` : `${m.color}14`,
+                          color: moduloAtivo === m.id ? "#fff" : m.color,
+                        }}
+                    >
+                      {m.icon}
+                    </div>
+                    <span className="sec2-nav-text">
+                  <span className="sec2-nav-text-main">{m.label}</span>
+                  <span className="sec2-nav-text-sub">{m.sub}</span>
+                </span>
+                    <ChevronRight size={13} className="sec2-nav-chevron" />
+                  </button>
+              ))}
+            </nav>
 
-          <div className="divider" style={{ margin:"16px 0" }} />
-
-          {/* Rodapé: só texto + logout, sem avatar */}
-          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 12px", borderRadius:10, background:isDark?"rgba(200,16,46,.06)":"rgba(200,16,46,.05)", border:"1px solid rgba(200,16,46,.1)" }}>
-              <div style={{ flex:1, minWidth:0 }}>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".1em", color:"var(--text)", margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                  {usuarioLogado?.nome || "SECRETARIA"}
-                </p>
-                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:"var(--text-sec)", margin:0 }}>
-                  {usuarioLogado?.perfil?.replace("ROLE_", "") || "Secretário(a)"}
-                </p>
+            {/* Footer */}
+            <div className="sec2-sidebar-footer">
+              <div className="sec2-divider" style={{ margin: "6px 0 14px" }}>
+                <div className="sec2-divider-dot" />
               </div>
+
+              <div className="sec2-user-chip">
+                <div className="sec2-user-chip-dot" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p className="sec2-user-chip-name">
+                    {usuarioLogado?.nome || "Secretaria"}
+                  </p>
+                  <p className="sec2-user-chip-role">
+                    {usuarioLogado?.perfil?.replace("ROLE_", "") || "Secretário(a)"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Botão Sair elegante */}
+              <button
+                  className="sec2-btn-exit"
+                  onClick={() => setShowExitConfirm(true)}
+              >
+                <LogOut size={15} />
+                <span>Sair do Sistema</span>
+              </button>
+
+              <p className="sec2-copyright">
+                © IEQ Pituaçu · {new Date().getFullYear()}
+              </p>
             </div>
-
-            <button
-                onClick={handleLogout}
-                style={{ display:"flex", alignItems:"center", gap:10, padding:"12px 16px", borderRadius:10, border:"none", cursor:"pointer", background:"rgba(200,16,46,.08)", color:IEQ.red, fontFamily:"'Cinzel',serif", fontSize:10, fontWeight:700, letterSpacing:".14em", width:"100%", transition:"all .2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(200,16,46,.18)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(200,16,46,.08)"}
-            >
-              <LogOut size={16} /> SAIR DO SISTEMA
-            </button>
           </div>
-
-          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".14em", color:"var(--text-sec)", textAlign:"center", marginTop:12 }}>
-            © IEQ PITUAÇU · {new Date().getFullYear()}
-          </p>
         </aside>
 
-        {/* ─── MAIN ────────────────────────────────────────────────────────────── */}
-        <div style={{ flex:1, display:"flex", flexDirection:"column", position:"relative", zIndex:1, minWidth:0 }}>
+        {/* ─── MAIN ────────────────────────────────────────────────────── */}
+        <div className="sec2-main" style={{ position: "relative", zIndex: 1 }}>
 
-          {/* Mobile header */}
-          <header className="mobile-header" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 20px", borderBottom:"1px solid var(--border)", background:"var(--card-bg)", backdropFilter:"blur(24px)", position:"sticky", top:0, zIndex:30 }}>
-            <button className="ieq-btn-ghost" style={{ padding:"9px 12px" }} onClick={() => setMenuOpen(true)}>
+          {/* Mobile topbar */}
+          <header className="sec2-topbar">
+            <button
+                className="sec2-btn-icon sec2-hamburger"
+                onClick={() => setMenuOpen(true)}
+                aria-label="Abrir menu"
+            >
               <Menu size={18} />
             </button>
-            <span className="ieq-badge" style={{ color:moduloInfo?.color||IEQ.red, borderColor:`${moduloInfo?.color||IEQ.red}44`, background:`${moduloInfo?.color||IEQ.red}11` }}>
-              {moduloInfo?.icon} {moduloInfo?.label?.toUpperCase()}
-            </span>
-            <button className="ieq-btn-ghost" style={{ padding:"9px 12px" }} onClick={() => setIsDark(!isDark)}>
-              {isDark ? <Sun size={16}/> : <Moon size={16}/>}
+
+            <span
+                className="sec2-mod-badge"
+                style={{
+                  color: moduloInfo?.color || AURA.red,
+                  borderColor: `${moduloInfo?.color || AURA.red}40`,
+                  background: `${moduloInfo?.color || AURA.red}10`,
+                }}
+            >
+            <span
+                className="sec2-mod-badge-dot"
+                style={{ background: moduloInfo?.color || AURA.red }}
+            />
+              {moduloInfo?.label}
+          </span>
+
+            <button
+                className="sec2-btn-icon"
+                onClick={() => setIsDark(!isDark)}
+                aria-label="Alternar tema"
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
           </header>
 
-          {/* Desktop subheader */}
-          <div style={{ padding:"28px 32px 0", display:"none" }} className="desk-subheader">
-            <motion.div
-                initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }}
-                style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:28 }}
-            >
+          {/* Desktop header */}
+          <div className="sec2-deskhead">
+            <div className="sec2-deskhead-inner">
               <div>
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".22em", color:"var(--text-sec)", margin:"0 0 4px" }}>MÓDULO ATIVO</p>
-                <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:26, fontWeight:700, letterSpacing:".14em", color:"var(--text)", margin:0 }}>
-                  {moduloInfo?.label?.toUpperCase()}
-                </h2>
+                <p className="sec2-module-eyebrow">Módulo Ativo</p>
+                <motion.h2
+                    className="sec2-module-title"
+                    key={moduloAtivo}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: .25 }}
+                >
+                  {moduloInfo?.label}
+                </motion.h2>
               </div>
-              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 {usuarioLogado && (
-                    <div style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 12px", borderRadius:99, background:isDark?"rgba(255,255,255,.04)":"rgba(200,16,46,.05)", border:"1px solid rgba(200,16,46,.12)" }}>
-                      <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".12em", color:"var(--text)" }}>
-                        {usuarioLogado.nome?.split(" ")[0].toUpperCase()}
-                      </span>
+                    <div style={{
+                      display: "flex", alignItems: "center", gap: 9,
+                      padding: "6px 12px 6px 8px", borderRadius: 100,
+                      background: isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.07)",
+                      border: `1px solid ${t.border}`,
+                    }}>
+                      <IEQAvatar usuario={usuarioLogado} size={24} />
+                      <span style={{
+                        fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
+                        letterSpacing: ".12em", textTransform: "uppercase", color: t.text,
+                      }}>
+                    {usuarioLogado.nome?.split(" ")[0]}
+                  </span>
                     </div>
                 )}
-                <span style={{ display:"flex", alignItems:"center", gap:6, padding:"6px 14px", borderRadius:99, background:"rgba(5,150,105,.12)", color:"#059669", border:"1px solid rgba(5,150,105,.2)", fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".14em" }}>
-                  <span style={{ width:6, height:6, borderRadius:"50%", background:"#059669", display:"inline-block" }} />
-                  ONLINE
-                </span>
-                <button className="ieq-btn-ghost" onClick={() => setIsDark(!isDark)}>
-                  {isDark ? <Sun size={16}/> : <Moon size={16}/>}
+
+                <div className="sec2-online">
+                  <div className="sec2-online-dot" />
+                  Online
+                </div>
+
+                <button
+                    className="sec2-btn-icon"
+                    onClick={() => setIsDark(!isDark)}
+                    title="Alternar tema"
+                >
+                  {isDark ? <Sun size={16} /> : <Moon size={16} />}
                 </button>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Content */}
-          <main style={{ flex:1, padding:"24px 20px", overflowY:"auto" }}>
+          <main className="sec2-content">
             <AnimatePresence mode="wait">
               <motion.div
                   key={moduloAtivo}
-                  initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }}
-                  transition={{ duration:.2 }}
-                  style={{ background:"var(--card-bg)", border:"1px solid var(--border)", borderRadius:16, backdropFilter:"blur(24px)", minHeight:500, overflow:"hidden" }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: .22, ease: "easeOut" }}
+                  className="sec2-card"
               >
                 {moduloAtivo === "MEMBROS"           && <Membros isDark={isDark} />}
                 {moduloAtivo === "VISITANTES"         && <Visitantes isDark={isDark} />}
@@ -317,6 +684,119 @@ export default function SecretariaPage() {
             </AnimatePresence>
           </main>
         </div>
+
+        {/* ─── Modal Confirmação de Saída ──────────────────────────────── */}
+        <AnimatePresence>
+          {showExitConfirm && (
+              <motion.div
+                  style={{
+                    position: "fixed", inset: 0, zIndex: 999,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: 20,
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+              >
+                {/* Backdrop */}
+                <motion.div
+                    style={{
+                      position: "absolute", inset: 0,
+                      background: "rgba(10,10,15,.88)",
+                      backdropFilter: "blur(8px)",
+                      WebkitBackdropFilter: "blur(8px)",
+                    }}
+                    onClick={() => setShowExitConfirm(false)}
+                />
+
+                {/* Card */}
+                <motion.div
+                    initial={{ scale: .88, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: .92, opacity: 0, y: 10 }}
+                    transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                    style={{
+                      position: "relative", zIndex: 10,
+                      width: "100%", maxWidth: 380,
+                      background: t.bgEl,
+                      border: `1px solid ${t.border}`,
+                      borderRadius: 22,
+                      padding: "36px 28px 28px",
+                      textAlign: "center",
+                      boxShadow: `0 40px 80px rgba(0,0,0,${isDark ? ".7" : ".2"})`,
+                    }}
+                >
+                  {/* Ícone */}
+                  <div style={{
+                    width: 64, height: 64, borderRadius: "50%", margin: "0 auto 20px",
+                    background: "linear-gradient(135deg, rgba(155,11,30,.15), rgba(200,16,46,.08))",
+                    border: "1.5px solid rgba(200,16,46,.25)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: AURA.red,
+                  }}>
+                    <LogOut size={26} />
+                  </div>
+
+                  <h3 style={{
+                    fontFamily: "'Playfair Display',serif",
+                    fontSize: 20, fontWeight: 500, color: t.text,
+                    margin: "0 0 10px", letterSpacing: ".02em",
+                  }}>
+                    Encerrar Sessão
+                  </h3>
+                  <p style={{
+                    fontFamily: "'Inter',sans-serif",
+                    fontSize: 13, fontWeight: 300, color: t.textSec,
+                    margin: "0 0 28px", lineHeight: 1.6,
+                  }}>
+                    Tem certeza que deseja sair do sistema?
+                  </p>
+
+                  {/* Linha decorativa */}
+                  <div style={{
+                    height: 1, marginBottom: 24,
+                    background: `linear-gradient(90deg, transparent, ${t.border}, transparent)`,
+                  }} />
+
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                        onClick={() => setShowExitConfirm(false)}
+                        style={{
+                          flex: 1, padding: "13px", borderRadius: 100,
+                          border: `1px solid ${t.border}`, cursor: "pointer",
+                          background: "transparent", color: t.textSec,
+                          fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
+                          letterSpacing: ".14em", textTransform: "uppercase",
+                          transition: "all .25s",
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = AURA.gold; e.currentTarget.style.color = AURA.gold; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.textSec; }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                          flex: 1.5, padding: "13px", borderRadius: 100, border: "none",
+                          cursor: "pointer",
+                          background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})`,
+                          color: "#fff",
+                          fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
+                          letterSpacing: ".14em", textTransform: "uppercase",
+                          boxShadow: "0 8px 24px rgba(200,16,46,.35)",
+                          transition: "all .25s",
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+                    >
+                      <LogOut size={13} /> Sair Agora
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+          )}
+        </AnimatePresence>
       </div>
   );
 }
