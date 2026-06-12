@@ -309,6 +309,7 @@ export default function Discipulado({ isDark = false }) {
     return ok && periodo;
   }), [relatorios, termoBusca, dataInicioFiltro, dataFimFiltro]);
 
+  // ── PDF INDIVIDUAL ──────────────────────────────────────────────────────────
   const gerarPDFIndividual = (rel) => {
     const doc = new jsPDF();
     doc.setFillColor(139, 11, 31);
@@ -320,25 +321,46 @@ export default function Discipulado({ isDark = false }) {
     doc.text(`Periodo: ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 14, 29);
     doc.setTextColor(0); doc.setFontSize(9); doc.setFont("helvetica", "bold");
     doc.text("LISTA DE PRESENCAS E JUSTIFICATIVAS:", 14, 44);
+
     const corposTabela = rel.presencas?.map(p => {
       const row = [p.nomeMembro];
       COLUNAS.forEach(col => {
-        const marcado = p[col.campo];
-        const just    = p[col.justField];
-        row.push(marcado ? "✓" : just ? `✗ (${just})` : "✗");
+        const marcado = !!p[col.campo];
+        const just    = p[col.justField] && String(p[col.justField]).trim();
+        if (marcado)        row.push("P");
+        else if (just)      row.push(`F (${just})`);
+        else                row.push("F");
       });
-      row.push(`${COLUNAS.filter(c => p[c.campo]).length}/${COLUNAS.length}`);
+      row.push(`${COLUNAS.filter(c => !!p[c.campo]).length}/${COLUNAS.length}`);
       return row;
     }) || [];
+
     autoTable(doc, {
       startY: 48,
       head: [["Membro", ...COLUNAS.map(c => c.label), "Total"]],
       body: corposTabela,
       headStyles: { fillColor: [139, 11, 31], textColor: 255, fontStyle: "bold", fontSize: 8 },
       bodyStyles: { fontSize: 8 },
-      columnStyles: { 1:{halign:"center"}, 2:{halign:"center"}, 3:{halign:"center"}, 4:{halign:"center"}, 5:{halign:"center"}, 6:{halign:"center",fontStyle:"bold"} },
+      columnStyles: {
+        1: { halign: "center" }, 2: { halign: "center" }, 3: { halign: "center" },
+        4: { halign: "center" }, 5: { halign: "center" }, 6: { halign: "center", fontStyle: "bold" },
+      },
       theme: "grid", margin: { left: 14, right: 14 },
+      didParseCell: (data) => {
+        if (data.section === "body" && data.column.index > 0 && data.column.index < 6) {
+          const val = data.cell.raw;
+          if (val === "P") {
+            data.cell.styles.textColor = [22, 163, 74];   // verde
+            data.cell.styles.fontStyle = "bold";
+          } else if (typeof val === "string" && val.startsWith("F (")) {
+            data.cell.styles.textColor = [234, 179, 8];   // amarelo
+          } else if (val === "F") {
+            data.cell.styles.textColor = [200, 16, 46];   // vermelho
+          }
+        }
+      },
     });
+
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -349,6 +371,7 @@ export default function Discipulado({ isDark = false }) {
     doc.save(`Relatorio_${rel.nomeCelula}_${rel.dataInicio}.pdf`);
   };
 
+  // ── PDF GERAL ───────────────────────────────────────────────────────────────
   const gerarPDFGeral = () => {
     if (!filtrados.length) return;
     const doc = new jsPDF("l", "mm", "a4");
@@ -359,6 +382,7 @@ export default function Discipulado({ isDark = false }) {
     doc.setFontSize(10); doc.setFont("helvetica", "normal");
     doc.text(`Periodo: ${formatarSemana(dataInicioFiltro, dataFimFiltro)}  |  Total de celulas: ${filtrados.length}`, 14, 26);
     doc.text(`Gerado em: ${new Date().toLocaleDateString("pt-BR")} as ${new Date().toLocaleTimeString("pt-BR")}`, 14, 33);
+
     let y = 50;
     filtrados.forEach((rel, idx) => {
       if (y > 170) { doc.addPage(); y = 20; }
@@ -366,27 +390,48 @@ export default function Discipulado({ isDark = false }) {
       doc.roundedRect(14, y - 4, 269, 10, 2, 2, "F");
       doc.setFontSize(10); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
       doc.text(`${idx + 1}. ${rel.nomeCelula}  |  Lider: ${rel.nomeLider}`, 17, y + 3);
+
       const corposTabela = rel.presencas?.map(p => {
         const row = [p.nomeMembro];
         COLUNAS.forEach(col => {
-          const marcado = p[col.campo];
-          const just    = p[col.justField];
-          row.push(marcado ? "✓" : just ? `✗ (${just})` : "✗");
+          const marcado = !!p[col.campo];
+          const just    = p[col.justField] && String(p[col.justField]).trim();
+          if (marcado)        row.push("P");
+          else if (just)      row.push(`F (${just})`);
+          else                row.push("F");
         });
-        row.push(`${COLUNAS.filter(c => p[c.campo]).length}/${COLUNAS.length}`);
+        row.push(`${COLUNAS.filter(c => !!p[c.campo]).length}/${COLUNAS.length}`);
         return row;
       }) || [];
+
       autoTable(doc, {
         startY: y + 8,
         head: [["Membro", ...COLUNAS.map(c => c.label.substring(0, 6)), "Total"]],
         body: corposTabela,
         headStyles: { fillColor: [139, 11, 31], textColor: 255, fontSize: 7, fontStyle: "bold" },
         bodyStyles: { fontSize: 7 },
-        columnStyles: { 1:{halign:"center"}, 2:{halign:"center"}, 3:{halign:"center"}, 4:{halign:"center"}, 5:{halign:"center"}, 6:{halign:"center",fontStyle:"bold"} },
+        columnStyles: {
+          1: { halign: "center" }, 2: { halign: "center" }, 3: { halign: "center" },
+          4: { halign: "center" }, 5: { halign: "center" }, 6: { halign: "center", fontStyle: "bold" },
+        },
         theme: "grid", margin: { left: 14, right: 14 },
+        didParseCell: (data) => {
+          if (data.section === "body" && data.column.index > 0 && data.column.index < 6) {
+            const val = data.cell.raw;
+            if (val === "P") {
+              data.cell.styles.textColor = [22, 163, 74];
+              data.cell.styles.fontStyle = "bold";
+            } else if (typeof val === "string" && val.startsWith("F (")) {
+              data.cell.styles.textColor = [234, 179, 8];
+            } else if (val === "F") {
+              data.cell.styles.textColor = [200, 16, 46];
+            }
+          }
+        },
       });
       y = doc.lastAutoTable.finalY + 14;
     });
+
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -446,7 +491,7 @@ export default function Discipulado({ isDark = false }) {
           {erro && (
               <div className="sd-erro">
                 <p style={{ color:"#ff6666", fontWeight:"bold", margin:"0 0 12px", fontSize:14 }}>
-                  ❌ ERRO AO CARREGAR RELATÓRIOS
+                  ERRO AO CARREGAR RELATÓRIOS
                 </p>
                 <p className="sd-erro-row"><strong>Status:</strong> {erro.status}</p>
                 <p className="sd-erro-row"><strong>Resposta:</strong> {erro.msg}</p>
