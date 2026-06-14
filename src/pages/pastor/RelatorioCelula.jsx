@@ -194,10 +194,10 @@ function GlobalStylesRel({ t, isDark }) {
       /* ── KPI Grid ── */
       .rl-kpi-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px; margin-bottom: 20px;
       }
-      @media(min-width: 640px) { .rl-kpi-grid { grid-template-columns: repeat(5, 1fr); gap:14px; } }
+      @media(min-width: 640px) { .rl-kpi-grid { grid-template-columns: repeat(4, 1fr); gap:14px; } }
 
       .rl-kpi-card {
         background: ${t.bgEl}; border: 1px solid ${t.border};
@@ -236,7 +236,6 @@ function GlobalStylesRel({ t, isDark }) {
         transition: border-color .25s; backdrop-filter: blur(24px);
         position: relative; display: flex; flex-direction: column;
         -webkit-user-select: none; user-select: none; touch-action: manipulation;
-        /* sem transform no hover em mobile para evitar flicker */
       }
       .rl-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(201,169,110,.2),transparent); z-index:1; }
       @media(hover:hover) { .rl-card:hover { transform:translateY(-4px); border-color:${t.cardHover}; box-shadow:0 14px 36px rgba(0,0,0,${isDark?".45":".1"}); } }
@@ -279,7 +278,6 @@ function GlobalStylesRel({ t, isDark }) {
         display: flex; flex-direction: column;
         background: ${t.bgEl}; border: 1px solid ${t.border};
         border-radius: 24px 24px 0 0; overflow: hidden;
-        /* native bottom sheet feel */
         animation: rl-sheet .28s cubic-bezier(.32,1,.6,1);
         overscroll-behavior: contain;
       }
@@ -330,7 +328,7 @@ function GlobalStylesRel({ t, isDark }) {
       .rl-tab-badge { padding:2px 7px; border-radius:99px; font-size:9px; font-weight:700; }
 
       /* ── Stats bar ── */
-      .rl-stats-bar { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid ${t.border}; flex-shrink:0; }
+      .rl-stats-bar { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid ${t.border}; flex-shrink:0; }
       @media(max-width:400px) { .rl-stats-bar { grid-template-columns:repeat(2,1fr); } }
       .rl-stat-cell { padding:14px 8px; text-align:center; }
       .rl-stat-cell+.rl-stat-cell { border-left:1px solid ${t.border}; }
@@ -376,7 +374,6 @@ function GlobalStylesRel({ t, isDark }) {
       /* ── Notif Panel ── */
       .rl-notif-panel {
         position: fixed;
-        /* bottom sheet em mobile, dropdown em desktop */
         bottom: 0; left: 0; right: 0;
         max-height: 75vh; max-height: 75dvh;
         background: ${t.bgEl}; border: 1px solid ${t.border};
@@ -397,9 +394,7 @@ function GlobalStylesRel({ t, isDark }) {
       }
 
       /* Backdrop do painel notif em mobile */
-      .rl-notif-overlay {
-        display: none;
-      }
+      .rl-notif-overlay { display: none; }
       @media(max-width:639px) {
         .rl-notif-overlay {
           display: block;
@@ -432,7 +427,6 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
     const naoLidas = naoRealizadas.filter(r => !lidas.includes(r.id));
     const count    = naoLidas.length;
 
-    // Fecha ao clicar fora (desktop)
     useEffect(() => {
         if (!aberto) return;
         const fn = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setAberto(false); };
@@ -440,7 +434,6 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
         return () => document.removeEventListener("mousedown", fn);
     }, [aberto]);
 
-    // Bloqueia scroll do body no mobile quando aberto
     useEffect(() => {
         if (aberto && window.innerWidth < 640) {
             document.body.style.overflow = "hidden";
@@ -476,7 +469,6 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
             <AnimatePresence>
                 {aberto && (
                     <>
-                        {/* Overlay mobile */}
                         <div className="rl-notif-overlay" onClick={() => setAberto(false)} />
 
                         <motion.div
@@ -486,7 +478,6 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
                             exit={{ opacity: 0, y: 20 }}
                             transition={{ duration: .2 }}
                         >
-                            {/* Handle mobile */}
                             <div className="rl-sheet-handle" />
 
                             <div style={{ padding:"14px 18px 12px", background:`linear-gradient(135deg,${AURA.yellow},#c8a010)`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
@@ -561,14 +552,12 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
     const tabsRef         = useRef(null);
     const bodyRef         = useRef(null);
 
-    // Bloqueia scroll do body enquanto modal aberto
     useEffect(() => {
         const prev = document.body.style.overflow;
         document.body.style.overflow = "hidden";
         return () => { document.body.style.overflow = prev; };
     }, []);
 
-    // Reset aba ao trocar de relatório
     useEffect(() => { setAba("info"); }, [rel.id]);
 
     const fmtLong = (s) => {
@@ -577,40 +566,36 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
         return new Date(a,m-1,d).toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
     };
 
-    const getDecisaoTexto = (d) => ({ACEITOU_JESUS:"Novo Convertido",RECONCILIOU:"Reconciliação",BATISMO_AGUAS:"Deseja Batismo",NENHUMA:"Nenhuma"}[d]||d||"—");
-    const getDecisaoCor   = (d) => {
+    const getDecisaoCor = (d) => {
         if (d==="ACEITOU_JESUS") return {background:"rgba(22,163,74,.12)",  color:"#16a34a", borderColor:"rgba(22,163,74,.3)"};
         if (d==="RECONCILIOU")   return {background:"rgba(14,165,233,.12)", color:"#0ea5e9", borderColor:"rgba(14,165,233,.3)"};
         if (d==="BATISMO_AGUAS") return {background:"rgba(139,92,246,.12)", color:"#8b5cf6", borderColor:"rgba(139,92,246,.3)"};
         return {background:"rgba(201,169,110,.1)", color:AURA.gold, borderColor:"rgba(201,169,110,.3)"};
     };
 
-    const naoRealizada         = rel.realizada === false;
-    const motivo               = naoRealizada ? getMotivoLabel(rel.motivoNaoRealizacao) : null;
-    const membrosPresentes     = rel.membrosPresentes    || [];
-    const visitantesPresentes  = rel.visitantesPresentes || [];
-    const simpatizantes        = rel.simpatizantes       || [];
-    const membrosAusentes      = rel.membrosAusentes     || [];
-    const ausentesJustif       = membrosAusentes.filter(a =>  a.justificativaFalta);
-    const ausentesSemJust      = membrosAusentes.filter(a => !a.justificativaFalta);
-    const comDecisao           = visitantesPresentes.filter(v => v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA");
-    const totalGeral           = membrosPresentes.length + visitantesPresentes.length + simpatizantes.length + (rel.quantidadeVisitantes||0);
+    const naoRealizada        = rel.realizada === false;
+    const motivo              = naoRealizada ? getMotivoLabel(rel.motivoNaoRealizacao) : null;
+    const membrosPresentes    = rel.membrosPresentes    || [];
+    const visitantesPresentes = rel.visitantesPresentes || [];
+    const membrosAusentes     = rel.membrosAusentes     || [];
+    const ausentesJustif      = membrosAusentes.filter(a =>  a.justificativaFalta);
+    const ausentesSemJust     = membrosAusentes.filter(a => !a.justificativaFalta);
+    const comDecisao          = visitantesPresentes.filter(v => v.decisaoEspiritual && v.decisaoEspiritual !== "NENHUMA");
+    const totalGeral          = membrosPresentes.length + visitantesPresentes.length + (rel.quantidadeVisitantes||0);
 
     const ABAS = [
-        { id:"info",         label:"Info",          count:null },
-        { id:"membros",      label:"Membros",       count:membrosPresentes.length },
-        { id:"visitantes",   label:"Visitantes",    count:visitantesPresentes.length+(rel.quantidadeVisitantes||0) },
-        ...(simpatizantes.length>0?[{id:"simpatizantes",label:"Simpatiz.",count:simpatizantes.length}]:[]),
-        { id:"ausentes",     label:"Ausentes",      count:membrosAusentes.length },
+        { id:"info",       label:"Info",        count:null },
+        { id:"membros",    label:"Membros",     count:membrosPresentes.length },
+        { id:"visitantes", label:"Visitantes",  count:visitantesPresentes.length+(rel.quantidadeVisitantes||0) },
+        { id:"ausentes",   label:"Ausentes",    count:membrosAusentes.length },
         ...(comDecisao.length>0?[{id:"decisoes",label:"Decisões",count:comDecisao.length}]:[]),
     ];
 
-    const TAB_COLORS = { info:AURA.gold, membros:"#16a34a", visitantes:"#0ea5e9", simpatizantes:"#8b5cf6", ausentes:"#6366F1", decisoes:"#c8a010" };
+    const TAB_COLORS = { info:AURA.gold, membros:"#16a34a", visitantes:"#0ea5e9", ausentes:"#6366F1", decisoes:"#c8a010" };
     const hGrad  = naoRealizada ? `linear-gradient(135deg,${AURA.yellow},#c8a010)` : `linear-gradient(135deg,${AURA.blue},${AURA.blueDark})`;
     const hText  = naoRealizada ? "#1A1008" : "#fff";
     const hSub   = naoRealizada ? "rgba(26,16,8,.7)" : "rgba(255,255,255,.7)";
 
-    // Scroll aba ativa para centro
     const scrollTabIntoView = (id) => {
         if (!tabsRef.current) return;
         const btn = tabsRef.current.querySelector(`[data-tab="${id}"]`);
@@ -628,7 +613,6 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                 exit={{y:"100%",opacity:0}}
                 transition={{type:"spring",damping:30,stiffness:320}}
             >
-                {/* Handle */}
                 <div className="rl-sheet-handle" />
 
                 {/* Header */}
@@ -653,14 +637,13 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                     </button>
                 </div>
 
-                {/* Stats bar */}
+                {/* Stats bar — sem Simpatizantes */}
                 {!naoRealizada && (
                     <div className="rl-stats-bar">
                         {[
-                            {num:membrosPresentes.length,        lbl:"Membros",      cor:t.text},
-                            {num:visitantesPresentes.length+(rel.quantidadeVisitantes||0), lbl:"Visitantes", cor:AURA.gold},
-                            {num:simpatizantes.length,           lbl:"Simpatiz.",    cor:"#8b5cf6"},
-                            {num:totalGeral,                     lbl:"Total",        cor:AURA.blue},
+                            {num:membrosPresentes.length,                                             lbl:"Membros",    cor:t.text},
+                            {num:visitantesPresentes.length+(rel.quantidadeVisitantes||0),            lbl:"Visitantes", cor:AURA.gold},
+                            {num:totalGeral,                                                          lbl:"Total",      cor:AURA.blue},
                         ].map((s,i) => (
                             <div key={i} className="rl-stat-cell">
                                 <p className="rl-stat-num" style={{color:s.cor}}>{s.num}</p>
@@ -670,7 +653,7 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                     </div>
                 )}
 
-                {/* Abas */}
+                {/* Abas — sem Simpatizantes */}
                 {!naoRealizada && (
                     <div className="rl-tabs" ref={tabsRef}>
                         {ABAS.map(tab => (
@@ -731,9 +714,9 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                                             <span className="rl-info-label">Estudo</span>
                                             <span className="rl-info-value" style={{fontStyle:rel.estudo?"normal":"italic",color:rel.estudo?t.text:t.textMuted}}>{rel.estudo||"Não informado"}</span>
                                         </div>
-                                        {rel.local    && <div className="rl-info-row"><span className="rl-info-label">Local</span><span className="rl-info-value">{rel.local}</span></div>}
-                                        {rel.lider    && <div className="rl-info-row"><span className="rl-info-label">Líder</span><span className="rl-info-value">{rel.lider}</span></div>}
-                                        {rel.anfitriao&& <div className="rl-info-row"><span className="rl-info-label">Anfitrião</span><span className="rl-info-value">{rel.anfitriao}</span></div>}
+                                        {rel.local     && <div className="rl-info-row"><span className="rl-info-label">Local</span><span className="rl-info-value">{rel.local}</span></div>}
+                                        {rel.lider     && <div className="rl-info-row"><span className="rl-info-label">Líder</span><span className="rl-info-value">{rel.lider}</span></div>}
+                                        {rel.anfitriao && <div className="rl-info-row"><span className="rl-info-label">Anfitrião</span><span className="rl-info-value">{rel.anfitriao}</span></div>}
                                         <div className="rl-info-row">
                                             <span className="rl-info-label">Situação</span>
                                             <span style={{display:"inline-flex",alignItems:"center",gap:7,padding:"5px 13px",borderRadius:99,background:"rgba(22,163,74,.1)",border:"1px solid rgba(22,163,74,.3)",color:"#16a34a",fontSize:10,fontWeight:600,letterSpacing:".08em",textTransform:"uppercase"}}>✓ Realizada</span>
@@ -810,27 +793,6 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                                             ))}
                                         </>
                                     )}
-                                </div>
-                            )}
-
-                            {/* ABA: SIMPATIZANTES */}
-                            {!naoRealizada && aba==="simpatizantes" && (
-                                <div className="rl-tab-panel">
-                                    {simpatizantes.length===0 ? (
-                                        <div className="rl-mini-empty">Nenhum simpatizante registrado.</div>
-                                    ) : simpatizantes.map((s,i) => {
-                                        const nome = s.nome||s;
-                                        return (
-                                            <div key={i} className="rl-person-row">
-                                                <div className="rl-avatar" style={{background:"rgba(139,92,246,.1)",color:"#8b5cf6"}}>{nome.charAt(0).toUpperCase()}</div>
-                                                <div style={{flex:1,minWidth:0}}>
-                                                    <p className="rl-person-name">{nome}</p>
-                                                    {s.telefone && <p className="rl-person-sub">📞 {s.telefone}</p>}
-                                                </div>
-                                                <span style={{display:"inline-flex",padding:"4px 10px",borderRadius:99,background:"rgba(139,92,246,.1)",color:"#8b5cf6",border:"1px solid rgba(139,92,246,.28)",fontSize:9,fontWeight:600,textTransform:"uppercase",whiteSpace:"nowrap"}}>Simpatizante</span>
-                                            </div>
-                                        );
-                                    })}
                                 </div>
                             )}
 
@@ -925,7 +887,6 @@ export default function RelatorioCelula({ isDark = false }) {
         return new Date(a,m-1,d).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"short"});
     };
     const getDecisaoTexto = (d) => ({ACEITOU_JESUS:"Novo Convertido",RECONCILIOU:"Reconciliação",BATISMO_AGUAS:"Deseja Batismo",NENHUMA:"Nenhuma"}[d]||d||"—");
-    const getJustInfo     = (v) => getJustificativaInfo(v);
 
     const carregarSemanaAtual = () => {
         const hoje=new Date(), ds=hoje.getDay();
@@ -1070,7 +1031,7 @@ export default function RelatorioCelula({ isDark = false }) {
                     </div>
                 )}
 
-                {/* KPIs */}
+                {/* KPIs — sem Simpatizantes */}
                 <div className="rl-kpi-grid">
                     <div className="rl-kpi-card">
                         <div className="rl-kpi-icon" style={{background:"rgba(200,16,46,.1)"}}><Users size={18} style={{color:AURA.red}} /></div>
@@ -1143,11 +1104,10 @@ export default function RelatorioCelula({ isDark = false }) {
                         </div>
                         <div className="rl-grid">
                             {realizadas.map((rel,i) => {
-                                const m  = rel.membrosPresentes?.length||0;
-                                const v  = (rel.visitantesPresentes?.length||0)+(rel.quantidadeVisitantes||0);
-                                const decisoes       = (rel.visitantesPresentes||[]).filter(vt=>vt.decisaoEspiritual&&vt.decisaoEspiritual!=="NENHUMA");
-                                const ausentesJ      = (rel.membrosAusentes||[]).filter(a=>a.justificativaFalta);
-                                const simpCount      = (rel.simpatizantes||[]).length;
+                                const m        = rel.membrosPresentes?.length||0;
+                                const v        = (rel.visitantesPresentes?.length||0)+(rel.quantidadeVisitantes||0);
+                                const decisoes = (rel.visitantesPresentes||[]).filter(vt=>vt.decisaoEspiritual&&vt.decisaoEspiritual!=="NENHUMA");
+                                const ausentesJ= (rel.membrosAusentes||[]).filter(a=>a.justificativaFalta);
                                 return (
                                     <motion.div key={rel.id} initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{delay:i*.03}} className="rl-card" onClick={() => handleVerDetalhes(rel)}>
                                         <div className="rl-card-body" style={{paddingBottom:14}}>
@@ -1159,11 +1119,10 @@ export default function RelatorioCelula({ isDark = false }) {
                                                 </div>
                                             </div>
                                             <h3 className="rl-card-title" style={{marginBottom:10}}>{rel.nomeCelula}</h3>
-                                            <div className="rl-card-tag" style={{background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.06)",border:`1px solid ${t.border}`,color:t.textSec,marginBottom:(decisoes.length>0||ausentesJ.length>0||simpCount>0)?8:0}}>
+                                            <div className="rl-card-tag" style={{background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.06)",border:`1px solid ${t.border}`,color:t.textSec,marginBottom:(decisoes.length>0||ausentesJ.length>0)?8:0}}>
                                                 <BookOpen size={11} style={{flexShrink:0}} />
                                                 <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{rel.estudo||"Sem estudo informado"}</span>
                                             </div>
-                                            {simpCount>0&&<div className="rl-card-tag" style={{background:"rgba(139,92,246,.08)",border:"1px solid rgba(139,92,246,.2)",color:"#8b5cf6",marginBottom:(decisoes.length>0||ausentesJ.length>0)?8:0}}><Users size={11} style={{flexShrink:0}} />{simpCount} simpatizante{simpCount>1?"s":""}</div>}
                                             {decisoes.length>0&&<div className="rl-card-tag" style={{background:"rgba(253,184,19,.08)",border:"1px solid rgba(253,184,19,.2)",color:"#c8a010",marginBottom:ausentesJ.length>0?8:0}}><Sparkles size={11} style={{flexShrink:0}} />{decisoes.length} decisão{decisoes.length>1?"ões":""}</div>}
                                             {ausentesJ.length>0&&<div className="rl-card-tag" style={{background:"rgba(99,102,241,.08)",border:"1px solid rgba(99,102,241,.2)",color:"#6366F1"}}><UserX size={11} style={{flexShrink:0}} />{ausentesJ.length} falta{ausentesJ.length>1?"s":""} justificada{ausentesJ.length>1?"s":""}</div>}
                                         </div>
