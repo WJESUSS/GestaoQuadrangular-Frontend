@@ -114,19 +114,10 @@ function GlobalStylesRel({ t, isDark }) {
 
       /* ── Header ── */
       .rl-header {
-        display: flex; align-items: flex-start; justify-content: space-between;
+        display: flex; align-items: center; justify-content: center;
         gap: 10px; margin-bottom: 16px;
       }
-      .rl-eyebrow {
-        font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
-        color: rgba(201,169,110,.55); margin: 0 0 3px; display: flex; align-items: center; gap: 5px;
-      }
-      .rl-title {
-        font-family: 'Playfair Display', serif;
-        font-size: clamp(18px, 5vw, 26px);
-        font-weight: 500; letter-spacing: .03em; margin: 0; line-height: 1.2; color: ${t.text};
-      }
-      .rl-header-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+      .rl-header-actions { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
 
       /* ── Botões ── */
       .rl-btn-gold {
@@ -256,6 +247,11 @@ function GlobalStylesRel({ t, isDark }) {
       /* ── Empty ── */
       .rl-empty { text-align:center; padding:48px 24px; background:${t.bgEl}; border:1.5px dashed ${t.border}; border-radius:18px; margin-top:6px; backdrop-filter:blur(24px); }
       .rl-empty p { font-family:'Playfair Display',serif; font-size:14px; font-weight:500; letter-spacing:.04em; color:${t.textSec}; margin:12px 0 0; }
+      .rl-empty-alert { text-align:center; padding:56px 24px; background:${isDark?"rgba(253,184,19,.04)":"rgba(253,184,19,.07)"}; border:1.5px dashed rgba(253,184,19,.35); border-radius:18px; margin-top:6px; backdrop-filter:blur(24px); }
+      .rl-empty-alert .rl-empty-icon { width:64px; height:64px; margin:0 auto 16px; border-radius:50%; background:rgba(253,184,19,.13); display:flex; align-items:center; justify-content:center; animation:rl-pulse 3s ease-in-out infinite; }
+      .rl-empty-alert h3 { font-family:'Playfair Display',serif; font-size:18px; font-weight:500; color:${t.text}; margin:0 0 6px; }
+      .rl-empty-alert p { font-family:'Inter',sans-serif; font-size:13px; color:${t.textSec}; margin:0 0 18px; line-height:1.5; }
+      @media(max-width:420px) { .rl-empty-alert { padding:40px 18px; } .rl-empty-alert .rl-empty-icon { width:52px; height:52px; } .rl-empty-alert h3 { font-size:16px; } .rl-empty-alert p { font-size:12px; } }
 
       /* ── Modal / Bottom Sheet ── */
       .rl-modal-backdrop {
@@ -392,6 +388,15 @@ function GlobalStylesRel({ t, isDark }) {
           animation: none;
         }
       }
+      @media(max-width: 639px) {
+        .rl-notif-panel {
+          top: 0; left: 0; right: 0; bottom: auto;
+          max-height: 85vh; max-height: 85dvh;
+          border-radius: 0 0 20px 20px;
+          box-shadow: 0 12px 48px rgba(0,0,0,.4);
+          animation: rl-fadein .2s ease;
+        }
+      }
 
       /* Backdrop do painel notif em mobile */
       .rl-notif-overlay { display: none; }
@@ -414,12 +419,78 @@ function GlobalStylesRel({ t, isDark }) {
       @media(max-width: 767px) {
         input, select, textarea { font-size: 16px !important; }
       }
+
+      /* ── Extra responsivo 320–480px ── */
+      @media(max-width: 420px) {
+        .rl-root { padding-bottom: max(80px, env(safe-area-inset-bottom, 80px)); }
+        .rl-content { padding: 8px 10px 0; }
+        .rl-btn-gold { padding: 10px 14px; font-size: 9px; min-height: 40px; }
+        .rl-btn-ghost { padding: 10px 12px; font-size: 9px; min-height: 40px; }
+        .rl-bell-btn { padding: 10px 12px; min-height: 40px; }
+        .rl-kpi-grid { gap: 8px; }
+        .rl-kpi-card { padding: 12px 10px; border-radius: 14px; }
+        .rl-kpi-icon { width: 32px; height: 32px; border-radius: 8px; }
+        .rl-card-body { padding: 14px 14px; }
+        .rl-card-stats .rl-card-stat { padding: 10px 4px; }
+        .rl-card-stat-value { font-size: 16px; }
+        .rl-card-footer { padding: 10px 14px; font-size: 8px; min-height: 40px; }
+        .rl-section-badge { padding: 6px 10px; font-size: 8px; }
+        .rl-empty { padding: 36px 16px; }
+        .rl-modal-head { padding: 12px 14px 10px; }
+        .rl-tab { padding: 12px 12px; font-size: 9px; }
+        .rl-tab-panel { padding: 12px; }
+        .rl-stats-bar { grid-template-columns: repeat(3,1fr); }
+        .rl-stats-bar .rl-stat-cell { padding: 12px 4px; }
+        .rl-person-row { padding: 11px 12px; min-height: 56px; gap: 10px; }
+        .rl-avatar { width: 36px; height: 36px; border-radius: 10px; font-size: 14px; }
+        .rl-filter-label { font-size: 8px; }
+        .rl-input { padding: 11px 12px; min-height: 44px; font-size: 16px; min-width: 0; }
+      }
+      @media(max-width: 360px) {
+        .rl-content { padding: 6px 8px 0; }
+        .rl-kpi-grid { gap: 6px; }
+        .rl-kpi-card { padding: 10px 8px; border-radius: 12px; }
+        .rl-kpi-icon { width: 28px; height: 28px; }
+        .rl-kpi-value { font-size: 18px; }
+        .rl-card-stats { grid-template-columns: 1fr 1fr 1fr; }
+        .rl-card-stats .rl-card-stat { padding: 8px 2px; }
+        .rl-card-stat-value { font-size: 14px; }
+        .rl-header-actions { gap: 4px; }
+        .rl-btn-gold { padding: 8px 10px; font-size: 8px; min-height: 36px; gap: 4px; }
+        .rl-btn-ghost { padding: 8px 10px; font-size: 8px; min-height: 36px; gap: 4px; }
+        .rl-bell-btn { padding: 8px 10px; min-height: 36px; gap: 4px; }
+        .rl-input { padding: 10px 10px; min-height: 40px; font-size: 16px; }
+        .rl-title { font-size: 16px; }
+        .rl-section-hd { gap: 6px; }
+        .rl-modal-box { border-radius: 20px 20px 0 0; }
+        .rl-decisao-badge { font-size: 8px; padding: 3px 7px; }
+        .rl-bell-count { font-size: 9px; padding: 0 6px; min-width: 18px; }
+      }
+      @media(max-width: 320px) {
+        .rl-content { padding: 4px 6px 0; }
+        .rl-kpi-grid { gap: 5px; }
+        .rl-kpi-card { padding: 8px 6px; border-radius: 10px; gap: 6px; }
+        .rl-kpi-icon { width: 24px; height: 24px; }
+        .rl-kpi-icon svg { width: 14px; height: 14px; }
+        .rl-kpi-value { font-size: 16px; }
+        .rl-card-body { padding: 10px 10px; }
+        .rl-card-title { font-size: 13px; }
+        .rl-tab { padding: 10px 8px; font-size: 8px; gap: 4px; }
+        .rl-card-footer { font-size: 7px; padding: 8px 10px; }
+        .rl-card-stats .rl-card-stat { padding: 6px 2px; }
+        .rl-btn-gold { font-size: 7px; padding: 6px 8px; }
+        .rl-btn-ghost { font-size: 7px; padding: 6px 8px; }
+        .rl-bell-btn { padding: 6px 8px; }
+        .rl-person-row { padding: 9px 10px; min-height: 48px; gap: 8px; }
+        .rl-avatar { width: 32px; height: 32px; font-size: 12px; }
+        .rl-person-name { font-size: 12px; }
+      }
     `}</style>
     );
 }
 
 /* ─── Painel de Notificações ─────────────────────────────────────────────── */
-function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
+function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes, semRelatorios }) {
     const [aberto, setAberto] = useState(false);
     const [lidas,  setLidas]  = useState(getNotifLidas);
     const wrapRef = useRef(null);
@@ -460,10 +531,11 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
 
     return (
         <div ref={wrapRef} style={{ position: "relative" }}>
-            <button className={`rl-bell-btn ${count > 0 ? "active" : "inactive"}`} onClick={() => setAberto(v => !v)}>
-                {count > 0 ? <BellRing size={15} className="rl-bell" /> : <Bell size={15} />}
+            <button className={`rl-bell-btn ${semRelatorios ? "active" : count > 0 ? "active" : "inactive"}`} onClick={() => setAberto(v => !v)}>
+                {semRelatorios ? <BellRing size={15} className="rl-bell" style={{color:"#1A1008"}} /> : count > 0 ? <BellRing size={15} className="rl-bell" /> : <Bell size={15} />}
                 <span style={{ fontFamily:"'Inter',sans-serif", fontSize:10, fontWeight:600, letterSpacing:".13em" }}>ALERTAS</span>
-                {count > 0 && <span className="rl-bell-count">{count}</span>}
+                {semRelatorios && <span className="rl-bell-count">!</span>}
+                {!semRelatorios && count > 0 && <span className="rl-bell-count">{count}</span>}
             </button>
 
             <AnimatePresence>
@@ -483,8 +555,9 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
                             <div style={{ padding:"14px 18px 12px", background:`linear-gradient(135deg,${AURA.yellow},#c8a010)`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
                                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                                     <BellRing size={16} style={{ color:"#1A1008" }} />
-                                    <span style={{ fontFamily:"'Inter',sans-serif", fontSize:10, letterSpacing:".15em", fontWeight:700, color:"#1A1008", textTransform:"uppercase" }}>Células não realizadas</span>
-                                    {count > 0 && <span style={{ background:"rgba(26,16,8,.18)", color:"#1A1008", borderRadius:99, fontSize:9, fontFamily:"'Inter',sans-serif", fontWeight:700, padding:"2px 8px" }}>{count} NOVA{count>1?"S":""}</span>}
+                                    <span style={{ fontFamily:"'Inter',sans-serif", fontSize:10, letterSpacing:".15em", fontWeight:700, color:"#1A1008", textTransform:"uppercase" }}>{semRelatorios ? "Sem células" : "Células não realizadas"}</span>
+                                    {semRelatorios && <span style={{ background:"rgba(26,16,8,.18)", color:"#1A1008", borderRadius:99, fontSize:9, fontFamily:"'Inter',sans-serif", fontWeight:700, padding:"2px 8px" }}>ALERTA</span>}
+                                    {!semRelatorios && count > 0 && <span style={{ background:"rgba(26,16,8,.18)", color:"#1A1008", borderRadius:99, fontSize:9, fontFamily:"'Inter',sans-serif", fontWeight:700, padding:"2px 8px" }}>{count} NOVA{count>1?"S":""}</span>}
                                 </div>
                                 <div style={{ display:"flex", gap:8, alignItems:"center" }}>
                                     {count > 0 && (
@@ -500,10 +573,20 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
                             </div>
 
                             <div style={{ overflowY:"auto", flex:1, WebkitOverflowScrolling:"touch" }}>
-                                {naoRealizadas.length === 0 ? (
+                                {naoRealizadas.length === 0 || semRelatorios ? (
                                     <div style={{ padding:"32px 20px", textAlign:"center" }}>
-                                        <CheckCheck size={28} style={{ color:t.textMuted, margin:"0 auto 10px" }} />
-                                        <p style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:t.textSec, margin:0, textTransform:"uppercase", letterSpacing:".12em" }}>Nenhum alerta pendente</p>
+                                        {semRelatorios ? (
+                                            <>
+                                                <AlertTriangle size={28} style={{ color:"#c8a010", margin:"0 auto 10px" }} />
+                                                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:"#c8a010", margin:"0 0 6px", textTransform:"uppercase", letterSpacing:".12em", fontWeight:600 }}>Nenhuma célula cadastrada</p>
+                                                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:10, color:t.textSec, margin:0 }}>Não há células no período selecionado</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCheck size={28} style={{ color:t.textMuted, margin:"0 auto 10px" }} />
+                                                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:t.textSec, margin:0, textTransform:"uppercase", letterSpacing:".12em" }}>Nenhum alerta pendente</p>
+                                            </>
+                                        )}
                                     </div>
                                 ) : naoRealizadas.map((rel) => {
                                     const mot   = getMotivoLabel(rel.motivoNaoRealizacao);
@@ -533,7 +616,7 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes }) {
                                 })}
                             </div>
 
-                            {naoRealizadas.length > 0 && (
+                            {naoRealizadas.length > 0 && !semRelatorios && (
                                 <div style={{ padding:"10px 18px", borderTop:`1px solid ${t.border}`, display:"flex", alignItems:"center", justifyContent:"center", paddingBottom:`max(14px, env(safe-area-inset-bottom, 14px))` }}>
                                     <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, letterSpacing:".13em", color:t.textMuted, textTransform:"uppercase" }}>{naoRealizadas.length - count} de {naoRealizadas.length} visualizadas</span>
                                 </div>
@@ -985,12 +1068,8 @@ export default function RelatorioCelula({ isDark = false }) {
             <div className="rl-content">
                 {/* Header */}
                 <motion.div className="rl-header" initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}} transition={{duration:.35}}>
-                    <div>
-                        <p className="rl-eyebrow"><Sparkles size={10} style={{color:AURA.gold}} /> Gestão de Crescimento</p>
-                        <h2 className="rl-title">Relatórios da Rede</h2>
-                    </div>
-                    <div className="rl-header-actions">
-                        <NotificacaoPanel naoRealizadas={naoRealizadas} isDark={isDark} t={t} onVerDetalhes={handleVerDetalhes} />
+                    <div className="rl-header-actions" style={{width:"100%",justifyContent:"center"}}>
+                        <NotificacaoPanel naoRealizadas={naoRealizadas} isDark={isDark} t={t} onVerDetalhes={handleVerDetalhes} semRelatorios={relatorios.length===0} />
                         <button className="rl-btn-ghost" onClick={() => setShowFilters(v=>!v)} aria-label="Filtrar">
                             <Filter size={14} />
                             <span style={{display:"none"}} className="rl-btn-label">Filtrar</span>
@@ -1003,8 +1082,6 @@ export default function RelatorioCelula({ isDark = false }) {
                 </motion.div>
 
                 <style>{`@media(min-width:400px){.rl-btn-label{display:inline!important;}}`}</style>
-
-                <div className="rl-divider"><div className="rl-divider-dot" /></div>
 
                 {/* Filtros */}
                 <AnimatePresence>
@@ -1145,10 +1222,18 @@ export default function RelatorioCelula({ isDark = false }) {
                 )}
 
                 {relatorios.length===0&&!loading&&!erro&&(
-                    <div className="rl-empty">
-                        <AlertCircle size={34} style={{color:t.textMuted}} />
-                        <p>Nenhum relatório encontrado</p>
-                    </div>
+                    <motion.div initial={{opacity:0,scale:.96}} animate={{opacity:1,scale:1}} transition={{duration:.3}}>
+                        <div className="rl-empty-alert">
+                            <div className="rl-empty-icon">
+                                <AlertTriangle size={28} style={{color:"#c8a010"}} />
+                            </div>
+                            <h3>Nenhuma célula encontrada</h3>
+                            <p>Não há relatórios de células no período selecionado.<br />Verifique se há células cadastradas ou ajuste o filtro de datas.</p>
+                            <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+                                <button className="rl-btn-ghost" onClick={carregarSemanaAtual} style={{padding:"10px 16px"}}>Ver esta semana</button>
+                            </div>
+                        </div>
+                    </motion.div>
                 )}
             </div>
 
