@@ -196,12 +196,12 @@ function AuraStyles({ t, isDark }) {
       .aura-loading { min-height: 60vh; display: flex; align-items: center; justify-content: center; }
       .aura-draft-toast { display: flex; align-items: center; gap: 10px; background: rgba(0,61,165,.08); border: 1px solid rgba(0,61,165,.2); border-radius: 14px; padding: 12px 18px; margin-bottom: 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; animation: aura-fadein .4s ease; }
 
-      /* Botão X justificar falta — agora à esquerda */
+      /* Botão X justificar falta — inline ao lado do nome */
       .aura-btn-justificar {
-        width: 34px; height: 34px; border-radius: 9px; border: none;
-        display: flex; align-items: center; justify-content: center;
+        width: 28px; height: 28px; border-radius: 8px; border: none;
+        display: inline-flex; align-items: center; justify-content: center;
         flex-shrink: 0; cursor: pointer; transition: all .2s;
-        margin-left: 14px; /* espaço da borda esquerda do card */
+        margin-left: 6px; vertical-align: middle;
       }
       .aura-btn-justificar:hover { background: rgba(220,38,38,.14) !important; color: #DC2626 !important; }
     `}</style>
@@ -398,25 +398,8 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                 <div key={pessoa.uKey} className="aura-person-row"
                      style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}>
 
-                  {/* ── Linha principal: [X] [→ botão de presença com checkbox] ── */}
+                  {/* ── Linha principal: botão de presença ocupa toda a largura ── */}
                   <div style={{ display: "flex", alignItems: "center" }}>
-
-                    {/* X — esquerda, só membros ausentes */}
-                    {isMembro && ausente && (
-                        <button
-                            title="Justificar falta"
-                            className="aura-btn-justificar"
-                            onClick={() => onToggleJustificando(pessoa.id)}
-                            style={{
-                              background: justAberto ? "rgba(220,38,38,.18)" : "rgba(255,255,255,.04)",
-                              color: justAberto ? "#DC2626" : t.textMuted,
-                            }}
-                        >
-                          <XCircle size={16} />
-                        </button>
-                    )}
-
-                    {/* Botão de presença — ocupa o restante, checkbox à direita */}
                     <button
                         onClick={() => alternarPresenca(pessoa.uKey)}
                         disabled={processing}
@@ -443,13 +426,29 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                         </div>
 
                         <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
-                          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: marcado ? 500 : 300, color: marcado ? t.text : t.textSec, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {pessoa.nome}
-                          </p>
+                          {/* ✅ AJUSTE 2: Nome + botão X inline, logo após o nome */}
+                          <div style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+                            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: marcado ? 500 : 300, color: marcado ? t.text : t.textSec, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {pessoa.nome}
+                            </p>
+                            {isMembro && ausente && (
+                                <button
+                                    title="Justificar falta"
+                                    className="aura-btn-justificar"
+                                    onClick={(e) => { e.stopPropagation(); onToggleJustificando(pessoa.id); }}
+                                    style={{
+                                      background: justAberto ? "rgba(220,38,38,.18)" : "rgba(255,255,255,.04)",
+                                      color: justAberto ? "#DC2626" : t.textMuted,
+                                    }}
+                                >
+                                  <XCircle size={15} />
+                                </button>
+                            )}
+                          </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
-                        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
-                          {pessoa.tipo}
-                        </span>
+                            <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
+                              {pessoa.tipo}
+                            </span>
                             {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
                             {isMembro && ausente && justAtual && <BadgeJustificativa valor={justAtual} />}
                           </div>
@@ -530,7 +529,12 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       ]);
       const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
       const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
-      setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
+
+      // ✅ AJUSTE 1: membros primeiro (A–Z), depois visitantes (A–Z)
+      setPessoas([
+        ...membros.sort((a, b) => a.nome.localeCompare(b.nome)),
+        ...visitantes.sort((a, b) => a.nome.localeCompare(b.nome)),
+      ]);
 
       const decisoesMap = {};
       await Promise.all((resVisitantes.data || []).map(async v => {
@@ -730,7 +734,12 @@ export default function TelaRelatorio({ isDark = false }) {
       ]);
       const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
       const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
-      setPessoas([...membros, ...visitantes].sort((a, b) => a.nome.localeCompare(b.nome)));
+
+      // ✅ AJUSTE 1: membros primeiro (A–Z), depois visitantes (A–Z)
+      setPessoas([
+        ...membros.sort((a, b) => a.nome.localeCompare(b.nome)),
+        ...visitantes.sort((a, b) => a.nome.localeCompare(b.nome)),
+      ]);
 
       const decisoesMap = {};
       await Promise.all((resVisitantes.data || []).map(async v => {
