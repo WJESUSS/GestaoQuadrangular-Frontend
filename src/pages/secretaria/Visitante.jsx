@@ -48,6 +48,8 @@ const DECISOES = {
 
 const TOAST_TYPES = { DECISAO:"decisao", ARQUIVADO:"arquivado", DESARQUIVADO:"desarquivado" };
 
+const TAMANHO_PAGINA = 50;
+
 const getHeaders = () => {
   const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
   return { Authorization: `Bearer ${token}` };
@@ -151,28 +153,98 @@ function ToastNotificacao({ toast, fechar, isDark }) {
   );
 }
 
+/* ─── Botão Carregar Mais ─── */
+function BotaoCarregarMais({ onClick, carregando, isDark }) {
+  const textSec = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+  const border  = isDark ? "rgba(124,58,237,.3)" : "rgba(124,58,237,.25)";
+  return (
+      <button onClick={onClick} disabled={carregando} style={{
+        width:"100%", display:"flex", alignItems:"center", justifyContent:"center",
+        gap:8, padding:"13px 0", marginTop:14, borderRadius:10,
+        border:`1px solid ${border}`, background: isDark ? `${purple}10` : `${purple}08`,
+        cursor: carregando ? "not-allowed" : "pointer", opacity: carregando ? .6 : 1,
+        fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".16em",
+        color: purple,
+      }}>
+        {carregando ? (
+            <><Loader2 size={13} className="spin-icon" /> CARREGANDO...</>
+        ) : (
+            <>CARREGAR MAIS</>
+        )}
+      </button>
+  );
+}
+
+/* ─── Info de contagem ─── */
+function InfoContagem({ carregados, total, isDark }) {
+  const textSec = isDark ? "rgba(245,240,232,.4)" : "rgba(26,10,13,.4)";
+  return (
+      <p style={{
+        textAlign:"center", marginTop:10, marginBottom:0,
+        fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".14em",
+        color:textSec,
+      }}>
+        {carregados} DE {total}
+      </p>
+  );
+}
+
 /* ─── Aba Arquivados ─── */
 function ArquivadosLista({ isDark, celulaId, onDesarquivar }) {
-  const [arquivados, setArquivados] = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [arquivados, setArquivados]   = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [carregandoMais, setCarregandoMais] = useState(false);
+  const [pagina, setPagina]           = useState(0);
+  const [temMais, setTemMais]         = useState(false);
+  const [total, setTotal]             = useState(0);
+
   const textPrimary = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSec     = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
   const cardBg      = isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)";
   const border      = isDark ? "rgba(217,119,6,.18)" : "rgba(217,119,6,.15)";
 
-  const carregar = useCallback(async () => {
+  const carregarPagina = useCallback(async (numeroPagina, reset) => {
+    if (reset) setLoading(true);
+    else setCarregandoMais(true);
+
     try {
-      setLoading(true);
-      const res = await api.get(
-          celulaId ? `/visitantes/celula/${celulaId}/arquivados` : "/visitantes/arquivados",
-          { headers: getHeaders() }
-      );
-      setArquivados(Array.isArray(res.data) ? res.data : []);
-    } catch { setArquivados([]); }
-    finally { setLoading(false); }
+      if (celulaId) {
+        // Endpoint por célula retorna lista simples (geralmente pequena) — sem paginação
+        const res = await api.get(`/visitantes/celula/${celulaId}/arquivados`, { headers: getHeaders() });
+        const lista = Array.isArray(res.data) ? res.data : [];
+        setArquivados(lista);
+        setTemMais(false);
+        setTotal(lista.length);
+      } else {
+        const res = await api.get("/visitantes/arquivados", {
+          headers: getHeaders(),
+          params: { page: numeroPagina, size: TAMANHO_PAGINA },
+        });
+        const conteudo = Array.isArray(res.data) ? res.data : (res.data.content || []);
+        const ultimaPagina = Array.isArray(res.data) ? true : (res.data.last ?? (conteudo.length < TAMANHO_PAGINA));
+        const totalElems = Array.isArray(res.data) ? conteudo.length : (res.data.totalElements ?? conteudo.length);
+
+        setArquivados(prev => reset ? conteudo : [...prev, ...conteudo]);
+        setTemMais(!ultimaPagina);
+        setTotal(totalElems);
+        setPagina(numeroPagina);
+      }
+    } catch {
+      if (reset) setArquivados([]);
+    } finally {
+      setLoading(false);
+      setCarregandoMais(false);
+    }
   }, [celulaId]);
 
-  useEffect(() => { carregar(); }, [carregar]);
+  useEffect(() => { carregarPagina(0, true); }, [carregarPagina]);
+
+  const carregarMais = () => {
+    if (!temMais || carregandoMais) return;
+    carregarPagina(pagina + 1, false);
+  };
+
+  const recarregar = () => carregarPagina(0, true);
 
   if (loading) return (
       <div style={{ textAlign:"center", padding:"48px 0" }}>
@@ -193,74 +265,83 @@ function ArquivadosLista({ isDark, celulaId, onDesarquivar }) {
   );
 
   return (
-      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-        {arquivados.map(v => {
-          const decisaoCfg = DECISOES[v.decisaoEspiritual];
-          const nomeCelula = typeof v.celula === "object" ? v.celula?.nome : v.celula;
-          return (
-              <div key={v.id} style={{
-                background:cardBg,
-                border:`1px solid ${decisaoCfg ? decisaoCfg.colorBorderCard : border}`,
-                borderRadius:12, overflow:"hidden",
-              }}>
-                {decisaoCfg && (
-                    <div style={{
-                      padding:"7px 14px", display:"flex", alignItems:"center", gap:8,
-                      background:decisaoCfg.colorBg, borderBottom:`1px solid ${decisaoCfg.colorBorderCard}`,
-                    }}>
-                      <span style={{ fontSize:14 }}>{decisaoCfg.emoji}</span>
-                      <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13,
-                        color:decisaoCfg.color, fontStyle:"italic", fontWeight:600, flex:1 }}>
+      <div>
+        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+          {arquivados.map(v => {
+            const decisaoCfg = DECISOES[v.decisaoEspiritual];
+            const nomeCelula = typeof v.celula === "object" ? v.celula?.nome : v.celula;
+            return (
+                <div key={v.id} style={{
+                  background:cardBg,
+                  border:`1px solid ${decisaoCfg ? decisaoCfg.colorBorderCard : border}`,
+                  borderRadius:12, overflow:"hidden",
+                }}>
+                  {decisaoCfg && (
+                      <div style={{
+                        padding:"7px 14px", display:"flex", alignItems:"center", gap:8,
+                        background:decisaoCfg.colorBg, borderBottom:`1px solid ${decisaoCfg.colorBorderCard}`,
+                      }}>
+                        <span style={{ fontSize:14 }}>{decisaoCfg.emoji}</span>
+                        <span style={{ fontFamily:"'EB Garamond',serif", fontSize:13,
+                          color:decisaoCfg.color, fontStyle:"italic", fontWeight:600, flex:1 }}>
                   {decisaoCfg.label}
                 </span>
-                      {v.dataArquivamento && (
-                          <span style={{ fontFamily:"'Cinzel',serif", fontSize:8,
-                            color:decisaoCfg.color, opacity:.7, letterSpacing:".1em" }}>
+                        {v.dataArquivamento && (
+                            <span style={{ fontFamily:"'Cinzel',serif", fontSize:8,
+                              color:decisaoCfg.color, opacity:.7, letterSpacing:".1em" }}>
                     {new Date(v.dataArquivamento + "T12:00:00").toLocaleDateString("pt-BR")}
                   </span>
+                        )}
+                      </div>
+                  )}
+                  <div style={{ padding:"12px 14px", display:"flex", alignItems:"center", gap:12 }}>
+                    <div style={{
+                      width:40, height:40, borderRadius:10, flexShrink:0,
+                      background: decisaoCfg ? decisaoCfg.colorBg : "rgba(217,119,6,.1)",
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      color: decisaoCfg ? decisaoCfg.color : "#D97706",
+                      fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:16,
+                      border:`1px solid ${decisaoCfg ? decisaoCfg.colorBorder : "rgba(217,119,6,.3)"}`,
+                    }}>
+                      {v.nome?.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <p style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700,
+                        letterSpacing:".1em", color:textPrimary, margin:"0 0 5px",
+                        overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        {v.nome}
+                      </p>
+                      {nomeCelula && (
+                          <BadgeCelula
+                              nomeCelula={nomeCelula}
+                              cor={decisaoCfg ? decisaoCfg.color : "#D97706"}
+                              corBg={decisaoCfg ? decisaoCfg.colorBg : "rgba(217,119,6,.1)"}
+                              corBorder={decisaoCfg ? decisaoCfg.colorBorder : "rgba(217,119,6,.3)"}
+                          />
                       )}
                     </div>
-                )}
-                <div style={{ padding:"12px 14px", display:"flex", alignItems:"center", gap:12 }}>
-                  <div style={{
-                    width:40, height:40, borderRadius:10, flexShrink:0,
-                    background: decisaoCfg ? decisaoCfg.colorBg : "rgba(217,119,6,.1)",
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                    color: decisaoCfg ? decisaoCfg.color : "#D97706",
-                    fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:16,
-                    border:`1px solid ${decisaoCfg ? decisaoCfg.colorBorder : "rgba(217,119,6,.3)"}`,
-                  }}>
-                    {v.nome?.charAt(0).toUpperCase()}
+                    <button onClick={() => onDesarquivar(v, recarregar)} style={{
+                      display:"flex", alignItems:"center", gap:6, padding:"9px 13px",
+                      borderRadius:8, border:`1px solid ${purple}44`,
+                      background:`${purple}12`, cursor:"pointer", flexShrink:0,
+                      fontFamily:"'Cinzel',serif", fontSize:8, fontWeight:700,
+                      letterSpacing:".12em", color:purple,
+                    }}>
+                      <ArchiveRestore size={13} />
+                      RESTAURAR
+                    </button>
                   </div>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700,
-                      letterSpacing:".1em", color:textPrimary, margin:"0 0 5px",
-                      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                      {v.nome}
-                    </p>
-                    {nomeCelula && (
-                        <BadgeCelula
-                            nomeCelula={nomeCelula}
-                            cor={decisaoCfg ? decisaoCfg.color : "#D97706"}
-                            corBg={decisaoCfg ? decisaoCfg.colorBg : "rgba(217,119,6,.1)"}
-                            corBorder={decisaoCfg ? decisaoCfg.colorBorder : "rgba(217,119,6,.3)"}
-                        />
-                    )}
-                  </div>
-                  <button onClick={() => onDesarquivar(v, carregar)} style={{
-                    display:"flex", alignItems:"center", gap:6, padding:"9px 13px",
-                    borderRadius:8, border:`1px solid ${purple}44`,
-                    background:`${purple}12`, cursor:"pointer", flexShrink:0,
-                    fontFamily:"'Cinzel',serif", fontSize:8, fontWeight:700,
-                    letterSpacing:".12em", color:purple,
-                  }}>
-                    <ArchiveRestore size={13} />
-                    RESTAURAR
-                  </button>
                 </div>
-              </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {!celulaId && temMais && (
+            <BotaoCarregarMais onClick={carregarMais} carregando={carregandoMais} isDark={isDark} />
+        )}
+        {!celulaId && (
+            <InfoContagem carregados={arquivados.length} total={total} isDark={isDark} />
+        )}
       </div>
   );
 }
@@ -414,6 +495,10 @@ function VisitanteCard({ v, isDark, onArquivar, destacarId }) {
 export default function Visitantes({ celulaId, isDark = false }) {
   const [visitantes, setVisitantes] = useState([]);
   const [loading,    setLoading]    = useState(true);
+  const [carregandoMais, setCarregandoMais] = useState(false);
+  const [pagina,     setPagina]     = useState(0);
+  const [temMais,    setTemMais]    = useState(false);
+  const [totalAtivos, setTotalAtivos] = useState(0);
   const [filtro,     setFiltro]     = useState("");
   const [abaAtiva,   setAbaAtiva]   = useState("ativos");
   const [destacarId, setDestacarId] = useState(null);
@@ -447,24 +532,56 @@ export default function Visitantes({ celulaId, isDark = false }) {
     .search-wrap{position:relative;width:100%;}
   `;
 
-  const listar = useCallback(async () => {
+  const carregarPagina = useCallback(async (numeroPagina, reset) => {
+    if (reset) setLoading(true);
+    else setCarregandoMais(true);
+
     try {
-      setLoading(true);
-      const endpoint = celulaId ? `/visitantes/celula/${celulaId}/ativos` : "/visitantes";
-      const res = await api.get(endpoint, { headers: getHeaders() });
-      setVisitantes(Array.isArray(res.data) ? res.data : []);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
+      if (celulaId) {
+        // Lista por célula — geralmente pequena, sem paginação
+        const res = await api.get(`/visitantes/celula/${celulaId}/ativos`, { headers: getHeaders() });
+        const lista = Array.isArray(res.data) ? res.data : [];
+        setVisitantes(lista);
+        setTemMais(false);
+        setTotalAtivos(lista.length);
+      } else {
+        const res = await api.get("/visitantes", {
+          headers: getHeaders(),
+          params: { page: numeroPagina, size: TAMANHO_PAGINA },
+        });
+        const conteudo = Array.isArray(res.data) ? res.data : (res.data.content || []);
+        const ultimaPagina = Array.isArray(res.data) ? true : (res.data.last ?? (conteudo.length < TAMANHO_PAGINA));
+        const totalElems = Array.isArray(res.data) ? conteudo.length : (res.data.totalElements ?? conteudo.length);
+
+        setVisitantes(prev => reset ? conteudo : [...prev, ...conteudo]);
+        setTemMais(!ultimaPagina);
+        setTotalAtivos(totalElems);
+        setPagina(numeroPagina);
+      }
+    } catch (err) {
+      console.error(err);
+      if (reset) setVisitantes([]);
+    } finally {
+      setLoading(false);
+      setCarregandoMais(false);
+    }
   }, [celulaId]);
 
-  useEffect(() => { listar(); }, [listar]);
+  useEffect(() => { carregarPagina(0, true); }, [carregarPagina]);
+
+  const carregarMais = () => {
+    if (!temMais || carregandoMais) return;
+    carregarPagina(pagina + 1, false);
+  };
+
+  const recarregar = () => carregarPagina(0, true);
 
   const arquivar = async (id) => {
     const v = visitantes.find(x => x.id === id);
     try {
       await api.patch(`/visitantes/${id}/arquivar`, {}, { headers: getHeaders() });
       disparar(TOAST_TYPES.ARQUIVADO, { nome: v?.nome || "Visitante" });
-      listar();
+      recarregar();
     } catch { alert("Erro ao arquivar visitante."); }
   };
 
@@ -472,7 +589,7 @@ export default function Visitantes({ celulaId, isDark = false }) {
     try {
       await api.patch(`/visitantes/${v.id}/desarquivar`, {}, { headers: getHeaders() });
       disparar(TOAST_TYPES.DESARQUIVADO, { nome: v.nome });
-      listar();
+      recarregar();
       if (recarregarArquivados) recarregarArquivados();
     } catch { alert("Erro ao restaurar visitante."); }
   };
@@ -486,6 +603,8 @@ export default function Visitantes({ celulaId, isDark = false }) {
         if (!aD && bD) return 1;
         return 0;
       });
+
+  const buscaPodeEstarIncompleta = filtro.trim() !== "" && temMais;
 
   return (
       <div className="v-wrap" style={{ fontFamily:"'EB Garamond',serif", color:textPrimary }}>
@@ -510,7 +629,7 @@ export default function Visitantes({ celulaId, isDark = false }) {
               <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700,
                 letterSpacing:".16em", color:textPrimary, margin:0 }}>VISITANTES</h3>
               <p style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".16em",
-                color:textSec, margin:0 }}>{visitantes.length} PESSOAS ALCANÇADAS</p>
+                color:textSec, margin:0 }}>{totalAtivos} PESSOAS ALCANÇADAS</p>
             </div>
           </div>
 
@@ -557,18 +676,37 @@ export default function Visitantes({ celulaId, isDark = false }) {
                   color:textSec, margin:0 }}>
                   {filtro ? "NENHUM RESULTADO" : "NENHUM VISITANTE ATIVO"}
                 </p>
+                {filtro && temMais && (
+                    <BotaoCarregarMais onClick={carregarMais} carregando={carregandoMais} isDark={isDark} />
+                )}
               </div>
           ) : (
-              <motion.div className="ieq-grid-v" initial="hidden" animate="visible"
-                          variants={{ hidden:{}, visible:{ transition:{ staggerChildren:.05 } } }}>
-                {visitantesFiltrados.map(v => (
-                    <VisitanteCard
-                        key={v.id} v={v} isDark={isDark}
-                        destacarId={destacarId}
-                        onArquivar={arquivar}
-                    />
-                ))}
-              </motion.div>
+              <>
+                <motion.div className="ieq-grid-v" initial="hidden" animate="visible"
+                            variants={{ hidden:{}, visible:{ transition:{ staggerChildren:.05 } } }}>
+                  {visitantesFiltrados.map(v => (
+                      <VisitanteCard
+                          key={v.id} v={v} isDark={isDark}
+                          destacarId={destacarId}
+                          onArquivar={arquivar}
+                      />
+                  ))}
+                </motion.div>
+
+                {!celulaId && temMais && (
+                    <BotaoCarregarMais onClick={carregarMais} carregando={carregandoMais} isDark={isDark} />
+                )}
+                {!celulaId && (
+                    <InfoContagem carregados={visitantes.length} total={totalAtivos} isDark={isDark} />
+                )}
+                {buscaPodeEstarIncompleta && !celulaId && (
+                    <p style={{ textAlign:"center", marginTop:6,
+                      fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".12em",
+                      color:textSec }}>
+                      CARREGUE MAIS PARA AMPLIAR A BUSCA
+                    </p>
+                )}
+              </>
           )}
         </div>
       </div>
