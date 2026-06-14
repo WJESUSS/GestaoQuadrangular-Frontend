@@ -1,370 +1,781 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import {
-  Trophy, Loader2, AlertCircle, RefreshCw,
-  Calendar, Star, Medal
-} from "lucide-react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import api from "../../services/api.js";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Trophy, Crown, Medal, Award, Search, Users, Flame, Star,
+  ChevronLeft, ChevronRight, ChevronDown, Loader2, Sparkles,
+  RefreshCw, Info, UserPlus, HeartHandshake, Droplet, Droplets,
+  Handshake, GitBranch,
+} from "lucide-react";
 
-const IEQ = {
-  red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
-  yellow: "#FDB813", yellowDark: "#C48C00",
-  blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
-  white: "#FFFFFF", offWhite: "#F5F0E8",
-  dark: "#0A0608", darkCard: "#110A0D",
+/* ─── Tokens AURA (mesmos do Dashboard) ────────────────────────────────── */
+const AURA = {
+  gold:      "#C9A96E",
+  goldLight: "#E8D5A3",
+  dark:      "#0A0A0F",
+  darkEl:    "#12121A",
+  light:     "#F5F0E8",
+  red:       "#C8102E",
+  redDark:   "#9B0B1E",
+  blue:      "#003DA5",
+  blueDark:  "#002470",
+  yellow:    "#FDB813",
 };
 
-function QuadrangularCross({ size = 28 }) {
+function theme(isDark) {
+  return {
+    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
+    text:        isDark ? "#F5F0E8"                : "#1A1008",
+    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
+    textMuted:   isDark ? "#6B6658"                : "#9A9080",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
+    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+  };
+}
+
+/* Cores por posição — alinhadas à identidade da igreja (ouro / azul / vermelho) */
+const RANK_STYLE = {
+  1: { main: AURA.gold, grad: `${AURA.gold}, ${AURA.goldLight}`, Icon: Crown, glow: "rgba(201,169,110,.28)" },
+  2: { main: AURA.blue, grad: `${AURA.blueDark}, ${AURA.blue}`,  Icon: Medal, glow: "rgba(0,61,165,.22)" },
+  3: { main: AURA.red,  grad: `${AURA.redDark}, ${AURA.red}`,    Icon: Award, glow: "rgba(200,16,46,.2)" },
+};
+
+/* Critérios que compõem a pontuação mensal */
+const CRITERIOS = [
+  { key: "presencaMedia", label: "Presença Média",   Icon: Users,         color: AURA.blue },
+  { key: "visitantes",    label: "Visitantes",        Icon: UserPlus,      color: "#c8a010" },
+  { key: "consolidados",  label: "Consolidados",      Icon: HeartHandshake,color: AURA.red },
+  { key: "aceitouJesus",  label: "Aceitaram Jesus",    Icon: Sparkles,      color: AURA.gold },
+  { key: "desejaBatismo", label: "Desejam Batismo",    Icon: Droplet,       color: AURA.blue },
+  { key: "batismos",      label: "Batismos",           Icon: Droplets,      color: AURA.blue },
+  { key: "reconciliou",   label: "Reconciliações",     Icon: Handshake,     color: AURA.red },
+];
+
+const MESES_PT = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
+function formatMesAno(date) {
+  return `${MESES_PT[date.getMonth()]} de ${date.getFullYear()}`;
+}
+function toMesParam(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/* ─── Logo (mesmo asset do Dashboard) ──────────────────────────────────── */
+function IEQCross({ size = 30 }) {
   return (
-      <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
-        <defs>
-          <linearGradient id="gVR" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={IEQ.redLight} />
-            <stop offset="100%" stopColor={IEQ.redDark} />
-          </linearGradient>
-          <linearGradient id="gHR" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={IEQ.blueDark} />
-            <stop offset="50%" stopColor={IEQ.blueLight} />
-            <stop offset="100%" stopColor={IEQ.blueDark} />
-          </linearGradient>
-          <filter id="glowR">
-            <feGaussianBlur stdDeviation="2" result="b" />
-            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-        </defs>
-        <rect x="38" y="4"  width="24" height="92" rx="3" fill="url(#gVR)" filter="url(#glowR)" />
-        <rect x="4"  y="38" width="92" height="24" rx="3" fill="url(#gHR)" filter="url(#glowR)" />
-        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowR)" />
-        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
-      </svg>
+      <img
+          src="/quadrangular.png"
+          alt="Logo IEQ"
+          style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
+      />
   );
 }
 
-export default function RankingCelulas({ isDark = false }) {
-  const [ranking,        setRanking]        = useState([]);
-  const [loading,        setLoading]        = useState(true);
-  const [error,          setError]          = useState(null);
-  const [mesSelecionado, setMesSelecionado] = useState(new Date().toISOString().slice(0, 7));
-  const dateInputRef = useRef(null);
+/* ─── CSS Global (segue exatamente os padrões dl- do Dashboard) ────────── */
+function GlobalStyles({ t, isDark }) {
+  return (
+      <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
-  const bg            = isDark ? IEQ.dark    : "#F0EAE8";
-  const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
-  const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
+      @keyframes dl-spin   { to { transform: rotate(360deg); } }
+      @keyframes dl-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+      @keyframes dl-blink  { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+      @keyframes rk-rise   { from { transform: translateY(18px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+      @keyframes rk-shine  {
+        0%   { transform: translateX(-120%) rotate(8deg); }
+        100% { transform: translateX(220%)  rotate(8deg); }
+      }
+      @keyframes rk-flicker { 0%,100%{opacity:1;} 50%{opacity:.55;} }
 
-  const globalStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-    * { box-sizing: border-box; }
-    @keyframes stripe {
-      0%   { background-position: 0 0; }
-      100% { background-position: 60px 60px; }
-    }
-    @keyframes pulse { 0%,100%{ transform:scale(1); opacity:.45; } 50%{ transform:scale(1.12); opacity:.12; } }
-    @keyframes spin  { to { transform: rotate(360deg); } }
-    @keyframes shimmer {
-      0%   { background-position: -200% center; }
-      100% { background-position:  200% center; }
-    }
-    .ieq-bg-rank {
-      position:fixed; inset:0; pointer-events:none; z-index:0;
-      background: repeating-linear-gradient(
-        -55deg,
-        ${isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.06)"} 0 10px,
-        transparent 10px 20px,
-        ${isDark ? "rgba(253,184,19,.03)" : "rgba(253,184,19,.05)"} 20px 30px,
-        transparent 30px 40px
-      );
-      background-size:60px 60px;
-      animation: stripe 8s linear infinite;
-    }
-    .ieq-card-rank {
-      background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
-      border: 1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"};
-      border-radius:18px;
-      backdrop-filter: blur(24px);
-      transition: all .3s;
-    }
-    .ieq-card-rank:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(200,16,46,.1); }
-    .ieq-btn-primary-rank {
-      background: linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red});
-      color:#fff; border:none; border-radius:8px;
-      font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.16em;
-      cursor:pointer; transition:all .25s; padding:12px 24px;
-      display:flex; align-items:center; gap:8px; white-space:nowrap;
-    }
-    .ieq-btn-primary-rank:hover { filter:brightness(1.1); transform:translateY(-2px); }
-    .ieq-date-rank {
-      background: transparent; border:none; outline:none;
-      font-family:'Cinzel',serif; font-size:13px; font-weight:700;
-      color:${isDark ? IEQ.offWhite : "#1A0A0D"}; cursor:pointer; width:100%;
-    }
-    .pulse-ring-r { position:absolute; border-radius:50%; border:1px solid rgba(253,184,19,.4); animation:pulse 3s ease-in-out infinite; }
-    .divider-r { height:1px; background:linear-gradient(90deg,transparent,${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"},transparent); margin:8px 0; }
-    .gold-title {
-      background: linear-gradient(90deg, ${IEQ.yellowDark} 0%, ${IEQ.yellow} 40%, #fff8dc 60%, ${IEQ.yellow} 80%, ${IEQ.yellowDark} 100%);
-      background-size: 200% auto;
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation: shimmer 3s linear infinite;
-    }
-    .podio-1st { background: linear-gradient(135deg, ${IEQ.redDark}, ${IEQ.red}, ${IEQ.blueDark}); }
-    .rank-row {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px;
-      background:${isDark ? "rgba(255,255,255,.02)" : "rgba(200,16,46,.03)"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.07)"};
-      border-radius:10px; transition:all .2s; cursor:default;
-    }
-    .rank-row:hover { border-color:${IEQ.red}; background:${isDark ? "rgba(200,16,46,.06)" : "rgba(200,16,46,.07)"}; }
-    @media (max-width:768px) {
-      .podio-grid { flex-direction:column !important; align-items:stretch !important; }
-      .podio-grid > * { width:100% !important; transform:none !important; }
-    }
-  `;
+      .dl-spin  { animation: dl-spin  1s linear infinite; }
+      .dl-pulse { animation: dl-pulse 3s ease-in-out infinite; }
+      .dl-blink { animation: dl-blink 2s ease-in-out infinite; }
 
-  const carregarRanking = async () => {
-    setLoading(true); setError(null);
+      .rk-root { font-family: 'Inter', sans-serif; color: ${t.text}; }
+
+      /* ── Cabeçalho ── */
+      .rk-hd {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+      }
+      .rk-hd-left { display: flex; align-items: center; gap: 13px; min-width: 0; }
+      .rk-hd-icon {
+        width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, rgba(201,169,110,.85), ${AURA.goldLight});
+        color: ${AURA.dark};
+        box-shadow: 0 8px 22px rgba(201,169,110,.28);
+      }
+      .rk-eyebrow {
+        font-size: 9px; font-weight: 500; letter-spacing: .2em;
+        text-transform: uppercase; color: rgba(201,169,110,.55); margin: 0 0 3px;
+      }
+      .rk-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(18px, 4.4vw, 23px); font-weight: 500;
+        color: ${t.text}; margin: 0; line-height: 1.2; letter-spacing: .02em;
+      }
+      .rk-subtitle {
+        font-size: 11px; font-weight: 300; color: ${t.textSec}; margin: 3px 0 0;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+
+      .rk-btn-refresh {
+        width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
+        border: 1px solid ${t.border}; color: ${t.textMuted};
+        cursor: pointer; transition: all .25s;
+      }
+      .rk-btn-refresh:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .rk-btn-refresh:disabled { opacity: .5; cursor: default; }
+
+      /* ── Navegador de mês ── */
+      .rk-month-nav {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 10px; padding: 6px;
+        background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(201,169,110,.06)"};
+        border: 1px solid ${t.border}; border-radius: 100px;
+        margin-bottom: 14px;
+      }
+      .rk-month-btn {
+        width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+        background: transparent; color: ${t.textMuted};
+        display: flex; align-items: center; justify-content: center;
+        transition: all .2s; flex-shrink: 0;
+      }
+      .rk-month-btn:hover:not(:disabled) { background: rgba(201,169,110,.12); color: ${AURA.gold}; }
+      .rk-month-btn:disabled { opacity: .3; cursor: default; }
+      .rk-month-label {
+        flex: 1; text-align: center; min-width: 0;
+        font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 500;
+        color: ${t.text}; letter-spacing: .02em;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .rk-month-now {
+        font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+        color: ${AURA.gold}; background: rgba(201,169,110,.1);
+        border: 1px solid rgba(201,169,110,.25); border-radius: 100px;
+        padding: 5px 10px; cursor: pointer; flex-shrink: 0; transition: all .2s;
+      }
+      .rk-month-now:hover { background: rgba(201,169,110,.18); }
+
+      /* ── Busca ── */
+      .rk-search-wrap { position: relative; margin-bottom: 20px; }
+      .rk-search-icon {
+        position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+        color: ${AURA.gold}; opacity: .5; pointer-events: none;
+      }
+      .rk-input {
+        width: 100%; box-sizing: border-box;
+        background: ${t.bgInput}; border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 13px 16px 13px 44px;
+        border-radius: 13px; outline: none;
+        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
+        transition: all .25s; -webkit-appearance: none; appearance: none;
+      }
+      .rk-input:focus {
+        border-color: rgba(201,169,110,.5);
+        background: rgba(201,169,110,.04);
+        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+      }
+      .rk-input::placeholder { color: ${t.placeholder}; }
+
+      /* ── Pódio ── */
+      .rk-podium {
+        display: grid; grid-template-columns: 1fr 1fr 1fr;
+        align-items: end; gap: 8px; margin-bottom: 22px;
+      }
+      .rk-podium-card {
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 18px; padding: 16px 8px 18px;
+        text-align: center; position: relative; overflow: hidden;
+        backdrop-filter: blur(20px);
+        animation: rk-rise .5s cubic-bezier(.2,.8,.2,1) backwards;
+        min-width: 0; cursor: pointer;
+      }
+      .rk-podium-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      }
+      .rk-podium-1 { order: 2; padding-top: 22px; padding-bottom: 24px; transform: translateY(-10px); z-index: 2; animation-delay: .05s; }
+      .rk-podium-2 { order: 1; animation-delay: .15s; }
+      .rk-podium-3 { order: 3; animation-delay: .25s; }
+      @media(min-width: 420px) {
+        .rk-podium-1 { padding-top: 28px; padding-bottom: 30px; }
+      }
+
+      .rk-podium-shine {
+        position: absolute; top: -40%; left: -10%; width: 60%; height: 220%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+        animation: rk-shine 3.4s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      .rk-podium-medal {
+        width: 38px; height: 38px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 8px; position: relative; z-index: 1;
+      }
+      .rk-podium-1 .rk-podium-medal { width: 46px; height: 46px; }
+
+      .rk-podium-avatar {
+        width: 46px; height: 46px; border-radius: 13px; margin: 0 auto 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 18px;
+        background: linear-gradient(135deg, rgba(201,169,110,.2), rgba(201,169,110,.06));
+        border: 1px solid rgba(201,169,110,.22); color: ${AURA.gold};
+        position: relative; z-index: 1;
+      }
+      .rk-podium-1 .rk-podium-avatar { width: 56px; height: 56px; font-size: 22px; }
+
+      .rk-podium-name {
+        font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 500;
+        color: ${t.text}; margin: 0 0 2px; line-height: 1.25;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        padding: 0 4px; position: relative; z-index: 1;
+      }
+      .rk-podium-1 .rk-podium-name { font-size: 15px; }
+      .rk-podium-lider {
+        font-size: 9px; font-weight: 400; color: ${t.textMuted};
+        margin: 0 0 10px; overflow: hidden; text-overflow: ellipsis;
+        white-space: nowrap; padding: 0 6px; position: relative; z-index: 1;
+      }
+      .rk-podium-score {
+        display: inline-flex; align-items: baseline; gap: 4px;
+        font-family: 'Playfair Display', serif; font-weight: 600;
+        color: ${t.text}; position: relative; z-index: 1;
+      }
+      .rk-podium-score-num { font-size: 20px; line-height: 1; }
+      .rk-podium-1 .rk-podium-score-num { font-size: 26px; }
+      .rk-podium-score-unit {
+        font-size: 8px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textMuted};
+      }
+      .rk-podium-rankbg {
+        position: absolute; bottom: -10px; right: -6px;
+        font-family: 'Playfair Display', serif; font-weight: 600;
+        font-size: 56px; line-height: 1; opacity: .06; pointer-events: none;
+      }
+
+      /* ── Lista geral ── */
+      .rk-card {
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 20px; overflow: hidden; margin-bottom: 18px;
+        backdrop-filter: blur(24px); position: relative;
+      }
+      .rk-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+      }
+      .rk-card-head {
+        padding: 18px 20px; border-bottom: 1px solid ${t.border};
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      }
+      .rk-card-head-title {
+        font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 500;
+        color: ${t.text}; margin: 0;
+      }
+      .rk-card-head-sub { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0; }
+
+      .rk-list { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+      .rk-row {
+        border-radius: 13px;
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(201,169,110,.04)"};
+        border: 1px solid ${isDark ? "rgba(201,169,110,.07)" : "rgba(201,169,110,.12)"};
+        transition: border-color .2s; min-width: 0;
+        animation: rk-rise .4s cubic-bezier(.2,.8,.2,1) backwards;
+        cursor: pointer; overflow: hidden;
+      }
+      .rk-row:hover { border-color: rgba(201,169,110,.3); }
+      .rk-row.is-self {
+        border-color: rgba(201,169,110,.45);
+        background: ${isDark ? "rgba(201,169,110,.07)" : "rgba(201,169,110,.09)"};
+      }
+
+      .rk-row-main {
+        display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-width: 0;
+      }
+
+      .rk-rank {
+        width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 13px;
+        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.035)"};
+        color: ${t.textSec}; border: 1px solid ${t.border};
+      }
+
+      .rk-row-avatar {
+        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+        background: linear-gradient(135deg, rgba(201,169,110,.2), rgba(201,169,110,.06));
+        border: 1px solid rgba(201,169,110,.22);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif; font-weight: 600;
+        font-size: 15px; color: ${AURA.gold};
+      }
+
+      .rk-row-info { flex: 1; min-width: 0; }
+      .rk-row-name {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 13px; font-weight: 400; color: ${t.text};
+      }
+      .rk-row-name-text {
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+      }
+      .rk-row-lider {
+        font-size: 10.5px; font-weight: 300; color: ${t.textMuted}; margin-top: 1px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+
+      .rk-self-tag {
+        font-size: 7.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+        color: ${AURA.gold}; background: rgba(201,169,110,.12);
+        border: 1px solid rgba(201,169,110,.3); border-radius: 100px;
+        padding: 2px 7px; flex-shrink: 0; line-height: 1.5;
+      }
+      .rk-multi-tag {
+        display: inline-flex; align-items: center; gap: 3px;
+        font-size: 7.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+        color: #c8a010; background: rgba(253,184,19,.12);
+        border: 1px solid rgba(253,184,19,.3); border-radius: 100px;
+        padding: 2px 7px; flex-shrink: 0; line-height: 1.5;
+      }
+
+      .rk-row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+      .rk-row-score {
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 16px;
+        color: ${t.text}; line-height: 1; text-align: right;
+      }
+      .rk-row-score-unit {
+        display: block; font-size: 7.5px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textMuted}; margin-top: 2px;
+      }
+      .rk-row-chevron { color: ${t.textMuted}; transition: transform .25s; flex-shrink: 0; }
+
+      /* ── Detalhe expandido ── */
+      .rk-row-detail {
+        padding: 0 14px 14px 14px;
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+      }
+      @media(min-width: 460px) {
+        .rk-row-detail { grid-template-columns: repeat(4, 1fr); }
+      }
+      .rk-stat {
+        display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+        border-radius: 10px;
+        background: ${isDark ? "rgba(0,0,0,.18)" : "rgba(255,255,255,.5)"};
+        border: 1px solid ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.12)"};
+        min-width: 0;
+      }
+      .rk-stat-icon {
+        width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .rk-stat-text { min-width: 0; }
+      .rk-stat-value {
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 13px;
+        color: ${t.text}; line-height: 1.2;
+      }
+      .rk-stat-label {
+        font-size: 8.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+        color: ${t.textMuted}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .rk-row-detail-multi {
+        grid-column: 1 / -1; display: flex; align-items: center; gap: 8px;
+        padding: 9px 12px; border-radius: 10px;
+        background: rgba(253,184,19,.08); border: 1px solid rgba(253,184,19,.25);
+        color: #c8a010; font-size: 11px; font-weight: 500;
+      }
+
+      .rk-empty {
+        text-align: center; padding: 34px 16px;
+        font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 300;
+        font-style: italic; color: ${t.textMuted};
+      }
+
+      /* ── Bloco "como funciona" ── */
+      .rk-info-toggle {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 10px; width: 100%; cursor: pointer; background: none; border: none;
+        color: inherit; padding: 0; text-align: left; font-family: 'Inter', sans-serif;
+      }
+      .rk-info-toggle-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .rk-info-icon {
+        width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(201,169,110,.08); border: 1px solid rgba(201,169,110,.2);
+        color: ${AURA.gold};
+      }
+      .rk-info-title { font-size: 12px; font-weight: 600; color: ${t.text}; margin: 0; letter-spacing: .02em; }
+      .rk-info-sub { font-size: 10.5px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; }
+      .rk-info-chevron { color: ${t.textMuted}; flex-shrink: 0; transition: transform .25s; }
+      .rk-info-body {
+        font-size: 12px; font-weight: 300; line-height: 1.7; color: ${t.textSec};
+        padding-top: 14px; margin-top: 14px;
+        border-top: 1px solid ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.14)"};
+      }
+      .rk-info-row {
+        display: flex; align-items: center; gap: 10px; padding: 7px 0;
+        border-bottom: 1px solid ${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)"};
+        font-size: 12px; color: ${t.textSec};
+      }
+      .rk-info-row:last-child { border-bottom: none; }
+      .rk-info-row-icon {
+        width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+
+      /* ── Loading ── */
+      .rk-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 70px 0; }
+      .rk-loading-rings { position: relative; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+
+      .rk-footer {
+        text-align: center; font-size: 9px; font-weight: 500; letter-spacing: .18em;
+        text-transform: uppercase; color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(26,16,8,.15)"};
+        padding: 6px 0 16px;
+      }
+
+      @media(max-width: 360px) {
+        .rk-podium-name  { font-size: 11.5px; }
+        .rk-podium-1 .rk-podium-name { font-size: 13px; }
+        .rk-podium-lider { display: none; }
+        .rk-podium-score-num { font-size: 17px; }
+        .rk-podium-1 .rk-podium-score-num { font-size: 22px; }
+        .rk-row-lider { display: none; }
+      }
+    `}</style>
+  );
+}
+
+/* ─── Componente Principal ─────────────────────────────────────────────── */
+export default function RankingCelulas({ isDark = false, celulaId = null }) {
+  const [ranking,   setRanking]   = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [refreshing,setRefreshing]= useState(false);
+  const [erro,      setErro]      = useState(false);
+  const [busca,     setBusca]     = useState("");
+  const [mesRef,    setMesRef]    = useState(() => new Date());
+  const [expandido, setExpandido] = useState(null);
+  const [infoAberto,setInfoAberto]= useState(false);
+
+  const t = theme(isDark);
+
+  const hoje = new Date();
+  const isMesAtual =
+      mesRef.getFullYear() === hoje.getFullYear() && mesRef.getMonth() === hoje.getMonth();
+
+  const carregarRanking = useCallback(async (isSilent = false) => {
     try {
-      const res = await api.get(`/api/ranking/celulas?mes=${mesSelecionado}`, {
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      setRanking(res.data || []);
-    } catch {
-      setError("Não foi possível carregar o ranking.");
+      if (isSilent) setRefreshing(true); else setLoading(true);
+      setErro(false);
+      const res = await api.get("/api/ranking/celulas", { params: { mes: toMesParam(mesRef) } });
+      const data = Array.isArray(res.data) ? res.data : [];
+      setRanking(data);
+    } catch (err) {
+      console.error("Erro ao carregar ranking:", err);
+      setErro(true);
+      setRanking([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [mesRef]);
 
-  // Polling automático a cada 30 segundos + recarrega ao trocar o mês
-  useEffect(() => {
-    carregarRanking();
-    const intervalo = setInterval(() => {
-      carregarRanking();
-    }, 10000);
-    return () => clearInterval(intervalo);
-  }, [mesSelecionado]);
+  useEffect(() => { carregarRanking(); setExpandido(null); }, [carregarRanking]);
 
-  const top3     = useMemo(() => ranking.slice(0, 3), [ranking]);
-  const restante = useMemo(() => ranking.slice(3),    [ranking]);
+  const buscaLower = busca.trim().toLowerCase();
 
-  if (loading && ranking.length === 0) return (
-      <div style={{ minHeight:"60vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:bg }}>
-        <style>{globalStyles}</style>
-        <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
-          <div className="pulse-ring-r" style={{ width:72, height:72 }} />
-          <QuadrangularCross size={42} />
-        </div>
-        <p style={{ fontFamily:"'Cinzel',serif", color:isDark ? IEQ.offWhite : IEQ.redDark, marginTop:16, letterSpacing:".2em", fontSize:11 }}>
-          SINCRONIZANDO DADOS...
-        </p>
-        <Loader2 size={22} style={{ color:IEQ.yellow, marginTop:12, animation:"spin 1s linear infinite" }} />
-      </div>
+  /* Garante ordenação por pontuação e atribui posição quando o backend não fornece */
+  const ordenado = useMemo(() => {
+    return [...ranking]
+        .sort((a, b) => (b.pontuacao ?? 0) - (a.pontuacao ?? 0))
+        .map((c, i) => ({ ...c, _posicao: c.posicao && c.posicao > 0 ? c.posicao : i + 1 }));
+  }, [ranking]);
+
+  const filtrado = useMemo(
+      () => ordenado.filter((c) => (c.nomeCelula || "").toLowerCase().includes(buscaLower)),
+      [ordenado, buscaLower]
   );
 
-  return (
-      <div style={{ minHeight:"100vh", background:bg, color:textPrimary, fontFamily:"'EB Garamond',serif", position:"relative", paddingBottom:60 }}>
-        <style>{globalStyles}</style>
-        <div className="ieq-bg-rank" />
+  const mostrarPodio = buscaLower === "" && ordenado.length >= 3;
+  const top3 = mostrarPodio ? ordenado.slice(0, 3) : [];
+  const restantes = mostrarPodio ? filtrado.slice(3) : filtrado;
 
-        <div style={{ position:"relative", zIndex:10, maxWidth:900, margin:"0 auto", padding:"32px 16px 0" }}>
+  const navegarMes = (delta) => {
+    setMesRef((prev) => {
+      const novo = new Date(prev.getFullYear(), prev.getMonth() + delta, 1);
+      const limite = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      return novo > limite ? prev : novo;
+    });
+  };
 
-          {/* Header */}
-          <motion.div initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }} style={{ marginBottom:36 }}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16, marginBottom:24 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:16 }}>
-                <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
-                  <div className="pulse-ring-r" style={{ width:64, height:64 }} />
-                  <div style={{ width:48, height:48, borderRadius:"50%", background:isDark ? "#1A0A0D" : "#fff", border:`1px solid rgba(253,184,19,.4)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    <Trophy size={22} style={{ color:IEQ.yellow }} />
-                  </div>
-                </div>
-                <div>
-                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSecondary, margin:0 }}>
-                    PERFORMANCE MENSAL
-                  </p>
-                  <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:22, fontWeight:700, letterSpacing:".16em", margin:0,
-                    background:`linear-gradient(90deg, ${IEQ.yellowDark}, ${IEQ.yellow}, ${IEQ.red})`,
-                    WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
-                    HALL DA FAMA
-                  </h1>
-                </div>
+  const toggleExpandido = (id) => setExpandido((prev) => (prev === id ? null : id));
+
+  if (loading) {
+    return (
+        <div className="rk-root">
+          <GlobalStyles t={t} isDark={isDark} />
+          <div className="rk-loading">
+            <div className="rk-loading-rings">
+              <div className="dl-pulse" style={{ position: "absolute", width: 80, height: 80, border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
+              <div className="dl-pulse" style={{ position: "absolute", width: 62, height: 62, border: "1px solid rgba(201,169,110,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
+              <div style={{ width: 50, height: 50, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(201,169,110,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                <IEQCross size={36} />
               </div>
             </div>
-
-            {/* Seletor de mês + botão */}
-            <div style={{ display:"flex", gap:12, flexWrap:"wrap", alignItems:"center" }}>
-              <div className="ieq-card-rank"
-                   onClick={() => { if(dateInputRef.current?.showPicker) dateInputRef.current.showPicker(); else dateInputRef.current?.focus(); }}
-                   style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 16px", cursor:"pointer", flex:1, minWidth:200 }}>
-                <div style={{ width:38, height:38, borderRadius:10, background:`rgba(253,184,19,.12)`, border:`1px solid rgba(253,184,19,.25)`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <Calendar size={18} style={{ color:IEQ.yellowDark }} />
-                </div>
-                <div style={{ flex:1 }}>
-                  <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".16em", color:textSecondary, margin:"0 0 2px" }}>MÊS DE REFERÊNCIA</p>
-                  <input ref={dateInputRef} type="month" value={mesSelecionado}
-                         onChange={e => setMesSelecionado(e.target.value)}
-                         className="ieq-date-rank" />
-                </div>
-              </div>
-              <button className="ieq-btn-primary-rank" onClick={carregarRanking}>
-                {loading ? <Loader2 size={14} style={{ animation:"spin 1s linear infinite" }} /> : <RefreshCw size={14} />}
-                ATUALIZAR RANKING
-              </button>
-            </div>
-          </motion.div>
-
-          <div className="divider-r" style={{ marginBottom:32 }} />
-
-          {/* Erro */}
-          {error && (
-              <div style={{ padding:"16px 20px", marginBottom:24, background:"rgba(200,16,46,.08)", border:`1px solid rgba(200,16,46,.25)`, borderRadius:12, display:"flex", alignItems:"center", gap:12, color:IEQ.red }}>
-                <AlertCircle size={18} />
-                <span style={{ fontFamily:"'Cinzel',serif", fontSize:11, letterSpacing:".12em" }}>{error}</span>
-              </div>
-          )}
-
-          {ranking.length > 0 ? (
-              <div style={{ display:"flex", flexDirection:"column", gap:40 }}>
-
-                {/* Pódio */}
-                <div className="podio-grid" style={{ display:"flex", alignItems:"flex-end", justifyContent:"center", gap:12 }}>
-
-                  {/* 2º lugar */}
-                  {top3[1] && (
-                      <motion.div initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ delay:.1 }}
-                                  style={{ flex:"1 1 0", minWidth:0 }}>
-                        <div className="ieq-card-rank" style={{ padding:"28px 20px 20px", textAlign:"center", position:"relative" }}>
-                          <div style={{ position:"absolute", top:-20, left:"50%", transform:"translateX(-50%)",
-                            width:40, height:40, borderRadius:"50%",
-                            background:"linear-gradient(135deg, #C0C0C0, #808080)",
-                            border:`3px solid ${isDark ? "#1A0A0D" : "#F0EAE8"}`,
-                            display:"flex", alignItems:"center", justifyContent:"center" }}>
-                            <Medal size={20} style={{ color:"#fff" }} />
-                          </div>
-                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"8px 0 6px" }}>2º LUGAR</p>
-                          <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 4px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                            {top3[1].nomeCelula}
-                          </h3>
-                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, fontStyle:"italic", color:textSecondary, margin:"0 0 14px" }}>
-                            {top3[1].lider}
-                          </p>
-                          <div style={{ padding:"10px", background:`rgba(200,16,46,.08)`, border:`1px solid rgba(200,16,46,.15)`, borderRadius:10 }}>
-                      <span style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, color:IEQ.red }}>
-                        {top3[1].pontuacao.toLocaleString()}
-                      </span>
-                            <span style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".12em", color:textSecondary, marginLeft:4 }}>PTS</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                  )}
-
-                  {/* 1º lugar */}
-                  {top3[0] && (
-                      <motion.div initial={{ opacity:0, y:40 }} animate={{ opacity:1, y:0 }} transition={{ delay:.05 }}
-                                  style={{ flex:"1 1 0", minWidth:0, transform:"scale(1.04)", zIndex:2 }}>
-                        <div className="podio-1st" style={{ borderRadius:20, padding:"44px 24px 24px", textAlign:"center", position:"relative", boxShadow:"0 20px 60px rgba(200,16,46,.3)" }}>
-                          <div style={{ position:"absolute", top:-28, left:"50%", transform:"translateX(-50%)",
-                            width:56, height:56, borderRadius:"50%",
-                            background:`linear-gradient(135deg, ${IEQ.yellow}, ${IEQ.yellowDark})`,
-                            border:`4px solid ${isDark ? IEQ.dark : "#F0EAE8"}`,
-                            display:"flex", alignItems:"center", justifyContent:"center",
-                            boxShadow:"0 8px 24px rgba(253,184,19,.5)" }}>
-                            <Trophy size={28} style={{ color:"#fff" }} />
-                          </div>
-                          <div style={{ display:"flex", justifyContent:"center", gap:3, marginBottom:10 }}>
-                            {[0,1,2].map(i => <Star key={i} size={12} style={{ color:IEQ.yellow }} fill={IEQ.yellow} />)}
-                          </div>
-                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".18em", color:"rgba(255,255,255,.5)", margin:"0 0 6px" }}>1º LUGAR</p>
-                          <h3 className="gold-title" style={{ fontFamily:"'Cinzel',serif", fontSize:18, fontWeight:700, letterSpacing:".12em", margin:"0 0 4px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                            {top3[0].nomeCelula}
-                          </h3>
-                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, fontStyle:"italic", color:"rgba(255,255,255,.55)", margin:"0 0 18px" }}>
-                            {top3[0].lider}
-                          </p>
-                          <div style={{ padding:"14px", background:"rgba(255,255,255,.15)", border:"1px solid rgba(255,255,255,.2)", borderRadius:12, backdropFilter:"blur(8px)" }}>
-                      <span style={{ fontFamily:"'Cinzel',serif", fontSize:24, fontWeight:700, color:"#fff" }}>
-                        {top3[0].pontuacao.toLocaleString()}
-                      </span>
-                            <span style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".14em", color:"rgba(255,255,255,.5)", marginLeft:6 }}>PTS</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                  )}
-
-                  {/* 3º lugar */}
-                  {top3[2] && (
-                      <motion.div initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ delay:.15 }}
-                                  style={{ flex:"1 1 0", minWidth:0 }}>
-                        <div className="ieq-card-rank" style={{ padding:"28px 20px 20px", textAlign:"center", position:"relative" }}>
-                          <div style={{ position:"absolute", top:-20, left:"50%", transform:"translateX(-50%)",
-                            width:40, height:40, borderRadius:"50%",
-                            background:"linear-gradient(135deg, #CD7F32, #8B4513)",
-                            border:`3px solid ${isDark ? "#1A0A0D" : "#F0EAE8"}`,
-                            display:"flex", alignItems:"center", justifyContent:"center" }}>
-                            <Medal size={20} style={{ color:"#fff" }} />
-                          </div>
-                          <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"8px 0 6px" }}>3º LUGAR</p>
-                          <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 4px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                            {top3[2].nomeCelula}
-                          </h3>
-                          <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, fontStyle:"italic", color:textSecondary, margin:"0 0 14px" }}>
-                            {top3[2].lider}
-                          </p>
-                          <div style={{ padding:"10px", background:`rgba(200,16,46,.08)`, border:`1px solid rgba(200,16,46,.15)`, borderRadius:10 }}>
-                      <span style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, color:IEQ.red }}>
-                        {top3[2].pontuacao.toLocaleString()}
-                      </span>
-                            <span style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".12em", color:textSecondary, marginLeft:4 }}>PTS</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                  )}
-                </div>
-
-                {/* Lista restante */}
-                {restante.length > 0 && (
-                    <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                      <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSecondary, margin:"0 0 4px 4px" }}>
-                        CLASSIFICAÇÃO GERAL
-                      </p>
-                      {restante.map((cel, i) => (
-                          <motion.div key={cel.celulaId} initial={{ opacity:0, x:-16 }} animate={{ opacity:1, x:0 }} transition={{ delay:i*.04 }}
-                                      className="rank-row">
-                            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                              <div style={{ width:40, height:40, borderRadius:10,
-                                background:isDark ? "rgba(255,255,255,.05)" : "rgba(200,16,46,.07)",
-                                border:`1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`,
-                                display:"flex", alignItems:"center", justifyContent:"center",
-                                fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:12, color:textSecondary, flexShrink:0 }}>
-                                {i + 4}º
-                              </div>
-                              <div>
-                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".1em", color:textPrimary, margin:"0 0 2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:200 }}>
-                                  {cel.nomeCelula}
-                                </p>
-                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:0 }}>
-                                  {cel.lider || "—"}
-                                </p>
-                              </div>
-                            </div>
-                            <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                              <span style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:700, color:IEQ.red }}>{cel.pontuacao.toLocaleString()}</span>
-                              <span style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".1em", color:textSecondary }}>PTS</span>
-                            </div>
-                          </motion.div>
-                      ))}
-                    </div>
-                )}
-              </div>
-          ) : (
-              <div style={{ textAlign:"center", padding:"64px 32px", background:isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)", borderRadius:20, border:`2px dashed ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.14)"}` }}>
-                <Medal size={52} style={{ color:isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)", margin:"0 auto 16px" }} />
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>
-                  NENHUM RESULTADO PARA ESTE MÊS
-                </p>
-              </div>
-          )}
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>
+              Carregando ranking…
+            </p>
+          </div>
         </div>
+    );
+  }
+
+  return (
+      <div className="rk-root">
+        <GlobalStyles t={t} isDark={isDark} />
+
+        {/* ── Cabeçalho ── */}
+        <div className="rk-hd">
+          <div className="rk-hd-left">
+            <div className="rk-hd-icon">
+              <Trophy size={22} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <p className="rk-eyebrow">Comunidade</p>
+              <h2 className="rk-title">Ranking de Células</h2>
+              <p className="rk-subtitle">{formatMesAno(mesRef)}</p>
+            </div>
+          </div>
+          <button className="rk-btn-refresh" onClick={() => carregarRanking(true)} disabled={refreshing} title="Atualizar">
+            <RefreshCw size={15} className={refreshing ? "dl-spin" : ""} />
+          </button>
+        </div>
+
+        {/* ── Navegador de mês ── */}
+        <div className="rk-month-nav">
+          <button className="rk-month-btn" onClick={() => navegarMes(-1)} title="Mês anterior">
+            <ChevronLeft size={17} />
+          </button>
+          <span className="rk-month-label">{formatMesAno(mesRef)}</span>
+          {isMesAtual ? (
+              <span style={{ width: 32 }} />
+          ) : (
+              <button className="rk-month-now" onClick={() => setMesRef(new Date())}>Atual</button>
+          )}
+          <button className="rk-month-btn" onClick={() => navegarMes(1)} disabled={isMesAtual} title="Próximo mês">
+            <ChevronRight size={17} />
+          </button>
+        </div>
+
+        {/* ── Busca ── */}
+        <div className="rk-search-wrap">
+          <Search size={15} className="rk-search-icon" />
+          <input
+              className="rk-input"
+              placeholder="Buscar célula…"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+          />
+        </div>
+
+        {/* ── Pódio (top 3) ── */}
+        {mostrarPodio && (
+            <div className="rk-podium">
+              {top3.map((c) => {
+                const posicao = c._posicao;
+                const style = RANK_STYLE[posicao] || RANK_STYLE[3];
+                const Icon = style.Icon;
+                const isSelf = celulaId && c.celulaId === celulaId;
+                return (
+                    <div
+                        key={c.celulaId}
+                        className={`rk-podium-card rk-podium-${posicao}`}
+                        onClick={() => toggleExpandido(c.celulaId)}
+                        style={{
+                          borderColor: isSelf ? "rgba(201,169,110,.5)" : t.border,
+                          boxShadow: posicao === 1 ? `0 16px 40px ${style.glow}` : `0 10px 26px ${style.glow}`,
+                        }}
+                    >
+                      <style>{`.rk-podium-${posicao}::before{ background: linear-gradient(90deg, transparent, ${style.main}, transparent); }`}</style>
+                      <div className="rk-podium-shine" />
+                      <span className="rk-podium-rankbg" style={{ color: style.main }}>{posicao}</span>
+
+                      <div className="rk-podium-medal" style={{ background: `linear-gradient(135deg, ${style.grad})`, color: posicao === 1 ? AURA.dark : "#fff", boxShadow: `0 6px 18px ${style.glow}` }}>
+                        <Icon size={posicao === 1 ? 22 : 18} />
+                      </div>
+
+                      <div className="rk-podium-avatar">{c.nomeCelula?.charAt(0).toUpperCase()}</div>
+                      <p className="rk-podium-name">{c.nomeCelula}</p>
+                      <p className="rk-podium-lider">{c.lider || "—"}</p>
+
+                      <div className="rk-podium-score">
+                        <span className="rk-podium-score-num">{c.pontuacao ?? 0}</span>
+                        <span className="rk-podium-score-unit">pts</span>
+                      </div>
+
+                      <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "center" }}>
+                        {isSelf && (
+                            <span className="rk-self-tag"><Star size={9} style={{ marginRight: 3, verticalAlign: "-1px" }} />Sua célula</span>
+                        )}
+                        {c.multiplicou && (
+                            <span className="rk-multi-tag"><GitBranch size={9} />Multiplicou</span>
+                        )}
+                      </div>
+                    </div>
+                );
+              })}
+            </div>
+        )}
+
+        {/* ── Lista geral ── */}
+        <div className="rk-card">
+          <div className="rk-card-head">
+            <div>
+              <h3 className="rk-card-head-title">Classificação</h3>
+              <p className="rk-card-head-sub">
+                {filtrado.length} célula{filtrado.length === 1 ? "" : "s"}{buscaLower ? " encontrada(s)" : " no mês"}
+              </p>
+            </div>
+            <Sparkles size={16} style={{ color: AURA.gold, opacity: .6, flexShrink: 0 }} />
+          </div>
+
+          <div className="rk-list">
+            {erro && (
+                <p className="rk-empty">Não foi possível carregar o ranking. Toque em atualizar para tentar novamente.</p>
+            )}
+
+            {!erro && restantes.length > 0 ? (
+                restantes.map((c, idx) => {
+                  const isSelf = celulaId && c.celulaId === celulaId;
+                  const aberto = expandido === c.celulaId;
+                  return (
+                      <div
+                          key={c.celulaId}
+                          className={`rk-row${isSelf ? " is-self" : ""}`}
+                          style={{ animationDelay: `${Math.min(idx, 8) * 0.04}s` }}
+                          onClick={() => toggleExpandido(c.celulaId)}
+                      >
+                        <div className="rk-row-main">
+                          <div className="rk-rank">{c._posicao}</div>
+                          <div className="rk-row-avatar">{c.nomeCelula?.charAt(0).toUpperCase()}</div>
+                          <div className="rk-row-info">
+                            <div className="rk-row-name">
+                              <span className="rk-row-name-text">{c.nomeCelula}</span>
+                              {isSelf && <span className="rk-self-tag">Você</span>}
+                              {c.multiplicou && <span className="rk-multi-tag"><GitBranch size={9} />Multiplicou</span>}
+                            </div>
+                            <p className="rk-row-lider">{c.lider || "—"}</p>
+                          </div>
+                          <div className="rk-row-right">
+                            <div>
+                              <span className="rk-row-score">{c.pontuacao ?? 0}</span>
+                              <span className="rk-row-score-unit">pts</span>
+                            </div>
+                            <ChevronDown size={16} className="rk-row-chevron" style={{ transform: aberto ? "rotate(180deg)" : "none" }} />
+                          </div>
+                        </div>
+
+                        <AnimatePresence initial={false}>
+                          {aberto && (
+                              <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: .22, ease: "easeInOut" }}
+                                  style={{ overflow: "hidden" }}
+                              >
+                                <div className="rk-row-detail">
+                                  {CRITERIOS.map(({ key, label, Icon, color }) => (
+                                      <div key={key} className="rk-stat">
+                                        <div className="rk-stat-icon" style={{ background: `${color}18`, color }}>
+                                          <Icon size={13} />
+                                        </div>
+                                        <div className="rk-stat-text">
+                                          <p className="rk-stat-value">{c[key] ?? 0}</p>
+                                          <p className="rk-stat-label">{label}</p>
+                                        </div>
+                                      </div>
+                                  ))}
+                                  {c.multiplicou && (
+                                      <div className="rk-row-detail-multi">
+                                        <GitBranch size={14} />
+                                        Esta célula se multiplicou neste mês — pontuação bônus aplicada.
+                                      </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                  );
+                })
+            ) : !erro && (
+                <p className="rk-empty">
+                  {ordenado.length === 0
+                      ? "Ainda não há dados de ranking para este mês."
+                      : "Nenhuma célula encontrada para essa busca."}
+                </p>
+            )}
+          </div>
+        </div>
+
+        {/* ── Como funciona a pontuação ── */}
+        <div className="rk-card" style={{ padding: "16px 20px" }}>
+          <button className="rk-info-toggle" onClick={() => setInfoAberto((v) => !v)}>
+            <div className="rk-info-toggle-left">
+              <div className="rk-info-icon"><Info size={16} /></div>
+              <div style={{ minWidth: 0 }}>
+                <p className="rk-info-title">Como funciona a pontuação</p>
+                <p className="rk-info-sub">Critérios considerados no mês</p>
+              </div>
+            </div>
+            <ChevronDown size={18} className="rk-info-chevron" style={{ transform: infoAberto ? "rotate(180deg)" : "none" }} />
+          </button>
+
+          <AnimatePresence initial={false}>
+            {infoAberto && (
+                <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: .25, ease: "easeInOut" }}
+                    style={{ overflow: "hidden" }}
+                >
+                  <div className="rk-info-body">
+                    {CRITERIOS.map(({ key, label, Icon, color }) => (
+                        <div key={key} className="rk-info-row">
+                          <div className="rk-info-row-icon" style={{ background: `${color}18`, color }}>
+                            <Icon size={13} />
+                          </div>
+                          <span>{label}</span>
+                        </div>
+                    ))}
+                    <div className="rk-info-row">
+                      <div className="rk-info-row-icon" style={{ background: "rgba(253,184,19,.12)", color: "#c8a010" }}>
+                        <GitBranch size={13} />
+                      </div>
+                      <span>Multiplicação da célula no mês</span>
+                    </div>
+                    <p style={{ margin: "12px 0 0", fontSize: 11, fontWeight: 300, color: t.textMuted, lineHeight: 1.6 }}>
+                      A pontuação é calculada automaticamente com base nos relatórios lançados pela célula durante o mês selecionado.
+                    </p>
+                  </div>
+                </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <p className="rk-footer">© {new Date().getFullYear()} IEQ Pituaçu — Sistema Eclesiástico</p>
       </div>
   );
 }

@@ -20,7 +20,7 @@ import {
   Cake, Bell, Send, Check, X, ChevronRight,
 } from "lucide-react";
 
-/* ─── Tokens AURA (mesmos do Dashboard) ────────────────────────────── */
+/* ─── Tokens AURA ────────────────────────────────────────────────── */
 const AURA = {
   gold:      "#C9A96E",
   goldLight: "#E8D5A3",
@@ -88,18 +88,20 @@ function IEQCross({ size = 36 }) {
   );
 }
 
-/* ─── CSS Global (AURA) ─────────────────────────────────────────── */
+/* ─── CSS Global ─────────────────────────────────────────────────── */
 function GlobalStyles({ t, isDark }) {
   return (
       <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+      *, *::before, *::after { box-sizing: border-box; }
 
       @keyframes pp-spin   { to { transform: rotate(360deg); } }
       @keyframes pp-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
       @keyframes pp-blink  { 0%,100%{opacity:1;} 50%{opacity:.3;} }
       @keyframes pp-badge  { 0%,100%{transform:scale(1);} 50%{transform:scale(1.15);} }
       @keyframes pp-bell   { 0%,100%{transform:rotate(0);} 15%{transform:rotate(14deg);} 30%{transform:rotate(-12deg);} 45%{transform:rotate(8deg);} 60%{transform:rotate(-5deg);} 75%{transform:rotate(3deg);} }
-      @keyframes pp-panel  { from{opacity:0;transform:translateY(-8px) scale(.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+      @keyframes pp-panel  { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
 
       .pp-spin   { animation: pp-spin   1s linear infinite; }
       .pp-pulse  { animation: pp-pulse  3s ease-in-out infinite; }
@@ -113,11 +115,14 @@ function GlobalStyles({ t, isDark }) {
         background: ${t.bg};
         color: ${t.text};
         min-height: 100dvh;
-        display: flex; flex-direction: column;
-        position: relative; overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow-x: hidden;
         transition: background .3s, color .3s;
         isolation: isolate;
       }
+
       .pp-glow {
         position: fixed; inset: 0; pointer-events: none; z-index: 0;
         background:
@@ -132,20 +137,23 @@ function GlobalStyles({ t, isDark }) {
         background: ${t.headerBg};
         border-bottom: 1px solid ${t.border};
         backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
         display: flex; align-items: center; justify-content: space-between;
-        padding: 0 20px; height: 64px; gap: 12px;
+        padding: 0 16px; height: 60px; gap: 10px;
         transition: background .3s, border-color .3s;
       }
-      @media(max-width:480px) { .pp-header { height: 56px; padding: 0 14px; } }
+      @media(min-width:480px) { .pp-header { padding: 0 20px; height: 64px; } }
 
       .pp-header-line {
-        height: 2px; position: sticky; top: 64px; z-index: 49;
+        height: 2px; position: sticky; top: 60px; z-index: 49;
         background: linear-gradient(90deg, ${AURA.redDark}, ${AURA.red}, ${AURA.yellow}, ${AURA.blue}, transparent);
+        flex-shrink: 0;
       }
-      @media(max-width:480px) { .pp-header-line { top: 56px; } }
+      @media(min-width:480px) { .pp-header-line { top: 64px; } }
 
-      .pp-hdr-left  { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
-      .pp-hdr-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+      .pp-hdr-left  { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; overflow: hidden; }
+      .pp-hdr-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+      @media(min-width:480px) { .pp-hdr-right { gap: 8px; } }
 
       .pp-avatar-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
       .pp-ring {
@@ -154,38 +162,44 @@ function GlobalStyles({ t, isDark }) {
         top: 50%; left: 50%; transform: translate(-50%,-50%);
       }
       .pp-avatar {
-        width: 44px; height: 44px; border-radius: 50%;
+        width: 38px; height: 38px; border-radius: 50%;
         border: 1.5px solid rgba(201,169,110,.28);
         background: ${isDark ? "rgba(18,18,26,.99)" : "#fff"};
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
-        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 16px; color: ${AURA.gold};
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 15px; color: ${AURA.gold};
+        flex-shrink: 0;
       }
       .pp-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-      @media(max-width:480px) { .pp-avatar { width: 36px; height: 36px; font-size: 14px; } }
+      @media(min-width:480px) { .pp-avatar { width: 44px; height: 44px; font-size: 16px; } }
 
-      .pp-title-block { min-width: 0; }
+      .pp-title-block { min-width: 0; overflow: hidden; }
       .pp-eyebrow {
-        font-size: 9px; font-weight: 500; letter-spacing: .2em;
-        text-transform: uppercase; color: rgba(201,169,110,.55); margin: 0 0 2px;
+        font-size: 8px; font-weight: 500; letter-spacing: .2em;
+        text-transform: uppercase; color: rgba(201,169,110,.55); margin: 0 0 1px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
+      @media(min-width:480px) { .pp-eyebrow { font-size: 9px; margin-bottom: 2px; } }
       .pp-title {
         font-family: 'Playfair Display', serif;
-        font-size: clamp(15px, 3.5vw, 20px);
+        font-size: clamp(14px, 3.5vw, 20px);
         font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.2;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .pp-title span { color: ${AURA.gold}; }
       .pp-breadcrumb {
-        display: flex; align-items: center; gap: 4px; margin-top: 2px;
+        display: flex; align-items: center; gap: 3px; margin-top: 2px;
+        overflow: hidden;
       }
       .pp-breadcrumb-seg {
         font-size: 10px; font-weight: 400; color: ${t.textMuted};
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        flex-shrink: 1;
       }
-      .pp-breadcrumb-seg.active { color: ${t.textSec}; font-weight: 500; }
+      .pp-breadcrumb-seg.active { color: ${t.textSec}; font-weight: 500; flex-shrink: 0; }
 
-      .pp-stat-chips { display: flex; gap: 6px; }
-      @media(max-width:480px) { .pp-stat-chips { display: none; } }
+      .pp-stat-chips { display: none; gap: 6px; }
+      @media(min-width:540px) { .pp-stat-chips { display: flex; } }
       .pp-stat-chip {
         padding: 5px 10px; border-radius: 10px;
         background: ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.08)"};
@@ -203,52 +217,103 @@ function GlobalStyles({ t, isDark }) {
       .pp-btn-ico {
         background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
         border: 1px solid ${t.border};
-        border-radius: 12px; width: 38px; height: 38px;
+        border-radius: 10px; width: 34px; height: 34px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
         color: ${t.textMuted}; transition: all .25s; flex-shrink: 0; position: relative;
       }
       .pp-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
-      @media(max-width:480px) { .pp-btn-ico { width: 34px; height: 34px; } }
+      @media(min-width:480px) { .pp-btn-ico { width: 38px; height: 38px; border-radius: 12px; } }
 
       .pp-btn-exit {
-        display: flex; align-items: center; gap: 7px;
-        padding: 0 14px; height: 38px; border-radius: 100px; border: none; cursor: pointer;
+        display: flex; align-items: center; gap: 6px;
+        padding: 0 12px; height: 34px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
         color: #fff; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
-        transition: all .3s; box-shadow: 0 6px 20px rgba(200,16,46,.25);
+        font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+        transition: all .3s; box-shadow: 0 4px 16px rgba(200,16,46,.22);
+        white-space: nowrap; flex-shrink: 0;
       }
       .pp-btn-exit:hover { opacity: .88; transform: translateY(-1px); }
-      @media(max-width:420px) { .pp-btn-exit span { display: none; } .pp-btn-exit { padding: 0 12px; } }
+      @media(min-width:480px) { .pp-btn-exit { padding: 0 14px; height: 38px; } }
+      .pp-btn-exit-label { display: none; }
+      @media(min-width:400px) { .pp-btn-exit-label { display: inline; } }
 
       /* ── NAV ── */
       .pp-nav {
-        position: sticky; top: 66px; z-index: 40;
+        position: sticky; top: 62px; z-index: 40;
         background: ${t.headerBg};
         border-bottom: 1px solid ${t.border};
         backdrop-filter: blur(24px);
-        padding: 10px 16px; overflow-x: auto; scrollbar-width: none;
+        -webkit-backdrop-filter: blur(24px);
+        padding: 8px 10px 10px;
+        overflow-x: auto;
+        overflow-y: visible;
+        scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
         transition: background .3s, border-color .3s;
       }
-      @media(max-width:480px) { .pp-nav { top: 58px; padding: 8px 10px; } }
+      @media(min-width:480px) { .pp-nav { top: 66px; padding: 10px 14px 12px; } }
       .pp-nav::-webkit-scrollbar { display: none; }
-      .pp-nav-inner { display: flex; gap: 4px; min-width: max-content; }
-      @media(min-width:720px) { .pp-nav-inner { min-width: 0; flex-wrap: wrap; justify-content: center; } }
 
-      .pp-nav-tile {
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        width: 68px; min-height: 60px; border-radius: 14px; gap: 6px; flex-shrink: 0;
-        text-decoration: none; text-align: center;
-        border: 1px solid transparent;
-        background: transparent; cursor: pointer;
-        transition: all .25s; padding: 7px 4px;
-        -webkit-tap-highlight-color: transparent; position: relative; overflow: hidden;
+      .pp-nav-inner {
+        display: flex;
+        gap: 3px;
+        width: max-content;
+        min-width: 100%;
       }
-      @media(min-width:420px) { .pp-nav-tile { width: 74px; min-height: 64px; } }
+      @media(min-width:720px) {
+        .pp-nav-inner {
+          width: 100%;
+          min-width: 0;
+          flex-wrap: nowrap;
+          justify-content: center;
+        }
+      }
+
+      /* Tile: largura fixa suficiente para exibir labels sem corte */
+      .pp-nav-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        /* mobile: largura mínima baseada no label mais longo */
+        min-width: 72px;
+        width: 72px;
+        min-height: 64px;
+        border-radius: 14px;
+        gap: 5px;
+        flex-shrink: 0;
+        text-decoration: none;
+        text-align: center;
+        border: 1px solid transparent;
+        background: transparent;
+        cursor: pointer;
+        transition: background .25s, border-color .25s, box-shadow .25s;
+        padding: 8px 4px 7px;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        overflow: visible; /* garante que nada seja cortado */
+      }
+      @media(min-width:480px) {
+        .pp-nav-tile {
+          min-width: 80px;
+          width: 80px;
+          min-height: 68px;
+          gap: 6px;
+        }
+      }
+      @media(min-width:720px) {
+        .pp-nav-tile {
+          flex: 1;
+          min-width: 0;
+          width: auto;
+          max-width: 100px;
+        }
+      }
       .pp-nav-tile:hover {
         background: ${isDark ? "rgba(201,169,110,.05)" : "rgba(201,169,110,.07)"};
-        border-color: ${t.border}; transform: translateY(-2px);
+        border-color: ${t.border};
+        transform: translateY(-1px);
       }
       .pp-nav-tile.pp-active {
         background: ${isDark ? "rgba(201,169,110,.09)" : "rgba(255,255,255,.9)"};
@@ -258,18 +323,32 @@ function GlobalStyles({ t, isDark }) {
       }
 
       .pp-tile-icon {
-        width: 32px; height: 32px; border-radius: 9px;
+        width: 30px; height: 30px; border-radius: 8px;
         display: flex; align-items: center; justify-content: center;
         background: rgba(201,169,110,.07); transition: all .25s; flex-shrink: 0;
       }
+      @media(min-width:480px) { .pp-tile-icon { width: 32px; height: 32px; border-radius: 9px; } }
+
       .pp-tile-label {
-        font-size: 8px; font-weight: 600; letter-spacing: .1em;
-        text-transform: uppercase; color: ${t.textMuted};
-        line-height: 1.2; overflow: hidden; text-overflow: ellipsis;
-        white-space: nowrap; max-width: 100%; transition: color .25s;
+        font-size: 8.5px;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: ${t.textMuted};
+        line-height: 1.25;
+        /* NUNCA truncar — quebra em 2 linhas se necessário */
+        white-space: normal;
+        word-break: break-word;
+        overflow: visible;
+        width: 100%;
+        text-align: center;
+        transition: color .25s;
+        padding: 0 2px;
       }
+      @media(min-width:480px) { .pp-tile-label { font-size: 9px; letter-spacing: .08em; } }
+
       .pp-active-dot {
-        position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+        position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
         width: 4px; height: 4px; border-radius: 50%; background: ${AURA.gold};
         box-shadow: 0 0 6px ${AURA.gold};
       }
@@ -277,11 +356,18 @@ function GlobalStyles({ t, isDark }) {
       /* ── MAIN ── */
       .pp-main { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
       .pp-content {
-        flex: 1; padding: 24px 18px 48px;
-        max-width: 960px; margin: 0 auto; width: 100%; box-sizing: border-box;
+        flex: 1; padding: 20px 14px 48px;
+        max-width: 960px; margin: 0 auto; width: 100%;
       }
+      @media(min-width:480px)  { .pp-content { padding: 24px 18px 48px; } }
       @media(min-width:540px)  { .pp-content { padding: 28px 24px 48px; } }
       @media(min-width:768px)  { .pp-content { padding: 36px 32px 56px; } }
+
+      /* Wrapper da animação de página — usa will-change apenas opacity */
+      .pp-page-anim {
+        will-change: opacity;
+        transform: translateZ(0); /* cria contexto de composição sem tremido */
+      }
 
       .pp-footer {
         text-align: center; font-size: 9px; font-weight: 500; letter-spacing: .18em;
@@ -304,13 +390,13 @@ function GlobalStyles({ t, isDark }) {
   );
 }
 
-/* ─── Sino de Aniversariantes ────────────────────────────────────── */
+/* ─── Sino de Aniversariantes ─────────────────────────────────────── */
 const CORES_SINO = [
-  { bg: "rgba(200,16,46,.12)",  text: "#9B0B1E" },
-  { bg: "rgba(0,61,165,.10)",   text: "#002470" },
-  { bg: "rgba(253,184,19,.15)", text: "#C48C00" },
-  { bg: "rgba(201,169,110,.15)",text: "#8B6F3E" },
-  { bg: "rgba(139,92,246,.12)", text: "#5B21B6" },
+  { bg: "rgba(200,16,46,.12)",   text: "#9B0B1E" },
+  { bg: "rgba(0,61,165,.10)",    text: "#002470" },
+  { bg: "rgba(253,184,19,.15)",  text: "#C48C00" },
+  { bg: "rgba(201,169,110,.15)", text: "#8B6F3E" },
+  { bg: "rgba(139,92,246,.12)",  text: "#5B21B6" },
 ];
 
 function sinoInitials(nome = "") {
@@ -388,8 +474,8 @@ function SinoPastor({ isDark, t }) {
                 className="pp-sino-panel"
                 onClick={e => e.stopPropagation()}
                 style={{
-                  position: "fixed", top: 72, left: "50%", transform: "translateX(-50%)",
-                  width: "min(344px, calc(100vw - 24px))",
+                  position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)",
+                  width: "min(344px, calc(100vw - 20px))",
                   background: t.bgEl,
                   border: `1px solid ${t.border}`,
                   borderRadius: 18,
@@ -510,6 +596,13 @@ function SinoPastor({ isDark, t }) {
   );
 }
 
+/* ─── Variantes de animação — apenas opacity, sem movimento Y ────── */
+const PAGE_VARIANTS = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.18, ease: "easeOut" } },
+  exit:    { opacity: 0, transition: { duration: 0.12, ease: "easeIn"  } },
+};
+
 /* ─── COMPONENTE PRINCIPAL ───────────────────────────────────────── */
 export default function PastorPage() {
   const [celulas,       setCelulas]       = useState([]);
@@ -578,8 +671,8 @@ export default function PastorPage() {
         <header className="pp-header">
           <div className="pp-hdr-left">
             <div className="pp-avatar-wrap">
-              <div className="pp-ring pp-pulse" style={{ width: 56, height: 56 }} />
-              <div className="pp-ring pp-pulse" style={{ width: 44, height: 44, animationDelay: ".9s" }} />
+              <div className="pp-ring pp-pulse" style={{ width: 52, height: 52 }} />
+              <div className="pp-ring pp-pulse" style={{ width: 40, height: 40, animationDelay: ".9s" }} />
               <div className="pp-avatar">
                 {usuarioLogado?.fotoPerfil
                     ? <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome} />
@@ -631,8 +724,8 @@ export default function PastorPage() {
                 className="pp-btn-exit"
                 onClick={() => { localStorage.clear(); window.location.href = "/"; }}
             >
-              <LogOut size={14} />
-              <span>Sair</span>
+              <LogOut size={13} />
+              <span className="pp-btn-exit-label">Sair</span>
             </button>
           </div>
         </header>
@@ -657,7 +750,7 @@ export default function PastorPage() {
                             className="pp-tile-icon"
                             style={{ background: isActive ? `color-mix(in srgb, ${color} 18%, transparent)` : undefined }}
                         >
-                          <Icon size={16} style={{ color: isActive ? color : undefined, transition: "color .25s" }} />
+                          <Icon size={15} style={{ color: isActive ? color : undefined, transition: "color .25s" }} />
                         </div>
                         <span className="pp-tile-label" style={{ color: isActive ? color : undefined }}>
                     {label}
@@ -676,11 +769,11 @@ export default function PastorPage() {
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                   key={location.pathname}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{    opacity: 0, y: -8 }}
-                  transition={{ duration: .2, ease: "easeOut" }}
-                  style={{ willChange: "opacity, transform" }}
+                  className="pp-page-anim"
+                  variants={PAGE_VARIANTS}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
               >
                 <Routes location={location}>
                   <Route index                    element={<PainelPastor              isDark={isDark} />} />

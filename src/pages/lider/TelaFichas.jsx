@@ -1,40 +1,272 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import {
-  Calendar, Users, BookOpen, Heart, AlertCircle,
-  Loader2, RefreshCw, CheckCircle2, FileText,
+  Calendar, Loader2, RefreshCw, CheckCircle2, FileText,
+  Sparkles, Heart, MapPin, User,
 } from "lucide-react";
 
-/* ─── Cores Oficiais IEQ ─── */
-const IEQ = {
-  red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
-  yellow: "#FDB813", yellowDark: "#C48C00",
-  blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
-  white: "#FFFFFF", offWhite: "#F5F0E8",
-  dark: "#0A0608", darkCard: "#110A0D",
+/* ─── Tokens AURA (mesmos do dashboard) ─── */
+const AURA = {
+  gold:      "#C9A96E",
+  goldLight: "#E8D5A3",
+  dark:      "#0A0A0F",
+  red:       "#C8102E",
+  redDark:   "#9B0B1E",
+  blue:      "#003DA5",
+  blueDark:  "#002470",
+  yellow:    "#FDB813",
 };
 
-function QuadrangularCross({ size = 28 }) {
+function theme(isDark) {
+  return {
+    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
+    text:        isDark ? "#F5F0E8"                : "#1A1008",
+    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
+    textMuted:   isDark ? "#6B6658"                : "#9A9080",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
+    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+    optionBg:    isDark ? "#12121A"                : "#F0EAE0",
+  };
+}
+
+function IEQCross({ size = 36 }) {
   return (
-      <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
-        <defs>
-          <linearGradient id="gVF" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={IEQ.redLight} /><stop offset="100%" stopColor={IEQ.redDark} />
-          </linearGradient>
-          <linearGradient id="gHF" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={IEQ.blueDark} /><stop offset="50%" stopColor={IEQ.blueLight} /><stop offset="100%" stopColor={IEQ.blueDark} />
-          </linearGradient>
-          <filter id="glowF"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <rect x="38" y="4" width="24" height="92" rx="3" fill="url(#gVF)" filter="url(#glowF)" />
-        <rect x="4" y="38" width="92" height="24" rx="3" fill="url(#gHF)" filter="url(#glowF)" />
-        <rect x="38" y="38" width="24" height="24" rx="2" fill={IEQ.yellow} filter="url(#glowF)" />
-        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
-      </svg>
+      <img
+          src="/quadrangular.png"
+          alt="Logo IEQ"
+          style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
+      />
+  );
+}
+
+/* ─── CSS Global (segue padrão dl-*) ─── */
+function GlobalStyles({ t, isDark }) {
+  return (
+      <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+      @keyframes dl-spin  { to { transform: rotate(360deg); } }
+      @keyframes dl-pulse { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+      .dl-spin  { animation: dl-spin 1s linear infinite; }
+      .dl-pulse { animation: dl-pulse 3s ease-in-out infinite; }
+
+      .ff-root {
+        font-family: 'Inter', sans-serif;
+        position: relative; z-index: 1;
+        max-width: 800px; margin: 0 auto;
+        padding: 0 0 40px;
+      }
+
+      .ff-header { text-align: center; padding: 8px 0 28px; }
+      .ff-eyebrow {
+        font-size: 9px; font-weight: 600; letter-spacing: .25em;
+        text-transform: uppercase; color: rgba(201,169,110,.6);
+        margin: 14px 0 6px;
+      }
+      .ff-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(20px, 5vw, 26px);
+        font-weight: 500; color: ${t.text};
+        margin: 0; letter-spacing: .02em;
+      }
+      .ff-subtitle {
+        font-size: 11px; font-weight: 400; letter-spacing: .14em;
+        text-transform: uppercase; color: ${AURA.gold};
+        margin: 8px 0 0;
+      }
+
+      .ff-divider {
+        display: flex; align-items: center; gap: 10px; margin: 22px 0 0;
+      }
+      .ff-divider::before, .ff-divider::after {
+        content: ''; flex: 1; height: 1px;
+      }
+      .ff-divider::before { background: linear-gradient(to right, transparent, ${AURA.gold}); }
+      .ff-divider::after  { background: linear-gradient(to left, transparent, ${AURA.gold}); }
+      .ff-divider-dot { width: 5px; height: 5px; border-radius: 50%; background: ${AURA.gold}; }
+
+      .ff-card {
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 20px; overflow: hidden; margin-bottom: 20px;
+        backdrop-filter: blur(24px); position: relative;
+      }
+      .ff-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+      }
+      .ff-card-pad { padding: 22px 22px 26px; }
+      @media(max-width: 480px) { .ff-card-pad { padding: 18px 16px 22px; } }
+
+      .ff-card-head {
+        padding: 20px 22px;
+        border-bottom: 1px solid ${t.border};
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px;
+      }
+      .ff-card-head-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0;
+      }
+      .ff-card-head-sub {
+        font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0;
+      }
+
+      .ff-section-hd {
+        display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
+      }
+      .ff-section-num {
+        width: 30px; height: 30px; min-width: 30px; border-radius: 10px;
+        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue});
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-family: 'Playfair Display',serif; font-weight: 600; font-size: 13px;
+      }
+      .ff-section-title {
+        font-size: 11px; font-weight: 600; letter-spacing: .18em;
+        text-transform: uppercase; color: ${t.text}; margin: 0;
+      }
+
+      .ff-grid-2     { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .ff-grid-2-1   { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+      .ff-grid-saude { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .ff-col-span-2 { grid-column: 1 / -1; }
+
+      @media(max-width: 640px) {
+        .ff-grid-2, .ff-grid-2-1, .ff-grid-saude { grid-template-columns: 1fr; }
+        .ff-col-span-2 { grid-column: 1; }
+      }
+
+      .ff-label {
+        display: block; margin-bottom: 6px;
+        font-size: 9.5px; font-weight: 600; letter-spacing: .18em;
+        text-transform: uppercase; color: ${AURA.gold};
+      }
+
+      .ff-input, .ff-select {
+        width: 100%; box-sizing: border-box;
+        background: ${t.bgInput}; border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 13px 16px;
+        border-radius: 13px; outline: none;
+        font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 300;
+        transition: all .25s; -webkit-appearance: none; appearance: none;
+      }
+      .ff-input:focus, .ff-select:focus {
+        border-color: rgba(201,169,110,.5);
+        background: rgba(201,169,110,.04);
+        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+      }
+      .ff-input::placeholder { color: ${t.placeholder}; }
+      .ff-select {
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9A96E' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px;
+      }
+      .ff-select option { background: ${t.optionBg}; color: ${t.text}; }
+
+      .ff-checkbox-card {
+        padding: 16px 18px; border-radius: 13px;
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(201,169,110,.04)"};
+        border: 1px solid ${isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.16)"};
+        transition: border-color .2s;
+      }
+      .ff-checkbox-card:hover { border-color: rgba(201,169,110,.3); }
+      .ff-checkbox-row {
+        display: flex; align-items: center; gap: 12px; cursor: pointer;
+        font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.text};
+      }
+      .ff-checkbox-row input[type=checkbox] {
+        accent-color: ${AURA.gold}; width: 20px; height: 20px; flex-shrink: 0;
+      }
+
+      .ff-bio-input {
+        text-align: center; font-weight: 600; font-size: 20px;
+        font-family: 'Playfair Display', serif; color: ${AURA.gold};
+      }
+
+      .ff-btn-primary {
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 16px; border: none; border-radius: 100px; cursor: pointer;
+        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
+        color: #fff; font-family: 'Inter', sans-serif;
+        font-size: 11px; font-weight: 600; letter-spacing: .2em;
+        text-transform: uppercase; transition: all .3s;
+        box-shadow: 0 6px 20px rgba(200,16,46,.25);
+      }
+      .ff-btn-primary:hover:not(:disabled) { opacity: .9; transform: translateY(-2px); }
+      .ff-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+      .ff-btn-gold {
+        display: flex; align-items: center; gap: 7px;
+        padding: 11px 20px; border-radius: 100px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
+        color: #0A0A0F; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; transition: all .35s;
+        box-shadow: 0 6px 22px rgba(201,169,110,.22); flex-shrink: 0;
+      }
+      .ff-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,169,110,.32); }
+      .ff-btn-gold:disabled { opacity: .5; cursor: not-allowed; }
+
+      .ff-divider-line {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(201,169,110,.15), transparent);
+        margin: 2px 0;
+      }
+
+      .ff-fichas-list {
+        padding: 16px 20px; display: flex; flex-direction: column; gap: 9px;
+      }
+      .ff-ficha-row {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        padding: 13px 16px;
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(201,169,110,.04)"};
+        border: 1px solid ${isDark ? "rgba(201,169,110,.07)" : "rgba(201,169,110,.12)"};
+        border-radius: 13px; transition: border-color .2s;
+      }
+      .ff-ficha-row:hover { border-color: rgba(201,169,110,.3); }
+      .ff-ficha-avatar {
+        width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+        background: linear-gradient(135deg, rgba(201,169,110,.2), rgba(201,169,110,.06));
+        border: 1px solid rgba(201,169,110,.22);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 15px; color: ${AURA.gold};
+      }
+      .ff-ficha-name {
+        font-size: 13px; font-weight: 400; color: ${t.text};
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        margin: 0;
+      }
+      .ff-ficha-date {
+        font-size: 10px; font-weight: 300; color: ${t.textMuted}; margin: 2px 0 0;
+      }
+      .ff-status-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 13px; border-radius: 100px; flex-shrink: 0;
+        background: rgba(201,169,110,.1); border: 1px solid rgba(201,169,110,.28);
+        font-size: 9px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; color: ${AURA.gold};
+      }
+
+      .ff-footer {
+        text-align: center;
+        font-size: 9px; font-weight: 500; letter-spacing: .18em;
+        text-transform: uppercase;
+        color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(26,16,8,.15)"};
+        padding: 16px 0 0;
+      }
+    `}</style>
   );
 }
 
 export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
+  const t = theme(isDark);
+
   const initialState = {
     nome: "", dataNascimento: "", endereco: "", bairro: "", cidade: "",
     telefone: "", sexo: "", estadoCivil: "", rg: "", estado: "",
@@ -110,185 +342,105 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
     } finally { setEnviando(false); }
   };
 
-  const tp = isDark ? IEQ.offWhite : "#1A0A0D";
-  const ts = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
-
-  const globalStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-    * { box-sizing:border-box; }
-    @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-    @keyframes spin { to{transform:rotate(360deg)} }
-
-    .ieq-bg-stripe {
-      position:absolute; inset:0; pointer-events:none;
-      background:repeating-linear-gradient(-55deg,
-        ${isDark?"rgba(200,16,46,.04)":"rgba(200,16,46,.05)"} 0 10px,transparent 10px 20px,
-        ${isDark?"rgba(253,184,19,.03)":"rgba(253,184,19,.04)"} 20px 30px,transparent 30px 40px);
-      background-size:60px 60px; animation:stripe 8s linear infinite;
-    }
-
-    .ieq-section {
-      background:${isDark?"rgba(17,10,13,.8)":"rgba(255,255,255,.85)"};
-      border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.12)"};
-      border-radius:14px; padding:28px 32px;
-    }
-
-    .ieq-input {
-      width:100%;
-      background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
-      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
-      color:${tp}; padding:12px 16px; border-radius:8px; outline:none;
-      font-family:'EB Garamond',serif; font-size:15px; transition:all .25s;
-    }
-    .ieq-input:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
-    .ieq-input::placeholder { color:${ts}; }
-
-    .ieq-select {
-      width:100%;
-      background:${isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
-      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
-      color:${tp}; padding:12px 16px; border-radius:8px; outline:none;
-      font-family:'EB Garamond',serif; font-size:15px; cursor:pointer; transition:all .25s;
-      appearance:none;
-    }
-    .ieq-select:focus { border-color:${IEQ.red}; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
-
-    .ieq-label {
-      display:block; margin-bottom:6px;
-      font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.18em; color:${IEQ.red};
-    }
-
-    .ieq-checkbox-row {
-      display:flex; align-items:center; gap:12px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:10px; letter-spacing:.12em; color:${tp};
-    }
-    .ieq-checkbox-row input[type=checkbox] { accent-color:${IEQ.red}; width:18px; height:18px; }
-
-    .ieq-btn-primary {
-      background:linear-gradient(135deg,${IEQ.redDark},${IEQ.red}); color:#fff;
-      border:none; border-radius:8px; padding:15px 28px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:.2em;
-      width:100%; transition:all .25s; display:flex; align-items:center; justify-content:center; gap:10px;
-    }
-    .ieq-btn-primary:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
-    .ieq-btn-primary:disabled { opacity:.5; cursor:not-allowed; }
-
-    .ieq-btn-ghost {
-      background:${isDark?"rgba(255,255,255,.04)":"rgba(200,16,46,.06)"};
-      border:1px solid ${isDark?"rgba(200,16,46,.2)":"rgba(200,16,46,.18)"};
-      color:${isDark?IEQ.offWhite:IEQ.redDark}; border-radius:8px;
-      padding:9px 20px; cursor:pointer;
-      font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:.15em;
-      display:flex; align-items:center; gap:8px; transition:all .25s;
-    }
-    .ieq-btn-ghost:hover:not(:disabled) { border-color:${IEQ.red}; }
-    .ieq-btn-ghost:disabled { opacity:.5; }
-
-    .ieq-ficha-card {
-      background:${isDark?"rgba(17,10,13,.9)":"rgba(255,255,255,.9)"};
-      border:1px solid ${isDark?"rgba(200,16,46,.15)":"rgba(200,16,46,.15)"};
-      border-radius:10px; padding:18px 20px; transition:all .25s;
-    }
-    .ieq-ficha-card:hover { border-color:${IEQ.red}; transform:translateY(-3px); }
-
-    .divider {
-      height:1px;
-      background:linear-gradient(90deg,transparent,${isDark?"rgba(200,16,46,.25)":"rgba(200,16,46,.2)"},transparent);
-      margin:6px 0;
-    }
-    .spin-icon { animation:spin 1s linear infinite; }
-  `;
-
-  const SectionTitle = ({ n, children, color = IEQ.red }) => (
-      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:22 }}>
-        <div style={{ width:28, height:28, borderRadius:"50%", background:`linear-gradient(135deg,${IEQ.redDark},${IEQ.blue})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:12 }}>{n}</div>
-        <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:700, letterSpacing:".18em", color:tp, margin:0 }}>{children}</h3>
-      </div>
-  );
-
   return (
-      <div style={{ position:"relative", minHeight:"100vh", padding:"0 0 48px" }}>
-        <style>{globalStyles}</style>
-        <div className="ieq-bg-stripe" />
+      <div className="ff-root">
+        <GlobalStyles t={t} isDark={isDark} />
 
-        <div style={{ position:"relative", zIndex:1, maxWidth:800, margin:"0 auto", padding:"0 16px" }}>
+        {/* ── Cabeçalho ── */}
+        <div className="ff-header">
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(201,169,110,.22)", borderRadius: "50%" }} />
+            <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(201,169,110,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(201,169,110,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+              <IEQCross size={32} />
+            </div>
+          </div>
+          <p className="ff-eyebrow">Secretaria · Ficha de Inscrição</p>
+          <h1 className="ff-title">{form.nomeEncontro}</h1>
+          <p className="ff-subtitle">{form.localEncontro}</p>
+        </div>
 
-          {/* Cabeçalho */}
-          <div style={{ textAlign:"center", padding:"36px 0 32px" }}>
-            <QuadrangularCross size={40} />
-            <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:20, fontWeight:700, letterSpacing:".18em", color:tp, margin:"14px 0 4px" }}>
-              FICHA DE INSCRIÇÃO
-            </h2>
-            <p style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".2em", color:IEQ.red }}>
-              {form.nomeEncontro.toUpperCase()} · {form.localEncontro.toUpperCase()}
-            </p>
-            <div style={{ height:1, background:`linear-gradient(90deg,transparent,${IEQ.red},transparent)`, margin:"20px 0 0" }} />
+        <div className="ff-divider"><div className="ff-divider-dot" /></div>
+
+        {/* ── Minhas Inscrições ── */}
+        <div className="ff-card" style={{ marginTop: 22 }}>
+          <div className="ff-card-head">
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <FileText size={16} style={{ color: AURA.gold, flexShrink: 0 }} />
+              <div>
+                <h3 className="ff-card-head-title">Minhas Inscrições</h3>
+                <p className="ff-card-head-sub">{minhasFichas.length} enviada(s)</p>
+              </div>
+            </div>
+            <button className="ff-btn-gold" onClick={carregarMinhasFichas} disabled={loadingFichas}>
+              <RefreshCw size={13} className={loadingFichas ? "dl-spin" : ""} /> Atualizar
+            </button>
           </div>
 
-          {/* Minhas fichas */}
-          <div className="ieq-section" style={{ marginBottom:20 }}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                <FileText size={16} style={{ color:IEQ.red }} />
-                <span style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".14em", color:tp }}>MINHAS INSCRIÇÕES</span>
-              </div>
-              <button className="ieq-btn-ghost" onClick={carregarMinhasFichas} disabled={loadingFichas}>
-                <RefreshCw size={14} className={loadingFichas ? "spin-icon" : ""} /> ATUALIZAR
-              </button>
-            </div>
-
+          <div className="ff-fichas-list">
             {loadingFichas ? (
-                <div style={{ textAlign:"center", padding:"24px 0" }}>
-                  <Loader2 size={28} style={{ color:IEQ.red, animation:"spin 1s linear infinite" }} />
+                <div style={{ textAlign: "center", padding: "20px 0" }}>
+                  <Loader2 size={24} className="dl-spin" style={{ color: AURA.gold }} />
                 </div>
             ) : minhasFichas.length > 0 ? (
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
-                  {minhasFichas.map((ficha) => (
-                      <div key={ficha.id} className="ieq-ficha-card">
-                        <p style={{ fontFamily:"'EB Garamond',serif", fontWeight:600, color:tp, marginBottom:4 }}>{ficha.nome}</p>
-                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color:ts }}>
-                          {new Date(ficha.dataInicio).toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric" })}
-                        </p>
-                        <div style={{ marginTop:10, display:"inline-flex", alignItems:"center", gap:6, padding:"4px 12px", borderRadius:99, background:"rgba(200,16,46,.1)", border:`1px solid rgba(200,16,46,.25)` }}>
-                          <CheckCircle2 size={11} style={{ color:IEQ.red }} />
-                          <span style={{ fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".15em", color:IEQ.red }}>ENVIADA</span>
+                minhasFichas.map((ficha, i) => (
+                    <React.Fragment key={ficha.id}>
+                      {i > 0 && i % 5 === 0 && <div className="ff-divider-line" />}
+                      <div className="ff-ficha-row">
+                        <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
+                          <div className="ff-ficha-avatar">{ficha.nome?.charAt(0).toUpperCase()}</div>
+                          <div style={{ minWidth: 0 }}>
+                            <p className="ff-ficha-name">{ficha.nome}</p>
+                            <p className="ff-ficha-date">
+                              <Calendar size={9} style={{ display: "inline", marginRight: 4, verticalAlign: "-1px" }} />
+                              {new Date(ficha.dataInicio).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                            </p>
+                          </div>
                         </div>
+                        <span className="ff-status-pill">
+                          <CheckCircle2 size={11} /> Enviada
+                        </span>
                       </div>
-                  ))}
-                </div>
+                    </React.Fragment>
+                ))
             ) : (
-                <div style={{ textAlign:"center", padding:"28px 0", color:ts, fontFamily:"'EB Garamond',serif", fontStyle:"italic", fontSize:15 }}>
+                <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
                   Nenhuma inscrição enviada ainda.
-                </div>
+                </p>
             )}
           </div>
+        </div>
 
-          {/* Formulário */}
-          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+        {/* ── Formulário ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-            {/* Seção 1: Dados Pessoais */}
-            <div className="ieq-section">
-              <SectionTitle n="1">DADOS PESSOAIS</SectionTitle>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-                <div style={{ gridColumn:"1/-1" }}>
-                  <label className="ieq-label">NOME COMPLETO *</label>
-                  <input className="ieq-input" name="nome" value={form.nome} onChange={handleChange} required placeholder="Nome completo" />
+          {/* Seção 1: Dados Pessoais */}
+          <div className="ff-card">
+            <div className="ff-card-pad">
+              <div className="ff-section-hd">
+                <div className="ff-section-num">1</div>
+                <h3 className="ff-section-title">Dados Pessoais</h3>
+              </div>
+              <div className="ff-grid-2">
+                <div className="ff-col-span-2">
+                  <label className="ff-label">Nome completo *</label>
+                  <input className="ff-input" name="nome" value={form.nome} onChange={handleChange} required placeholder="Nome completo" autoComplete="name" />
                 </div>
                 <div>
-                  <label className="ieq-label">DATA DE NASCIMENTO *</label>
-                  <input className="ieq-input" name="dataNascimento" type="date" value={form.dataNascimento} onChange={handleChange} required />
+                  <label className="ff-label">Data de nascimento *</label>
+                  <input className="ff-input" name="dataNascimento" type="date" value={form.dataNascimento} onChange={handleChange} required style={{ colorScheme: isDark ? "dark" : "light" }} />
                 </div>
                 <div>
-                  <label className="ieq-label">SEXO</label>
-                  <select className="ieq-select" name="sexo" value={form.sexo} onChange={handleChange}>
+                  <label className="ff-label">Sexo</label>
+                  <select className="ff-select" name="sexo" value={form.sexo} onChange={handleChange}>
                     <option value="">Selecione</option>
                     <option value="MASCULINO">Masculino</option>
                     <option value="FEMININO">Feminino</option>
                   </select>
                 </div>
                 <div>
-                  <label className="ieq-label">ESTADO CIVIL</label>
-                  <select className="ieq-select" name="estadoCivil" value={form.estadoCivil} onChange={handleChange}>
+                  <label className="ff-label">Estado civil</label>
+                  <select className="ff-select" name="estadoCivil" value={form.estadoCivil} onChange={handleChange}>
                     <option value="">Selecione</option>
                     <option value="SOLTEIRO">Solteiro</option>
                     <option value="CASADO">Casado</option>
@@ -297,106 +449,125 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
                   </select>
                 </div>
                 <div>
-                  <label className="ieq-label">TELEFONE / WHATSAPP *</label>
-                  <input className="ieq-input" name="telefone" value={form.telefone} onChange={handleChange} required placeholder="(00) 00000-0000" />
+                  <label className="ff-label">Telefone / WhatsApp *</label>
+                  <input className="ff-input" name="telefone" value={form.telefone} onChange={handleChange} required placeholder="(00) 00000-0000" type="tel" inputMode="tel" autoComplete="tel" />
                 </div>
                 <div>
-                  <label className="ieq-label">RG</label>
-                  <input className="ieq-input" name="rg" value={form.rg} onChange={handleChange} />
+                  <label className="ff-label">RG</label>
+                  <input className="ff-input" name="rg" value={form.rg} onChange={handleChange} inputMode="numeric" />
                 </div>
                 <div>
-                  <label className="ieq-label">ESTADO (UF)</label>
-                  <input className="ieq-input" name="estado" value={form.estado} onChange={handleChange} maxLength={2} placeholder="BA" style={{ textTransform:"uppercase" }} />
+                  <label className="ff-label">Estado (UF)</label>
+                  <input className="ff-input" name="estado" value={form.estado} onChange={handleChange} maxLength={2} placeholder="BA" style={{ textTransform: "uppercase" }} />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Seção 2: Localização */}
-            <div className="ieq-section" style={{ borderColor: isDark?"rgba(0,61,165,.2)":"rgba(0,61,165,.15)" }}>
-              <SectionTitle n="2">LOCALIZAÇÃO</SectionTitle>
-              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:14 }}>
-                <div style={{ gridColumn:"1/-1" }}>
-                  <label className="ieq-label" style={{ color:IEQ.blue }}>ENDEREÇO (RUA, Nº)</label>
-                  <input className="ieq-input" name="endereco" value={form.endereco} onChange={handleChange} />
+          {/* Seção 2: Localização */}
+          <div className="ff-card">
+            <div className="ff-card-pad">
+              <div className="ff-section-hd">
+                <div className="ff-section-num" style={{ background: `linear-gradient(135deg,${AURA.blueDark},${AURA.blue})` }}>
+                  <MapPin size={13} />
+                </div>
+                <h3 className="ff-section-title">Localização</h3>
+              </div>
+              <div className="ff-grid-2-1">
+                <div className="ff-col-span-2">
+                  <label className="ff-label">Endereço (rua, nº)</label>
+                  <input className="ff-input" name="endereco" value={form.endereco} onChange={handleChange} autoComplete="street-address" />
                 </div>
                 <div>
-                  <label className="ieq-label" style={{ color:IEQ.blue }}>BAIRRO</label>
-                  <input className="ieq-input" name="bairro" value={form.bairro} onChange={handleChange} />
+                  <label className="ff-label">Bairro</label>
+                  <input className="ff-input" name="bairro" value={form.bairro} onChange={handleChange} />
                 </div>
                 <div>
-                  <label className="ieq-label" style={{ color:IEQ.blue }}>CIDADE</label>
-                  <input className="ieq-input" name="cidade" value={form.cidade} onChange={handleChange} />
+                  <label className="ff-label">Cidade</label>
+                  <input className="ff-input" name="cidade" value={form.cidade} onChange={handleChange} autoComplete="address-level2" />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Seção 3: Saúde */}
-            <div className="ieq-section">
-              <SectionTitle n="3">SAÚDE E BIOMETRIA</SectionTitle>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
-                <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                  <label className="ieq-checkbox-row">
+          {/* Seção 3: Saúde e Biometria */}
+          <div className="ff-card">
+            <div className="ff-card-pad">
+              <div className="ff-section-hd">
+                <div className="ff-section-num">
+                  <Heart size={13} />
+                </div>
+                <h3 className="ff-section-title">Saúde e Biometria</h3>
+              </div>
+
+              <div className="ff-grid-saude">
+                <div className="ff-checkbox-card">
+                  <label className="ff-checkbox-row">
                     <input type="checkbox" name="tomaMedicamento" checked={form.tomaMedicamento} onChange={handleChange} />
-                    TOMA ALGUM MEDICAMENTO?
+                    Toma algum medicamento?
                   </label>
                   {form.tomaMedicamento && (
-                      <input className="ieq-input" name="qualMedicamento" value={form.qualMedicamento} onChange={handleChange} placeholder="Quais medicamentos?" />
+                      <input className="ff-input" name="qualMedicamento" value={form.qualMedicamento} onChange={handleChange} placeholder="Quais medicamentos?" style={{ marginTop: 12 }} />
                   )}
                 </div>
-                <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                  <label className="ieq-checkbox-row">
+                <div className="ff-checkbox-card">
+                  <label className="ff-checkbox-row">
                     <input type="checkbox" name="temProblemasSaude" checked={form.temProblemasSaude} onChange={handleChange} />
-                    PROBLEMAS DE SAÚDE?
+                    Problemas de saúde?
                   </label>
                   {form.temProblemasSaude && (
-                      <input className="ieq-input" name="qualProblemaSaude" value={form.qualProblemaSaude} onChange={handleChange} placeholder="Quais problemas?" />
+                      <input className="ff-input" name="qualProblemaSaude" value={form.qualProblemaSaude} onChange={handleChange} placeholder="Quais problemas?" style={{ marginTop: 12 }} />
                   )}
                 </div>
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginTop:20 }}>
+
+              <div className="ff-grid-2" style={{ marginTop: 18 }}>
                 <div>
-                  <label className="ieq-label" style={{ textAlign:"center", display:"block" }}>PESO (KG)</label>
-                  <input className="ieq-input" name="peso" type="number" step="0.1" value={form.peso} onChange={handleChange} placeholder="00.0" style={{ textAlign:"center", fontWeight:700, fontSize:18 }} />
+                  <label className="ff-label" style={{ textAlign: "center", display: "block" }}>Peso (kg)</label>
+                  <input className="ff-input ff-bio-input" name="peso" type="number" step="0.1" inputMode="decimal" value={form.peso} onChange={handleChange} placeholder="00.0" />
                 </div>
                 <div>
-                  <label className="ieq-label" style={{ textAlign:"center", display:"block" }}>ALTURA (M)</label>
-                  <input className="ieq-input" name="altura" type="number" step="0.01" value={form.altura} onChange={handleChange} placeholder="0.00" style={{ textAlign:"center", fontWeight:700, fontSize:18 }} />
+                  <label className="ff-label" style={{ textAlign: "center", display: "block" }}>Altura (m)</label>
+                  <input className="ff-input ff-bio-input" name="altura" type="number" step="0.01" inputMode="decimal" value={form.altura} onChange={handleChange} placeholder="0.00" />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Seção 4: Vida Espiritual */}
-            <div className="ieq-section" style={{ borderColor: isDark?"rgba(0,61,165,.2)":"rgba(0,61,165,.15)" }}>
-              <SectionTitle n="4">VIDA ESPIRITUAL</SectionTitle>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+          {/* Seção 4: Vida Espiritual */}
+          <div className="ff-card">
+            <div className="ff-card-pad">
+              <div className="ff-section-hd">
+                <div className="ff-section-num" style={{ background: `linear-gradient(135deg,${AURA.blueDark},${AURA.blue})` }}>
+                  <Sparkles size={13} />
+                </div>
+                <h3 className="ff-section-title">Vida Espiritual</h3>
+              </div>
+              <div className="ff-grid-2">
                 {[
-                  { name:"aceitouJesus", label:"JÁ ACEITOU JESUS?" },
-                  { name:"jaEraCristao", label:"JÁ ERA CRISTÃO?" },
+                  { name: "aceitouJesus", label: "Já aceitou Jesus?" },
+                  { name: "jaEraCristao", label: "Já era cristão?" },
                 ].map(({ name, label }) => (
-                    <div key={name} style={{
-                      padding:"16px 18px",
-                      background: isDark?"rgba(0,61,165,.08)":"rgba(0,61,165,.05)",
-                      border:`1px solid ${isDark?"rgba(0,61,165,.2)":"rgba(0,61,165,.15)"}`,
-                      borderRadius:8,
+                    <div key={name} className="ff-checkbox-card" style={{
+                      background: isDark ? "rgba(0,61,165,.08)" : "rgba(0,61,165,.05)",
+                      borderColor: isDark ? "rgba(0,61,165,.2)" : "rgba(0,61,165,.15)",
                     }}>
-                      <label className="ieq-checkbox-row" style={{ color: isDark?IEQ.blueLight:IEQ.blue }}>
-                        <input type="checkbox" name={name} checked={form[name]} onChange={handleChange} style={{ accentColor:IEQ.blue }} />
+                      <label className="ff-checkbox-row" style={{ color: isDark ? "#7090e8" : AURA.blue }}>
+                        <input type="checkbox" name={name} checked={form[name]} onChange={handleChange} style={{ accentColor: AURA.blue }} />
                         {label}
                       </label>
                     </div>
                 ))}
               </div>
             </div>
-
-            {/* Botão enviar */}
-            <button className="ieq-btn-primary" style={{ marginTop:8 }} onClick={handleSubmit} disabled={enviando}>
-              {enviando ? <><Loader2 size={18} className="spin-icon" /> ENVIANDO...</> : "CONCLUIR INSCRIÇÃO"}
-            </button>
-
-            <p style={{ textAlign:"center", fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".15em", color:ts, marginTop:8 }}>
-              © IEQ PITUAÇU · SISTEMA SEGURO · {new Date().getFullYear()}
-            </p>
           </div>
+
+          {/* Botão enviar */}
+          <button className="ff-btn-primary" onClick={handleSubmit} disabled={enviando}>
+            {enviando ? <><Loader2 size={18} className="dl-spin" /> Enviando...</> : <><User size={15} /> Concluir Inscrição</>}
+          </button>
+
+          <p className="ff-footer">© IEQ Pituaçu · Sistema Seguro · {new Date().getFullYear()}</p>
         </div>
       </div>
   );
