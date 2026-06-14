@@ -309,6 +309,23 @@ function GlobalStylesMembers({ t, isDark }) {
       }
       .mem-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,169,110,.32); }
 
+      .mem-btn-gold:disabled {
+        opacity: .5; cursor: not-allowed; transform: none;
+      }
+
+      .mem-btn-outline {
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+        width: 100%; padding: 13px 20px; border-radius: 13px;
+        border: 1px solid ${t.borderInput};
+        background: ${t.bgInput};
+        color: ${t.text}; font-family: 'Inter', sans-serif;
+        font-size: 11px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; cursor: pointer; transition: all .25s;
+        margin-top: 12px;
+      }
+      .mem-btn-outline:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .mem-btn-outline:disabled { opacity: .5; cursor: not-allowed; }
+
       .mem-card {
         background: ${t.bgEl}; border: 1px solid ${t.border};
         border-radius: 16px; overflow: hidden; margin-bottom: 12px;
@@ -388,6 +405,11 @@ function GlobalStylesMembers({ t, isDark }) {
       .mem-loading {
         min-height: 60vh; display: flex;
         align-items: center; justify-content: center;
+      }
+
+      .mem-info-bar {
+        text-align: center; padding: 10px 0 4px;
+        font-size: 11px; font-weight: 300; color: ${t.textMuted};
       }
 
       .mem-modal-backdrop {
@@ -953,9 +975,15 @@ function MembroModalRefatorado({
 }
 
 /* ─── Componente Principal ──────────────────────────────────────── */
+const TAMANHO_PAGINA = 50; // tamanho de cada lote carregado do backend
+
 export default function MembrosRefatorado({ isDark = false }) {
   const [membros,        setMembros]        = useState([]);
-  const [loading,        setLoading]        = useState(true);
+  const [loading,        setLoading]        = useState(true);       // carregamento inicial
+  const [carregandoMais, setCarregandoMais] = useState(false);       // "carregar mais"
+  const [pagina,         setPagina]         = useState(0);
+  const [temMais,        setTemMais]        = useState(false);
+  const [totalRegistros, setTotalRegistros] = useState(0);
   const [isModalOpen,    setIsModalOpen]    = useState(false);
   const [editandoId,     setEditandoId]     = useState(null);
   const [filtro,         setFiltro]         = useState("");
@@ -967,21 +995,52 @@ export default function MembrosRefatorado({ isDark = false }) {
 
   const t = themeMembers(isDark);
 
-  const listar = useCallback(async () => {
-    setLoading(true);
+  /**
+   * Carrega uma página de membros do backend.
+   * - reset=true: substitui a lista (usado no carregamento inicial e após criar/editar/excluir)
+   * - reset=false: acrescenta à lista existente (usado no botão "Carregar mais")
+   */
+  const carregarPagina = useCallback(async (numeroPagina, reset) => {
+    if (reset) setLoading(true);
+    else setCarregandoMais(true);
+
     try {
-      const res  = await api.get("/membros");
-      const data = Array.isArray(res.data) ? res.data : res.data.content || [];
-      setMembros(data);
+      const res = await api.get("/membros", {
+        params: { page: numeroPagina, size: TAMANHO_PAGINA },
+      });
+
+      // Suporta tanto Page<T> (objeto com "content") quanto array simples (fallback)
+      const conteudo = Array.isArray(res.data) ? res.data : (res.data.content || []);
+      const ultimaPagina = Array.isArray(res.data)
+          ? true
+          : (res.data.last ?? (conteudo.length < TAMANHO_PAGINA));
+      const total = Array.isArray(res.data) ? conteudo.length : (res.data.totalElements ?? conteudo.length);
+
+      setMembros(prev => reset ? conteudo : [...prev, ...conteudo]);
+      setTemMais(!ultimaPagina);
+      setTotalRegistros(total);
+      setPagina(numeroPagina);
     } catch (err) {
       console.error("Erro ao listar membros:", err);
-      setMembros([]);
+      if (reset) setMembros([]);
     } finally {
       setLoading(false);
+      setCarregandoMais(false);
     }
   }, []);
 
-  useEffect(() => { listar(); }, [listar]);
+  // Carregamento inicial
+  useEffect(() => {
+    carregarPagina(0, true);
+  }, [carregarPagina]);
+
+  const carregarMais = () => {
+    if (!temMais || carregandoMais) return;
+    carregarPagina(pagina + 1, false);
+  };
+
+  // Recarrega a lista do início (após criar/editar/excluir)
+  const recarregar = () => carregarPagina(0, true);
 
   const abrirNovo = () => {
     setEditandoId(null); setStatusOriginal(null);
@@ -1053,7 +1112,7 @@ export default function MembrosRefatorado({ isDark = false }) {
       } else {
         await api.post("/membros", dados);
       }
-      fecharModal(); listar();
+      fecharModal(); recarregar();
     } catch (err) {
       const mensagem = err.response?.data?.message || err.response?.data?.error || err.message || "Erro desconhecido";
       alert(`Erro ao salvar:\n\n${mensagem}`);
@@ -1067,7 +1126,7 @@ export default function MembrosRefatorado({ isDark = false }) {
     setSalvando(true);
     try {
       await api.delete(`/membros/${editandoId}`);
-      fecharModal(); listar();
+      fecharModal(); recarregar();
     } catch (err) {
       const mensagem = err.response?.data?.message || err.response?.data?.error || err.message;
       alert(`Erro ao excluir:\n\n${mensagem}`);
@@ -1086,6 +1145,10 @@ export default function MembrosRefatorado({ isDark = false }) {
               .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" })),
       [membros, filtro]
   );
+
+  // Quando o usuário está filtrando e a busca não encontra nada na página atual,
+  // mas ainda há mais páginas no servidor, avisamos que pode ser necessário carregar mais.
+  const buscaPodeEstarIncompleta = filtro.trim() !== "" && temMais;
 
   return (
       <div className="mem-root">
@@ -1142,45 +1205,68 @@ export default function MembrosRefatorado({ isDark = false }) {
                 <Loader2 size={28} className="dl-spin" style={{ color: AURA.gold }} />
               </div>
           ) : membrosFiltrados.length > 0 ? (
-              <motion.div
-                  className="mem-grid"
-                  initial="hidden" animate="visible"
-                  variants={{ hidden: {}, visible: { transition: { staggerChildren: .04 } } }}
-              >
-                {membrosFiltrados.map(m => {
-                  const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
-                  return (
-                      <motion.div
-                          key={m.id}
-                          className="mem-card"
-                          variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
-                          onClick={() => abrirEdicao(m)}
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: .98 }}
-                      >
-                        <div className="mem-card-inner">
-                          <div className="mem-card-avatar">
-                            {m.nome?.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="mem-card-content">
-                            <p className="mem-card-name">{m.nome?.toUpperCase()}</p>
-                            <div className="mem-card-meta">
-                              <span className="mem-badge" style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>
-                                {m.status}
-                              </span>
-                              {m.profissao && (
-                                  <span className="mem-badge" style={{ background: `${AURA.gold}12`, color: AURA.gold, border: `1px solid ${AURA.gold}30` }}>
-                                    {m.profissao.slice(0, 12)}
-                                  </span>
-                              )}
+              <>
+                <motion.div
+                    className="mem-grid"
+                    initial="hidden" animate="visible"
+                    variants={{ hidden: {}, visible: { transition: { staggerChildren: .04 } } }}
+                >
+                  {membrosFiltrados.map(m => {
+                    const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
+                    return (
+                        <motion.div
+                            key={m.id}
+                            className="mem-card"
+                            variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                            onClick={() => abrirEdicao(m)}
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: .98 }}
+                        >
+                          <div className="mem-card-inner">
+                            <div className="mem-card-avatar">
+                              {m.nome?.charAt(0).toUpperCase()}
                             </div>
+                            <div className="mem-card-content">
+                              <p className="mem-card-name">{m.nome?.toUpperCase()}</p>
+                              <div className="mem-card-meta">
+                                <span className="mem-badge" style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>
+                                  {m.status}
+                                </span>
+                                {m.profissao && (
+                                    <span className="mem-badge" style={{ background: `${AURA.gold}12`, color: AURA.gold, border: `1px solid ${AURA.gold}30` }}>
+                                      {m.profissao.slice(0, 12)}
+                                    </span>
+                                )}
+                              </div>
+                            </div>
+                            <ChevronRight className="mem-card-arrow" size={18} />
                           </div>
-                          <ChevronRight className="mem-card-arrow" size={18} />
-                        </div>
-                      </motion.div>
-                  );
-                })}
-              </motion.div>
+                        </motion.div>
+                    );
+                  })}
+                </motion.div>
+
+                {/* ── Carregar mais ── */}
+                {temMais && (
+                    <button
+                        className="mem-btn-outline"
+                        onClick={carregarMais}
+                        disabled={carregandoMais}
+                    >
+                      {carregandoMais ? (
+                          <><Loader2 size={14} className="dl-spin" /> Carregando...</>
+                      ) : (
+                          <>Carregar mais membros</>
+                      )}
+                    </button>
+                )}
+
+                {/* ── Info de contagem ── */}
+                <p className="mem-info-bar">
+                  {membros.length} de {totalRegistros} membro{totalRegistros === 1 ? "" : "s"} carregado{membros.length === 1 ? "" : "s"}
+                  {buscaPodeEstarIncompleta && " — carregue mais para ampliar a busca"}
+                </p>
+              </>
           ) : (
               <motion.div
                   className="mem-empty"
@@ -1193,6 +1279,20 @@ export default function MembrosRefatorado({ isDark = false }) {
                 <p className="mem-empty-text">
                   {filtro ? "Nenhum membro encontrado." : "Nenhum membro cadastrado."}
                 </p>
+                {filtro && temMais && (
+                    <button
+                        className="mem-btn-outline"
+                        onClick={carregarMais}
+                        disabled={carregandoMais}
+                        style={{ marginTop: 12 }}
+                    >
+                      {carregandoMais ? (
+                          <><Loader2 size={14} className="dl-spin" /> Carregando...</>
+                      ) : (
+                          <>Carregar mais para buscar</>
+                      )}
+                    </button>
+                )}
                 <button className="mem-btn-gold" style={{ marginTop: 16 }} onClick={abrirNovo}>
                   <Plus size={13} /> Adicionar Membro
                 </button>
