@@ -503,7 +503,7 @@ function AuditoriaRow({ reg, isDark, t }) {
 }
 
 /* ─── COMPONENTE PRINCIPAL ──────────────────────────────────────────────── */
-export default function HistoricoAuditoria({ isDark = false }) {
+export default function HistoricoAuditoria({ isDark = false, embedded = false }) {
     const [registros, setRegistros] = useState([]);
     const [loading, setLoading] = useState(false);
     const [erro, setErro] = useState(null);
@@ -560,6 +560,174 @@ export default function HistoricoAuditoria({ isDark = false }) {
         buscar(z);
     };
     const irPara  = (p) => { const f = { ...filtros, page: p }; setFiltros(f); buscar(f); };
+
+    if (embedded) {
+        return (
+            <>
+                <GlobalStyles t={t} isDark={isDark} />
+                <div style={{ padding: "4px 0" }}>
+                    {/* Header actions inline */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8, marginBottom: 14 }}>
+                        <button className="aud-btn aud-btn-ghost" onClick={() => setShowFiltros(s => !s)}>
+                            <Filter size={14} /> {showFiltros ? "Ocultar" : "Filtros"}
+                        </button>
+                        <button className="aud-btn aud-btn-ghost" onClick={() => buscar()}>
+                            <RefreshCw size={14} className={loading ? "dl-spin" : ""} />
+                        </button>
+                    </div>
+
+                    {/* Filtros */}
+                    <AnimatePresence>
+                        {showFiltros && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.22 }}
+                                style={{ overflow: "hidden", marginBottom: 16 }}
+                            >
+                                <div className="aud-filters-wrap">
+                                    <p className="aud-filters-label">Filtros de Pesquisa</p>
+                                    <div className="aud-filter-grid">
+                                        <div>
+                                            <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Entidade</label>
+                                            <select className="aud-select" value={filtros.entidade} onChange={e => setFiltro("entidade", e.target.value)}>
+                                                <option value="">Todas</option>
+                                                {ENTIDADES.map(e => <option key={e} value={e}>{e}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Ação</label>
+                                            <select className="aud-select" value={filtros.acao} onChange={e => setFiltro("acao", e.target.value)}>
+                                                <option value="">Todas</option>
+                                                {Object.entries(ACOES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Operador</label>
+                                            <input className="aud-input" placeholder="Nome do usuário..." value={filtros.usuario} onChange={e => setFiltro("usuario", e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>ID do Registro</label>
+                                            <input className="aud-input" placeholder="Ex: 42" type="number" value={filtros.entidadeId} onChange={e => setFiltro("entidadeId", e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Data Início</label>
+                                            <input className="aud-input" type="datetime-local" value={filtros.de} onChange={e => setFiltro("de", e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Data Fim</label>
+                                            <input className="aud-input" type="datetime-local" value={filtros.ate} onChange={e => setFiltro("ate", e.target.value)} />
+                                        </div>
+                                    </div>
+                                    <div className="aud-filter-actions">
+                                        <button className="aud-btn aud-btn-ghost" onClick={limpar}>
+                                            <X size={14} /> Limpar
+                                        </button>
+                                        <button className="aud-btn aud-btn-primary" onClick={aplicar}>
+                                            <Search size={14} /> Buscar
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Stats */}
+                    <motion.div
+                        className="aud-stats"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <span>
+                            {totalItems > 0
+                                ? `${totalItems.toLocaleString("pt-BR")} Registro${totalItems !== 1 ? "s" : ""}`
+                                : "Nenhum registro"}
+                        </span>
+                        {totalItems > 0 && (
+                            <span>
+                                Página {filtros.page + 1} de {totalPages}
+                            </span>
+                        )}
+                    </motion.div>
+
+                    {/* Table */}
+                    <div className="aud-card" style={{ borderRadius: 14 }}>
+                        {loading ? (
+                            <div className="aud-empty">
+                                <Loader2 size={32} className="dl-spin aud-empty-icon" style={{ color: AURA.gold }} />
+                                <p className="aud-empty-text">Carregando histórico…</p>
+                            </div>
+                        ) : erro ? (
+                            <div className="aud-empty">
+                                <AlertTriangle size={32} className="aud-empty-icon" style={{ color: AURA.red }} />
+                                <p className="aud-empty-text">{erro}</p>
+                                <button className="aud-btn aud-btn-primary" style={{ marginTop: 12 }} onClick={() => buscar()}>
+                                    <RefreshCw size={13} /> Tentar Novamente
+                                </button>
+                            </div>
+                        ) : registros.length === 0 ? (
+                            <div className="aud-empty">
+                                <Shield size={40} className="aud-empty-icon" />
+                                <p className="aud-empty-text">Nenhum registro encontrado</p>
+                            </div>
+                        ) : (
+                            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+                                <table className="aud-table">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Data / Hora</th>
+                                        <th>Entidade</th>
+                                        <th>Registro</th>
+                                        <th>Ação</th>
+                                        <th>Operador</th>
+                                        <th>Aprovador</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {registros.map((reg, i) => (
+                                        <AuditoriaRow key={reg.id ?? i} reg={reg} isDark={isDark} t={t} />
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Paginação */}
+                    {totalPages > 1 && (
+                        <motion.div
+                            className="aud-pagination"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <button className="aud-page-btn" disabled={filtros.page === 0} onClick={() => irPara(filtros.page - 1)}>
+                                <ChevronLeft size={14} />
+                            </button>
+                            {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                                let p = i;
+                                if (totalPages > 7) {
+                                    const start = Math.max(0, Math.min(filtros.page - 3, totalPages - 7));
+                                    p = start + i;
+                                }
+                                return (
+                                    <button key={p} className={`aud-page-btn${filtros.page === p ? " active" : ""}`} onClick={() => irPara(p)}>
+                                        {p + 1}
+                                    </button>
+                                );
+                            })}
+                            <button className="aud-page-btn" disabled={filtros.page >= totalPages - 1} onClick={() => irPara(filtros.page + 1)}>
+                                <ChevronRight size={14} />
+                            </button>
+                        </motion.div>
+                    )}
+                </div>
+            </>
+        );
+    }
 
     return (
         <div className={`aud-root${isDark ? " dark" : ""}`} style={{ background: t.bg }}>

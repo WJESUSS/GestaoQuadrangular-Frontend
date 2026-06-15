@@ -1,551 +1,542 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import api from "../../services/api.js";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   UserPlus, Users, Power, Trash2, LogOut,
   Mail, Key, User, Shield, Loader2, RefreshCcw, Pencil, X,
   Sun, Moon, Eye, EyeOff, CheckCircle, XCircle, Clock, Camera,
-  History, ChevronLeft, ChevronRight, Search, Filter,
-  Edit3, PlusCircle, AlertTriangle, RefreshCw,
-  ChevronDown, ChevronUp, Menu, FileText,
-  Building2, DollarSign, Home, Flame,
+  History, Menu, FileText, Building2, DollarSign, Home, Flame,
   LayoutDashboard, Share2, Trophy, ClipboardList,
-  BarChart2, TrendingUp, Target,
+  BarChart2, TrendingUp, Target, ChevronDown,
 } from "lucide-react";
 
-import Membros             from "../secretaria/Membros";
-import Celulas             from "../secretaria/Celulas";
-import Visitantes          from "../secretaria/Visitante";
-import FichasEncontro      from "../secretaria/FichasEncontro";
-import SecretariaCelulas   from "../secretaria/SecretariaCelulas";
-import PainelPastor        from "../pastor/PainelPastor";
-import RelatorioCelula     from "../pastor/RelatorioCelula";
+import Membros                   from "../secretaria/Membros";
+import Celulas                   from "../secretaria/Celulas";
+import Visitantes                from "../secretaria/Visitante";
+import FichasEncontro            from "../secretaria/FichasEncontro";
+import SecretariaCelulas         from "../secretaria/SecretariaCelulas";
+import PainelPastor              from "../pastor/PainelPastor";
+import RelatorioCelula           from "../pastor/RelatorioCelula";
 import SolicitacoesMultiplicacao from "../pastor/SolicitacoesMultiplicacao";
-import RankingCelulas      from "../pastor/RankingCelulas";
-import PainelAlertas       from "../pastor/PainelAlertas";
-import Discipulado         from "../pastor/Discipulado";
-import TelaPendencias      from "../pastor/TelaPendencias";
-import RelatorioCasasDePaz from "../pastor/RelatorioCasasDePaz";
-import RelatorioMissao70Pastor from "../pastor/RelatorioMissao70Pastor";
-import TelaRelatorio       from "../lider/TelaRelatorio";
-import RelatorioDiscipulado from "../lider/RelatorioDiscipulado";
-import TelaVisitantes      from "../lider/TelaVisitantes";
-import TelaFichas          from "../lider/TelaFichas";
-import CasasDePazLider     from "../lider/CasasDePazLider";
-import Missao70Lider       from "../lider/Missao70Lider";
-import TesourariaDashboard  from "../tesouraria/TesourariaDashboard";
-import TesourariaLancamento from "../tesouraria/TesourariaLancamento";
-import TesourariaRelatorio  from "../tesouraria/TesourariaRelatorio";
-import TesourariaDizimistas from "../tesouraria/TesourariaDizimistas";
-import TesourariaComparativo from "../tesouraria/TesourariaComparativo";
-import HistoricoAuditoria  from "./HistoricoAuditoria";
+import RankingCelulas            from "../pastor/RankingCelulas";
+import PainelAlertas             from "../pastor/PainelAlertas";
+import Discipulado               from "../pastor/Discipulado";
+import TelaPendencias            from "../pastor/TelaPendencias";
+import RelatorioCasasDePaz       from "../pastor/RelatorioCasasDePaz";
+import RelatorioMissao70Pastor   from "../pastor/RelatorioMissao70Pastor";
+import TelaRelatorio             from "../lider/TelaRelatorio";
+import RelatorioDiscipulado      from "../lider/RelatorioDiscipulado";
+import TelaVisitantes            from "../lider/TelaVisitantes";
+import TelaFichas                from "../lider/TelaFichas";
+import CasasDePazLider           from "../lider/CasasDePazLider";
+import Missao70Lider             from "../lider/Missao70Lider";
+import TesourariaDashboard       from "../tesouraria/TesourariaDashboard";
+import TesourariaLancamento      from "../tesouraria/TesourariaLancamento";
+import TesourariaRelatorio       from "../tesouraria/TesourariaRelatorio";
+import TesourariaDizimistas      from "../tesouraria/TesourariaDizimistas";
+import TesourariaComparativo     from "../tesouraria/TesourariaComparativo";
+import HistoricoAuditoria        from "./HistoricoAuditoria";
 
-/* ─── Tokens AURA ────────────────────────────────────────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-  yellowDark:"#C48C00",
-  green:     "#059669",
+/* ─── Paleta ──────────────────────────────────────────────────────────────── */
+const C = {
+  red:        "#C8102E",
+  redDark:    "#9B0B1E",
+  blue:       "#003DA5",
+  blueDark:   "#002470",
+  yellow:     "#FDB813",
+  yellowDark: "#C48C00",
+  green:      "#059669",
 };
 
-function theme(isDark) {
+/* ─── Tema dinâmico ───────────────────────────────────────────────────────── */
+function useTheme(dark) {
   return {
-    bg:        isDark ? "#0A0A0F"              : "#F5F0E8",
-    bgEl:      isDark ? "rgba(18,18,26,.97)"   : "rgba(255,255,255,.97)",
-    bgInput:   isDark ? "rgba(255,255,255,.04)": "rgba(0,0,0,.04)",
-    border:    isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.2)",
-    borderIn:  isDark ? "rgba(201,169,110,.15)": "rgba(201,169,110,.28)",
-    text:      isDark ? "#F5F0E8"              : "#1A1008",
-    textSec:   isDark ? "#9A9588"              : "#6B5E4A",
-    textMuted: isDark ? "#6B6658"              : "#9A9080",
-    glow1:     isDark ? "rgba(201,169,110,.05)": "rgba(201,169,110,.08)",
-    glow2:     isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
-    sidebarBg: isDark ? "rgba(8,8,14,.99)"     : "rgba(10,8,6,.98)",
-    headerBg:  isDark ? "rgba(10,10,15,.97)"   : "rgba(245,240,232,.97)",
-    placeholder: isDark ? "rgba(154,149,136,.35)": "rgba(107,94,74,.35)",
+    bg:          dark ? "#0A0A0F"              : "#F5F0E8",
+    surface:     dark ? "rgba(18,18,26,.97)"   : "#FFFFFF",
+    surfaceHov:  dark ? "rgba(255,255,255,.03)": "rgba(201,169,110,.03)",
+    border:      dark ? "rgba(255,255,255,.07)": "rgba(0,0,0,.08)",
+    borderSoft:  dark ? "rgba(255,255,255,.04)": "rgba(0,0,0,.05)",
+    text:        dark ? "#F0EDE8"              : "#1A1008",
+    textSec:     dark ? "#9A9588"              : "#5A4E3C",
+    textMuted:   dark ? "#5A5650"              : "#9A9080",
+    input:       dark ? "rgba(255,255,255,.05)": "rgba(0,0,0,.03)",
+    inputBorder: dark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)",
+    navActive:   dark ? "rgba(200,16,46,.12)"  : "rgba(200,16,46,.07)",
+    navHov:      dark ? "rgba(255,255,255,.04)": "rgba(0,0,0,.03)",
+    topbar:      dark ? "rgba(10,10,15,.98)"   : "rgba(252,250,247,.98)",
+    subnav:      dark ? "rgba(12,12,18,.98)"   : "rgba(249,247,244,.98)",
+    warnBg:      dark ? "rgba(253,184,19,.07)" : "rgba(253,184,19,.06)",
+    warnBorder:  dark ? "rgba(253,184,19,.18)" : "rgba(253,184,19,.15)",
   };
 }
 
-const perfis = ["ADMIN","PASTOR","LIDER_CELULA","SECRETARIO","TESOUREIRO"];
+/* ─── Seções de navegação ─────────────────────────────────────────────────── */
+const PERFIS = ["ADMIN", "PASTOR", "LIDER_CELULA", "SECRETARIO", "TESOUREIRO"];
 
 const SECOES = [
   {
-    id:"admin", label:"Administração", icon:Shield, color:AURA.red,
-    itens:[
-      { key:"usuarios",  label:"Usuários",  sub:"Controle",  icon:Users   },
-      { key:"historico", label:"Histórico", sub:"Auditoria", icon:History },
+    id: "admin", label: "Administração", icon: Shield, color: C.red,
+    itens: [
+      { key: "usuarios",  label: "Usuários",  sub: "Controle",  icon: Users   },
+      { key: "historico", label: "Histórico", sub: "Auditoria", icon: History },
     ],
   },
   {
-    id:"secretaria", label:"Secretaria", icon:FileText, color:AURA.blue,
-    itens:[
-      { key:"membros",           label:"Membros",     sub:"Base",      icon:Users    },
-      { key:"visitantes",        label:"Visitantes",  sub:"Novas Vidas",icon:UserPlus},
-      { key:"celulas",           label:"Células",     sub:"Grupos",    icon:Home     },
-      { key:"fichas",            label:"Fichas",      sub:"Encontro",  icon:FileText },
-      { key:"secretariacelulas", label:"Sec. Células",sub:"Secretaria",icon:Building2},
+    id: "secretaria", label: "Secretaria", icon: FileText, color: C.blue,
+    itens: [
+      { key: "membros",           label: "Membros",      sub: "Base",       icon: Users      },
+      { key: "visitantes",        label: "Visitantes",   sub: "Novas Vidas",icon: UserPlus   },
+      { key: "celulas",           label: "Células",      sub: "Grupos",     icon: Home       },
+      { key: "fichas",            label: "Fichas",       sub: "Encontro",   icon: FileText   },
+      { key: "secretariacelulas", label: "Sec. Células", sub: "Secretaria", icon: Building2  },
     ],
   },
   {
-    id:"pastor", label:"Pastoral", icon:LayoutDashboard, color:"#e05050",
-    itens:[
-      { key:"painel-pastor",  label:"Dashboard",   sub:"Visão geral",icon:LayoutDashboard },
-      { key:"relatorios",     label:"Relatórios",  sub:"Células",    icon:FileText        },
-      { key:"discipulado",    label:"Discipulado", sub:"Secretaria", icon:Users           },
-      { key:"multiplicacoes", label:"Multip.",     sub:"Solicitações",icon:Share2         },
-      { key:"ranking",        label:"Ranking",     sub:"Células",    icon:Trophy          },
-      { key:"casas-de-paz",   label:"Casas de Paz",sub:"Evangelismo",icon:Home           },
-      { key:"missao70",       label:"Missão 70",   sub:"Evangelismo",icon:Flame          },
-      { key:"pendencias",     label:"Pendências",  sub:"Semana",     icon:ClipboardList   },
-      { key:"alertas",        label:"Alertas",     sub:"Sistema",    icon:AlertTriangle, alert:true },
+    id: "pastor", label: "Pastoral", icon: LayoutDashboard, color: "#D04040",
+    itens: [
+      { key: "painel-pastor",  label: "Dashboard",    sub: "Visão geral",  icon: LayoutDashboard },
+      { key: "relatorios",     label: "Relatórios",   sub: "Células",      icon: FileText        },
+      { key: "discipulado",    label: "Discipulado",  sub: "Secretaria",   icon: Users           },
+      { key: "multiplicacoes", label: "Multip.",      sub: "Solicitações", icon: Share2          },
+      { key: "ranking",        label: "Ranking",      sub: "Células",      icon: Trophy          },
+      { key: "casas-de-paz",   label: "Casas de Paz", sub: "Evangelismo",  icon: Home            },
+      { key: "missao70",       label: "Missão 70",    sub: "Evangelismo",  icon: Flame           },
+      { key: "pendencias",     label: "Pendências",   sub: "Semana",       icon: ClipboardList   },
+      { key: "alertas",        label: "Alertas",      sub: "Sistema",      icon: Shield, alert: true },
     ],
   },
   {
-    id:"lider", label:"Líder", icon:Target, color:AURA.green,
-    itens:[
-      { key:"lider-relatorio",   label:"Relatório",   sub:"Semanal",   icon:FileText },
-      { key:"lider-discipulado", label:"Discipulado", sub:"Membros",   icon:Users    },
-      { key:"lider-visitantes",  label:"Visitantes",  sub:"Novas vidas",icon:UserPlus},
-      { key:"lider-fichas",      label:"Fichas",      sub:"Encontro",  icon:FileText },
-      { key:"lider-casas",       label:"Casas de Paz",sub:"Evangelismo",icon:Home   },
-      { key:"lider-missao70",    label:"Missão 70",   sub:"Evangelismo",icon:Flame  },
+    id: "lider", label: "Líder", icon: Target, color: C.green,
+    itens: [
+      { key: "lider-relatorio",   label: "Relatório",    sub: "Semanal",    icon: FileText  },
+      { key: "lider-discipulado", label: "Discipulado",  sub: "Membros",    icon: Users     },
+      { key: "lider-visitantes",  label: "Visitantes",   sub: "Novas vidas",icon: UserPlus  },
+      { key: "lider-fichas",      label: "Fichas",       sub: "Encontro",   icon: FileText  },
+      { key: "lider-casas",       label: "Casas de Paz", sub: "Evangelismo",icon: Home      },
+      { key: "lider-missao70",    label: "Missão 70",    sub: "Evangelismo",icon: Flame     },
     ],
   },
   {
-    id:"tesouraria", label:"Tesouraria", icon:DollarSign, color:AURA.yellowDark,
-    itens:[
-      { key:"teso-dashboard",   label:"Dashboard",  sub:"Análise",   icon:BarChart2  },
-      { key:"teso-lancamento",  label:"Lançamento", sub:"Fluxo",     icon:DollarSign },
-      { key:"teso-relatorio",   label:"Relatório",  sub:"Exportação",icon:FileText   },
-      { key:"teso-dizimistas",  label:"Dizimistas", sub:"Base",      icon:Users      },
-      { key:"teso-comparativo", label:"Comparativo",sub:"Evolução",  icon:TrendingUp },
+    id: "tesouraria", label: "Tesouraria", icon: DollarSign, color: C.yellowDark,
+    itens: [
+      { key: "teso-dashboard",  label: "Dashboard",  sub: "Análise",    icon: BarChart2  },
+      { key: "teso-lancamento", label: "Lançamento", sub: "Fluxo",      icon: DollarSign },
+      { key: "teso-relatorio",  label: "Relatório",  sub: "Exportação", icon: FileText   },
+      { key: "teso-dizimistas", label: "Dizimistas", sub: "Base",       icon: Users      },
+      { key: "teso-comparativo",label: "Comparativo",sub: "Evolução",   icon: TrendingUp },
     ],
   },
 ];
 
-/* ─── CSS Global ─────────────────────────────────────────────────────────── */
-function GlobalStyles({ t, isDark }) {
+/* ─── CSS global ──────────────────────────────────────────────────────────── */
+function GlobalStyles({ t, dark }) {
   return (
       <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      @keyframes adm-spin  { to { transform: rotate(360deg); } }
-      @keyframes adm-pulse { 0%,100%{opacity:.2;transform:scale(1)} 50%{opacity:.05;transform:scale(1.1)} }
-      @keyframes adm-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-      @keyframes adm-stripe{
-        0%  { background-position: 0 0; }
-        100%{ background-position: 80px 80px; }
-      }
-
-      *, *::before, *::after { box-sizing: border-box; }
+      @keyframes spin  { to { transform: rotate(360deg); } }
+      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
       .adm-root {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', system-ui, sans-serif;
         background: ${t.bg};
         color: ${t.text};
-        min-height: 100vh; min-height: 100dvh;
-        display: flex; position: relative; overflow-x: hidden;
-        transition: background .4s, color .4s;
-        isolation: isolate;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        transition: background .3s, color .3s;
       }
 
-      .adm-bg {
-        position: fixed; inset: 0; pointer-events: none; z-index: 0;
-        background:
-          radial-gradient(ellipse at 10% 0%, ${t.glow1} 0%, transparent 55%),
-          radial-gradient(ellipse at 90% 100%, ${t.glow2} 0%, transparent 55%);
-        transition: background .4s;
+      /* ── topbar ── */
+      .adm-topbar {
+        position: sticky; top: 0; z-index: 40;
+        background: ${t.topbar};
+        border-bottom: 1px solid ${t.border};
+        backdrop-filter: blur(20px);
+        flex-shrink: 0;
       }
-      .adm-stripes {
-        position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .4;
-        background-image: repeating-linear-gradient(
-          -55deg,
-          ${isDark ? "rgba(201,169,110,.02)" : "rgba(201,169,110,.035)"} 0 8px,
-          transparent 8px 16px,
-          ${isDark ? "rgba(200,16,46,.015)"  : "rgba(200,16,46,.02)"}   16px 24px,
-          transparent 24px 40px
-        );
-        background-size: 80px 80px;
-        animation: adm-stripe 14s linear infinite;
+      .adm-brand-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 20px;
+        border-bottom: 1px solid ${t.borderSoft};
       }
+      .adm-brand {
+        display: flex; align-items: center; gap: 10px;
+      }
+      .adm-brand-icon {
+        width: 32px; height: 32px; border-radius: 8px;
+        background: ${C.red};
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; flex-shrink: 0;
+      }
+      .adm-brand-name  { font-size: 14px; font-weight: 600; color: ${t.text}; }
+      .adm-brand-sub   { font-size: 11px; color: ${t.textMuted}; }
 
-      /* ── SIDEBAR ── */
-      .adm-sidebar {
-        position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
-        width: 256px;
-        background: ${t.sidebarBg};
-        border-right: 1px solid rgba(200,16,46,.18);
-        display: flex; flex-direction: column;
-        transform: translateX(-100%);
-        transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s;
-        will-change: transform;
+      .adm-top-actions { display: flex; align-items: center; gap: 8px; }
+      .adm-user-pill {
+        display: flex; align-items: center; gap: 7px;
+        padding: 6px 12px; border-radius: 8px;
+        border: 1px solid ${t.border};
+        background: ${t.navHov}; cursor: pointer;
       }
-      .adm-sidebar.open {
-        transform: translateX(0);
-        box-shadow: 24px 0 60px rgba(0,0,0,.6);
+      .adm-user-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: ${C.green};
+        animation: blink 2.5s ease-in-out infinite;
       }
-      @media (min-width: 900px) {
-        .adm-sidebar {
-          position: sticky; top: 0; height: 100vh; height: 100dvh;
-          transform: translateX(0) !important;
-          box-shadow: none !important;
-          flex-shrink: 0;
-        }
-      }
+      .adm-user-name { font-size: 12px; font-weight: 600; color: ${t.text}; }
+      .adm-user-role { font-size: 10px; color: ${t.textMuted}; }
 
-      .adm-sidebar-inner {
-        flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+      .adm-ico-btn {
+        width: 34px; height: 34px; border-radius: 8px;
+        border: 1px solid ${t.border}; background: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        color: ${t.textMuted}; transition: all .2s; flex-shrink: 0;
+      }
+      .adm-ico-btn:hover { border-color: ${C.red}; color: ${C.red}; }
+
+      .adm-exit-btn {
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 8px;
+        border: 1px solid rgba(200,16,46,.3);
+        background: none; cursor: pointer;
+        font-size: 12px; font-weight: 600; color: ${C.red};
+        letter-spacing: .06em; transition: all .2s;
+      }
+      .adm-exit-btn:hover { background: rgba(200,16,46,.08); }
+
+      /* ── seções nav (barra de abas) ── */
+      .adm-secnav {
+        display: flex; align-items: center; gap: 2px;
+        padding: 0 20px; overflow-x: auto;
         scrollbar-width: none;
       }
-      .adm-sidebar-inner::-webkit-scrollbar { display: none; }
-
-      /* Faixa topo sidebar */
-      .adm-sidebar-stripe {
-        height: 3px; flex-shrink: 0;
-        background: linear-gradient(90deg, ${AURA.redDark}, ${AURA.red}, ${AURA.yellow}, ${AURA.blue});
+      .adm-secnav::-webkit-scrollbar { display: none; }
+      .adm-sec-btn {
+        display: flex; align-items: center; gap: 6px;
+        padding: 9px 14px;
+        border: none; border-bottom: 2px solid transparent;
+        background: none; cursor: pointer;
+        font-size: 12px; font-weight: 600; white-space: nowrap;
+        color: ${t.textMuted}; transition: all .2s;
+      }
+      .adm-sec-btn:hover  { color: ${t.textSec}; }
+      .adm-sec-btn.active { border-bottom-color: var(--sec-color); color: var(--sec-color); }
+      .adm-sec-sep {
+        width: 1px; height: 14px; background: ${t.border};
+        flex-shrink: 0; align-self: center; margin: 0 2px;
       }
 
-      /* Brand */
-      .adm-brand {
-        display: flex; align-items: center; gap: 11px;
-        padding: 20px 18px 16px;
-        border-bottom: 1px solid rgba(200,16,46,.12);
-        flex-shrink: 0;
+      /* ── body ── */
+      .adm-body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+      /* ── subnav ── */
+      .adm-subnav {
+        width: 196px; flex-shrink: 0;
+        background: ${t.subnav};
+        border-right: 1px solid ${t.border};
+        padding: 10px 0; overflow-y: auto;
+        scrollbar-width: none;
       }
-      .adm-brand-avatar {
-        width: 40px; height: 40px; border-radius: 50%; overflow: hidden;
-        border: 1.5px solid rgba(200,16,46,.35); flex-shrink: 0;
+      .adm-subnav::-webkit-scrollbar { display: none; }
+      .adm-subnav-label {
+        font-size: 10px; font-weight: 700; letter-spacing: .18em;
+        text-transform: uppercase; color: ${t.textMuted};
+        padding: 8px 16px 6px;
+      }
+      .adm-subnav-item {
+        display: flex; align-items: center; gap: 9px;
+        width: 100%; padding: 9px 16px;
+        border: none; border-left: 2px solid transparent;
+        background: none; cursor: pointer; text-align: left;
+        transition: all .15s;
+      }
+      .adm-subnav-item:hover  { background: ${t.navHov}; }
+      .adm-subnav-item.active {
+        background: ${t.navActive};
+        border-left-color: var(--sec-color);
+      }
+      .adm-subnav-icon {
+        width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
-        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue});
+        background: ${dark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)"};
+        transition: background .15s;
       }
-      .adm-brand-avatar img { width: 100%; height: 100%; object-fit: cover; }
-      .adm-brand-name {
-        font-family: 'Playfair Display', serif;
-        font-size: 14px; font-weight: 600; color: #F5F0E8;
-        margin: 0; letter-spacing: .03em;
-        background: linear-gradient(90deg, ${AURA.redDark}, ${AURA.red}, ${AURA.yellow});
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-clip: text;
+      .adm-subnav-item.active .adm-subnav-icon {
+        background: var(--sec-color-soft);
       }
-      .adm-brand-sub {
-        font-size: 8px; font-weight: 600; letter-spacing: .22em;
-        text-transform: uppercase; color: rgba(245,240,232,.25); margin: 3px 0 0;
+      .adm-subnav-main {
+        font-size: 12px; font-weight: 600; color: ${t.textSec};
+        display: block; line-height: 1.2;
+      }
+      .adm-subnav-item.active .adm-subnav-main { color: ${t.text}; }
+      .adm-subnav-sub {
+        font-size: 10px; color: ${t.textMuted};
+        display: block; margin-top: 1px;
+        text-transform: uppercase; letter-spacing: .07em;
+      }
+      .adm-subnav-badge {
+        margin-left: auto; background: ${C.yellow}; color: ${C.blueDark || "#002470"};
+        font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 99px;
+        animation: blink 2.5s ease-in-out infinite;
       }
 
-      /* Seções nav */
-      .adm-sec-header {
+      /* ── conteúdo ── */
+      .adm-content {
+        flex: 1; overflow-y: auto; padding: 22px 24px 40px;
+        background: ${t.bg};
+        scrollbar-width: thin;
+        scrollbar-color: ${t.border} transparent;
+      }
+
+      /* ── page header ── */
+      .adm-page-head {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 18px 7px; cursor: pointer;
-        transition: background .2s;
-      }
-      .adm-sec-header:hover { background: rgba(200,16,46,.05); }
-      .adm-sec-label {
-        font-size: 8px; font-weight: 700; letter-spacing: .22em;
-        text-transform: uppercase; color: rgba(245,240,232,.28);
-      }
-      .adm-nav-item {
-        width: 100%; display: flex; align-items: center; gap: 9px;
-        padding: 9px 18px 9px 28px; border: none; cursor: pointer;
-        background: transparent; text-align: left; position: relative;
-        transition: all .2s;
-      }
-      .adm-nav-item::before {
-        content: ''; position: absolute; left: 0; top: 50%;
-        transform: translateY(-50%);
-        width: 3px; height: 0; border-radius: 0 3px 3px 0;
-        background: var(--nav-color, ${AURA.gold});
-        transition: height .2s;
-      }
-      .adm-nav-item:hover { background: rgba(200,16,46,.07); }
-      .adm-nav-item:hover::before { height: 18px; }
-      .adm-nav-item.active { background: rgba(200,16,46,.15); }
-      .adm-nav-item.active::before { height: 22px; }
-      .adm-nav-icon {
-        width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0;
-        display: flex; align-items: center; justify-content: center;
-        transition: background .2s;
-      }
-      .adm-nav-item.active .adm-nav-icon { background: rgba(200,16,46,.2); }
-      .adm-nav-item:not(.active) .adm-nav-icon { background: rgba(255,255,255,.04); }
-      .adm-nav-main { font-size: 10.5px; font-weight: 600; color: rgba(245,240,232,.55); display: block; line-height: 1; }
-      .adm-nav-item.active .adm-nav-main { color: #F5F0E8; }
-      .adm-nav-sub  { font-size: 8px; color: rgba(245,240,232,.2); letter-spacing: .08em; text-transform: uppercase; display: block; margin-top: 2px; }
-      .adm-nav-badge {
-        margin-left: auto; background: ${AURA.yellow}; color: ${AURA.blue};
-        font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
-        animation: adm-blink 2.5s ease-in-out infinite;
-      }
-
-      /* Sidebar footer */
-      .adm-sidebar-footer {
-        padding: 14px 16px 18px; border-top: 1px solid rgba(200,16,46,.12);
-        flex-shrink: 0;
-      }
-      .adm-user-chip {
-        display: flex; align-items: center; gap: 10px;
-        padding: 11px 13px; border-radius: 12px;
-        background: rgba(200,16,46,.07); border: 1px solid rgba(200,16,46,.14);
-        margin-bottom: 10px;
-      }
-      .adm-user-chip-dot {
-        width: 7px; height: 7px; border-radius: 50%; background: ${AURA.green};
-        flex-shrink: 0; animation: adm-blink 2.5s ease-in-out infinite;
-      }
-      .adm-user-chip-name { font-size: 11px; font-weight: 600; color: #F5F0E8; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .adm-user-chip-role { font-size: 8px; color: rgba(245,240,232,.28); letter-spacing: .12em; text-transform: uppercase; }
-
-      /* Botão sair */
-      .adm-btn-exit {
-        display: flex; align-items: center; justify-content: center; gap: 9px;
-        width: 100%; padding: 12px 18px; border-radius: 11px; border: none;
-        cursor: pointer; position: relative; overflow: hidden;
-        background: linear-gradient(135deg, rgba(155,11,30,.18), rgba(200,16,46,.12));
-        border: 1px solid rgba(200,16,46,.25);
-        color: ${AURA.red};
-        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
-        letter-spacing: .18em; text-transform: uppercase;
-        transition: all .3s;
-      }
-      .adm-btn-exit::after {
-        content: ''; position: absolute; inset: 0;
-        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
-        opacity: 0; transition: opacity .3s;
-      }
-      .adm-btn-exit:hover { color: #fff; border-color: transparent; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,16,46,.3); }
-      .adm-btn-exit:hover::after { opacity: 1; }
-      .adm-btn-exit > * { position: relative; z-index: 1; }
-
-      /* ── OVERLAY ── */
-      .adm-overlay {
-        position: fixed; inset: 0; z-index: 49;
-        background: rgba(0,0,0,.72); backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-      }
-      @media (min-width: 900px) { .adm-overlay { display: none !important; } }
-
-      /* ── MAIN ── */
-      .adm-main {
-        flex: 1; display: flex; flex-direction: column;
-        position: relative; z-index: 1; min-width: 0;
-        min-height: 100vh; min-height: 100dvh;
-      }
-
-      /* Topbar */
-      .adm-topbar {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 0 20px; height: 58px;
-        background: ${t.headerBg};
-        border-bottom: 1px solid ${t.border};
-        backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-        position: sticky; top: 0; z-index: 30;
-        gap: 12px;
-      }
-      .adm-topbar-left { display: flex; align-items: center; gap: 12px; }
-
-      .adm-btn-ico {
-        width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
-        border: 1px solid ${t.border}; color: ${t.textMuted};
-        transition: all .25s; flex-shrink: 0;
-      }
-      .adm-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
-      @media (min-width: 900px) { .adm-hamburger { display: none !important; } }
-
-      .adm-page-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0;
+        margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
       }
       .adm-page-eyebrow {
-        font-size: 8px; font-weight: 600; letter-spacing: .2em;
-        text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 2px;
+        font-size: 10px; font-weight: 700; letter-spacing: .18em;
+        text-transform: uppercase; color: ${t.textMuted}; margin-bottom: 3px;
       }
+      .adm-page-title {
+        font-size: 18px; font-weight: 700; color: ${t.text};
+      }
+      .adm-page-actions { display: flex; gap: 8px; align-items: center; }
 
-      /* Module badge */
-      .adm-mod-badge {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 6px 14px; border-radius: 100px;
-        font-size: 9px; font-weight: 600; letter-spacing: .14em;
-        text-transform: uppercase; border: 1px solid; white-space: nowrap;
+      /* ── KPI grid ── */
+      .adm-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px; margin-bottom: 18px;
       }
-      .adm-mod-dot { width: 5px; height: 5px; border-radius: 50%; animation: adm-blink 2.5s ease-in-out infinite; }
-
-      /* Online */
-      .adm-online {
-        display: flex; align-items: center; gap: 5px;
-        padding: 5px 12px; border-radius: 100px;
-        background: rgba(5,150,105,.1); border: 1px solid rgba(5,150,105,.25);
-        color: ${AURA.green}; font-size: 8.5px; font-weight: 600; letter-spacing: .15em;
-        text-transform: uppercase;
-      }
-      .adm-online-dot { width: 6px; height: 6px; border-radius: 50%; background: ${AURA.green}; animation: adm-blink 2.5s ease-in-out infinite; }
-
-      /* Content */
-      .adm-content {
-        flex: 1; padding: 22px 18px;
-        padding-bottom: max(32px, env(safe-area-inset-bottom, 32px));
-        overflow-y: auto;
-      }
-      @media (min-width: 640px) { .adm-content { padding: 26px 28px; } }
-
-      /* Card */
-      .adm-card {
-        background: ${t.bgEl}; border: 1px solid ${t.border};
-        border-radius: 18px; overflow: hidden; position: relative;
-        backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      }
-      .adm-card::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
-        pointer-events: none;
-      }
-
-      /* Inputs */
-      .adm-input {
-        width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderIn};
-        color: ${t.text}; padding: 12px 16px 12px 44px; border-radius: 11px;
-        outline: none; font-family: 'Inter', sans-serif; font-size: 14px;
-        font-weight: 300; transition: all .25s;
-        -webkit-appearance: none; appearance: none;
-      }
-      .adm-input:focus {
-        border-color: rgba(201,169,110,.5);
-        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
-      }
-      .adm-input::placeholder { color: ${t.placeholder}; }
-
-      .adm-select {
-        width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderIn};
-        color: ${t.text}; padding: 12px 14px 12px 44px; border-radius: 11px;
-        outline: none; font-family: 'Inter', sans-serif; font-size: 12px;
-        font-weight: 500; letter-spacing: .06em; cursor: pointer;
-        appearance: none; -webkit-appearance: none;
-        transition: all .25s;
-      }
-      .adm-select:focus { border-color: rgba(201,169,110,.5); box-shadow: 0 0 0 3px rgba(201,169,110,.08); }
-
-      .adm-label {
-        display: block; font-size: 9px; font-weight: 600; letter-spacing: .2em;
-        text-transform: uppercase; color: rgba(201,169,110,.7); margin: 0 0 7px;
-      }
-
-      /* Buttons */
-      .adm-btn-gold {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 12px 20px; border-radius: 100px; border: none; cursor: pointer;
-        background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-        color: #0A0A0F; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
-        transition: all .3s; box-shadow: 0 6px 22px rgba(201,169,110,.22);
-      }
-      .adm-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,169,110,.32); }
-
-      .adm-btn-red {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 12px 20px; border-radius: 100px; border: none; cursor: pointer;
-        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
-        color: #fff; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
-        transition: all .3s; box-shadow: 0 6px 22px rgba(200,16,46,.25);
-      }
-      .adm-btn-red:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(200,16,46,.35); }
-
-      .adm-btn-blue {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 12px 20px; border-radius: 100px; border: none; cursor: pointer;
-        background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
-        color: #fff; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
-        transition: all .3s; box-shadow: 0 6px 22px rgba(0,61,165,.25);
-      }
-      .adm-btn-blue:hover { transform: translateY(-2px); }
-
-      .adm-btn-ghost {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 10px 16px; border-radius: 100px;
-        border: 1px solid ${t.border}; cursor: pointer;
-        background: transparent; color: ${t.textSec};
-        font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
-        letter-spacing: .14em; text-transform: uppercase; transition: all .25s;
-      }
-      .adm-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
-
-      /* KPI cards */
-      .adm-kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-      @media (min-width: 640px) { .adm-kpi-grid { grid-template-columns: repeat(4, 1fr); } }
       .adm-kpi {
-        background: ${t.bgEl}; border: 1px solid ${t.border};
-        border-radius: 16px; padding: 18px 16px;
-        display: flex; align-items: center; gap: 12px;
-        backdrop-filter: blur(20px); position: relative; overflow: hidden;
+        background: ${t.surface}; border: 1px solid ${t.border};
+        border-radius: 14px; padding: 16px 14px;
+        display: flex; align-items: center; gap: 11px;
       }
-      .adm-kpi::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+      .adm-kpi-icon {
+        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
       }
-      .adm-kpi-icon { width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-      .adm-kpi-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; line-height: 1; margin: 0; }
-      .adm-kpi-lbl { font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: ${t.textMuted}; margin: 3px 0 0; }
-
-      /* Divider */
-      .adm-divider {
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
-        margin: 16px 0;
+      .adm-kpi-num {
+        font-size: 24px; font-weight: 700; color: ${t.text}; line-height: 1;
+      }
+      .adm-kpi-lbl {
+        font-size: 10px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textMuted}; margin-top: 2px;
       }
 
-      /* Member row */
+      /* ── card ── */
+      .adm-card {
+        background: ${t.surface}; border: 1px solid ${t.border};
+        border-radius: 16px; overflow: hidden; margin-bottom: 14px;
+      }
+      .adm-card-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 18px; border-bottom: 1px solid ${t.border};
+      }
+      .adm-card-head-left { display: flex; align-items: center; gap: 10px; }
+      .adm-card-head-icon {
+        width: 32px; height: 32px; border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 15px; flex-shrink: 0;
+      }
+      .adm-card-title { font-size: 14px; font-weight: 700; color: ${t.text}; }
+      .adm-card-sub   { font-size: 11px; color: ${t.textMuted}; margin-top: 1px; }
+
+      /* ── aviso pendente ── */
+      .adm-warn-bar {
+        display: flex; align-items: center; gap: 7px;
+        padding: 7px 18px;
+        background: ${t.warnBg};
+        border-bottom: 1px solid ${t.warnBorder};
+      }
+      .adm-warn-text {
+        font-size: 11px; font-weight: 600; color: ${C.yellowDark};
+        letter-spacing: .07em; text-transform: uppercase;
+      }
+
+      /* ── user row ── */
       .adm-user-row {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 13px 18px; gap: 12px;
+        padding: 11px 18px; gap: 10px;
         border-bottom: 1px solid ${t.border};
         transition: background .15s; flex-wrap: wrap;
       }
-      .adm-user-row:hover { background: ${isDark ? "rgba(201,169,110,.03)" : "rgba(201,169,110,.04)"}; }
+      .adm-user-row:last-child { border-bottom: none; }
+      .adm-user-row:hover { background: ${t.surfaceHov}; }
+      .adm-user-row.pend { border-left: 2.5px solid ${C.yellow}; }
 
-      /* Toast */
+      .adm-avatar {
+        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: 700; color: #fff;
+        cursor: pointer; position: relative; overflow: hidden;
+      }
+      .adm-avatar-overlay {
+        position: absolute; inset: 0; border-radius: 10px;
+        background: rgba(0,0,0,.5); display: flex; align-items: center;
+        justify-content: center; opacity: 0; transition: opacity .2s;
+      }
+      .adm-avatar:hover .adm-avatar-overlay { opacity: 1; }
+
+      .adm-pill {
+        display: inline-flex; align-items: center; gap: 3px;
+        padding: 3px 9px; border-radius: 99px; font-size: 10px;
+        font-weight: 600; border: 1px solid; white-space: nowrap;
+        letter-spacing: .06em;
+      }
+      .adm-pill-dot {
+        width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+      }
+
+      .adm-act-btn {
+        width: 28px; height: 28px; border-radius: 7px;
+        border: 1px solid ${t.border}; background: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        color: ${t.textMuted}; transition: all .15s;
+      }
+
+      /* ── form ── */
+      .adm-form-label {
+        display: block; font-size: 10px; font-weight: 700;
+        letter-spacing: .16em; text-transform: uppercase;
+        color: ${t.textMuted}; margin-bottom: 6px;
+      }
+      .adm-input-wrap { position: relative; }
+      .adm-input-ico {
+        position: absolute; left: 12px; top: 50%;
+        transform: translateY(-50%); color: ${t.textMuted};
+        pointer-events: none;
+      }
+      .adm-input {
+        width: 100%; background: ${t.input};
+        border: 1px solid ${t.inputBorder};
+        color: ${t.text}; padding: 11px 14px 11px 38px;
+        border-radius: 10px; outline: none;
+        font-family: inherit; font-size: 14px; transition: all .2s;
+        -webkit-appearance: none;
+      }
+      .adm-input:focus {
+        border-color: ${C.red};
+        box-shadow: 0 0 0 3px rgba(200,16,46,.08);
+      }
+      .adm-input::placeholder { color: ${t.textMuted}; }
+      .adm-select {
+        width: 100%; background: ${t.input};
+        border: 1px solid ${t.inputBorder};
+        color: ${t.text}; padding: 11px 14px 11px 38px;
+        border-radius: 10px; outline: none; cursor: pointer;
+        font-family: inherit; font-size: 13px; font-weight: 600;
+        appearance: none; -webkit-appearance: none; transition: all .2s;
+      }
+      .adm-select:focus { border-color: ${C.red}; box-shadow: 0 0 0 3px rgba(200,16,46,.08); }
+
+      /* ── botões ── */
+      .adm-btn-red {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 18px; border-radius: 99px; border: none; cursor: pointer;
+        background: ${C.red}; color: #fff;
+        font-family: inherit; font-size: 11px; font-weight: 700;
+        letter-spacing: .12em; text-transform: uppercase; transition: all .2s;
+      }
+      .adm-btn-red:hover { background: ${C.redDark}; }
+
+      .adm-btn-blue {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 18px; border-radius: 99px; border: none; cursor: pointer;
+        background: ${C.blue}; color: #fff;
+        font-family: inherit; font-size: 11px; font-weight: 700;
+        letter-spacing: .12em; text-transform: uppercase; transition: all .2s;
+      }
+      .adm-btn-blue:hover { background: ${C.blueDark}; }
+
+      .adm-btn-ghost {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 16px; border-radius: 99px;
+        border: 1px solid ${t.border}; cursor: pointer;
+        background: none; color: ${t.textSec};
+        font-family: inherit; font-size: 11px; font-weight: 600;
+        letter-spacing: .1em; text-transform: uppercase; transition: all .2s;
+      }
+      .adm-btn-ghost:hover { border-color: ${C.red}; color: ${C.red}; }
+
+      /* ── online badge ── */
+      .adm-online {
+        display: flex; align-items: center; gap: 5px;
+        padding: 5px 11px; border-radius: 99px;
+        background: rgba(5,150,105,.1); border: 1px solid rgba(5,150,105,.2);
+        color: ${C.green}; font-size: 10px; font-weight: 700;
+        letter-spacing: .14em; text-transform: uppercase;
+      }
+      .adm-online-dot {
+        width: 6px; height: 6px; border-radius: 50%; background: ${C.green};
+        animation: blink 2.5s ease-in-out infinite;
+      }
+
+      /* ── toast ── */
       .adm-toast {
         position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-        padding: 13px 20px; border-radius: 12px;
-        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
-        letter-spacing: .12em; text-transform: uppercase;
-        display: flex; align-items: center; gap: 10px; z-index: 500;
-        max-width: 90vw; white-space: nowrap;
+        padding: 12px 18px; border-radius: 11px;
+        font-family: inherit; font-size: 11px; font-weight: 700;
+        letter-spacing: .1em; text-transform: uppercase;
+        display: flex; align-items: center; gap: 8px; z-index: 600;
+        white-space: nowrap;
       }
 
-      /* Selector célula lider */
+      /* ── modal overlay ── */
+      .adm-modal-bg {
+        position: fixed; inset: 0; z-index: 200;
+        background: rgba(0,0,0,.75); backdrop-filter: blur(8px);
+        display: flex; align-items: flex-end; justify-content: center;
+      }
+      .adm-modal-sheet {
+        width: 100%; max-width: 460px; max-height: 90vh;
+        display: flex; flex-direction: column;
+        border-radius: 20px 20px 0 0;
+        background: ${t.surface}; border: 1px solid ${t.border};
+        overflow: hidden;
+      }
+      .adm-modal-inner { padding: 26px 22px; overflow-y: auto; flex: 1; }
+      .adm-divider {
+        height: 1px; background: ${t.border}; margin: 16px 0;
+      }
+
+      /* ── seletor célula ── */
       .adm-celula-sel {
-        background: ${t.bgEl}; border: 1px solid ${t.border};
-        border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;
-        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-        backdrop-filter: blur(20px);
+        display: flex; align-items: center; gap: 10px;
+        padding: 12px 16px; border-radius: 12px;
+        background: ${t.surface}; border: 1px solid ${t.border};
+        margin-bottom: 16px; flex-wrap: wrap;
+      }
+      .adm-celula-label {
+        font-size: 10px; font-weight: 700; letter-spacing: .14em;
+        text-transform: uppercase; color: ${t.textMuted}; flex-shrink: 0;
       }
 
-      /* Footer */
-      .adm-footer {
-        text-align: center; font-size: 8px; font-weight: 500;
-        letter-spacing: .18em; text-transform: uppercase;
-        color: ${isDark ? "rgba(245,240,232,.08)" : "rgba(26,16,8,.12)"};
-        padding: 14px 0 0;
+      /* ── mobile ── */
+      @media (max-width: 768px) {
+        .adm-subnav { display: none; }
+        .adm-mob-subnav-toggle { display: flex !important; }
+        .adm-subnav.open { display: flex; position: fixed; z-index: 50; height: 100dvh; top: 0; left: 0; flex-direction: column; }
+      }
+      .adm-mob-subnav-toggle { display: none; }
+
+      .adm-empty {
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; padding: 60px 20px; text-align: center;
       }
     `}</style>
   );
 }
 
-/* ─── Input com ícone ─────────────────────────────────────────────────────── */
-function InputField({ icon, type = "text", value, onChange, placeholder, required, isDark, t }) {
+/* ─── Campo de input com ícone ────────────────────────────────────────────── */
+function InputField({ icon, type = "text", value, onChange, placeholder, required, t }) {
   const [show, setShow] = useState(false);
   const isPass = type === "password";
   return (
-      <div style={{ position: "relative" }}>
-        <div style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .55, pointerEvents: "none", zIndex: 1 }}>
-          {icon}
-        </div>
+      <div className="adm-input-wrap">
+        <span className="adm-input-ico">{icon}</span>
         <input
             className="adm-input"
             type={isPass && show ? "text" : type}
@@ -553,12 +544,19 @@ function InputField({ icon, type = "text", value, onChange, placeholder, require
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
             required={required}
-            style={{ paddingRight: isPass ? 44 : 16 }}
+            style={{ paddingRight: isPass ? 40 : 14 }}
         />
         {isPass && (
-            <button type="button" onClick={() => setShow(v => !v)}
-                    style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex" }}>
-              {show ? <EyeOff size={14}/> : <Eye size={14}/>}
+            <button
+                type="button"
+                onClick={() => setShow(v => !v)}
+                style={{
+                  position: "absolute", right: 10, top: "50%",
+                  transform: "translateY(-50%)", background: "none", border: "none",
+                  cursor: "pointer", color: t.textMuted, display: "flex",
+                }}
+            >
+              {show ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
         )}
       </div>
@@ -566,40 +564,41 @@ function InputField({ icon, type = "text", value, onChange, placeholder, require
 }
 
 /* ─── Renderer de módulos ─────────────────────────────────────────────────── */
-function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
-  const p = { isDark };
+function ModuloRenderer({ moduloKey, dark, celulaAdmin }) {
+  const p = { isDark: dark };
   switch (moduloKey) {
-    case "membros":           return <Membros {...p}/>;
-    case "visitantes":        return <Visitantes {...p}/>;
-    case "celulas":           return <Celulas {...p}/>;
-    case "fichas":            return <FichasEncontro {...p}/>;
-    case "secretariacelulas": return <SecretariaCelulas {...p}/>;
-    case "painel-pastor":     return <PainelPastor {...p}/>;
-    case "relatorios":        return <RelatorioCelula {...p}/>;
-    case "discipulado":       return <Discipulado {...p}/>;
-    case "multiplicacoes":    return <SolicitacoesMultiplicacao {...p}/>;
-    case "ranking":           return <RankingCelulas {...p}/>;
-    case "casas-de-paz":      return <RelatorioCasasDePaz {...p}/>;
-    case "missao70":          return <RelatorioMissao70Pastor {...p}/>;
-    case "pendencias":        return <TelaPendencias {...p}/>;
-    case "alertas":           return <PainelAlertas {...p}/>;
-    case "lider-relatorio":   return <TelaRelatorio celula={celulaAdmin} {...p}/>;
-    case "lider-discipulado": return <RelatorioDiscipulado membros={[]} {...p}/>;
-    case "lider-visitantes":  return <TelaVisitantes celulaId={celulaAdmin?.id} {...p}/>;
-    case "lider-fichas":      return <TelaFichas celula={celulaAdmin} {...p}/>;
-    case "lider-casas":       return <CasasDePazLider celulaId={celulaAdmin?.id} {...p}/>;
-    case "lider-missao70":    return <Missao70Lider celulaId={celulaAdmin?.id} {...p}/>;
-    case "teso-dashboard":    return <TesourariaDashboard {...p}/>;
-    case "teso-lancamento":   return <TesourariaLancamento {...p}/>;
-    case "teso-relatorio":    return <TesourariaRelatorio {...p}/>;
-    case "teso-dizimistas":   return <TesourariaDizimistas {...p}/>;
-    case "teso-comparativo":  return <TesourariaComparativo {...p}/>;
+    case "membros":           return <Membros {...p} />;
+    case "visitantes":        return <Visitantes {...p} />;
+    case "celulas":           return <Celulas {...p} />;
+    case "fichas":            return <FichasEncontro {...p} />;
+    case "secretariacelulas": return <SecretariaCelulas {...p} />;
+    case "painel-pastor":     return <PainelPastor {...p} />;
+    case "relatorios":        return <RelatorioCelula {...p} />;
+    case "discipulado":       return <Discipulado {...p} />;
+    case "multiplicacoes":    return <SolicitacoesMultiplicacao {...p} />;
+    case "ranking":           return <RankingCelulas {...p} />;
+    case "casas-de-paz":      return <RelatorioCasasDePaz {...p} />;
+    case "missao70":          return <RelatorioMissao70Pastor {...p} />;
+    case "pendencias":        return <TelaPendencias {...p} />;
+    case "alertas":           return <PainelAlertas {...p} />;
+    case "lider-relatorio":   return <TelaRelatorio celula={celulaAdmin} {...p} />;
+    case "lider-discipulado": return <RelatorioDiscipulado membros={[]} {...p} />;
+    case "lider-visitantes":  return <TelaVisitantes celulaId={celulaAdmin?.id} {...p} />;
+    case "lider-fichas":      return <TelaFichas celula={celulaAdmin} {...p} />;
+    case "lider-casas":       return <CasasDePazLider celulaId={celulaAdmin?.id} {...p} />;
+    case "lider-missao70":    return <Missao70Lider celulaId={celulaAdmin?.id} {...p} />;
+    case "teso-dashboard":    return <TesourariaDashboard {...p} />;
+    case "teso-lancamento":   return <TesourariaLancamento {...p} />;
+    case "teso-relatorio":    return <TesourariaRelatorio {...p} />;
+    case "teso-dizimistas":   return <TesourariaDizimistas {...p} />;
+    case "teso-comparativo":  return <TesourariaComparativo {...p} />;
     default: return null;
   }
 }
 
 /* ════════════════════════════════════════════════════════════════════════════ */
 export default function AdminUsers() {
+  /* state */
   const [usuarios,       setUsuarios]       = useState([]);
   const [pendentes,      setPendentes]      = useState(new Set());
   const [loading,        setLoading]        = useState(true);
@@ -611,21 +610,21 @@ export default function AdminUsers() {
   const [editModalOpen,  setEditModalOpen]  = useState(false);
   const [editandoId,     setEditandoId]     = useState(null);
   const [exitConfirm,    setExitConfirm]    = useState(false);
-  const [form,           setForm]           = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" });
-  const [isDark,         setIsDark]         = useState(() => localStorage.getItem("theme") === "dark");
-  const [sidebarOpen,    setSidebarOpen]    = useState(false);
+  const [form,           setForm]           = useState({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" });
+  const [dark,           setDark]           = useState(() => localStorage.getItem("theme") === "dark");
+  const [subnavOpen,     setSubnavOpen]     = useState(false);
   const [moduloAtivo,    setModuloAtivo]    = useState("usuarios");
-  const [secaoExp,       setSecaoExp]       = useState("admin");
+  const [secaoAtiva,     setSecaoAtiva]     = useState("admin");
   const [celulas,        setCelulas]        = useState([]);
   const [celulaAdmin,    setCelulaAdmin]    = useState(null);
 
   const fotoRef   = useRef(null);
   const fotoIdRef = useRef(null);
+  const t = useTheme(dark);
 
-  const t = theme(isDark);
+  useEffect(() => { localStorage.setItem("theme", dark ? "dark" : "light"); }, [dark]);
 
-  useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
-
+  /* ── carregamento ── */
   const carregarUsuarios = useCallback(async () => {
     setLoading(true); setErro("");
     try {
@@ -651,11 +650,12 @@ export default function AdminUsers() {
 
   const ok = msg => { setSucesso(msg); setTimeout(() => setSucesso(""), 3500); };
 
+  /* ── CRUD ── */
   const adicionarUsuario = async e => {
     e.preventDefault(); setSending(true); setErro("");
     try {
       await api.post("usuarios", form);
-      setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" });
+      setForm({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" });
       carregarUsuarios(); ok("Acesso liberado com sucesso.");
     } catch { setErro("Falha ao criar novo acesso."); }
     finally { setSending(false); }
@@ -666,7 +666,7 @@ export default function AdminUsers() {
     try {
       await api.put(`usuarios/${editandoId}`, form);
       setEditModalOpen(false); setEditandoId(null);
-      setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" });
+      setForm({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" });
       carregarUsuarios();
     } catch { setErro("Erro ao atualizar dados."); }
     finally { setSending(false); }
@@ -708,7 +708,9 @@ export default function AdminUsers() {
     const id = fotoIdRef.current;
     setUploadandoFoto(id);
     try {
-      const base64 = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
+      });
       await api.patch(`usuarios/${id}/foto`, { fotoBase64: base64 });
       ok("Foto atualizada."); carregarUsuarios();
     } catch { setErro("Erro ao enviar foto."); }
@@ -721,166 +723,164 @@ export default function AdminUsers() {
     catch { setErro("Erro ao remover foto."); }
     finally { setUploadandoFoto(null); }
   };
+  const abrirEdicao = u => {
+    setEditandoId(u.id);
+    setForm({ nome: u.nome, email: u.email, senha: "", perfil: u.perfil });
+    setEditModalOpen(true);
+  };
 
-  const abrirEdicao = u => { setEditandoId(u.id); setForm({ nome:u.nome, email:u.email, senha:"", perfil:u.perfil }); setEditModalOpen(true); };
-
-  const qtdPend = pendentes.size;
-  const isLider = moduloAtivo?.startsWith("lider-");
-  const secaoAtiva = SECOES.find(s => s.itens.some(i => i.key === moduloAtivo));
-  const itemAtivo  = SECOES.flatMap(s => s.itens).find(i => i.key === moduloAtivo);
-
+  /* ── derivados ── */
+  const qtdPend   = pendentes.size;
   const ativos    = usuarios.filter(u =>  u.ativo).length;
   const suspensos = usuarios.filter(u => !u.ativo).length;
+  const isLider   = moduloAtivo?.startsWith("lider-");
+  const secObj    = SECOES.find(s => s.id === secaoAtiva);
+  const itemObj   = secObj?.itens.find(i => i.key === moduloAtivo);
 
+  /* ── navegação ── */
+  const irParaSecao = (secId) => {
+    const sec = SECOES.find(s => s.id === secId);
+    setSecaoAtiva(secId);
+    setModuloAtivo(sec.itens[0].key);
+  };
+  const irParaModulo = (key) => {
+    setModuloAtivo(key);
+    setSubnavOpen(false);
+  };
+
+  /* ── helpers de estilo ── */
+  const avatarBg = (u) => {
+    if (!u.ativo) return dark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)";
+    const cores = ["#C8102E", "#003DA5", "#059669", "#7F77DD", "#C48C00"];
+    return cores[(u.nome?.charCodeAt(0) || 0) % cores.length];
+  };
+
+  /* ── loading splash ── */
   if (loading && usuarios.length === 0) return (
-      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? "#0A0A0F" : "#F5F0E8" }}>
-        <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');</style>
-        <div style={{ textAlign:"center" }}>
-          <div style={{ width:52, height:52, borderRadius:"50%", background:`linear-gradient(135deg,${AURA.redDark},${AURA.blue})`, border:`2px solid ${AURA.red}44`, margin:"0 auto 16px", display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <Shield size={22} color="#fff"/>
+      <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: t.bg }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: "50%",
+            background: C.red, display: "flex", alignItems: "center",
+            justifyContent: "center", margin: "0 auto 14px",
+          }}>
+            <Shield size={22} color="#fff" />
           </div>
-          <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:600, letterSpacing:".2em", fontSize:9, color: isDark ? AURA.gold : AURA.redDark, textTransform:"uppercase" }}>Carregando…</p>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".2em", color: t.textMuted, textTransform: "uppercase" }}>
+            Carregando…
+          </p>
         </div>
       </div>
   );
 
   return (
       <div className="adm-root">
-        <GlobalStyles t={t} isDark={isDark} />
-        <div className="adm-bg" />
-        <div className="adm-stripes" />
+        <GlobalStyles t={t} dark={dark} />
 
-        {/* Overlay mobile */}
-        <AnimatePresence>
-          {sidebarOpen && (
-              <motion.div className="adm-overlay" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} transition={{ duration:.22 }} onClick={() => setSidebarOpen(false)} />
-          )}
-        </AnimatePresence>
-
-        {/* ─── SIDEBAR ──────────────────────────────────────────────────── */}
-        <aside className={`adm-sidebar${sidebarOpen ? " open" : ""}`}>
-          <div className="adm-sidebar-stripe" />
-
-          {/* Brand */}
-          <div className="adm-brand">
-            <div className="adm-brand-avatar">
-              <img src="/quadrangular.png" alt="IEQ"
-                   onError={e => { e.target.style.display="none"; }}
-                   style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+        {/* ══ TOPBAR ══════════════════════════════════════════════════════════ */}
+        <div className="adm-topbar">
+          {/* Linha 1: brand + ações */}
+          <div className="adm-brand-row">
+            <div className="adm-brand">
+              <div className="adm-brand-icon"><Shield size={16} color="#fff" /></div>
+              <div>
+                <div className="adm-brand-name">IEQ Pituaçu</div>
+                <div className="adm-brand-sub">Sistema Eclesiástico</div>
+              </div>
             </div>
-            <div>
-              <h1 className="adm-brand-name">IEQ Pituaçu</h1>
-              <p className="adm-brand-sub">Painel Admin</p>
+            <div className="adm-top-actions">
+              <div className="adm-online">
+                <div className="adm-online-dot" /> Online
+              </div>
+              <div className="adm-user-pill">
+                <div className="adm-user-dot" />
+                <div>
+                  <div className="adm-user-name">Administrador</div>
+                  <div className="adm-user-role">Admin · IEQ</div>
+                </div>
+              </div>
+              <button className="adm-ico-btn" onClick={() => setDark(d => !d)} aria-label="Tema">
+                {dark ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+              <button className="adm-ico-btn" onClick={carregarUsuarios} aria-label="Atualizar">
+                <RefreshCcw size={15} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
+              </button>
+              <button className="adm-exit-btn" onClick={() => setExitConfirm(true)}>
+                <LogOut size={13} /> Sair
+              </button>
             </div>
           </div>
 
-          {/* Nav */}
-          <div className="adm-sidebar-inner">
-            {SECOES.map(sec => {
-              const SIcon = sec.icon;
-              const exp = secaoExp === sec.id;
+          {/* Linha 2: abas de seção */}
+          <div className="adm-secnav">
+            {SECOES.map((sec, i) => {
+              const Icon = sec.icon;
+              const ativa = secaoAtiva === sec.id;
               return (
-                  <div key={sec.id}>
-                    <div className="adm-sec-header" onClick={() => setSecaoExp(exp ? null : sec.id)}>
-                      <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-                        <SIcon size={11} style={{ color:sec.color }} />
-                        <span className="adm-sec-label">{sec.label}</span>
-                      </div>
-                      <ChevronDown size={10} style={{ color:"rgba(245,240,232,.18)", transform:exp?"rotate(180deg)":"rotate(0deg)", transition:"transform .2s" }} />
-                    </div>
-                    <AnimatePresence>
-                      {exp && (
-                          <motion.div initial={{ height:0, opacity:0 }} animate={{ height:"auto", opacity:1 }} exit={{ height:0, opacity:0 }} transition={{ duration:.18 }} style={{ overflow:"hidden" }}>
-                            {sec.itens.map(item => {
-                              const IIcon = item.icon;
-                              const ativo = moduloAtivo === item.key;
-                              return (
-                                  <button key={item.key} className={`adm-nav-item${ativo?" active":""}`}
-                                          style={{ "--nav-color": sec.color }}
-                                          onClick={() => { setModuloAtivo(item.key); setSidebarOpen(false); }}>
-                                    <div className="adm-nav-icon">
-                                      <IIcon size={13} style={{ color: ativo ? "#fff" : sec.color, opacity: ativo ? 1 : .7 }} />
-                                    </div>
-                                    <div style={{ flex:1, minWidth:0 }}>
-                                      <span className="adm-nav-main">{item.label}</span>
-                                      <span className="adm-nav-sub">{item.sub}</span>
-                                    </div>
-                                    {item.key === "usuarios" && qtdPend > 0 && <span className="adm-nav-badge">{qtdPend}</span>}
-                                  </button>
-                              );
-                            })}
-                          </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <React.Fragment key={sec.id}>
+                    {i > 0 && <div className="adm-sec-sep" />}
+                    <button
+                        className={`adm-sec-btn${ativa ? " active" : ""}`}
+                        style={{ "--sec-color": sec.color }}
+                        onClick={() => irParaSecao(sec.id)}
+                    >
+                      <Icon size={13} />
+                      {sec.label}
+                    </button>
+                  </React.Fragment>
               );
             })}
           </div>
+        </div>
 
-          {/* Footer */}
-          <div className="adm-sidebar-footer">
-            <div className="adm-user-chip">
-              <div className="adm-user-chip-dot" />
-              <div style={{ flex:1, minWidth:0 }}>
-                <p className="adm-user-chip-name">Administrador</p>
-                <p className="adm-user-chip-role">Admin · IEQ</p>
-              </div>
-            </div>
-            <button className="adm-btn-exit" onClick={() => setExitConfirm(true)}>
-              <LogOut size={14} />
-              <span>Sair do Sistema</span>
-            </button>
-            <p style={{ textAlign:"center", fontFamily:"'Inter',sans-serif", fontSize:8, letterSpacing:".14em", color:"rgba(245,240,232,.1)", marginTop:10, textTransform:"uppercase" }}>
-              © IEQ Pituaçu · {new Date().getFullYear()}
-            </p>
-          </div>
-        </aside>
+        {/* ══ BODY ════════════════════════════════════════════════════════════ */}
+        <div className="adm-body" style={{ flex: 1, minHeight: 0 }}>
 
-        {/* ─── MAIN ─────────────────────────────────────────────────────── */}
-        <main className="adm-main">
-
-          {/* Topbar */}
-          <header className="adm-topbar">
-            <div className="adm-topbar-left">
-              <button className="adm-btn-ico adm-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Menu">
-                <Menu size={18} />
-              </button>
-              <div>
-                <p className="adm-page-eyebrow">{secaoAtiva?.label || "Admin"}</p>
-                <motion.h2 className="adm-page-title" key={moduloAtivo} initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} transition={{ duration:.22 }}>
-                  {itemAtivo?.label || "Painel"}
-                </motion.h2>
-              </div>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <div className="adm-online">
-                <div className="adm-online-dot" />
-                Online
-              </div>
-              <button className="adm-btn-ico" onClick={() => setIsDark(!isDark)} aria-label="Tema">
-                {isDark ? <Sun size={15}/> : <Moon size={15}/>}
-              </button>
-              <button className="adm-btn-ico" onClick={carregarUsuarios} aria-label="Atualizar">
-                <RefreshCcw size={15} style={{ animation: loading ? "adm-spin 1s linear infinite" : "none" }} />
-              </button>
-              {moduloAtivo === "usuarios" && (
-                  <button className="adm-btn-red" style={{ padding:"8px 16px", fontSize:9 }}
-                          onClick={() => { setEditandoId(null); setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" }); setEditModalOpen(true); }}>
-                    <UserPlus size={13}/> Novo
+          {/* Subnav lateral */}
+          <nav
+              className={`adm-subnav${subnavOpen ? " open" : ""}`}
+              style={{ "--sec-color": secObj?.color, "--sec-color-soft": secObj?.color + "18" }}
+          >
+            <div className="adm-subnav-label">{secObj?.label}</div>
+            {secObj?.itens.map(item => {
+              const Icon = item.icon;
+              const ativo = moduloAtivo === item.key;
+              return (
+                  <button
+                      key={item.key}
+                      className={`adm-subnav-item${ativo ? " active" : ""}`}
+                      onClick={() => irParaModulo(item.key)}
+                  >
+                    <div className="adm-subnav-icon">
+                      <Icon size={14} style={{ color: ativo ? secObj.color : t.textMuted }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <span className="adm-subnav-main">{item.label}</span>
+                      <span className="adm-subnav-sub">{item.sub}</span>
+                    </div>
+                    {item.key === "usuarios" && qtdPend > 0 && (
+                        <span className="adm-subnav-badge">{qtdPend}</span>
+                    )}
                   </button>
-              )}
-            </div>
-          </header>
+              );
+            })}
+          </nav>
 
-          {/* Content */}
+          {/* Conteúdo principal */}
           <div className="adm-content">
-            {/* Seletor célula para módulos de Líder */}
+
+            {/* Seletor de célula (módulos líder) */}
             {isLider && celulas.length > 0 && (
                 <div className="adm-celula-sel">
-                  <Building2 size={15} style={{ color:AURA.blue, flexShrink:0 }} />
-                  <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:600, letterSpacing:".14em", textTransform:"uppercase", color:t.textMuted, flexShrink:0 }}>Célula:</span>
-                  <div style={{ position:"relative", flex:1 }}>
-                    <select className="adm-select" style={{ paddingLeft:16 }} value={celulaAdmin?.id || ""} onChange={e => setCelulaAdmin(celulas.find(c => c.id === Number(e.target.value)))}>
+                  <Building2 size={15} style={{ color: C.blue, flexShrink: 0 }} />
+                  <span className="adm-celula-label">Célula:</span>
+                  <div style={{ position: "relative", flex: 1, minWidth: 120 }}>
+                    <select
+                        className="adm-select"
+                        style={{ paddingLeft: 14 }}
+                        value={celulaAdmin?.id || ""}
+                        onChange={e => setCelulaAdmin(celulas.find(c => c.id === Number(e.target.value)))}
+                    >
                       {celulas.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                     </select>
                   </div>
@@ -888,86 +888,127 @@ export default function AdminUsers() {
             )}
 
             <AnimatePresence mode="wait">
-              <motion.div key={moduloAtivo} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }} transition={{ duration:.18 }}>
+              <motion.div
+                  key={moduloAtivo}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: .16 }}
+              >
 
-                {/* ── PAINEL USUÁRIOS ── */}
+                {/* ── PAINEL USUÁRIOS ─────────────────────────────────────── */}
                 {moduloAtivo === "usuarios" && (
-                    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+                      {/* Page header */}
+                      <div className="adm-page-head">
+                        <div>
+                          <div className="adm-page-eyebrow">Administração</div>
+                          <div className="adm-page-title">Usuários</div>
+                        </div>
+                        <div className="adm-page-actions">
+                          <button className="adm-ico-btn" onClick={carregarUsuarios} aria-label="Atualizar">
+                            <RefreshCcw size={14} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
+                          </button>
+                          <button
+                              className="adm-btn-red"
+                              onClick={() => { setEditandoId(null); setForm({ nome: "", email: "", senha: "", perfil: "LIDER_CELULA" }); setEditModalOpen(true); }}
+                          >
+                            <UserPlus size={13} /> Novo acesso
+                          </button>
+                        </div>
+                      </div>
 
                       {/* KPIs */}
                       <div className="adm-kpi-grid">
                         {[
-                          { icon:<Users size={17}/>,  label:"Total",     value:usuarios.length, color:AURA.blue,       bg:"rgba(0,61,165,.1)"    },
-                          { icon:<Power size={17}/>,  label:"Ativos",    value:ativos,          color:AURA.green,      bg:"rgba(5,150,105,.1)"   },
-                          { icon:<Shield size={17}/>, label:"Suspensos", value:suspensos,       color:AURA.redDark,    bg:"rgba(200,16,46,.1)"   },
-                          { icon:<Clock size={17}/>,  label:"Pendentes", value:qtdPend,         color:AURA.yellowDark, bg:"rgba(196,140,0,.1)"   },
-                        ].map(({ icon, label, value, color, bg: ibg }) => (
+                          { icon: <Users size={16} />,  label: "Total",     value: usuarios.length, color: C.blue,       bg: "rgba(0,61,165,.1)"   },
+                          { icon: <Power size={16} />,  label: "Ativos",    value: ativos,          color: C.green,      bg: "rgba(5,150,105,.1)"  },
+                          { icon: <Shield size={16} />, label: "Suspensos", value: suspensos,       color: C.redDark,    bg: "rgba(200,16,46,.1)"  },
+                          { icon: <Clock size={16} />,  label: "Pendentes", value: qtdPend,         color: C.yellowDark, bg: "rgba(196,140,0,.1)"  },
+                        ].map(({ icon, label, value, color, bg }) => (
                             <div key={label} className="adm-kpi">
-                              <div className="adm-kpi-icon" style={{ background:ibg, color }}>
+                              <div className="adm-kpi-icon" style={{ background: bg, color }}>
                                 {icon}
                               </div>
                               <div>
-                                <p className="adm-kpi-num" style={{ color: label==="Pendentes" && value > 0 ? AURA.yellowDark : t.text }}>{value}</p>
-                                <p className="adm-kpi-lbl">{label}</p>
+                                <div className="adm-kpi-num" style={{ color: label === "Pendentes" && value > 0 ? C.yellowDark : t.text }}>
+                                  {value}
+                                </div>
+                                <div className="adm-kpi-lbl">{label}</div>
                               </div>
                             </div>
                         ))}
                       </div>
 
-                      {/* Form novo usuário */}
+                      {/* Formulário */}
                       <div className="adm-card">
-                        <div style={{ padding:"18px 22px", borderBottom:`1px solid ${t.border}`, display:"flex", alignItems:"center", gap:12 }}>
-                          <div style={{ width:36, height:36, borderRadius:10, background:"rgba(200,16,46,.1)", color:AURA.red, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                            <UserPlus size={16} />
-                          </div>
-                          <div>
-                            <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:16, fontWeight:500, color:t.text, margin:0 }}>Novo Acesso</h3>
-                            <p style={{ fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:300, color:t.textMuted, margin:0 }}>Liberar usuário no sistema</p>
+                        <div className="adm-card-head">
+                          <div className="adm-card-head-left">
+                            <div className="adm-card-head-icon" style={{ background: "rgba(200,16,46,.1)", color: C.red }}>
+                              <UserPlus size={15} />
+                            </div>
+                            <div>
+                              <div className="adm-card-title">Novo acesso</div>
+                              <div className="adm-card-sub">Liberar usuário no sistema</div>
+                            </div>
                           </div>
                         </div>
-                        <form onSubmit={adicionarUsuario} style={{ padding:"20px 22px", display:"flex", flexDirection:"column", gap:14 }}>
+                        <form onSubmit={adicionarUsuario} style={{ padding: "18px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
                           {[
-                            { icon:<User size={14}/>,   type:"text",     placeholder:"Nome completo",        key:"nome",  label:"Nome" },
-                            { icon:<Mail size={14}/>,   type:"email",    placeholder:"E-mail institucional",  key:"email", label:"E-mail" },
-                            { icon:<Key size={14}/>,    type:"password", placeholder:"Senha de acesso",       key:"senha", label:"Senha" },
+                            { icon: <User size={13} />,  type: "text",     placeholder: "Nome completo",       key: "nome",  label: "Nome"  },
+                            { icon: <Mail size={13} />,  type: "email",    placeholder: "E-mail institucional", key: "email", label: "E-mail" },
+                            { icon: <Key size={13} />,   type: "password", placeholder: "Senha de acesso",      key: "senha", label: "Senha" },
                           ].map(f => (
                               <div key={f.key}>
-                                <label className="adm-label">{f.label}</label>
-                                <InputField icon={f.icon} type={f.type} placeholder={f.placeholder} value={form[f.key]} onChange={v => setForm({...form,[f.key]:v})} required isDark={isDark} t={t} />
+                                <label className="adm-form-label">{f.label}</label>
+                                <InputField
+                                    icon={f.icon} type={f.type} placeholder={f.placeholder}
+                                    value={form[f.key]} onChange={v => setForm({ ...form, [f.key]: v })}
+                                    required t={t}
+                                />
                               </div>
                           ))}
                           <div>
-                            <label className="adm-label">Perfil</label>
-                            <div style={{ position:"relative" }}>
-                              <div style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:AURA.gold, opacity:.55, pointerEvents:"none" }}><Shield size={14}/></div>
-                              <select className="adm-select" value={form.perfil} onChange={e => setForm({...form,perfil:e.target.value})}>
-                                {perfis.map(p => <option key={p} value={p}>{p.replace(/_/g," ")}</option>)}
+                            <label className="adm-form-label">Perfil</label>
+                            <div className="adm-input-wrap">
+                              <span className="adm-input-ico"><Shield size={13} /></span>
+                              <select className="adm-select" value={form.perfil} onChange={e => setForm({ ...form, perfil: e.target.value })}>
+                                {PERFIS.map(p => <option key={p} value={p}>{p.replace(/_/g, " ")}</option>)}
                               </select>
                             </div>
                           </div>
-                          <button type="submit" disabled={sending} className="adm-btn-red" style={{ width:"100%", justifyContent:"center", opacity:sending?.6:1 }}>
-                            {sending ? <><Loader2 size={14} style={{ animation:"adm-spin 1s linear infinite" }}/> Criando…</> : <><UserPlus size={14}/> Liberar Acesso</>}
+                          <button type="submit" disabled={sending} className="adm-btn-red" style={{ width: "100%", justifyContent: "center", opacity: sending ? .6 : 1 }}>
+                            {sending
+                                ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Criando…</>
+                                : <><UserPlus size={13} /> Liberar Acesso</>
+                            }
                           </button>
                         </form>
                       </div>
 
-                      {/* Lista */}
+                      {/* Lista de usuários */}
                       <div className="adm-card">
                         {qtdPend > 0 && (
-                            <div style={{ display:"flex", alignItems:"center", gap:8, padding:"9px 20px", background:"rgba(253,184,19,.07)", borderBottom:"1px solid rgba(253,184,19,.18)" }}>
-                              <Clock size={13} style={{ color:AURA.yellowDark }} />
-                              <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:600, letterSpacing:".12em", textTransform:"uppercase", color:AURA.yellowDark }}>
+                            <div className="adm-warn-bar">
+                              <Clock size={13} style={{ color: C.yellowDark, flexShrink: 0 }} />
+                              <span className="adm-warn-text">
                           {qtdPend} solicitaç{qtdPend > 1 ? "ões" : "ão"} aguardando aprovação
                         </span>
                             </div>
                         )}
-                        <div style={{ padding:"16px 22px", borderBottom:`1px solid ${t.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap" }}>
-                          <div>
-                            <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:16, fontWeight:500, color:t.text, margin:0 }}>Base de Usuários</h3>
-                            <p style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:0 }}>{usuarios.length} registros</p>
+                        <div className="adm-card-head">
+                          <div className="adm-card-head-left">
+                            <div className="adm-card-head-icon" style={{ background: "rgba(0,61,165,.08)", color: C.blue }}>
+                              <Users size={15} />
+                            </div>
+                            <div>
+                              <div className="adm-card-title">Base de usuários</div>
+                              <div className="adm-card-sub">{usuarios.length} registros</div>
+                            </div>
                           </div>
                           <button className="adm-btn-ghost" onClick={carregarUsuarios}>
-                            <RefreshCcw size={12} style={{ animation:loading?"adm-spin 1s linear infinite":"none" }} /> Atualizar
+                            <RefreshCcw size={12} /> Atualizar
                           </button>
                         </div>
 
@@ -977,65 +1018,93 @@ export default function AdminUsers() {
                             const eApr = aprovando === u.id;
                             const eFoto = uploadandoFoto === u.id;
                             return (
-                                <motion.div key={u.id} className="adm-user-row" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-20 }} transition={{ delay:i*.03 }}
-                                            style={{ borderLeft:`3px solid ${temP ? AURA.yellow : "transparent"}` }}>
-                                  <div style={{ display:"flex", alignItems:"center", gap:12, flex:1, minWidth:0 }}>
-                                    {/* Avatar foto */}
-                                    <div style={{ position:"relative", flexShrink:0, cursor:"pointer" }} onClick={() => abrirSeletorFoto(u.id)}>
-                                      {u.fotoPerfil ? (
-                                          <div style={{ width:40, height:40, borderRadius:11, overflow:"hidden", border:`1.5px solid ${temP ? AURA.yellow : t.border}`, opacity:u.ativo?1:.45 }}>
-                                            <img src={u.fotoPerfil} alt={u.nome} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-                                          </div>
-                                      ) : (
-                                          <div style={{ width:40, height:40, borderRadius:11, background:u.ativo?`linear-gradient(135deg,${AURA.redDark},${AURA.blue})`:(isDark?"rgba(255,255,255,.08)":"rgba(0,0,0,.08)"), display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Playfair Display',serif", fontSize:16, fontWeight:600, color:"#fff", opacity:u.ativo?1:.6 }}>
-                                            {u.nome?.charAt(0).toUpperCase()}
-                                          </div>
-                                      )}
-                                      <div style={{ position:"absolute", inset:0, borderRadius:11, background:"rgba(0,0,0,.5)", display:"flex", alignItems:"center", justifyContent:"center", opacity:0, transition:"opacity .2s" }}
-                                           onMouseEnter={e => e.currentTarget.style.opacity=1}
-                                           onMouseLeave={e => e.currentTarget.style.opacity=0}>
-                                        {eFoto ? <Loader2 size={13} color="#fff" style={{ animation:"adm-spin 1s linear infinite" }}/> : <Camera size={13} color="#fff"/>}
+                                <motion.div
+                                    key={u.id}
+                                    className={`adm-user-row${temP ? " pend" : ""}`}
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, x: -16 }}
+                                    transition={{ delay: i * .025 }}
+                                >
+                                  {/* Avatar */}
+                                  <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
+                                    <div
+                                        className="adm-avatar"
+                                        style={{ background: avatarBg(u), opacity: u.ativo ? 1 : .5 }}
+                                        onClick={() => abrirSeletorFoto(u.id)}
+                                    >
+                                      {u.fotoPerfil
+                                          ? <img src={u.fotoPerfil} alt={u.nome} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }} />
+                                          : u.nome?.charAt(0).toUpperCase()
+                                      }
+                                      <div className="adm-avatar-overlay">
+                                        {eFoto
+                                            ? <Loader2 size={12} color="#fff" style={{ animation: "spin 1s linear infinite" }} />
+                                            : <Camera size={12} color="#fff" />
+                                        }
                                       </div>
                                     </div>
-
-                                    <div style={{ flex:1, minWidth:0 }}>
-                                      <p style={{ fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:600, color:t.text, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.nome}</p>
-                                      <p style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.email}</p>
+                                    <div style={{ minWidth: 0 }}>
+                                      <p style={{ fontSize: 13, fontWeight: 700, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nome}</p>
+                                      <p style={{ fontSize: 11, color: t.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</p>
                                     </div>
                                   </div>
 
-                                  <div style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap", flexShrink:0 }}>
-                                    {/* Badges */}
-                                    <span style={{ padding:"3px 10px", borderRadius:99, border:"1px solid rgba(0,61,165,.22)", background:"rgba(0,61,165,.07)", color:AURA.blue, fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:600, letterSpacing:".1em", whiteSpace:"nowrap" }}>
-                                {u.perfil?.replace(/_/g," ")}
+                                  {/* Badges + ações */}
+                                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", flexShrink: 0 }}>
+                              <span className="adm-pill" style={{ color: C.blue, background: "rgba(0,61,165,.07)", borderColor: "rgba(0,61,165,.2)" }}>
+                                {u.perfil?.replace(/_/g, " ")}
                               </span>
-                                    <span style={{ padding:"3px 10px", borderRadius:99, border:`1px solid ${u.ativo?"rgba(5,150,105,.22)":"rgba(0,0,0,.08)"}`, background:u.ativo?"rgba(5,150,105,.07)":"rgba(0,0,0,.04)", color:u.ativo?AURA.green:t.textMuted, fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:600, letterSpacing:".1em", whiteSpace:"nowrap", display:"flex", alignItems:"center", gap:4 }}>
-                                <span style={{ width:5, height:5, borderRadius:"50%", background:u.ativo?AURA.green:t.textMuted, flexShrink:0 }}/>
+                                    <span className="adm-pill" style={{
+                                      color: u.ativo ? C.green : t.textMuted,
+                                      background: u.ativo ? "rgba(5,150,105,.07)" : "rgba(0,0,0,.04)",
+                                      borderColor: u.ativo ? "rgba(5,150,105,.2)" : t.border,
+                                    }}>
+                                <span className="adm-pill-dot" style={{ background: u.ativo ? C.green : t.textMuted }} />
                                       {u.ativo ? "Ativo" : "Suspenso"}
                               </span>
 
-                                    {/* Pendente: Aprovar/Rejeitar */}
                                     {temP && (
                                         <>
-                                          <button disabled={eApr} onClick={() => aprovarAlteracao(u.id, u.nome)} style={{ display:"flex", alignItems:"center", gap:4, background:"none", border:"1px solid rgba(5,150,105,.3)", borderRadius:8, color:AURA.green, fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:600, letterSpacing:".1em", cursor:"pointer", padding:"5px 10px", textTransform:"uppercase" }}>
-                                            {eApr ? <Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/> : <CheckCircle size={11}/>} Aprovar
+                                          <button
+                                              disabled={eApr}
+                                              onClick={() => aprovarAlteracao(u.id, u.nome)}
+                                              style={{
+                                                display: "flex", alignItems: "center", gap: 4,
+                                                background: "none", border: "1px solid rgba(5,150,105,.3)",
+                                                borderRadius: 7, color: C.green, fontSize: 10, fontWeight: 700,
+                                                cursor: "pointer", padding: "4px 9px", letterSpacing: ".07em",
+                                              }}
+                                          >
+                                            {eApr ? <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} /> : <CheckCircle size={11} />} Aprovar
                                           </button>
-                                          <button disabled={eApr} onClick={() => rejeitarAlteracao(u.id, u.nome)} style={{ display:"flex", alignItems:"center", gap:4, background:"none", border:"1px solid rgba(200,16,46,.3)", borderRadius:8, color:AURA.red, fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:600, letterSpacing:".1em", cursor:"pointer", padding:"5px 10px", textTransform:"uppercase" }}>
-                                            {eApr ? <Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/> : <XCircle size={11}/>} Rejeitar
+                                          <button
+                                              disabled={eApr}
+                                              onClick={() => rejeitarAlteracao(u.id, u.nome)}
+                                              style={{
+                                                display: "flex", alignItems: "center", gap: 4,
+                                                background: "none", border: "1px solid rgba(200,16,46,.3)",
+                                                borderRadius: 7, color: C.red, fontSize: 10, fontWeight: 700,
+                                                cursor: "pointer", padding: "4px 9px", letterSpacing: ".07em",
+                                              }}
+                                          >
+                                            {eApr ? <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} /> : <XCircle size={11} />} Rejeitar
                                           </button>
                                         </>
                                     )}
 
-                                    {/* Ações */}
                                     {[
-                                      { icon:<Pencil size={14}/>,  title:"Editar",   action:() => abrirEdicao(u),     hc:AURA.blue,       hb:"rgba(0,61,165,.1)"     },
-                                      { icon:<Power size={14}/>,   title:"Suspender",action:() => alternarStatus(u.id),hc:AURA.yellowDark, hb:"rgba(196,140,0,.1)"    },
-                                      { icon:<Trash2 size={14}/>,  title:"Excluir",  action:() => deletarUsuario(u.id),hc:AURA.red,        hb:"rgba(200,16,46,.1)"    },
+                                      { icon: <Pencil size={13} />,  title: "Editar",    action: () => abrirEdicao(u),      hc: C.blue,       hb: "rgba(0,61,165,.08)"    },
+                                      { icon: <Power size={13} />,   title: "Suspender", action: () => alternarStatus(u.id),hc: C.yellowDark, hb: "rgba(196,140,0,.08)"   },
+                                      { icon: <Trash2 size={13} />,  title: "Excluir",   action: () => deletarUsuario(u.id),hc: C.red,        hb: "rgba(200,16,46,.08)"   },
                                     ].map(btn => (
-                                        <button key={btn.title} onClick={btn.action} title={btn.title}
-                                                style={{ width:30, height:30, borderRadius:8, border:`1px solid ${t.border}`, background:"transparent", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:t.textMuted, transition:"all .2s" }}
-                                                onMouseEnter={e => { e.currentTarget.style.color=btn.hc; e.currentTarget.style.background=btn.hb; e.currentTarget.style.borderColor=btn.hc; }}
-                                                onMouseLeave={e => { e.currentTarget.style.color=t.textMuted; e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor=t.border; }}>
+                                        <button
+                                            key={btn.title} title={btn.title}
+                                            className="adm-act-btn"
+                                            onClick={btn.action}
+                                            onMouseEnter={e => { e.currentTarget.style.color = btn.hc; e.currentTarget.style.background = btn.hb; e.currentTarget.style.borderColor = btn.hc; }}
+                                            onMouseLeave={e => { e.currentTarget.style.color = t.textMuted; e.currentTarget.style.background = "none"; e.currentTarget.style.borderColor = t.border; }}
+                                        >
                                           {btn.icon}
                                         </button>
                                     ))}
@@ -1048,78 +1117,113 @@ export default function AdminUsers() {
                     </div>
                 )}
 
-                {/* ── HISTÓRICO ── */}
+                {/* ── HISTÓRICO ──────────────────────────────────────────── */}
                 {moduloAtivo === "historico" && (
-                    <div className="adm-card">
-                      <HistoricoAuditoria isDark={isDark} />
-                    </div>
+                    <>
+                      <div className="adm-page-head">
+                        <div>
+                          <div className="adm-page-eyebrow">Administração</div>
+                          <div className="adm-page-title">Histórico de alterações</div>
+                        </div>
+                      </div>
+                      <HistoricoAuditoria isDark={dark} embedded />
+                    </>
                 )}
 
-                {/* ── OUTROS MÓDULOS ── */}
+                {/* ── OUTROS MÓDULOS ─────────────────────────────────────── */}
                 {moduloAtivo !== "usuarios" && moduloAtivo !== "historico" && (
-                    <ModuloRenderer moduloKey={moduloAtivo} isDark={isDark} celulaAdmin={celulaAdmin} />
+                    <>
+                      <div className="adm-page-head">
+                        <div>
+                          <div className="adm-page-eyebrow">{secObj?.label}</div>
+                          <div className="adm-page-title">{itemObj?.label}</div>
+                        </div>
+                      </div>
+                      <ModuloRenderer moduloKey={moduloAtivo} dark={dark} celulaAdmin={celulaAdmin} />
+                    </>
                 )}
 
               </motion.div>
             </AnimatePresence>
 
-            <p className="adm-footer">© {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico · Admin Total</p>
+            <p style={{ textAlign: "center", fontSize: 10, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted, opacity: .4, paddingTop: 24 }}>
+              © {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico
+            </p>
           </div>
-        </main>
+        </div>
 
         {/* Input foto oculto */}
-        <input ref={fotoRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFoto} />
+        <input ref={fotoRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFoto} />
 
-        {/* ─── Modal Edição / Criação ──────────────────────────────────── */}
+        {/* ══ MODAL: Edição / Criação ═════════════════════════════════════════ */}
         <AnimatePresence>
           {editModalOpen && (
-              <motion.div style={{ position:"fixed", inset:0, zIndex:200, display:"flex", alignItems:"flex-end", justifyContent:"center" }} initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-                <motion.div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.82)", backdropFilter:"blur(10px)", zIndex:0 }} onClick={() => setEditModalOpen(false)} />
-                <motion.div initial={{ y:80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:80, opacity:0 }} transition={{ type:"spring", damping:28, stiffness:300 }}
-                            style={{ position:"relative", zIndex:10, width:"100%", maxWidth:440, maxHeight:"90vh", display:"flex", flexDirection:"column", borderRadius:"20px 20px 0 0", overflow:"hidden", background:t.bgEl, border:`1px solid ${t.border}`, boxShadow:`0 -24px 60px rgba(0,0,0,.5)` }}>
-                  <div style={{ padding:"26px 22px", overflowY:"auto", flex:1 }}>
-                    {/* Header */}
-                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18 }}>
-                      <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                        <div style={{ width:40, height:40, borderRadius:11, background:`linear-gradient(135deg,${editandoId ? AURA.blueDark : AURA.redDark},${editandoId ? AURA.blue : AURA.red})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff" }}>
-                          {editandoId ? <Pencil size={16}/> : <UserPlus size={16}/>}
+              <motion.div className="adm-modal-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                          onClick={e => e.target === e.currentTarget && setEditModalOpen(false)}
+              >
+                <motion.div
+                    className="adm-modal-sheet"
+                    initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 80, opacity: 0 }} transition={{ type: "spring", damping: 28, stiffness: 300 }}
+                >
+                  <div className="adm-modal-inner">
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{
+                          width: 38, height: 38, borderRadius: 10, display: "flex", alignItems: "center",
+                          justifyContent: "center", color: "#fff",
+                          background: editandoId ? C.blue : C.red,
+                        }}>
+                          {editandoId ? <Pencil size={16} /> : <UserPlus size={16} />}
                         </div>
                         <div>
-                          <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:500, color:t.text, margin:0 }}>{editandoId ? "Editar Usuário" : "Novo Acesso"}</h2>
-                          {editandoId && <p style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:0 }}>ID: {editandoId}</p>}
+                          <div style={{ fontSize: 16, fontWeight: 700, color: t.text }}>
+                            {editandoId ? "Editar usuário" : "Novo acesso"}
+                          </div>
+                          {editandoId && <div style={{ fontSize: 11, color: t.textMuted }}>ID: {editandoId}</div>}
                         </div>
                       </div>
-                      <button onClick={() => setEditModalOpen(false)} style={{ background:"none", border:"none", cursor:"pointer", color:t.textMuted, padding:6, borderRadius:8, display:"flex", transition:"color .2s" }}
-                              onMouseEnter={e => e.currentTarget.style.color = AURA.red}
-                              onMouseLeave={e => e.currentTarget.style.color = t.textMuted}>
-                        <X size={20}/>
+                      <button
+                          onClick={() => setEditModalOpen(false)}
+                          style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, display: "flex" }}
+                      >
+                        <X size={18} />
                       </button>
                     </div>
                     <div className="adm-divider" />
-                    <form onSubmit={editandoId ? salvarEdicao : adicionarUsuario} style={{ display:"flex", flexDirection:"column", gap:14 }}>
+                    <form onSubmit={editandoId ? salvarEdicao : adicionarUsuario} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                       {[
-                        { icon:<User size={14}/>,  type:"text",     placeholder:"Nome completo",                    key:"nome",  label:"Nome",   req:true     },
-                        { icon:<Mail size={14}/>,  type:"email",    placeholder:"E-mail institucional",              key:"email", label:"E-mail",  req:true     },
-                        { icon:<Key size={14}/>,   type:"password", placeholder:editandoId?"Deixe vazio para manter":"Senha de acesso", key:"senha", label:"Senha", req:!editandoId },
+                        { icon: <User size={13} />,  type: "text",     placeholder: "Nome completo",                                  key: "nome",  label: "Nome",   req: true          },
+                        { icon: <Mail size={13} />,  type: "email",    placeholder: "E-mail institucional",                            key: "email", label: "E-mail", req: true          },
+                        { icon: <Key size={13} />,   type: "password", placeholder: editandoId ? "Deixe vazio para manter" : "Senha", key: "senha", label: "Senha",  req: !editandoId   },
                       ].map(f => (
                           <div key={f.key}>
-                            <label className="adm-label">{f.label}</label>
-                            <InputField icon={f.icon} type={f.type} placeholder={f.placeholder} value={form[f.key]} onChange={v => setForm({...form,[f.key]:v})} required={f.req} isDark={isDark} t={t} />
+                            <label className="adm-form-label">{f.label}</label>
+                            <InputField
+                                icon={f.icon} type={f.type} placeholder={f.placeholder}
+                                value={form[f.key]} onChange={v => setForm({ ...form, [f.key]: v })}
+                                required={f.req} t={t}
+                            />
                           </div>
                       ))}
                       <div>
-                        <label className="adm-label">Perfil</label>
-                        <div style={{ position:"relative" }}>
-                          <div style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:AURA.gold, opacity:.55, pointerEvents:"none" }}><Shield size={14}/></div>
-                          <select className="adm-select" value={form.perfil} onChange={e => setForm({...form,perfil:e.target.value})}>
-                            {perfis.map(p => <option key={p} value={p}>{p.replace(/_/g," ")}</option>)}
+                        <label className="adm-form-label">Perfil</label>
+                        <div className="adm-input-wrap">
+                          <span className="adm-input-ico"><Shield size={13} /></span>
+                          <select className="adm-select" value={form.perfil} onChange={e => setForm({ ...form, perfil: e.target.value })}>
+                            {PERFIS.map(p => <option key={p} value={p}>{p.replace(/_/g, " ")}</option>)}
                           </select>
                         </div>
                       </div>
-                      <div style={{ display:"flex", gap:10, marginTop:4 }}>
-                        <button type="button" onClick={() => setEditModalOpen(false)} className="adm-btn-ghost" style={{ flex:1, justifyContent:"center", padding:"12px" }}>Cancelar</button>
-                        <button type="submit" disabled={sending} className={editandoId ? "adm-btn-blue" : "adm-btn-red"} style={{ flex:2, justifyContent:"center", padding:"12px", opacity:sending?.6:1 }}>
-                          {sending ? <><Loader2 size={14} style={{ animation:"adm-spin 1s linear infinite" }}/> Salvando…</> : editandoId ? <><Pencil size={14}/> Salvar Alterações</> : <><UserPlus size={14}/> Liberar Acesso</>}
+                      <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                        <button type="button" onClick={() => setEditModalOpen(false)} className="adm-btn-ghost" style={{ flex: 1, justifyContent: "center" }}>
+                          Cancelar
+                        </button>
+                        <button type="submit" disabled={sending} className={editandoId ? "adm-btn-blue" : "adm-btn-red"} style={{ flex: 2, justifyContent: "center", opacity: sending ? .6 : 1 }}>
+                          {sending
+                              ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Salvando…</>
+                              : editandoId ? <><Pencil size={13} /> Salvar alterações</> : <><UserPlus size={13} /> Liberar acesso</>
+                          }
                         </button>
                       </div>
                     </form>
@@ -1129,23 +1233,46 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ─── Modal Sair ──────────────────────────────────────────────── */}
+        {/* ══ MODAL: Sair ════════════════════════════════════════════════════ */}
         <AnimatePresence>
           {exitConfirm && (
-              <motion.div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }} initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-                <motion.div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.88)", backdropFilter:"blur(10px)" }} onClick={() => setExitConfirm(false)} />
-                <motion.div initial={{ scale:.88, opacity:0, y:20 }} animate={{ scale:1, opacity:1, y:0 }} exit={{ scale:.92, opacity:0 }} transition={{ type:"spring", stiffness:420, damping:30 }}
-                            style={{ position:"relative", zIndex:10, width:"100%", maxWidth:360, background:t.bgEl, border:`1px solid ${t.border}`, borderRadius:22, padding:"36px 28px 28px", textAlign:"center", boxShadow:`0 40px 80px rgba(0,0,0,.7)` }}>
-                  <div style={{ width:60, height:60, borderRadius:"50%", margin:"0 auto 20px", background:"linear-gradient(135deg,rgba(155,11,30,.15),rgba(200,16,46,.08))", border:"1.5px solid rgba(200,16,46,.25)", display:"flex", alignItems:"center", justifyContent:"center", color:AURA.red }}>
-                    <LogOut size={24}/>
+              <motion.div
+                  style={{
+                    position: "fixed", inset: 0, zIndex: 300,
+                    display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+                    background: "rgba(0,0,0,.8)", backdropFilter: "blur(10px)",
+                  }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  onClick={e => e.target === e.currentTarget && setExitConfirm(false)}
+              >
+                <motion.div
+                    initial={{ scale: .9, opacity: 0, y: 16 }} animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: .92, opacity: 0 }} transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                    style={{
+                      width: "100%", maxWidth: 340,
+                      background: t.surface, border: `1px solid ${t.border}`,
+                      borderRadius: 20, padding: "32px 24px 24px", textAlign: "center",
+                    }}
+                >
+                  <div style={{
+                    width: 54, height: 54, borderRadius: "50%",
+                    background: "rgba(200,16,46,.08)", border: "1px solid rgba(200,16,46,.2)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: C.red, margin: "0 auto 18px",
+                  }}>
+                    <LogOut size={22} />
                   </div>
-                  <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:20, fontWeight:500, color:t.text, margin:"0 0 10px" }}>Encerrar Sessão</h3>
-                  <p style={{ fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:300, color:t.textSec, margin:"0 0 24px", lineHeight:1.6 }}>Tem certeza que deseja sair do sistema?</p>
-                  <div className="adm-divider" style={{ margin:"0 0 20px" }} />
-                  <div style={{ display:"flex", gap:10 }}>
-                    <button onClick={() => setExitConfirm(false)} className="adm-btn-ghost" style={{ flex:1, justifyContent:"center", padding:"13px" }}>Cancelar</button>
-                    <button onClick={() => { localStorage.clear(); window.location.href = "/"; }} className="adm-btn-red" style={{ flex:1.5, justifyContent:"center", padding:"13px" }}>
-                      <LogOut size={13}/> Sair Agora
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: t.text, marginBottom: 8 }}>Encerrar sessão</h3>
+                  <p style={{ fontSize: 13, color: t.textSec, marginBottom: 22, lineHeight: 1.6 }}>
+                    Tem certeza que deseja sair do sistema?
+                  </p>
+                  <div className="adm-divider" style={{ marginBottom: 18 }} />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => setExitConfirm(false)} className="adm-btn-ghost" style={{ flex: 1, justifyContent: "center" }}>
+                      Cancelar
+                    </button>
+                    <button onClick={() => { localStorage.clear(); window.location.href = "/"; }} className="adm-btn-red" style={{ flex: 1.5, justifyContent: "center" }}>
+                      <LogOut size={13} /> Sair agora
                     </button>
                   </div>
                 </motion.div>
@@ -1153,22 +1280,24 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ─── Toasts ───────────────────────────────────────────────────── */}
+        {/* ══ TOASTS ══════════════════════════════════════════════════════════ */}
         <AnimatePresence>
           {sucesso && (
-              <motion.div className="adm-toast" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }}
-                          style={{ background:AURA.green, color:"#fff", boxShadow:"0 8px 28px rgba(5,150,105,.35)" }}>
-                <CheckCircle size={14}/> {sucesso}
+              <motion.div className="adm-toast" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
+                          style={{ background: C.green, color: "#fff" }}>
+                <CheckCircle size={14} /> {sucesso}
               </motion.div>
           )}
         </AnimatePresence>
         <AnimatePresence>
           {erro && (
-              <motion.div className="adm-toast" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }}
-                          style={{ background:AURA.red, color:"#fff", boxShadow:"0 8px 28px rgba(200,16,46,.35)", bottom:sucesso?72:24 }}>
-                <Power size={14}/>
-                <span style={{ overflow:"hidden", textOverflow:"ellipsis", maxWidth:"60vw" }}>{erro}</span>
-                <button onClick={() => setErro("")} style={{ background:"none", border:"none", cursor:"pointer", color:"rgba(255,255,255,.7)", display:"flex", marginLeft:4 }}><X size={14}/></button>
+              <motion.div className="adm-toast" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
+                          style={{ background: C.red, color: "#fff", bottom: sucesso ? 68 : 24 }}>
+                <Power size={14} />
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", maxWidth: "60vw" }}>{erro}</span>
+                <button onClick={() => setErro("")} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.7)", display: "flex", marginLeft: 4 }}>
+                  <X size={14} />
+                </button>
               </motion.div>
           )}
         </AnimatePresence>
