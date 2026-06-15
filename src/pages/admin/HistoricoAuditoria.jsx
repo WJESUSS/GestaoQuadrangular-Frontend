@@ -2,20 +2,346 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Search, Filter, ChevronLeft, ChevronRight, X,
-    Shield, Clock, User, Edit3, Trash2, CheckCircle,
-    XCircle, PlusCircle, Eye, ChevronDown, ChevronUp,
-    AlertTriangle, RefreshCw,
+    Shield, RefreshCw, AlertTriangle,
+    Edit3, Trash2, CheckCircle, XCircle, PlusCircle, Eye,
+    ChevronDown, ChevronUp, Loader2,
 } from "lucide-react";
 import api from "../../services/api.js";
 
-/* ─── Paleta IEQ ─────────────────────────────────────────────────────────── */
-const IEQ = {
-    red: "#C8102E", redDark: "#8B0B1F",
-    yellow: "#FDB813", blue: "#003DA5", blueLight: "#1A56C4",
-    offWhite: "#F5F0E8", dark: "#0A0608",
+/* ─── Tokens AURA (Mesmo do Dashboard) ──────────────────────────────── */
+const AURA = {
+    gold:      "#C9A96E",
+    goldLight: "#E8D5A3",
+    dark:      "#0A0A0F",
+    darkEl:    "#12121A",
+    light:     "#F5F0E8",
+    red:       "#C8102E",
+    redDark:   "#9B0B1E",
+    blue:      "#003DA5",
+    blueDark:  "#002470",
+    yellow:    "#FDB813",
 };
 
-/* ─── Metadados das ações ─────────────────────────────────────────────────── */
+function theme(isDark) {
+    return {
+        bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
+        bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+        border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+        borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
+        text:        isDark ? "#F5F0E8"                : "#1A1008",
+        textSec:     isDark ? "#9A9588"                : "#6B5E4A",
+        textMuted:   isDark ? "#6B6658"                : "#9A9080",
+        glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+        glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
+        cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
+        placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+    };
+}
+
+function GlobalStyles({ t, isDark }) {
+    return (
+        <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+      @keyframes dl-spin   { to { transform: rotate(360deg); } }
+      @keyframes dl-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+      @keyframes fadeUp    { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+      .dl-spin   { animation: dl-spin  1s linear infinite; }
+      .dl-pulse  { animation: dl-pulse 3s ease-in-out infinite; }
+      .fadeUp    { animation: fadeUp .5s ease; }
+
+      * { box-sizing: border-box; }
+
+      .aud-root {
+        font-family: 'Inter', sans-serif;
+        background: ${t.bg};
+        color: ${t.text};
+        padding-bottom: 40px;
+        transition: background .3s, color .3s;
+      }
+
+      .aud-glow {
+        position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        background:
+          radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
+          radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
+        transition: background .3s;
+      }
+
+      .aud-content {
+        position: relative; z-index: 1;
+        max-width: 1200px; margin: 0 auto;
+        padding: 0 18px;
+      }
+      @media(max-width: 420px) { .aud-content { padding: 0 14px; } }
+
+      .aud-header {
+        display: flex; flex-direction: column; gap: 18px;
+        margin-bottom: 28px; padding-top: 28px;
+        align-items: flex-start;
+      }
+      @media(min-width: 768px) {
+        .aud-header { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+      }
+
+      .aud-header-left {
+        display: flex; align-items: flex-start; gap: 16px;
+      }
+
+      .aud-header-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; flex-shrink: 0;
+      }
+
+      .aud-header-text h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(24px, 5vw, 32px);
+        font-weight: 500; color: ${t.text};
+        margin: 0 0 4px; letter-spacing: .02em;
+      }
+
+      .aud-header-text p {
+        font-size: 10px; font-weight: 500; letter-spacing: .16em;
+        text-transform: uppercase; color: ${AURA.red}; margin: 0 0 8px;
+        display: flex; align-items: center; gap: 6px;
+      }
+
+      .aud-header-sub {
+        font-family: 'Inter', sans-serif; font-size: 13px;
+        color: ${t.textSec}; margin: 0;
+      }
+
+      .aud-header-actions {
+        display: flex; gap: 8px; flex-shrink: 0;
+      }
+
+      .aud-btn {
+        border: none; border-radius: 10px; cursor: pointer;
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+        letter-spacing: .12em; padding: 10px 16px; transition: all .25s;
+        display: inline-flex; align-items: center; gap: 7px;
+      }
+
+      .aud-btn-primary {
+        background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
+        color: #fff; box-shadow: 0 6px 20px rgba(0, 61, 165, .25);
+      }
+      .aud-btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+      .aud-btn-ghost {
+        background: none; border: 1px solid ${t.border};
+        color: ${t.textMuted}; transition: all .25s;
+      }
+      .aud-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+
+      .aud-card {
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-radius: 16px; overflow: hidden; backdrop-filter: blur(20px);
+        position: relative;
+      }
+      .aud-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+      }
+
+      .aud-filters-wrap {
+        padding: 20px; background: ${t.bgEl};
+        border: 1px solid ${t.border}; border-radius: 12px;
+        margin-bottom: 20px;
+      }
+
+      .aud-filters-label {
+        font-size: 10px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 14px;
+      }
+
+      .aud-filter-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px; margin-bottom: 16px;
+      }
+
+      .aud-input {
+        width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 10px 12px; border-radius: 8px;
+        outline: none; font-family: 'Inter', sans-serif; font-size: 13px;
+        transition: all .25s;
+      }
+      .aud-input:focus { border-color: ${AURA.gold}; box-shadow: 0 0 0 3px rgba(201,169,110,.08); }
+      .aud-input::placeholder { color: ${t.placeholder}; }
+
+      .aud-select {
+        width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderInput};
+        color: ${t.text}; padding: 10px 12px; border-radius: 8px;
+        outline: none; font-family: 'Inter', sans-serif; font-size: 13px;
+        cursor: pointer; transition: all .25s; appearance: none; -webkit-appearance: none;
+      }
+      .aud-select:focus { border-color: ${AURA.gold}; box-shadow: 0 0 0 3px rgba(201,169,110,.08); }
+
+      .aud-filter-actions {
+        display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;
+      }
+
+      .aud-stats {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 14px; flex-wrap: wrap; gap: 8px;
+        font-size: 10px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textMuted};
+      }
+
+      .aud-table {
+        width: 100%; border-collapse: collapse;
+        min-width: 700px;
+      }
+
+      .aud-table thead tr { background: ${isDark ? "rgba(255,255,255,.02)" : "rgba(201,169,110,.03)"}; }
+
+      .aud-table th {
+        padding: 14px 14px; font-family: 'Inter', sans-serif;
+        font-size: 9px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textMuted}; text-align: left;
+      }
+
+      .aud-table td {
+        padding: 12px 14px; border-top: 1px solid ${t.border};
+        font-size: 13px; color: ${t.text};
+      }
+
+      .aud-table tbody tr { transition: background .15s; cursor: pointer; }
+      .aud-table tbody tr:hover { background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(201,169,110,.04)"}; }
+
+      .aud-expand-icon {
+        width: 32px; height: 32px; display: flex; align-items: center;
+        justify-content: center; color: ${t.textMuted};
+      }
+
+      .aud-date {
+        font-family: 'Inter', sans-serif; font-size: 11px;
+        color: ${t.textMuted}; white-space: nowrap;
+      }
+
+      .aud-tag {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 6px 10px; border-radius: 6px; font-size: 8px;
+        font-weight: 600; letter-spacing: .1em; border: 1px solid;
+        white-space: nowrap;
+      }
+
+      .aud-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 6px 12px; border-radius: 99px; font-size: 8px;
+        font-weight: 600; letter-spacing: .1em; border: 1px solid;
+        white-space: nowrap;
+      }
+
+      .aud-avatar {
+        width: 28px; height: 28px; border-radius: 8px;
+        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue});
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-family: 'Playfair Display', serif;
+        font-weight: 600; font-size: 11px; flex-shrink: 0;
+      }
+
+      .aud-user-cell {
+        display: flex; align-items: center; gap: 9px; min-width: 0;
+      }
+
+      .aud-user-name {
+        font-family: 'Inter', sans-serif; font-size: 13px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+
+      .aud-detail-panel {
+        background: ${isDark ? "rgba(255,255,255,.02)" : "rgba(201,169,110,.02)"};
+      }
+
+      .aud-detail-content {
+        padding: 20px;
+      }
+
+      .aud-detail-row {
+        display: flex; align-items: flex-start; gap: 16px;
+        margin-bottom: 16px;
+      }
+      .aud-detail-row:last-child { margin-bottom: 0; }
+
+      .aud-detail-label {
+        font-family: 'Inter', sans-serif; font-size: 9px;
+        font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textMuted};
+        min-width: 100px;
+      }
+
+      .aud-detail-value {
+        font-family: 'Inter', sans-serif; font-size: 13px;
+        color: ${t.text};
+      }
+
+      .aud-diff-from {
+        background: rgba(239, 68, 68, .1); color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, .2); padding: 4px 8px;
+        border-radius: 6px; font-size: 12px; text-decoration: line-through;
+      }
+
+      .aud-diff-to {
+        background: rgba(5, 150, 105, .1); color: #059669;
+        border: 1px solid rgba(5, 150, 105, .2); padding: 4px 8px;
+        border-radius: 6px; font-size: 12px;
+      }
+
+      .aud-divider {
+        height: 1px; background: linear-gradient(90deg, transparent, ${t.border}, transparent);
+        margin: 16px 0;
+      }
+
+      .aud-empty {
+        display: flex; flex-direction: column; align-items: center;
+        padding: 60px 20px; text-align: center;
+      }
+
+      .aud-empty-icon {
+        color: ${isDark ? "rgba(201,169,110,.15)" : "rgba(201,169,110,.1)"};
+        margin-bottom: 12px;
+      }
+
+      .aud-empty-text {
+        font-family: 'Inter', sans-serif; font-size: 13px;
+        color: ${t.textMuted}; font-weight: 300;
+      }
+
+      .aud-pagination {
+        display: flex; align-items: center; justify-content: center;
+        gap: 6px; margin-top: 20px; flex-wrap: wrap;
+      }
+
+      .aud-page-btn {
+        width: 36px; height: 36px; border-radius: 8px;
+        border: 1px solid ${t.border}; background: none;
+        color: ${t.textMuted}; cursor: pointer; display: flex;
+        align-items: center; justify-content: center; transition: all .25s;
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+      }
+      .aud-page-btn:hover:not(:disabled) { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .aud-page-btn.active {
+        background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
+        color: #fff; border-color: transparent;
+      }
+      .aud-page-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+      .aud-footer {
+        text-align: center; font-size: 9px; font-weight: 500;
+        letter-spacing: .14em; text-transform: uppercase;
+        color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(26,16,8,.15)"};
+        padding: 20px 0 0; margin-top: 32px;
+      }
+    `}</style>
+    );
+}
+
+/* ─── Metadados de Ações ─────────────────────────────────────────────────── */
 const ACOES = {
     CREATE:  { label: "Criação",    icon: PlusCircle,   color: "#059669", bg: "rgba(5,150,105,.12)",  border: "rgba(5,150,105,.25)"  },
     UPDATE:  { label: "Edição",     icon: Edit3,        color: "#F59E0B", bg: "rgba(245,158,11,.12)", border: "rgba(245,158,11,.25)" },
@@ -26,116 +352,6 @@ const ACOES = {
 };
 
 const ENTIDADES = ["MEMBRO", "VISITANTE", "CELULA", "FICHA", "USUARIO", "SECRETARIA"];
-
-/* ─── CSS ────────────────────────────────────────────────────────────────── */
-const CSS = `
-  .aud-root {
-    --bg:      #F0EAE8; --text: #1A0A0D; --text-sec: rgba(26,10,13,.45);
-    --card:    rgba(255,255,255,.92); --border: rgba(200,16,46,.12);
-    --input:   rgba(255,255,255,.8);  --input-border: rgba(200,16,46,.2);
-    --stripe-a: rgba(200,16,46,.05); --stripe-b: rgba(253,184,19,.04);
-  }
-  .aud-root.dark {
-    --bg:      #0A0608; --text: #F5F0E8; --text-sec: rgba(245,240,232,.45);
-    --card:    rgba(17,10,13,.97);    --border: rgba(200,16,46,.15);
-    --input:   rgba(255,255,255,.04); --input-border: rgba(200,16,46,.2);
-    --stripe-a: rgba(200,16,46,.04); --stripe-b: rgba(253,184,19,.03);
-  }
-
-  @keyframes stripe { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-  @keyframes spin   { to { transform: rotate(360deg); } }
-
-  .aud-bg {
-    position:fixed; inset:0; pointer-events:none; z-index:0;
-    background: repeating-linear-gradient(-55deg,
-      var(--stripe-a) 0 10px, transparent 10px 20px,
-      var(--stripe-b) 20px 30px, transparent 30px 40px);
-    background-size:60px 60px; animation:stripe 8s linear infinite;
-  }
-
-  .aud-card {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:14px; backdrop-filter:blur(24px);
-    transition: background .3s, border-color .3s;
-  }
-
-  .aud-input {
-    background:var(--input); border:1px solid var(--input-border);
-    border-radius:8px; color:var(--text); font-family:'EB Garamond',serif;
-    font-size:14px; padding:9px 12px; outline:none; width:100%;
-    transition:border-color .2s;
-  }
-  .aud-input:focus { border-color:#C8102E; }
-  .aud-input::placeholder { color:var(--text-sec); font-style:italic; }
-
-  .aud-select {
-    background:var(--input); border:1px solid var(--input-border);
-    border-radius:8px; color:var(--text); font-family:'Cinzel',serif;
-    font-size:9px; font-weight:700; letter-spacing:.14em;
-    padding:9px 12px; outline:none; cursor:pointer;
-    transition:border-color .2s; appearance:none;
-  }
-  .aud-select:focus { border-color:#C8102E; }
-
-  .aud-btn {
-    border:none; border-radius:8px; cursor:pointer; font-family:'Cinzel',serif;
-    font-size:9px; font-weight:700; letter-spacing:.15em;
-    padding:10px 18px; transition:all .2s; display:inline-flex;
-    align-items:center; gap:7px;
-  }
-  .aud-btn-primary {
-    background:linear-gradient(135deg,#8B0B1F,#C8102E);
-    color:#fff; box-shadow:0 4px 14px rgba(200,16,46,.3);
-  }
-  .aud-btn-primary:hover { box-shadow:0 6px 20px rgba(200,16,46,.45); transform:translateY(-1px); }
-  .aud-btn-ghost {
-    background:rgba(200,16,46,.06); color:var(--text);
-    border:1px solid rgba(200,16,46,.18);
-  }
-  .aud-btn-ghost:hover { border-color:#C8102E; background:rgba(200,16,46,.1); }
-
-  .aud-row {
-    border-bottom:1px solid var(--border); transition:background .15s;
-    cursor:pointer;
-  }
-  .aud-row:hover { background:rgba(200,16,46,.03); }
-  .aud-root.dark .aud-row:hover { background:rgba(200,16,46,.06); }
-
-  .aud-badge {
-    display:inline-flex; align-items:center; gap:5px;
-    padding:4px 10px; border-radius:99px;
-    font-family:'Cinzel',serif; font-size:8px; font-weight:700;
-    letter-spacing:.14em; border:1px solid; white-space:nowrap;
-  }
-
-  .aud-tag {
-    display:inline-flex; align-items:center;
-    padding:2px 8px; border-radius:4px;
-    font-family:'Cinzel',serif; font-size:8px; font-weight:700;
-    letter-spacing:.12em; border:1px solid;
-  }
-
-  .aud-detail-row {
-    display:flex; align-items:flex-start; gap:8px;
-    padding:8px 0; border-bottom:1px solid var(--border);
-    font-family:'EB Garamond',serif; font-size:14px;
-  }
-  .aud-detail-row:last-child { border-bottom:none; }
-
-  .divider { height:1px; background:linear-gradient(90deg,transparent,rgba(200,16,46,.2),transparent); }
-
-  .spin { animation:spin .8s linear infinite; }
-
-  .page-btn {
-    width:32px; height:32px; border-radius:6px; border:1px solid var(--border);
-    background:var(--card); color:var(--text); display:flex; align-items:center;
-    justify-content:center; cursor:pointer; font-family:'Cinzel',serif;
-    font-size:10px; font-weight:700; transition:all .2s;
-  }
-  .page-btn:hover { border-color:#C8102E; color:#C8102E; }
-  .page-btn.active { background:linear-gradient(135deg,#8B0B1F,#C8102E); color:#fff; border-color:transparent; }
-  .page-btn:disabled { opacity:.35; cursor:not-allowed; }
-`;
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 function formatDate(iso) {
@@ -149,58 +365,51 @@ function AcaoBadge({ acao }) {
     const Icon = meta.icon;
     return (
         <span className="aud-badge" style={{ color: meta.color, background: meta.bg, borderColor: meta.border }}>
-      <Icon size={10} /> {meta.label}
-    </span>
+            <Icon size={10} /> {meta.label}
+        </span>
     );
 }
 
 function EntidadeTag({ entidade }) {
     const colors = {
-        MEMBRO:     { c: IEQ.blue,     b: "rgba(0,61,165,.15)"   },
-        VISITANTE:  { c: IEQ.red,      b: "rgba(200,16,46,.12)"  },
+        MEMBRO:     { c: AURA.blue,     b: `rgba(0,61,165,.12)`   },
+        VISITANTE:  { c: AURA.red,      b: `rgba(200,16,46,.12)`  },
         CELULA:     { c: "#059669",    b: "rgba(5,150,105,.12)"  },
-        FICHA:      { c: IEQ.yellow,   b: "rgba(253,184,19,.15)" },
+        FICHA:      { c: AURA.yellow,   b: `rgba(253,184,19,.12)` },
         USUARIO:    { c: "#8B5CF6",    b: "rgba(139,92,246,.12)" },
-        SECRETARIA: { c: IEQ.blueLight,b: "rgba(26,86,196,.12)"  },
+        SECRETARIA: { c: "#003DA5",    b: "rgba(0,61,165,.12)"  },
     };
     const s = colors[entidade] || { c: "#888", b: "rgba(128,128,128,.1)" };
     return (
         <span className="aud-tag" style={{ color: s.c, background: s.b, borderColor: s.c + "44" }}>
-      {entidade}
-    </span>
+            {entidade}
+        </span>
     );
 }
 
-/* ─── Painel de detalhes (diff de campos) ───────────────────────────────── */
-function DetalhesDiff({ detalhes }) {
+function DetalhesDiff({ detalhes, t }) {
     let parsed = null;
-    try { parsed = JSON.parse(detalhes); } catch { return <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, fontStyle: "italic", color: "var(--text-sec)" }}>Sem detalhes registrados.</p>; }
+    try { parsed = JSON.parse(detalhes); } catch { return <p style={{ fontStyle: "italic", color: "var(--text-sec)" }}>Sem detalhes registrados.</p>; }
     if (!parsed || Object.keys(parsed).length === 0)
-        return <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, fontStyle: "italic", color: "var(--text-sec)" }}>Sem detalhes registrados.</p>;
+        return <p style={{ fontStyle: "italic", color: "var(--text-sec)" }}>Sem detalhes registrados.</p>;
 
     return (
         <div>
             {Object.entries(parsed).map(([campo, val]) => (
-                <div key={campo} className="aud-detail-row">
-          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, fontWeight: 700, letterSpacing: ".12em", color: "var(--text-sec)", minWidth: 110, paddingTop: 3 }}>
-            {campo.toUpperCase()}
-          </span>
-                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <div key={campo} style={{ marginBottom: 12 }}>
+                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--text-sec)", margin: "0 0 6px" }}>
+                        {campo}
+                    </p>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                         {val?.de !== undefined && (
                             <>
-                <span style={{ background: "rgba(239,68,68,.1)", color: "#EF4444", border: "1px solid rgba(239,68,68,.2)", borderRadius: 4, padding: "2px 8px", fontSize: 13, textDecoration: "line-through" }}>
-                  {String(val.de || "—")}
-                </span>
+                                <span className="aud-diff-from">{String(val.de || "—")}</span>
                                 <span style={{ color: "var(--text-sec)", fontSize: 12 }}>→</span>
-                                <span style={{ background: "rgba(5,150,105,.1)", color: "#059669", border: "1px solid rgba(5,150,105,.2)", borderRadius: 4, padding: "2px 8px", fontSize: 13 }}>
-                  {String(val.para ?? "—")}
-                </span>
+                                <span className="aud-diff-to">{String(val.para ?? "—")}</span>
                             </>
                         )}
                         {val?.para !== undefined && val?.de === undefined && (
-                            <span style={{ background: "rgba(5,150,105,.1)", color: "#059669", border: "1px solid rgba(5,150,105,.2)", borderRadius: 4, padding: "2px 8px", fontSize: 13 }}>
-                {String(val.para ?? "—")}
-              </span>
+                            <span className="aud-diff-to">{String(val.para ?? "—")}</span>
                         )}
                         {typeof val === "string" && (
                             <span style={{ fontSize: 13, color: "var(--text)" }}>{val}</span>
@@ -213,88 +422,76 @@ function DetalhesDiff({ detalhes }) {
 }
 
 /* ─── Linha expansível ───────────────────────────────────────────────────── */
-function AuditoriaRow({ reg, isDark }) {
+function AuditoriaRow({ reg, isDark, t }) {
     const [open, setOpen] = useState(false);
 
     return (
         <>
-            <tr className="aud-row" onClick={() => setOpen(o => !o)}>
-                <td style={{ padding: "13px 16px", width: 32 }}>
-                    {open ? <ChevronUp size={14} style={{ color: IEQ.red }} /> : <ChevronDown size={14} style={{ color: "var(--text-sec)" }} />}
+            <tr onClick={() => setOpen(o => !o)}>
+                <td className="aud-expand-icon">
+                    {open ? (
+                        <ChevronUp size={16} style={{ color: AURA.red }} />
+                    ) : (
+                        <ChevronDown size={16} style={{ color: t.textMuted }} />
+                    )}
                 </td>
-                <td style={{ padding: "13px 8px", whiteSpace: "nowrap" }}>
-          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".1em", color: "var(--text-sec)" }}>
-            {formatDate(reg.dataHora)}
-          </span>
+                <td className="aud-date">{formatDate(reg.dataHora)}</td>
+                <td><EntidadeTag entidade={reg.entidade} /></td>
+                <td style={{ maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {reg.entidadeNome || `#${reg.entidadeId}`}
                 </td>
-                <td style={{ padding: "13px 8px" }}>
-                    <EntidadeTag entidade={reg.entidade} />
-                </td>
-                <td style={{ padding: "13px 8px", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: "var(--text)" }}>
-            {reg.entidadeNome || `#${reg.entidadeId}`}
-          </span>
-                </td>
-                <td style={{ padding: "13px 8px" }}>
-                    <AcaoBadge acao={reg.acao} />
-                </td>
-                <td style={{ padding: "13px 8px", maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: 6, background: "linear-gradient(135deg,#8B0B1F,#003DA5)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 9, color: "#fff" }}>
-                {reg.usuarioNome?.charAt(0).toUpperCase()}
-              </span>
-                        </div>
-                        <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: "var(--text)" }}>
-              {reg.usuarioNome}
-            </span>
+                <td><AcaoBadge acao={reg.acao} /></td>
+                <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div className="aud-user-cell">
+                        <div className="aud-avatar">{reg.usuarioNome?.charAt(0).toUpperCase()}</div>
+                        <span className="aud-user-name">{reg.usuarioNome}</span>
                     </div>
                 </td>
-                <td style={{ padding: "13px 8px" }}>
+                <td>
                     {reg.aprovadorNome ? (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                             <CheckCircle size={12} style={{ color: "#059669" }} />
-                            <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: "#059669" }}>{reg.aprovadorNome}</span>
+                            <span style={{ fontSize: 12, color: "#059669" }}>{reg.aprovadorNome}</span>
                         </div>
                     ) : (
-                        <span style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: "var(--text-sec)", fontStyle: "italic" }}>—</span>
+                        <span style={{ fontStyle: "italic", color: t.textMuted }}>—</span>
                     )}
                 </td>
             </tr>
 
             <AnimatePresence>
                 {open && (
-                    <tr>
-                        <td colSpan={7} style={{ padding: 0, background: isDark ? "rgba(200,16,46,.03)" : "rgba(200,16,46,.02)" }}>
+                    <tr className="aud-detail-panel">
+                        <td colSpan={7}>
                             <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: "auto", opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: .2 }}
+                                transition={{ duration: 0.2 }}
                                 style={{ overflow: "hidden" }}
                             >
-                                <div style={{ padding: "16px 24px 20px 52px" }}>
-                                    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginBottom: 14 }}>
+                                <div className="aud-detail-content">
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginBottom: 16 }}>
                                         <div>
-                                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".18em", color: "var(--text-sec)", margin: "0 0 3px" }}>ID DO REGISTRO</p>
-                                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: "var(--text)", margin: 0 }}>#{reg.entidadeId}</p>
+                                            <p className="aud-detail-label">ID do Registro</p>
+                                            <p className="aud-detail-value">#{reg.entidadeId}</p>
                                         </div>
                                         {reg.ipOrigem && (
                                             <div>
-                                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".18em", color: "var(--text-sec)", margin: "0 0 3px" }}>IP DE ORIGEM</p>
-                                                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: "var(--text)", margin: 0 }}>{reg.ipOrigem}</p>
+                                                <p className="aud-detail-label">IP de Origem</p>
+                                                <p className="aud-detail-value">{reg.ipOrigem}</p>
                                             </div>
                                         )}
                                         {reg.usuarioEmail && (
                                             <div>
-                                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".18em", color: "var(--text-sec)", margin: "0 0 3px" }}>E-MAIL DO OPERADOR</p>
-                                                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: "var(--text)", margin: 0 }}>{reg.usuarioEmail}</p>
+                                                <p className="aud-detail-label">E-mail do Operador</p>
+                                                <p className="aud-detail-value">{reg.usuarioEmail}</p>
                                             </div>
                                         )}
                                     </div>
-                                    <div className="divider" style={{ marginBottom: 12 }} />
-                                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".2em", color: "var(--text-sec)", margin: "0 0 10px" }}>CAMPOS ALTERADOS</p>
-                                    <DetalhesDiff detalhes={reg.detalhes} />
+                                    <div className="aud-divider" />
+                                    <p className="aud-detail-label" style={{ marginBottom: 10 }}>Campos Alterados</p>
+                                    <DetalhesDiff detalhes={reg.detalhes} t={t} />
                                 </div>
                             </motion.div>
                         </td>
@@ -306,13 +503,15 @@ function AuditoriaRow({ reg, isDark }) {
 }
 
 /* ─── COMPONENTE PRINCIPAL ──────────────────────────────────────────────── */
-export default function HistoricoAuditoria({ isDark }) {
-    const [registros,   setRegistros]   = useState([]);
-    const [loading,     setLoading]     = useState(false);
-    const [erro,        setErro]        = useState(null);
-    const [totalPages,  setTotalPages]  = useState(0);
-    const [totalItems,  setTotalItems]  = useState(0);
+export default function HistoricoAuditoria({ isDark = false }) {
+    const [registros, setRegistros] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [erro, setErro] = useState(null);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
     const [showFiltros, setShowFiltros] = useState(false);
+
+    const t = theme(isDark);
 
     const [filtros, setFiltros] = useState({
         entidade:   "",
@@ -330,12 +529,12 @@ export default function HistoricoAuditoria({ isDark }) {
         setErro(null);
         try {
             const params = new URLSearchParams();
-            if (f.entidade)   params.set("entidade",   f.entidade);
-            if (f.acao)       params.set("acao",        f.acao);
-            if (f.usuario)    params.set("usuario",     f.usuario);
-            if (f.entidadeId) params.set("entidadeId",  f.entidadeId);
-            if (f.de)         params.set("de",          new Date(f.de).toISOString());
-            if (f.ate)        params.set("ate",          new Date(f.ate).toISOString());
+            if (f.entidade)   params.set("entidade", f.entidade);
+            if (f.acao)       params.set("acao", f.acao);
+            if (f.usuario)    params.set("usuario", f.usuario);
+            if (f.entidadeId) params.set("entidadeId", f.entidadeId);
+            if (f.de)         params.set("de", new Date(f.de).toISOString());
+            if (f.ate)        params.set("ate", new Date(f.ate).toISOString());
             params.set("page", f.page);
             params.set("size", f.size);
 
@@ -345,6 +544,7 @@ export default function HistoricoAuditoria({ isDark }) {
             setTotalItems(res.data.totalElements || 0);
         } catch (e) {
             setErro("Não foi possível carregar o histórico. Verifique a conexão.");
+            console.error(e);
         } finally {
             setLoading(false);
         }
@@ -353,169 +553,192 @@ export default function HistoricoAuditoria({ isDark }) {
     useEffect(() => { buscar(); }, []); // eslint-disable-line
 
     const setFiltro = (key, val) => setFiltros(f => ({ ...f, [key]: val, page: 0 }));
-
     const aplicar = () => buscar({ ...filtros, page: 0 });
     const limpar  = () => {
-        const z = { entidade:"", acao:"", usuario:"", entidadeId:"", de:"", ate:"", page:0, size:20 };
+        const z = { entidade: "", acao: "", usuario: "", entidadeId: "", de: "", ate: "", page: 0, size: 20 };
         setFiltros(z);
         buscar(z);
     };
     const irPara  = (p) => { const f = { ...filtros, page: p }; setFiltros(f); buscar(f); };
 
-    const inputStyle = { fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: "var(--text-sec)", margin: "0 0 5px", display: "block" };
-
     return (
-        <div className={`aud-root${isDark ? " dark" : ""}`} style={{ minHeight: "100%", padding: "28px 24px", fontFamily: "'EB Garamond',serif", color: "var(--text)", position: "relative" }}>
-            <style>{CSS}</style>
-            <div className="aud-bg" />
+        <div className={`aud-root${isDark ? " dark" : ""}`} style={{ background: t.bg }}>
+            <GlobalStyles t={t} isDark={isDark} />
+            <div className="aud-glow" />
 
-            <div style={{ position: "relative", zIndex: 1 }}>
-
-                {/* ─── Cabeçalho ─────────────────────────────────────────────────── */}
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-                    <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                            <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg,#8B0B1F,#C8102E)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <Shield size={18} color="#fff" />
-                            </div>
-                            <div>
-                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".22em", color: "rgba(200,16,46,.7)", margin: 0 }}>ADMINISTRAÇÃO</p>
-                                <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, letterSpacing: ".14em", color: "var(--text)", margin: 0 }}>
-                                    Histórico de Alterações
-                                </h1>
-                            </div>
+            <div className="aud-content">
+                {/* Header */}
+                <motion.div
+                    className="aud-header"
+                    initial={{ opacity: 0, y: -18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                >
+                    <div className="aud-header-left">
+                        <div className="aud-header-icon">
+                            <Shield size={24} />
                         </div>
-                        <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 15, color: "var(--text-sec)", margin: 0 }}>
-                            Rastreabilidade completa de todas as operações no sistema
-                        </p>
+                        <div className="aud-header-text">
+                            <p>🔐 Administração</p>
+                            <h1>Histórico de Alterações</h1>
+                            <p className="aud-header-sub">Rastreabilidade completa de todas as operações no sistema</p>
+                        </div>
                     </div>
 
-                    <div style={{ display: "flex", gap: 8 }}>
+                    <div className="aud-header-actions">
                         <button className="aud-btn aud-btn-ghost" onClick={() => setShowFiltros(s => !s)}>
-                            <Filter size={13} /> {showFiltros ? "Ocultar" : "Filtros"}
+                            <Filter size={14} /> {showFiltros ? "Ocultar" : "Filtros"}
                         </button>
                         <button className="aud-btn aud-btn-ghost" onClick={() => buscar()}>
-                            <RefreshCw size={13} className={loading ? "spin" : ""} /> Atualizar
+                            <RefreshCw size={14} className={loading ? "dl-spin" : ""} />
                         </button>
                     </div>
-                </div>
+                </motion.div>
 
-                {/* ─── Filtros ────────────────────────────────────────────────────── */}
+                {/* Filtros */}
                 <AnimatePresence>
                     {showFiltros && (
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: .22 }}
+                            transition={{ duration: 0.22 }}
                             style={{ overflow: "hidden", marginBottom: 20 }}
                         >
-                            <div className="aud-card" style={{ padding: "22px 24px" }}>
-                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".22em", color: "var(--text-sec)", margin: "0 0 18px" }}>FILTROS DE PESQUISA</p>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14 }}>
-
+                            <div className="aud-filters-wrap">
+                                <p className="aud-filters-label">Filtros de Pesquisa</p>
+                                <div className="aud-filter-grid">
                                     <div>
-                                        <label style={inputStyle}>ENTIDADE</label>
-                                        <select className="aud-select" style={{ width: "100%" }} value={filtros.entidade} onChange={e => setFiltro("entidade", e.target.value)}>
+                                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Entidade</label>
+                                        <select className="aud-select" value={filtros.entidade} onChange={e => setFiltro("entidade", e.target.value)}>
                                             <option value="">Todas</option>
                                             {ENTIDADES.map(e => <option key={e} value={e}>{e}</option>)}
                                         </select>
                                     </div>
 
                                     <div>
-                                        <label style={inputStyle}>AÇÃO</label>
-                                        <select className="aud-select" style={{ width: "100%" }} value={filtros.acao} onChange={e => setFiltro("acao", e.target.value)}>
+                                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Ação</label>
+                                        <select className="aud-select" value={filtros.acao} onChange={e => setFiltro("acao", e.target.value)}>
                                             <option value="">Todas</option>
                                             {Object.entries(ACOES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                                         </select>
                                     </div>
 
                                     <div>
-                                        <label style={inputStyle}>OPERADOR</label>
+                                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Operador</label>
                                         <input className="aud-input" placeholder="Nome do usuário..." value={filtros.usuario} onChange={e => setFiltro("usuario", e.target.value)} />
                                     </div>
 
                                     <div>
-                                        <label style={inputStyle}>ID DO REGISTRO</label>
+                                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>ID do Registro</label>
                                         <input className="aud-input" placeholder="Ex: 42" type="number" value={filtros.entidadeId} onChange={e => setFiltro("entidadeId", e.target.value)} />
                                     </div>
 
                                     <div>
-                                        <label style={inputStyle}>DATA INÍCIO</label>
+                                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Data Início</label>
                                         <input className="aud-input" type="datetime-local" value={filtros.de} onChange={e => setFiltro("de", e.target.value)} />
                                     </div>
 
                                     <div>
-                                        <label style={inputStyle}>DATA FIM</label>
+                                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6 }}>Data Fim</label>
                                         <input className="aud-input" type="datetime-local" value={filtros.ate} onChange={e => setFiltro("ate", e.target.value)} />
                                     </div>
                                 </div>
 
-                                <div style={{ display: "flex", gap: 10, marginTop: 18, justifyContent: "flex-end" }}>
-                                    <button className="aud-btn aud-btn-ghost" onClick={limpar}><X size={13} /> Limpar</button>
-                                    <button className="aud-btn aud-btn-primary" onClick={aplicar}><Search size={13} /> Buscar</button>
+                                <div className="aud-filter-actions">
+                                    <button className="aud-btn aud-btn-ghost" onClick={limpar}>
+                                        <X size={14} /> Limpar
+                                    </button>
+                                    <button className="aud-btn aud-btn-primary" onClick={aplicar}>
+                                        <Search size={14} /> Buscar
+                                    </button>
                                 </div>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* ─── Resumo ─────────────────────────────────────────────────────── */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".16em", color: "var(--text-sec)" }}>
-            {totalItems > 0 ? `${totalItems.toLocaleString("pt-BR")} REGISTRO${totalItems !== 1 ? "S" : ""} ENCONTRADO${totalItems !== 1 ? "S" : ""}` : "NENHUM REGISTRO"}
-          </span>
+                {/* Stats */}
+                <motion.div
+                    className="aud-stats"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                >
+                    <span>
+                        {totalItems > 0
+                            ? `${totalItems.toLocaleString("pt-BR")} Registro${totalItems !== 1 ? "s" : ""}`
+                            : "Nenhum registro"}
+                    </span>
                     {totalItems > 0 && (
-                        <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".14em", color: "var(--text-sec)" }}>
-              PÁGINA {filtros.page + 1} DE {totalPages}
-            </span>
+                        <span>
+                            Página {filtros.page + 1} de {totalPages}
+                        </span>
                     )}
-                </div>
+                </motion.div>
 
-                {/* ─── Tabela ─────────────────────────────────────────────────────── */}
-                <div className="aud-card" style={{ overflow: "hidden" }}>
+                {/* Table */}
+                <motion.div
+                    className="aud-card"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                >
                     {loading ? (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 0", gap: 12 }}>
-                            <RefreshCw size={20} className="spin" style={{ color: IEQ.red }} />
-                            <span style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".2em", color: "var(--text-sec)" }}>CARREGANDO...</span>
+                        <div className="aud-empty">
+                            <Loader2 size={32} className="dl-spin aud-empty-icon" style={{ color: AURA.gold }} />
+                            <p className="aud-empty-text">Carregando histórico…</p>
                         </div>
                     ) : erro ? (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "60px 0", gap: 12 }}>
-                            <AlertTriangle size={28} style={{ color: IEQ.red }} />
-                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".16em", color: "var(--text-sec)", textAlign: "center" }}>{erro}</p>
-                            <button className="aud-btn aud-btn-primary" onClick={() => buscar()}><RefreshCw size={13} /> Tentar novamente</button>
+                        <div className="aud-empty">
+                            <AlertTriangle size={32} className="aud-empty-icon" style={{ color: AURA.red }} />
+                            <p className="aud-empty-text">{erro}</p>
+                            <button className="aud-btn aud-btn-primary" style={{ marginTop: 12 }} onClick={() => buscar()}>
+                                <RefreshCw size={13} /> Tentar Novamente
+                            </button>
                         </div>
                     ) : registros.length === 0 ? (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "60px 0", gap: 10 }}>
-                            <Shield size={32} style={{ color: "var(--text-sec)", opacity: .4 }} />
-                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".18em", color: "var(--text-sec)" }}>NENHUM REGISTRO ENCONTRADO</p>
+                        <div className="aud-empty">
+                            <Shield size={40} className="aud-empty-icon" />
+                            <p className="aud-empty-text">Nenhum registro encontrado</p>
                         </div>
                     ) : (
-                        <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+                            <table className="aud-table">
                                 <thead>
-                                <tr style={{ borderBottom: "2px solid var(--border)" }}>
-                                    {["", "DATA / HORA", "ENTIDADE", "REGISTRO", "AÇÃO", "OPERADOR", "APROVADOR"].map(h => (
-                                        <th key={h} style={{ padding: "12px 8px", textAlign: "left", fontFamily: "'Cinzel',serif", fontSize: 8, fontWeight: 700, letterSpacing: ".18em", color: "var(--text-sec)", whiteSpace: "nowrap" }}>
-                                            {h}
-                                        </th>
-                                    ))}
+                                <tr>
+                                    <th></th>
+                                    <th>Data / Hora</th>
+                                    <th>Entidade</th>
+                                    <th>Registro</th>
+                                    <th>Ação</th>
+                                    <th>Operador</th>
+                                    <th>Aprovador</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {registros.map((reg, i) => (
-                                    <AuditoriaRow key={reg.id ?? i} reg={reg} isDark={isDark} />
+                                    <AuditoriaRow key={reg.id ?? i} reg={reg} isDark={isDark} t={t} />
                                 ))}
                                 </tbody>
                             </table>
                         </div>
                     )}
-                </div>
+                </motion.div>
 
-                {/* ─── Paginação ──────────────────────────────────────────────────── */}
+                {/* Paginação */}
                 {totalPages > 1 && (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 20 }}>
-                        <button className="page-btn" disabled={filtros.page === 0} onClick={() => irPara(filtros.page - 1)}>
+                    <motion.div
+                        className="aud-pagination"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.4, delay: 0.3 }}
+                    >
+                        <button
+                            className="aud-page-btn"
+                            disabled={filtros.page === 0}
+                            onClick={() => irPara(filtros.page - 1)}
+                        >
                             <ChevronLeft size={14} />
                         </button>
 
@@ -526,23 +749,30 @@ export default function HistoricoAuditoria({ isDark }) {
                                 p = start + i;
                             }
                             return (
-                                <button key={p} className={`page-btn${filtros.page === p ? " active" : ""}`} onClick={() => irPara(p)}>
+                                <button
+                                    key={p}
+                                    className={`aud-page-btn${filtros.page === p ? " active" : ""}`}
+                                    onClick={() => irPara(p)}
+                                >
                                     {p + 1}
                                 </button>
                             );
                         })}
 
-                        <button className="page-btn" disabled={filtros.page >= totalPages - 1} onClick={() => irPara(filtros.page + 1)}>
+                        <button
+                            className="aud-page-btn"
+                            disabled={filtros.page >= totalPages - 1}
+                            onClick={() => irPara(filtros.page + 1)}
+                        >
                             <ChevronRight size={14} />
                         </button>
-                    </div>
+                    </motion.div>
                 )}
 
-                {/* ─── Rodapé ─────────────────────────────────────────────────────── */}
-                <div className="divider" style={{ marginTop: 32 }} />
-                <p style={{ textAlign: "center", fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".16em", color: "var(--text-sec)", padding: "10px 0 0" }}>
-                    © IEQ PITUAÇU · AUDITORIA DO SISTEMA · {new Date().getFullYear()}
-                </p>
+                {/* Footer */}
+                <div className="aud-footer">
+                    © IEQ Pituaçu · Sistema de Auditoria · {new Date().getFullYear()}
+                </div>
             </div>
         </div>
     );
