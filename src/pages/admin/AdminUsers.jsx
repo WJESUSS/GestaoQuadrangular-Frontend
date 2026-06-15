@@ -515,12 +515,119 @@ function GlobalStyles({ t, dark }) {
       }
 
       /* ── mobile ── */
-      @media (max-width: 768px) {
-        .adm-subnav { display: none; }
-        .adm-mob-subnav-toggle { display: flex !important; }
-        .adm-subnav.open { display: flex; position: fixed; z-index: 50; height: 100dvh; top: 0; left: 0; flex-direction: column; }
+      .adm-mob-toggle {
+        display: none; width: 34px; height: 34px; border-radius: 8px;
+        border: 1px solid ${t.border}; background: none; cursor: pointer;
+        align-items: center; justify-content: center;
+        color: ${t.textMuted}; flex-shrink: 0;
       }
-      .adm-mob-subnav-toggle { display: none; }
+      .adm-mob-overlay {
+        position: fixed; inset: 0; z-index: 49;
+        background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
+
+      @media (max-width: 900px) {
+        .adm-subnav {
+          position: fixed; top: 0; left: -260px; z-index: 50;
+          height: 100dvh; width: 240px;
+          transition: left .25s cubic-bezier(.4,0,.2,1);
+          display: flex; flex-direction: column;
+          box-shadow: 4px 0 24px rgba(0,0,0,.25);
+        }
+        .adm-subnav.open { left: 0; }
+        .adm-mob-toggle { display: flex; }
+
+        .adm-content { padding: 16px 14px 32px; }
+
+        .adm-brand-row {
+          padding: 8px 12px;
+          gap: 6px;
+        }
+        .adm-brand-icon { width: 28px; height: 28px; }
+        .adm-brand-name { font-size: 12px; }
+        .adm-brand-sub  { font-size: 10px; }
+
+        .adm-top-actions { gap: 4px; }
+        .adm-user-pill { display: none; }
+        .adm-online  { display: none; }
+        .adm-exit-btn { padding: 6px 10px; font-size: 10px; }
+        .adm-exit-btn span { display: none; }
+
+        .adm-secnav { padding: 0 12px; }
+
+        .adm-page-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .adm-page-title { font-size: 16px; }
+        .adm-page-actions { width: 100%; justify-content: flex-start; }
+
+        .adm-kpi-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+        }
+        .adm-kpi { padding: 12px 10px; gap: 8px; }
+        .adm-kpi-icon { width: 30px; height: 30px; }
+        .adm-kpi-num  { font-size: 20px; }
+
+        .adm-card-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+        .adm-user-row  { padding: 10px 12px; }
+        .adm-user-row > div:last-child { width: 100%; justify-content: flex-start; }
+
+        .adm-pill { font-size: 9px; padding: 2px 7px; }
+
+        .adm-modal-sheet { max-width: 100%; border-radius: 16px 16px 0 0; }
+        .adm-modal-inner { padding: 20px 16px; }
+
+        .adm-celula-sel { padding: 10px 14px; }
+        .adm-celula-sel select { font-size: 12px; }
+
+        .adm-subnav.open { box-shadow: 4px 0 40px rgba(0,0,0,.4); }
+
+        .adm-card form { padding: 14px 14px !important; }
+      }
+
+      @media (max-width: 480px) {
+        .adm-content { padding: 12px 10px 28px; }
+
+        .adm-kpi-grid { gap: 6px; }
+        .adm-kpi { padding: 10px 8px; gap: 6px; flex-direction: column; text-align: center; }
+        .adm-kpi-icon { width: 26px; height: 26px; }
+        .adm-kpi-num  { font-size: 18px; }
+
+        .adm-page-head { margin-bottom: 12px; }
+        .adm-page-title { font-size: 15px; }
+        .adm-page-eyebrow { font-size: 9px; }
+
+        .adm-card-head { padding: 10px 12px; }
+        .adm-card-head-icon { width: 28px; height: 28px; }
+        .adm-card-title { font-size: 13px; }
+
+        .adm-user-row { padding: 8px 10px; gap: 6px; }
+        .adm-user-row > div:first-child { gap: 8px; }
+        .adm-user-row p:first-child { font-size: 12px !important; }
+        .adm-user-row p:last-child  { font-size: 10px !important; }
+
+        .adm-avatar { width: 30px; height: 30px; font-size: 12px; }
+        .adm-act-btn { width: 26px; height: 26px; }
+
+        .adm-btn-red,
+        .adm-btn-blue,
+        .adm-btn-ghost { font-size: 10px; padding: 8px 14px; }
+
+        .adm-input { font-size: 13px; padding: 10px 12px 10px 34px; }
+        .adm-select { font-size: 12px; padding: 10px 12px 10px 34px; }
+
+        .adm-top-actions .adm-ico-btn { width: 30px; height: 30px; }
+
+        .adm-toast {
+          font-size: 10px; padding: 10px 14px;
+          bottom: 14px !important; left: 10px; right: 10px;
+          transform: none; width: auto; white-space: normal;
+          justify-content: center;
+        }
+
+        .adm-subnav { width: 220px; left: -240px; }
+      }
 
       .adm-empty {
         display: flex; flex-direction: column; align-items: center;
@@ -781,11 +888,16 @@ export default function AdminUsers() {
         <div className="adm-topbar">
           {/* Linha 1: brand + ações */}
           <div className="adm-brand-row">
-            <div className="adm-brand">
-              <div className="adm-brand-icon"><Shield size={16} color="#fff" /></div>
-              <div>
-                <div className="adm-brand-name">IEQ Pituaçu</div>
-                <div className="adm-brand-sub">Sistema Eclesiástico</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button className="adm-mob-toggle" onClick={() => setSubnavOpen(true)} aria-label="Menu">
+                <Menu size={16} />
+              </button>
+              <div className="adm-brand">
+                <div className="adm-brand-icon"><Shield size={16} color="#fff" /></div>
+                <div>
+                  <div className="adm-brand-name">IEQ Pituaçu</div>
+                  <div className="adm-brand-sub">Sistema Eclesiástico</div>
+                </div>
               </div>
             </div>
             <div className="adm-top-actions">
@@ -836,12 +948,25 @@ export default function AdminUsers() {
         {/* ══ BODY ════════════════════════════════════════════════════════════ */}
         <div className="adm-body" style={{ flex: 1, minHeight: 0 }}>
 
+          {/* Overlay mobile */}
+          <AnimatePresence>
+            {subnavOpen && (
+                <motion.div className="adm-mob-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .2 }}
+                            onClick={() => setSubnavOpen(false)} />
+            )}
+          </AnimatePresence>
+
           {/* Subnav lateral */}
           <nav
               className={`adm-subnav${subnavOpen ? " open" : ""}`}
               style={{ "--sec-color": secObj?.color, "--sec-color-soft": secObj?.color + "18" }}
           >
-            <div className="adm-subnav-label">{secObj?.label}</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 12px 4px" }}>
+              <div className="adm-subnav-label" style={{ padding: 0 }}>{secObj?.label}</div>
+              <button className="adm-mob-toggle" onClick={() => setSubnavOpen(false)} aria-label="Fechar" style={{ width: 30, height: 30 }}>
+                <X size={14} />
+              </button>
+            </div>
             {secObj?.itens.map(item => {
               const Icon = item.icon;
               const ativo = moduloAtivo === item.key;
