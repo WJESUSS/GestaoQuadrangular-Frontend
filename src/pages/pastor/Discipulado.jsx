@@ -1,237 +1,380 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import api from "../../services/api.js";
 import {
   Search, Calendar, Download, X, Users,
   Loader2, ChevronRight, RefreshCw, Filter,
-  CheckCircle2, AlertCircle, BookOpen, Sparkles,
+  CheckCircle2, AlertCircle, BookOpen,
+  ChevronLeft, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-/* ─── Tokens AURA ─────────────────────────────────────────────────────── */
+/* ─── Paleta ───────────────────────────────────────────────────────────── */
 const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-  yellowDark:"#C48C00",
+  gold:       "#C9A96E",
+  goldLight:  "#E8D5A3",
+  red:        "#C8102E",
+  redDark:    "#9B0B1E",
+  blue:       "#003DA5",
+  blueDark:   "#002470",
+  yellow:     "#FDB813",
+  yellowDark: "#C48C00",
+  green:      "#16a34a",
 };
 
 function theme(isDark) {
   return {
-    bg:          isDark ? "#0A0A0F"              : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.96)"   : "rgba(255,255,255,.96)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)": "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.18)": "rgba(201,169,110,.3)",
-    text:        isDark ? "#F5F0E8"              : "#1A1008",
-    textSec:     isDark ? "#9A9588"              : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"              : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)": "rgba(201,169,110,.08)",
-    glow2:       isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
-    placeholder: isDark ? "rgba(154,149,136,.35)": "rgba(107,94,74,.35)",
+    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
+    bgEl:        isDark ? "rgba(18,18,26,.97)"    : "rgba(255,255,255,.97)",
+    bgInput:     isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"  : "rgba(201,169,110,.2)",
+    borderInput: isDark ? "rgba(201,169,110,.18)" : "rgba(201,169,110,.3)",
+    text:        isDark ? "#F5F0E8"               : "#1A1008",
+    textSec:     isDark ? "#9A9588"               : "#6B5E4A",
+    textMuted:   isDark ? "#6B6658"               : "#9A9080",
+    glow1:       isDark ? "rgba(201,169,110,.05)" : "rgba(201,169,110,.08)",
+    glow2:       isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)",
+    placeholder: isDark ? "rgba(154,149,136,.35)" : "rgba(107,94,74,.35)",
+    rowHov:      isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.05)",
+    warnBg:      isDark ? "rgba(253,184,19,.07)"  : "rgba(253,184,19,.06)",
   };
 }
 
+/* ─── Config ───────────────────────────────────────────────────────────── */
 const COLUNAS = [
-  { campo: "escolaBiblica", label: "EBD",       justField: "justEscolaBiblica" },
-  { campo: "quartaNoite",   label: "4ª Noite",  justField: "justQuartaNoite"   },
-  { campo: "quintaNoite",   label: "5ª Noite",  justField: "justQuintaNoite"   },
-  { campo: "domingoManha",  label: "Dom. Manhã",justField: "justDomingoManha"  },
-  { campo: "domingoNoite",  label: "Dom. Noite",justField: "justDomingoNoite"  },
+  { campo: "escolaBiblica", label: "EBD",        justField: "justEscolaBiblica" },
+  { campo: "quartaNoite",   label: "4ª Noite",   justField: "justQuartaNoite"   },
+  { campo: "quintaNoite",   label: "5ª Noite",   justField: "justQuintaNoite"   },
+  { campo: "domingoManha",  label: "Dom. Manhã", justField: "justDomingoManha"  },
+  { campo: "domingoNoite",  label: "Dom. Noite", justField: "justDomingoNoite"  },
 ];
 
 const JUST_CONFIG = {
-  Trabalho: { emoji:"💼", color:"#6366F1", bg:"rgba(99,102,241,.1)",  border:"rgba(99,102,241,.28)" },
-  Doença:   { emoji:"🤒", color:"#DC2626", bg:"rgba(220,38,38,.1)",   border:"rgba(220,38,38,.28)"  },
-  Viagem:   { emoji:"✈️", color:"#0891B2", bg:"rgba(8,145,178,.1)",   border:"rgba(8,145,178,.28)"  },
-  Outro:    { emoji:"📝", color:AURA.yellowDark, bg:"rgba(217,119,6,.1)", border:"rgba(217,119,6,.28)" },
+  Trabalho: { emoji: "💼", color: "#6366F1", bg: "rgba(99,102,241,.1)",  border: "rgba(99,102,241,.28)" },
+  Doença:   { emoji: "🤒", color: "#DC2626", bg: "rgba(220,38,38,.1)",   border: "rgba(220,38,38,.28)"  },
+  Viagem:   { emoji: "✈️", color: "#0891B2", bg: "rgba(8,145,178,.1)",   border: "rgba(8,145,178,.28)"  },
+  Outro:    { emoji: "📝", color: AURA.yellowDark, bg: "rgba(217,119,6,.1)", border: "rgba(217,119,6,.28)" },
 };
 
-function IEQCross({ size = 36 }) {
-  return (
-      <img src="/quadrangular.png" alt="IEQ"
-           style={{ width:size, height:size, borderRadius:"50%", objectFit:"cover", display:"block" }} />
-  );
+const PAGE_SIZES = [6, 12, 24];
+
+/* ─── Helpers ──────────────────────────────────────────────────────────── */
+function formatarSemana(inicio, fim) {
+  if (!inicio || !fim) return "Período indefinido";
+  const f = d => { const [, m, dia] = d.split("-"); return `${dia}/${m}`; };
+  return `${f(inicio)} → ${f(fim)}`;
 }
 
-/* ─── Célula de presença ───────────────────────────────────────────────── */
+function obterSemanaAtual() {
+  const hoje = new Date();
+  const dom  = new Date(hoje); dom.setDate(hoje.getDate() - hoje.getDay());
+  const sab  = new Date(dom);  sab.setDate(dom.getDate() + 6);
+  return {
+    inicio: dom.toISOString().split("T")[0],
+    fim:    sab.toISOString().split("T")[0],
+  };
+}
+
+function frequencia(presencas = []) {
+  if (!presencas.length) return 0;
+  const total    = presencas.length * COLUNAS.length;
+  const presentes = presencas.reduce(
+      (acc, p) => acc + COLUNAS.filter(c => p[c.campo]).length,
+      0,
+  );
+  return Math.round((presentes / total) * 100);
+}
+
+/* ─── Sub-componentes ──────────────────────────────────────────────────── */
 function CelulaPresenca({ membro, coluna, isDark, t }) {
-  const marcado  = membro[coluna.campo];
-  const justval  = membro[coluna.justField];
-  const cfg      = JUST_CONFIG[justval] || { emoji:"📝", color:AURA.gold, bg:`${AURA.gold}15`, border:`${AURA.gold}30` };
+  const marcado = membro[coluna.campo];
+  const justval = membro[coluna.justField];
+  const cfg     = JUST_CONFIG[justval] || {
+    emoji: "📝", color: AURA.gold,
+    bg:    `${AURA.gold}15`, border: `${AURA.gold}30`,
+  };
 
   return (
-      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, padding:"6px 2px" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "5px 2px" }}>
         {marcado
-            ? <CheckCircle2 size={18} style={{ color:"#16a34a" }} />
-            : <X size={15} style={{ color:isDark?"rgba(255,255,255,.15)":"rgba(26,16,8,.15)" }} />
+            ? <CheckCircle2 size={17} style={{ color: AURA.green }} />
+            : <X size={14} style={{ color: isDark ? "rgba(255,255,255,.15)" : "rgba(26,16,8,.15)" }} />
         }
         {!marcado && justval && (
-            <div style={{
-              fontSize:8, color:cfg.color, fontFamily:"'Inter',sans-serif", fontWeight:600,
-              textAlign:"center", lineHeight:1.2, padding:"2px 5px",
-              background:cfg.bg, borderRadius:6, border:`1px solid ${cfg.border}`,
-              maxWidth:60, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+            <span style={{
+              fontSize: 8, color: cfg.color, fontWeight: 600,
+              padding: "2px 5px", background: cfg.bg,
+              borderRadius: 5, border: `1px solid ${cfg.border}`,
+              maxWidth: 58, whiteSpace: "nowrap",
+              overflow: "hidden", textOverflow: "ellipsis",
             }}>
-              {cfg.emoji} {justval}
-            </div>
+          {cfg.emoji} {justval}
+        </span>
         )}
       </div>
   );
 }
 
-/* ─── Modal de detalhe da célula ───────────────────────────────────────── */
+/* barra de frequência inline */
+function FreqBar({ pct }) {
+  const color = pct === 100 ? AURA.green : pct >= 60 ? AURA.gold : AURA.red;
+  return (
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{
+          height: 4, width: 52, borderRadius: 99,
+          background: "rgba(128,128,128,.15)", overflow: "hidden",
+        }}>
+          <div style={{ height: "100%", width: `${pct}%`, borderRadius: 99, background: color, transition: "width .4s" }} />
+        </div>
+        <span style={{ fontSize: 10, fontWeight: 600, color, minWidth: 30 }}>{pct}%</span>
+      </div>
+  );
+}
+
+/* paginação */
+function Paginacao({ page, totalPages, onChange, t, totalItems, pageSize }) {
+  if (totalPages <= 1) return null;
+
+  const pages = [];
+  const delta = 1; // vizinhos de cada lado
+  for (let i = 0; i < totalPages; i++) {
+    if (
+        i === 0 ||
+        i === totalPages - 1 ||
+        (i >= page - delta && i <= page + delta)
+    ) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== "...") {
+      pages.push("...");
+    }
+  }
+
+  const inicio = page * pageSize + 1;
+  const fim    = Math.min((page + 1) * pageSize, totalItems);
+
+  return (
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexWrap: "wrap", gap: 10, marginTop: 20,
+      }}>
+        {/* info */}
+        <span style={{ fontSize: 11, color: t.textMuted, fontWeight: 500 }}>
+        Exibindo {inicio}–{fim} de {totalItems}
+      </span>
+
+        {/* botões */}
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <button
+              onClick={() => onChange(page - 1)}
+              disabled={page === 0}
+              style={pagBtnStyle(false, false, t)}
+              aria-label="Página anterior"
+          >
+            <ChevronLeft size={14} />
+          </button>
+
+          {pages.map((p, i) =>
+              p === "..." ? (
+                  <span key={`e${i}`} style={{ color: t.textMuted, fontSize: 12, padding: "0 4px" }}>…</span>
+              ) : (
+                  <button
+                      key={p}
+                      onClick={() => onChange(p)}
+                      style={pagBtnStyle(p === page, false, t)}
+                      aria-label={`Página ${p + 1}`}
+                      aria-current={p === page ? "page" : undefined}
+                  >
+                    {p + 1}
+                  </button>
+              )
+          )}
+
+          <button
+              onClick={() => onChange(page + 1)}
+              disabled={page >= totalPages - 1}
+              style={pagBtnStyle(false, false, t)}
+              aria-label="Próxima página"
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+  );
+}
+
+function pagBtnStyle(active, disabled, t) {
+  return {
+    width: 34, height: 34, borderRadius: 8,
+    border: active ? "none" : `1px solid ${t.border}`,
+    background: active
+        ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`
+        : "transparent",
+    color:    active ? "#fff" : t.textMuted,
+    cursor:   disabled ? "not-allowed" : "pointer",
+    opacity:  disabled ? .35 : 1,
+    display:  "flex", alignItems: "center", justifyContent: "center",
+    fontSize: 12, fontWeight: 600,
+    transition: "all .2s",
+  };
+}
+
+/* ─── Modal de detalhe ──────────────────────────────────────────────────── */
 function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
   if (!rel) return null;
   const presencas = rel.presencas || [];
+  const pct       = frequencia(presencas);
 
   return (
-      <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                  style={{
-                    position:"fixed", inset:0, zIndex:9999,
-                    background:"rgba(10,10,15,.88)", backdropFilter:"blur(16px)",
-                    display:"flex", alignItems:"flex-start", justifyContent:"center",
-                    padding:"env(safe-area-inset-top,12px) 10px 10px",
-                    overflowY:"auto", WebkitOverflowScrolling:"touch",
-                  }}
-                  onClick={onClose}>
-
+      <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(10,10,15,.88)", backdropFilter: "blur(16px)",
+            display: "flex", alignItems: "flex-start", justifyContent: "center",
+            padding: "env(safe-area-inset-top,12px) 10px 10px",
+            overflowY: "auto", WebkitOverflowScrolling: "touch",
+          }}
+          onClick={onClose}
+      >
         <motion.div
-            initial={{ y:-36, opacity:0, scale:.97 }}
-            animate={{ y:0,   opacity:1, scale:1   }}
-            exit={{    y:-36, opacity:0, scale:.97 }}
-            transition={{ type:"spring", stiffness:320, damping:30 }}
+            initial={{ y: -32, opacity: 0, scale: .97 }}
+            animate={{ y: 0,   opacity: 1, scale: 1   }}
+            exit={{    y: -32, opacity: 0, scale: .97 }}
+            transition={{ type: "spring", stiffness: 320, damping: 30 }}
             onClick={e => e.stopPropagation()}
             style={{
-              width:"100%", maxWidth:860,
-              background:t.bgEl, border:`1px solid ${t.border}`,
-              borderRadius:22, overflow:"hidden",
-              boxShadow:"0 32px 80px rgba(0,0,0,.55)",
-            }}>
-
-          {/* Header */}
+              width: "100%", maxWidth: 860, marginTop: 8, marginBottom: 16,
+              background: t.bgEl, border: `1px solid ${t.border}`,
+              borderRadius: 22, overflow: "hidden",
+              boxShadow: "0 32px 80px rgba(0,0,0,.55)",
+            }}
+        >
+          {/* Header azul */}
           <div style={{
-            padding:"18px 20px",
-            background:`linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`,
-            display:"flex", justifyContent:"space-between", alignItems:"center", gap:12,
+            padding: "16px 18px",
+            background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`,
+            display: "flex", justifyContent: "space-between",
+            alignItems: "center", gap: 12,
           }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
-              <div style={{ width:42, height:42, borderRadius:11, background:"rgba(255,255,255,.15)",
-                display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <BookOpen size={20} style={{ color:"#fff" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 10,
+                background: "rgba(255,255,255,.15)",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <BookOpen size={19} style={{ color: "#fff" }} />
               </div>
-              <div style={{ minWidth:0 }}>
-                <h3 style={{ fontFamily:"'Inter',sans-serif", fontSize:15, fontWeight:700,
-                  color:"#fff", margin:"0 0 3px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+              <div style={{ minWidth: 0 }}>
+                <h3 style={{
+                  fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 700,
+                  color: "#fff", margin: "0 0 2px",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
                   {rel.nomeCelula}
                 </h3>
-                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:"rgba(255,255,255,.65)", margin:0 }}>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,.65)", margin: 0 }}>
                   {rel.nomeLider} · {formatarSemana(rel.dataInicio, rel.dataFim)}
                 </p>
               </div>
             </div>
-            <div style={{ display:"flex", gap:8, flexShrink:0 }}>
-              <button onClick={() => onPDF(rel)}
-                      style={{ display:"flex", alignItems:"center", gap:6, padding:"9px 14px",
-                        background:"rgba(201,169,110,.2)", border:`1px solid ${AURA.gold}50`,
-                        borderRadius:10, cursor:"pointer", color:AURA.gold,
-                        fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:".12em",
-                        textTransform:"uppercase", whiteSpace:"nowrap" }}>
-                <Download size={13} /> PDF
+            <div style={{ display: "flex", gap: 7, flexShrink: 0 }}>
+              <button
+                  onClick={() => onPDF(rel)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    padding: "8px 13px",
+                    background: "rgba(201,169,110,.2)", border: `1px solid ${AURA.gold}50`,
+                    borderRadius: 9, cursor: "pointer", color: AURA.gold,
+                    fontSize: 9, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase",
+                  }}
+              >
+                <Download size={12} /> PDF
               </button>
-              <button onClick={onClose}
-                      style={{ background:"rgba(255,255,255,.15)", border:"none",
-                        color:"#fff", padding:10, borderRadius:10, cursor:"pointer", display:"flex" }}>
-                <X size={18} />
+              <button
+                  onClick={onClose}
+                  style={{
+                    background: "rgba(255,255,255,.15)", border: "none",
+                    color: "#fff", padding: 9, borderRadius: 9, cursor: "pointer",
+                    display: "flex",
+                  }}
+                  aria-label="Fechar"
+              >
+                <X size={17} />
               </button>
             </div>
           </div>
 
-          {/* KPIs rápidos */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)",
-            borderBottom:`1px solid ${t.border}` }}>
+          {/* KPIs */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${t.border}` }}>
             {[
-              { label:"MEMBROS", value:presencas.length, color:t.text },
-              { label:"PRESENTES", value:presencas.filter(p=>COLUNAS.some(c=>p[c.campo])).length, color:"#16a34a" },
-              { label:"SEMANA", value:formatarSemana(rel.dataInicio, rel.dataFim), color:AURA.gold, small:true },
-            ].map((k,i) => (
-                <div key={i} style={{ padding:"14px 12px", textAlign:"center",
-                  borderRight:i<2?`1px solid ${t.border}`:"none" }}>
-                  <p style={{ fontFamily:"'Inter',sans-serif", fontSize:k.small?10:20,
-                    fontWeight:700, color:k.color, margin:0, letterSpacing:k.small?".04em":0 }}>{k.value}</p>
-                  <p style={{ fontFamily:"'Inter',sans-serif", fontSize:8, letterSpacing:".12em",
-                    color:t.textMuted, margin:"3px 0 0" }}>{k.label}</p>
+              { label: "MEMBROS",   value: presencas.length, color: t.text            },
+              { label: "PRESENTES", value: presencas.filter(p => COLUNAS.some(c => p[c.campo])).length, color: AURA.green },
+              { label: "FREQUÊNCIA",value: `${pct}%`,        color: pct >= 70 ? AURA.green : pct >= 50 ? AURA.gold : AURA.red },
+            ].map((k, i) => (
+                <div key={i} style={{
+                  padding: "12px 10px", textAlign: "center",
+                  borderRight: i < 2 ? `1px solid ${t.border}` : "none",
+                }}>
+                  <p style={{ fontSize: 20, fontWeight: 700, color: k.color, margin: 0 }}>{k.value}</p>
+                  <p style={{ fontSize: 8, letterSpacing: ".12em", color: t.textMuted, margin: "3px 0 0" }}>{k.label}</p>
                 </div>
             ))}
           </div>
 
-          {/* Tabela — scroll horizontal no mobile */}
-          <div style={{ overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
-            <table style={{ width:"100%", borderCollapse:"collapse", minWidth:460 }}>
+          {/* Tabela scroll */}
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 440 }}>
               <thead>
-              <tr style={{ background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.05)" }}>
-                <th style={{ padding:"12px 16px", textAlign:"left", fontFamily:"'Inter',sans-serif",
-                  fontSize:9, fontWeight:700, letterSpacing:".14em", color:t.textMuted,
-                  borderBottom:`1px solid ${t.border}`, whiteSpace:"nowrap" }}>MEMBRO</th>
+              <tr style={{ background: isDark ? "rgba(255,255,255,.03)" : "rgba(201,169,110,.05)" }}>
+                <th style={thStyle(t, "left")}>MEMBRO</th>
                 {COLUNAS.map(c => (
-                    <th key={c.campo} style={{ padding:"12px 8px", textAlign:"center",
-                      fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700,
-                      letterSpacing:".1em", color:t.textMuted,
-                      borderBottom:`1px solid ${t.border}`, whiteSpace:"nowrap" }}>{c.label}</th>
+                    <th key={c.campo} style={thStyle(t, "center")}>{c.label}</th>
                 ))}
+                <th style={thStyle(t, "center")}>%</th>
               </tr>
               </thead>
               <tbody>
               {presencas.map((p, i) => {
-                const totalP = COLUNAS.filter(c => p[c.campo]).length;
-                const pct    = Math.round((totalP / COLUNAS.length) * 100);
+                const tot = COLUNAS.filter(c => p[c.campo]).length;
+                const pctM = Math.round((tot / COLUNAS.length) * 100);
                 return (
-                    <tr key={i} style={{ borderBottom:`1px solid ${t.border}` }}
-                        onMouseEnter={e => e.currentTarget.style.background=isDark?"rgba(201,169,110,.04)":"rgba(201,169,110,.05)"}
-                        onMouseLeave={e => e.currentTarget.style.background="transparent"}>
-                      <td style={{ padding:"8px 16px", fontFamily:"'Inter',sans-serif",
-                        fontSize:14, fontWeight:400, color:t.text, whiteSpace:"nowrap" }}>
-                        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                          <div style={{ width:30, height:30, borderRadius:8, flexShrink:0,
-                            background:`linear-gradient(135deg,${AURA.blue}30,${AURA.gold}20)`,
-                            display:"flex", alignItems:"center", justifyContent:"center",
-                            fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:13, color:AURA.gold }}>
+                    <tr
+                        key={i}
+                        style={{ borderBottom: `1px solid ${t.border}`, transition: "background .15s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = t.rowHov}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                    >
+                      <td style={{ padding: "8px 14px", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                          <div style={{
+                            width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+                            background: `linear-gradient(135deg,${AURA.blue}28,${AURA.gold}18)`,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 12, fontWeight: 700, color: AURA.gold,
+                          }}>
                             {p.nomeMembro?.charAt(0) || "?"}
                           </div>
-                          <div>
-                            <div style={{ fontWeight:500 }}>{p.nomeMembro}</div>
-                            <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:2 }}>
-                              <div style={{ height:3, width:50, borderRadius:99,
-                                background:isDark?"rgba(255,255,255,.08)":"rgba(0,0,0,.08)", overflow:"hidden" }}>
-                                <div style={{ height:"100%", width:`${pct}%`, borderRadius:99,
-                                  background:pct===100?"#16a34a":pct>=60?AURA.gold:AURA.red }} />
-                              </div>
-                              <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9,
-                                color:t.textMuted }}>{pct}%</span>
-                            </div>
-                          </div>
+                          <span style={{ fontSize: 13, fontWeight: 500, color: t.text }}>{p.nomeMembro}</span>
                         </div>
                       </td>
                       {COLUNAS.map(col => (
-                          <td key={col.campo} style={{ textAlign:"center", padding:"4px 6px" }}>
+                          <td key={col.campo} style={{ textAlign: "center", padding: "2px 4px" }}>
                             <CelulaPresenca membro={p} coluna={col} isDark={isDark} t={t} />
                           </td>
                       ))}
+                      <td style={{ textAlign: "center", padding: "6px 10px" }}>
+                        <FreqBar pct={pctM} />
+                      </td>
                     </tr>
                 );
               })}
               {presencas.length === 0 && (
                   <tr>
-                    <td colSpan={COLUNAS.length + 1} style={{ padding:"32px", textAlign:"center",
-                      fontFamily:"'Inter',sans-serif", fontSize:13, fontStyle:"italic", color:t.textMuted }}>
+                    <td colSpan={COLUNAS.length + 2} style={{
+                      padding: 32, textAlign: "center",
+                      fontSize: 13, fontStyle: "italic", color: t.textMuted,
+                    }}>
                       Nenhuma presença registrada.
                     </td>
                   </tr>
@@ -240,15 +383,20 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
             </table>
           </div>
 
-          {/* Botão fechar rodapé */}
-          <div style={{ padding:"16px 20px", borderTop:`1px solid ${t.border}` }}>
-            <button onClick={onClose}
-                    style={{ width:"100%", padding:"12px", borderRadius:100,
-                      border:`1px solid ${t.border}`, cursor:"pointer", background:"transparent",
-                      color:t.textSec, fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:600,
-                      letterSpacing:".14em", textTransform:"uppercase", transition:"all .3s",
-                      display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-              <X size={14} /> Fechar
+          {/* Rodapé */}
+          <div style={{ padding: "14px 18px", borderTop: `1px solid ${t.border}` }}>
+            <button
+                onClick={onClose}
+                style={{
+                  width: "100%", padding: "11px", borderRadius: 100,
+                  border: `1px solid ${t.border}`, cursor: "pointer",
+                  background: "transparent", color: t.textSec,
+                  fontSize: 11, fontWeight: 600, letterSpacing: ".14em",
+                  textTransform: "uppercase",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                }}
+            >
+              <X size={13} /> Fechar
             </button>
           </div>
         </motion.div>
@@ -256,45 +404,50 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
   );
 }
 
-/* ─── Helpers ──────────────────────────────────────────────────────────── */
-function formatarSemana(inicio, fim) {
-  if (!inicio || !fim) return "Período indefinido";
-  const f = d => { const [,m,dia] = d.split("-"); return `${dia}/${m}`; };
-  return `${f(inicio)} → ${f(fim)}`;
+/* ─── estilos th ────────────────────────────────────────────────────────── */
+function thStyle(t, align = "left") {
+  return {
+    padding: "11px 8px", textAlign: align,
+    fontSize: 9, fontWeight: 700, letterSpacing: ".12em",
+    color: t.textMuted, borderBottom: `1px solid ${t.border}`,
+    whiteSpace: "nowrap",
+  };
 }
 
-function obterSemanaAtual() {
-  const hoje = new Date();
-  const dom  = new Date(hoje); dom.setDate(hoje.getDate() - hoje.getDay());
-  const sab  = new Date(dom);  sab.setDate(dom.getDate() + 6);
-  return { inicio: dom.toISOString().split("T")[0], fim: sab.toISOString().split("T")[0] };
-}
-
-/* ─── Componente principal ─────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   COMPONENTE PRINCIPAL
+══════════════════════════════════════════════════════════════════════════ */
 export default function Discipulado({ isDark = false }) {
-  const [relatorios, setRelatorios] = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [erro,       setErro]       = useState(null);
-  const [busca,      setBusca]      = useState("");
-  const [dataInicio, setDataInicio] = useState("");
-  const [dataFim,    setDataFim]    = useState("");
-  const [selected,   setSelected]   = useState(null);
-  const [showFilter, setShowFilter] = useState(false);
+  const [relatorios,  setRelatorios]  = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [erro,        setErro]        = useState(null);
+  const [busca,       setBusca]       = useState("");
+  const [dataInicio,  setDataInicio]  = useState("");
+  const [dataFim,     setDataFim]     = useState("");
+  const [selected,    setSelected]    = useState(null);
+  const [showFilter,  setShowFilter]  = useState(false);
+
+  /* paginação */
+  const [page,     setPage]     = useState(0);
+  const [pageSize, setPageSize] = useState(PAGE_SIZES[0]); // 6 por padrão
 
   const t = theme(isDark);
 
+  /* ── CSS inline ─────────────────────────────────────────────────────── */
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
     @keyframes aura-spin  { to { transform: rotate(360deg); } }
-    @keyframes aura-pulse { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+    @keyframes aura-pulse { 0%,100%{opacity:.2} 50%{opacity:.05} }
+    @keyframes blink      { 0%,100%{opacity:1}  50%{opacity:.3}  }
+    *, *::before, *::after { box-sizing: border-box; }
 
     .disc-root {
       min-height: 100vh;
       background: ${t.bg};
       color: ${t.text};
-      position: relative;
-      padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
       font-family: 'Inter', sans-serif;
+      padding-bottom: max(48px, env(safe-area-inset-bottom, 48px));
+      -webkit-overflow-scrolling: touch;
     }
     .disc-glow {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -302,408 +455,572 @@ export default function Discipulado({ isDark = false }) {
         radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
         radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
     }
-    .disc-content {
+    .disc-wrap {
       position: relative; z-index: 1;
       max-width: 1100px; margin: 0 auto;
-      padding: 24px 16px 0;
+      padding: 20px 16px 0;
     }
+    @media (min-width: 640px) { .disc-wrap { padding: 28px 24px 0; } }
+
+    /* inputs */
     .disc-input {
-      width: 100%; box-sizing: border-box;
+      width: 100%;
       background: ${t.bgInput}; border: 1px solid ${t.borderInput};
-      color: ${t.text}; padding: 12px 14px 12px 42px;
-      border-radius: 12px; outline: none;
+      color: ${t.text}; padding: 11px 14px 11px 40px;
+      border-radius: 11px; outline: none;
       font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
-      transition: all .25s; -webkit-appearance: none;
+      transition: border-color .25s;
+      -webkit-appearance: none;
     }
-    .disc-input:focus {
-      border-color: ${AURA.gold}80;
-      box-shadow: 0 0 0 3px ${AURA.gold}15;
-    }
+    .disc-input:focus { border-color: ${AURA.gold}80; }
     .disc-input::placeholder { color: ${t.placeholder}; }
+
     .disc-date {
-      flex: 1; min-width: 130px; box-sizing: border-box;
+      flex: 1; min-width: 130px;
       background: ${t.bgInput}; border: 1px solid ${t.borderInput};
-      color: ${t.text}; padding: 11px 12px;
-      border-radius: 12px; outline: none;
+      color: ${t.text}; padding: 10px 12px;
+      border-radius: 11px; outline: none;
       font-family: 'Inter', sans-serif; font-size: 13px;
-      transition: all .25s; -webkit-appearance: none;
+      transition: border-color .25s; -webkit-appearance: none;
     }
     .disc-date:focus { border-color: ${AURA.gold}80; }
 
-    /* Cards grid */
+    /* grid de cards */
     .disc-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
     }
-    @media (max-width: 520px) {
-      .disc-grid { grid-template-columns: 1fr; }
-      .disc-content { padding: 18px 14px 0; }
-    }
+    @media (max-width: 480px) { .disc-grid { grid-template-columns: 1fr; } }
 
-    /* Card hover */
+    /* card */
     .disc-card {
-      background: ${t.bgEl};
-      border: 1px solid ${t.border};
+      background: ${t.bgEl}; border: 1px solid ${t.border};
       border-radius: 18px; overflow: hidden; cursor: pointer;
-      transition: all .3s; position: relative;
+      transition: transform .25s, border-color .25s, box-shadow .25s;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
     .disc-card:hover {
       transform: translateY(-4px);
-      border-color: ${AURA.gold}60;
-      box-shadow: 0 14px 36px rgba(0,0,0,${isDark?.4:.12});
+      border-color: ${AURA.gold}55;
+      box-shadow: 0 12px 32px rgba(0,0,0,${isDark ? .35 : .1});
     }
     .disc-card:active { transform: scale(.98); }
 
-    /* Btn */
+    /* botões */
     .disc-btn-ghost {
-      display: flex; align-items: center; gap: 7px;
-      padding: 0 16px; height: 38px; border-radius: 100px;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 14px; height: 36px; border-radius: 100px;
       border: 1px solid ${t.border}; cursor: pointer;
       background: transparent; color: ${t.textSec};
-      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
-      letter-spacing: .12em; text-transform: uppercase; transition: all .3s;
-      white-space: nowrap;
+      font-family: 'Inter', sans-serif; font-size: 10px;
+      font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      transition: border-color .2s, color .2s; white-space: nowrap;
     }
     .disc-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
-    .disc-btn-gold {
-      display: flex; align-items: center; gap: 7px;
-      padding: 0 18px; height: 38px; border-radius: 100px; border: none;
+
+    .disc-btn-blue {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 16px; height: 36px; border-radius: 100px; border: none;
       cursor: pointer;
       background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
       color: #fff; font-family: 'Inter', sans-serif;
       font-size: 10px; font-weight: 600; letter-spacing: .12em;
-      text-transform: uppercase; transition: all .3s;
-      box-shadow: 0 6px 20px ${AURA.blue}40; white-space: nowrap;
+      text-transform: uppercase; transition: opacity .2s, transform .2s;
+      box-shadow: 0 5px 18px ${AURA.blue}40; white-space: nowrap;
     }
-    .disc-btn-gold:hover { opacity: .9; transform: translateY(-1px); }
-    .disc-btn-gold:disabled { opacity: .45; cursor: not-allowed; }
+    .disc-btn-blue:hover   { opacity: .9; transform: translateY(-1px); }
+    .disc-btn-blue:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* Divider dourado */
-    .disc-divider {
+    /* select page size */
+    .disc-select {
+      background: ${t.bgInput}; border: 1px solid ${t.borderInput};
+      color: ${t.text}; padding: 6px 10px; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; outline: none; -webkit-appearance: none; appearance: none;
+    }
+
+    /* divider */
+    .disc-div {
       height: 1px;
       background: linear-gradient(90deg, transparent, ${AURA.gold}50, transparent);
-      margin: 20px 0;
+      margin: 18px 0;
     }
-
-    /* Safe area scroll */
-    .disc-scroll { -webkit-overflow-scrolling: touch; }
   `;
 
-  const carregarRelatorios = async () => {
+  /* ── fetch ──────────────────────────────────────────────────────────── */
+  const carregarRelatorios = useCallback(async () => {
     try {
       setLoading(true); setErro(null);
       const res = await api.get("/relatorios/todos-relatorios");
       setRelatorios(res.data || []);
+      setPage(0); // volta à 1ª página ao recarregar
     } catch (e) {
-      setErro({ status: e.response?.status, msg: JSON.stringify(e.response?.data) });
-    } finally { setLoading(false); }
-  };
+      setErro({ status: e.response?.status, msg: "Não foi possível carregar os relatórios." });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const sem = obterSemanaAtual();
-    setDataInicio(sem.inicio); setDataFim(sem.fim);
+    setDataInicio(sem.inicio);
+    setDataFim(sem.fim);
     carregarRelatorios();
-  }, []);
+  }, [carregarRelatorios]);
 
-  const filtrados = useMemo(() => relatorios.filter(rel => {
-    const b  = busca.toLowerCase();
-    const ok = !b || rel.nomeLider?.toLowerCase().includes(b) || rel.nomeCelula?.toLowerCase().includes(b);
-    let p    = true;
-    if (dataInicio) p = p && rel.dataFim   >= dataInicio;
-    if (dataFim)    p = p && rel.dataInicio <= dataFim;
-    return ok && p;
-  }), [relatorios, busca, dataInicio, dataFim]);
+  /* ── filtro (client-side) ───────────────────────────────────────────── */
+  const filtrados = useMemo(() => {
+    setPage(0); // reset ao mudar filtros
+    return relatorios.filter(rel => {
+      const b  = busca.toLowerCase();
+      const ok = !b
+          || rel.nomeLider?.toLowerCase().includes(b)
+          || rel.nomeCelula?.toLowerCase().includes(b);
+      let p = true;
+      if (dataInicio) p = p && rel.dataFim   >= dataInicio;
+      if (dataFim)    p = p && rel.dataInicio <= dataFim;
+      return ok && p;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [relatorios, busca, dataInicio, dataFim]);
 
-  /* ── PDF individual ── */
+  /* ── paginação ──────────────────────────────────────────────────────── */
+  const totalPages  = Math.ceil(filtrados.length / pageSize);
+  const safePage    = Math.min(page, Math.max(totalPages - 1, 0));
+  const paginaAtual = filtrados.slice(safePage * pageSize, (safePage + 1) * pageSize);
+
+  const irPara = (p) => {
+    setPage(p);
+    // scroll suave ao topo do grid em mobile
+    document.getElementById("disc-grid-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const mudarTamanho = (novoSize) => {
+    setPageSize(novoSize);
+    setPage(0);
+  };
+
+  /* ── PDF individual ─────────────────────────────────────────────────── */
   const gerarPDF = (rel) => {
     const doc = new jsPDF();
-    doc.setFillColor(0,36,112); doc.rect(0,0,210,36,"F");
-    doc.setFontSize(15); doc.setTextColor(255,255,255); doc.setFont("helvetica","bold");
-    doc.text("IEQ PITUAÇU — DISCIPULADO",14,14);
-    doc.setFontSize(9); doc.setFont("helvetica","normal");
-    doc.text(`Célula: ${rel.nomeCelula}  |  Líder: ${rel.nomeLider}`,14,22);
-    doc.text(`Período: ${formatarSemana(rel.dataInicio, rel.dataFim)}`,14,29);
+    doc.setFillColor(0, 36, 112); doc.rect(0, 0, 210, 36, "F");
+    doc.setFontSize(15); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
+    doc.text("IEQ PITUAÇU — DISCIPULADO", 14, 14);
+    doc.setFontSize(9); doc.setFont("helvetica", "normal");
+    doc.text(`Célula: ${rel.nomeCelula}  |  Líder: ${rel.nomeLider}`, 14, 22);
+    doc.text(`Período: ${formatarSemana(rel.dataInicio, rel.dataFim)}`, 14, 29);
     doc.setTextColor(0);
     autoTable(doc, {
-      startY:42,
-      head:[["Membro",...COLUNAS.map(c=>c.label),"Total"]],
-      body:(rel.presencas||[]).map(p => {
+      startY: 42,
+      head:   [["Membro", ...COLUNAS.map(c => c.label), "Total"]],
+      body:   (rel.presencas || []).map(p => {
         const row = [p.nomeMembro];
         COLUNAS.forEach(col => {
           const m = !!p[col.campo]; const j = p[col.justField]?.trim();
-          row.push(m?"P": j?`F(${j})`:"F");
+          row.push(m ? "P" : j ? `F(${j})` : "F");
         });
-        row.push(`${COLUNAS.filter(c=>!!p[c.campo]).length}/${COLUNAS.length}`);
+        row.push(`${COLUNAS.filter(c => !!p[c.campo]).length}/${COLUNAS.length}`);
         return row;
       }),
-      headStyles:{ fillColor:[0,36,112], textColor:255, fontSize:8 },
-      bodyStyles:{ fontSize:8 }, theme:"grid",
-      didParseCell(d){
-        if(d.section==="body"&&d.column.index>0&&d.column.index<6){
-          const v=d.cell.raw;
-          if(v==="P"){ d.cell.styles.textColor=[22,163,74]; d.cell.styles.fontStyle="bold"; }
-          else if(typeof v==="string"&&v.startsWith("F(")){ d.cell.styles.textColor=[234,179,8]; }
-          else if(v==="F"){ d.cell.styles.textColor=[200,16,46]; }
+      headStyles: { fillColor: [0, 36, 112], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 }, theme: "grid",
+      didParseCell(d) {
+        if (d.section === "body" && d.column.index > 0 && d.column.index < 6) {
+          const v = d.cell.raw;
+          if (v === "P")                          { d.cell.styles.textColor = [22, 163, 74];  d.cell.styles.fontStyle = "bold"; }
+          else if (typeof v === "string" && v.startsWith("F(")) { d.cell.styles.textColor = [234, 179, 8]; }
+          else if (v === "F")                     { d.cell.styles.textColor = [200, 16, 46]; }
         }
       },
     });
     doc.save(`Discipulado_${rel.nomeCelula}_${rel.dataInicio}.pdf`);
   };
 
-  /* ── PDF geral ── */
+  /* ── PDF geral ──────────────────────────────────────────────────────── */
   const gerarPDFGeral = () => {
     if (!filtrados.length) return;
-    const doc = new jsPDF("l","mm","a4");
-    doc.setFillColor(0,36,112); doc.rect(0,0,297,40,"F");
-    doc.setFontSize(18); doc.setTextColor(255,255,255); doc.setFont("helvetica","bold");
-    doc.text("IEQ PITUAÇU — DISCIPULADO GERAL",14,16);
-    doc.setFontSize(9); doc.setFont("helvetica","normal");
-    doc.text(`Período: ${formatarSemana(dataInicio,dataFim)}  |  Células: ${filtrados.length}`,14,26);
-    let y=50;
-    filtrados.forEach((rel,idx) => {
-      if(y>170){ doc.addPage(); y=20; }
-      doc.setFillColor(9,11,31); doc.roundedRect(14,y-4,269,10,2,2,"F");
-      doc.setFontSize(10); doc.setTextColor(255,255,255); doc.setFont("helvetica","bold");
-      doc.text(`${idx+1}. ${rel.nomeCelula}  |  ${rel.nomeLider}`,17,y+3);
-      autoTable(doc,{
-        startY:y+8,
-        head:[["Membro",...COLUNAS.map(c=>c.label.substring(0,6)),"Total"]],
-        body:(rel.presencas||[]).map(p=>{
-          const row=[p.nomeMembro];
-          COLUNAS.forEach(col=>{ const m=!!p[col.campo]; const j=p[col.justField]?.trim(); row.push(m?"P":j?`F(${j})`:"F"); });
-          row.push(`${COLUNAS.filter(c=>!!p[c.campo]).length}/${COLUNAS.length}`);
+    const doc = new jsPDF("l", "mm", "a4");
+    doc.setFillColor(0, 36, 112); doc.rect(0, 0, 297, 40, "F");
+    doc.setFontSize(17); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
+    doc.text("IEQ PITUAÇU — DISCIPULADO GERAL", 14, 16);
+    doc.setFontSize(9); doc.setFont("helvetica", "normal");
+    doc.text(`Período: ${formatarSemana(dataInicio, dataFim)}  |  Células: ${filtrados.length}`, 14, 26);
+    let y = 50;
+    filtrados.forEach((rel, idx) => {
+      if (y > 170) { doc.addPage(); y = 20; }
+      doc.setFillColor(9, 11, 31); doc.roundedRect(14, y - 4, 269, 10, 2, 2, "F");
+      doc.setFontSize(10); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
+      doc.text(`${idx + 1}. ${rel.nomeCelula}  |  ${rel.nomeLider}`, 17, y + 3);
+      autoTable(doc, {
+        startY: y + 8,
+        head:   [["Membro", ...COLUNAS.map(c => c.label.substring(0, 6)), "Total"]],
+        body:   (rel.presencas || []).map(p => {
+          const row = [p.nomeMembro];
+          COLUNAS.forEach(col => {
+            const m = !!p[col.campo]; const j = p[col.justField]?.trim();
+            row.push(m ? "P" : j ? `F(${j})` : "F");
+          });
+          row.push(`${COLUNAS.filter(c => !!p[c.campo]).length}/${COLUNAS.length}`);
           return row;
         }),
-        headStyles:{fillColor:[9,11,31],textColor:255,fontSize:7},
-        bodyStyles:{fontSize:7}, theme:"grid",
-        didParseCell(d){
-          if(d.section==="body"&&d.column.index>0&&d.column.index<6){
-            const v=d.cell.raw;
-            if(v==="P"){d.cell.styles.textColor=[22,163,74];d.cell.styles.fontStyle="bold";}
-            else if(typeof v==="string"&&v.startsWith("F(")){d.cell.styles.textColor=[234,179,8];}
-            else if(v==="F"){d.cell.styles.textColor=[200,16,46];}
+        headStyles: { fillColor: [9, 11, 31], textColor: 255, fontSize: 7 },
+        bodyStyles: { fontSize: 7 }, theme: "grid",
+        didParseCell(d) {
+          if (d.section === "body" && d.column.index > 0 && d.column.index < 6) {
+            const v = d.cell.raw;
+            if (v === "P")                          { d.cell.styles.textColor = [22, 163, 74];  d.cell.styles.fontStyle = "bold"; }
+            else if (typeof v === "string" && v.startsWith("F(")) { d.cell.styles.textColor = [234, 179, 8]; }
+            else if (v === "F")                     { d.cell.styles.textColor = [200, 16, 46]; }
           }
         },
       });
-      y=doc.lastAutoTable.finalY+14;
+      y = doc.lastAutoTable.finalY + 14;
     });
     doc.save("Discipulado_Geral.pdf");
   };
 
-  /* ── Loading ── */
+  /* ── Loading ────────────────────────────────────────────────────────── */
   if (loading) return (
-      <div style={{ minHeight:"60vh", display:"flex", flexDirection:"column",
-        alignItems:"center", justifyContent:"center", background:t.bg }}>
+      <div style={{
+        minHeight: "60vh", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", background: t.bg,
+      }}>
         <style>{css}</style>
-        <div style={{ position:"relative", display:"inline-flex", marginBottom:20 }}>
-          <div style={{ position:"absolute", width:80, height:80, top:"50%", left:"50%",
-            transform:"translate(-50%,-50%)", border:"1px solid rgba(201,169,110,.25)",
-            borderRadius:"50%", animation:"aura-pulse 3s ease-in-out infinite" }} />
-          <div style={{ width:52, height:52, borderRadius:"50%",
-            background:isDark?"rgba(18,18,26,.99)":"#fff", border:"1.5px solid rgba(201,169,110,.28)",
-            display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <IEQCross size={36} />
+        <div style={{ position: "relative", display: "inline-flex", marginBottom: 20 }}>
+          <div style={{
+            position: "absolute", width: 80, height: 80, top: "50%", left: "50%",
+            transform: "translate(-50%,-50%)",
+            border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%",
+            animation: "aura-pulse 3s ease-in-out infinite",
+          }} />
+          <div style={{
+            width: 52, height: 52, borderRadius: "50%",
+            background: isDark ? "rgba(18,18,26,.99)" : "#fff",
+            border: "1.5px solid rgba(201,169,110,.28)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <BookOpen size={24} style={{ color: AURA.gold }} />
           </div>
         </div>
-        <p style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:600,
-          letterSpacing:".25em", textTransform:"uppercase", color:AURA.gold, opacity:.7 }}>
+        <p style={{
+          fontSize: 9, fontWeight: 600, letterSpacing: ".25em",
+          textTransform: "uppercase", color: AURA.gold, opacity: .7,
+        }}>
           Carregando discipulado…
         </p>
       </div>
   );
 
+  /* ── Render ─────────────────────────────────────────────────────────── */
   return (
-      <div className="disc-root disc-scroll">
+      <div className="disc-root">
         <style>{css}</style>
         <div className="disc-glow" />
 
-        <div className="disc-content">
+        <div className="disc-wrap">
 
           {/* ── Header ── */}
-          <motion.div initial={{ opacity:0, y:-18 }} animate={{ opacity:1, y:0 }} transition={{ duration:.4 }}
-                      style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between",
-                        flexWrap:"wrap", gap:14, marginBottom:22 }}>
-
-            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:44, height:44, borderRadius:12,
-                background:`${AURA.blue}18`, border:`1px solid ${AURA.blue}30`,
-                display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <BookOpen size={22} style={{ color:AURA.blue }} />
+          <motion.div
+              initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: .35 }}
+              style={{
+                display: "flex", alignItems: "flex-start",
+                justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20,
+              }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: 11,
+                background: `${AURA.blue}18`, border: `1px solid ${AURA.blue}30`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <BookOpen size={20} style={{ color: AURA.blue }} />
               </div>
               <div>
-                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:9, letterSpacing:".2em",
-                  fontWeight:500, color:`${AURA.gold}88`, margin:"0 0 3px",
-                  textTransform:"uppercase" }}>Controle & Auditoria</p>
-                <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(18px,4vw,24px)",
-                  fontWeight:500, letterSpacing:".02em", margin:0, color:t.text }}>
+                <p style={{
+                  fontSize: 9, letterSpacing: ".2em", fontWeight: 600,
+                  color: `${AURA.gold}88`, margin: "0 0 3px", textTransform: "uppercase",
+                }}>
+                  Controle & Auditoria
+                </p>
+                <h2 style={{
+                  fontFamily: "'Playfair Display',serif",
+                  fontSize: "clamp(17px,4vw,23px)",
+                  fontWeight: 500, margin: 0, color: t.text,
+                }}>
                   Discipulado
                 </h2>
               </div>
             </div>
 
-            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-              <button className="disc-btn-ghost" onClick={() => setShowFilter(!showFilter)}>
-                <Filter size={14} /> {showFilter ? "Ocultar" : "Filtrar"}
+            <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+              <button className="disc-btn-ghost" onClick={() => setShowFilter(s => !s)}>
+                <Filter size={13} /> {showFilter ? "Ocultar" : "Filtrar"}
               </button>
               <button className="disc-btn-ghost" onClick={carregarRelatorios}>
-                <RefreshCw size={14} /> Atualizar
+                <RefreshCw size={13} />
+                <span className="disc-hide-xs">Atualizar</span>
               </button>
-              <button className="disc-btn-gold" onClick={gerarPDFGeral} disabled={!filtrados.length}>
-                <Download size={14} /> Exportar PDF
+              <button className="disc-btn-blue" onClick={gerarPDFGeral} disabled={!filtrados.length}>
+                <Download size={13} />
+                <span className="disc-hide-xs">Exportar PDF</span>
               </button>
             </div>
           </motion.div>
 
-          <div className="disc-divider" />
+          <div className="disc-div" />
 
           {/* ── Erro ── */}
           {erro && (
-              <div style={{ padding:"16px 18px", borderRadius:14, marginBottom:20,
-                background:`${AURA.red}12`, border:`1px solid ${AURA.red}30`,
-                display:"flex", alignItems:"center", gap:10 }}>
-                <AlertCircle size={16} style={{ color:AURA.red, flexShrink:0 }} />
-                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:13, color:AURA.red, margin:0 }}>
-                  Erro ao carregar — Status {erro.status}
+              <div style={{
+                padding: "14px 16px", borderRadius: 13, marginBottom: 18,
+                background: `${AURA.red}10`, border: `1px solid ${AURA.red}28`,
+                display: "flex", alignItems: "center", gap: 10,
+              }}>
+                <AlertCircle size={15} style={{ color: AURA.red, flexShrink: 0 }} />
+                <p style={{ fontSize: 13, color: AURA.red, margin: 0 }}>
+                  {erro.msg} {erro.status ? `(status ${erro.status})` : ""}
                 </p>
               </div>
           )}
 
-          {/* ── Filtros ── */}
+          {/* ── Painel de filtros ── */}
           <AnimatePresence>
             {showFilter && (
-                <motion.div initial={{ height:0, opacity:0 }} animate={{ height:"auto", opacity:1 }}
-                            exit={{ height:0, opacity:0 }} style={{ overflow:"hidden", marginBottom:20 }}>
-                  <div style={{ background:t.bgEl, border:`1px solid ${t.border}`,
-                    borderRadius:16, padding:"16px 18px",
-                    display:"flex", flexDirection:"column", gap:12, backdropFilter:"blur(20px)" }}>
-
-                    {/* Busca */}
-                    <div style={{ position:"relative" }}>
-                      <Search size={15} style={{ position:"absolute", left:14, top:"50%",
-                        transform:"translateY(-50%)", color:AURA.gold, opacity:.5, pointerEvents:"none" }} />
-                      <input className="disc-input" placeholder="Buscar por líder ou célula…"
-                             value={busca} onChange={e => setBusca(e.target.value)} />
+                <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: .22 }}
+                    style={{ overflow: "hidden", marginBottom: 18 }}
+                >
+                  <div style={{
+                    background: t.bgEl, border: `1px solid ${t.border}`,
+                    borderRadius: 16, padding: "16px 16px",
+                    display: "flex", flexDirection: "column", gap: 12,
+                  }}>
+                    {/* busca */}
+                    <div style={{ position: "relative" }}>
+                      <Search size={14} style={{
+                        position: "absolute", left: 13, top: "50%",
+                        transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none",
+                      }} />
+                      <input
+                          className="disc-input"
+                          placeholder="Buscar por líder ou célula…"
+                          value={busca}
+                          onChange={e => setBusca(e.target.value)}
+                      />
                     </div>
 
-                    {/* Datas */}
-                    <div style={{ display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
-                  <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9,
-                    letterSpacing:".14em", color:t.textMuted, whiteSpace:"nowrap" }}>DE</span>
-                      <input className="disc-date" type="date"
-                             value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
-                      <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9,
-                        letterSpacing:".14em", color:t.textMuted, whiteSpace:"nowrap" }}>ATÉ</span>
-                      <input className="disc-date" type="date"
-                             value={dataFim} onChange={e => setDataFim(e.target.value)} />
-                      <button className="disc-btn-ghost"
-                              onClick={() => { const s=obterSemanaAtual(); setDataInicio(s.inicio); setDataFim(s.fim); setBusca(""); }}>
+                    {/* datas */}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                      <span style={{ fontSize: 9, letterSpacing: ".14em", color: t.textMuted, whiteSpace: "nowrap" }}>DE</span>
+                      <input className="disc-date" type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
+                      <span style={{ fontSize: 9, letterSpacing: ".14em", color: t.textMuted, whiteSpace: "nowrap" }}>ATÉ</span>
+                      <input className="disc-date" type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} />
+                      <button
+                          className="disc-btn-ghost"
+                          onClick={() => {
+                            const s = obterSemanaAtual();
+                            setDataInicio(s.inicio); setDataFim(s.fim); setBusca("");
+                          }}
+                      >
                         Esta semana
                       </button>
+                      {(busca || dataInicio || dataFim) && (
+                          <button
+                              className="disc-btn-ghost"
+                              onClick={() => { setBusca(""); setDataInicio(""); setDataFim(""); }}
+                              style={{ color: AURA.red, borderColor: `${AURA.red}40` }}
+                          >
+                            <X size={12} /> Limpar
+                          </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ── Contador ── */}
-          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 14px",
-              background:`${AURA.blue}15`, border:`1px solid ${AURA.blue}35`, borderRadius:10 }}>
-              <BookOpen size={13} style={{ color:AURA.blue }} />
-              <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, letterSpacing:".14em",
-                color:AURA.blue, fontWeight:700 }}>
-              RELATÓRIOS — {filtrados.length}
+          {/* ── Barra de estado: contador + controle de tamanho de página ── */}
+          <div
+              id="disc-grid-anchor"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                flexWrap: "wrap", gap: 10, marginBottom: 14,
+              }}
+          >
+            {/* badge contador */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 7,
+              padding: "6px 13px",
+              background: `${AURA.blue}14`, border: `1px solid ${AURA.blue}30`,
+              borderRadius: 10,
+            }}>
+              <BookOpen size={12} style={{ color: AURA.blue }} />
+              <span style={{ fontSize: 9, letterSpacing: ".14em", color: AURA.blue, fontWeight: 700 }}>
+              {filtrados.length} RELATÓRIO{filtrados.length !== 1 ? "S" : ""}
             </span>
             </div>
-            <div style={{ flex:1, height:1, background:`linear-gradient(90deg,${AURA.blue}40,transparent)` }} />
+
+            {/* itens por página */}
+            {filtrados.length > PAGE_SIZES[0] && (
+                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <span style={{ fontSize: 11, color: t.textMuted, whiteSpace: "nowrap" }}>Por página:</span>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {PAGE_SIZES.map(s => (
+                        <button
+                            key={s}
+                            onClick={() => mudarTamanho(s)}
+                            style={{
+                              width: 32, height: 28, borderRadius: 7,
+                              border: `1px solid ${pageSize === s ? AURA.blue : t.border}`,
+                              background: pageSize === s ? `${AURA.blue}18` : "transparent",
+                              color: pageSize === s ? AURA.blue : t.textMuted,
+                              fontSize: 11, fontWeight: 600, cursor: "pointer",
+                              transition: "all .2s",
+                            }}
+                        >
+                          {s}
+                        </button>
+                    ))}
+                  </div>
+                </div>
+            )}
           </div>
 
-          {/* ── Cards ── */}
+          {/* ── Grid de cards ── */}
           <div className="disc-grid">
-            {filtrados.map((rel, i) => (
-                <motion.div key={rel.id} className="disc-card"
-                            initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }}
-                            transition={{ delay:i*.04 }}
-                            onClick={() => setSelected(rel)}>
+            <AnimatePresence mode="popLayout">
+              {paginaAtual.map((rel, i) => {
+                const pct = frequencia(rel.presencas);
+                const freqColor = pct >= 70 ? AURA.green : pct >= 50 ? AURA.gold : AURA.red;
 
-                  {/* Topo colorido */}
-                  <div style={{ height:3, background:`linear-gradient(90deg,${AURA.blue},${AURA.gold})` }} />
+                return (
+                    <motion.div
+                        key={`${rel.id}-${safePage}`}
+                        className="disc-card"
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: .96 }}
+                        transition={{ delay: i * .04 }}
+                        onClick={() => setSelected(rel)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={e => e.key === "Enter" && setSelected(rel)}
+                        aria-label={`Ver detalhes de ${rel.nomeCelula}`}
+                    >
+                      {/* faixa topo */}
+                      <div style={{ height: 3, background: `linear-gradient(90deg, ${AURA.blue}, ${AURA.gold})` }} />
 
-                  <div style={{ padding:"18px 18px 0" }}>
-                    <div style={{ display:"flex", justifyContent:"space-between",
-                      alignItems:"flex-start", marginBottom:12 }}>
-                  <span style={{ background:`${AURA.blue}18`, color:AURA.blue,
-                    border:`1px solid ${AURA.blue}35`, borderRadius:99,
-                    padding:"3px 10px", fontFamily:"'Inter',sans-serif",
-                    fontSize:8, fontWeight:700, letterSpacing:".1em" }}>
-                    {rel.nomeCelula}
-                  </span>
-                      <ChevronRight size={15} style={{ color:t.textMuted }} />
-                    </div>
+                      <div style={{ padding: "16px 16px 0" }}>
+                        {/* badge célula + seta */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                      <span style={{
+                        background: `${AURA.blue}16`, color: AURA.blue,
+                        border: `1px solid ${AURA.blue}30`, borderRadius: 99,
+                        padding: "3px 9px", fontSize: 8, fontWeight: 700, letterSpacing: ".1em",
+                        maxWidth: "70%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>
+                        {rel.nomeCelula}
+                      </span>
+                          <ChevronRight size={14} style={{ color: t.textMuted, flexShrink: 0 }} />
+                        </div>
 
-                    <h3 style={{ fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:700,
-                      color:t.text, margin:"0 0 8px",
-                      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                      {rel.nomeLider}
-                    </h3>
+                        {/* líder */}
+                        <h3 style={{
+                          fontSize: 14, fontWeight: 700, color: t.text,
+                          margin: "0 0 8px",
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        }}>
+                          {rel.nomeLider}
+                        </h3>
 
-                    <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:16 }}>
-                      <Calendar size={12} style={{ color:AURA.gold }} />
-                      <span style={{ fontFamily:"'Inter',sans-serif", fontSize:12,
-                        fontWeight:300, color:t.textSec }}>
-                    {formatarSemana(rel.dataInicio, rel.dataFim)}
-                  </span>
-                    </div>
-                  </div>
+                        {/* semana */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
+                          <Calendar size={11} style={{ color: AURA.gold, flexShrink: 0 }} />
+                          <span style={{ fontSize: 12, fontWeight: 300, color: t.textSec }}>
+                        {formatarSemana(rel.dataInicio, rel.dataFim)}
+                      </span>
+                        </div>
+                      </div>
 
-                  {/* Stats footer */}
-                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr",
-                    borderTop:`1px solid ${t.border}` }}>
-                    <div style={{ padding:"12px 14px", textAlign:"center",
-                      borderRight:`1px solid ${t.border}` }}>
-                      <p style={{ fontFamily:"'Inter',sans-serif", fontSize:20,
-                        fontWeight:700, color:t.text, margin:0 }}>
-                        {rel.presencas?.length || 0}
-                      </p>
-                      <p style={{ fontFamily:"'Inter',sans-serif", fontSize:8,
-                        letterSpacing:".1em", color:t.textMuted, margin:"3px 0 0" }}>MEMBROS</p>
-                    </div>
-                    <div style={{ padding:"12px 14px", display:"flex",
-                      alignItems:"center", justifyContent:"center", gap:6 }}>
-                      <Users size={13} style={{ color:AURA.gold }} />
-                      <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9,
-                        letterSpacing:".1em", color:AURA.gold, fontWeight:600 }}>VER DETALHES</span>
-                    </div>
-                  </div>
-                </motion.div>
-            ))}
+                      {/* footer do card */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: `1px solid ${t.border}` }}>
+                        {/* membros */}
+                        <div style={{ padding: "10px 12px", textAlign: "center", borderRight: `1px solid ${t.border}` }}>
+                          <p style={{ fontSize: 20, fontWeight: 700, color: t.text, margin: 0, lineHeight: 1 }}>
+                            {rel.presencas?.length || 0}
+                          </p>
+                          <p style={{ fontSize: 8, letterSpacing: ".1em", color: t.textMuted, margin: "3px 0 0" }}>MEMBROS</p>
+                        </div>
+                        {/* frequência */}
+                        <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                          <span style={{ fontSize: 16, fontWeight: 700, color: freqColor, lineHeight: 1 }}>{pct}%</span>
+                          <span style={{ fontSize: 8, letterSpacing: ".1em", color: t.textMuted }}>FREQUÊNCIA</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
 
           {/* ── Vazio ── */}
           {!erro && filtrados.length === 0 && (
-              <div style={{ textAlign:"center", padding:"56px 24px", background:t.bgEl,
-                borderRadius:20, border:`2px dashed ${t.border}`, marginTop:16 }}>
-                <AlertCircle size={36} style={{ color:`${AURA.gold}40`, margin:"0 auto 14px" }} />
-                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:300,
-                  color:t.textMuted, margin:0 }}>Nenhum relatório encontrado.</p>
+              <div style={{
+                textAlign: "center", padding: "52px 24px",
+                background: t.bgEl, borderRadius: 20,
+                border: `2px dashed ${t.border}`, marginTop: 12,
+              }}>
+                <AlertCircle size={34} style={{ color: `${AURA.gold}40`, margin: "0 auto 12px" }} />
+                <p style={{ fontSize: 13, fontWeight: 300, color: t.textMuted, margin: 0 }}>
+                  Nenhum relatório encontrado.
+                </p>
+                {(busca || dataInicio || dataFim) && (
+                    <button
+                        className="disc-btn-ghost"
+                        style={{ margin: "12px auto 0" }}
+                        onClick={() => { setBusca(""); setDataInicio(""); setDataFim(""); }}
+                    >
+                      <X size={12} /> Limpar filtros
+                    </button>
+                )}
               </div>
           )}
 
-          <div className="disc-divider" style={{ marginTop:28 }} />
-          <p style={{ textAlign:"center", fontFamily:"'Inter',sans-serif", fontSize:9,
-            letterSpacing:".18em", textTransform:"uppercase", paddingBottom:16,
-            color:isDark?"rgba(245,240,232,.1)":"rgba(26,16,8,.12)" }}>
-            © {new Date().getFullYear()} IEQ Pituaçu — Sistema Eclesiástico
+          {/* ── Paginação ── */}
+          <Paginacao
+              page={safePage}
+              totalPages={totalPages}
+              onChange={irPara}
+              t={t}
+              totalItems={filtrados.length}
+              pageSize={pageSize}
+          />
+
+          {/* footer */}
+          <div className="disc-div" style={{ marginTop: 28 }} />
+          <p style={{
+            textAlign: "center", fontSize: 9, letterSpacing: ".18em",
+            textTransform: "uppercase", paddingBottom: 16,
+            color: isDark ? "rgba(245,240,232,.1)" : "rgba(26,16,8,.12)",
+          }}>
+
           </p>
         </div>
 
         {/* ── Modal ── */}
         <AnimatePresence>
           {selected && (
-              <ModalRelatorio rel={selected} isDark={isDark} t={t}
-                              onClose={() => setSelected(null)} onPDF={gerarPDF} />
+              <ModalRelatorio
+                  rel={selected} isDark={isDark} t={t}
+                  onClose={() => setSelected(null)}
+                  onPDF={gerarPDF}
+              />
           )}
         </AnimatePresence>
       </div>
