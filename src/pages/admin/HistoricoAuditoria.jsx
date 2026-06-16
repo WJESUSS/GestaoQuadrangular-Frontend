@@ -361,9 +361,10 @@ function formatDate(iso) {
 }
 
 // ✅ Converte "2025-06-15T00:00" → "2025-06-15T00:00:00" sem toISOString (sem conversão UTC)
-function toLocalISOParam(val, endOfMinute = false) {
+// Envia com offset de Brasília: "2025-06-01T00:00:00-03:00"
+function toOffsetParam(val, endOfMinute = false) {
     if (!val) return null;
-    return val + (endOfMinute ? ":59" : ":00");
+    return val + (endOfMinute ? ":59-03:00" : ":00-03:00");
 }
 
 function AcaoBadge({ acao }) {
@@ -624,6 +625,15 @@ function Paginacao({ page, totalPages, irPara }) {
             </button>
         </motion.div>
     );
+}
+
+/* ─── Helper para datas (local → ISO) ───────────────────────────────────── */
+function toLocalISOParam(val, isEnd) {
+    if (!val) return null;
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return null;
+    if (isEnd) d.setHours(23, 59, 59, 999);
+    return d.toISOString();
 }
 
 /* ─── COMPONENTE PRINCIPAL ──────────────────────────────────────────────── */
