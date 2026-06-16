@@ -86,9 +86,7 @@ function GlobalStyles({ t, isDark }) {
         .aud-header { flex-direction: row; align-items: flex-end; justify-content: space-between; }
       }
 
-      .aud-header-left {
-        display: flex; align-items: flex-start; gap: 16px;
-      }
+      .aud-header-left { display: flex; align-items: flex-start; gap: 16px; }
 
       .aud-header-icon {
         width: 48px; height: 48px; border-radius: 14px;
@@ -115,9 +113,7 @@ function GlobalStyles({ t, isDark }) {
         color: ${t.textSec}; margin: 0;
       }
 
-      .aud-header-actions {
-        display: flex; gap: 8px; flex-shrink: 0;
-      }
+      .aud-header-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
       .aud-btn {
         border: none; border-radius: 10px; cursor: pointer;
@@ -128,7 +124,7 @@ function GlobalStyles({ t, isDark }) {
 
       .aud-btn-primary {
         background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
-        color: #fff; box-shadow: 0 6px 20px rgba(0, 61, 165, .25);
+        color: #fff; box-shadow: 0 6px 20px rgba(0,61,165,.25);
       }
       .aud-btn-primary:hover { opacity: .88; transform: translateY(-1px); }
 
@@ -192,15 +188,12 @@ function GlobalStyles({ t, isDark }) {
         text-transform: uppercase; color: ${t.textMuted};
       }
 
-      .aud-table {
-        width: 100%; border-collapse: collapse;
-        min-width: 700px;
-      }
+      .aud-table { width: 100%; border-collapse: collapse; min-width: 700px; }
 
       .aud-table thead tr { background: ${isDark ? "rgba(255,255,255,.02)" : "rgba(201,169,110,.03)"}; }
 
       .aud-table th {
-        padding: 14px 14px; font-family: 'Inter', sans-serif;
+        padding: 14px; font-family: 'Inter', sans-serif;
         font-size: 9px; font-weight: 600; letter-spacing: .12em;
         text-transform: uppercase; color: ${t.textMuted}; text-align: left;
       }
@@ -226,15 +219,13 @@ function GlobalStyles({ t, isDark }) {
       .aud-tag {
         display: inline-flex; align-items: center; gap: 4px;
         padding: 6px 10px; border-radius: 6px; font-size: 8px;
-        font-weight: 600; letter-spacing: .1em; border: 1px solid;
-        white-space: nowrap;
+        font-weight: 600; letter-spacing: .1em; border: 1px solid; white-space: nowrap;
       }
 
       .aud-badge {
         display: inline-flex; align-items: center; gap: 4px;
         padding: 6px 12px; border-radius: 99px; font-size: 8px;
-        font-weight: 600; letter-spacing: .1em; border: 1px solid;
-        white-space: nowrap;
+        font-weight: 600; letter-spacing: .1em; border: 1px solid; white-space: nowrap;
       }
 
       .aud-avatar {
@@ -245,9 +236,7 @@ function GlobalStyles({ t, isDark }) {
         font-weight: 600; font-size: 11px; flex-shrink: 0;
       }
 
-      .aud-user-cell {
-        display: flex; align-items: center; gap: 9px; min-width: 0;
-      }
+      .aud-user-cell { display: flex; align-items: center; gap: 9px; min-width: 0; }
 
       .aud-user-name {
         font-family: 'Inter', sans-serif; font-size: 13px;
@@ -258,42 +247,31 @@ function GlobalStyles({ t, isDark }) {
         background: ${isDark ? "rgba(255,255,255,.02)" : "rgba(201,169,110,.02)"};
       }
 
-      .aud-detail-content {
-        padding: 20px;
-      }
-
-      .aud-detail-row {
-        display: flex; align-items: flex-start; gap: 16px;
-        margin-bottom: 16px;
-      }
-      .aud-detail-row:last-child { margin-bottom: 0; }
+      .aud-detail-content { padding: 20px; }
 
       .aud-detail-label {
         font-family: 'Inter', sans-serif; font-size: 9px;
         font-weight: 600; letter-spacing: .12em;
-        text-transform: uppercase; color: ${t.textMuted};
-        min-width: 100px;
+        text-transform: uppercase; color: ${t.textMuted}; min-width: 100px;
       }
 
-      .aud-detail-value {
-        font-family: 'Inter', sans-serif; font-size: 13px;
-        color: ${t.text};
-      }
+      .aud-detail-value { font-family: 'Inter', sans-serif; font-size: 13px; color: ${t.text}; }
 
       .aud-diff-from {
-        background: rgba(239, 68, 68, .1); color: #EF4444;
-        border: 1px solid rgba(239, 68, 68, .2); padding: 4px 8px;
+        background: rgba(239,68,68,.1); color: #EF4444;
+        border: 1px solid rgba(239,68,68,.2); padding: 4px 8px;
         border-radius: 6px; font-size: 12px; text-decoration: line-through;
       }
 
       .aud-diff-to {
-        background: rgba(5, 150, 105, .1); color: #059669;
-        border: 1px solid rgba(5, 150, 105, .2); padding: 4px 8px;
+        background: rgba(5,150,105,.1); color: #059669;
+        border: 1px solid rgba(5,150,105,.2); padding: 4px 8px;
         border-radius: 6px; font-size: 12px;
       }
 
       .aud-divider {
-        height: 1px; background: linear-gradient(90deg, transparent, ${t.border}, transparent);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, ${t.border}, transparent);
         margin: 16px 0;
       }
 
@@ -360,13 +338,21 @@ function formatDate(iso) {
     return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
-// ✅ Converte "2025-06-15T00:00" → "2025-06-15T00:00:00" sem toISOString (sem conversão UTC)
-// Envia com offset de Brasília: "2025-06-01T00:00:00-03:00"
-function toOffsetParam(val, endOfMinute = false) {
+// ✅ CORRETO: envia com offset de Brasília, sem passar por Date/toISOString
+// Input do datetime-local: "2025-06-15T14:30"
+// Saída início: "2025-06-15T14:30:00-03:00"
+// Saída fim:    "2025-06-15T23:59:59-03:00"
+function toOffsetParam(val, isEnd = false) {
     if (!val) return null;
-    return val + (endOfMinute ? ":59-03:00" : ":00-03:00");
+    if (isEnd) {
+        // Pega só a parte da data "2025-06-15" e coloca 23:59:59
+        const dataBase = val.length >= 10 ? val.slice(0, 10) : val;
+        return `${dataBase}T23:59:59-03:00`;
+    }
+    return `${val}:00-03:00`;
 }
 
+/* ─── Badges / Tags ─────────────────────────────────────────────────────── */
 function AcaoBadge({ acao }) {
     const meta = ACOES[acao] || { label: acao, icon: Shield, color: "#888", bg: "rgba(128,128,128,.1)", border: "rgba(128,128,128,.2)" };
     const Icon = meta.icon;
@@ -394,9 +380,12 @@ function EntidadeTag({ entidade }) {
     );
 }
 
+/* ─── Detalhe de diff ───────────────────────────────────────────────────── */
 function DetalhesDiff({ detalhes }) {
     let parsed = null;
-    try { parsed = JSON.parse(detalhes); } catch { return <p style={{ fontStyle: "italic", color: "var(--text-sec)" }}>Sem detalhes registrados.</p>; }
+    try { parsed = JSON.parse(detalhes); } catch {
+        return <p style={{ fontStyle: "italic", color: "var(--text-sec)" }}>Sem detalhes registrados.</p>;
+    }
     if (!parsed || Object.keys(parsed).length === 0)
         return <p style={{ fontStyle: "italic", color: "var(--text-sec)" }}>Sem detalhes registrados.</p>;
 
@@ -431,7 +420,6 @@ function DetalhesDiff({ detalhes }) {
 /* ─── Linha expansível ───────────────────────────────────────────────────── */
 function AuditoriaRow({ reg, isDark, t }) {
     const [open, setOpen] = useState(false);
-
     return (
         <>
             <tr onClick={() => setOpen(o => !o)}>
@@ -507,7 +495,7 @@ function AuditoriaRow({ reg, isDark, t }) {
     );
 }
 
-/* ─── Filtros (extraído para evitar re-render do pai) ───────────────────── */
+/* ─── Filtros ───────────────────────────────────────────────────────────── */
 function FiltrosPanel({ filtros, setFiltro, aplicar, limpar, t }) {
     return (
         <div className="aud-filters-wrap">
@@ -556,7 +544,7 @@ function FiltrosPanel({ filtros, setFiltro, aplicar, limpar, t }) {
     );
 }
 
-/* ─── Tabela + loading/erro/vazio ───────────────────────────────────────── */
+/* ─── Tabela ────────────────────────────────────────────────────────────── */
 function TabelaAuditoria({ registros, loading, erro, isDark, t, onRetry }) {
     if (loading) return (
         <div className="aud-empty">
@@ -627,15 +615,6 @@ function Paginacao({ page, totalPages, irPara }) {
     );
 }
 
-/* ─── Helper para datas (local → ISO) ───────────────────────────────────── */
-function toLocalISOParam(val, isEnd) {
-    if (!val) return null;
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return null;
-    if (isEnd) d.setHours(23, 59, 59, 999);
-    return d.toISOString();
-}
-
 /* ─── COMPONENTE PRINCIPAL ──────────────────────────────────────────────── */
 export default function HistoricoAuditoria({ isDark = false, embedded = false }) {
     const [registros,   setRegistros]   = useState([]);
@@ -652,12 +631,10 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
         de: "", ate: "", page: 0, size: 20,
     });
 
-    // ✅ useRef para sempre ter o filtro mais recente sem re-criar buscar
     const filtrosRef = useRef(filtros);
     useEffect(() => { filtrosRef.current = filtros; }, [filtros]);
 
     const buscar = useCallback(async (f) => {
-        // ✅ Se não receber f explícito, usa o ref (sempre atualizado)
         const filtro = f ?? filtrosRef.current;
         setLoading(true);
         setErro(null);
@@ -668,9 +645,9 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
             if (filtro.usuario)    params.set("usuario",    filtro.usuario);
             if (filtro.entidadeId) params.set("entidadeId", filtro.entidadeId);
 
-            // ✅ Envia sem conversão UTC — preserva o horário local (Brasília)
-            const deParam  = toLocalISOParam(filtro.de,  false);
-            const ateParam = toLocalISOParam(filtro.ate, true);
+            // ✅ USA toOffsetParam — sem toISOString, sem conversão UTC
+            const deParam  = toOffsetParam(filtro.de,  false);
+            const ateParam = toOffsetParam(filtro.ate, true);
             if (deParam)  params.set("de",  deParam);
             if (ateParam) params.set("ate", ateParam);
 
@@ -678,8 +655,8 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
             params.set("size", filtro.size);
 
             const res = await api.get(`/auditoria?${params}`);
-            setRegistros(res.data.content      || []);
-            setTotalPages(res.data.totalPages  || 0);
+            setRegistros(res.data.content       || []);
+            setTotalPages(res.data.totalPages   || 0);
             setTotalItems(res.data.totalElements || 0);
         } catch (e) {
             setErro("Não foi possível carregar o histórico. Verifique a conexão.");
@@ -687,7 +664,7 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
         } finally {
             setLoading(false);
         }
-    }, []); // ✅ Sem deps — estável, nunca recriado
+    }, []);
 
     useEffect(() => { buscar(); }, [buscar]);
 
@@ -764,7 +741,6 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
             <div className="aud-glow" />
 
             <div className="aud-content">
-                {/* Header */}
                 <motion.div className="aud-header" initial={{ opacity: 0, y: -18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
                     <div className="aud-header-left">
                         <div className="aud-header-icon"><Shield size={24} /></div>
@@ -784,7 +760,6 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
                     </div>
                 </motion.div>
 
-                {/* Filtros */}
                 <AnimatePresence>
                     {showFiltros && (
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }} style={{ overflow: "hidden", marginBottom: 20 }}>
@@ -793,17 +768,14 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
                     )}
                 </AnimatePresence>
 
-                {/* Stats */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 }}>
                     {statsEl}
                 </motion.div>
 
-                {/* Table */}
                 <motion.div className="aud-card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
                     <TabelaAuditoria registros={registros} loading={loading} erro={erro} isDark={isDark} t={t} onRetry={() => buscar()} />
                 </motion.div>
 
-                {/* Paginação */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.3 }}>
                     <Paginacao page={filtros.page} totalPages={totalPages} irPara={irPara} />
                 </motion.div>
