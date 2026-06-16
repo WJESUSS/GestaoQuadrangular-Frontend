@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Search, Filter, ChevronLeft, ChevronRight, X,
+    Search, Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X,
     Shield, RefreshCw, AlertTriangle,
     Edit3, Trash2, CheckCircle, XCircle, PlusCircle, Eye,
     ChevronDown, ChevronUp, Loader2,
@@ -334,8 +334,9 @@ const ENTIDADES = ["MEMBRO", "VISITANTE", "CELULA", "FICHA", "USUARIO", "SECRETA
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 function formatDate(iso) {
     if (!iso) return "—";
-    const d = new Date(iso);
-    return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const d = new Date(iso); // ← funciona corretamente SE iso tiver offset
+    return d.toLocaleDateString("pt-BR") + " " +
+        d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
 // ✅ CORRETO: envia com offset de Brasília, sem passar por Date/toISOString
@@ -593,23 +594,48 @@ function TabelaAuditoria({ registros, loading, erro, isDark, t, onRetry }) {
 
 /* ─── Paginação ─────────────────────────────────────────────────────────── */
 function Paginacao({ page, totalPages, irPara }) {
-    if (totalPages <= 1) return null;
-    const pages = Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-        if (totalPages <= 7) return i;
-        return Math.max(0, Math.min(page - 3, totalPages - 7)) + i;
-    });
+    const tp = Math.max(1, Number(totalPages) || 0);
+    if (tp <= 1) return null;
+
+    const range = (lo, hi) => Array.from({ length: hi - lo }, (_, i) => lo + i);
+    const W = 5;
+    let start = Math.max(0, page - Math.floor(W / 2));
+    let end   = Math.min(tp, start + W);
+    if (end - start < W) start = Math.max(0, end - W);
+
+    const items = [];
+    if (start > 0) {
+        items.push(0);
+        if (start > 1) items.push(-1);  // ellipsis
+    }
+    items.push(...range(start, end));
+    if (end < tp) {
+        if (end < tp - 1) items.push(-2); // ellipsis
+        items.push(tp - 1);
+    }
+
     return (
         <motion.div className="aud-pagination" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-            <button className="aud-page-btn" disabled={page === 0} onClick={() => irPara(page - 1)}>
+            <button className="aud-page-btn" disabled={page === 0} onClick={() => irPara(0)} title="Primeira página">
+                <ChevronsLeft size={14} />
+            </button>
+            <button className="aud-page-btn" disabled={page === 0} onClick={() => irPara(page - 1)} title="Anterior">
                 <ChevronLeft size={14} />
             </button>
-            {pages.map(p => (
-                <button key={p} className={`aud-page-btn${page === p ? " active" : ""}`} onClick={() => irPara(p)}>
-                    {p + 1}
-                </button>
-            ))}
-            <button className="aud-page-btn" disabled={page >= totalPages - 1} onClick={() => irPara(page + 1)}>
+            {items.map((p, i) =>
+                p < 0 ? (
+                    <span key={`ell-${i}`} style={{ width: 36, textAlign: "center", color: "var(--text-muted)", fontSize: 12 }}>…</span>
+                ) : (
+                    <button key={p} className={`aud-page-btn${page === p ? " active" : ""}`} onClick={() => irPara(p)}>
+                        {p + 1}
+                    </button>
+                )
+            )}
+            <button className="aud-page-btn" disabled={page >= tp - 1} onClick={() => irPara(page + 1)} title="Próxima">
                 <ChevronRight size={14} />
+            </button>
+            <button className="aud-page-btn" disabled={page >= tp - 1} onClick={() => irPara(tp - 1)} title="Última página">
+                <ChevronsRight size={14} />
             </button>
         </motion.div>
     );
@@ -656,8 +682,8 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
 
             const res = await api.get(`/auditoria?${params}`);
             setRegistros(res.data.content       || []);
-            setTotalPages(res.data.totalPages   || 0);
-            setTotalItems(res.data.totalElements || 0);
+            setTotalPages(Number(res.data.totalPages) || 0);
+            setTotalItems(Math.max(0, Number(res.data.totalElements) || 0));
         } catch (e) {
             setErro("Não foi possível carregar o histórico. Verifique a conexão.");
             console.error(e);
@@ -677,13 +703,19 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
     };
 
     const limpar = () => {
-        const z = { entidade: "", acao: "", usuario: "", entidadeId: "", de: "", ate: "", page: 0, size: 20 };
+        const z = { entidade: "", acao: "", usuario: "", entidadeId: "", de: "", ate: "", page: 0, size: filtros.size };
         setFiltros(z);
         buscar(z);
     };
 
     const irPara = (p) => {
         const f = { ...filtrosRef.current, page: p };
+        setFiltros(f);
+        buscar(f);
+    };
+
+    const mudarTamanho = (novoSize) => {
+        const f = { ...filtrosRef.current, size: Number(novoSize), page: 0 };
         setFiltros(f);
         buscar(f);
     };
@@ -695,7 +727,20 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
                     ? `${totalItems.toLocaleString("pt-BR")} Registro${totalItems !== 1 ? "s" : ""}`
                     : "Nenhum registro"}
             </span>
-            {totalItems > 0 && <span>Página {filtros.page + 1} de {totalPages}</span>}
+            <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                {totalItems > 0 && (
+                    <span>Página {filtros.page + 1} de {Math.max(1, totalPages)}</span>
+                )}
+                <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: "inherit" }}>
+                    Itens/pág
+                    <select className="aud-select" style={{ width: 60, padding: "4px 6px", fontSize: 11 }} value={filtros.size} onChange={e => mudarTamanho(e.target.value)}>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                    </select>
+                </label>
+            </span>
         </div>
     );
 
