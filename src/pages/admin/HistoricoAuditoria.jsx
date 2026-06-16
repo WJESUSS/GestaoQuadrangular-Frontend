@@ -26,7 +26,7 @@ function theme(isDark) {
     return {
         bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
         bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-        bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
+        bgInput:     isDark ? "#1C1C26"                : "#F0EBE0",
         border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
         borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
         text:        isDark ? "#F5F0E8"                : "#1A1008",
@@ -36,6 +36,7 @@ function theme(isDark) {
         glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
         cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
         placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+        optionBg:    isDark ? "#1C1C26"                : "#FFFFFF",
     };
 }
 
@@ -170,12 +171,21 @@ function GlobalStyles({ t, isDark }) {
       .aud-input::placeholder { color: ${t.placeholder}; }
 
       .aud-select {
-        width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderInput};
-        color: ${t.text}; padding: 10px 12px; border-radius: 8px;
+        width: 100%;
+        background: ${t.bgInput};
+        border: 1px solid ${t.borderInput};
+        color: ${t.text};
+        padding: 10px 12px; border-radius: 8px;
         outline: none; font-family: 'Inter', sans-serif; font-size: 13px;
         cursor: pointer; transition: all .25s; appearance: none; -webkit-appearance: none;
       }
       .aud-select:focus { border-color: ${AURA.gold}; box-shadow: 0 0 0 3px rgba(201,169,110,.08); }
+
+      /* ✅ Força cor das options no tema escuro (Chrome/Edge/Firefox) */
+      .aud-select option {
+        background: ${t.optionBg};
+        color: ${t.text};
+      }
 
       .aud-filter-actions {
         display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;
@@ -334,23 +344,25 @@ const ENTIDADES = ["MEMBRO", "VISITANTE", "CELULA", "FICHA", "USUARIO", "SECRETA
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 function formatDate(iso) {
     if (!iso) return "—";
-    const d = new Date(iso); // ← funciona corretamente SE iso tiver offset
+    const d = new Date(iso);
     return d.toLocaleDateString("pt-BR") + " " +
         d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
-
-// ✅ CORRETO: envia com offset de Brasília, sem passar por Date/toISOString
-// Input do datetime-local: "2025-06-15T14:30"
-// Saída início: "2025-06-15T14:30:00-03:00"
-// Saída fim:    "2025-06-15T23:59:59-03:00"
 function toOffsetParam(val, isEnd = false) {
     if (!val) return null;
+
+    // datetime-local pode vir como "2026-05-24T14:30" ou só "2026-05-24"
+    const hasTime = val.includes("T");
+    const date = hasTime ? val.slice(0, 10) : val;
+    const time = hasTime ? val.slice(11, 16) : null; // "14:30"
+
     if (isEnd) {
-        // Pega só a parte da data "2025-06-15" e coloca 23:59:59
-        const dataBase = val.length >= 10 ? val.slice(0, 10) : val;
-        return `${dataBase}T23:59:59-03:00`;
+        const hora = time || "23:59";
+        return `${date}T${hora}:59-03:00`;
+    } else {
+        const hora = time || "00:00";
+        return `${date}T${hora}:00-03:00`;
     }
-    return `${val}:00-03:00`;
 }
 
 /* ─── Badges / Tags ─────────────────────────────────────────────────────── */
@@ -606,11 +618,11 @@ function Paginacao({ page, totalPages, irPara }) {
     const items = [];
     if (start > 0) {
         items.push(0);
-        if (start > 1) items.push(-1);  // ellipsis
+        if (start > 1) items.push(-1);
     }
     items.push(...range(start, end));
     if (end < tp) {
-        if (end < tp - 1) items.push(-2); // ellipsis
+        if (end < tp - 1) items.push(-2);
         items.push(tp - 1);
     }
 
@@ -671,7 +683,6 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
             if (filtro.usuario)    params.set("usuario",    filtro.usuario);
             if (filtro.entidadeId) params.set("entidadeId", filtro.entidadeId);
 
-            // ✅ USA toOffsetParam — sem toISOString, sem conversão UTC
             const deParam  = toOffsetParam(filtro.de,  false);
             const ateParam = toOffsetParam(filtro.ate, true);
             if (deParam)  params.set("de",  deParam);
@@ -720,6 +731,16 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
         buscar(f);
     };
 
+    // ✅ Select de "Itens/pág" com cores inline para garantir tema escuro
+    const selectSizeStyle = {
+        width: 60,
+        padding: "4px 6px",
+        fontSize: 11,
+        background: t.bgInput,
+        color: t.text,
+        borderColor: t.borderInput,
+    };
+
     const statsEl = (
         <div className="aud-stats">
             <span>
@@ -733,11 +754,17 @@ export default function HistoricoAuditoria({ isDark = false, embedded = false })
                 )}
                 <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: "inherit" }}>
                     Itens/pág
-                    <select className="aud-select" style={{ width: 60, padding: "4px 6px", fontSize: 11 }} value={filtros.size} onChange={e => mudarTamanho(e.target.value)}>
+                    <select
+                        className="aud-select"
+                        style={selectSizeStyle}
+                        value={filtros.size}
+                        onChange={e => mudarTamanho(e.target.value)}
+                    >
                         <option value={10}>10</option>
                         <option value={20}>20</option>
                         <option value={50}>50</option>
                         <option value={100}>100</option>
+                        <option value={1000}>1000</option>
                     </select>
                 </label>
             </span>
