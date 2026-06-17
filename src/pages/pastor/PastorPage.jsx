@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Routes, Route, NavLink, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 import api from "../../services/api.js";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -37,7 +38,7 @@ const AURA = {
 function theme(isDark) {
   return {
     bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
+    bgEl:        isDark ? "rgba(18,18,26,.98)"     : "rgba(255,255,255,.98)",
     bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
     border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
     borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
@@ -102,6 +103,7 @@ function GlobalStyles({ t, isDark }) {
       @keyframes pp-badge  { 0%,100%{transform:scale(1);} 50%{transform:scale(1.15);} }
       @keyframes pp-bell   { 0%,100%{transform:rotate(0);} 15%{transform:rotate(14deg);} 30%{transform:rotate(-12deg);} 45%{transform:rotate(8deg);} 60%{transform:rotate(-5deg);} 75%{transform:rotate(3deg);} }
       @keyframes pp-panel  { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
+      @keyframes pp-sheet  { from{opacity:0;transform:translateY(100%);} to{opacity:1;transform:translateY(0);} }
 
       .pp-spin   { animation: pp-spin   1s linear infinite; }
       .pp-pulse  { animation: pp-pulse  3s ease-in-out infinite; }
@@ -109,6 +111,7 @@ function GlobalStyles({ t, isDark }) {
       .pp-bell   { animation: pp-bell   1.2s ease-in-out infinite; }
       .pp-badge  { animation: pp-badge  2s ease-in-out infinite; }
       .pp-panel  { animation: pp-panel  .22s ease both; }
+      .pp-sheet  { animation: pp-sheet  .28s cubic-bezier(.32,1,.23,1) both; }
 
       .pp-root {
         font-family: 'Inter', sans-serif;
@@ -270,13 +273,11 @@ function GlobalStyles({ t, isDark }) {
         }
       }
 
-      /* Tile: largura fixa suficiente para exibir labels sem corte */
       .pp-nav-tile {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        /* mobile: largura mínima baseada no label mais longo */
         min-width: 72px;
         width: 72px;
         min-height: 64px;
@@ -292,23 +293,13 @@ function GlobalStyles({ t, isDark }) {
         padding: 8px 4px 7px;
         -webkit-tap-highlight-color: transparent;
         position: relative;
-        overflow: visible; /* garante que nada seja cortado */
+        overflow: visible;
       }
       @media(min-width:480px) {
-        .pp-nav-tile {
-          min-width: 80px;
-          width: 80px;
-          min-height: 68px;
-          gap: 6px;
-        }
+        .pp-nav-tile { min-width: 80px; width: 80px; min-height: 68px; gap: 6px; }
       }
       @media(min-width:720px) {
-        .pp-nav-tile {
-          flex: 1;
-          min-width: 0;
-          width: auto;
-          max-width: 100px;
-        }
+        .pp-nav-tile { flex: 1; min-width: 0; width: auto; max-width: 100px; }
       }
       .pp-nav-tile:hover {
         background: ${isDark ? "rgba(201,169,110,.05)" : "rgba(201,169,110,.07)"};
@@ -330,20 +321,10 @@ function GlobalStyles({ t, isDark }) {
       @media(min-width:480px) { .pp-tile-icon { width: 32px; height: 32px; border-radius: 9px; } }
 
       .pp-tile-label {
-        font-size: 8.5px;
-        font-weight: 600;
-        letter-spacing: .06em;
-        text-transform: uppercase;
-        color: ${t.textMuted};
-        line-height: 1.25;
-        /* NUNCA truncar — quebra em 2 linhas se necessário */
-        white-space: normal;
-        word-break: break-word;
-        overflow: visible;
-        width: 100%;
-        text-align: center;
-        transition: color .25s;
-        padding: 0 2px;
+        font-size: 8.5px; font-weight: 600; letter-spacing: .06em;
+        text-transform: uppercase; color: ${t.textMuted}; line-height: 1.25;
+        white-space: normal; word-break: break-word; overflow: visible;
+        width: 100%; text-align: center; transition: color .25s; padding: 0 2px;
       }
       @media(min-width:480px) { .pp-tile-label { font-size: 9px; letter-spacing: .08em; } }
 
@@ -363,10 +344,9 @@ function GlobalStyles({ t, isDark }) {
       @media(min-width:540px)  { .pp-content { padding: 28px 24px 48px; } }
       @media(min-width:768px)  { .pp-content { padding: 36px 32px 56px; } }
 
-      /* Wrapper da animação de página — usa will-change apenas opacity */
       .pp-page-anim {
         will-change: opacity;
-        transform: translateZ(0); /* cria contexto de composição sem tremido */
+        transform: translateZ(0);
       }
 
       .pp-footer {
@@ -383,6 +363,7 @@ function GlobalStyles({ t, isDark }) {
 
       /* ── Sino ── */
       .pp-sino-panel { animation: pp-panel .22s ease both; }
+      .pp-sino-sheet { animation: pp-sheet .28s cubic-bezier(.32,1,.23,1) both; }
       .pp-sino-scroll::-webkit-scrollbar { width: 4px; }
       .pp-sino-scroll::-webkit-scrollbar-track { background: transparent; }
       .pp-sino-scroll::-webkit-scrollbar-thumb { background: rgba(201,169,110,.25); border-radius: 4px; }
@@ -403,6 +384,16 @@ function sinoInitials(nome = "") {
   return nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
 }
 
+function useIsMobileSino() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 520);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 520);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return isMobile;
+}
+
 function SinoPastor({ isDark, t }) {
   const [open,     setOpen]     = useState(false);
   const [tab,      setTab]      = useState("hoje");
@@ -410,7 +401,9 @@ function SinoPastor({ isDark, t }) {
   const [semana,   setSemana]   = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [enviados, setEnviados] = useState({});
-  const ref = React.useRef(null);
+  const btnRef   = React.useRef(null);
+  const panelRef = React.useRef(null);
+  const isMobile = useIsMobileSino();
 
   useEffect(() => {
     Promise.all([
@@ -422,181 +415,299 @@ function SinoPastor({ isDark, t }) {
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
+  // Fecha ao clicar fora (desktop)
   useEffect(() => {
-    const fn = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    if (!open || isMobile) return;
+    const fn = (e) => {
+      const noBtn   = btnRef.current   && !btnRef.current.contains(e.target);
+      const noPanel = panelRef.current && !panelRef.current.contains(e.target);
+      if (noBtn && noPanel) setOpen(false);
+    };
     document.addEventListener("mousedown", fn);
     return () => document.removeEventListener("mousedown", fn);
-  }, []);
+  }, [open, isMobile]);
+
+  // Trava scroll do body no mobile
+  useEffect(() => {
+    document.body.style.overflow = (isMobile && open) ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isMobile, open]);
 
   const lista   = tab === "hoje" ? hoje : semana;
   const temHoje = hoje.length > 0;
 
   const abrirWhatsApp = (m, id) => {
     try {
-      if (m.link) { window.open(m.link, "_blank"); setEnviados(p => ({ ...p, [id]: true })); return; }
+      if (m.link) {
+        window.open(m.link, "_blank");
+        setEnviados(p => ({ ...p, [id]: true }));
+        return;
+      }
       let tel = (m.telefone || "").replace(/\D/g, "");
       if (!tel) { alert("Telefone não disponível para " + m.nome); return; }
       const ddi = tel.startsWith("55") ? "" : "55";
-      const msg = encodeURIComponent(`🎂 Paz seja contigo minha ovelhinha 🙏! Feliz Aniversário ${m.nome}!\n\nQue Deus abençoe sua vida, lhe conceda saúde, paz e prosperidade.\n\nCom carinho,\nPastores Renato e Jaci Soares 🙏`);
+      const msg = encodeURIComponent(
+          `🎂 Paz seja contigo minha ovelhinha 🙏! Feliz Aniversário ${m.nome}!\n\nQue Deus abençoe sua vida, lhe conceda saúde, paz e prosperidade.\n\nCom carinho,\nPastores Renato e Jaci Soares 🙏`
+      );
       window.open(`https://wa.me/${ddi}${tel}?text=${msg}`, "_blank");
       setEnviados(p => ({ ...p, [id]: true }));
     } catch { alert("Erro ao abrir WhatsApp"); }
   };
 
-  return (
-      <div ref={ref} style={{ position: "relative" }}>
-        <button
-            className="pp-btn-ico"
-            onClick={e => { e.stopPropagation(); setOpen(o => !o); }}
-            aria-label="Aniversariantes"
-            style={temHoje ? { borderColor: "rgba(201,169,110,.4)", color: AURA.gold } : {}}
-        >
-        <span className={temHoje && !open ? "pp-bell" : ""} style={{ display: "inline-flex" }}>
-          <Bell size={15} style={{ color: temHoje ? AURA.gold : undefined }} />
-        </span>
-          {temHoje && (
-              <span className="pp-badge" style={{
-                position: "absolute", top: -5, right: -5,
-                minWidth: 17, height: 17, borderRadius: 9,
-                background: AURA.red, color: "#fff",
-                fontSize: 9, fontWeight: 700,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                padding: "0 4px", border: `2px solid ${isDark ? AURA.dark : AURA.light}`,
-                fontFamily: "'Inter', sans-serif",
+  // Conteúdo interno compartilhado
+  const conteudoInterno = (
+      <>
+        {/* Cabeçalho */}
+        <div style={{
+          padding: "14px 16px 10px",
+          borderBottom: `1px solid ${t.border}`,
+          background: "rgba(201,169,110,.04)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 10,
+              background: "rgba(201,169,110,.1)", border: `1px solid ${t.border}`,
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <Cake size={16} color={AURA.gold} />
+            </div>
+            <div>
+              <p style={{
+                fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
+                letterSpacing: ".18em", textTransform: "uppercase", color: AURA.gold, margin: 0,
               }}>
-            {hoje.length}
-          </span>
-          )}
-        </button>
+                ANIVERSARIANTES
+              </p>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textSec, marginTop: 2 }}>
+                {temHoje ? `🎂 ${hoje.length} hoje!` : "Nenhum hoje"}
+              </p>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+            {["hoje", "semana"].map(tb => (
+                <button key={tb} onClick={() => setTab(tb)} style={{
+                  padding: "4px 10px", borderRadius: 8, cursor: "pointer",
+                  fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
+                  border: `1px solid ${tab === tb ? "rgba(201,169,110,.4)" : "transparent"}`,
+                  background: tab === tb ? "rgba(201,169,110,.1)" : "transparent",
+                  color: tab === tb ? AURA.gold : t.textMuted, transition: "all .18s",
+                }}>
+                  {tb === "hoje" ? "Hoje" : "Semana"}
+                </button>
+            ))}
+            <button onClick={() => setOpen(false)} style={{
+              width: 26, height: 26, borderRadius: 7, border: "none",
+              background: "transparent", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: t.textMuted,
+            }}>
+              <X size={13} />
+            </button>
+          </div>
+        </div>
 
-        {open && (
-            <div
-                className="pp-sino-panel"
-                onClick={e => e.stopPropagation()}
-                style={{
-                  position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)",
-                  width: "min(344px, calc(100vw - 20px))",
-                  background: t.bgEl,
-                  border: `1px solid ${t.border}`,
-                  borderRadius: 18,
-                  boxShadow: isDark ? "0 16px 48px rgba(0,0,0,.6)" : "0 8px 32px rgba(201,169,110,.18)",
-                  zIndex: 300, overflow: "hidden",
-                }}
-            >
-              {/* Header sino */}
-              <div style={{
-                padding: "14px 16px 10px",
-                borderBottom: `1px solid ${t.border}`,
-                background: "rgba(201,169,110,.04)",
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Lista — única área com scroll */}
+        <div
+            className="pp-sino-scroll"
+            style={{
+              flex: 1,
+              minHeight: 0,        /* ← essencial para o scroll funcionar no flex */
+              overflowY: "auto",
+              overflowX: "hidden",
+              padding: "10px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              WebkitOverflowScrolling: "touch",
+            }}
+        >
+          {loading ? (
+              <p style={{ textAlign: "center", padding: "28px 0", fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textMuted }}>
+                Carregando…
+              </p>
+          ) : lista.length === 0 ? (
+              <p style={{ textAlign: "center", padding: "28px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, color: t.textMuted }}>
+                🎂 Nenhum aniversariante {tab === "hoje" ? "hoje" : "essa semana"}.
+              </p>
+          ) : lista.map((m, i) => {
+            const cor     = CORES_SINO[i % CORES_SINO.length];
+            const isToday = tab === "hoje";
+            const enviado = enviados[m.id];
+            return (
+                <div key={m.id} style={{
+                  display: "flex", alignItems: "center", gap: 11,
+                  padding: "11px 12px", borderRadius: 13,
+                  border: `1px solid ${isToday ? "rgba(201,169,110,.35)" : t.border}`,
+                  background: isToday
+                      ? "rgba(201,169,110,.05)"
+                      : isDark ? "rgba(255,255,255,.02)" : "rgba(201,169,110,.02)",
+                  borderLeft: isToday ? `3px solid ${AURA.gold}` : undefined,
+                  flexShrink: 0,
+                }}>
                   <div style={{
-                    width: 34, height: 34, borderRadius: 10,
-                    background: "rgba(201,169,110,.1)", border: `1px solid ${t.border}`,
-                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                    width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: cor.bg, color: cor.text,
+                    fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 600,
+                    border: `2px solid ${isToday ? "rgba(201,169,110,.4)" : "rgba(128,128,128,.18)"}`,
                   }}>
-                    <Cake size={16} color={AURA.gold} />
+                    {sinoInitials(m.nome)}
                   </div>
-                  <div>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: AURA.gold, margin: 0 }}>
-                      ANIVERSARIANTES
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      color: t.text, margin: 0,
+                    }}>
+                      {m.nome}
                     </p>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textSec, marginTop: 2 }}>
-                      {temHoje ? `🎂 ${hoje.length} hoje!` : "Nenhum hoje"}
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textSec, marginTop: 1 }}>
+                      📱 {m.telefone}
                     </p>
+                    {isToday && (
+                        <span style={{
+                          fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 700,
+                          letterSpacing: ".1em", padding: "2px 7px", borderRadius: 5,
+                          background: "rgba(201,169,110,.1)", color: AURA.gold,
+                          border: "1px solid rgba(201,169,110,.22)",
+                          marginTop: 4, display: "inline-block",
+                        }}>
+                    🎂 HOJE!
+                  </span>
+                    )}
                   </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                  {["hoje", "semana"].map(tb => (
-                      <button key={tb} onClick={e => { e.stopPropagation(); setTab(tb); }} style={{
-                        padding: "4px 10px", borderRadius: 8, cursor: "pointer",
-                        fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
-                        border: `1px solid ${tab === tb ? "rgba(201,169,110,.4)" : "transparent"}`,
-                        background: tab === tb ? "rgba(201,169,110,.1)" : "transparent",
-                        color: tab === tb ? AURA.gold : t.textMuted, transition: "all .18s",
-                      }}>
-                        {tb.charAt(0).toUpperCase() + tb.slice(1)}
-                      </button>
-                  ))}
-                  <button onClick={e => { e.stopPropagation(); setOpen(false); }} style={{
-                    width: 26, height: 26, borderRadius: 7, border: "none", background: "transparent",
-                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: t.textMuted,
+                  <button onClick={() => abrirWhatsApp(m, m.id)} style={{
+                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                    border: `1px solid ${enviado ? "rgba(5,150,105,.35)" : "rgba(37,211,102,.35)"}`,
+                    background: enviado ? "rgba(5,150,105,.08)" : "rgba(37,211,102,.08)",
+                    cursor: "pointer", display: "flex", alignItems: "center",
+                    justifyContent: "center", transition: "all .18s",
                   }}>
-                    <X size={13} />
+                    {enviado ? <Check size={15} color="#059669" /> : <Send size={15} color="#25D366" />}
                   </button>
                 </div>
-              </div>
+            );
+          })}
+        </div>
 
-              {/* Lista */}
-              <div className="pp-sino-scroll" style={{ maxHeight: "min(320px, calc(100dvh - 180px))", overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: 6 }}>
-                {loading ? (
-                    <p style={{ textAlign: "center", padding: "28px 0", fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textMuted }}>Carregando…</p>
-                ) : lista.length === 0 ? (
-                    <p style={{ textAlign: "center", padding: "28px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, color: t.textMuted }}>
-                      🎂 Nenhum aniversariante {tab === "hoje" ? "hoje" : "essa semana"}.
-                    </p>
-                ) : lista.map((m, i) => {
-                  const cor = CORES_SINO[i % CORES_SINO.length];
-                  const isToday = tab === "hoje";
-                  const enviado = enviados[m.id];
-                  return (
-                      <div key={m.id} style={{
-                        display: "flex", alignItems: "center", gap: 11, padding: "11px 12px", borderRadius: 13,
-                        border: `1px solid ${isToday ? "rgba(201,169,110,.35)" : t.border}`,
-                        background: isToday ? "rgba(201,169,110,.05)" : isDark ? "rgba(255,255,255,.02)" : "rgba(201,169,110,.02)",
-                        borderLeft: isToday ? `3px solid ${AURA.gold}` : undefined,
-                      }}>
-                        <div style={{
-                          width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          background: cor.bg, color: cor.text,
-                          fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 600,
-                          border: `2px solid ${isToday ? "rgba(201,169,110,.4)" : "rgba(128,128,128,.18)"}`,
-                        }}>
-                          {sinoInitials(m.nome)}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: t.text, margin: 0 }}>
-                            {m.nome}
-                          </p>
-                          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textSec, marginTop: 1 }}>
-                            📱 {m.telefone}
-                          </p>
-                          {isToday && (
-                              <span style={{
-                                fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 700, letterSpacing: ".1em",
-                                padding: "2px 7px", borderRadius: 5, background: "rgba(201,169,110,.1)",
-                                color: AURA.gold, border: "1px solid rgba(201,169,110,.22)", marginTop: 4, display: "inline-block",
-                              }}>
-                        🎂 HOJE!
-                      </span>
-                          )}
-                        </div>
-                        <button onClick={e => { e.stopPropagation(); abrirWhatsApp(m, m.id); }} style={{
-                          width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-                          border: `1px solid ${enviado ? "rgba(5,150,105,.35)" : "rgba(37,211,102,.35)"}`,
-                          background: enviado ? "rgba(5,150,105,.08)" : "rgba(37,211,102,.08)",
-                          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s",
-                        }}>
-                          {enviado ? <Check size={15} color="#059669" /> : <Send size={15} color="#25D366" />}
-                        </button>
-                      </div>
-                  );
-                })}
-              </div>
+        {/* Rodapé */}
+        <div style={{
+          padding: "8px 16px", flexShrink: 0,
+          borderTop: `1px solid ${t.border}`,
+          textAlign: "center",
+          fontFamily: "'Inter',sans-serif", fontSize: 8,
+          letterSpacing: ".16em", textTransform: "uppercase",
+          color: t.textMuted, background: "rgba(201,169,110,.02)",
+        }}>
+          🙏 IEQ Pituaçu – Sistema Pastoral
+        </div>
+      </>
+  );
 
-              {/* Footer sino */}
-              <div style={{ padding: "8px 16px", borderTop: `1px solid ${t.border}`, textAlign: "center", fontFamily: "'Inter',sans-serif", fontSize: 8, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted, background: "rgba(201,169,110,.02)" }}>
-                🙏 IEQ Pituaçu – Sistema Pastoral
+  // Estilos base do painel
+  const estiloBase = {
+    background: t.bgEl,
+    border: `1px solid ${t.border}`,
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  return (
+      <>
+        {/* Botão sino */}
+        <div ref={btnRef} style={{ display: "inline-flex" }}>
+          <button
+              className="pp-btn-ico"
+              onClick={() => setOpen(o => !o)}
+              aria-label="Aniversariantes"
+              style={temHoje ? { borderColor: "rgba(201,169,110,.4)", color: AURA.gold } : {}}
+          >
+          <span className={temHoje && !open ? "pp-bell" : ""} style={{ display: "inline-flex" }}>
+            <Bell size={15} style={{ color: temHoje ? AURA.gold : undefined }} />
+          </span>
+            {temHoje && (
+                <span className="pp-badge" style={{
+                  position: "absolute", top: -5, right: -5,
+                  minWidth: 17, height: 17, borderRadius: 9,
+                  background: AURA.red, color: "#fff",
+                  fontSize: 9, fontWeight: 700,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  padding: "0 4px", border: `2px solid ${isDark ? AURA.dark : AURA.light}`,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+              {hoje.length}
+            </span>
+            )}
+          </button>
+        </div>
+
+        {/* Portal — renderiza direto no body, fora do header */}
+        {open && createPortal(
+            <>
+              {/* Overlay */}
+              <div
+                  onMouseDown={() => setOpen(false)}
+                  style={{
+                    position: "fixed", inset: 0,
+                    background: isMobile ? "rgba(0,0,0,.5)" : "transparent",
+                    zIndex: 9998,
+                  }}
+              />
+
+              {/* Painel */}
+              <div
+                  ref={panelRef}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className={isMobile ? "pp-sino-sheet" : "pp-sino-panel"}
+                  style={{
+                    ...estiloBase,
+                    position: "fixed",
+                    zIndex: 9999,
+                    boxShadow: isDark
+                        ? "0 16px 48px rgba(0,0,0,.7)"
+                        : "0 8px 32px rgba(201,169,110,.22)",
+                    // Mobile: bottom sheet
+                    ...(isMobile ? {
+                      bottom: 0, left: 0, right: 0,
+                      width: "100%",
+                      height: "90dvh",           /* ← height explícito: flex filho sabe até onde crescer */
+                      borderRadius: "20px 20px 0 0",
+                      borderBottom: "none",
+                      boxShadow: "0 -8px 48px rgba(0,0,0,.4)",
+                    } : {
+                      // Desktop: centralizado horizontalmente, abaixo do header
+                      top: 72,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "min(360px, calc(100vw - 20px))",
+                      height: "min(460px, calc(100dvh - 100px))", /* ← height explícito */
+                      borderRadius: 18,
+                    }),
+                  }}
+              >
+                {/* Handle de arraste (mobile) */}
+                {isMobile && (
+                    <div style={{
+                      width: 36, height: 4, borderRadius: 2,
+                      background: "rgba(201,169,110,.3)",
+                      margin: "10px auto 4px",
+                      flexShrink: 0,
+                    }} />
+                )}
+
+                {conteudoInterno}
               </div>
-            </div>
+            </>,
+            document.body
         )}
-      </div>
+      </>
   );
 }
 
-/* ─── Variantes de animação — apenas opacity, sem movimento Y ────── */
+/* ─── Variantes de animação ───────────────────────────────────────── */
 const PAGE_VARIANTS = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.18, ease: "easeOut" } },
