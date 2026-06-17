@@ -196,7 +196,6 @@ function AuraStyles({ t, isDark }) {
       .aura-loading { min-height: 60vh; display: flex; align-items: center; justify-content: center; }
       .aura-draft-toast { display: flex; align-items: center; gap: 10px; background: rgba(0,61,165,.08); border: 1px solid rgba(0,61,165,.2); border-radius: 14px; padding: 12px 18px; margin-bottom: 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; animation: aura-fadein .4s ease; }
 
-      /* Botão X justificar falta — inline ao lado do nome */
       .aura-btn-justificar {
         width: 28px; height: 28px; border-radius: 8px; border: none;
         display: inline-flex; align-items: center; justify-content: center;
@@ -347,6 +346,115 @@ function ToastSucesso({ total, onClose }) {
   );
 }
 
+/* ✅ COMPONENTE: AlertaErro com mensagens amigáveis por tipo */
+function AlertaErro({ erro, onFechar, t }) {
+  if (!erro) return null;
+
+  const configuracao = {
+    conflito: {
+      icone: <AlertTriangle size={18} />,
+      cor: "#DC2626",
+      bg: "rgba(220,38,38,.08)",
+      borda: "rgba(220,38,38,.25)",
+    },
+    validacao: {
+      icone: <AlertTriangle size={18} />,
+      cor: "#D97706",
+      bg: "rgba(217,119,6,.08)",
+      borda: "rgba(217,119,6,.25)",
+    },
+    servidor: {
+      icone: <AlertTriangle size={18} />,
+      cor: "#7C3AED",
+      bg: "rgba(124,58,237,.08)",
+      borda: "rgba(124,58,237,.25)",
+    },
+    generico: {
+      icone: <AlertTriangle size={18} />,
+      cor: "#6366F1",
+      bg: "rgba(99,102,241,.08)",
+      borda: "rgba(99,102,241,.25)",
+    },
+  };
+
+  const cfg = configuracao[erro.tipo] || configuracao.generico;
+
+  return (
+      <div style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 14,
+        background: cfg.bg,
+        border: `1px solid ${cfg.borda}`,
+        borderRadius: 14,
+        padding: "14px 18px",
+        marginBottom: 16,
+        animation: "aura-fadein .3s ease forwards",
+      }}>
+        <div style={{ color: cfg.cor, flexShrink: 0, marginTop: 2 }}>
+          {cfg.icone}
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontFamily: "'Inter',sans-serif",
+            fontSize: 13,
+            fontWeight: 600,
+            color: cfg.cor,
+            margin: "0 0 6px",
+            letterSpacing: ".05em",
+          }}>
+            {erro.titulo}
+          </p>
+          <p style={{
+            fontFamily: "'Inter',sans-serif",
+            fontSize: 12,
+            fontWeight: 300,
+            color: t.textSec,
+            lineHeight: 1.5,
+            margin: 0,
+          }}>
+            {erro.mensagem}
+          </p>
+          {erro.codigo && (
+              <p style={{
+                fontFamily: "'Inter',sans-serif",
+                fontSize: 10,
+                fontWeight: 500,
+                color: t.textMuted,
+                margin: "8px 0 0",
+                letterSpacing: ".08em",
+                textTransform: "uppercase",
+              }}>
+                Código: {erro.codigo}
+              </p>
+          )}
+        </div>
+
+        <button
+            onClick={onFechar}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: cfg.cor,
+              padding: 0,
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              transition: "opacity .2s",
+            }}
+            onMouseEnter={e => e.target.style.opacity = ".6"}
+            onMouseLeave={e => e.target.style.opacity = "1"}
+        >
+          ✕
+        </button>
+      </div>
+  );
+}
+
 function PainelJustificativa({ membroId, justificativas, onSelecionar, t }) {
   const atual = justificativas[membroId] || null;
   return (
@@ -371,7 +479,6 @@ function PainelJustificativa({ membroId, justificativas, onSelecionar, t }) {
   );
 }
 
-/* ─── Lista de chamada ───────────────────────────────────────────────── */
 function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesVisitantes, justificativas, onJustificativa, justificandoIds, onToggleJustificando, t, isDark }) {
   return (
       <div className="aura-card" style={{ overflow: "hidden" }}>
@@ -397,20 +504,25 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
             return (
                 <div key={pessoa.uKey} className="aura-person-row"
                      style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}>
-
-                  {/* ── Linha principal: botão de presença ocupa toda a largura ── */}
                   <div style={{ display: "flex", alignItems: "center" }}>
-                    <button
-                        onClick={() => alternarPresenca(pessoa.uKey)}
-                        disabled={processing}
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => { if (!processing) alternarPresenca(pessoa.uKey); }}
+                        onKeyDown={(e) => {
+                          if ((e.key === "Enter" || e.key === " ") && !processing) {
+                            e.preventDefault();
+                            alternarPresenca(pessoa.uKey);
+                          }
+                        }}
+                        aria-disabled={processing}
                         style={{
-                          flex: 1, background: "none", border: "none", cursor: "pointer",
+                          flex: 1, background: "none", border: "none", cursor: processing ? "default" : "pointer",
                           display: "flex", alignItems: "center", justifyContent: "space-between",
                           padding: "15px 22px", transition: "all .2s",
                         }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
-                        {/* Avatar */}
                         <div style={{
                           width: 42, height: 42, borderRadius: 12, flexShrink: 0,
                           background: marcado
@@ -426,7 +538,6 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                         </div>
 
                         <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
-                          {/* ✅ AJUSTE 2: Nome + botão X inline, logo após o nome */}
                           <div style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
                             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: marcado ? 500 : 300, color: marcado ? t.text : t.textSec, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {pessoa.nome}
@@ -455,7 +566,6 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                         </div>
                       </div>
 
-                      {/* Checkbox — direita */}
                       <div style={{
                         width: 26, height: 26, borderRadius: 8, flexShrink: 0,
                         border: `2px solid ${marcado ? AURA.gold : t.border}`,
@@ -464,15 +574,13 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                       }}>
                         {marcado && <CheckCircle2 size={14} style={{ color: "#0A0A0F" }} />}
                       </div>
-                    </button>
+                    </div>
                   </div>
 
-                  {/* Painel de justificativa */}
                   {justAberto && (
                       <PainelJustificativa membroId={pessoa.id} justificativas={justificativas} onSelecionar={onJustificativa} t={t} />
                   )}
 
-                  {/* Decisão espiritual — visitantes presentes */}
                   {marcado && isVisitante && (
                       <div style={{ padding: "0 22px 16px 76px" }}>
                         <div className="aura-card" style={{ padding: "12px 16px", marginBottom: 0 }}>
@@ -530,7 +638,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
       const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
 
-      // ✅ AJUSTE 1: membros primeiro (A–Z), depois visitantes (A–Z)
       setPessoas([
         ...membros.sort((a, b) => a.nome.localeCompare(b.nome)),
         ...visitantes.sort((a, b) => a.nome.localeCompare(b.nome)),
@@ -684,13 +791,14 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
 }
 
 /* =============================================================
-   TELA PRINCIPAL
+   TELA PRINCIPAL COM TRATAMENTO COMPLETO DE ERRO 409
 ============================================================= */
 export default function TelaRelatorio({ isDark = false }) {
   const t = theme(isDark);
   const [modo, setModo] = useState("novo");
   const [relatorioEditId, setRelatorioEditId] = useState(null);
   const [modalDuplicado, setModalDuplicado]   = useState(null);
+  const [erroAlerta, setErroAlerta] = useState(null); // ✅ NOVO: Estado para alertas de erro
   const [celula, setCelula]   = useState(null);
   const [pessoas, setPessoas] = useState([]);
   const [historico, setHistorico]   = useState([]);
@@ -735,7 +843,6 @@ export default function TelaRelatorio({ isDark = false }) {
       const membros    = (resMembros.data   || []).map(m => ({ id: m.id, nome: m.nome, tipo: "MEMBRO",    uKey: `MEMBRO-${m.id}`    }));
       const visitantes = (resVisitantes.data || []).map(v => ({ id: v.id, nome: v.nome, tipo: "VISITANTE", uKey: `VISITANTE-${v.id}` }));
 
-      // ✅ AJUSTE 1: membros primeiro (A–Z), depois visitantes (A–Z)
       setPessoas([
         ...membros.sort((a, b) => a.nome.localeCompare(b.nome)),
         ...visitantes.sort((a, b) => a.nome.localeCompare(b.nome)),
@@ -798,40 +905,120 @@ export default function TelaRelatorio({ isDark = false }) {
   const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
   const total = membrosPresentes + visitantesPresentes;
 
+  // ✅ TRATAMENTO COMPLETO DE ERRO 409 COM ALERTA AMIGÁVEL
   const handleSubmit = async () => {
     if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
-    try {
-      const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const res = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
-      const existente = (res.data || []).find(r => normalizarData(r.dataReuniao) === normalizarData(form.dataReuniao));
-      if (existente) { setModalDuplicado({ relatorioId: existente.id, dataReuniao: existente.dataReuniao, estudo: existente.estudo || "Sem tema" }); return; }
-    } catch (err) { console.warn("Não foi possível verificar duplicata:", err); }
 
     try {
       setEnviando(true);
+      setErroAlerta(null); // Limpa erros anteriores
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const totalEnviado = total;
       const todosMembrosIds = pessoas.filter(p => p.tipo === "MEMBRO").map(p => p.id);
       const membrosPresentesIds = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", "")));
-      const membrosAusentes = todosMembrosIds.filter(id => !membrosPresentesIds.includes(id) && justificativas[id]).map(id => ({ membroId: id, justificativa: justificativas[id] }));
+      const membrosAusentes = todosMembrosIds
+          .filter(id => !membrosPresentesIds.includes(id) && justificativas[id])
+          .map(id => ({ membroId: id, justificativa: justificativas[id] }));
+
       const payload = {
-        celulaId: Number(form.celulaId), dataReuniao: form.dataReuniao, estudo: form.estudo.trim(),
+        celulaId: Number(form.celulaId),
+        dataReuniao: form.dataReuniao,
+        estudo: form.estudo.trim(),
         membrosPresentesIds,
-        visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => { const id = Number(k.replace("VISITANTE-", "")); return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" }; }),
+        visitantesPresentes: form.selecionadosKeys
+            .filter(k => k.startsWith("VISITANTE-"))
+            .map(k => { const id = Number(k.replace("VISITANTE-", "")); return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" }; }),
         membrosAusentes,
       };
+
       await api.post("/relatorios", payload, { headers: { Authorization: `Bearer ${token}` } });
-      try { await api.put(`/metas/celula/${form.celulaId}/recalcular`, {}, { headers: { Authorization: `Bearer ${token}` } }); dispararAtualizacaoMetas(form.celulaId); }
-      catch (err) { console.warn("Não foi possível recalcular metas:", err); }
+
+      try {
+        await api.put(`/metas/celula/${form.celulaId}/recalcular`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        dispararAtualizacaoMetas(form.celulaId);
+      } catch (err) { console.warn("Não foi possível recalcular metas:", err); }
+
       try { localStorage.removeItem(draftKey(form.celulaId)); } catch (_) {}
       prontoParaSalvar.current = false;
       setForm(f => ({ ...f, estudo: "", selecionadosKeys: [] }));
       setJustificativas({}); setJustificandoIds(new Set());
       setTimeout(() => { prontoParaSalvar.current = true; }, 0);
       setToastSucesso({ total: totalEnviado });
+
     } catch (err) {
-      alert(err.response?.data?.message || "Erro ao enviar relatório.");
-    } finally { setEnviando(false); }
+      // ✅ Trata erro 409 do backend com mensagem amigável
+      if (err.response?.status === 409) {
+        const errorData = err.response.data;
+        const errorCode = errorData?.errorCode;
+
+        if (errorCode === "DUPLICATE_REPORT") {
+          // Procura no histórico em memória
+          const dataNormalizada = normalizarData(form.dataReuniao);
+          const existente = historico.find(r => normalizarData(r.dataReuniao) === dataNormalizada);
+
+          if (existente) {
+            setModalDuplicado({
+              relatorioId: existente.id,
+              dataReuniao: existente.dataReuniao,
+              estudo: existente.estudo || "Sem tema",
+              totalPresentes: existente.totalPresentes || 0,
+            });
+            setEnviando(false);
+            return;
+          }
+
+          // Fallback: busca no backend
+          try {
+            const res = await api.get("/relatorios/historico", {
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")?.replace(/"/g, "").trim()}` }
+            });
+            const existenteNovoFetch = (res.data || []).find(r => normalizarData(r.dataReuniao) === dataNormalizada);
+            if (existenteNovoFetch) {
+              setModalDuplicado({
+                relatorioId: existenteNovoFetch.id,
+                dataReuniao: existenteNovoFetch.dataReuniao,
+                estudo: existenteNovoFetch.estudo || "Sem tema",
+                totalPresentes: existenteNovoFetch.totalPresentes || 0,
+              });
+              setEnviando(false);
+              return;
+            }
+          } catch (_) {}
+        } else {
+          // Outros erros 409 → exibe alerta amigável
+          setErroAlerta({
+            tipo: "conflito",
+            titulo: errorData?.title || "Erro de conflito",
+            mensagem: errorData?.message || "Não foi possível enviar o relatório",
+            codigo: errorCode,
+          });
+        }
+      }
+      // Outros erros HTTP
+      else if (err.response?.status === 422) {
+        setErroAlerta({
+          tipo: "validacao",
+          titulo: "Erro de validação",
+          mensagem: err.response.data?.message || "Alguns campos estão inválidos",
+        });
+      }
+      else if (err.response?.status === 500) {
+        setErroAlerta({
+          tipo: "servidor",
+          titulo: "Erro do servidor",
+          mensagem: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
+        });
+      }
+      else {
+        setErroAlerta({
+          tipo: "generico",
+          titulo: "Erro",
+          mensagem: err.response?.data?.message || "Erro ao enviar relatório",
+        });
+      }
+    } finally {
+      setEnviando(false);
+    }
   };
 
   const nomeCelula = celula?.nome || "Carregando…";
@@ -883,7 +1070,9 @@ export default function TelaRelatorio({ isDark = false }) {
                 </div>
                 <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${AURA.gold}, transparent)`, margin: "0 0 18px" }} />
                 <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.textSec, lineHeight: 1.65, margin: "0 0 20px" }}>
-                  Já existe um relatório para esta data. Deseja <strong style={{ color: t.text, fontWeight: 500 }}>editar o existente</strong>?
+                  Já existe um relatório para <strong style={{ color: t.text, fontWeight: 500 }}>
+                  {new Date(normalizarData(modalDuplicado.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}
+                </strong> com <strong style={{ color: t.text, fontWeight: 500 }}>{modalDuplicado.totalPresentes} presentes</strong>. Deseja <strong style={{ color: t.text, fontWeight: 500 }}>editar</strong>?
                 </p>
                 <div style={{ display: "flex", gap: 10 }}>
                   <button className="aura-btn-ghost" style={{ flex: 1 }} onClick={() => setModalDuplicado(null)}>Cancelar</button>
@@ -954,6 +1143,15 @@ export default function TelaRelatorio({ isDark = false }) {
 
           {modo === "novo" && (
               <>
+                {/* ✅ RENDERIZA ALERTA DE ERRO AMIGÁVEL */}
+                {erroAlerta && (
+                    <AlertaErro
+                        erro={erroAlerta}
+                        onFechar={() => setErroAlerta(null)}
+                        t={t}
+                    />
+                )}
+
                 {rascunhoCarregado && (
                     <div className="aura-draft-toast">
                       <CheckCircle2 size={14} style={{ flexShrink: 0 }} />
