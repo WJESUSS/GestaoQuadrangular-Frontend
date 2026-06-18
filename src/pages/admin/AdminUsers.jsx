@@ -724,6 +724,7 @@ export default function AdminUsers() {
   const [secaoAtiva,     setSecaoAtiva]     = useState("admin");
   const [celulas,        setCelulas]        = useState([]);
   const [celulaAdmin,    setCelulaAdmin]    = useState(null);
+  const [fotos,          setFotos]          = useState({});
 
   const fotoRef   = useRef(null);
   const fotoIdRef = useRef(null);
@@ -819,15 +820,19 @@ export default function AdminUsers() {
         const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
       });
       await api.patch(`usuarios/${id}/foto`, { fotoBase64: base64 });
-      ok("Foto atualizada."); carregarUsuarios();
+      setFotos(prev => ({ ...prev, [id]: base64 }));
+      ok("Foto atualizada.");
     } catch { setErro("Erro ao enviar foto."); }
     finally { setUploadandoFoto(null); e.target.value = ""; }
   };
   const removerFoto = async (id, nome) => {
     if (!window.confirm(`Remover foto de "${nome}"?`)) return;
     setUploadandoFoto(id);
-    try { await api.patch(`usuarios/${id}/foto`, { fotoBase64: null }); ok("Foto removida."); carregarUsuarios(); }
-    catch { setErro("Erro ao remover foto."); }
+    try {
+      await api.patch(`usuarios/${id}/foto`, { fotoBase64: null });
+      setFotos(prev => { const n = { ...prev }; delete n[id]; return n; });
+      ok("Foto removida.");
+    } catch { setErro("Erro ao remover foto."); }
     finally { setUploadandoFoto(null); }
   };
   const abrirEdicao = u => {
@@ -1158,15 +1163,21 @@ export default function AdminUsers() {
                                         style={{ background: avatarBg(u), opacity: u.ativo ? 1 : .5 }}
                                         onClick={() => abrirSeletorFoto(u.id)}
                                     >
-                                      {u.fotoPerfil
-                                          ? <img src={u.fotoPerfil} alt={u.nome} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }} />
+                                      {fotos[u.id]
+                                          ? <img src={fotos[u.id]} alt={u.nome} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }} />
                                           : u.nome?.charAt(0).toUpperCase()
                                       }
-                                      <div className="adm-avatar-overlay">
-                                        {eFoto
-                                            ? <Loader2 size={12} color="#fff" style={{ animation: "spin 1s linear infinite" }} />
-                                            : <Camera size={12} color="#fff" />
-                                        }
+                                      <div className="adm-avatar-overlay" style={{ flexDirection: "column", gap: 4 }}>
+                                        {eFoto ? (
+                                            <Loader2 size={12} color="#fff" style={{ animation: "spin 1s linear infinite" }} />
+                                        ) : fotos[u.id] ? (
+                                            <>
+                                              <Camera size={12} color="#fff" onClick={e => { e.stopPropagation(); abrirSeletorFoto(u.id); }} />
+                                              <X size={12} color="#fff" onClick={e => { e.stopPropagation(); removerFoto(u.id, u.nome); }} style={{ cursor: "pointer" }} />
+                                            </>
+                                        ) : (
+                                            <Camera size={12} color="#fff" />
+                                        )}
                                       </div>
                                     </div>
                                     <div style={{ minWidth: 0 }}>
