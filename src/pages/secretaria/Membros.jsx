@@ -137,6 +137,16 @@ function prepararFormParaEnvio(form) {
   return dados;
 }
 
+/* ─── Helper: deduplica array pelo campo id ───────────────────────── */
+function deduplicarPorId(lista) {
+  const seen = new Set();
+  return lista.filter(m => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+}
+
 /* ─── DateInput ──────────────────────────────────────────────────── */
 function DateInput({ value, onChange, className = "", isDark = false, ...rest }) {
   const [texto, setTexto] = useState(isoParaBr(value));
@@ -975,12 +985,12 @@ function MembroModalRefatorado({
 }
 
 /* ─── Componente Principal ──────────────────────────────────────── */
-const TAMANHO_PAGINA = 50; // tamanho de cada lote carregado do backend
+const TAMANHO_PAGINA = 50;
 
 export default function MembrosRefatorado({ isDark = false }) {
   const [membros,        setMembros]        = useState([]);
-  const [loading,        setLoading]        = useState(true);       // carregamento inicial
-  const [carregandoMais, setCarregandoMais] = useState(false);       // "carregar mais"
+  const [loading,        setLoading]        = useState(true);
+  const [carregandoMais, setCarregandoMais] = useState(false);
   const [pagina,         setPagina]         = useState(0);
   const [temMais,        setTemMais]        = useState(false);
   const [totalRegistros, setTotalRegistros] = useState(0);
@@ -995,11 +1005,6 @@ export default function MembrosRefatorado({ isDark = false }) {
 
   const t = themeMembers(isDark);
 
-  /**
-   * Carrega uma página de membros do backend.
-   * - reset=true: substitui a lista (usado no carregamento inicial e após criar/editar/excluir)
-   * - reset=false: acrescenta à lista existente (usado no botão "Carregar mais")
-   */
   const carregarPagina = useCallback(async (numeroPagina, reset) => {
     if (reset) setLoading(true);
     else setCarregandoMais(true);
@@ -1009,14 +1014,17 @@ export default function MembrosRefatorado({ isDark = false }) {
         params: { page: numeroPagina, size: TAMANHO_PAGINA },
       });
 
-      // Suporta tanto Page<T> (objeto com "content") quanto array simples (fallback)
       const conteudo = Array.isArray(res.data) ? res.data : (res.data.content || []);
       const ultimaPagina = Array.isArray(res.data)
           ? true
           : (res.data.last ?? (conteudo.length < TAMANHO_PAGINA));
       const total = Array.isArray(res.data) ? conteudo.length : (res.data.totalElements ?? conteudo.length);
 
-      setMembros(prev => reset ? conteudo : [...prev, ...conteudo]);
+      // ✅ CORREÇÃO: deduplica por id ao acumular páginas
+      setMembros(prev => {
+        const merged = reset ? conteudo : [...prev, ...conteudo];
+        return deduplicarPorId(merged);
+      });
       setTemMais(!ultimaPagina);
       setTotalRegistros(total);
       setPagina(numeroPagina);
@@ -1029,7 +1037,6 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   }, []);
 
-  // Carregamento inicial
   useEffect(() => {
     carregarPagina(0, true);
   }, [carregarPagina]);
@@ -1039,7 +1046,6 @@ export default function MembrosRefatorado({ isDark = false }) {
     carregarPagina(pagina + 1, false);
   };
 
-  // Recarrega a lista do início (após criar/editar/excluir)
   const recarregar = () => carregarPagina(0, true);
 
   const abrirNovo = () => {
@@ -1146,8 +1152,6 @@ export default function MembrosRefatorado({ isDark = false }) {
       [membros, filtro]
   );
 
-  // Quando o usuário está filtrando e a busca não encontra nada na página atual,
-  // mas ainda há mais páginas no servidor, avisamos que pode ser necessário carregar mais.
   const buscaPodeEstarIncompleta = filtro.trim() !== "" && temMais;
 
   return (
