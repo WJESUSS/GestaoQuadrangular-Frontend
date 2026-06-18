@@ -15,6 +15,7 @@ import Celulas                   from "../secretaria/Celulas";
 import Visitantes                from "../secretaria/Visitante";
 import FichasEncontro            from "../secretaria/FichasEncontro";
 import SecretariaCelulas         from "../secretaria/SecretariaCelulas";
+import AprovacaoFichasMembro     from "../secretaria/AprovacaoFichasMembro";
 import PainelPastor              from "../pastor/PainelPastor";
 import RelatorioCelula           from "../pastor/RelatorioCelula";
 import SolicitacoesMultiplicacao from "../pastor/SolicitacoesMultiplicacao";
@@ -30,6 +31,7 @@ import TelaVisitantes            from "../lider/TelaVisitantes";
 import TelaFichas                from "../lider/TelaFichas";
 import CasasDePazLider           from "../lider/CasasDePazLider";
 import Missao70Lider             from "../lider/Missao70Lider";
+import SolicitarFichaMembro      from "../lider/SolicitarFichaMembro";
 import TesourariaDashboard       from "../tesouraria/TesourariaDashboard";
 import TesourariaLancamento      from "../tesouraria/TesourariaLancamento";
 import TesourariaRelatorio       from "../tesouraria/TesourariaRelatorio";
@@ -84,11 +86,12 @@ const SECOES = [
   {
     id: "secretaria", label: "Secretaria", icon: FileText, color: C.blue,
     itens: [
-      { key: "membros",           label: "Membros",      sub: "Base",       icon: Users      },
-      { key: "visitantes",        label: "Visitantes",   sub: "Novas Vidas",icon: UserPlus   },
-      { key: "celulas",           label: "Células",      sub: "Grupos",     icon: Home       },
-      { key: "fichas",            label: "Fichas",       sub: "Encontro",   icon: FileText   },
-      { key: "secretariacelulas", label: "Sec. Células", sub: "Secretaria", icon: Building2  },
+      { key: "membros",              label: "Membros",      sub: "Base",       icon: Users      },
+      { key: "visitantes",           label: "Visitantes",   sub: "Novas Vidas",icon: UserPlus   },
+      { key: "celulas",              label: "Células",      sub: "Grupos",     icon: Home       },
+      { key: "fichas",               label: "Fichas",       sub: "Encontro",   icon: FileText   },
+      { key: "secretariacelulas",    label: "Sec. Células", sub: "Secretaria", icon: Building2  },
+      { key: "aprovacao-fichas",     label: "Aprov. Fichas",sub: "Membros",    icon: ClipboardList },
     ],
   },
   {
@@ -112,6 +115,7 @@ const SECOES = [
       { key: "lider-discipulado", label: "Discipulado",  sub: "Membros",    icon: Users     },
       { key: "lider-visitantes",  label: "Visitantes",   sub: "Novas vidas",icon: UserPlus  },
       { key: "lider-fichas",      label: "Fichas",       sub: "Encontro",   icon: FileText  },
+      { key: "lider-solicitar-ficha", label: "Solic. Ficha", sub: "Membros", icon: ClipboardList },
       { key: "lider-casas",       label: "Casas de Paz", sub: "Evangelismo",icon: Home      },
       { key: "lider-missao70",    label: "Missão 70",    sub: "Evangelismo",icon: Flame     },
     ],
@@ -692,8 +696,10 @@ function ModuloRenderer({ moduloKey, dark, celulaAdmin }) {
     case "lider-discipulado": return <RelatorioDiscipulado membros={[]} {...p} />;
     case "lider-visitantes":  return <TelaVisitantes celulaId={celulaAdmin?.id} {...p} />;
     case "lider-fichas":      return <TelaFichas celula={celulaAdmin} {...p} />;
-    case "lider-casas":       return <CasasDePazLider celulaId={celulaAdmin?.id} {...p} />;
-    case "lider-missao70":    return <Missao70Lider celulaId={celulaAdmin?.id} {...p} />;
+    case "lider-casas":            return <CasasDePazLider celulaId={celulaAdmin?.id} {...p} />;
+    case "lider-missao70":         return <Missao70Lider celulaId={celulaAdmin?.id} {...p} />;
+    case "lider-solicitar-ficha":  return <SolicitarFichaMembro {...p} />;
+    case "aprovacao-fichas":       return <AprovacaoFichasMembro {...p} />;
     case "teso-dashboard":    return <TesourariaDashboard {...p} />;
     case "teso-lancamento":   return <TesourariaLancamento {...p} />;
     case "teso-relatorio":    return <TesourariaRelatorio {...p} />;

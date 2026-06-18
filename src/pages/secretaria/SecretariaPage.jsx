@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Users, UserPlus, Home, FileText, Building2,
-  Sun, Moon, LogOut, Menu, X, ChevronRight,
+  Sun, Moon, LogOut, Menu, X, ChevronRight, ClipboardList,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
@@ -11,6 +11,7 @@ import Celulas           from "./Celulas";
 import Visitantes        from "./Visitante";
 import FichasEncontro    from "./FichasEncontro";
 import SecretariaCelulas from "./SecretariaCelulas";
+import AprovacaoFichasMembro from "./AprovacaoFichasMembro";
 
 /* ─── Tokens (espelhados do DashboardLider) ──────────────────────────── */
 const AURA = {
@@ -49,6 +50,7 @@ const modulos = [
   { id: "CELULAS",           label: "Células",    sub: "Grupos",      icon: <Home size={17}/>,      color: "#059669"      },
   { id: "FICHAS",            label: "Fichas",     sub: "Encontro",    icon: <FileText size={17}/>,  color: AURA.yellow    },
   { id: "SECRETARIACELULAS", label: "Secretaria", sub: "Controle",    icon: <Building2 size={17}/>, color: "#7090e8"      },
+  { id: "APROVACAO_FICHAS",  label: "Aprov. Fichas", sub: "Membros",  icon: <ClipboardList size={17}/>, color: AURA.red    },
 ];
 
 /* ─── CSS Global ─────────────────────────────────────────────────────── */
@@ -239,6 +241,17 @@ function GlobalStyles({ t, isDark }) {
       .sec2-nav-btn.active .sec2-nav-text-sub { opacity: .7; }
       .sec2-nav-chevron { opacity: 0; transition: opacity .26s; }
       .sec2-nav-btn.active .sec2-nav-chevron { opacity: .5; }
+      .sec2-nav-badge {
+        margin-left: auto;
+        background: ${AURA.red};
+        color: #fff;
+        font-size: 9px; font-weight: 700;
+        padding: 2px 6px; border-radius: 99px;
+        min-width: 18px; text-align: center;
+        line-height: 1.3;
+        animation: sec-blink 2.5s ease-in-out infinite;
+        flex-shrink: 0;
+      }
 
       /* ── RODAPÉ SIDEBAR ── */
       .sec2-sidebar-footer { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
@@ -440,6 +453,22 @@ export default function SecretariaPage() {
   const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [pendentesCount, setPendentesCount] = useState(0);
+
+  const carregarPendentes = useCallback(async () => {
+    try {
+      const res = await api.get("/solicitacoes-ficha/pendentes", { params: { page: 0, size: 1 } });
+      const data = res.data;
+      const count = data?.totalElements ?? data?.content?.length ?? 0;
+      setPendentesCount(count);
+    } catch (err) {
+      console.warn("Erro ao carregar pendentes:", err?.response?.status, err?.message);
+      setPendentesCount(0);
+    }
+  }, []);
+
+  useEffect(() => { carregarPendentes(); }, [carregarPendentes]);
+  useEffect(() => { if (moduloAtivo === "APROVACAO_FICHAS") carregarPendentes(); }, [moduloAtivo, carregarPendentes]);
 
   /* Botão voltar Android/PWA */
   useEffect(() => {
@@ -538,6 +567,9 @@ export default function SecretariaPage() {
                   <span className="sec2-nav-text-main">{m.label}</span>
                   <span className="sec2-nav-text-sub">{m.sub}</span>
                 </span>
+                    {m.id === "APROVACAO_FICHAS" && pendentesCount > 0 && (
+                      <span className="sec2-nav-badge">{pendentesCount}</span>
+                    )}
                     <ChevronRight size={13} className="sec2-nav-chevron" />
                   </button>
               ))}
@@ -680,6 +712,7 @@ export default function SecretariaPage() {
                 {moduloAtivo === "CELULAS"            && <Celulas isDark={isDark} />}
                 {moduloAtivo === "FICHAS"             && <FichasEncontro isDark={isDark} />}
                 {moduloAtivo === "SECRETARIACELULAS"  && <SecretariaCelulas isDark={isDark} />}
+                {moduloAtivo === "APROVACAO_FICHAS"  && <AprovacaoFichasMembro isDark={isDark} />}
               </motion.div>
             </AnimatePresence>
           </main>

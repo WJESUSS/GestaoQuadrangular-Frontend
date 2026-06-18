@@ -8,6 +8,7 @@ import TelaFichas from "./TelaFichas";
 import RelatorioDiscipulado from "./RelatorioDiscipulado";
 import CasasDePazLider from "./CasasDePazLider";
 import Missao70Lider from "./Missao70Lider";
+import SolicitarFichaMembro from "./SolicitarFichaMembro";
 import SinoAniversariantes from "./SinoAniversariantes";
 import BoasVindasLider from "./BoasVindasLider";
 import TelaMetasLider from "./TelaMetasLider";
@@ -15,7 +16,7 @@ import {
   Trash2, Loader2, Users, Plus, Search, X,
   TrendingUp, Target, Sparkles, LogOut,
   Sun, Moon, CheckCircle2, Home, Flame,
-  CalendarDays, ChevronRight,
+  CalendarDays, ChevronRight, ClipboardList,
 } from "lucide-react";
 
 /* ─── Tokens AURA ──────────────────────────────────────────────────────── */
@@ -657,6 +658,7 @@ export default function DashboardLider() {
     { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#c8a010", gradient: `#a07800,#c8a010` },
     { icon: <Home size={18} />,         name: "Casas de Paz", desc: "Evangelismo", aba: "casas",       color: "#7090e8", gradient: `${AURA.blueDark},${AURA.blue}` },
     { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#c8a010", gradient: `#a07800,#c8a010` },
+    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#7090e8", gradient: `${AURA.blueDark},${AURA.blue}` },
   ];
 
   return (
@@ -913,6 +915,7 @@ export default function DashboardLider() {
                   {abaAtiva === "fichas"      && <TelaFichas           celula={celula}       isDark={isDark} />}
                   {abaAtiva === "casas"       && <CasasDePazLider      celulaId={celula?.id} isDark={isDark} />}
                   {abaAtiva === "missao70"    && <Missao70Lider        celulaId={celula?.id} isDark={isDark} />}
+                  {abaAtiva === "solicitar-ficha" && <SolicitarFichaMembro isDark={isDark} />}
                 </motion.div>
 
             )}
