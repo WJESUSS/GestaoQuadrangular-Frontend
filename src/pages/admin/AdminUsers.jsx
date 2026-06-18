@@ -736,10 +736,11 @@ export default function AdminUsers() {
   const carregarUsuarios = useCallback(async () => {
     setLoading(true); setErro("");
     try {
-      const [ru, rp, rc] = await Promise.all([
+      const [ru, rp, rc, rf] = await Promise.all([
         api.get("usuarios"),
         api.get("usuarios/com-alteracao-pendente"),
         api.get("celulas"),
+        api.get("usuarios/fotos"),
       ]);
       const data = ru.data;
       setUsuarios(Array.isArray(data) ? data : data?.content ?? data?.usuarios ?? []);
@@ -748,6 +749,7 @@ export default function AdminUsers() {
       setPendentes(new Set(pl.map(u => u.id)));
       setCelulas(rc.data || []);
       if (rc.data?.length > 0 && !celulaAdmin) setCelulaAdmin(rc.data[0]);
+      setFotos(rf.data || {});
     } catch (err) {
       if (err.response?.status === 401) { localStorage.clear(); window.location.href = "/"; return; }
       setErro("Não foi possível sincronizar os dados.");
