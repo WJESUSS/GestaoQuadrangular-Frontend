@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import api from "../../services/api.js";
 import {
-  Calendar, BookOpen, Loader2, ChevronDown,
+  Calendar, BookOpen, Loader2,
   UserCheck, ClipboardCheck, Trophy, Users2, CheckCircle2,
   Edit3, ArrowLeft, AlertTriangle, History, Lock,
-  XCircle, Briefcase, Plane, HeartPulse, HelpCircle,
+  XCircle, Briefcase, Plane, HeartPulse, HelpCircle, Ban,
+  PartyPopper, Church,
 } from "lucide-react";
 
 /* ─── Tokens AURA ──────────────────────────────────────────────────── */
@@ -20,6 +21,8 @@ const AURA = {
   blue:      "#003DA5",
   blueDark:  "#002470",
   yellow:    "#FDB813",
+  green:     "#0d6e3a",
+  greenDark: "#073d22",
 };
 
 function theme(isDark) {
@@ -48,9 +51,20 @@ const JUSTIFICATIVAS = [
 ];
 
 const DECISAO_CONFIG = {
-  ACEITOU_JESUS: { label: "Aceitou Jesus",  cor: AURA.blue,  bg: "rgba(0,61,165,.08)",  borda: "rgba(0,61,165,.25)",  icone: "✝️" },
-  RECONCILIOU:   { label: "Reconciliou",    cor: "#854F0B",  bg: "rgba(253,184,19,.1)", borda: "rgba(253,184,19,.3)", icone: "🙏" },
-  BATISMO_AGUAS: { label: "Deseja Batismo", cor: "#0F6E56",  bg: "rgba(29,158,117,.08)",borda: "rgba(29,158,117,.3)", icone: "💧" },
+  ACEITOU_JESUS: { label: "Aceitou Jesus",  cor: AURA.blue,  bg: "rgba(0,61,165,.08)",   borda: "rgba(0,61,165,.25)",  icone: "✝️" },
+  RECONCILIOU:   { label: "Reconciliou",    cor: "#854F0B",  bg: "rgba(253,184,19,.1)",  borda: "rgba(253,184,19,.3)", icone: "🙏" },
+  BATISMO_AGUAS: { label: "Deseja Batismo", cor: "#0F6E56",  bg: "rgba(29,158,117,.08)", borda: "rgba(29,158,117,.3)", icone: "💧" },
+};
+
+const MOTIVO_LABELS = {
+  AUSENCIA_LIDER:     { label: "Ausência do líder",     icone: "👤" },
+  PROBLEMA_CLIMATICO: { label: "Problema climático",    icone: "🌧️" },
+  EVENTO_IGREJA:      { label: "Evento da igreja",      icone: "⛪" },
+  PROBLEMA_SAUDE:     { label: "Problema de saúde",     icone: "🏥" },
+  LOCAL_INDISPONIVEL: { label: "Local indisponível",    icone: "🔒" },
+  VIAGEM_MEMBROS:     { label: "Viagem dos membros",    icone: "✈️" },
+  CANCELADA_PASTOR:   { label: "Cancelada pelo pastor", icone: "✋" },
+  OUTRO:              { label: "Outro motivo",          icone: "📋" },
 };
 
 const draftKey = (celulaId) => `ieq_relatorio_draft_${celulaId}`;
@@ -95,25 +109,37 @@ function dispararAtualizacaoMetas(celulaId) {
   window.dispatchEvent(new CustomEvent("ieq:metas:recalculadas", { detail: { celulaId: Number(celulaId) } }));
 }
 
+/* ─── Estilos globais ─────────────────────────────────────────────── */
 function AuraStyles({ t, isDark }) {
   return (
       <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
-      @keyframes aura-spin    { to { transform: rotate(360deg); } }
-      @keyframes aura-pulse   { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
-      @keyframes aura-blink   { 0%,100%{opacity:1;} 50%{opacity:.3;} }
-      @keyframes aura-fadein  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-      @keyframes aura-toast-in  { from{opacity:0;transform:scale(.88) translateY(28px)} to{opacity:1;transform:scale(1) translateY(0)} }
-      @keyframes aura-toast-out { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(.92) translateY(-18px)} }
-      @keyframes aura-just-in  { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes aura-spin      { to { transform: rotate(360deg); } }
+      @keyframes aura-pulse     { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
+      @keyframes aura-blink     { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+      @keyframes aura-fadein    { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes aura-just-in   { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
-      .aura-spin   { animation: aura-spin  1s linear infinite; }
-      .aura-pulse  { animation: aura-pulse 3s ease-in-out infinite; }
-      .aura-blink  { animation: aura-blink 2s ease-in-out infinite; }
+      /* ── Modal elegante ── */
+      @keyframes aura-modal-in  { from{opacity:0;transform:scale(.94) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+      @keyframes aura-modal-out { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(.94) translateY(16px)} }
+      @keyframes aura-overlay-in  { from{opacity:0} to{opacity:1} }
+      @keyframes aura-shimmer   { 0%{background-position:200% center} 100%{background-position:-200% center} }
+      @keyframes aura-float     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+      @keyframes aura-ring      { 0%{transform:scale(1);opacity:.7} 100%{transform:scale(1.7);opacity:0} }
+      @keyframes aura-check-draw { from{stroke-dashoffset:60} to{stroke-dashoffset:0} }
+
+      .aura-spin  { animation: aura-spin  1s linear infinite; }
+      .aura-pulse { animation: aura-pulse 3s ease-in-out infinite; }
+      .aura-blink { animation: aura-blink 2s ease-in-out infinite; }
+      .aura-float { animation: aura-float 3s ease-in-out infinite; }
 
       .aura-root { font-family: 'Inter', sans-serif; color: ${t.text}; min-height: 100vh; position: relative; padding-bottom: 120px; }
-      .aura-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%); transition: background .3s; }
+      .aura-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        background: radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
+                    radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
+        transition: background .3s; }
       .aura-content { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 18px; }
       @media(max-width:420px) { .aura-content { padding: 0 14px; } }
 
@@ -160,13 +186,123 @@ function AuraStyles({ t, isDark }) {
       .aura-just-options { display: flex; flex-wrap: wrap; gap: 8px; }
       .aura-just-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 100px; border: 1px solid; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; transition: all .2s; background: transparent; }
 
-      .aura-alert-warn { display: flex; align-items: center; gap: 12px; background: rgba(253,184,19,.06); border: 1px solid rgba(253,184,19,.22); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #c8a010; }
+      .aura-alert-warn    { display: flex; align-items: center; gap: 12px; background: rgba(253,184,19,.06); border: 1px solid rgba(253,184,19,.22); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #c8a010; }
       .aura-alert-success { display: flex; align-items: center; gap: 12px; background: rgba(13,110,58,.08); border: 1px solid rgba(13,110,58,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #0d6e3a; animation: aura-fadein .4s ease; }
-      .aura-alert-info { display: flex; align-items: center; gap: 12px; background: rgba(0,61,165,.06); border: 1px solid rgba(0,61,165,.2); border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; }
+      .aura-alert-info    { display: flex; align-items: center; gap: 12px; background: rgba(0,61,165,.06); border: 1px solid rgba(0,61,165,.2); border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; }
 
-      .aura-toast-overlay { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; padding: 0 20px; background: rgba(10,10,15,.75); backdrop-filter: blur(6px); animation: aura-fadein .3s ease forwards; }
-      .aura-toast-box { background: linear-gradient(160deg, #0d6e3a 0%, #073d22 100%); border: 1px solid rgba(201,169,110,.15); border-radius: 24px; padding: 36px 44px 32px; display: flex; flex-direction: column; align-items: center; gap: 20px; min-width: 300px; max-width: 380px; width: 100%; box-shadow: 0 24px 80px rgba(13,110,58,.5); animation: aura-toast-in .55s cubic-bezier(.34,1.56,.64,1) forwards; }
-      .aura-toast-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; }
+      /* ── Modal overlay elegante ── */
+      .aura-modal-overlay-bg {
+        position: fixed; inset: 0; z-index: 400;
+        display: flex; align-items: center; justify-content: center; padding: 20px;
+        background: rgba(5,5,10,.88);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        animation: aura-overlay-in .3s ease forwards;
+      }
+      .aura-modal-overlay-bg.saindo { animation: aura-overlay-in .3s ease reverse forwards; }
+
+      /* ── Cartão do modal (legado, mantido para compatibilidade) ── */
+      .aura-modal-card {
+        position: relative; width: 100%; max-width: 400px;
+        border-radius: 28px; overflow: hidden;
+        box-shadow: 0 40px 120px rgba(0,0,0,.7);
+        animation: aura-modal-in .45s cubic-bezier(.34,1.28,.64,1) forwards;
+      }
+      .aura-modal-card.saindo { animation: aura-modal-out .3s ease forwards; }
+      .aura-modal-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 10;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
+      }
+
+      /* ── Cartão do modal v2 (responsivo, usado pelos modais de resultado) ── */
+      .aura-modal-card-v2 {
+        position: relative; width: 100%; max-width: 420px;
+        border-radius: clamp(20px, 5vw, 28px); overflow: hidden;
+        box-shadow: 0 40px 120px rgba(0,0,0,.7);
+        animation: aura-modal-in .45s cubic-bezier(.34,1.28,.64,1) forwards;
+        max-height: calc(100vh - 40px);
+        display: flex; flex-direction: column;
+      }
+      .aura-modal-card-v2.saindo { animation: aura-modal-out .3s ease forwards; }
+      .aura-modal-card-v2::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 10;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
+      }
+      .aura-modal-body-v2 {
+        position: relative; z-index: 1;
+        padding: clamp(28px, 6vw, 44px) clamp(22px, 6vw, 36px) clamp(24px, 5vw, 36px);
+        overflow-y: auto;
+      }
+      .aura-modal-icon-wrap-v2 {
+        position: relative; display: flex; align-items: center; justify-content: center;
+        width: clamp(64px, 18vw, 88px); height: clamp(64px, 18vw, 88px); margin: 0 auto clamp(16px, 4vw, 24px);
+      }
+      .aura-modal-icon-circle-v2 {
+        position: relative; z-index: 1;
+        width: 100%; height: 100%; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: clamp(28px, 7vw, 40px); line-height: 1;
+      }
+      .aura-modal-title-v2 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(21px, 5.5vw, 26px);
+        font-weight: 600; color: #fff; text-align: center;
+        margin: 0 0 6px; letter-spacing: .01em; line-height: 1.25;
+      }
+      .aura-modal-num-v2 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(40px, 13vw, 54px);
+        font-weight: 600; color: #fff; margin: 0; line-height: 1;
+      }
+
+      /* ── Área de ícone com anel pulsante (legado) ── */
+      .aura-modal-icon-wrap {
+        position: relative; display: flex; align-items: center; justify-content: center;
+        width: 88px; height: 88px; margin: 0 auto 24px;
+      }
+      .aura-modal-icon-ring {
+        position: absolute; inset: 0; border-radius: 50%;
+        animation: aura-ring 2s ease-out infinite;
+      }
+      .aura-modal-icon-ring-2 {
+        position: absolute; inset: 0; border-radius: 50%;
+        animation: aura-ring 2s ease-out infinite .7s;
+      }
+      .aura-modal-icon-circle {
+        position: relative; z-index: 1;
+        width: 88px; height: 88px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 40px; line-height: 1;
+      }
+
+      /* ── Stat chips ── */
+      .aura-modal-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 14px; border-radius: 100px;
+        font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+        letter-spacing: .06em; text-transform: uppercase;
+      }
+
+      /* ── Separador com brilho ── */
+      .aura-modal-sep {
+        height: 1px; margin: 22px 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+      }
+
+      /* ── Shimmer nas linhas de stats ── */
+      .aura-shimmer-text {
+        background: linear-gradient(90deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,1) 30%, rgba(255,255,255,.5) 60%);
+        background-size: 200% auto;
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: aura-shimmer 3s linear infinite;
+      }
+
+      /* ── SVG checkmark animado ── */
+      .aura-check-svg { display: block; }
+      .aura-check-path {
+        stroke-dasharray: 60; stroke-dashoffset: 60;
+        animation: aura-check-draw .6s .3s cubic-bezier(.4,0,.2,1) forwards;
+      }
 
       .aura-modal-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(10,10,15,.82); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 0 20px; }
       .aura-modal-box { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 22px; padding: 32px 28px 26px; max-width: 420px; width: 100%; animation: aura-fadein .3s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 24px 80px rgba(0,0,0,.5); }
@@ -234,6 +370,21 @@ function BadgeJustificativa({ valor }) {
   );
 }
 
+function BadgeNaoRealizada({ motivo }) {
+  const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
+  return (
+      <span style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        padding: "3px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600,
+        fontFamily: "'Inter',sans-serif", letterSpacing: ".06em",
+        background: "rgba(253,184,19,.15)", color: "#C48C00",
+        border: "1px solid rgba(253,184,19,.4)", whiteSpace: "nowrap",
+      }}>
+      <Ban size={10} /> NÃO REALIZADA · {cfg.icone} {cfg.label.toUpperCase()}
+    </span>
+  );
+}
+
 function DecisaoReadOnly({ decisao, t }) {
   const cfg = decisao && decisao !== "NENHUMA" ? DECISAO_CONFIG[decisao] : null;
   return (
@@ -248,6 +399,232 @@ function DecisaoReadOnly({ decisao, t }) {
   );
 }
 
+/* ─── Modal Elegante: Célula REALIZADA ───────────────────────────── */
+function ModalRealizadaSucesso({ total, estudo, nomeCelula, onClose }) {
+  const [saindo, setSaindo] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSaindo(true);
+      setTimeout(() => onClose?.(), 380);
+    }, 5500);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  const fechar = () => { setSaindo(true); setTimeout(() => onClose?.(), 380); };
+
+  return (
+      <div className={`aura-modal-overlay-bg${saindo ? " saindo" : ""}`} onClick={fechar}>
+        <div
+            className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
+            onClick={e => e.stopPropagation()}
+            style={{ background: "linear-gradient(165deg, #2C2308 0%, #1A1404 50%, #0D0A02 100%)" }}
+        >
+          {/* Partículas decorativas de fundo */}
+          <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
+            {[...Array(6)].map((_, i) => (
+                <div key={i} style={{
+                  position: "absolute",
+                  width: i % 2 === 0 ? 130 : 85,
+                  height: i % 2 === 0 ? 130 : 85,
+                  borderRadius: "50%",
+                  background: "rgba(201,169,110,.10)",
+                  top: `${[10,60,30,80,20,70][i]}%`,
+                  left: `${[10,70,85,20,55,40][i]}%`,
+                  transform: "translate(-50%,-50%)",
+                  filter: "blur(30px)",
+                }} />
+            ))}
+          </div>
+
+          <div className="aura-modal-body-v2">
+            {/* Ícone com anel pulsante e checkmark animado */}
+            <div className="aura-modal-icon-wrap-v2">
+              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(201,169,110,.3)" }} />
+              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(201,169,110,.15)" }} />
+              <div className="aura-modal-icon-circle-v2" style={{ background: "linear-gradient(135deg, rgba(201,169,110,.85), rgba(13,110,58,.45))", border: "1.5px solid rgba(232,213,163,.45)" }}>
+                <svg className="aura-check-svg" width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ width: "55%", height: "55%" }}>
+                  <path
+                      className="aura-check-path"
+                      d="M10 22 L18 31 L34 13"
+                      stroke="rgba(255,255,255,.95)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Título */}
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(232,213,163,.75)", textAlign: "center", margin: "0 0 8px" }}>
+              Glória a Deus
+            </p>
+            <h2 className="aura-modal-title-v2">Célula Realizada</h2>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.5)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5, wordBreak: "break-word" }}>
+              {nomeCelula || "O Senhor viu cada presença."}
+            </p>
+
+            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(201,169,110,.25), transparent)" }} />
+
+            {/* Stats */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: "clamp(22px,5vw,28px)", marginTop: 18 }}>
+              {/* Total presentes — destaque */}
+              <div style={{ textAlign: "center" }}>
+                <p className="aura-modal-num-v2 aura-shimmer-text">{total}</p>
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(232,213,163,.55)", margin: "4px 0 0" }}>
+                  presentes
+                </p>
+              </div>
+
+              {/* Estudo */}
+              {estudo && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(201,169,110,.08)", border: "1px solid rgba(201,169,110,.18)", minWidth: 0 }}>
+                    <BookOpen size={14} style={{ color: "rgba(232,213,163,.8)", flexShrink: 0 }} />
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.8)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                      {estudo}
+                    </p>
+                  </div>
+              )}
+            </div>
+
+            {/* Botão fechar */}
+            <button
+                onClick={fechar}
+                style={{
+                  width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
+                  background: "linear-gradient(135deg, #9B7E3F, #C9A96E)",
+                  color: "#1A1404", fontFamily: "'Inter',sans-serif", fontSize: 10,
+                  fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
+                  boxShadow: "0 8px 28px rgba(201,169,110,.35)", transition: "all .25s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+            >
+              Perfeito, obrigado!
+            </button>
+          </div>
+        </div>
+      </div>
+  );
+}
+
+/* ─── Modal Elegante: Célula NÃO REALIZADA ───────────────────────── */
+function ModalNaoRealizadaSucesso({ motivo, nomeCelula, onClose }) {
+  const [saindo, setSaindo] = useState(false);
+  const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSaindo(true);
+      setTimeout(() => onClose?.(), 380);
+    }, 6000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  const fechar = () => { setSaindo(true); setTimeout(() => onClose?.(), 380); };
+
+  return (
+      <div className={`aura-modal-overlay-bg${saindo ? " saindo" : ""}`} onClick={fechar}>
+        <div
+            className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
+            onClick={e => e.stopPropagation()}
+            style={{ background: "linear-gradient(165deg, #2A1810 0%, #1A0F0A 50%, #0D0805 100%)" }}
+        >
+          {/* Partículas de fundo */}
+          <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
+            {[...Array(5)].map((_, i) => (
+                <div key={i} style={{
+                  position: "absolute",
+                  width: i % 2 === 0 ? 140 : 90,
+                  height: i % 2 === 0 ? 140 : 90,
+                  borderRadius: "50%",
+                  background: "rgba(196,108,58,.10)",
+                  top: `${[15,65,35,80,50][i]}%`,
+                  left: `${[15,75,80,25,50][i]}%`,
+                  transform: "translate(-50%,-50%)",
+                  filter: "blur(35px)",
+                }} />
+            ))}
+          </div>
+
+          <div className="aura-modal-body-v2">
+            {/* Ícone flutuante com anel */}
+            <div className="aura-modal-icon-wrap-v2">
+              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(196,108,58,.3)" }} />
+              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(196,108,58,.15)" }} />
+              <div
+                  className="aura-modal-icon-circle-v2 aura-float"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(120,60,20,.85), rgba(196,108,58,.4))",
+                    border: "1.5px solid rgba(216,140,90,.4)",
+                  }}
+              >
+                {cfg.icone}
+              </div>
+            </div>
+
+            {/* Título */}
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(216,140,90,.75)", textAlign: "center", margin: "0 0 8px" }}>
+              Ausência registrada
+            </p>
+            <h2 className="aura-modal-title-v2">Célula Não Realizada</h2>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.45)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5 }}>
+              Deus conhece cada circunstância.
+            </p>
+
+            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(216,140,90,.25), transparent)" }} />
+
+            {/* Motivo em destaque */}
+            <div style={{ marginBottom: "clamp(22px,5vw,28px)", marginTop: 18, display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{
+                padding: "clamp(16px,4vw,20px)",
+                borderRadius: 18,
+                background: "rgba(196,108,58,.09)",
+                border: "1px solid rgba(196,108,58,.2)",
+                textAlign: "center",
+              }}>
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(216,140,90,.65)", margin: "0 0 10px" }}>
+                  Motivo
+                </p>
+                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(16px,4vw,18px)", fontWeight: 500, color: "rgba(255,255,255,.9)", margin: 0, wordBreak: "break-word" }}>
+                  {cfg.label}
+                </p>
+              </div>
+
+              {/* Célula */}
+              {nomeCelula && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.07)", minWidth: 0 }}>
+                    <Church size={14} style={{ color: "rgba(216,140,90,.7)", flexShrink: 0 }} />
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.65)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                      {nomeCelula}
+                    </p>
+                  </div>
+              )}
+            </div>
+
+            {/* Botão fechar */}
+            <button
+                onClick={fechar}
+                style={{
+                  width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
+                  background: "linear-gradient(135deg, #8A4A24, #C46C3A)",
+                  color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10,
+                  fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
+                  boxShadow: "0 8px 28px rgba(196,108,58,.35)", transition: "all .25s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+  );
+}
+
+/* ─── Seletor de Referência Bíblica ──────────────────────────────── */
 function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
   const [inputVal, setInputVal] = useState(value || "");
   const [sugestoes, setSugestoes] = useState([]);
@@ -289,7 +666,10 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
       window.addEventListener("resize", atualizarPosicao);
       window.addEventListener("scroll", atualizarPosicao, true);
     }
-    return () => { window.removeEventListener("resize", atualizarPosicao); window.removeEventListener("scroll", atualizarPosicao, true); };
+    return () => {
+      window.removeEventListener("resize", atualizarPosicao);
+      window.removeEventListener("scroll", atualizarPosicao, true);
+    };
   }, [aberto]);
 
   return (
@@ -321,140 +701,140 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
   );
 }
 
-function ToastSucesso({ total, onClose }) {
-  const [saindo, setSaindo] = useState(false);
-  useEffect(() => {
-    const timer = setTimeout(() => { setSaindo(true); setTimeout(() => { if (onClose) onClose(); }, 450); }, 4800);
-    return () => clearTimeout(timer);
-  }, [onClose]);
+/* ─── Seletor de Status da Célula (Realizada / Não Realizada) ──── */
+function SeletorStatusCelula({ realizada, onChange, t }) {
+  const opcoes = [
+    {
+      key: true,
+      titulo: "Célula realizada",
+      sub: "Registre a presença dos membros e visitantes",
+      icone: <CheckCircle2 size={18} />,
+      corOn:  AURA.blue,
+      corOnDark: AURA.blueDark,
+      iconBg: "rgba(0,61,165,.16)",
+    },
+    {
+      key: false,
+      titulo: "Não realizada",
+      sub: "Selecione o motivo da ausência",
+      icone: <Ban size={18} />,
+      corOn:  AURA.red,
+      corOnDark: AURA.redDark,
+      iconBg: "rgba(200,16,46,.16)",
+    },
+  ];
 
   return (
-      <div className="aura-toast-overlay" style={{ animation: saindo ? "aura-toast-out .45s ease forwards" : undefined }}>
-        <div className="aura-toast-box">
-          <div className="aura-toast-icon"><CheckCircle2 size={34} style={{ color: "#fff" }} /></div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: "0 0 8px", letterSpacing: ".02em" }}>Glória a Deus!</p>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: "rgba(255,255,255,.8)", lineHeight: 1.6, margin: 0 }}>
-              Relatório enviado com sucesso.<br /><em>O Senhor viu cada presença.</em>
-            </p>
-          </div>
-          <span className="aura-badge" style={{ background: "rgba(255,255,255,.12)", borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.9)" }}>
-          <span className="aura-badge-dot" style={{ background: "#fff" }} /> {total} presentes
-        </span>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+        {opcoes.map((op) => {
+          const ativo = realizada === op.key;
+          return (
+              <button
+                  key={String(op.key)}
+                  onClick={() => onChange(op.key)}
+                  style={{
+                    textAlign: "left", cursor: "pointer",
+                    padding: "16px 16px",
+                    borderRadius: 16,
+                    fontFamily: "'Inter',sans-serif",
+                    transition: "all .25s",
+                    border: ativo ? `2px solid ${AURA.gold}` : `1px solid ${t.borderInput}`,
+                    background: ativo ? `linear-gradient(135deg, ${op.corOnDark}, ${op.corOn})` : t.bgInput,
+                    boxShadow: ativo ? `0 8px 22px ${op.corOn}33` : "none",
+                  }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: ativo ? "rgba(255,255,255,.16)" : op.iconBg,
+                    color: ativo ? "#fff" : op.corOn,
+                  }}>
+                    {op.icone}
+                  </div>
+                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: ativo ? "#fff" : t.text }}>
+                    {op.titulo}
+                  </p>
+                </div>
+                <p style={{ fontSize: 11, fontWeight: 300, margin: 0, color: ativo ? "rgba(255,255,255,.7)" : t.textMuted, lineHeight: 1.4 }}>
+                  {op.sub}
+                </p>
+              </button>
+          );
+        })}
+      </div>
+  );
+}
+
+/* ─── Seletor de Motivo ──────────────────────────────────────────── */
+function SeletorMotivo({ value, onChange, t }) {
+  return (
+      <div className="aura-card" style={{ padding: "22px 24px" }}>
+        <label className="aura-label" style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+          <Ban size={12} /> Motivo da Não Realização
+        </label>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {Object.entries(MOTIVO_LABELS).map(([key, { label, icone }]) => {
+            const selecionado = value === key;
+            return (
+                <button
+                    key={key}
+                    onClick={() => onChange(key)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      padding: "13px 14px", borderRadius: 12, cursor: "pointer",
+                      textAlign: "left", transition: "all .2s",
+                      fontFamily: "'Inter',sans-serif",
+                      /* ✅ border definido UMA só vez — sem duplicata */
+                      border: selecionado ? "none" : `1px solid ${t.borderInput}`,
+                      background: selecionado
+                          ? `linear-gradient(135deg, #c8a010, ${AURA.yellow})`
+                          : t.bgInput,
+                      boxShadow: selecionado ? "0 4px 16px rgba(253,184,19,.3)" : "none",
+                    }}
+                >
+                  <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{icone}</span>
+                  <span style={{
+                    fontSize: 13, lineHeight: 1.3, flex: 1,
+                    color: selecionado ? "#0A0A0F" : t.text,
+                    fontWeight: selecionado ? 600 : 300,
+                  }}>{label}</span>
+                  {selecionado && <CheckCircle2 size={16} style={{ color: "#0A0A0F", flexShrink: 0 }} />}
+                </button>
+            );
+          })}
         </div>
       </div>
   );
 }
 
-/* ✅ COMPONENTE: AlertaErro com mensagens amigáveis por tipo */
+/* ─── AlertaErro ─────────────────────────────────────────────────── */
 function AlertaErro({ erro, onFechar, t }) {
   if (!erro) return null;
-
-  const configuracao = {
-    conflito: {
-      icone: <AlertTriangle size={18} />,
-      cor: "#DC2626",
-      bg: "rgba(220,38,38,.08)",
-      borda: "rgba(220,38,38,.25)",
-    },
-    validacao: {
-      icone: <AlertTriangle size={18} />,
-      cor: "#D97706",
-      bg: "rgba(217,119,6,.08)",
-      borda: "rgba(217,119,6,.25)",
-    },
-    servidor: {
-      icone: <AlertTriangle size={18} />,
-      cor: "#7C3AED",
-      bg: "rgba(124,58,237,.08)",
-      borda: "rgba(124,58,237,.25)",
-    },
-    generico: {
-      icone: <AlertTriangle size={18} />,
-      cor: "#6366F1",
-      bg: "rgba(99,102,241,.08)",
-      borda: "rgba(99,102,241,.25)",
-    },
-  };
-
-  const cfg = configuracao[erro.tipo] || configuracao.generico;
+  const cfg = {
+    conflito:  { cor: "#DC2626", bg: "rgba(220,38,38,.08)", borda: "rgba(220,38,38,.25)" },
+    validacao: { cor: "#D97706", bg: "rgba(217,119,6,.08)", borda: "rgba(217,119,6,.25)" },
+    servidor:  { cor: "#7C3AED", bg: "rgba(124,58,237,.08)", borda: "rgba(124,58,237,.25)" },
+    generico:  { cor: "#6366F1", bg: "rgba(99,102,241,.08)", borda: "rgba(99,102,241,.25)" },
+  }[erro.tipo] || { cor: "#6366F1", bg: "rgba(99,102,241,.08)", borda: "rgba(99,102,241,.25)" };
 
   return (
-      <div style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 14,
-        background: cfg.bg,
-        border: `1px solid ${cfg.borda}`,
-        borderRadius: 14,
-        padding: "14px 18px",
-        marginBottom: 16,
-        animation: "aura-fadein .3s ease forwards",
-      }}>
-        <div style={{ color: cfg.cor, flexShrink: 0, marginTop: 2 }}>
-          {cfg.icone}
-        </div>
-
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 14, background: cfg.bg, border: `1px solid ${cfg.borda}`, borderRadius: 14, padding: "14px 18px", marginBottom: 16, animation: "aura-fadein .3s ease forwards" }}>
+        <AlertTriangle size={18} style={{ color: cfg.cor, flexShrink: 0, marginTop: 2 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{
-            fontFamily: "'Inter',sans-serif",
-            fontSize: 13,
-            fontWeight: 600,
-            color: cfg.cor,
-            margin: "0 0 6px",
-            letterSpacing: ".05em",
-          }}>
-            {erro.titulo}
-          </p>
-          <p style={{
-            fontFamily: "'Inter',sans-serif",
-            fontSize: 12,
-            fontWeight: 300,
-            color: t.textSec,
-            lineHeight: 1.5,
-            margin: 0,
-          }}>
-            {erro.mensagem}
-          </p>
-          {erro.codigo && (
-              <p style={{
-                fontFamily: "'Inter',sans-serif",
-                fontSize: 10,
-                fontWeight: 500,
-                color: t.textMuted,
-                margin: "8px 0 0",
-                letterSpacing: ".08em",
-                textTransform: "uppercase",
-              }}>
-                Código: {erro.codigo}
-              </p>
-          )}
+          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: cfg.cor, margin: "0 0 6px", letterSpacing: ".05em" }}>{erro.titulo}</p>
+          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, lineHeight: 1.5, margin: 0 }}>{erro.mensagem}</p>
+          {erro.codigo && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 500, color: t.textMuted, margin: "8px 0 0", letterSpacing: ".08em", textTransform: "uppercase" }}>Código: {erro.codigo}</p>}
         </div>
-
-        <button
-            onClick={onFechar}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: cfg.cor,
-              padding: 0,
-              flexShrink: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 18,
-              transition: "opacity .2s",
-            }}
-            onMouseEnter={e => e.target.style.opacity = ".6"}
-            onMouseLeave={e => e.target.style.opacity = "1"}
-        >
-          ✕
-        </button>
+        <button onClick={onFechar} style={{ background: "none", border: "none", cursor: "pointer", color: cfg.cor, padding: 0, flexShrink: 0, fontSize: 18, transition: "opacity .2s" }}
+                onMouseEnter={e => e.target.style.opacity = ".6"}
+                onMouseLeave={e => e.target.style.opacity = "1"}
+        >✕</button>
       </div>
   );
 }
 
+/* ─── PainelJustificativa ────────────────────────────────────────── */
 function PainelJustificativa({ membroId, justificativas, onSelecionar, t }) {
   const atual = justificativas[membroId] || null;
   return (
@@ -479,6 +859,7 @@ function PainelJustificativa({ membroId, justificativas, onSelecionar, t }) {
   );
 }
 
+/* ─── PessoasList ────────────────────────────────────────────────── */
 function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesVisitantes, justificativas, onJustificativa, justificandoIds, onToggleJustificando, t, isDark }) {
   return (
       <div className="aura-card" style={{ overflow: "hidden" }}>
@@ -506,28 +887,16 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                      style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <div
-                        role="button"
-                        tabIndex={0}
+                        role="button" tabIndex={0}
                         onClick={() => { if (!processing) alternarPresenca(pessoa.uKey); }}
-                        onKeyDown={(e) => {
-                          if ((e.key === "Enter" || e.key === " ") && !processing) {
-                            e.preventDefault();
-                            alternarPresenca(pessoa.uKey);
-                          }
-                        }}
+                        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !processing) { e.preventDefault(); alternarPresenca(pessoa.uKey); } }}
                         aria-disabled={processing}
-                        style={{
-                          flex: 1, background: "none", border: "none", cursor: processing ? "default" : "pointer",
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          padding: "15px 22px", transition: "all .2s",
-                        }}
+                        style={{ flex: 1, background: "none", border: "none", cursor: processing ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 22px", transition: "all .2s" }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
                         <div style={{
                           width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-                          background: marcado
-                              ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`
-                              : isDark ? "rgba(255,255,255,.05)" : "rgba(201,169,110,.08)",
+                          background: marcado ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` : isDark ? "rgba(255,255,255,.05)" : "rgba(201,169,110,.08)",
                           border: marcado ? "none" : `1px solid ${t.border}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           color: marcado ? "#fff" : AURA.gold,
@@ -536,36 +905,28 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                         }}>
                           {processing ? <Loader2 size={17} className="aura-spin" /> : pessoa.nome.charAt(0)}
                         </div>
-
                         <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
                             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: marcado ? 500 : 300, color: marcado ? t.text : t.textSec, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {pessoa.nome}
                             </p>
                             {isMembro && ausente && (
-                                <button
-                                    title="Justificar falta"
-                                    className="aura-btn-justificar"
-                                    onClick={(e) => { e.stopPropagation(); onToggleJustificando(pessoa.id); }}
-                                    style={{
-                                      background: justAberto ? "rgba(220,38,38,.18)" : "rgba(255,255,255,.04)",
-                                      color: justAberto ? "#DC2626" : t.textMuted,
-                                    }}
-                                >
+                                <button title="Justificar falta" className="aura-btn-justificar"
+                                        onClick={(e) => { e.stopPropagation(); onToggleJustificando(pessoa.id); }}
+                                        style={{ background: justAberto ? "rgba(220,38,38,.18)" : "rgba(255,255,255,.04)", color: justAberto ? "#DC2626" : t.textMuted }}>
                                   <XCircle size={15} />
                                 </button>
                             )}
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
-                            <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
-                              {pessoa.tipo}
-                            </span>
+                        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
+                          {pessoa.tipo}
+                        </span>
                             {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
                             {isMembro && ausente && justAtual && <BadgeJustificativa valor={justAtual} />}
                           </div>
                         </div>
                       </div>
-
                       <div style={{
                         width: 26, height: 26, borderRadius: 8, flexShrink: 0,
                         border: `2px solid ${marcado ? AURA.gold : t.border}`,
@@ -604,9 +965,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
   );
 }
 
-/* =============================================================
-   TELA EDITAR RELATÓRIO
-============================================================= */
+/* ─── TelaEditarRelatorio ────────────────────────────────────────── */
 function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false }) {
   const t = theme(isDark);
   const [loading, setLoading]   = useState(true);
@@ -620,6 +979,8 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
   const [justificativas, setJustificativas] = useState({});
   const [justificandoIds, setJustificandoIds] = useState(new Set());
+  const [relatorioRealizada, setRelatorioRealizada] = useState(true);
+  const [motivoNaoRealizacao, setMotivoNaoRealizacao] = useState(null);
   const [form, setForm] = useState({ dataReuniao: "", estudo: "", selecionadosKeys: [] });
 
   const carregarDados = useCallback(async () => {
@@ -630,6 +991,8 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       const resRel = await api.get(`/relatorios/${relatorioId}`, { headers });
       const rel = resRel.data;
       setNomeCelula(rel.nomeCelula || ""); setNomeLider(rel.nomeLider || ""); setCelulaId(rel.celulaId);
+      setRelatorioRealizada(rel.realizada !== false);
+      setMotivoNaoRealizacao(rel.motivoNaoRealizacao || null);
 
       const [resMembros, resVisitantes] = await Promise.all([
         api.get(`/celulas/${rel.celulaId}/membros`, { headers }),
@@ -688,19 +1051,19 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const total = membrosPresentes + visitantesPresentes;
 
   const handleSalvar = async () => {
-    if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+    if (relatorioRealizada && !form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+    if (!relatorioRealizada && !motivoNaoRealizacao) return alert("Selecione o motivo da não realização da célula.");
     try {
       setSalvando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
-      const todosMembrosIds = pessoas.filter(p => p.tipo === "MEMBRO").map(p => p.id);
-      const membrosPresentesIds = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", "")));
-      const membrosAusentes = todosMembrosIds.filter(id => !membrosPresentesIds.includes(id) && justificativas[id]).map(id => ({ membroId: id, justificativa: justificativas[id] }));
-      const payload = {
-        celulaId: Number(celulaId), dataReuniao: normalizarData(form.dataReuniao), estudo: form.estudo.trim(),
-        membrosPresentesIds,
-        visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => { const id = Number(k.replace("VISITANTE-", "")); return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" }; }),
-        membrosAusentes,
-      };
+      const payload = relatorioRealizada
+          ? {
+            celulaId: Number(celulaId), dataReuniao: normalizarData(form.dataReuniao), estudo: form.estudo.trim(),
+            membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
+            visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => { const id = Number(k.replace("VISITANTE-", "")); return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" }; }),
+            membrosAusentes: pessoas.filter(p => p.tipo === "MEMBRO").filter(p => !form.selecionadosKeys.includes(p.uKey) && justificativas[p.id]).map(p => ({ membroId: p.id, justificativa: justificativas[p.id] })),
+          }
+          : { celulaId: Number(celulaId), dataReuniao: normalizarData(form.dataReuniao), realizada: false, motivoNaoRealizacao };
       await api.put(`/relatorios/${relatorioId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
       setSucesso(true);
       setTimeout(() => { setSucesso(false); if (onSalvo) onSalvo(); }, 2200);
@@ -762,27 +1125,44 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
                 <label className="aura-label"><Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />Data da Reunião</label>
                 <input className="aura-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }} value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
               </div>
-              <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
+              {relatorioRealizada && (
+                  <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
+              )}
             </div>
           </div>
 
-          <div className="aura-kpi-grid">
-            <div className="aura-kpi"><p className="aura-kpi-label">Membros</p><p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p></div>
-            <div className="aura-kpi"><p className="aura-kpi-label">Visitantes</p><p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p></div>
-            <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue})`, border: "none" }}>
-              <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
-              <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
-            </div>
-          </div>
+          {!relatorioRealizada && (
+              <div className="aura-alert-info"><Ban size={15} style={{ flexShrink: 0 }} />Célula não realizada — informe o motivo abaixo.</div>
+          )}
 
-          <PessoasList pessoas={pessoas} form={form} processingIds={processingIds} alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes} justificativas={justificativas} onJustificativa={handleJustificativa} justificandoIds={justificandoIds} onToggleJustificando={handleToggleJustificando} t={t} isDark={isDark} />
+          <SeletorStatusCelula
+              realizada={relatorioRealizada}
+              onChange={(val) => { setRelatorioRealizada(val); if (val) setMotivoNaoRealizacao(null); }}
+              t={t}
+          />
+
+          {relatorioRealizada ? (
+              <>
+                <div className="aura-kpi-grid">
+                  <div className="aura-kpi"><p className="aura-kpi-label">Membros</p><p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p></div>
+                  <div className="aura-kpi"><p className="aura-kpi-label">Visitantes</p><p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p></div>
+                  <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue})`, border: "none" }}>
+                    <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
+                    <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
+                  </div>
+                </div>
+                <PessoasList pessoas={pessoas} form={form} processingIds={processingIds} alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes} justificativas={justificativas} onJustificativa={handleJustificativa} justificandoIds={justificandoIds} onToggleJustificando={handleToggleJustificando} t={t} isDark={isDark} />
+              </>
+          ) : (
+              <SeletorMotivo value={motivoNaoRealizacao} onChange={setMotivoNaoRealizacao} t={t} />
+          )}
           <div style={{ height: 100 }} />
         </div>
 
         <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)" }}>
           <div style={{ maxWidth: 760, margin: "0 auto" }}>
-            <button className="aura-btn-red" onClick={handleSalvar} disabled={salvando || !form.estudo.trim()}>
-              {salvando ? <><Loader2 size={16} className="aura-spin" /> Salvando…</> : <><ClipboardCheck size={16} /> Salvar Alterações ({total} presentes)</>}
+            <button className="aura-btn-red" onClick={handleSalvar} disabled={salvando || (relatorioRealizada ? !form.estudo.trim() : !motivoNaoRealizacao)}>
+              {salvando ? <><Loader2 size={16} className="aura-spin" /> Salvando…</> : <><ClipboardCheck size={16} /> {relatorioRealizada ? `Salvar Alterações (${total} presentes)` : "Salvar Alterações"}</>}
             </button>
           </div>
         </div>
@@ -790,27 +1170,31 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   );
 }
 
-/* =============================================================
-   TELA PRINCIPAL COM TRATAMENTO COMPLETO DE ERRO 409
-============================================================= */
+/* ─── TelaRelatorio (componente principal) ───────────────────────── */
 export default function TelaRelatorio({ isDark = false }) {
   const t = theme(isDark);
   const [modo, setModo] = useState("novo");
   const [relatorioEditId, setRelatorioEditId] = useState(null);
   const [modalDuplicado, setModalDuplicado]   = useState(null);
-  const [erroAlerta, setErroAlerta] = useState(null); // ✅ NOVO: Estado para alertas de erro
+  const [erroAlerta, setErroAlerta]           = useState(null);
+
+  /* ── Modais elegantes de resultado ── */
+  const [modalRealizada,    setModalRealizada]    = useState(null); // { total, estudo, nomeCelula }
+  const [modalNaoRealizada, setModalNaoRealizada] = useState(null); // { motivo, nomeCelula }
+
   const [celula, setCelula]   = useState(null);
   const [pessoas, setPessoas] = useState([]);
-  const [historico, setHistorico]   = useState([]);
+  const [historico, setHistorico]     = useState([]);
   const [loadingHist, setLoadingHist] = useState(false);
   const [loading, setLoading]   = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
   const [rascunhoCarregado, setRascunhoCarregado] = useState(false);
-  const [toastSucesso, setToastSucesso] = useState(null);
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
   const [justificativas, setJustificativas] = useState({});
   const [justificandoIds, setJustificandoIds] = useState(new Set());
+  const [realizada, setRealizada] = useState(true);
+  const [motivoNaoRealizacao, setMotivoNaoRealizacao] = useState(null);
   const prontoParaSalvar = useRef(false);
 
   const [form, setForm] = useState({
@@ -822,9 +1206,9 @@ export default function TelaRelatorio({ isDark = false }) {
 
   useEffect(() => {
     if (!prontoParaSalvar.current || !form.celulaId) return;
-    try { localStorage.setItem(draftKey(form.celulaId), JSON.stringify({ dataReuniao: form.dataReuniao, estudo: form.estudo, selecionadosKeys: form.selecionadosKeys, salvoEm: new Date().toISOString() })); }
+    try { localStorage.setItem(draftKey(form.celulaId), JSON.stringify({ dataReuniao: form.dataReuniao, estudo: form.estudo, selecionadosKeys: form.selecionadosKeys, realizada, motivoNaoRealizacao, salvoEm: new Date().toISOString() })); }
     catch (err) { console.warn("Não foi possível salvar rascunho:", err); }
-  }, [form]);
+  }, [form, realizada, motivoNaoRealizacao]);
 
   const carregarDados = useCallback(async () => {
     try {
@@ -862,6 +1246,8 @@ export default function TelaRelatorio({ isDark = false }) {
           const draft = JSON.parse(raw);
           const hoje = new Date();
           setForm({ celulaId: dadosCelula.id, dataReuniao: draft.dataReuniao || `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`, estudo: draft.estudo || "", selecionadosKeys: draft.selecionadosKeys || [] });
+          if (draft.realizada !== undefined) setRealizada(draft.realizada);
+          if (draft.motivoNaoRealizacao) setMotivoNaoRealizacao(draft.motivoNaoRealizacao);
           restaurou = true; setRascunhoCarregado(true);
           setTimeout(() => setRascunhoCarregado(false), 4000);
         }
@@ -898,40 +1284,44 @@ export default function TelaRelatorio({ isDark = false }) {
     setTimeout(() => setProcessingIds(prev => { const n = new Set(prev); n.delete(uKey); return n; }), 200);
   };
 
-  const handleJustificativa = (membroId, valor) => setJustificativas(prev => { if (!valor) { const n = { ...prev }; delete n[membroId]; return n; } return { ...prev, [membroId]: valor }; });
+  const handleJustificativa    = (membroId, valor) => setJustificativas(prev => { if (!valor) { const n = { ...prev }; delete n[membroId]; return n; } return { ...prev, [membroId]: valor }; });
   const handleToggleJustificando = (membroId) => setJustificandoIds(prev => { const n = new Set(prev); n.has(membroId) ? n.delete(membroId) : n.add(membroId); return n; });
 
   const membrosPresentes    = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).length;
   const visitantesPresentes = form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).length;
   const total = membrosPresentes + visitantesPresentes;
 
-  // ✅ TRATAMENTO COMPLETO DE ERRO 409 COM ALERTA AMIGÁVEL
   const handleSubmit = async () => {
-    if (!form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+    if (realizada && !form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
+    if (!realizada && !motivoNaoRealizacao) return alert("Selecione o motivo da não realização da célula.");
 
     try {
       setEnviando(true);
-      setErroAlerta(null); // Limpa erros anteriores
+      setErroAlerta(null);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
       const totalEnviado = total;
-      const todosMembrosIds = pessoas.filter(p => p.tipo === "MEMBRO").map(p => p.id);
-      const membrosPresentesIds = form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", "")));
-      const membrosAusentes = todosMembrosIds
-          .filter(id => !membrosPresentesIds.includes(id) && justificativas[id])
-          .map(id => ({ membroId: id, justificativa: justificativas[id] }));
+      const motivoEnviado = motivoNaoRealizacao;
+      const estudoEnviado = form.estudo.trim();
+      const nomeCell = celula?.nome || "";
 
-      const payload = {
-        celulaId: Number(form.celulaId),
-        dataReuniao: form.dataReuniao,
-        estudo: form.estudo.trim(),
-        membrosPresentesIds,
-        visitantesPresentes: form.selecionadosKeys
-            .filter(k => k.startsWith("VISITANTE-"))
-            .map(k => { const id = Number(k.replace("VISITANTE-", "")); return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" }; }),
-        membrosAusentes,
-      };
-
-      await api.post("/relatorios", payload, { headers: { Authorization: `Bearer ${token}` } });
+      if (realizada) {
+        await api.post("/relatorios", {
+          celulaId: Number(form.celulaId),
+          dataReuniao: form.dataReuniao,
+          estudo: estudoEnviado,
+          membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
+          visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => { const id = Number(k.replace("VISITANTE-", "")); return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" }; }),
+          membrosAusentes: pessoas.filter(p => p.tipo === "MEMBRO").filter(p => !form.selecionadosKeys.includes(p.uKey) && justificativas[p.id]).map(p => ({ membroId: p.id, justificativa: justificativas[p.id] })),
+        }, { headers: { Authorization: `Bearer ${token}` } });
+      } else {
+        // ✅ URL corrigida: /relatorios/nao-realizada
+        await api.post("/relatorios/nao-realizada", {
+          celulaId: Number(form.celulaId),
+          dataReuniao: form.dataReuniao,
+          realizada: false,
+          motivoNaoRealizacao: motivoEnviado,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+      }
 
       try {
         await api.put(`/metas/celula/${form.celulaId}/recalcular`, {}, { headers: { Authorization: `Bearer ${token}` } });
@@ -942,79 +1332,45 @@ export default function TelaRelatorio({ isDark = false }) {
       prontoParaSalvar.current = false;
       setForm(f => ({ ...f, estudo: "", selecionadosKeys: [] }));
       setJustificativas({}); setJustificandoIds(new Set());
+      setRealizada(true); setMotivoNaoRealizacao(null);
       setTimeout(() => { prontoParaSalvar.current = true; }, 0);
-      setToastSucesso({ total: totalEnviado });
+
+      // ✅ Abre modal elegante correspondente
+      if (realizada) {
+        setModalRealizada({ total: totalEnviado, estudo: estudoEnviado, nomeCelula: nomeCell });
+      } else {
+        setModalNaoRealizada({ motivo: motivoEnviado, nomeCelula: nomeCell });
+      }
 
     } catch (err) {
-      // ✅ Trata erro 409 do backend com mensagem amigável
       if (err.response?.status === 409) {
         const errorData = err.response.data;
         const errorCode = errorData?.errorCode;
-
         if (errorCode === "DUPLICATE_REPORT") {
-          // Procura no histórico em memória
           const dataNormalizada = normalizarData(form.dataReuniao);
           const existente = historico.find(r => normalizarData(r.dataReuniao) === dataNormalizada);
-
           if (existente) {
-            setModalDuplicado({
-              relatorioId: existente.id,
-              dataReuniao: existente.dataReuniao,
-              estudo: existente.estudo || "Sem tema",
-              totalPresentes: existente.totalPresentes || 0,
-            });
-            setEnviando(false);
-            return;
+            setModalDuplicado({ relatorioId: existente.id, dataReuniao: existente.dataReuniao, estudo: existente.estudo || "Sem tema", totalPresentes: existente.totalPresentes || 0 });
+            setEnviando(false); return;
           }
-
-          // Fallback: busca no backend
           try {
-            const res = await api.get("/relatorios/historico", {
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")?.replace(/"/g, "").trim()}` }
-            });
-            const existenteNovoFetch = (res.data || []).find(r => normalizarData(r.dataReuniao) === dataNormalizada);
-            if (existenteNovoFetch) {
-              setModalDuplicado({
-                relatorioId: existenteNovoFetch.id,
-                dataReuniao: existenteNovoFetch.dataReuniao,
-                estudo: existenteNovoFetch.estudo || "Sem tema",
-                totalPresentes: existenteNovoFetch.totalPresentes || 0,
-              });
-              setEnviando(false);
-              return;
+            const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+            const res = await api.get("/relatorios/historico", { headers: { Authorization: `Bearer ${token}` } });
+            const encontrado = (res.data || []).find(r => normalizarData(r.dataReuniao) === dataNormalizada);
+            if (encontrado) {
+              setModalDuplicado({ relatorioId: encontrado.id, dataReuniao: encontrado.dataReuniao, estudo: encontrado.estudo || "Sem tema", totalPresentes: encontrado.totalPresentes || 0 });
+              setEnviando(false); return;
             }
           } catch (_) {}
         } else {
-          // Outros erros 409 → exibe alerta amigável
-          setErroAlerta({
-            tipo: "conflito",
-            titulo: errorData?.title || "Erro de conflito",
-            mensagem: errorData?.message || "Não foi possível enviar o relatório",
-            codigo: errorCode,
-          });
+          setErroAlerta({ tipo: "conflito", titulo: errorData?.title || "Erro de conflito", mensagem: errorData?.message || "Não foi possível enviar o relatório", codigo: errorCode });
         }
-      }
-      // Outros erros HTTP
-      else if (err.response?.status === 422) {
-        setErroAlerta({
-          tipo: "validacao",
-          titulo: "Erro de validação",
-          mensagem: err.response.data?.message || "Alguns campos estão inválidos",
-        });
-      }
-      else if (err.response?.status === 500) {
-        setErroAlerta({
-          tipo: "servidor",
-          titulo: "Erro do servidor",
-          mensagem: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
-        });
-      }
-      else {
-        setErroAlerta({
-          tipo: "generico",
-          titulo: "Erro",
-          mensagem: err.response?.data?.message || "Erro ao enviar relatório",
-        });
+      } else if (err.response?.status === 422) {
+        setErroAlerta({ tipo: "validacao", titulo: "Erro de validação", mensagem: err.response.data?.message || "Alguns campos estão inválidos" });
+      } else if (err.response?.status === 500) {
+        setErroAlerta({ tipo: "servidor", titulo: "Erro do servidor", mensagem: "Ocorreu um erro inesperado. Tente novamente mais tarde." });
+      } else {
+        setErroAlerta({ tipo: "generico", titulo: "Erro", mensagem: err.response?.data?.message || "Erro ao enviar relatório" });
       }
     } finally {
       setEnviando(false);
@@ -1052,8 +1408,25 @@ export default function TelaRelatorio({ isDark = false }) {
       <div className="aura-root">
         <AuraStyles t={t} isDark={isDark} />
         <div className="aura-glow" />
-        {toastSucesso && <ToastSucesso total={toastSucesso.total} onClose={() => setToastSucesso(null)} />}
 
+        {/* ✅ Modais elegantes de sucesso */}
+        {modalRealizada && (
+            <ModalRealizadaSucesso
+                total={modalRealizada.total}
+                estudo={modalRealizada.estudo}
+                nomeCelula={modalRealizada.nomeCelula}
+                onClose={() => setModalRealizada(null)}
+            />
+        )}
+        {modalNaoRealizada && (
+            <ModalNaoRealizadaSucesso
+                motivo={modalNaoRealizada.motivo}
+                nomeCelula={modalNaoRealizada.nomeCelula}
+                onClose={() => setModalNaoRealizada(null)}
+            />
+        )}
+
+        {/* Modal duplicado */}
         {modalDuplicado && (
             <div className="aura-modal-overlay" onClick={() => setModalDuplicado(null)}>
               <div className="aura-modal-box" onClick={e => e.stopPropagation()}>
@@ -1122,7 +1495,8 @@ export default function TelaRelatorio({ isDark = false }) {
                           {rel.estudo || "Sem referência"}
                         </p>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <span className="aura-badge" style={{ fontSize: 9, padding: "3px 10px" }}>
+                          {rel.realizada === false && rel.motivoNaoRealizacao && <BadgeNaoRealizada motivo={rel.motivoNaoRealizacao} />}
+                          <span className="aura-badge" style={{ fontSize: 9, padding: "3px 10px" }}>
                       <Users2 size={9} /> {rel.totalPresentes || 0} presentes
                     </span>
                           {(rel.membrosAusentes || []).filter(m => m.justificativaFalta).slice(0, 3).map(m => (
@@ -1143,14 +1517,7 @@ export default function TelaRelatorio({ isDark = false }) {
 
           {modo === "novo" && (
               <>
-                {/* ✅ RENDERIZA ALERTA DE ERRO AMIGÁVEL */}
-                {erroAlerta && (
-                    <AlertaErro
-                        erro={erroAlerta}
-                        onFechar={() => setErroAlerta(null)}
-                        t={t}
-                    />
-                )}
+                {erroAlerta && <AlertaErro erro={erroAlerta} onFechar={() => setErroAlerta(null)} t={t} />}
 
                 {rascunhoCarregado && (
                     <div className="aura-draft-toast">
@@ -1192,25 +1559,41 @@ export default function TelaRelatorio({ isDark = false }) {
                       <label className="aura-label"><Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />Data da Reunião</label>
                       <input className="aura-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }} value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
                     </div>
-                    <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
+                    {realizada && (
+                        <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
+                    )}
                   </div>
                 </div>
 
-                <div className="aura-divider"><div className="aura-divider-dot" /></div>
-                <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
-                  <span className="aura-badge"><span className="aura-badge-dot aura-blink" />Presença em Tempo Real</span>
-                </div>
+                {!realizada && (
+                    <div className="aura-alert-info"><Ban size={15} style={{ flexShrink: 0 }} />Célula não realizada — informe o motivo abaixo.</div>
+                )}
 
-                <div className="aura-kpi-grid">
-                  <div className="aura-kpi"><p className="aura-kpi-label">Membros</p><p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p></div>
-                  <div className="aura-kpi"><p className="aura-kpi-label">Visitantes</p><p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p></div>
-                  <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`, border: "none" }}>
-                    <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
-                    <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
-                  </div>
-                </div>
+                <SeletorStatusCelula
+                    realizada={realizada}
+                    onChange={(val) => { setRealizada(val); if (val) setMotivoNaoRealizacao(null); }}
+                    t={t}
+                />
 
-                <PessoasList pessoas={pessoas} form={form} processingIds={processingIds} alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes} justificativas={justificativas} onJustificativa={handleJustificativa} justificandoIds={justificandoIds} onToggleJustificando={handleToggleJustificando} t={t} isDark={isDark} />
+                {realizada ? (
+                    <>
+                      <div className="aura-divider"><div className="aura-divider-dot" /></div>
+                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
+                        <span className="aura-badge"><span className="aura-badge-dot aura-blink" />Presença em Tempo Real</span>
+                      </div>
+                      <div className="aura-kpi-grid">
+                        <div className="aura-kpi"><p className="aura-kpi-label">Membros</p><p className="aura-kpi-num" style={{ color: AURA.red }}>{membrosPresentes}</p></div>
+                        <div className="aura-kpi"><p className="aura-kpi-label">Visitantes</p><p className="aura-kpi-num" style={{ color: AURA.blue }}>{visitantesPresentes}</p></div>
+                        <div className="aura-kpi" style={{ background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`, border: "none" }}>
+                          <p className="aura-kpi-label" style={{ color: "rgba(255,255,255,.55)" }}>Total</p>
+                          <p className="aura-kpi-num" style={{ color: "#fff" }}>{total}</p>
+                        </div>
+                      </div>
+                      <PessoasList pessoas={pessoas} form={form} processingIds={processingIds} alternarPresenca={alternarPresenca} decisoesVisitantes={decisoesVisitantes} justificativas={justificativas} onJustificativa={handleJustificativa} justificandoIds={justificandoIds} onToggleJustificando={handleToggleJustificando} t={t} isDark={isDark} />
+                    </>
+                ) : (
+                    <SeletorMotivo value={motivoNaoRealizacao} onChange={setMotivoNaoRealizacao} t={t} />
+                )}
                 <div style={{ height: 100 }} />
               </>
           )}
@@ -1219,8 +1602,8 @@ export default function TelaRelatorio({ isDark = false }) {
         {modo === "novo" && (
             <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)" }}>
               <div style={{ maxWidth: 760, margin: "0 auto" }}>
-                <button className="aura-btn-primary" onClick={handleSubmit} disabled={enviando || !form.estudo.trim()}>
-                  {enviando ? <><Loader2 size={16} className="aura-spin" /> Enviando…</> : <><ClipboardCheck size={16} /> Finalizar Relatório ({total} presentes)</>}
+                <button className="aura-btn-primary" onClick={handleSubmit} disabled={enviando || (realizada ? !form.estudo.trim() : !motivoNaoRealizacao)}>
+                  {enviando ? <><Loader2 size={16} className="aura-spin" /> Enviando…</> : <><ClipboardCheck size={16} /> {realizada ? `Finalizar Relatório (${total} presentes)` : "Registrar Ausência"}</>}
                 </button>
               </div>
             </div>

@@ -990,10 +990,18 @@ export default function RelatorioCelula({ isDark = false }) {
         finally   { setLoading(false); }
     }, [dataInicio, dataFim]);
 
-    const { realizadas, naoRealizadas } = useMemo(() => ({
-        realizadas:    relatorios.filter(r => r.realizada !== false),
-        naoRealizadas: relatorios.filter(r => r.realizada === false),
-    }), [relatorios]);
+    const { realizadas, naoRealizadas } = useMemo(() => {
+        const ehNaoRealizada = (r) => {
+            if (r.realizada === false || r.realizada === 0) return true;
+            if (typeof r.realizada === "string" && r.realizada.toLowerCase() === "false") return true;
+            if (r.motivoNaoRealizacao && r.realizada !== true) return true;
+            return false;
+        };
+        return {
+            realizadas:    relatorios.filter(r => !ehNaoRealizada(r)),
+            naoRealizadas: relatorios.filter(r => ehNaoRealizada(r)),
+        };
+    }, [relatorios]);
 
     const totais = useMemo(() => realizadas.reduce((acc,rel) => {
         const m  = rel.membrosPresentes?.length||0;
