@@ -5,31 +5,36 @@ export default function UserForm({ fetchUsuarios, editingUser, setEditingUser })
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [perfil, setPerfil] = useState("ADMIN");
+  const [telefoneWhatsapp, setTelefoneWhatsapp] = useState("");
 
   useEffect(() => {
     if (editingUser) {
       setEmail(editingUser.email);
       setSenha(""); // não mostrar senha
       setPerfil(editingUser.perfil);
+      setTelefoneWhatsapp(editingUser.telefoneWhatsapp || "");
     } else {
       setEmail("");
       setSenha("");
       setPerfil("ADMIN");
+      setTelefoneWhatsapp("");
     }
   }, [editingUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const tel = telefoneWhatsapp ? `55${telefoneWhatsapp.replace(/\D/g, "")}` : "";
     try {
       if (editingUser) {
-        await api.put(`/usuarios/${editingUser.id}`, { email, senha, perfil });
+        await api.put(`/usuarios/${editingUser.id}`, { email, senha, perfil, telefoneWhatsapp: tel });
         setEditingUser(null);
       } else {
-        await api.post("/usuarios", { email, senha, perfil });
+        await api.post("/usuarios", { email, senha, perfil, telefoneWhatsapp: tel });
       }
       setEmail("");
       setSenha("");
       setPerfil("ADMIN");
+      setTelefoneWhatsapp("");
       fetchUsuarios();
     } catch (error) {
       console.error(error);
@@ -52,7 +57,13 @@ export default function UserForm({ fetchUsuarios, editingUser, setEditingUser })
         placeholder="Senha"
         value={senha}
         onChange={(e) => setSenha(e.target.value)}
-        required={!editingUser} // obrigatório apenas para novo usuário
+        required={!editingUser}
+      />
+      <input
+        type="tel"
+        placeholder="WhatsApp"
+        value={telefoneWhatsapp}
+        onChange={(e) => setTelefoneWhatsapp(e.target.value)}
       />
       <select value={perfil} onChange={(e) => setPerfil(e.target.value)}>
         <option value="ADMIN">ADMIN</option>

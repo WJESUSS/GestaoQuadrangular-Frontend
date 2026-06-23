@@ -20,7 +20,7 @@ export default function Usuarios() {
 
       <ul>
         {usuarios.map((u) => (
-          <li key={u.id}>{u.email}</li>
+          <li key={u.id}>{u.email}{u.telefoneWhatsapp ? ` — ${u.telefoneWhatsapp}` : ""}</li>
         ))}
       </ul>
     </div>
