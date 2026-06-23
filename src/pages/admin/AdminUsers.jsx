@@ -668,6 +668,9 @@ export default function AdminUsers() {
     const tel = form.telefoneWhatsapp ? form.telefoneWhatsapp.replace(/\D/g, "") : "";
     try {
       await api.put(`usuarios/${editandoId}`, { ...form, telefoneWhatsapp: tel });
+      setUsuarios(prev => prev.map(u =>
+          u.id === editandoId ? { ...u, telefoneWhatsapp: tel } : u
+      ));
       setEditModalOpen(false); setEditandoId(null);
       setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
       carregarUsuarios();
