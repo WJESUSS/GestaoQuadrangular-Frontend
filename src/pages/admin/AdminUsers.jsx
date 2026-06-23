@@ -6,7 +6,7 @@ import {
   Mail, Key, User, Shield, Loader2, RefreshCcw, Pencil, X,
   Sun, Moon, Eye, EyeOff, CheckCircle, XCircle, Clock, Camera,
   History, ChevronLeft, ChevronRight, Search, Filter,
-  Edit3, PlusCircle, AlertTriangle, RefreshCw,
+  Edit3, PlusCircle, AlertTriangle, RefreshCw, Phone,
   ChevronDown, ChevronUp, Menu, FileText,
   Building2, DollarSign, Home, Flame,
   LayoutDashboard, Share2, Trophy, ClipboardList,
@@ -611,7 +611,7 @@ export default function AdminUsers() {
   const [editModalOpen,  setEditModalOpen]  = useState(false);
   const [editandoId,     setEditandoId]     = useState(null);
   const [exitConfirm,    setExitConfirm]    = useState(false);
-  const [form,           setForm]           = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" });
+  const [form,           setForm]           = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
   const [isDark,         setIsDark]         = useState(() => localStorage.getItem("theme") === "dark");
   const [sidebarOpen,    setSidebarOpen]    = useState(false);
   const [moduloAtivo,    setModuloAtivo]    = useState("usuarios");
@@ -653,9 +653,10 @@ export default function AdminUsers() {
 
   const adicionarUsuario = async e => {
     e.preventDefault(); setSending(true); setErro("");
+    const tel = form.telefoneWhatsapp ? form.telefoneWhatsapp.replace(/\D/g, "") : "";
     try {
-      await api.post("usuarios", form);
-      setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" });
+      await api.post("usuarios", { ...form, telefoneWhatsapp: tel });
+      setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
       carregarUsuarios(); ok("Acesso liberado com sucesso.");
     } catch { setErro("Falha ao criar novo acesso."); }
     finally { setSending(false); }
@@ -663,10 +664,11 @@ export default function AdminUsers() {
 
   const salvarEdicao = async e => {
     e.preventDefault(); setSending(true);
+    const tel = form.telefoneWhatsapp ? form.telefoneWhatsapp.replace(/\D/g, "") : "";
     try {
-      await api.put(`usuarios/${editandoId}`, form);
+      await api.put(`usuarios/${editandoId}`, { ...form, telefoneWhatsapp: tel });
       setEditModalOpen(false); setEditandoId(null);
-      setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" });
+      setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
       carregarUsuarios();
     } catch { setErro("Erro ao atualizar dados."); }
     finally { setSending(false); }
@@ -722,7 +724,7 @@ export default function AdminUsers() {
     finally { setUploadandoFoto(null); }
   };
 
-  const abrirEdicao = u => { setEditandoId(u.id); setForm({ nome:u.nome, email:u.email, senha:"", perfil:u.perfil }); setEditModalOpen(true); };
+  const abrirEdicao = u => { setEditandoId(u.id); setForm({ nome:u.nome, email:u.email, senha:"", perfil:u.perfil, telefoneWhatsapp:u.telefoneWhatsapp || "55" }); setEditModalOpen(true); };
 
   const qtdPend = pendentes.size;
   const isLider = moduloAtivo?.startsWith("lider-");
@@ -865,7 +867,7 @@ export default function AdminUsers() {
               </button>
               {moduloAtivo === "usuarios" && (
                   <button className="adm-btn-red" style={{ padding:"8px 16px", fontSize:9 }}
-                          onClick={() => { setEditandoId(null); setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA" }); setEditModalOpen(true); }}>
+                          onClick={() => { setEditandoId(null); setForm({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" }); setEditModalOpen(true); }}>
                     <UserPlus size={13}/> Novo
                   </button>
               )}
@@ -927,9 +929,10 @@ export default function AdminUsers() {
                         </div>
                         <form onSubmit={adicionarUsuario} style={{ padding:"20px 22px", display:"flex", flexDirection:"column", gap:14 }}>
                           {[
-                            { icon:<User size={14}/>,   type:"text",     placeholder:"Nome completo",        key:"nome",  label:"Nome" },
-                            { icon:<Mail size={14}/>,   type:"email",    placeholder:"E-mail institucional",  key:"email", label:"E-mail" },
-                            { icon:<Key size={14}/>,    type:"password", placeholder:"Senha de acesso",       key:"senha", label:"Senha" },
+                            { icon:<User size={14}/>,   type:"text",     placeholder:"Nome completo",         key:"nome",  label:"Nome" },
+                            { icon:<Mail size={14}/>,   type:"email",    placeholder:"E-mail institucional",   key:"email", label:"E-mail" },
+                            { icon:<Key size={14}/>,    type:"password", placeholder:"Senha de acesso",        key:"senha", label:"Senha" },
+                            { icon:<Phone size={14}/>,  type:"tel",      placeholder:"WhatsApp (com DDD)",     key:"telefoneWhatsapp", label:"WhatsApp" },
                           ].map(f => (
                               <div key={f.key}>
                                 <label className="adm-label">{f.label}</label>
@@ -1098,9 +1101,10 @@ export default function AdminUsers() {
                     <div className="adm-divider" />
                     <form onSubmit={editandoId ? salvarEdicao : adicionarUsuario} style={{ display:"flex", flexDirection:"column", gap:14 }}>
                       {[
-                        { icon:<User size={14}/>,  type:"text",     placeholder:"Nome completo",                    key:"nome",  label:"Nome",   req:true     },
-                        { icon:<Mail size={14}/>,  type:"email",    placeholder:"E-mail institucional",              key:"email", label:"E-mail",  req:true     },
+                        { icon:<User size={14}/>,  type:"text",     placeholder:"Nome completo",                     key:"nome",  label:"Nome",   req:true     },
+                        { icon:<Mail size={14}/>,  type:"email",    placeholder:"E-mail institucional",               key:"email", label:"E-mail",  req:true     },
                         { icon:<Key size={14}/>,   type:"password", placeholder:editandoId?"Deixe vazio para manter":"Senha de acesso", key:"senha", label:"Senha", req:!editandoId },
+                        { icon:<Phone size={14}/>, type:"tel",      placeholder:"WhatsApp (com DDD)",                key:"telefoneWhatsapp", label:"WhatsApp", req:false },
                       ].map(f => (
                           <div key={f.key}>
                             <label className="adm-label">{f.label}</label>

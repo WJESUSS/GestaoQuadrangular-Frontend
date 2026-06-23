@@ -5,25 +5,25 @@ export default function UserForm({ fetchUsuarios, editingUser, setEditingUser })
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [perfil, setPerfil] = useState("ADMIN");
-  const [telefoneWhatsapp, setTelefoneWhatsapp] = useState("");
+  const [telefoneWhatsapp, setTelefoneWhatsapp] = useState("55");
 
   useEffect(() => {
     if (editingUser) {
       setEmail(editingUser.email);
       setSenha(""); // não mostrar senha
       setPerfil(editingUser.perfil);
-      setTelefoneWhatsapp(editingUser.telefoneWhatsapp || "");
+      setTelefoneWhatsapp(editingUser.telefoneWhatsapp || "55");
     } else {
       setEmail("");
       setSenha("");
       setPerfil("ADMIN");
-      setTelefoneWhatsapp("");
+      setTelefoneWhatsapp("55");
     }
   }, [editingUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const tel = telefoneWhatsapp ? `55${telefoneWhatsapp.replace(/\D/g, "")}` : "";
+    const tel = telefoneWhatsapp ? telefoneWhatsapp.replace(/\D/g, "") : "";
     try {
       if (editingUser) {
         await api.put(`/usuarios/${editingUser.id}`, { email, senha, perfil, telefoneWhatsapp: tel });
@@ -34,7 +34,7 @@ export default function UserForm({ fetchUsuarios, editingUser, setEditingUser })
       setEmail("");
       setSenha("");
       setPerfil("ADMIN");
-      setTelefoneWhatsapp("");
+      setTelefoneWhatsapp("55");
       fetchUsuarios();
     } catch (error) {
       console.error(error);
