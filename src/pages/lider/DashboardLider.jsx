@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import api from "../../services/api.js";
+import { getFotoUrl } from "../../utils/foto.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import TelaRelatorio from "./TelaRelatorio";
@@ -692,7 +693,7 @@ export default function DashboardLider() {
                 <div className="dl-ring dl-pulse" style={{ width: 56, height: 56, animationDelay: ".9s" }} />
                 <div className="dl-avatar">
                   {usuarioLogado?.fotoPerfil
-                      ? <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome || "Líder"} />
+                      ? <img src={getFotoUrl(usuarioLogado.fotoPerfil)} alt={usuarioLogado.nome || "Líder"} />
                       : <IEQCross size={34} />
                   }
                 </div>

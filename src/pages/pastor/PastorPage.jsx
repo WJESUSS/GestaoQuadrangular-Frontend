@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Routes, Route, NavLink, useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import api from "../../services/api.js";
+import { getFotoUrl } from "../../utils/foto.js";
 import { motion, AnimatePresence } from "framer-motion";
 
 import PainelPastor               from "./PainelPastor";
@@ -786,7 +787,7 @@ export default function PastorPage() {
               <div className="pp-ring pp-pulse" style={{ width: 40, height: 40, animationDelay: ".9s" }} />
               <div className="pp-avatar">
                 {usuarioLogado?.fotoPerfil
-                    ? <img src={usuarioLogado.fotoPerfil} alt={usuarioLogado.nome} />
+                    ? <img src={getFotoUrl(usuarioLogado.fotoPerfil)} alt={usuarioLogado.nome} />
                     : (usuarioLogado?.nome?.charAt(0).toUpperCase() || "P")
                 }
               </div>

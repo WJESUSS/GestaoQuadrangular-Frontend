@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
+import { getFotoUrl } from "../../utils/foto.js";
 
 import Membros           from "./Membros";
 import Celulas           from "./Celulas";
@@ -434,7 +435,7 @@ function IEQAvatar({ usuario, size = 48 }) {
         background: "rgba(18,18,26,.8)",
         display: "flex", alignItems: "center", justifyContent: "center" }}>
         {usuario?.fotoPerfil ? (
-            <img src={usuario.fotoPerfil} alt={usuario.nome || "S"}
+            <img src={getFotoUrl(usuario.fotoPerfil)} alt={usuario.nome || "S"}
                  style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
             <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 600,

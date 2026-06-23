@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import api from "../../services/api.js";
+import { getFotoUrl } from "../../utils/foto.js";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   UserPlus, Users, Power, Trash2, LogOut,
@@ -987,7 +988,7 @@ export default function AdminUsers() {
                                     <div style={{ position:"relative", flexShrink:0, cursor:"pointer" }} onClick={() => abrirSeletorFoto(u.id)}>
                                       {u.fotoPerfil ? (
                                           <div style={{ width:40, height:40, borderRadius:11, overflow:"hidden", border:`1.5px solid ${temP ? AURA.yellow : t.border}`, opacity:u.ativo?1:.45 }}>
-                                            <img src={u.fotoPerfil} alt={u.nome} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                                            <img src={getFotoUrl(u.fotoPerfil)} alt={u.nome} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
                                           </div>
                                       ) : (
                                           <div style={{ width:40, height:40, borderRadius:11, background:u.ativo?`linear-gradient(135deg,${AURA.redDark},${AURA.blue})`:(isDark?"rgba(255,255,255,.08)":"rgba(0,0,0,.08)"), display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Playfair Display',serif", fontSize:16, fontWeight:600, color:"#fff", opacity:u.ativo?1:.6 }}>
