@@ -508,6 +508,10 @@ function GlobalStyles({ t, isDark }) {
         transition: background .15s; flex-wrap: wrap;
       }
       .adm-user-row:hover { background: ${isDark ? "rgba(201,169,110,.03)" : "rgba(201,169,110,.04)"}; }
+      .adm-user-text, .adm-user-sub {
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .adm-user-actions { flex-shrink: 0; }
 
       /* Toast */
       .adm-toast {
@@ -525,6 +529,38 @@ function GlobalStyles({ t, isDark }) {
         border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;
         display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
         backdrop-filter: blur(20px);
+      }
+
+      /* Mobile */
+      @media (max-width: 639px) {
+        .adm-topbar { padding: 0 12px; height: 50px; gap: 6px; }
+        .adm-topbar-left { gap: 8px; }
+        .adm-page-title { font-size: 14px; }
+        .adm-page-eyebrow { font-size: 7px; }
+        .adm-online { display: none !important; }
+        .adm-content { padding: 14px 12px; }
+        .adm-card { border-radius: 14px; }
+        .adm-user-row {
+          flex-direction: column; align-items: stretch;
+          gap: 8px; padding: 10px 14px;
+        }
+        .adm-user-text, .adm-user-sub {
+          white-space: normal; overflow: visible; text-overflow: clip;
+        }
+        .adm-user-actions {
+          justify-content: flex-start;
+        }
+        .adm-user-actions button {
+          width: 26px !important; height: 26px !important;
+        }
+        .adm-user-actions button svg { width: 12px; height: 12px; }
+        .adm-user-row > div:first-child { gap: 10px; }
+        .adm-user-wrap { flex: none !important; }
+        .adm-kpi-grid { gap: 8px; }
+        .adm-kpi { padding: 12px; }
+        .adm-kpi-num { font-size: 18px; }
+        .adm-topbar .adm-btn-red { padding: 6px 10px !important; font-size: 8px !important; }
+        .adm-topbar .adm-btn-red svg { width: 11px !important; height: 11px !important; }
       }
 
       /* Footer */
@@ -1005,13 +1041,13 @@ export default function AdminUsers() {
                                       </div>
                                     </div>
 
-                                    <div style={{ flex:1, minWidth:0 }}>
-                                      <p style={{ fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:600, color:t.text, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.nome}</p>
-                                      <p style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.email}</p>
+                                    <div className="adm-user-wrap" style={{ flex:1, minWidth:0 }}>
+                                      <p className="adm-user-text" style={{ fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:600, color:t.text, margin:0 }}>{u.nome}</p>
+                                      <p className="adm-user-sub" style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:0 }}>{u.email}</p>
                                     </div>
                                   </div>
 
-                                  <div style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap", flexShrink:0 }}>
+                                  <div className="adm-user-actions" style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap" }}>
                                     {/* Badges */}
                                     <span style={{ padding:"3px 10px", borderRadius:99, border:"1px solid rgba(0,61,165,.22)", background:"rgba(0,61,165,.07)", color:AURA.blue, fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:600, letterSpacing:".1em", whiteSpace:"nowrap" }}>
                                 {u.perfil?.replace(/_/g," ")}
