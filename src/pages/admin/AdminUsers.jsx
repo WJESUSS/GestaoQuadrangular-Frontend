@@ -646,8 +646,8 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PAINEL WHATSAPP REGISTROS
+   ✅ CORRIGIDO: usa api (axios) em vez de fetch com localhost:8080
 ═══════════════════════════════════════════════════════════════════════════ */
-const WA_API = "http://localhost:8080/webhook/whatsapp/registros";
 
 function statusPill(s) {
   const m = {
@@ -696,7 +696,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
   const [detalhes,   setDetalhes]   = useState(null);
   const POR_PAG = 15;
 
-  // Função para buscar usuário pelo telefone
   const buscarUsuarioPorTelefone = (numero) => {
     if (!numero || !usuarios.length) return null;
     const numLimpo = numero.replace(/\D/g, '');
@@ -706,20 +705,28 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
     });
   };
 
+  // ✅ CORREÇÃO PRINCIPAL: usa api (axios com baseURL do Render) em vez de fetch localhost
   const carregar = useCallback(async () => {
     setLoading(true); setOffline(false);
     try {
       const [resReg, resMet] = await Promise.allSettled([
-        fetch(`${WA_API}/filtrar?tipoEvento=${filtroTipo}&status=${filtroSt}&busca=${encodeURIComponent(busca)}`, { headers: { Accept: "application/json" } }),
-        fetch(`${WA_API}/metricas`, { headers: { Accept: "application/json" } }),
+        api.get(`webhook/whatsapp/registros/filtrar`, {
+          params: { tipoEvento: filtroTipo, status: filtroSt, busca },
+        }),
+        api.get(`webhook/whatsapp/registros/metricas`),
       ]);
-      if (resReg.status === "fulfilled" && resReg.value.ok) {
-        const data = await resReg.value.json();
-        const arr = Array.isArray(data) ? data : data.content ?? data.registros ?? [];
-        setRegistros(arr); setFiltrados(arr);
-      } else { throw new Error("offline"); }
-      if (resMet.status === "fulfilled" && resMet.value.ok) {
-        setMetricas(await resMet.value.json());
+
+      if (resReg.status === "fulfilled") {
+        const data = resReg.value.data;
+        const arr = Array.isArray(data) ? data : data?.content ?? data?.registros ?? [];
+        setRegistros(arr);
+        setFiltrados(arr);
+      } else {
+        throw new Error("offline");
+      }
+
+      if (resMet.status === "fulfilled") {
+        setMetricas(resMet.value.data);
       }
     } catch {
       setOffline(true);
@@ -761,24 +768,22 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
   const kpis = [
     { label: "Total",     value: metricas.total,      color: AURA.wa,        bg: "rgba(37,211,102,.08)",  icon: <MessageCircle size={16}/> },
     { label: "Mensagens", value: metricas.mensagens,  color: AURA.blue,      bg: "rgba(0,61,165,.08)",    icon: <Users size={16}/> },
-    { label: "Últ. 24h", value: metricas.ultimas24h, color: AURA.gold,      bg: "rgba(201,169,110,.08)", icon: <Clock size={16}/> },
+    { label: "Últ. 24h",  value: metricas.ultimas24h, color: AURA.gold,      bg: "rgba(201,169,110,.08)", icon: <Clock size={16}/> },
     { label: "Falhas",    value: metricas.failed,     color: AURA.red,       bg: "rgba(200,16,46,.08)",   icon: <AlertCircle size={16}/> },
   ];
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-        {/* Banner offline */}
         {offline && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 16px", background: "rgba(200,16,46,.06)", border: "1px solid rgba(200,16,46,.18)", borderRadius: 12 }}>
               <WifiOff size={13} style={{ color: AURA.red, flexShrink: 0 }}/>
               <span style={{ fontSize: 11, color: AURA.red, fontWeight: 500 }}>
-                Servidor offline — exibindo dados de exemplo. Verifique <code style={{ fontSize: 10 }}>localhost:8080</code>
+                Servidor offline ou sem dados ainda. Verifique o backend no Render.
               </span>
             </div>
         )}
 
-        {/* KPIs */}
         <div className="adm-kpi-grid">
           {kpis.map(k => (
               <div key={k.label} className="adm-kpi">
@@ -793,10 +798,8 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
           ))}
         </div>
 
-        {/* Card tabela */}
         <div className="adm-card">
 
-          {/* Header */}
           <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -818,7 +821,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
             </div>
           </div>
 
-          {/* Filtros */}
           <div className="wa-filtros-row">
             <div className="wa-filtro-busca">
               <Search size={13} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }}/>
@@ -851,7 +853,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
             </div>
           </div>
 
-          {/* Cabeçalho da tabela */}
           <div className="wa-thead">
             <span className="wa-col-num wa-th" style={{ textAlign: "right" }}>#</span>
             <span className="wa-col-tipo wa-th">Tipo</span>
@@ -862,7 +863,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
             <span className="wa-col-arr wa-th"></span>
           </div>
 
-          {/* Linhas */}
           {loading ? (
               <div style={{ padding: "40px 20px", textAlign: "center", color: t.textMuted }}>
                 <Loader2 size={22} style={{ animation: "adm-spin 1s linear infinite", marginBottom: 8 }}/>
@@ -885,17 +885,14 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
                                   onClick={() => setDetalhes(r)}>
                         <span className="wa-col-num">{(pag - 1) * POR_PAG + i + 1}</span>
                         <span className="wa-col-tipo">{tipoBadge(r.tipoEvento)}</span>
-
-                        {/* Coluna com nome do usuário e número */}
                         <span className="wa-col-fone" style={{ display: usuario ? 'flex' : 'block', flexDirection: usuario ? 'column' : undefined, gap: usuario ? '3px' : 0 }}>
                           {usuario && (
                               <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 11.5 }}>
-                              👤 {usuario.nome}
-                            </span>
+                                👤 {usuario.nome}
+                              </span>
                           )}
                           <span className="wa-mono">{r.numeroDestino || "—"}</span>
                         </span>
-
                         <span className="wa-col-id" style={{ display: "flex", flexDirection: "column", gap: 2, overflow: "hidden" }}>
                           <span style={{ fontSize: 10, fontFamily: "monospace", color: t.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {r.idMensagem || "—"}
@@ -906,7 +903,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
                               </span>
                           )}
                         </span>
-
                         <span className="wa-col-st">{statusPill(r.status)}</span>
                         <span className="wa-col-dt">{fmtData(r.recebidoEm)}</span>
                         <span className="wa-col-arr"><ChevronRight size={13}/></span>
@@ -916,7 +912,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
               </AnimatePresence>
           )}
 
-          {/* Paginação */}
           {totalPags > 1 && (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", borderTop: `1px solid ${t.border}` }}>
                 <span style={{ fontSize: 11, color: t.textMuted }}>{filtrados.length} registros</span>
@@ -931,7 +926,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
           )}
         </div>
 
-        {/* ══ Drawer detalhe (portal) ══════════════════════════════════ */}
         {createPortal(
             <>
               <div
@@ -946,7 +940,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
                   return (
                       <>
                         <div style={{ height: 2, background: `linear-gradient(90deg, ${AURA.wa}, ${AURA.blue})` }}/>
-
                         <div className="wa-drawer-head">
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -956,87 +949,54 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
                           </div>
                           <button className="adm-ico-btn" onClick={() => setDetalhes(null)} aria-label="Fechar"><X size={15}/></button>
                         </div>
-
                         <div className="wa-drawer-body">
-
-                          {/* Identificação */}
                           <div className="wa-ds">
                             <p className="wa-ds-title">Identificação</p>
                             <div className="wa-dr"><span className="wa-dl">ID interno</span><span className="wa-dv" style={{ fontFamily: "monospace", fontSize: 11 }}>{detalhes.id}</span></div>
                             <div className="wa-dr"><span className="wa-dl">Tipo evento</span><span className="wa-dv">{tipoBadge(detalhes.tipoEvento)}</span></div>
                             <div className="wa-dr"><span className="wa-dl">Recebido em</span><span className="wa-dv">{fmtData(detalhes.recebidoEm)}</span></div>
                           </div>
-
-                          {/* Dados da mensagem */}
                           <div className="wa-ds">
                             <p className="wa-ds-title">Dados da mensagem</p>
                             <div className="wa-dr"><span className="wa-dl">ID mensagem</span><span className="wa-dv" style={{ fontFamily: "monospace", fontSize: 10, wordBreak: "break-all" }}>{detalhes.idMensagem || "—"}</span></div>
                             <div className="wa-dr">
                               <span className="wa-dl">Número</span>
                               <span className="wa-dv">
-                                {usuarioDetalhe && (
+                                {usuarioDetalhe ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                      <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 12 }}>
-                                        👤 {usuarioDetalhe.nome}
-                                      </span>
-                                      <span style={{ fontFamily: "monospace" }}>
-                                        {detalhes.numeroDestino || "—"}
-                                      </span>
+                                      <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 12 }}>👤 {usuarioDetalhe.nome}</span>
+                                      <span style={{ fontFamily: "monospace" }}>{detalhes.numeroDestino || "—"}</span>
                                     </div>
-                                )}
-                                {!usuarioDetalhe && (
-                                    <span style={{ fontFamily: "monospace" }}>
-                                      {detalhes.numeroDestino || "—"}
-                                    </span>
+                                ) : (
+                                    <span style={{ fontFamily: "monospace" }}>{detalhes.numeroDestino || "—"}</span>
                                 )}
                               </span>
                             </div>
                             <div className="wa-dr"><span className="wa-dl">Status</span><span className="wa-dv">{statusPill(detalhes.status)}</span></div>
                           </div>
-
-                          {/* CONTEÚDO DA MENSAGEM */}
                           {detalhes.tipoEvento === "mensagem" && (
                               <div className="wa-ds">
                                 <p className="wa-ds-title">Conteúdo da mensagem</p>
-
                                 {tipoMsg && (
                                     <div className="wa-dr">
                                       <span className="wa-dl">Tipo</span>
-                                      <span className="wa-dv">
-                                        <span className="wa-tipo-badge" style={{ textTransform: "capitalize" }}>{tipoMsg}</span>
-                                      </span>
+                                      <span className="wa-dv"><span className="wa-tipo-badge" style={{ textTransform: "capitalize" }}>{tipoMsg}</span></span>
                                     </div>
                                 )}
-
                                 <div className="wa-dr" style={{ alignItems: "flex-start" }}>
                                   <span className="wa-dl" style={{ paddingTop: 10 }}>Texto</span>
-                                  <div style={{
-                                    flex: 1,
-                                    background: texto ? "rgba(37,211,102,.06)" : "transparent",
-                                    border: `1px solid ${texto ? "rgba(37,211,102,.18)" : t.borderIn}`,
-                                    borderRadius: 10,
-                                    padding: "10px 14px",
-                                    fontSize: 13,
-                                    color: texto ? t.text : t.textMuted,
-                                    lineHeight: 1.65,
-                                    wordBreak: "break-word",
-                                    fontStyle: texto ? "normal" : "italic",
-                                    minHeight: 42,
-                                  }}>
+                                  <div style={{ flex: 1, background: texto ? "rgba(37,211,102,.06)" : "transparent", border: `1px solid ${texto ? "rgba(37,211,102,.18)" : t.borderIn}`, borderRadius: 10, padding: "10px 14px", fontSize: 13, color: texto ? t.text : t.textMuted, lineHeight: 1.65, wordBreak: "break-word", fontStyle: texto ? "normal" : "italic", minHeight: 42 }}>
                                     {texto || "Sem texto (áudio, imagem ou tipo sem corpo)"}
                                   </div>
                                 </div>
                               </div>
                           )}
-
-                          {/* Payload bruto */}
                           <div className="wa-ds">
                             <p className="wa-ds-title">Payload original</p>
                             <div className="wa-json">
                               {(() => { try { return JSON.stringify(JSON.parse(detalhes.payload), null, 2); } catch { return detalhes.payload || "—"; } })()}
                             </div>
                           </div>
-
                         </div>
                       </>
                   );
@@ -1228,15 +1188,11 @@ export default function AdminUsers() {
         <div className="adm-bg-layer" />
         <div className="adm-noise" />
 
-        {/* HEADER */}
         <div className="adm-header-wrap">
           <div className="adm-header-top-line" />
-
           <div className="adm-topbar">
             <div className="adm-topbar-l">
-              <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
-                <Menu size={18}/>
-              </button>
+              <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu"><Menu size={18}/></button>
               <div className="adm-topbar-sep"/>
               <div className="adm-brand">
                 <div className="adm-brand-logo">
@@ -1248,7 +1204,6 @@ export default function AdminUsers() {
                 </div>
               </div>
             </div>
-
             <div className="adm-topbar-r">
               <div className="adm-user-chip">
                 <div className="adm-user-chip-dot"/>
@@ -1266,9 +1221,7 @@ export default function AdminUsers() {
                 <RefreshCcw size={15} style={{ animation: loading ? "adm-spin 1s linear infinite" : "none" }}/>
               </button>
               <div className="adm-topbar-sep"/>
-              <button className="adm-ico-btn" onClick={() => setExitConfirm(true)} aria-label="Sair">
-                <LogOut size={15}/>
-              </button>
+              <button className="adm-ico-btn" onClick={() => setExitConfirm(true)} aria-label="Sair"><LogOut size={15}/></button>
               {moduloAtivo === "usuarios" && (
                   <>
                     <div className="adm-topbar-sep"/>
@@ -1280,7 +1233,6 @@ export default function AdminUsers() {
             </div>
           </div>
 
-          {/* Nav desktop */}
           <nav className="adm-nav-row" ref={navRowRef}>
             {SECOES.map(sec => {
               const SIcon = sec.icon;
@@ -1300,7 +1252,6 @@ export default function AdminUsers() {
             })}
           </nav>
 
-          {/* Mega menu */}
           <AnimatePresence>
             {megaOpenId && (
                 <>
@@ -1333,7 +1284,6 @@ export default function AdminUsers() {
           </AnimatePresence>
         </div>
 
-        {/* MOBILE OVERLAY */}
         <AnimatePresence>
           {mobileMenuOpen && (
               <motion.div className="adm-mobile-overlay"
@@ -1349,11 +1299,8 @@ export default function AdminUsers() {
                       <span className="adm-brand-sub">Painel Administrativo</span>
                     </div>
                   </div>
-                  <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Fechar menu">
-                    <X size={18}/>
-                  </button>
+                  <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Fechar menu"><X size={18}/></button>
                 </div>
-
                 <div className="adm-mobile-overlay-body">
                   {SECOES.map(sec => {
                     const SIcon = sec.icon;
@@ -1397,7 +1344,6 @@ export default function AdminUsers() {
                     );
                   })}
                 </div>
-
                 <div className="adm-mobile-overlay-foot">
                   <button className="adm-btn-primary red" style={{ width:"100%" }} onClick={() => { setMobileMenuOpen(false); setExitConfirm(true); }}>
                     <LogOut size={14}/> Sair do sistema
@@ -1410,7 +1356,6 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* MAIN */}
         <main className="adm-main">
           <div className="adm-page-head">
             <p className="adm-page-eyebrow">{secaoAtiva?.label || "Admin"}</p>
@@ -1421,7 +1366,6 @@ export default function AdminUsers() {
           </div>
 
           <div className="adm-content">
-
             {isLider && celulas.length > 0 && (
                 <div className="adm-celula-bar" style={{ marginTop:14 }}>
                   <Building2 size={15} style={{ color:AURA.blue, flexShrink:0 }}/>
@@ -1473,7 +1417,6 @@ export default function AdminUsers() {
                               </span>
                             </div>
                         )}
-
                         <div className="adm-card-header" style={{ padding:"18px 22px", borderBottom:`1px solid ${t.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap" }}>
                           <div>
                             <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:17, fontWeight:500, color:t.text, margin:0, lineHeight:1.1 }}>Base de Usuários</h3>
@@ -1483,7 +1426,6 @@ export default function AdminUsers() {
                             <RefreshCcw size={12} style={{ animation:loading?"adm-spin 1s linear infinite":"none" }}/> Atualizar
                           </button>
                         </div>
-
                         <AnimatePresence>
                           {usuarios.map((u, i) => {
                             const temP = pendentes.has(u.id);
@@ -1494,7 +1436,6 @@ export default function AdminUsers() {
                                             initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-16 }}
                                             transition={{ delay: i*.025 }}
                                             style={{ borderLeft:`3px solid ${temP ? AURA.yellow : "transparent"}` }}>
-
                                   <div className="adm-row-l">
                                     <div className="adm-avatar"
                                          style={{ border:`1.5px solid ${temP?AURA.yellow+"55":t.border}`, opacity:u.ativo?1:.5 }}
@@ -1515,7 +1456,6 @@ export default function AdminUsers() {
                                       <p className="adm-row-email">{u.email}</p>
                                     </div>
                                   </div>
-
                                   <div className="adm-row-r">
                                     <span className="adm-badge" style={{ background:"rgba(0,61,165,.07)", border:"1px solid rgba(0,61,165,.18)", color:AURA.blue }}>
                                       {u.perfil?.replace(/_/g," ")}
@@ -1524,7 +1464,6 @@ export default function AdminUsers() {
                                       <span style={{ width:5, height:5, borderRadius:"50%", background:u.ativo?AURA.green:t.textMuted, flexShrink:0, display:"block" }}/>
                                       {u.ativo ? "Ativo" : "Suspenso"}
                                     </span>
-
                                     {temP && (
                                         <>
                                           <button disabled={eApr} onClick={() => aprovarAlteracao(u.id, u.nome)}
@@ -1539,7 +1478,6 @@ export default function AdminUsers() {
                                           </button>
                                         </>
                                     )}
-
                                     {[
                                       { icon:<Pencil size={14}/>,  title:"Editar",    fn:() => abrirEdicao(u),       hc:AURA.blue,       hb:"rgba(0,61,165,.08)"  },
                                       { icon:<Power size={14}/>,   title:"Suspender", fn:() => alternarStatus(u.id), hc:AURA.yellowDark, hb:"rgba(196,140,0,.08)" },
@@ -1561,9 +1499,7 @@ export default function AdminUsers() {
                 )}
 
                 {moduloAtivo === "historico" && (
-                    <div className="adm-card">
-                      <HistoricoAuditoria isDark={isDark}/>
-                    </div>
+                    <div className="adm-card"><HistoricoAuditoria isDark={isDark}/></div>
                 )}
 
                 {moduloAtivo === "wa-registros" && (
@@ -1582,7 +1518,6 @@ export default function AdminUsers() {
 
         <input ref={fotoRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFoto}/>
 
-        {/* MODAL USUÁRIO */}
         <AnimatePresence>
           {drawerOpen && (
               <motion.div className="adm-modal-backdrop"
@@ -1594,9 +1529,7 @@ export default function AdminUsers() {
                             animate={{ opacity:1, y:0,   scale:1   }}
                             exit={{    opacity:0, y:-20,  scale:.97 }}
                             transition={{ type:"spring", damping:28, stiffness:280 }}>
-
                   <div style={{ height:2, background:`linear-gradient(90deg,${AURA.blue},${AURA.red} 40%,${AURA.gold} 70%,${AURA.goldLight})`, flexShrink:0 }}/>
-
                   <div className="adm-modal-header">
                     <button className="adm-modal-close" onClick={() => setDrawerOpen(false)} style={{
                       position:"absolute", width:34, height:34, borderRadius:10, border:`1px solid ${t.border}`,
@@ -1608,7 +1541,6 @@ export default function AdminUsers() {
                             onMouseLeave={e => { e.currentTarget.style.color=t.textMuted; e.currentTarget.style.borderColor=t.border; e.currentTarget.style.background=isDark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)"; }}>
                       <X size={16}/>
                     </button>
-
                     <div style={{ display:"flex", alignItems:"center", gap:16, paddingRight:36 }}>
                       <div style={{
                         width:52, height:52, borderRadius:15, flexShrink:0,
@@ -1631,7 +1563,6 @@ export default function AdminUsers() {
                       </div>
                     </div>
                   </div>
-
                   <div className="adm-modal-body">
                     <form id="modal-form" onSubmit={editandoId ? salvarEdicao : adicionarUsuario}>
                       <div className="adm-modal-form-grid">
@@ -1649,7 +1580,6 @@ export default function AdminUsers() {
                             </div>
                         ))}
                       </div>
-
                       <div style={{ marginBottom:16 }}>
                         <label className="adm-label">Perfil de Acesso</label>
                         <div style={{ position:"relative" }}>
@@ -1661,7 +1591,6 @@ export default function AdminUsers() {
                           </select>
                         </div>
                       </div>
-
                       <div style={{ padding:"12px 16px", borderRadius:12, background:isDark?"rgba(201,169,110,.04)":"rgba(201,169,110,.05)", border:`1px solid ${t.border}` }}>
                         <p style={{ fontSize:10, fontWeight:400, color:t.textSec, margin:0, lineHeight:1.65 }}>
                           {editandoId
@@ -1671,11 +1600,8 @@ export default function AdminUsers() {
                       </div>
                     </form>
                   </div>
-
                   <div className="adm-modal-footer">
-                    <button type="button" className="adm-btn-ghost" style={{ minWidth:100 }} onClick={() => setDrawerOpen(false)}>
-                      Cancelar
-                    </button>
+                    <button type="button" className="adm-btn-ghost" style={{ minWidth:100 }} onClick={() => setDrawerOpen(false)}>Cancelar</button>
                     <button type="submit" form="modal-form" disabled={sending}
                             className={`adm-btn-primary ${editandoId?"blue":"red"}`}
                             style={{ opacity:sending?.65:1 }}>
@@ -1691,7 +1617,6 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* MODAL SAIR */}
         <AnimatePresence>
           {exitConfirm && (
               <motion.div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}
@@ -1719,7 +1644,6 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* TOASTS */}
         <AnimatePresence>
           {sucesso && (
               <motion.div className="adm-toast"
