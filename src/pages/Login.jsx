@@ -9,11 +9,10 @@ import api               from "../services/api.js";
 
 /* ─── Paleta idêntica à Home ─── */
 const BRAND = {
-    red:"#C8102E", redDark:"#9B0B1E", redLight:"#E8294A",
-    yellow:"#FDB813", yellowDark:"#C48C00",
-    blue:"#003DA5", blueLight:"#1A56C4", blueDark:"#002470",
-    dark:"#0A0608", stone:"#1A1416",
-    light:"#F5F0EB", muted:"#8A7F7A",
+    blue:"#0077C8", blueDark:"#003D7A", blueLight:"#2E94DC",
+    violet:"#5B21B6", violetDeep:"#39068F", violetLight:"#7C4DD8",
+    dark:"#07060F", stone:"#120E1F",
+    light:"#F5F0EB", muted:"#8A7F9A",
 };
 
 /* ─── Mini-hook fade-in (igual ao da Home) ─── */
@@ -69,7 +68,7 @@ function ErrIcon({ t }) {
 /* ─── Cálculo de força de senha ─── */
 const calcForca   = s => s.length < 6 ? 1 : s.length < 8 ? 2 : /[A-Z]/.test(s) && /[0-9]/.test(s) ? 4 : 3;
 const forcaLabel  = ["","Muito curta","Fraca","Média","Forte"];
-const forcaColor  = ["",BRAND.red,BRAND.yellow,"#22c55e",BRAND.blue];
+const forcaColor  = ["",BRAND.violet,BRAND.blueLight,"#22c55e",BRAND.blue];
 
 /* ══════════════════════════════════════════════════════════════ */
 export default function Login() {
@@ -126,9 +125,9 @@ export default function Login() {
     /* helpers */
     const trocarAba = a => { setAba(a); setErrLogin(null); setErrCad(null); setErrAlt(null); setOkCad(false); setOkAlt(false); };
 
-    const errBg     = e => e?.tipo==="limite" ? "rgba(253,184,19,.1)" : "rgba(200,16,46,.1)";
-    const errBorder = e => e?.tipo==="limite" ? "rgba(253,184,19,.35)" : "rgba(200,16,46,.3)";
-    const errColor  = e => e?.tipo==="limite" ? BRAND.yellow : BRAND.red;
+    const errBg     = e => e?.tipo==="limite" ? "rgba(91,33,182,.1)" : "rgba(0,119,200,.1)";
+    const errBorder = e => e?.tipo==="limite" ? "rgba(91,33,182,.35)" : "rgba(0,119,200,.3)";
+    const errColor  = e => e?.tipo==="limite" ? BRAND.violetLight : BRAND.blue;
 
     /* ── handlers ── */
     const handleLogin = async e => {
@@ -211,10 +210,10 @@ export default function Login() {
 
     /* ── Cores base (mesmas da Home) ── */
     const bg    = dark ? BRAND.dark  : BRAND.light;
-    const cardBg= dark ? "rgba(26,20,22,.96)" : "rgba(255,255,255,.96)";
+    const cardBg= dark ? "rgba(18,14,31,.96)" : "rgba(255,255,255,.96)";
     const txt   = dark ? BRAND.light : BRAND.dark;
-    const sub   = dark ? "rgba(245,240,235,.5)" : "rgba(10,6,8,.45)";
-    const border= dark ? "rgba(253,184,19,.13)" : "rgba(200,16,46,.15)";
+    const sub   = dark ? "rgba(245,240,235,.5)" : "rgba(7,6,15,.45)";
+    const border= dark ? "rgba(0,119,200,.16)" : "rgba(91,33,182,.15)";
 
     /* ── Força senha ── */
     const fc = calcForca(cSenha);
@@ -250,24 +249,24 @@ export default function Login() {
         .grid-bg {
           position:fixed; inset:0; pointer-events:none; z-index:0;
           background-image:
-            linear-gradient(rgba(253,184,19,.04) 1px,transparent 1px),
-            linear-gradient(90deg,rgba(253,184,19,.04) 1px,transparent 1px);
+            linear-gradient(rgba(0,119,200,.05) 1px,transparent 1px),
+            linear-gradient(90deg,rgba(0,119,200,.05) 1px,transparent 1px);
           background-size:60px 60px;
           transition:transform .3s linear;
         }
 
-        /* ── glow vermelho central ── */
+        /* ── glow azul central ── */
         .glow-red {
           position:fixed; top:50%; left:50%;
           transform:translate(-50%,-50%);
           width:700px; height:700px; border-radius:50%;
-          background:radial-gradient(circle,rgba(200,16,46,.16) 0%,transparent 68%);
+          background:radial-gradient(circle,rgba(0,119,200,.18) 0%,transparent 68%);
           pointer-events:none; z-index:0;
         }
         .glow-blue {
           position:fixed; top:30%; right:10%;
           width:400px; height:400px; border-radius:50%;
-          background:radial-gradient(circle,rgba(0,61,165,.12) 0%,transparent 70%);
+          background:radial-gradient(circle,rgba(91,33,182,.16) 0%,transparent 70%);
           pointer-events:none; z-index:0;
         }
 
@@ -287,7 +286,7 @@ export default function Login() {
           box-shadow:
             0 2px 1px rgba(0,0,0,.04),
             0 8px 32px rgba(0,0,0,.12),
-            0 0 0 1px rgba(253,184,19,.07);
+            0 0 0 1px rgba(0,119,200,.08);
         }
 
         /* ── tabs ── */
@@ -307,9 +306,9 @@ export default function Login() {
           transition:all .25s;
         }
         .tab-btn.active {
-          background:${BRAND.red};
+          background:linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet});
           color:#fff;
-          box-shadow:0 3px 12px rgba(200,16,46,.35);
+          box-shadow:0 3px 12px rgba(0,119,200,.35);
         }
         .tab-btn.inactive {
           background:transparent;
@@ -317,7 +316,7 @@ export default function Login() {
         }
         .tab-btn.inactive:hover {
           background:${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)"};
-          color:${BRAND.red};
+          color:${BRAND.blue};
         }
 
         /* ── label ── */
@@ -325,15 +324,15 @@ export default function Login() {
           display:block; margin-bottom:6px;
           font-size:10px; font-weight:700;
           letter-spacing:.12em; text-transform:uppercase;
-          color:${BRAND.red}; font-family:'Manrope',sans-serif;
+          color:${BRAND.blue}; font-family:'Manrope',sans-serif;
         }
-        .fld-label.blue { color:${BRAND.blue}; }
+        .fld-label.blue { color:${BRAND.violet}; }
 
         /* ── inputs ── */
         .ieq-input {
           width:100%;
           background:${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
-          border:1px solid ${dark?"rgba(253,184,19,.12)":"rgba(200,16,46,.14)"};
+          border:1px solid ${dark?"rgba(0,119,200,.15)":"rgba(91,33,182,.14)"};
           color:${txt};
           padding:13px 13px 13px 43px;
           border-radius:6px; outline:none;
@@ -341,16 +340,16 @@ export default function Login() {
           transition:border-color .2s, box-shadow .2s, background .2s;
         }
         .ieq-input:focus {
-          border-color:${BRAND.red};
-          box-shadow:0 0 0 3px rgba(200,16,46,.14);
-          background:${dark?"rgba(255,255,255,.06)":"rgba(200,16,46,.02)"};
+          border-color:${BRAND.blue};
+          box-shadow:0 0 0 3px rgba(0,119,200,.14);
+          background:${dark?"rgba(255,255,255,.06)":"rgba(0,119,200,.02)"};
         }
         .ieq-input.blue:focus {
-          border-color:${BRAND.blue};
-          box-shadow:0 0 0 3px rgba(0,61,165,.14);
+          border-color:${BRAND.violet};
+          box-shadow:0 0 0 3px rgba(91,33,182,.14);
         }
-        .ieq-input.error { border-color:${BRAND.red}; }
-        .ieq-input::placeholder { color:${dark?"rgba(245,240,235,.22)":"rgba(10,6,8,.22)"}; }
+        .ieq-input.error { border-color:${BRAND.violetLight}; }
+        .ieq-input::placeholder { color:${dark?"rgba(245,240,235,.22)":"rgba(7,6,15,.22)"}; }
 
         /* ── botão principal ── */
         .btn-primary {
@@ -362,10 +361,10 @@ export default function Login() {
         }
         .btn-primary:hover:not(:disabled) {
           opacity:.88; transform:translateY(-2px);
-          box-shadow:0 8px 28px rgba(200,16,46,.35);
+          box-shadow:0 8px 28px rgba(0,119,200,.35);
         }
         .btn-primary:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
-        .btn-primary.blue:hover:not(:disabled) { box-shadow:0 8px 28px rgba(0,61,165,.35); }
+        .btn-primary.blue:hover:not(:disabled) { box-shadow:0 8px 28px rgba(91,33,182,.35); }
 
         /* ── caixa de erro ── */
         .err-box {
@@ -395,7 +394,7 @@ export default function Login() {
         }
         .divider::before,.divider::after {
           content:""; flex:1; height:1px;
-          background:${dark?"rgba(253,184,19,.1)":"rgba(10,6,8,.09)"};
+          background:${dark?"rgba(0,119,200,.12)":"rgba(7,6,15,.09)"};
         }
 
         /* ── força senha ── */
@@ -420,23 +419,23 @@ export default function Login() {
         /* ── pulse ring da cruz ── */
         .pulse-ring {
           position:absolute; border-radius:50%;
-          border:1px solid rgba(200,16,46,.3);
+          border:1px solid rgba(0,119,200,.32);
           animation:pulse 3s ease-in-out infinite;
         }
 
         /* ── tag badge ── */
         .badge {
           display:inline-flex; align-items:center; gap:7px;
-          background:rgba(253,184,19,.07);
-          border:1px solid rgba(253,184,19,.22);
+          background:rgba(91,33,182,.08);
+          border:1px solid rgba(91,33,182,.25);
           border-radius:100px; padding:5px 14px;
           font-size:11px; font-weight:700;
           letter-spacing:.1em; text-transform:uppercase;
-          color:${BRAND.yellow};
+          color:${BRAND.violetLight};
         }
         .badge-dot {
           width:6px; height:6px; border-radius:50%;
-          background:${BRAND.yellow};
+          background:${BRAND.violetLight};
           animation:pulse 2s ease-in-out infinite;
         }
 
@@ -460,7 +459,7 @@ export default function Login() {
                     style={{
                         position:"fixed", top:22, right:22, zIndex:50,
                         background:"none", border:"none", cursor:"pointer",
-                        color:dark?BRAND.yellow:BRAND.red, transition:"color .3s",
+                        color:dark?BRAND.violetLight:BRAND.blue, transition:"color .3s",
                     }}
                 >
                     {dark ? <Sun size={22}/> : <Moon size={22}/>}
@@ -480,8 +479,8 @@ export default function Login() {
                             <div className="pulse-ring" style={{ width:72, height:72, animationDelay:"1s" }}/>
                             <div style={{
                                 width:62, height:62, borderRadius:"50%",
-                                background:dark?"rgba(26,20,22,.9)":"#fff",
-                                border:`1px solid rgba(200,16,46,.25)`,
+                                background:dark?"rgba(18,14,31,.9)":"#fff",
+                                border:`1px solid rgba(0,119,200,.28)`,
                                 display:"flex", alignItems:"center", justifyContent:"center",
                             }}>
                                 <IEQCross size={44}/>
@@ -505,7 +504,7 @@ export default function Login() {
                             color:txt, margin:0,
                         }}>
                             Sua Igreja,{" "}
-                            <span style={{ color:BRAND.yellow }}>Bem Administrada.</span>
+                            <span style={{ background:`linear-gradient(90deg, ${BRAND.blue}, ${BRAND.violet})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>Bem Administrada.</span>
                         </h1>
                         <p style={{
                             marginTop:8, fontSize:12,
@@ -520,9 +519,9 @@ export default function Login() {
                     <div style={{
                         display:"flex", alignItems:"center", gap:12, marginBottom:24,
                     }}>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to right,transparent,${BRAND.yellow})` }}/>
-                        <div style={{ width:6, height:6, borderRadius:"50%", background:BRAND.yellow }}/>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to left,transparent,${BRAND.yellow})` }}/>
+                        <div style={{ flex:1, height:1, background:`linear-gradient(to right,transparent,${BRAND.blue})` }}/>
+                        <div style={{ width:6, height:6, borderRadius:"50%", background:BRAND.blue }}/>
+                        <div style={{ flex:1, height:1, background:`linear-gradient(to left,transparent,${BRAND.blue})` }}/>
                     </div>
 
                     {/* ── tabs ── */}
@@ -548,7 +547,7 @@ export default function Login() {
                                 <div>
                                     <label className="fld-label">E-mail</label>
                                     <div style={{ position:"relative" }}>
-                                        <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                        <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                         <input
                                             className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
                                             type="email" placeholder="usuario@ieq.com"
@@ -562,7 +561,7 @@ export default function Login() {
                                 <div>
                                     <label className="fld-label">Senha</label>
                                     <div style={{ position:"relative" }}>
-                                        <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                        <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                         <input
                                             className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
                                             type={showPass?"text":"password"} placeholder="••••••••"
@@ -570,7 +569,7 @@ export default function Login() {
                                             required autoComplete="current-password"
                                         />
                                         <button type="button" onClick={()=>setShowPass(!showPass)}
-                                                style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.red }}>
+                                                style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
                                             <EyeIcon open={showPass}/>
                                         </button>
                                     </div>
@@ -590,7 +589,7 @@ export default function Login() {
 
                                 {/* botão */}
                                 <button type="submit" className="btn-primary" disabled={loadLogin}
-                                        style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.redDark},${BRAND.red})` }}>
+                                        style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.blueDark},${BRAND.blue})` }}>
                                     {loadLogin
                                         ? <><Loader2 size={16} className="spin"/> Verificando...</>
                                         : "Acessar Sistema"}
@@ -602,14 +601,14 @@ export default function Login() {
                     {/* ════ ABA: CADASTRO ════ */}
                     {aba === "cadastro" && (
                         <div className="tab-content">
-                            {/* aviso azul */}
+                            {/* aviso roxo */}
                             <div style={{
                                 marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
-                                border:`1px solid ${dark?"rgba(0,61,165,.28)":"rgba(0,61,165,.18)"}`,
+                                background:dark?"rgba(91,33,182,.1)":"rgba(91,33,182,.06)",
+                                border:`1px solid ${dark?"rgba(91,33,182,.3)":"rgba(91,33,182,.18)"}`,
                                 display:"flex", gap:9, alignItems:"flex-start",
                             }}>
-                <span style={{ color:BRAND.blue, flexShrink:0, marginTop:2 }}>
+                <span style={{ color:BRAND.violet, flexShrink:0, marginTop:2 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </span>
                                 <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>
@@ -621,8 +620,8 @@ export default function Login() {
                             {okCad ? (
                                 <div className="pop-in" style={{
                                     textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
-                                    border:`1px solid ${dark?"rgba(0,61,165,.32)":"rgba(0,61,165,.18)"}`,
+                                    background:dark?"rgba(0,119,200,.1)":"rgba(0,119,200,.06)",
+                                    border:`1px solid ${dark?"rgba(0,119,200,.32)":"rgba(0,119,200,.18)"}`,
                                 }}>
                                     <CheckCircle2 size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
                                     <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color:BRAND.blue, marginBottom:8 }}>Solicitação Enviada!</p>
@@ -641,7 +640,7 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">Nome Completo</label>
                                         <div style={{ position:"relative" }}>
-                                            <User size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                            <User size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                             <input className="ieq-input" type="text" placeholder="Seu nome completo"
                                                    value={cNome} onChange={e=>{setCNome(e.target.value);if(errCad)setErrCad(null);}} required autoComplete="name"/>
                                         </div>
@@ -650,7 +649,7 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">E-mail</label>
                                         <div style={{ position:"relative" }}>
-                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                             <input className="ieq-input" type="email" placeholder="seu@email.com"
                                                    value={cEmail} onChange={e=>{setCEmail(e.target.value);if(errCad)setErrCad(null);}} required autoComplete="email"/>
                                         </div>
@@ -659,12 +658,12 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">Senha</label>
                                         <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                             <input className={`ieq-input${errCad?.tipo==="senha"?" error":""}`}
                                                    type={showCP?"text":"password"} placeholder="Mínimo 6 caracteres"
                                                    value={cSenha} onChange={e=>{setCSenha(e.target.value);if(errCad)setErrCad(null);}} required/>
                                             <button type="button" onClick={()=>setShowCP(!showCP)}
-                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.red }}>
+                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
                                                 <EyeIcon open={showCP}/>
                                             </button>
                                         </div>
@@ -684,13 +683,13 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">Confirmar Senha</label>
                                         <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                             <input className={`ieq-input${cConf.length>0&&cSenha!==cConf?" error":""}`}
                                                    type={showCP?"text":"password"} placeholder="Repita a senha"
                                                    value={cConf} onChange={e=>{setCConf(e.target.value);if(errCad)setErrCad(null);}} required/>
                                         </div>
                                         {cConf.length > 0 && (
-                                            <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Manrope',sans-serif", color:cSenha===cConf?"#22c55e":BRAND.red }}>
+                                            <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Manrope',sans-serif", color:cSenha===cConf?"#22c55e":BRAND.violetLight }}>
                                                 {cSenha===cConf?"✓ Senhas conferem":"✗ Senhas não conferem"}
                                             </p>
                                         )}
@@ -708,7 +707,7 @@ export default function Login() {
                                     )}
                                     {/* botão */}
                                     <button type="submit" className="btn-primary blue" disabled={loadCad}
-                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.blueDark},${BRAND.blue})` }}>
+                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.violetDeep},${BRAND.violet})` }}>
                                         {loadCad ? <><Loader2 size={16} className="spin"/> Enviando...</> : "Solicitar Acesso"}
                                     </button>
                                 </form>
@@ -719,14 +718,14 @@ export default function Login() {
                     {/* ════ ABA: ALTERAR DADOS ════ */}
                     {aba === "alterar" && (
                         <div className="tab-content">
-                            {/* aviso amarelo */}
+                            {/* aviso violeta */}
                             <div style={{
                                 marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:dark?"rgba(253,184,19,.07)":"rgba(253,184,19,.09)",
-                                border:`1px solid ${dark?"rgba(253,184,19,.22)":"rgba(196,140,0,.28)"}`,
+                                background:dark?"rgba(91,33,182,.08)":"rgba(91,33,182,.09)",
+                                border:`1px solid ${dark?"rgba(91,33,182,.25)":"rgba(91,33,182,.28)"}`,
                                 display:"flex", gap:9, alignItems:"flex-start",
                             }}>
-                <span style={{ color:BRAND.yellow, flexShrink:0, marginTop:2 }}>
+                <span style={{ color:BRAND.violetLight, flexShrink:0, marginTop:2 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </span>
                                 <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>
@@ -738,8 +737,8 @@ export default function Login() {
                             {okAlt ? (
                                 <div className="pop-in" style={{
                                     textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
-                                    border:`1px solid ${dark?"rgba(0,61,165,.32)":"rgba(0,61,165,.18)"}`,
+                                    background:dark?"rgba(0,119,200,.1)":"rgba(0,119,200,.06)",
+                                    border:`1px solid ${dark?"rgba(0,119,200,.32)":"rgba(0,119,200,.18)"}`,
                                 }}>
                                     <ShieldCheck size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
                                     <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color:BRAND.blue, marginBottom:8 }}>Solicitação Enviada!</p>
@@ -756,9 +755,9 @@ export default function Login() {
                                 <form onSubmit={handleAlt} style={{ display:"flex", flexDirection:"column", gap:0 }}>
                                     {/* e-mail atual */}
                                     <div style={{ marginBottom:14 }}>
-                                        <label className="fld-label">Seu E-mail <span style={{ color:BRAND.red }}>*</span></label>
+                                        <label className="fld-label">Seu E-mail <span style={{ color:BRAND.violetLight }}>*</span></label>
                                         <div style={{ position:"relative" }}>
-                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                             <input className={`ieq-input${errAlt&&(errAlt.titulo==="E-mail obrigatório"||errAlt.titulo==="E-mail não encontrado")?" error":""}`}
                                                    type="email" placeholder="seu@email.com"
                                                    value={aEmail} onChange={e=>{setAEmail(e.target.value);if(errAlt)setErrAlt(null);}} required autoComplete="email"/>
@@ -766,14 +765,14 @@ export default function Login() {
                                     </div>
                                     {/* senha atual */}
                                     <div style={{ marginBottom:18 }}>
-                                        <label className="fld-label">Senha Atual <span style={{ color:BRAND.red }}>*</span></label>
+                                        <label className="fld-label">Senha Atual <span style={{ color:BRAND.violetLight }}>*</span></label>
                                         <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.red, opacity:.55 }}/>
+                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
                                             <input className={`ieq-input${errAlt?.tipo==="senha"?" error":""}`}
                                                    type={showAA?"text":"password"} placeholder="Confirme sua identidade"
                                                    value={aAtual} onChange={e=>{setAAtual(e.target.value);if(errAlt)setErrAlt(null);}} required autoComplete="current-password"/>
                                             <button type="button" onClick={()=>setShowAA(!showAA)}
-                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.red }}>
+                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
                                                 <EyeIcon open={showAA}/>
                                             </button>
                                         </div>
@@ -796,21 +795,21 @@ export default function Login() {
                                                  onClick={()=>{set(!state);setErrAlt(null);}}
                                                  style={{
                                                      background: state
-                                                         ? (dark?"rgba(200,16,46,.1)":"rgba(200,16,46,.06)")
+                                                         ? (dark?"rgba(0,119,200,.1)":"rgba(0,119,200,.06)")
                                                          : (dark?"rgba(255,255,255,.02)":"rgba(0,0,0,.02)"),
-                                                     border:`1px solid ${state?"rgba(200,16,46,.35)":(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.07)")}`,
+                                                     border:`1px solid ${state?"rgba(0,119,200,.35)":(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.07)")}`,
                                                  }}
                                             >
                                                 <div className="check-box"
                                                      style={{
-                                                         background:state?BRAND.red:"transparent",
-                                                         border:`2px solid ${state?BRAND.red:(dark?"rgba(255,255,255,.2)":"rgba(0,0,0,.18)")}`,
+                                                         background:state?BRAND.blue:"transparent",
+                                                         border:`2px solid ${state?BRAND.blue:(dark?"rgba(255,255,255,.2)":"rgba(0,0,0,.18)")}`,
                                                      }}>
                                                     {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
                                                 </div>
                                                 {key==="email"
-                                                    ? <Mail size={14} color={state?BRAND.red:sub} style={{ flexShrink:0 }}/>
-                                                    : <Lock size={14} color={state?BRAND.red:sub} style={{ flexShrink:0 }}/>}
+                                                    ? <Mail size={14} color={state?BRAND.blue:sub} style={{ flexShrink:0 }}/>
+                                                    : <Lock size={14} color={state?BRAND.blue:sub} style={{ flexShrink:0 }}/>}
                                                 <span style={{ fontSize:11, fontWeight:700, letterSpacing:".1em", fontFamily:"'Manrope',sans-serif", color:state?txt:sub }}>{label}</span>
                                             </div>
                                         ))}
@@ -821,7 +820,7 @@ export default function Login() {
                                         <div style={{ marginBottom:14, animation:"slideDown .25s ease both" }}>
                                             <label className="fld-label blue">Novo E-mail</label>
                                             <div style={{ position:"relative" }}>
-                                                <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                                <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.violet, opacity:.55 }}/>
                                                 <input className="ieq-input blue" type="email" placeholder="novo@email.com"
                                                        value={aEmailN} onChange={e=>{setAEmailN(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="email"/>
                                             </div>
@@ -834,11 +833,11 @@ export default function Login() {
                                             <div>
                                                 <label className="fld-label blue">Nova Senha</label>
                                                 <div style={{ position:"relative" }}>
-                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.violet, opacity:.55 }}/>
                                                     <input className="ieq-input blue" type={showAN?"text":"password"} placeholder="Mínimo 6 caracteres"
                                                            value={aNova} onChange={e=>{setANova(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="new-password"/>
                                                     <button type="button" onClick={()=>setShowAN(!showAN)}
-                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
+                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.violet }}>
                                                         <EyeIcon open={showAN}/>
                                                     </button>
                                                 </div>
@@ -857,17 +856,17 @@ export default function Login() {
                                             <div>
                                                 <label className="fld-label blue">Confirmar Nova Senha</label>
                                                 <div style={{ position:"relative" }}>
-                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.violet, opacity:.55 }}/>
                                                     <input className={`ieq-input blue${aConf.length>0&&aNova!==aConf?" error":""}`}
                                                            type={showAC?"text":"password"} placeholder="Repita a nova senha"
                                                            value={aConf} onChange={e=>{setAConf(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="new-password"/>
                                                     <button type="button" onClick={()=>setShowAC(!showAC)}
-                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
+                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.violet }}>
                                                         <EyeIcon open={showAC}/>
                                                     </button>
                                                 </div>
                                                 {aConf.length > 0 && (
-                                                    <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Manrope',sans-serif", color:aNova===aConf?"#22c55e":BRAND.red }}>
+                                                    <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Manrope',sans-serif", color:aNova===aConf?"#22c55e":BRAND.violetLight }}>
                                                         {aNova===aConf?"✓ Senhas conferem":"✗ Senhas não conferem"}
                                                     </p>
                                                 )}
@@ -888,7 +887,7 @@ export default function Login() {
 
                                     {/* botão */}
                                     <button type="submit" className="btn-primary" disabled={loadAlt||(!altEmail&&!altSenha)}
-                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.redDark},${BRAND.red})` }}>
+                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.blueDark},${BRAND.blue})` }}>
                                         {loadAlt
                                             ? <><Loader2 size={16} className="spin"/> Enviando...</>
                                             : <><CheckCircle2 size={15}/> Enviar Solicitação</>}
@@ -902,7 +901,7 @@ export default function Login() {
                     <p style={{
                         marginTop:28, textAlign:"center",
                         fontSize:10, letterSpacing:".15em", fontFamily:"'Manrope',sans-serif",
-                        color:dark?"rgba(245,240,235,.15)":"rgba(10,6,8,.18)",
+                        color:dark?"rgba(245,240,235,.15)":"rgba(7,6,15,.18)",
                         textTransform:"uppercase",
                     }}>
                         © {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico

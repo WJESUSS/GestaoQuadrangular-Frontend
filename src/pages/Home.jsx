@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
 const BRAND = {
-    red: "#C8102E",
-    yellow: "#FDB813",
-    blue: "#003DA5",
-    dark: "#0A0608",
-    stone: "#1A1416",
+    blue: "#0077C8",
+    blueDark: "#003D7A",
+    violet: "#5B21B6",
+    violetDeep: "#39068F",
+    dark: "#07060F",
+    stone: "#120E1F",
     light: "#F5F0EB",
-    muted: "#8A7F7A",
+    muted: "#8A7F9A",
 };
 
 /* ── tiny hook: revela elementos ao entrar na viewport ── */
@@ -56,9 +57,9 @@ function FadeSection({ children, delay = 0, style = {} }) {
 function Divider() {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 auto", maxWidth: 200 }}>
-            <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${BRAND.yellow})` }} />
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.yellow }} />
-            <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${BRAND.yellow})` }} />
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${BRAND.blue})` }} />
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.blue }} />
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${BRAND.blue})` }} />
         </div>
     );
 }
@@ -103,12 +104,12 @@ const IconArrow = () => (
     </svg>
 );
 const IconCross = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={BRAND.yellow} strokeWidth="1.5" strokeLinecap="round">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={BRAND.blue} strokeWidth="1.5" strokeLinecap="round">
         <line x1="12" y1="2" x2="12" y2="22" /><line x1="2" y1="9" x2="22" y2="9" />
     </svg>
 );
 const IconCheck = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BRAND.yellow} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BRAND.blue} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="20 6 9 17 4 12" />
     </svg>
 );
@@ -164,14 +165,14 @@ export default function Home() {
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     padding: "0 clamp(20px, 5vw, 80px)",
                     height: 64,
-                    background: "rgba(10,6,8,0.92)",
+                    background: "rgba(7,6,15,0.92)",
                     backdropFilter: "blur(12px)",
-                    borderBottom: `1px solid rgba(253,184,19,0.12)`,
+                    borderBottom: `1px solid rgba(91,33,182,0.18)`,
                 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <IconCross />
                         <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 20, letterSpacing: "0.02em" }}>
-              IEQ <span style={{ color: BRAND.yellow }}>Gestão</span>
+              IEQ <span style={{ color: BRAND.blue }}>Gestão</span>
             </span>
                     </div>
 
@@ -180,7 +181,7 @@ export default function Home() {
                             onClick={() => navigate("/login")}
                             style={{
                                 padding: "8px 24px",
-                                border: `1px solid ${BRAND.red}`,
+                                border: `1px solid ${BRAND.violet}`,
                                 borderRadius: 4,
                                 background: "transparent",
                                 color: "#fff",
@@ -191,7 +192,7 @@ export default function Home() {
                                 letterSpacing: "0.05em",
                                 transition: "all 0.25s",
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.background = BRAND.red; }}
+                            onMouseEnter={e => { e.currentTarget.style.background = BRAND.violet; }}
                             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
                         >
                             ENTRAR
@@ -215,8 +216,8 @@ export default function Home() {
                     <div ref={heroRef} style={{
                         position: "absolute", inset: 0, zIndex: 0,
                         backgroundImage: `
-              linear-gradient(rgba(253,184,19,0.04) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(253,184,19,0.04) 1px, transparent 1px)
+              linear-gradient(rgba(0,119,200,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0,119,200,0.05) 1px, transparent 1px)
             `,
                         backgroundSize: "60px 60px",
                     }} />
@@ -228,7 +229,7 @@ export default function Home() {
                         transform: "translate(-50%, -50%)",
                         width: 600, height: 600,
                         borderRadius: "50%",
-                        background: `radial-gradient(circle, rgba(200,16,46,0.18) 0%, transparent 70%)`,
+                        background: `radial-gradient(circle, rgba(91,33,182,0.22) 0%, transparent 70%)`,
                         zIndex: 0,
                     }} />
 
@@ -236,16 +237,16 @@ export default function Home() {
                         {/* Etiqueta */}
                         <div style={{
                             display: "inline-flex", alignItems: "center", gap: 8,
-                            background: "rgba(253,184,19,0.08)",
-                            border: `1px solid rgba(253,184,19,0.25)`,
+                            background: "rgba(0,119,200,0.1)",
+                            border: `1px solid rgba(0,119,200,0.3)`,
                             borderRadius: 100,
                             padding: "5px 16px",
                             marginBottom: 32,
                             fontSize: 12, fontWeight: 600, letterSpacing: "0.1em",
-                            color: BRAND.yellow,
+                            color: BRAND.blue,
                             textTransform: "uppercase",
                         }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.yellow, display: "inline-block", animation: "pulse 2s infinite" }} />
+                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.blue, display: "inline-block", animation: "pulse 2s infinite" }} />
                             Sistema exclusivo para a IEQ
                         </div>
 
@@ -258,7 +259,7 @@ export default function Home() {
                             letterSpacing: "-0.02em",
                         }}>
                             Sua Igreja,<br />
-                            <span style={{ color: BRAND.yellow }}>Bem Administrada.</span>
+                            <span style={{ background: `linear-gradient(90deg, ${BRAND.blue}, ${BRAND.violet})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Bem Administrada.</span>
                         </h1>
 
                         <p style={{
@@ -281,7 +282,7 @@ export default function Home() {
                                     padding: "14px 32px",
                                     border: "none",
                                     borderRadius: 4,
-                                    background: BRAND.red,
+                                    background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet})`,
                                     color: "#fff",
                                     cursor: "pointer",
                                     fontFamily: "'Manrope', sans-serif",
@@ -308,7 +309,7 @@ export default function Home() {
                                     fontSize: 15, fontWeight: 500,
                                     transition: "border-color 0.2s, color 0.2s",
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = BRAND.yellow; e.currentTarget.style.color = BRAND.yellow; }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = BRAND.blue; e.currentTarget.style.color = BRAND.blue; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
                             >
                                 Ver funcionalidades
@@ -330,8 +331,8 @@ export default function Home() {
                 {/* ═══════════════════════════════ STATS ═══════════════════════════════ */}
                 <section style={{
                     background: BRAND.stone,
-                    borderTop: `1px solid rgba(253,184,19,0.1)`,
-                    borderBottom: `1px solid rgba(253,184,19,0.1)`,
+                    borderTop: `1px solid rgba(0,119,200,0.15)`,
+                    borderBottom: `1px solid rgba(0,119,200,0.15)`,
                     padding: "40px clamp(20px, 5vw, 80px)",
                 }}>
                     <div style={{
@@ -343,7 +344,7 @@ export default function Home() {
                         {stats.map((s, i) => (
                             <FadeSection key={i} delay={i * 80}>
                                 <div style={{ textAlign: "center", padding: "20px 10px" }}>
-                                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: BRAND.yellow, lineHeight: 1 }}>{s.value}</div>
+                                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: BRAND.blue, lineHeight: 1 }}>{s.value}</div>
                                     <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.label}</div>
                                 </div>
                             </FadeSection>
@@ -355,7 +356,7 @@ export default function Home() {
                 <section id="funcionalidades" style={{ padding: "100px clamp(20px, 5vw, 80px)" }}>
                     <FadeSection>
                         <div style={{ textAlign: "center", marginBottom: 64 }}>
-                            <p style={{ fontSize: 12, color: BRAND.yellow, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Módulos do sistema</p>
+                            <p style={{ fontSize: 12, color: BRAND.blue, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Módulos do sistema</p>
                             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 700, margin: "0 0 16px" }}>
                                 Tudo que sua igreja precisa
                             </h2>
@@ -385,10 +386,10 @@ export default function Home() {
                                         transition: "background 0.25s",
                                         cursor: "default",
                                     }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,16,46,0.07)"; }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(91,33,182,0.1)"; }}
                                     onMouseLeave={e => { e.currentTarget.style.background = i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent"; }}
                                 >
-                                    <div style={{ color: BRAND.yellow, marginBottom: 16 }}>{f.icon}</div>
+                                    <div style={{ color: BRAND.blue, marginBottom: 16 }}>{f.icon}</div>
                                     <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, margin: "0 0 10px" }}>{f.title}</h3>
                                     <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.7, margin: 0 }}>{f.desc}</p>
                                 </div>
@@ -401,12 +402,12 @@ export default function Home() {
                 <section style={{
                     padding: "80px clamp(20px, 5vw, 80px)",
                     background: BRAND.stone,
-                    borderTop: `1px solid rgba(253,184,19,0.1)`,
-                    borderBottom: `1px solid rgba(253,184,19,0.1)`,
+                    borderTop: `1px solid rgba(0,119,200,0.15)`,
+                    borderBottom: `1px solid rgba(0,119,200,0.15)`,
                 }}>
                     <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
                         <FadeSection>
-                            <p style={{ fontSize: 12, color: BRAND.yellow, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16 }}>Por que o IEQ Gestão</p>
+                            <p style={{ fontSize: 12, color: BRAND.blue, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16 }}>Por que o IEQ Gestão</p>
                             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 700, margin: "0 0 24px", lineHeight: 1.2 }}>
                                 Feito para a realidade da sua igreja
                             </h2>
@@ -426,15 +427,15 @@ export default function Home() {
 
                         <FadeSection delay={150}>
                             <div style={{
-                                border: `1px solid rgba(253,184,19,0.15)`,
+                                border: `1px solid rgba(91,33,182,0.25)`,
                                 borderRadius: 8,
                                 padding: "40px 36px",
-                                background: "rgba(253,184,19,0.03)",
+                                background: "rgba(91,33,182,0.05)",
                             }}>
                                 <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 32 }}>
                                     <div style={{
                                         width: 44, height: 44, borderRadius: "50%",
-                                        background: BRAND.red,
+                                        background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet})`,
                                         display: "flex", alignItems: "center", justifyContent: "center",
                                         flexShrink: 0,
                                         fontFamily: "'Playfair Display', serif",
@@ -453,7 +454,7 @@ export default function Home() {
                                     color: "rgba(255,255,255,0.8)",
                                     lineHeight: 1.7,
                                     margin: 0,
-                                    borderLeft: `3px solid ${BRAND.yellow}`,
+                                    borderLeft: `3px solid ${BRAND.blue}`,
                                     paddingLeft: 20,
                                 }}>
                                     "Finalmente um sistema que entende
@@ -479,7 +480,7 @@ export default function Home() {
                         transform: "translate(-50%, -50%)",
                         width: 700, height: 400,
                         borderRadius: "50%",
-                        background: `radial-gradient(ellipse, rgba(0,61,165,0.18) 0%, transparent 70%)`,
+                        background: `radial-gradient(ellipse, rgba(0,119,200,0.22) 0%, transparent 70%)`,
                         pointerEvents: "none",
                     }} />
 
@@ -500,17 +501,17 @@ export default function Home() {
                                 padding: "16px 40px",
                                 border: "none",
                                 borderRadius: 4,
-                                background: `linear-gradient(135deg, ${BRAND.red}, #9B0B1E)`,
+                                background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet})`,
                                 color: "#fff",
                                 cursor: "pointer",
                                 fontFamily: "'Manrope', sans-serif",
                                 fontSize: 15, fontWeight: 700,
                                 letterSpacing: "0.05em",
                                 transition: "transform 0.2s, box-shadow 0.2s",
-                                boxShadow: `0 0 0 0px ${BRAND.red}`,
+                                boxShadow: `0 0 0 0px ${BRAND.blue}`,
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px rgba(200,16,46,0.4)`; }}
-                            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 0 0 0px ${BRAND.red}`; }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px rgba(0,119,200,0.4)`; }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 0 0 0px ${BRAND.blue}`; }}
                         >
                             Entrar no Sistema <IconArrow />
                         </button>
@@ -527,14 +528,14 @@ export default function Home() {
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <IconCross />
                             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 600 }}>
-                IEQ <span style={{ color: BRAND.yellow }}>Gestão</span>
+                IEQ <span style={{ color: BRAND.blue }}>Gestão</span>
               </span>
                         </div>
 
                         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center" }}>
                             © {new Date().getFullYear()} IEQ Gestão — Sistema Eclesiástico.
                             Suporte:{" "}
-                            <a href="mailto:washquesia@gmail.com" style={{ color: BRAND.red, textDecoration: "none" }}>
+                            <a href="mailto:washquesia@gmail.com" style={{ color: BRAND.blue, textDecoration: "none" }}>
                                 washquesia@gmail.com
                             </a>
                         </p>
