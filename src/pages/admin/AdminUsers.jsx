@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// AdminUsers — Versão Refinada (Menu Superior)
-// Melhorias: Topbar com mega-menu, overlay mobile, KPIs, modal drawer, rows
+// AdminUsers — com painel WhatsApp Registros integrado
 // ══════════════════════════════════════════════════════════════════════════════
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import api from "../../services/api.js";
 import { getFotoUrl } from "../../utils/foto.js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,34 +14,36 @@ import {
   Building2, DollarSign, Home, Flame,
   LayoutDashboard, Share2, Trophy, ClipboardList,
   BarChart2, TrendingUp, Target, Sparkles, ChevronRight,
+  MessageCircle, Filter, AlertCircle, Wifi, WifiOff, RefreshCw,
+  ChevronLeft, Download, Inbox,
 } from "lucide-react";
 
-import Membros             from "../secretaria/Membros";
-import Celulas             from "../secretaria/Celulas";
-import Visitantes          from "../secretaria/Visitante";
-import FichasEncontro      from "../secretaria/FichasEncontro";
-import SecretariaCelulas   from "../secretaria/SecretariaCelulas";
-import PainelPastor        from "../pastor/PainelPastor";
-import RelatorioCelula     from "../pastor/RelatorioCelula";
+import Membros                   from "../secretaria/Membros";
+import Celulas                   from "../secretaria/Celulas";
+import Visitantes                from "../secretaria/Visitante";
+import FichasEncontro            from "../secretaria/FichasEncontro";
+import SecretariaCelulas         from "../secretaria/SecretariaCelulas";
+import PainelPastor              from "../pastor/PainelPastor";
+import RelatorioCelula           from "../pastor/RelatorioCelula";
 import SolicitacoesMultiplicacao from "../pastor/SolicitacoesMultiplicacao";
-import RankingCelulas      from "../pastor/RankingCelulas";
-import PainelAlertas       from "../pastor/PainelAlertas";
-import Discipulado         from "../pastor/Discipulado";
-import TelaPendencias      from "../pastor/TelaPendencias";
-import RelatorioCasasDePaz from "../pastor/RelatorioCasasDePaz";
-import RelatorioMissao70Pastor from "../pastor/RelatorioMissao70Pastor";
-import TelaRelatorio       from "../lider/TelaRelatorio";
-import RelatorioDiscipulado from "../lider/RelatorioDiscipulado";
-import TelaVisitantes      from "../lider/TelaVisitantes";
-import TelaFichas          from "../lider/TelaFichas";
-import CasasDePazLider     from "../lider/CasasDePazLider";
-import Missao70Lider       from "../lider/Missao70Lider";
-import TesourariaDashboard  from "../tesouraria/TesourariaDashboard";
-import TesourariaLancamento from "../tesouraria/TesourariaLancamento";
-import TesourariaRelatorio  from "../tesouraria/TesourariaRelatorio";
-import TesourariaDizimistas from "../tesouraria/TesourariaDizimistas";
-import TesourariaComparativo from "../tesouraria/TesourariaComparativo";
-import HistoricoAuditoria  from "./HistoricoAuditoria";
+import RankingCelulas            from "../pastor/RankingCelulas";
+import PainelAlertas             from "../pastor/PainelAlertas";
+import Discipulado               from "../pastor/Discipulado";
+import TelaPendencias            from "../pastor/TelaPendencias";
+import RelatorioCasasDePaz       from "../pastor/RelatorioCasasDePaz";
+import RelatorioMissao70Pastor   from "../pastor/RelatorioMissao70Pastor";
+import TelaRelatorio             from "../lider/TelaRelatorio";
+import RelatorioDiscipulado      from "../lider/RelatorioDiscipulado";
+import TelaVisitantes            from "../lider/TelaVisitantes";
+import TelaFichas                from "../lider/TelaFichas";
+import CasasDePazLider           from "../lider/CasasDePazLider";
+import Missao70Lider             from "../lider/Missao70Lider";
+import TesourariaDashboard       from "../tesouraria/TesourariaDashboard";
+import TesourariaLancamento      from "../tesouraria/TesourariaLancamento";
+import TesourariaRelatorio       from "../tesouraria/TesourariaRelatorio";
+import TesourariaDizimistas      from "../tesouraria/TesourariaDizimistas";
+import TesourariaComparativo     from "../tesouraria/TesourariaComparativo";
+import HistoricoAuditoria        from "./HistoricoAuditoria";
 
 /* ─── Design Tokens ──────────────────────────────────────────────────────── */
 const AURA = {
@@ -56,29 +58,31 @@ const AURA = {
   yellowDark: "#C48C00",
   green:      "#059669",
   greenDark:  "#047857",
+  wa:         "#25D366",
+  waDark:     "#1a9e4a",
 };
 
 function theme(isDark) {
   return {
-    bg:         isDark ? "#080810"              : "#F2EDE4",
-    bgEl:       isDark ? "rgba(14,14,22,.98)"   : "rgba(255,255,255,.98)",
-    bgElHover:  isDark ? "rgba(20,20,32,.98)"   : "rgba(248,244,238,.98)",
-    bgInput:    isDark ? "rgba(255,255,255,.05)": "rgba(0,0,0,.04)",
-    border:     isDark ? "rgba(201,169,110,.09)": "rgba(201,169,110,.18)",
-    borderIn:   isDark ? "rgba(201,169,110,.13)": "rgba(201,169,110,.25)",
-    borderHov:  isDark ? "rgba(201,169,110,.28)": "rgba(201,169,110,.45)",
-    text:       isDark ? "#EDE8DF"              : "#180E04",
-    textSec:    isDark ? "#8A8378"              : "#6B5E4A",
-    textMuted:  isDark ? "#585248"              : "#9A8E80",
-    glow1:      isDark ? "rgba(200,16,46,.06)"  : "rgba(200,16,46,.04)",
-    glow2:      isDark ? "rgba(0,61,165,.05)"   : "rgba(0,61,165,.035)",
-    glow3:      isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
-    headerBg:   isDark ? "rgba(8,8,14,.97)"     : "rgba(242,237,228,.97)",
-    megaBg:     isDark ? "rgba(10,10,18,.99)"   : "rgba(252,249,244,.99)",
-    overlayBg:  isDark ? "rgba(5,5,10,.99)"     : "rgba(8,6,4,.985)",
-    placeholder:isDark ? "rgba(138,131,120,.3)" : "rgba(107,94,74,.3)",
-    shadow:     isDark ? "rgba(0,0,0,.7)"       : "rgba(0,0,0,.12)",
-    drawerBg:   isDark ? "rgba(10,10,18,.99)"   : "rgba(252,249,244,.99)",
+    bg:          isDark ? "#080810"              : "#F2EDE4",
+    bgEl:        isDark ? "rgba(14,14,22,.98)"   : "rgba(255,255,255,.98)",
+    bgElHover:   isDark ? "rgba(20,20,32,.98)"   : "rgba(248,244,238,.98)",
+    bgInput:     isDark ? "rgba(255,255,255,.05)": "rgba(0,0,0,.04)",
+    border:      isDark ? "rgba(201,169,110,.09)": "rgba(201,169,110,.18)",
+    borderIn:    isDark ? "rgba(201,169,110,.13)": "rgba(201,169,110,.25)",
+    borderHov:   isDark ? "rgba(201,169,110,.28)": "rgba(201,169,110,.45)",
+    text:        isDark ? "#EDE8DF"              : "#180E04",
+    textSec:     isDark ? "#8A8378"              : "#6B5E4A",
+    textMuted:   isDark ? "#585248"              : "#9A8E80",
+    glow1:       isDark ? "rgba(200,16,46,.06)"  : "rgba(200,16,46,.04)",
+    glow2:       isDark ? "rgba(0,61,165,.05)"   : "rgba(0,61,165,.035)",
+    glow3:       isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
+    headerBg:    isDark ? "rgba(8,8,14,.97)"     : "rgba(242,237,228,.97)",
+    megaBg:      isDark ? "rgba(10,10,18,.99)"   : "rgba(252,249,244,.99)",
+    overlayBg:   isDark ? "rgba(5,5,10,.99)"     : "rgba(8,6,4,.985)",
+    placeholder: isDark ? "rgba(138,131,120,.3)" : "rgba(107,94,74,.3)",
+    shadow:      isDark ? "rgba(0,0,0,.7)"       : "rgba(0,0,0,.12)",
+    drawerBg:    isDark ? "rgba(10,10,18,.99)"   : "rgba(252,249,244,.99)",
   };
 }
 
@@ -88,8 +92,9 @@ const SECOES = [
   {
     id:"admin", label:"Administração", icon:Shield, color:AURA.red,
     itens:[
-      { key:"usuarios",  label:"Usuários",  sub:"Controle de acesso", icon:Users   },
-      { key:"historico", label:"Histórico", sub:"Log de auditoria",   icon:History },
+      { key:"usuarios",    label:"Usuários",    sub:"Controle de acesso", icon:Users         },
+      { key:"historico",   label:"Histórico",   sub:"Log de auditoria",   icon:History       },
+      { key:"wa-registros",label:"WhatsApp",    sub:"Mensagens webhook",  icon:MessageCircle },
     ],
   },
   {
@@ -139,6 +144,34 @@ const SECOES = [
   },
 ];
 
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
+
+function extrairTexto(r) {
+  if (r.textoMensagem) return r.textoMensagem;
+  try {
+    const p = JSON.parse(r.payload);
+    if (p?.text?.body)           return p.text.body;
+    if (p?.image?.caption)       return `[Imagem] ${p.image.caption}`;
+    if (p?.image)                return "[Imagem]";
+    if (p?.document?.filename)   return `[Documento] ${p.document.filename}`;
+    if (p?.audio)                return "[Áudio]";
+    if (p?.video?.caption)       return `[Vídeo] ${p.video.caption}`;
+    if (p?.video)                return "[Vídeo]";
+    if (p?.sticker)              return "[Sticker]";
+    if (p?.location)             return "[Localização]";
+    if (p?.contacts)             return "[Contato]";
+  } catch { }
+  return null;
+}
+
+function extrairTipoMsg(r) {
+  if (r.tipoMensagem) return r.tipoMensagem;
+  try {
+    const p = JSON.parse(r.payload);
+    return p?.type || null;
+  } catch { return null; }
+}
+
 /* ─── Global CSS ─────────────────────────────────────────────────────────── */
 function GlobalStyles({ t, isDark }) {
   return (
@@ -151,9 +184,7 @@ function GlobalStyles({ t, isDark }) {
     @keyframes adm-float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
     *, *::before, *::after { box-sizing: border-box; }
-
     html, body { overflow-x: hidden; }
-
     button, [role="button"] { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
@@ -164,11 +195,9 @@ function GlobalStyles({ t, isDark }) {
       min-height: 100vh; min-height: 100dvh;
       display: flex; flex-direction: column; position: relative; overflow-x: hidden;
       transition: background .35s, color .35s;
-      isolation: isolate;
-      width: 100%;
+      isolation: isolate; width: 100%;
     }
 
-    /* ── Background atmosphere ── */
     .adm-bg-layer {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background:
@@ -183,7 +212,7 @@ function GlobalStyles({ t, isDark }) {
       background-size: 200px 200px;
     }
 
-    /* ══ HEADER WRAPPER (sticky) ══════════════════════════════════════ */
+    /* ══ HEADER ══ */
     .adm-header-wrap {
       position: sticky; top: 0; z-index: 100;
       background: ${t.headerBg};
@@ -195,7 +224,6 @@ function GlobalStyles({ t, isDark }) {
       background: linear-gradient(90deg, ${AURA.redDark} 0%, ${AURA.red} 25%, ${AURA.gold} 55%, ${AURA.blue} 100%);
     }
 
-    /* ── Row 1: Brand + actions ── */
     .adm-topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 24px; height: 60px; gap: 14px; position: relative;
@@ -212,9 +240,7 @@ function GlobalStyles({ t, isDark }) {
     }
     .adm-brand-logo img { width: 100%; height: 100%; object-fit: cover; }
     .adm-brand-text { display: none; }
-    @media (min-width: 480px) {
-      .adm-brand-text { display: block; }
-    }
+    @media (min-width: 480px) { .adm-brand-text { display: block; } }
     .adm-brand-name {
       font-family: 'Playfair Display', serif;
       font-size: 14px; font-weight: 600;
@@ -228,10 +254,7 @@ function GlobalStyles({ t, isDark }) {
       display: block; white-space: nowrap;
     }
 
-    .adm-topbar-sep {
-      width: 1px; height: 22px; flex-shrink: 0;
-      background: ${t.border};
-    }
+    .adm-topbar-sep { width: 1px; height: 22px; flex-shrink: 0; background: ${t.border}; }
 
     .adm-ico-btn {
       width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer;
@@ -245,11 +268,9 @@ function GlobalStyles({ t, isDark }) {
     .adm-live-pill {
       display: flex; align-items: center; gap: 5px;
       padding: 5px 12px; border-radius: 100px;
-      background: rgba(5,150,105,.08);
-      border: 1px solid rgba(5,150,105,.2);
+      background: rgba(5,150,105,.08); border: 1px solid rgba(5,150,105,.2);
       color: ${AURA.green};
-      font-size: 8px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
-      flex-shrink: 0;
+      font-size: 8px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; flex-shrink: 0;
     }
     .adm-live-dot { width: 6px; height: 6px; border-radius: 50%; background: ${AURA.green}; animation: adm-blink 2.5s ease-in-out infinite; box-shadow: 0 0 6px ${AURA.green}88; }
 
@@ -269,30 +290,20 @@ function GlobalStyles({ t, isDark }) {
     @media (min-width: 560px) { .adm-cta-btn-label { display: inline; } }
 
     .adm-user-chip {
-      display: none;
-      align-items: center; gap: 8px;
+      display: none; align-items: center; gap: 8px;
       padding: 6px 12px 6px 8px; border-radius: 100px;
       background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)"};
-      border: 1px solid ${t.border};
-      flex-shrink: 0;
+      border: 1px solid ${t.border}; flex-shrink: 0;
     }
     @media (min-width: 900px) { .adm-user-chip { display: flex; } }
-    .adm-user-chip-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: ${AURA.green}; flex-shrink: 0;
-      box-shadow: 0 0 8px ${AURA.green}88;
-      animation: adm-blink 2.8s ease-in-out infinite;
-    }
+    .adm-user-chip-dot { width: 7px; height: 7px; border-radius: 50%; background: ${AURA.green}; flex-shrink: 0; box-shadow: 0 0 8px ${AURA.green}88; animation: adm-blink 2.8s ease-in-out infinite; }
     .adm-user-chip-name { font-size: 11px; font-weight: 600; color: ${t.text}; line-height: 1.1; white-space: nowrap; }
     .adm-user-chip-role { font-size: 7.5px; color: ${t.textMuted}; letter-spacing: .1em; text-transform: uppercase; line-height: 1.1; }
 
-    /* ── Row 2: Desktop nav (sections) ── */
+    /* ── Desktop nav ── */
     .adm-nav-row {
-      display: none;
-      align-items: stretch;
-      padding: 0 24px;
-      gap: 2px;
-      border-top: 1px solid ${t.border};
+      display: none; align-items: stretch;
+      padding: 0 24px; gap: 2px; border-top: 1px solid ${t.border};
     }
     @media (min-width: 900px) { .adm-nav-row { display: flex; } }
 
@@ -301,13 +312,11 @@ function GlobalStyles({ t, isDark }) {
       padding: 11px 16px; border: none; background: transparent; cursor: pointer;
       font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 600;
       letter-spacing: .06em; color: ${t.textSec};
-      position: relative; transition: color .2s, background .2s;
-      white-space: nowrap;
+      position: relative; transition: color .2s, background .2s; white-space: nowrap;
     }
     .adm-nav-sec-btn::after {
       content: ''; position: absolute; left: 16px; right: 16px; bottom: 0; height: 2px;
-      border-radius: 2px 2px 0 0;
-      background: var(--sc, ${AURA.gold});
+      border-radius: 2px 2px 0 0; background: var(--sc, ${AURA.gold});
       transform: scaleX(0); transition: transform .2s;
     }
     .adm-nav-sec-btn:hover { color: ${t.text}; background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.025)"}; }
@@ -321,21 +330,16 @@ function GlobalStyles({ t, isDark }) {
       animation: adm-blink 2.8s ease-in-out infinite; margin-left: 2px;
     }
 
-    /* ── Mega menu panel (desktop) ── */
-    .adm-megamenu-backdrop {
-      position: fixed; inset: 0; z-index: 95; background: transparent;
-    }
+    /* ── Mega menu ── */
+    .adm-megamenu-backdrop { position: fixed; inset: 0; z-index: 95; background: transparent; }
     .adm-megamenu {
       position: absolute; left: 0; right: 0; top: 100%; z-index: 96;
-      background: ${t.megaBg};
-      border-bottom: 1px solid ${t.border};
-      box-shadow: 0 24px 60px rgba(0,0,0,.35);
-      overflow: hidden;
+      background: ${t.megaBg}; border-bottom: 1px solid ${t.border};
+      box-shadow: 0 24px 60px rgba(0,0,0,.35); overflow: hidden;
     }
     .adm-megamenu-grid {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 4px; padding: 18px 24px 22px;
-      max-width: 1100px; margin: 0 auto;
+      gap: 4px; padding: 18px 24px 22px; max-width: 1100px; margin: 0 auto;
     }
     @media (min-width: 1100px) { .adm-megamenu-grid { grid-template-columns: repeat(4, 1fr); } }
 
@@ -347,48 +351,23 @@ function GlobalStyles({ t, isDark }) {
     }
     .adm-mega-item:hover { background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.035)"}; }
     .adm-mega-item.act { background: ${isDark ? "rgba(255,255,255,.055)" : "rgba(0,0,0,.05)"}; }
-
-    .adm-mega-ico {
-      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .adm-mega-ico { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .adm-mega-main { font-size: 12px; font-weight: 600; color: ${t.text}; display: block; line-height: 1.2; }
     .adm-mega-sub  { font-size: 9.5px; color: ${t.textMuted}; letter-spacing: .03em; display: block; margin-top: 1px; }
     .adm-mega-rel  { position: relative; flex: 1; min-width: 0; }
-    .adm-mega-badge {
-      position: absolute; right: 0; top: -2px;
-      background: ${AURA.yellow}; color: #080810;
-      font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 99px;
-    }
+    .adm-mega-badge { position: absolute; right: 0; top: -2px; background: ${AURA.yellow}; color: #080810; font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
 
-    /* ══ MOBILE OVERLAY (full screen) ══════════════════════════════════ */
-    .adm-mobile-overlay {
-      position: fixed; inset: 0; z-index: 250;
-      background: ${t.overlayBg};
-      display: flex; flex-direction: column;
-    }
-    .adm-mobile-overlay-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 18px; flex-shrink: 0;
-      border-bottom: 1px solid rgba(201,169,110,.08);
-    }
-    .adm-mobile-overlay-body {
-      flex: 1; overflow-y: auto; padding: 8px 0 24px;
-    }
-    .adm-mobile-sec-toggle {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px; cursor: pointer; user-select: none; min-height: 48px;
-    }
+    /* ══ MOBILE OVERLAY ══ */
+    .adm-mobile-overlay { position: fixed; inset: 0; z-index: 250; background: ${t.overlayBg}; display: flex; flex-direction: column; }
+    .adm-mobile-overlay-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; flex-shrink: 0; border-bottom: 1px solid rgba(201,169,110,.08); }
+    .adm-mobile-overlay-body { flex: 1; overflow-y: auto; padding: 8px 0 24px; }
+    .adm-mobile-sec-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; user-select: none; min-height: 48px; }
     .adm-mobile-sec-left { display: flex; align-items: center; gap: 9px; }
-    .adm-mobile-sec-label {
-      font-size: 12.5px; font-weight: 700; letter-spacing: .04em;
-      color: rgba(245,240,232,.85);
-    }
+    .adm-mobile-sec-label { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; color: rgba(245,240,232,.85); }
     .adm-mobile-nav-item {
       width: 100%; display: flex; align-items: center; gap: 12px;
       padding: 12px 20px 12px 32px; min-height: 48px;
-      border: none; cursor: pointer; background: transparent; text-align: left;
-      position: relative;
+      border: none; cursor: pointer; background: transparent; text-align: left; position: relative;
     }
     .adm-mobile-nav-item.act { background: rgba(255,255,255,.045); }
     .adm-mobile-nav-item::before {
@@ -397,50 +376,26 @@ function GlobalStyles({ t, isDark }) {
       background: var(--nc, ${AURA.gold}); transition: height .15s;
     }
     .adm-mobile-nav-item.act::before { height: 24px; }
-    .adm-mobile-nav-ico {
-      width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,.04);
-    }
+    .adm-mobile-nav-ico { width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.04); }
     .adm-mobile-nav-main { font-size: 12.5px; font-weight: 500; color: rgba(245,240,232,.55); display: block; line-height: 1.2; }
     .adm-mobile-nav-item.act .adm-mobile-nav-main { color: rgba(245,240,232,.95); font-weight: 600; }
     .adm-mobile-nav-sub { font-size: 9px; color: rgba(245,240,232,.2); margin-top: 2px; display: block; text-transform: uppercase; letter-spacing: .06em; }
-    .adm-mobile-nav-badge {
-      margin-left: auto; background: ${AURA.yellow}; color: #080810;
-      font-size: 8.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
-      flex-shrink: 0;
-    }
-    .adm-mobile-overlay-foot {
-      padding: 14px 18px 22px; flex-shrink: 0;
-      border-top: 1px solid rgba(201,169,110,.08);
-    }
+    .adm-mobile-nav-badge { margin-left: auto; background: ${AURA.yellow}; color: #080810; font-size: 8.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .adm-mobile-overlay-foot { padding: 14px 18px 22px; flex-shrink: 0; border-top: 1px solid rgba(201,169,110,.08); }
 
     /* ══ MAIN ══ */
     .adm-main { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; min-width: 0; }
-
-    .adm-page-eyebrow {
-      font-size: 7.5px; font-weight: 700; letter-spacing: .22em;
-      text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 2px;
-    }
-    .adm-page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.1;
-    }
+    .adm-page-eyebrow { font-size: 7.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 2px; }
+    .adm-page-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.1; }
     .adm-page-head { padding: 18px 22px 0; }
     @media (min-width: 640px) { .adm-page-head { padding: 22px 32px 0; } }
 
-    /* ══ CONTENT ══ */
-    .adm-content {
-      flex: 1; padding: 16px 22px 24px;
-      padding-bottom: max(36px, env(safe-area-inset-bottom, 36px));
-    }
+    .adm-content { flex: 1; padding: 16px 22px 24px; padding-bottom: max(36px, env(safe-area-inset-bottom, 36px)); }
     @media (min-width: 640px) { .adm-content { padding: 18px 32px 28px; } }
 
-    /* Card */
     .adm-card {
       background: ${t.bgEl}; border: 1px solid ${t.border};
-      border-radius: 20px; overflow: hidden; position: relative;
-      backdrop-filter: blur(24px);
+      border-radius: 20px; overflow: hidden; position: relative; backdrop-filter: blur(24px);
     }
     .adm-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -448,7 +403,7 @@ function GlobalStyles({ t, isDark }) {
       pointer-events: none;
     }
 
-    /* KPI grid */
+    /* KPI */
     .adm-kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px; }
     @media (min-width: 640px) { .adm-kpi-grid { grid-template-columns: repeat(4, 1fr); } }
     .adm-kpi {
@@ -457,58 +412,38 @@ function GlobalStyles({ t, isDark }) {
       backdrop-filter: blur(20px); transition: border-color .25s, transform .22s;
     }
     .adm-kpi:hover { border-color: ${t.borderHov}; transform: translateY(-2px); }
-    .adm-kpi::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(201,169,110,.18), transparent);
-    }
+    .adm-kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,169,110,.18), transparent); }
     .adm-kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
     .adm-kpi-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .adm-kpi-num { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 600; line-height: 1; margin: 0 0 3px; }
     .adm-kpi-lbl { font-size: 8.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${t.textMuted}; }
     .adm-kpi-trend { font-size: 8px; font-weight: 500; color: ${t.textMuted}; margin-top: 2px; }
 
-    /* Label */
-    .adm-label {
-      display: block; font-size: 8.5px; font-weight: 700; letter-spacing: .22em;
-      text-transform: uppercase; color: rgba(201,169,110,.65); margin: 0 0 7px;
-    }
+    .adm-label { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(201,169,110,.65); margin: 0 0 7px; }
 
-    /* Input / Select */
     .adm-input {
       width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderIn};
       color: ${t.text}; padding: 12px 16px 12px 44px; border-radius: 12px;
-      outline: none; font-family: 'Inter', sans-serif; font-size: 14px;
-      font-weight: 300; transition: all .22s;
+      outline: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300; transition: all .22s;
       -webkit-appearance: none; appearance: none;
     }
-    .adm-input:focus {
-      border-color: rgba(201,169,110,.45);
-      box-shadow: 0 0 0 3px rgba(201,169,110,.07), 0 2px 12px rgba(0,0,0,.08);
-    }
+    .adm-input:focus { border-color: rgba(201,169,110,.45); box-shadow: 0 0 0 3px rgba(201,169,110,.07), 0 2px 12px rgba(0,0,0,.08); }
     .adm-input::placeholder { color: ${t.placeholder}; }
 
     .adm-select {
       width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderIn};
       color: ${t.text}; padding: 12px 14px 12px 44px; border-radius: 12px;
-      outline: none; font-family: 'Inter', sans-serif; font-size: 12px;
-      font-weight: 500; cursor: pointer; appearance: none; -webkit-appearance: none;
-      transition: all .22s;
+      outline: none; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; appearance: none; -webkit-appearance: none; transition: all .22s;
     }
     .adm-select:focus { border-color: rgba(201,169,110,.45); box-shadow: 0 0 0 3px rgba(201,169,110,.07); }
+    .adm-select option { background: ${t.bgEl}; color: ${t.text}; }
+    .adm-select option:checked, .adm-select option:hover { background: ${isDark ? "#1c1c2c" : "#EFE7D6"}; color: ${t.text}; }
 
-    /* Divider */
-    .adm-divider {
-      height: 1px; margin: 18px 0;
-      background: linear-gradient(90deg, transparent 0%, ${t.border} 30%, ${t.border} 70%, transparent 100%);
-    }
+    .adm-divider { height: 1px; margin: 18px 0; background: linear-gradient(90deg, transparent 0%, ${t.border} 30%, ${t.border} 70%, transparent 100%); }
 
     /* User rows */
-    .adm-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 22px; gap: 14px;
-      border-bottom: 1px solid ${t.border};
-      transition: background .15s; flex-wrap: wrap;
-    }
+    .adm-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; gap: 14px; border-bottom: 1px solid ${t.border}; transition: background .15s; flex-wrap: wrap; }
     .adm-row:last-child { border-bottom: none; }
     .adm-row:hover { background: ${isDark ? "rgba(201,169,110,.025)" : "rgba(201,169,110,.03)"}; }
     .adm-row-l { display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; }
@@ -519,95 +454,38 @@ function GlobalStyles({ t, isDark }) {
       .adm-row-r .adm-action-btn { flex-shrink: 0; }
     }
 
-    .adm-avatar {
-      width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
-      overflow: hidden; position: relative; cursor: pointer;
-      transition: transform .2s;
-    }
+    .adm-avatar { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; overflow: hidden; position: relative; cursor: pointer; transition: transform .2s; }
     .adm-avatar:hover { transform: scale(1.06); }
     .adm-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .adm-avatar-placeholder {
-      width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: #fff;
-    }
-    .adm-avatar-overlay {
-      position: absolute; inset: 0; border-radius: 12px;
-      background: rgba(0,0,0,.52); display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity .18s;
-    }
+    .adm-avatar-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: #fff; }
+    .adm-avatar-overlay { position: absolute; inset: 0; border-radius: 12px; background: rgba(0,0,0,.52); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .18s; }
     .adm-avatar:hover .adm-avatar-overlay { opacity: 1; }
 
     .adm-row-name { font-size: 12.5px; font-weight: 600; color: ${t.text}; margin: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .adm-row-email { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* Badges */
-    .adm-badge {
-      padding: 3px 10px; border-radius: 99px;
-      font-size: 8px; font-weight: 600; letter-spacing: .1em;
-      white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
-    }
+    .adm-badge { padding: 3px 10px; border-radius: 99px; font-size: 8px; font-weight: 600; letter-spacing: .1em; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 
-    /* Row action btns */
-    .adm-action-btn {
-      width: 32px; height: 32px; border-radius: 9px;
-      border: 1px solid ${t.border}; background: transparent; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: ${t.textMuted}; transition: all .18s;
-    }
+    .adm-action-btn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid ${t.border}; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: ${t.textMuted}; transition: all .18s; }
     .adm-action-btn:hover { transform: translateY(-1px); }
 
-    .adm-pending-action {
-      display: flex; align-items: center; gap: 5px;
-      padding: 5px 11px; border-radius: 8px; border: none; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase; transition: all .2s;
-    }
+    .adm-pending-action { display: flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 8px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; transition: all .2s; }
 
     /* Toast */
     .adm-toast {
       position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
       padding: 12px 20px; border-radius: 14px;
-      font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 600;
-      letter-spacing: .12em; text-transform: uppercase;
+      font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
       display: flex; align-items: center; gap: 10px; z-index: 600;
-      max-width: 88vw; white-space: nowrap;
-      backdrop-filter: blur(20px);
+      max-width: 88vw; white-space: nowrap; backdrop-filter: blur(20px);
     }
-    @media (max-width: 480px) {
-      .adm-toast { max-width: 92vw; white-space: normal; bottom: 16px; padding: 11px 16px; }
-      .adm-toast span { white-space: normal !important; max-width: none !important; }
-    }
+    @media (max-width: 480px) { .adm-toast { max-width: 92vw; white-space: normal; bottom: 16px; padding: 11px 16px; } }
 
-    /* Célula selector */
-    .adm-celula-bar {
-      background: ${t.bgEl}; border: 1px solid ${t.border};
-      border-radius: 14px; padding: 13px 18px; margin-bottom: 16px;
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    }
+    .adm-celula-bar { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 14px; padding: 13px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
-    /* ══ MODAL ════════════════════════════════════════════════════════════ */
-    .adm-drawer-accent {
-      height: 2px; flex-shrink: 0;
-      background: linear-gradient(90deg, ${AURA.blue} 0%, ${AURA.red} 40%, ${AURA.gold} 70%, ${AURA.goldLight} 100%);
-    }
-
-    .adm-modal-backdrop {
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(0,0,0,.78);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      display: flex; align-items: flex-start; justify-content: center;
-      padding: 60px 16px 40px;
-      overflow-y: auto;
-    }
-    .adm-modal-box {
-      width: 100%; max-width: 520px;
-      background: ${t.drawerBg};
-      border: 1px solid ${t.border};
-      border-radius: 22px;
-      overflow: hidden;
-      box-shadow: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(201,169,110,.06);
-      position: relative;
-    }
+    /* ══ MODAL ══ */
+    .adm-modal-backdrop { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px 40px; overflow-y: auto; }
+    .adm-modal-box { width: 100%; max-width: 520px; background: ${t.drawerBg}; border: 1px solid ${t.border}; border-radius: 22px; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(201,169,110,.06); position: relative; }
     .adm-modal-header { padding: 26px 28px 22px; border-bottom: 1px solid ${t.border}; position: relative; }
     .adm-modal-close { position: absolute; right: 20px; top: 20px; }
     .adm-modal-body { padding: 24px 28px; }
@@ -625,72 +503,82 @@ function GlobalStyles({ t, isDark }) {
       .adm-modal-form-grid > div { grid-column: 1 / -1 !important; }
     }
 
-    .adm-btn-primary {
-      flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
-      letter-spacing: .15em; text-transform: uppercase; transition: all .25s;
-    }
-    .adm-btn-primary.blue {
-      background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
-      color: #fff; box-shadow: 0 6px 20px rgba(0,61,165,.22);
-    }
+    .adm-btn-primary { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; transition: all .25s; }
+    .adm-btn-primary.blue { background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff; box-shadow: 0 6px 20px rgba(0,61,165,.22); }
     .adm-btn-primary.blue:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(0,61,165,.32); }
-    .adm-btn-primary.red {
-      background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
-      color: #fff; box-shadow: 0 6px 20px rgba(200,16,46,.22);
-    }
+    .adm-btn-primary.red { background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red}); color: #fff; box-shadow: 0 6px 20px rgba(200,16,46,.22); }
     .adm-btn-primary.red:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(200,16,46,.32); }
 
-    .adm-btn-ghost {
-      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-      padding: 14px 18px; border-radius: 12px;
-      border: 1px solid ${t.border}; cursor: pointer;
-      background: transparent; color: ${t.textSec};
-      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500;
-      letter-spacing: .1em; text-transform: uppercase; transition: all .22s;
-    }
+    .adm-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 14px 18px; border-radius: 12px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; transition: all .22s; }
     .adm-btn-ghost:hover { border-color: ${t.borderHov}; color: ${t.text}; }
 
-    /* Mobile */
-    @media (max-width: 899px) {
-      .adm-topbar { padding: 0 10px; height: 54px; gap: 8px; }
-      .adm-topbar-l { gap: 8px; }
-      .adm-topbar-r { gap: 5px; }
-      .adm-cta-btn { padding: 9px 12px; }
-      .adm-ico-btn { width: 38px; height: 38px; }
-    }
-    @media (max-width: 639px) {
-      .adm-live-pill { display: none !important; }
-      .adm-topbar-sep { display: none !important; }
-      .adm-content { padding: 12px 12px 20px; }
-      .adm-page-head { padding: 14px 12px 0; }
-      .adm-kpi-grid { gap: 9px; }
-      .adm-kpi { padding: 13px 12px; border-radius: 15px; }
-      .adm-kpi-num { font-size: 21px; }
-      .adm-kpi-icon { width: 32px; height: 32px; }
-      .adm-kpi-trend { font-size: 7.5px; }
-      .adm-row { flex-direction: column; align-items: stretch; gap: 10px; padding: 13px 14px; }
-      .adm-row-r { justify-content: flex-stretch; }
-      .adm-row-name { white-space: normal; }
-      .adm-row-email { white-space: normal; word-break: break-all; }
-      .adm-action-btn { width: 36px; height: 36px; }
-      .adm-celula-bar { padding: 11px 14px; }
-      .adm-card-header { padding: 15px 14px !important; }
+    /* ══ WHATSAPP PAINEL ══ */
+    .wa-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; }
+    .wa-p-recebida  { background: rgba(37,211,102,.1);  color: ${AURA.wa}; }
+    .wa-p-sent      { background: rgba(0,61,165,.08);   color: ${AURA.blue}; }
+    .wa-p-delivered { background: rgba(5,150,105,.08);  color: ${AURA.green}; }
+    .wa-p-read      { background: rgba(201,169,110,.1); color: ${AURA.goldDim}; }
+    .wa-p-failed    { background: rgba(200,16,46,.08);  color: ${AURA.red}; }
+    .wa-p-status    { background: rgba(196,140,0,.08);  color: ${AURA.yellowDark}; }
+    .wa-tipo-badge  { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; border: 0.5px solid ${t.border}; color: ${t.textMuted}; }
+    .wa-mono { font-family: monospace; font-size: 11px; color: ${t.textSec}; }
+
+    .wa-row { display: flex; align-items: center; padding: 11px 20px; gap: 12px; border-bottom: 1px solid ${t.border}; cursor: pointer; transition: background .14s; }
+    .wa-row:last-child { border-bottom: none; }
+    .wa-row:hover { background: ${isDark ? "rgba(37,211,102,.025)" : "rgba(37,211,102,.03)"}; }
+
+    .wa-col-num  { width: 32px; flex-shrink: 0; font-size: 11px; color: ${t.textMuted}; text-align: right; }
+    .wa-col-tipo { width: 90px; flex-shrink: 0; }
+    .wa-col-fone { width: 140px; flex-shrink: 0; }
+    .wa-col-id   { flex: 1; min-width: 0; overflow: hidden; }
+    .wa-col-st   { width: 86px; flex-shrink: 0; }
+    .wa-col-dt   { width: 80px; flex-shrink: 0; font-size: 11px; color: ${t.textSec}; text-align: right; }
+    .wa-col-arr  { width: 22px; flex-shrink: 0; color: ${t.textMuted}; }
+    .wa-th { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: ${t.textMuted}; overflow: hidden; }
+    .wa-thead { display: flex; align-items: center; padding: 8px 20px; border-bottom: 1px solid ${t.border}; background: ${isDark ? "rgba(255,255,255,.018)" : "rgba(0,0,0,.018)"}; }
+
+    .wa-filtros-row { padding: 12px 20px; border-bottom: 1px solid ${t.border}; display: flex; gap: 8px; flex-wrap: wrap; }
+    .wa-filtro-busca { position: relative; flex: 1 1 180px; min-width: 160px; }
+    .wa-filtro-select { position: relative; flex: 0 1 130px; min-width: 110px; }
+    .wa-filtro-select .adm-select { width: 100%; }
+
+    @media (max-width: 480px) {
+      .wa-filtros-row { padding: 10px 14px; gap: 6px; }
+      .wa-filtro-busca { flex: 1 1 100%; min-width: 100%; }
+      .wa-filtro-select { flex: 1 1 calc(50% - 3px); min-width: 0; }
     }
     @media (max-width: 380px) {
-      .adm-brand-sub { display: none; }
-      .adm-cta-btn-label { display: none !important; }
-      .adm-cta-btn { padding: 9px 10px; }
-      .adm-exit-modal { padding: 28px 18px 20px !important; }
+      .wa-row { padding: 10px 12px; gap: 8px; }
+      .wa-col-num  { width: 18px; font-size: 10px; }
+      .wa-col-tipo { width: 58px; }
+      .wa-col-fone { width: 76px; font-size: 10px; }
+      .wa-tipo-badge { padding: 2px 6px; font-size: 10px; }
+      .wa-tipo-badge span { display: none; }
     }
 
-    /* Footer */
-    .adm-footer-txt {
-      text-align: center; font-size: 7.5px; font-weight: 500;
-      letter-spacing: .2em; text-transform: uppercase; padding: 16px 0 0;
-      color: ${isDark ? "rgba(245,240,232,.07)" : "rgba(26,16,8,.1)"};
-    }
+    @media (max-width: 700px) { .wa-col-id  { display: none; } .wa-col-fone{ width: 110px; } }
+    @media (max-width: 500px) { .wa-col-dt  { display: none; } .wa-col-fone{ width: 90px; } }
+
+    /* Drawer detalhe WA */
+    .wa-drawer { position: fixed; right: -440px; top: 0; width: 420px; height: 100vh; height: 100dvh; background: ${t.drawerBg}; border-left: 1px solid ${t.border}; z-index: 201; transition: right .25s ease; overflow-y: auto; padding: 0; box-sizing: border-box; }
+    .wa-drawer.open { right: 0; }
+    .wa-drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 22px 18px; border-bottom: 1px solid ${t.border}; position: sticky; top: 0; background: ${t.drawerBg}; z-index: 5; }
+    .wa-drawer-body { padding: 20px 22px 32px; }
+    .wa-ds { margin-bottom: 20px; }
+    .wa-ds-title { font-size: 10px; font-weight: 700; color: ${t.textMuted}; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 10px; }
+    .wa-dr { display: flex; gap: 8px; margin-bottom: 9px; align-items: flex-start; }
+    .wa-dl { font-size: 11px; color: ${t.textSec}; min-width: 110px; padding-top: 1px; }
+    .wa-dv { font-size: 12px; color: ${t.text}; word-break: break-word; flex: 1; }
+    .wa-json { background: ${t.bgInput}; border: 1px solid ${t.borderIn}; border-radius: 10px; padding: 12px; font-size: 10.5px; font-family: monospace; color: ${t.textSec}; line-height: 1.65; white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
+
+    /* Mobile */
+    @media (max-width: 899px) { .adm-topbar { padding: 0 10px; height: 54px; gap: 8px; } .adm-topbar-l { gap: 8px; } .adm-topbar-r { gap: 5px; } .adm-cta-btn { padding: 9px 12px; } .adm-ico-btn { width: 38px; height: 38px; } }
+    @media (max-width: 639px) { .adm-live-pill { display: none !important; } .adm-topbar-sep { display: none !important; } .adm-content { padding: 12px 12px 20px; } .adm-page-head { padding: 14px 12px 0; } .adm-kpi-grid { gap: 9px; } .adm-kpi { padding: 13px 12px; border-radius: 15px; } .adm-kpi-num { font-size: 21px; } .adm-kpi-icon { width: 32px; height: 32px; } .adm-kpi-trend { font-size: 7.5px; } .adm-row { flex-direction: column; align-items: stretch; gap: 10px; padding: 13px 14px; } .adm-row-r { justify-content: flex-stretch; } .adm-row-name { white-space: normal; } .adm-row-email { white-space: normal; word-break: break-all; } .adm-action-btn { width: 36px; height: 36px; } .adm-celula-bar { padding: 11px 14px; } .adm-card-header { padding: 15px 14px !important; } }
+    @media (max-width: 380px) { .adm-brand-sub { display: none; } .adm-cta-btn-label { display: none !important; } .adm-cta-btn { padding: 9px 10px; } .adm-exit-modal { padding: 28px 18px 20px !important; } }
+    @media (max-width: 420px) { .wa-drawer { width: 100vw; right: -100vw; } .wa-drawer.open { right: 0; } }
+    @media (max-width: 639px) { .adm-input, .adm-select { font-size: 16px !important; } }
+
+    .adm-footer-txt { text-align: center; font-size: 7.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; padding: 16px 0 0; color: ${isDark ? "rgba(245,240,232,.07)" : "rgba(26,16,8,.1)"}; }
     `}</style>
   );
 }
@@ -756,7 +644,414 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
   }
 }
 
-/* ════════════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAINEL WHATSAPP REGISTROS
+═══════════════════════════════════════════════════════════════════════════ */
+const WA_API = "http://localhost:8080/webhook/whatsapp/registros";
+
+function statusPill(s) {
+  const m = {
+    recebida:  ["wa-p-recebida",  "Recebida" ],
+    sent:      ["wa-p-sent",      "Sent"     ],
+    delivered: ["wa-p-delivered", "Delivered"],
+    read:      ["wa-p-read",      "Read"     ],
+    failed:    ["wa-p-failed",    "Failed"   ],
+  };
+  const v = (s || "").toLowerCase();
+  const [cls, label] = m[v] || ["wa-p-status", s || "—"];
+  return <span className={`wa-pill ${cls}`}>{label}</span>;
+}
+
+function tipoBadge(tipo) {
+  const icon = tipo === "mensagem"
+      ? <MessageCircle size={11} style={{ color: AURA.wa }}/>
+      : <RefreshCw size={11} style={{ color: AURA.yellowDark }}/>;
+  return (
+      <span className="wa-tipo-badge">
+        {icon}
+        <span style={{ fontSize: 10 }}>{tipo || "—"}</span>
+      </span>
+  );
+}
+
+function fmtData(d) {
+  if (!d) return "—";
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " " +
+        dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  } catch { return d; }
+}
+
+function PainelWhatsApp({ isDark, t, usuarios = [] }) {
+  const [registros,  setRegistros]  = useState([]);
+  const [filtrados,  setFiltrados]  = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [offline,    setOffline]    = useState(false);
+  const [metricas,   setMetricas]   = useState({ total: 0, mensagens: 0, statusEvt: 0, failed: 0, ultimas24h: 0 });
+  const [busca,      setBusca]      = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("");
+  const [filtroSt,   setFiltroSt]   = useState("");
+  const [pag,        setPag]        = useState(1);
+  const [detalhes,   setDetalhes]   = useState(null);
+  const POR_PAG = 15;
+
+  // Função para buscar usuário pelo telefone
+  const buscarUsuarioPorTelefone = (numero) => {
+    if (!numero || !usuarios.length) return null;
+    const numLimpo = numero.replace(/\D/g, '');
+    return usuarios.find(u => {
+      const telLimpo = (u.telefoneWhatsapp || '').replace(/\D/g, '');
+      return telLimpo === numLimpo || telLimpo.endsWith(numLimpo);
+    });
+  };
+
+  const carregar = useCallback(async () => {
+    setLoading(true); setOffline(false);
+    try {
+      const [resReg, resMet] = await Promise.allSettled([
+        fetch(`${WA_API}/filtrar?tipoEvento=${filtroTipo}&status=${filtroSt}&busca=${encodeURIComponent(busca)}`, { headers: { Accept: "application/json" } }),
+        fetch(`${WA_API}/metricas`, { headers: { Accept: "application/json" } }),
+      ]);
+      if (resReg.status === "fulfilled" && resReg.value.ok) {
+        const data = await resReg.value.json();
+        const arr = Array.isArray(data) ? data : data.content ?? data.registros ?? [];
+        setRegistros(arr); setFiltrados(arr);
+      } else { throw new Error("offline"); }
+      if (resMet.status === "fulfilled" && resMet.value.ok) {
+        setMetricas(await resMet.value.json());
+      }
+    } catch {
+      setOffline(true);
+      const fake = Array.from({ length: 18 }, (_, i) => ({
+        id: i + 1,
+        tipoEvento:    i % 3 === 0 ? "status" : "mensagem",
+        status:        ["recebida","sent","delivered","read","failed"][i % 5],
+        idMensagem:    `wamid.${Math.random().toString(36).slice(2,18)}`,
+        numeroDestino: `5571 9${String(90000000 + i * 1234567).slice(0, 8)}`,
+        tipoMensagem:  "text",
+        textoMensagem: i % 3 !== 0 ? `Olá! Mensagem de exemplo número ${i + 1}` : null,
+        payload:       JSON.stringify({ from: "557191234567", type: "text", text: { body: `Olá! Mensagem de exemplo número ${i + 1}` } }, null, 2),
+        recebidoEm:    new Date(Date.now() - i * 3600000).toISOString(),
+      }));
+      setRegistros(fake); setFiltrados(fake);
+      setMetricas({ total: 18, mensagens: 12, statusEvt: 6, failed: 2, ultimas24h: 8 });
+    } finally { setLoading(false); }
+  }, [filtroTipo, filtroSt, busca]);
+
+  useEffect(() => { carregar(); }, [carregar]);
+
+  useEffect(() => {
+    const q = busca.toLowerCase();
+    setFiltrados(registros.filter(r =>
+        (!q ||
+            (r.numeroDestino||"").toLowerCase().includes(q) ||
+            (r.idMensagem||"").toLowerCase().includes(q) ||
+            (extrairTexto(r)||"").toLowerCase().includes(q)
+        ) &&
+        (!filtroTipo || (r.tipoEvento||"").toLowerCase() === filtroTipo) &&
+        (!filtroSt   || (r.status||"").toLowerCase() === filtroSt)
+    ));
+    setPag(1);
+  }, [busca, filtroTipo, filtroSt, registros]);
+
+  const totalPags = Math.ceil(filtrados.length / POR_PAG);
+  const slice     = filtrados.slice((pag - 1) * POR_PAG, pag * POR_PAG);
+
+  const kpis = [
+    { label: "Total",     value: metricas.total,      color: AURA.wa,        bg: "rgba(37,211,102,.08)",  icon: <MessageCircle size={16}/> },
+    { label: "Mensagens", value: metricas.mensagens,  color: AURA.blue,      bg: "rgba(0,61,165,.08)",    icon: <Users size={16}/> },
+    { label: "Últ. 24h", value: metricas.ultimas24h, color: AURA.gold,      bg: "rgba(201,169,110,.08)", icon: <Clock size={16}/> },
+    { label: "Falhas",    value: metricas.failed,     color: AURA.red,       bg: "rgba(200,16,46,.08)",   icon: <AlertCircle size={16}/> },
+  ];
+
+  return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* Banner offline */}
+        {offline && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 16px", background: "rgba(200,16,46,.06)", border: "1px solid rgba(200,16,46,.18)", borderRadius: 12 }}>
+              <WifiOff size={13} style={{ color: AURA.red, flexShrink: 0 }}/>
+              <span style={{ fontSize: 11, color: AURA.red, fontWeight: 500 }}>
+                Servidor offline — exibindo dados de exemplo. Verifique <code style={{ fontSize: 10 }}>localhost:8080</code>
+              </span>
+            </div>
+        )}
+
+        {/* KPIs */}
+        <div className="adm-kpi-grid">
+          {kpis.map(k => (
+              <div key={k.label} className="adm-kpi">
+                <div className="adm-kpi-top">
+                  <div>
+                    <p className="adm-kpi-num" style={{ color: t.text }}>{loading ? "…" : k.value}</p>
+                    <p className="adm-kpi-lbl">{k.label}</p>
+                  </div>
+                  <div className="adm-kpi-icon" style={{ background: k.bg, color: k.color }}>{k.icon}</div>
+                </div>
+              </div>
+          ))}
+        </div>
+
+        {/* Card tabela */}
+        <div className="adm-card">
+
+          {/* Header */}
+          <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <MessageCircle size={16} style={{ color: AURA.wa }}/>
+              </div>
+              <div>
+                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 500, color: t.text, margin: 0, lineHeight: 1.1 }}>Mensagens recebidas</p>
+                <p style={{ fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "1px 0 0" }}>{filtrados.length} registro{filtrados.length !== 1 ? "s" : ""}</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: offline ? AURA.red : AURA.wa, animation: "adm-blink 2.5s ease-in-out infinite" }}/>
+                <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".12em", color: offline ? AURA.red : AURA.wa, textTransform: "uppercase" }}>{offline ? "Offline" : "Online"}</span>
+              </div>
+              <button className="adm-btn-ghost" style={{ padding: "7px 13px", fontSize: 8, letterSpacing: ".12em", height: 32 }} onClick={carregar}>
+                <RefreshCcw size={12} style={{ animation: loading ? "adm-spin 1s linear infinite" : "none" }}/> Atualizar
+              </button>
+            </div>
+          </div>
+
+          {/* Filtros */}
+          <div className="wa-filtros-row">
+            <div className="wa-filtro-busca">
+              <Search size={13} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }}/>
+              <input
+                  className="adm-input"
+                  style={{ padding: "8px 12px 8px 34px", fontSize: 13, borderRadius: 9 }}
+                  placeholder="Número, ID ou texto da mensagem..."
+                  value={busca}
+                  onChange={e => setBusca(e.target.value)}
+              />
+            </div>
+            <div className="wa-filtro-select">
+              <Filter size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none", zIndex: 1 }}/>
+              <select className="adm-select" style={{ padding: "8px 12px 8px 28px", fontSize: 12, borderRadius: 9 }} value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}>
+                <option value="">Todos tipos</option>
+                <option value="mensagem">Mensagem</option>
+                <option value="status">Status</option>
+              </select>
+            </div>
+            <div className="wa-filtro-select">
+              <Filter size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none", zIndex: 1 }}/>
+              <select className="adm-select" style={{ padding: "8px 12px 8px 28px", fontSize: 12, borderRadius: 9 }} value={filtroSt} onChange={e => setFiltroSt(e.target.value)}>
+                <option value="">Todos status</option>
+                <option value="recebida">Recebida</option>
+                <option value="sent">Sent</option>
+                <option value="delivered">Delivered</option>
+                <option value="read">Read</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Cabeçalho da tabela */}
+          <div className="wa-thead">
+            <span className="wa-col-num wa-th" style={{ textAlign: "right" }}>#</span>
+            <span className="wa-col-tipo wa-th">Tipo</span>
+            <span className="wa-col-fone wa-th">Número</span>
+            <span className="wa-col-id wa-th">Mensagem</span>
+            <span className="wa-col-st wa-th">Status</span>
+            <span className="wa-col-dt wa-th" style={{ textAlign: "right" }}>Recebido</span>
+            <span className="wa-col-arr wa-th"></span>
+          </div>
+
+          {/* Linhas */}
+          {loading ? (
+              <div style={{ padding: "40px 20px", textAlign: "center", color: t.textMuted }}>
+                <Loader2 size={22} style={{ animation: "adm-spin 1s linear infinite", marginBottom: 8 }}/>
+                <p style={{ fontSize: 11, margin: 0 }}>Carregando registros…</p>
+              </div>
+          ) : filtrados.length === 0 ? (
+              <div style={{ padding: "48px 20px", textAlign: "center", color: t.textMuted }}>
+                <Inbox size={28} style={{ marginBottom: 10, opacity: .4 }}/>
+                <p style={{ fontSize: 12, margin: 0 }}>Nenhum registro encontrado</p>
+              </div>
+          ) : (
+              <AnimatePresence>
+                {slice.map((r, i) => {
+                  const textoPreview = extrairTexto(r);
+                  const usuario = buscarUsuarioPorTelefone(r.numeroDestino);
+                  return (
+                      <motion.div key={r.id} className="wa-row"
+                                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: i * .025 }}
+                                  onClick={() => setDetalhes(r)}>
+                        <span className="wa-col-num">{(pag - 1) * POR_PAG + i + 1}</span>
+                        <span className="wa-col-tipo">{tipoBadge(r.tipoEvento)}</span>
+
+                        {/* Coluna com nome do usuário e número */}
+                        <span className="wa-col-fone" style={{ display: usuario ? 'flex' : 'block', flexDirection: usuario ? 'column' : undefined, gap: usuario ? '3px' : 0 }}>
+                          {usuario && (
+                              <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 11.5 }}>
+                              👤 {usuario.nome}
+                            </span>
+                          )}
+                          <span className="wa-mono">{r.numeroDestino || "—"}</span>
+                        </span>
+
+                        <span className="wa-col-id" style={{ display: "flex", flexDirection: "column", gap: 2, overflow: "hidden" }}>
+                          <span style={{ fontSize: 10, fontFamily: "monospace", color: t.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {r.idMensagem || "—"}
+                          </span>
+                          {textoPreview && (
+                              <span style={{ fontSize: 11.5, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 400 }}>
+                                {textoPreview}
+                              </span>
+                          )}
+                        </span>
+
+                        <span className="wa-col-st">{statusPill(r.status)}</span>
+                        <span className="wa-col-dt">{fmtData(r.recebidoEm)}</span>
+                        <span className="wa-col-arr"><ChevronRight size={13}/></span>
+                      </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+          )}
+
+          {/* Paginação */}
+          {totalPags > 1 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", borderTop: `1px solid ${t.border}` }}>
+                <span style={{ fontSize: 11, color: t.textMuted }}>{filtrados.length} registros</span>
+                <div style={{ display: "flex", gap: 4 }}>
+                  <button className="adm-ico-btn" style={{ width: 28, height: 28 }} disabled={pag === 1} onClick={() => setPag(p => p - 1)}><ChevronLeft size={12}/></button>
+                  {Array.from({ length: Math.min(totalPags, 7) }, (_, i) => i + 1).map(p => (
+                      <button key={p} onClick={() => setPag(p)} style={{ width: 28, height: 28, borderRadius: 8, border: `1px solid ${pag === p ? AURA.wa : t.border}`, background: pag === p ? AURA.wa : "transparent", color: pag === p ? "#fff" : t.textSec, fontSize: 11, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>{p}</button>
+                  ))}
+                  <button className="adm-ico-btn" style={{ width: 28, height: 28 }} disabled={pag === totalPags} onClick={() => setPag(p => p + 1)}><ChevronRight size={12}/></button>
+                </div>
+              </div>
+          )}
+        </div>
+
+        {/* ══ Drawer detalhe (portal) ══════════════════════════════════ */}
+        {createPortal(
+            <>
+              <div
+                  style={{ position: "fixed", inset: 0, zIndex: 200, display: detalhes ? "block" : "none", background: "rgba(0,0,0,.5)", backdropFilter: "blur(6px)" }}
+                  onClick={() => setDetalhes(null)}
+              />
+              <div className={`wa-drawer${detalhes ? " open" : ""}`}>
+                {detalhes && (() => {
+                  const texto    = extrairTexto(detalhes);
+                  const tipoMsg  = extrairTipoMsg(detalhes);
+                  const usuarioDetalhe = buscarUsuarioPorTelefone(detalhes.numeroDestino);
+                  return (
+                      <>
+                        <div style={{ height: 2, background: `linear-gradient(90deg, ${AURA.wa}, ${AURA.blue})` }}/>
+
+                        <div className="wa-drawer-head">
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <MessageCircle size={14} style={{ color: AURA.wa }}/>
+                            </div>
+                            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0 }}>Detalhe do registro</p>
+                          </div>
+                          <button className="adm-ico-btn" onClick={() => setDetalhes(null)} aria-label="Fechar"><X size={15}/></button>
+                        </div>
+
+                        <div className="wa-drawer-body">
+
+                          {/* Identificação */}
+                          <div className="wa-ds">
+                            <p className="wa-ds-title">Identificação</p>
+                            <div className="wa-dr"><span className="wa-dl">ID interno</span><span className="wa-dv" style={{ fontFamily: "monospace", fontSize: 11 }}>{detalhes.id}</span></div>
+                            <div className="wa-dr"><span className="wa-dl">Tipo evento</span><span className="wa-dv">{tipoBadge(detalhes.tipoEvento)}</span></div>
+                            <div className="wa-dr"><span className="wa-dl">Recebido em</span><span className="wa-dv">{fmtData(detalhes.recebidoEm)}</span></div>
+                          </div>
+
+                          {/* Dados da mensagem */}
+                          <div className="wa-ds">
+                            <p className="wa-ds-title">Dados da mensagem</p>
+                            <div className="wa-dr"><span className="wa-dl">ID mensagem</span><span className="wa-dv" style={{ fontFamily: "monospace", fontSize: 10, wordBreak: "break-all" }}>{detalhes.idMensagem || "—"}</span></div>
+                            <div className="wa-dr">
+                              <span className="wa-dl">Número</span>
+                              <span className="wa-dv">
+                                {usuarioDetalhe && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                      <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 12 }}>
+                                        👤 {usuarioDetalhe.nome}
+                                      </span>
+                                      <span style={{ fontFamily: "monospace" }}>
+                                        {detalhes.numeroDestino || "—"}
+                                      </span>
+                                    </div>
+                                )}
+                                {!usuarioDetalhe && (
+                                    <span style={{ fontFamily: "monospace" }}>
+                                      {detalhes.numeroDestino || "—"}
+                                    </span>
+                                )}
+                              </span>
+                            </div>
+                            <div className="wa-dr"><span className="wa-dl">Status</span><span className="wa-dv">{statusPill(detalhes.status)}</span></div>
+                          </div>
+
+                          {/* CONTEÚDO DA MENSAGEM */}
+                          {detalhes.tipoEvento === "mensagem" && (
+                              <div className="wa-ds">
+                                <p className="wa-ds-title">Conteúdo da mensagem</p>
+
+                                {tipoMsg && (
+                                    <div className="wa-dr">
+                                      <span className="wa-dl">Tipo</span>
+                                      <span className="wa-dv">
+                                        <span className="wa-tipo-badge" style={{ textTransform: "capitalize" }}>{tipoMsg}</span>
+                                      </span>
+                                    </div>
+                                )}
+
+                                <div className="wa-dr" style={{ alignItems: "flex-start" }}>
+                                  <span className="wa-dl" style={{ paddingTop: 10 }}>Texto</span>
+                                  <div style={{
+                                    flex: 1,
+                                    background: texto ? "rgba(37,211,102,.06)" : "transparent",
+                                    border: `1px solid ${texto ? "rgba(37,211,102,.18)" : t.borderIn}`,
+                                    borderRadius: 10,
+                                    padding: "10px 14px",
+                                    fontSize: 13,
+                                    color: texto ? t.text : t.textMuted,
+                                    lineHeight: 1.65,
+                                    wordBreak: "break-word",
+                                    fontStyle: texto ? "normal" : "italic",
+                                    minHeight: 42,
+                                  }}>
+                                    {texto || "Sem texto (áudio, imagem ou tipo sem corpo)"}
+                                  </div>
+                                </div>
+                              </div>
+                          )}
+
+                          {/* Payload bruto */}
+                          <div className="wa-ds">
+                            <p className="wa-ds-title">Payload original</p>
+                            <div className="wa-json">
+                              {(() => { try { return JSON.stringify(JSON.parse(detalhes.payload), null, 2); } catch { return detalhes.payload || "—"; } })()}
+                            </div>
+                          </div>
+
+                        </div>
+                      </>
+                  );
+                })()}
+              </div>
+            </>,
+            document.body
+        )}
+      </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   COMPONENTE PRINCIPAL
+════════════════════════════════════════════════════════════════════════════ */
 export default function AdminUsers() {
   const [usuarios,       setUsuarios]       = useState([]);
   const [pendentes,      setPendentes]      = useState(new Set());
@@ -772,7 +1067,7 @@ export default function AdminUsers() {
   const [form,           setForm]           = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
   const [isDark,         setIsDark]         = useState(() => localStorage.getItem("theme") === "dark");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [megaOpenId,     setMegaOpenId]     = useState(null); // desktop mega-menu (id da seção aberta)
+  const [megaOpenId,     setMegaOpenId]     = useState(null);
   const [moduloAtivo,    setModuloAtivo]    = useState("usuarios");
   const [secaoExpMobile, setSecaoExpMobile] = useState("admin");
   const [celulas,        setCelulas]        = useState([]);
@@ -785,7 +1080,6 @@ export default function AdminUsers() {
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
 
-  // Trava o scroll do body quando o overlay mobile está aberto
   useEffect(() => {
     if (mobileMenuOpen) {
       const prev = document.body.style.overflow;
@@ -794,7 +1088,6 @@ export default function AdminUsers() {
     }
   }, [mobileMenuOpen]);
 
-  // Fecha o mega-menu com ESC
   useEffect(() => {
     if (!megaOpenId) return;
     const onKey = e => { if (e.key === "Escape") setMegaOpenId(null); };
@@ -911,14 +1204,13 @@ export default function AdminUsers() {
     setMobileMenuOpen(false);
   };
 
-  const qtdPend   = pendentes.size;
-  const isLider   = moduloAtivo?.startsWith("lider-");
+  const qtdPend    = pendentes.size;
+  const isLider    = moduloAtivo?.startsWith("lider-");
   const secaoAtiva = SECOES.find(s => s.itens.some(i => i.key === moduloAtivo));
   const itemAtivo  = SECOES.flatMap(s => s.itens).find(i => i.key === moduloAtivo);
   const ativos     = usuarios.filter(u =>  u.ativo).length;
   const suspensos  = usuarios.filter(u => !u.ativo).length;
 
-  /* Loading screen */
   if (loading && usuarios.length === 0) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? "#080810" : "#F2EDE4" }}>
         <div style={{ textAlign:"center" }}>
@@ -936,22 +1228,19 @@ export default function AdminUsers() {
         <div className="adm-bg-layer" />
         <div className="adm-noise" />
 
-        {/* ════════════════════════════════════════════════════════════════
-            HEADER (sticky) — Topbar + nav row (desktop) + mega-menu
-        ════════════════════════════════════════════════════════════════ */}
+        {/* HEADER */}
         <div className="adm-header-wrap">
           <div className="adm-header-top-line" />
 
-          {/* Row 1: brand + actions */}
           <div className="adm-topbar">
             <div className="adm-topbar-l">
-              <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu" style={{ display: "flex" }}>
-                <Menu size={18} />
+              <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
+                <Menu size={18}/>
               </button>
-              <div className="adm-topbar-sep" style={{ display: "block" }} />
+              <div className="adm-topbar-sep"/>
               <div className="adm-brand">
                 <div className="adm-brand-logo">
-                  <img src="/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }} />
+                  <img src="/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }}/>
                 </div>
                 <div className="adm-brand-text">
                   <p className="adm-brand-name">IEQ Pituaçu</p>
@@ -962,30 +1251,27 @@ export default function AdminUsers() {
 
             <div className="adm-topbar-r">
               <div className="adm-user-chip">
-                <div className="adm-user-chip-dot" />
+                <div className="adm-user-chip-dot"/>
                 <div>
                   <p className="adm-user-chip-name">Administrador</p>
                   <p className="adm-user-chip-role">Admin · IEQ</p>
                 </div>
               </div>
-              <div className="adm-live-pill">
-                <div className="adm-live-dot" />
-                Online
-              </div>
-              <div className="adm-topbar-sep" />
+              <div className="adm-live-pill"><div className="adm-live-dot"/> Online</div>
+              <div className="adm-topbar-sep"/>
               <button className="adm-ico-btn" onClick={() => setIsDark(!isDark)} aria-label="Tema">
                 {isDark ? <Sun size={15}/> : <Moon size={15}/>}
               </button>
               <button className="adm-ico-btn" onClick={carregarUsuarios} aria-label="Atualizar">
-                <RefreshCcw size={15} style={{ animation: loading ? "adm-spin 1s linear infinite" : "none" }} />
+                <RefreshCcw size={15} style={{ animation: loading ? "adm-spin 1s linear infinite" : "none" }}/>
               </button>
-              <div className="adm-topbar-sep" />
-              <button className="adm-ico-btn" onClick={() => setExitConfirm(true)} aria-label="Sair" title="Sair do sistema">
-                <LogOut size={15} />
+              <div className="adm-topbar-sep"/>
+              <button className="adm-ico-btn" onClick={() => setExitConfirm(true)} aria-label="Sair">
+                <LogOut size={15}/>
               </button>
               {moduloAtivo === "usuarios" && (
                   <>
-                    <div className="adm-topbar-sep" />
+                    <div className="adm-topbar-sep"/>
                     <button className="adm-cta-btn adm-cta-red" onClick={abrirNovo}>
                       <UserPlus size={13}/> <span className="adm-cta-btn-label">Novo usuário</span>
                     </button>
@@ -994,7 +1280,7 @@ export default function AdminUsers() {
             </div>
           </div>
 
-          {/* Row 2: desktop section nav */}
+          {/* Nav desktop */}
           <nav className="adm-nav-row" ref={navRowRef}>
             {SECOES.map(sec => {
               const SIcon = sec.icon;
@@ -1002,23 +1288,23 @@ export default function AdminUsers() {
               const hasActive = sec.itens.some(i => i.key === moduloAtivo);
               return (
                   <button key={sec.id}
-                          className={`adm-nav-sec-btn${open ? " open" : ""}${hasActive ? " has-active" : ""}`}
+                          className={`adm-nav-sec-btn${open?" open":""}${hasActive?" has-active":""}`}
                           style={{ "--sc": sec.color }}
                           onClick={() => setMegaOpenId(open ? null : sec.id)}>
-                    <SIcon size={13} />
+                    <SIcon size={13}/>
                     {sec.label}
                     {sec.id === "admin" && qtdPend > 0 && <span className="adm-nav-sec-badge">{qtdPend}</span>}
-                    <ChevronDown size={11} style={{ opacity:.5, transform: open ? "rotate(180deg)" : "none", transition:"transform .2s" }} />
+                    <ChevronDown size={11} style={{ opacity:.5, transform: open?"rotate(180deg)":"none", transition:"transform .2s" }}/>
                   </button>
               );
             })}
           </nav>
 
-          {/* Mega menu (desktop) */}
+          {/* Mega menu */}
           <AnimatePresence>
             {megaOpenId && (
                 <>
-                  <div className="adm-megamenu-backdrop" onClick={() => setMegaOpenId(null)} />
+                  <div className="adm-megamenu-backdrop" onClick={() => setMegaOpenId(null)}/>
                   <motion.div className="adm-megamenu"
                               initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }}
                               transition={{ duration:.16 }}>
@@ -1028,9 +1314,9 @@ export default function AdminUsers() {
                         const ativo = moduloAtivo === item.key;
                         const sec = SECOES.find(s => s.id === megaOpenId);
                         return (
-                            <button key={item.key} className={`adm-mega-item${ativo ? " act" : ""}`} onClick={() => selecionarModulo(item.key)}>
-                              <div className="adm-mega-ico" style={{ background: ativo ? sec.color : (isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.045)") }}>
-                                <IIcon size={16} style={{ color: ativo ? "#fff" : sec.color, opacity: ativo ? 1 : .75 }} />
+                            <button key={item.key} className={`adm-mega-item${ativo?" act":""}`} onClick={() => selecionarModulo(item.key)}>
+                              <div className="adm-mega-ico" style={{ background: ativo ? sec.color : (isDark?"rgba(255,255,255,.05)":"rgba(0,0,0,.045)") }}>
+                                <IIcon size={16} style={{ color: ativo?"#fff":sec.color, opacity: ativo?1:.75 }}/>
                               </div>
                               <div className="adm-mega-rel">
                                 <span className="adm-mega-main">{item.label}</span>
@@ -1047,9 +1333,7 @@ export default function AdminUsers() {
           </AnimatePresence>
         </div>
 
-        {/* ════════════════════════════════════════════════════════════════
-            MOBILE OVERLAY (tela cheia)
-        ════════════════════════════════════════════════════════════════ */}
+        {/* MOBILE OVERLAY */}
         <AnimatePresence>
           {mobileMenuOpen && (
               <motion.div className="adm-mobile-overlay"
@@ -1058,7 +1342,7 @@ export default function AdminUsers() {
                 <div className="adm-mobile-overlay-head">
                   <div className="adm-brand">
                     <div className="adm-brand-logo">
-                      <img src="/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }} />
+                      <img src="/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }}/>
                     </div>
                     <div>
                       <p className="adm-brand-name">IEQ Pituaçu</p>
@@ -1066,7 +1350,7 @@ export default function AdminUsers() {
                     </div>
                   </div>
                   <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Fechar menu">
-                    <X size={18} />
+                    <X size={18}/>
                   </button>
                 </div>
 
@@ -1078,39 +1362,31 @@ export default function AdminUsers() {
                         <div key={sec.id}>
                           <div className="adm-mobile-sec-toggle" onClick={() => setSecaoExpMobile(exp ? null : sec.id)}>
                             <div className="adm-mobile-sec-left">
-                              <SIcon size={14} style={{ color: sec.color }} />
+                              <SIcon size={14} style={{ color: sec.color }}/>
                               <span className="adm-mobile-sec-label">{sec.label}</span>
-                              {sec.id === "admin" && qtdPend > 0 && <span className="adm-mobile-nav-badge" style={{ marginLeft: 4 }}>{qtdPend}</span>}
+                              {sec.id === "admin" && qtdPend > 0 && <span className="adm-mobile-nav-badge" style={{ marginLeft:4 }}>{qtdPend}</span>}
                             </div>
-                            <ChevronDown size={14} style={{ color:"rgba(245,240,232,.3)", transform: exp ? "rotate(180deg)" : "none", transition:"transform .2s" }} />
+                            <ChevronDown size={14} style={{ color:"rgba(245,240,232,.3)", transform: exp?"rotate(180deg)":"none", transition:"transform .2s" }}/>
                           </div>
                           <AnimatePresence>
                             {exp && (
-                                <motion.div
-                                    initial={{ height:0, opacity:0 }}
-                                    animate={{ height:"auto", opacity:1 }}
-                                    exit={{ height:0, opacity:0 }}
-                                    transition={{ duration:.16 }}
-                                    style={{ overflow:"hidden" }}
-                                >
+                                <motion.div initial={{ height:0,opacity:0 }} animate={{ height:"auto",opacity:1 }} exit={{ height:0,opacity:0 }} transition={{ duration:.16 }} style={{ overflow:"hidden" }}>
                                   {sec.itens.map(item => {
                                     const IIcon = item.icon;
                                     const ativo = moduloAtivo === item.key;
                                     return (
                                         <button key={item.key}
-                                                className={`adm-mobile-nav-item${ativo ? " act" : ""}`}
+                                                className={`adm-mobile-nav-item${ativo?" act":""}`}
                                                 style={{ "--nc": sec.color }}
                                                 onClick={() => selecionarModulo(item.key)}>
                                           <div className="adm-mobile-nav-ico">
-                                            <IIcon size={14} style={{ color: ativo ? "#fff" : sec.color, opacity: ativo ? 1 : .65 }} />
+                                            <IIcon size={14} style={{ color: ativo?"#fff":sec.color, opacity: ativo?1:.65 }}/>
                                           </div>
                                           <div style={{ flex:1, minWidth:0 }}>
                                             <span className="adm-mobile-nav-main">{item.label}</span>
                                             <span className="adm-mobile-nav-sub">{item.sub}</span>
                                           </div>
-                                          {item.key === "usuarios" && qtdPend > 0 && (
-                                              <span className="adm-mobile-nav-badge">{qtdPend}</span>
-                                          )}
+                                          {item.key === "usuarios" && qtdPend > 0 && <span className="adm-mobile-nav-badge">{qtdPend}</span>}
                                         </button>
                                     );
                                   })}
@@ -1124,7 +1400,7 @@ export default function AdminUsers() {
 
                 <div className="adm-mobile-overlay-foot">
                   <button className="adm-btn-primary red" style={{ width:"100%" }} onClick={() => { setMobileMenuOpen(false); setExitConfirm(true); }}>
-                    <LogOut size={14} /> Sair do sistema
+                    <LogOut size={14}/> Sair do sistema
                   </button>
                   <p style={{ textAlign:"center", fontSize:7.5, letterSpacing:".16em", color:"rgba(245,240,232,.12)", marginTop:14, textTransform:"uppercase", fontFamily:"'Inter',sans-serif" }}>
                     © IEQ Pituaçu · {new Date().getFullYear()}
@@ -1134,9 +1410,8 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ─── MAIN ─────────────────────────────────────────────────────── */}
+        {/* MAIN */}
         <main className="adm-main">
-
           <div className="adm-page-head">
             <p className="adm-page-eyebrow">{secaoAtiva?.label || "Admin"}</p>
             <motion.h2 className="adm-page-title" key={moduloAtivo}
@@ -1145,13 +1420,11 @@ export default function AdminUsers() {
             </motion.h2>
           </div>
 
-          {/* Content */}
           <div className="adm-content">
 
-            {/* Seletor célula */}
             {isLider && celulas.length > 0 && (
-                <div className="adm-celula-bar" style={{ marginTop: 14 }}>
-                  <Building2 size={15} style={{ color:AURA.blue, flexShrink:0 }} />
+                <div className="adm-celula-bar" style={{ marginTop:14 }}>
+                  <Building2 size={15} style={{ color:AURA.blue, flexShrink:0 }}/>
                   <span style={{ fontSize:9, fontWeight:600, letterSpacing:".14em", textTransform:"uppercase", color:t.textMuted, flexShrink:0 }}>Célula:</span>
                   <div style={{ position:"relative", flex:1 }}>
                     <select className="adm-select" style={{ paddingLeft:16 }}
@@ -1169,53 +1442,45 @@ export default function AdminUsers() {
                           transition={{ duration:.18 }}
                           style={{ marginTop: isLider && celulas.length > 0 ? 0 : 14 }}>
 
-                {/* ══ PAINEL USUÁRIOS ══ */}
                 {moduloAtivo === "usuarios" && (
                     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-
-                      {/* KPIs */}
                       <div className="adm-kpi-grid">
                         {[
-                          { label:"Total",     value:usuarios.length, color:AURA.blue,       bg:"rgba(0,61,165,.08)",    icon:<Users size={16}/>,  trend:"usuários cadastrados" },
-                          { label:"Ativos",    value:ativos,          color:AURA.green,      bg:"rgba(5,150,105,.08)",   icon:<Power size={16}/>,  trend:"com acesso liberado"  },
-                          { label:"Suspensos", value:suspensos,       color:AURA.red,        bg:"rgba(200,16,46,.08)",   icon:<Shield size={16}/>, trend:"acesso bloqueado"     },
-                          { label:"Pendentes", value:qtdPend,         color:AURA.yellowDark, bg:"rgba(196,140,0,.08)",   icon:<Clock size={16}/>,  trend:"aguardando aprovação" },
+                          { label:"Total",     value:usuarios.length, color:AURA.blue,       bg:"rgba(0,61,165,.08)",  icon:<Users size={16}/>,  trend:"usuários cadastrados" },
+                          { label:"Ativos",    value:ativos,          color:AURA.green,      bg:"rgba(5,150,105,.08)", icon:<Power size={16}/>,  trend:"com acesso liberado"  },
+                          { label:"Suspensos", value:suspensos,       color:AURA.red,        bg:"rgba(200,16,46,.08)", icon:<Shield size={16}/>, trend:"acesso bloqueado"     },
+                          { label:"Pendentes", value:qtdPend,         color:AURA.yellowDark, bg:"rgba(196,140,0,.08)", icon:<Clock size={16}/>,  trend:"aguardando aprovação" },
                         ].map(k => (
                             <div key={k.label} className="adm-kpi">
                               <div className="adm-kpi-top">
                                 <div>
-                                  <p className="adm-kpi-num" style={{ color: k.label === "Pendentes" && k.value > 0 ? AURA.yellowDark : t.text }}>{k.value}</p>
+                                  <p className="adm-kpi-num" style={{ color: k.label==="Pendentes"&&k.value>0 ? AURA.yellowDark : t.text }}>{k.value}</p>
                                   <p className="adm-kpi-lbl">{k.label}</p>
                                 </div>
-                                <div className="adm-kpi-icon" style={{ background:k.bg, color:k.color }}>
-                                  {k.icon}
-                                </div>
+                                <div className="adm-kpi-icon" style={{ background:k.bg, color:k.color }}>{k.icon}</div>
                               </div>
                               <p className="adm-kpi-trend">{k.trend}</p>
                             </div>
                         ))}
                       </div>
 
-                      {/* Lista de usuários */}
                       <div className="adm-card">
-                        {/* Alerta pendentes */}
                         {qtdPend > 0 && (
                             <div style={{ display:"flex", alignItems:"center", gap:8, padding:"9px 22px", background:"rgba(253,184,19,.06)", borderBottom:`1px solid rgba(253,184,19,.15)` }}>
-                              <Clock size={12} style={{ color:AURA.yellowDark }} />
+                              <Clock size={12} style={{ color:AURA.yellowDark }}/>
                               <span style={{ fontSize:8.5, fontWeight:600, letterSpacing:".12em", textTransform:"uppercase", color:AURA.yellowDark }}>
-                          {qtdPend} solicitaç{qtdPend > 1 ? "ões" : "ão"} aguardando aprovação
-                        </span>
+                                {qtdPend} solicitaç{qtdPend > 1 ? "ões" : "ão"} aguardando aprovação
+                              </span>
                             </div>
                         )}
 
-                        {/* Header card */}
                         <div className="adm-card-header" style={{ padding:"18px 22px", borderBottom:`1px solid ${t.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap" }}>
                           <div>
                             <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:17, fontWeight:500, color:t.text, margin:0, lineHeight:1.1 }}>Base de Usuários</h3>
                             <p style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:"2px 0 0" }}>{usuarios.length} registros</p>
                           </div>
                           <button className="adm-btn-ghost" style={{ padding:"8px 14px", fontSize:8, letterSpacing:".14em" }} onClick={carregarUsuarios}>
-                            <RefreshCcw size={12} style={{ animation:loading?"adm-spin 1s linear infinite":"none" }} /> Atualizar
+                            <RefreshCcw size={12} style={{ animation:loading?"adm-spin 1s linear infinite":"none" }}/> Atualizar
                           </button>
                         </div>
 
@@ -1227,18 +1492,17 @@ export default function AdminUsers() {
                             return (
                                 <motion.div key={u.id} className="adm-row"
                                             initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-16 }}
-                                            transition={{ delay: i * .025 }}
+                                            transition={{ delay: i*.025 }}
                                             style={{ borderLeft:`3px solid ${temP ? AURA.yellow : "transparent"}` }}>
 
-                                  {/* Left */}
                                   <div className="adm-row-l">
                                     <div className="adm-avatar"
-                                         style={{ border:`1.5px solid ${temP ? AURA.yellow+"55" : t.border}`, opacity: u.ativo ? 1 : .5 }}
+                                         style={{ border:`1.5px solid ${temP?AURA.yellow+"55":t.border}`, opacity:u.ativo?1:.5 }}
                                          onClick={() => abrirSeletorFoto(u.id)}>
                                       {u.fotoPerfil
-                                          ? <img src={getFotoUrl(u.fotoPerfil)} alt={u.nome} />
+                                          ? <img src={getFotoUrl(u.fotoPerfil)} alt={u.nome}/>
                                           : <div className="adm-avatar-placeholder"
-                                                 style={{ background: u.ativo ? `linear-gradient(135deg,${AURA.redDark},${AURA.blue})` : (isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)") }}>
+                                                 style={{ background:u.ativo?`linear-gradient(135deg,${AURA.redDark},${AURA.blue})`:(isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)") }}>
                                             {u.nome?.charAt(0).toUpperCase()}
                                           </div>
                                       }
@@ -1252,37 +1516,34 @@ export default function AdminUsers() {
                                     </div>
                                   </div>
 
-                                  {/* Right */}
                                   <div className="adm-row-r">
-                              <span className="adm-badge" style={{ background:"rgba(0,61,165,.07)", border:"1px solid rgba(0,61,165,.18)", color:AURA.blue }}>
-                                {u.perfil?.replace(/_/g," ")}
-                              </span>
+                                    <span className="adm-badge" style={{ background:"rgba(0,61,165,.07)", border:"1px solid rgba(0,61,165,.18)", color:AURA.blue }}>
+                                      {u.perfil?.replace(/_/g," ")}
+                                    </span>
                                     <span className="adm-badge" style={{ background:u.ativo?"rgba(5,150,105,.07)":"rgba(0,0,0,.04)", border:`1px solid ${u.ativo?"rgba(5,150,105,.2)":"rgba(0,0,0,.07)"}`, color:u.ativo?AURA.green:t.textMuted }}>
-                                <span style={{ width:5, height:5, borderRadius:"50%", background:u.ativo?AURA.green:t.textMuted, flexShrink:0, display:"block" }}/>
+                                      <span style={{ width:5, height:5, borderRadius:"50%", background:u.ativo?AURA.green:t.textMuted, flexShrink:0, display:"block" }}/>
                                       {u.ativo ? "Ativo" : "Suspenso"}
-                              </span>
+                                    </span>
 
-                                    {/* Aprovação */}
                                     {temP && (
                                         <>
                                           <button disabled={eApr} onClick={() => aprovarAlteracao(u.id, u.nome)}
                                                   className="adm-pending-action"
                                                   style={{ background:"rgba(5,150,105,.07)", border:"1px solid rgba(5,150,105,.22)", color:AURA.green }}>
-                                            {eApr ? <Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/> : <CheckCircle size={11}/>} Aprovar
+                                            {eApr?<Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/>:<CheckCircle size={11}/>} Aprovar
                                           </button>
                                           <button disabled={eApr} onClick={() => rejeitarAlteracao(u.id, u.nome)}
                                                   className="adm-pending-action"
                                                   style={{ background:"rgba(200,16,46,.07)", border:"1px solid rgba(200,16,46,.22)", color:AURA.red }}>
-                                            {eApr ? <Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/> : <XCircle size={11}/>} Rejeitar
+                                            {eApr?<Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/>:<XCircle size={11}/>} Rejeitar
                                           </button>
                                         </>
                                     )}
 
-                                    {/* Ações */}
                                     {[
-                                      { icon:<Pencil size={14}/>,  title:"Editar",    fn:() => abrirEdicao(u),      hc:AURA.blue,       hb:"rgba(0,61,165,.08)"   },
-                                      { icon:<Power size={14}/>,   title:"Suspender", fn:() => alternarStatus(u.id),hc:AURA.yellowDark, hb:"rgba(196,140,0,.08)"  },
-                                      { icon:<Trash2 size={14}/>,  title:"Excluir",   fn:() => deletarUsuario(u.id),hc:AURA.red,        hb:"rgba(200,16,46,.08)"  },
+                                      { icon:<Pencil size={14}/>,  title:"Editar",    fn:() => abrirEdicao(u),       hc:AURA.blue,       hb:"rgba(0,61,165,.08)"  },
+                                      { icon:<Power size={14}/>,   title:"Suspender", fn:() => alternarStatus(u.id), hc:AURA.yellowDark, hb:"rgba(196,140,0,.08)" },
+                                      { icon:<Trash2 size={14}/>,  title:"Excluir",   fn:() => deletarUsuario(u.id), hc:AURA.red,        hb:"rgba(200,16,46,.08)" },
                                     ].map(btn => (
                                         <button key={btn.title} className="adm-action-btn" onClick={btn.fn} title={btn.title}
                                                 onMouseEnter={e => { e.currentTarget.style.color=btn.hc; e.currentTarget.style.background=btn.hb; e.currentTarget.style.borderColor=btn.hc+"44"; }}
@@ -1299,16 +1560,18 @@ export default function AdminUsers() {
                     </div>
                 )}
 
-                {/* ══ HISTÓRICO ══ */}
                 {moduloAtivo === "historico" && (
                     <div className="adm-card">
-                      <HistoricoAuditoria isDark={isDark} />
+                      <HistoricoAuditoria isDark={isDark}/>
                     </div>
                 )}
 
-                {/* ══ OUTROS ══ */}
-                {moduloAtivo !== "usuarios" && moduloAtivo !== "historico" && (
-                    <ModuloRenderer moduloKey={moduloAtivo} isDark={isDark} celulaAdmin={celulaAdmin} />
+                {moduloAtivo === "wa-registros" && (
+                    <PainelWhatsApp isDark={isDark} t={t} usuarios={usuarios}/>
+                )}
+
+                {moduloAtivo !== "usuarios" && moduloAtivo !== "historico" && moduloAtivo !== "wa-registros" && (
+                    <ModuloRenderer moduloKey={moduloAtivo} isDark={isDark} celulaAdmin={celulaAdmin}/>
                 )}
               </motion.div>
             </AnimatePresence>
@@ -1317,35 +1580,27 @@ export default function AdminUsers() {
           </div>
         </main>
 
-        {/* Input foto oculto */}
-        <input ref={fotoRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFoto} />
+        <input ref={fotoRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFoto}/>
 
-        {/* ════ MODAL CENTRADO — vindo do topo ═══════════════════════════ */}
+        {/* MODAL USUÁRIO */}
         <AnimatePresence>
           {drawerOpen && (
-              <motion.div
-                  className="adm-modal-backdrop"
-                  initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                  transition={{ duration:.2 }}
-                  onClick={e => { if (e.target === e.currentTarget) setDrawerOpen(false); }}
-              >
-                <motion.div
-                    className="adm-modal-box"
-                    initial={{ opacity:0, y:-32, scale:.96 }}
-                    animate={{ opacity:1, y:0,   scale:1   }}
-                    exit={{    opacity:0, y:-20,  scale:.97 }}
-                    transition={{ type:"spring", damping:28, stiffness:280 }}
-                >
-                  {/* Linha topo colorida */}
-                  <div style={{ height:2, background:`linear-gradient(90deg, ${AURA.blue}, ${AURA.red} 40%, ${AURA.gold} 70%, ${AURA.goldLight})`, flexShrink:0 }} />
+              <motion.div className="adm-modal-backdrop"
+                          initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                          transition={{ duration:.2 }}
+                          onClick={e => { if (e.target === e.currentTarget) setDrawerOpen(false); }}>
+                <motion.div className="adm-modal-box"
+                            initial={{ opacity:0, y:-32, scale:.96 }}
+                            animate={{ opacity:1, y:0,   scale:1   }}
+                            exit={{    opacity:0, y:-20,  scale:.97 }}
+                            transition={{ type:"spring", damping:28, stiffness:280 }}>
 
-                  {/* Header */}
+                  <div style={{ height:2, background:`linear-gradient(90deg,${AURA.blue},${AURA.red} 40%,${AURA.gold} 70%,${AURA.goldLight})`, flexShrink:0 }}/>
+
                   <div className="adm-modal-header">
-                    {/* Botão fechar */}
                     <button className="adm-modal-close" onClick={() => setDrawerOpen(false)} style={{
-                      position:"absolute",
-                      width:34, height:34, borderRadius:10, border:`1px solid ${t.border}`,
-                      background: isDark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",
+                      position:"absolute", width:34, height:34, borderRadius:10, border:`1px solid ${t.border}`,
+                      background:isDark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",
                       cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
                       color:t.textMuted, transition:"all .2s",
                     }}
@@ -1354,17 +1609,12 @@ export default function AdminUsers() {
                       <X size={16}/>
                     </button>
 
-                    {/* Ícone + título lado a lado */}
                     <div style={{ display:"flex", alignItems:"center", gap:16, paddingRight:36 }}>
                       <div style={{
                         width:52, height:52, borderRadius:15, flexShrink:0,
                         display:"flex", alignItems:"center", justifyContent:"center",
-                        background: editandoId
-                            ? `linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`
-                            : `linear-gradient(135deg,${AURA.redDark},${AURA.red})`,
-                        boxShadow: editandoId
-                            ? "0 8px 24px rgba(0,61,165,.28)"
-                            : "0 8px 24px rgba(200,16,46,.28)",
+                        background:editandoId?`linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`:`linear-gradient(135deg,${AURA.redDark},${AURA.red})`,
+                        boxShadow:editandoId?"0 8px 24px rgba(0,61,165,.28)":"0 8px 24px rgba(200,16,46,.28)",
                       }}>
                         {editandoId ? <Pencil size={20} color="#fff"/> : <UserPlus size={20} color="#fff"/>}
                       </div>
@@ -1382,7 +1632,6 @@ export default function AdminUsers() {
                     </div>
                   </div>
 
-                  {/* Corpo */}
                   <div className="adm-modal-body">
                     <form id="modal-form" onSubmit={editandoId ? salvarEdicao : adicionarUsuario}>
                       <div className="adm-modal-form-grid">
@@ -1396,7 +1645,7 @@ export default function AdminUsers() {
                               <label className="adm-label">{f.label}</label>
                               <InputField icon={f.icon} type={f.type} placeholder={f.placeholder}
                                           value={form[f.key]} onChange={v => setForm({...form,[f.key]:v})}
-                                          required={f.req} isDark={isDark} t={t} />
+                                          required={f.req} isDark={isDark} t={t}/>
                             </div>
                         ))}
                       </div>
@@ -1407,7 +1656,7 @@ export default function AdminUsers() {
                           <div style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:AURA.gold, opacity:.5, pointerEvents:"none" }}>
                             <Shield size={14}/>
                           </div>
-                          <select className="adm-select" value={form.perfil} onChange={e => setForm({...form, perfil:e.target.value})}>
+                          <select className="adm-select" value={form.perfil} onChange={e => setForm({...form,perfil:e.target.value})}>
                             {perfis.map(p => <option key={p} value={p}>{p.replace(/_/g," ")}</option>)}
                           </select>
                         </div>
@@ -1423,14 +1672,13 @@ export default function AdminUsers() {
                     </form>
                   </div>
 
-                  {/* Rodapé */}
                   <div className="adm-modal-footer">
                     <button type="button" className="adm-btn-ghost" style={{ minWidth:100 }} onClick={() => setDrawerOpen(false)}>
                       Cancelar
                     </button>
                     <button type="submit" form="modal-form" disabled={sending}
-                            className={`adm-btn-primary ${editandoId ? "blue" : "red"}`}
-                            style={{ opacity: sending ? .65 : 1 }}>
+                            className={`adm-btn-primary ${editandoId?"blue":"red"}`}
+                            style={{ opacity:sending?.65:1 }}>
                       {sending
                           ? <><Loader2 size={14} style={{ animation:"adm-spin 1s linear infinite" }}/> Salvando…</>
                           : editandoId
@@ -1443,13 +1691,14 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ════ MODAL SAIR ════════════════════════════════════════════════ */}
+        {/* MODAL SAIR */}
         <AnimatePresence>
           {exitConfirm && (
               <motion.div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}
                           initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-                <motion.div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.85)", backdropFilter:"blur(14px)" }} onClick={() => setExitConfirm(false)} />
-                <motion.div className="adm-exit-modal" initial={{ scale:.88, opacity:0, y:20 }} animate={{ scale:1, opacity:1, y:0 }} exit={{ scale:.92, opacity:0 }}
+                <motion.div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.85)", backdropFilter:"blur(14px)" }} onClick={() => setExitConfirm(false)}/>
+                <motion.div className="adm-exit-modal"
+                            initial={{ scale:.88,opacity:0,y:20 }} animate={{ scale:1,opacity:1,y:0 }} exit={{ scale:.92,opacity:0 }}
                             transition={{ type:"spring", stiffness:380, damping:28 }}
                             style={{ position:"relative", zIndex:10, width:"100%", maxWidth:360, background:t.bgEl, border:`1px solid ${t.border}`, borderRadius:22, padding:"36px 28px 28px", textAlign:"center", boxShadow:"0 40px 80px rgba(0,0,0,.7)" }}>
                   <div style={{ width:60, height:60, borderRadius:18, margin:"0 auto 20px", background:"rgba(200,16,46,.08)", border:"1px solid rgba(200,16,46,.2)", display:"flex", alignItems:"center", justifyContent:"center", color:AURA.red }}>
@@ -1457,10 +1706,10 @@ export default function AdminUsers() {
                   </div>
                   <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:500, color:t.text, margin:"0 0 10px" }}>Encerrar Sessão</h3>
                   <p style={{ fontSize:13, fontWeight:300, color:t.textSec, margin:"0 0 24px", lineHeight:1.65 }}>Tem certeza que deseja sair do sistema?</p>
-                  <div className="adm-divider" style={{ margin:"0 0 20px" }} />
+                  <div className="adm-divider" style={{ margin:"0 0 20px" }}/>
                   <div style={{ display:"flex", gap:10 }}>
                     <button onClick={() => setExitConfirm(false)} className="adm-btn-ghost" style={{ flex:1, padding:"13px" }}>Cancelar</button>
-                    <button onClick={() => { localStorage.clear(); window.location.href = "/"; }}
+                    <button onClick={() => { localStorage.clear(); window.location.href="/"; }}
                             className="adm-btn-primary red" style={{ flex:1.5, padding:"13px" }}>
                       <LogOut size={13}/> Sair Agora
                     </button>
@@ -1470,11 +1719,11 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ════ TOASTS ════════════════════════════════════════════════════ */}
+        {/* TOASTS */}
         <AnimatePresence>
           {sucesso && (
               <motion.div className="adm-toast"
-                          initial={{ opacity:0, y:20, scale:.95 }} animate={{ opacity:1, y:0, scale:1 }} exit={{ opacity:0, y:16, scale:.95 }}
+                          initial={{ opacity:0,y:20,scale:.95 }} animate={{ opacity:1,y:0,scale:1 }} exit={{ opacity:0,y:16,scale:.95 }}
                           style={{ background:AURA.green, color:"#fff", boxShadow:"0 10px 32px rgba(5,150,105,.4)" }}>
                 <CheckCircle size={14}/> {sucesso}
               </motion.div>
@@ -1483,7 +1732,7 @@ export default function AdminUsers() {
         <AnimatePresence>
           {erro && (
               <motion.div className="adm-toast"
-                          initial={{ opacity:0, y:20, scale:.95 }} animate={{ opacity:1, y:0, scale:1 }} exit={{ opacity:0, y:16, scale:.95 }}
+                          initial={{ opacity:0,y:20,scale:.95 }} animate={{ opacity:1,y:0,scale:1 }} exit={{ opacity:0,y:16,scale:.95 }}
                           style={{ background:AURA.red, color:"#fff", boxShadow:"0 10px 32px rgba(200,16,46,.4)", bottom:sucesso?76:26 }}>
                 <Power size={14}/>
                 <span style={{ overflow:"hidden", textOverflow:"ellipsis", maxWidth:"60vw" }}>{erro}</span>
