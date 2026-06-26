@@ -16,7 +16,6 @@ import {
   BarChart2, TrendingUp, Target, ChevronRight,
   MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
   ChevronLeft, Inbox,
-  // ── Bloqueios ──
   ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info,
 } from "lucide-react";
 
@@ -152,6 +151,16 @@ function normalizarNumero(n) {
   return (n || "").replace(/\D/g, "");
 }
 
+// Remove o 9 extra de celular BR:
+// 5571 9XXXXXXXX (13 dígitos) → 5571XXXXXXXX (12 dígitos)
+function normalizarTelBR(n) {
+  const d = (n || "").replace(/\D/g, "");
+  if (d.length === 13 && d.startsWith("55")) {
+    return d.slice(0, 4) + d.slice(5);
+  }
+  return d;
+}
+
 function extrairTexto(r) {
   if (r.textoMensagem) return r.textoMensagem;
   try {
@@ -226,7 +235,6 @@ function GlobalStyles({ t, isDark }) {
       background-size: 200px 200px;
     }
 
-    /* ══ HEADER ══ */
     .adm-header-wrap {
       position: sticky; top: 0; z-index: 100;
       background: ${t.headerBg};
@@ -307,7 +315,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-user-chip-name { font-size: 11px; font-weight: 600; color: ${t.text}; line-height: 1.1; white-space: nowrap; }
     .adm-user-chip-role { font-size: 7.5px; color: ${t.textMuted}; letter-spacing: .1em; text-transform: uppercase; line-height: 1.1; }
 
-    /* ── Desktop nav ── */
     .adm-nav-row {
       display: none; align-items: stretch;
       padding: 0 24px; gap: 2px; border-top: 1px solid ${t.border};
@@ -335,7 +342,6 @@ function GlobalStyles({ t, isDark }) {
       animation: adm-blink 2.8s ease-in-out infinite; margin-left: 2px;
     }
 
-    /* ── Mega menu ── */
     .adm-megamenu-backdrop { position: fixed; inset: 0; z-index: 95; background: transparent; }
     .adm-megamenu {
       position: absolute; left: 0; right: 0; top: 100%; z-index: 96;
@@ -361,7 +367,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-mega-rel  { position: relative; flex: 1; min-width: 0; }
     .adm-mega-badge { position: absolute; right: 0; top: -2px; background: ${AURA.yellow}; color: #080810; font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
 
-    /* ══ MOBILE OVERLAY ══ */
     .adm-mobile-overlay { position: fixed; inset: 0; z-index: 250; background: ${t.overlayBg}; display: flex; flex-direction: column; }
     .adm-mobile-overlay-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; flex-shrink: 0; border-bottom: 1px solid rgba(201,169,110,.08); }
     .adm-mobile-overlay-body { flex: 1; overflow-y: auto; padding: 8px 0 24px; }
@@ -387,7 +392,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-mobile-nav-badge { margin-left: auto; background: ${AURA.yellow}; color: #080810; font-size: 8.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
     .adm-mobile-overlay-foot { padding: 14px 18px 22px; flex-shrink: 0; border-top: 1px solid rgba(201,169,110,.08); }
 
-    /* ══ MAIN ══ */
     .adm-main { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; min-width: 0; }
     .adm-page-eyebrow { font-size: 7.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 2px; }
     .adm-page-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.1; }
@@ -405,7 +409,6 @@ function GlobalStyles({ t, isDark }) {
       pointer-events: none;
     }
 
-    /* KPI */
     .adm-kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px; }
     @media (min-width: 640px) { .adm-kpi-grid { grid-template-columns: repeat(4, 1fr); } }
     .adm-kpi {
@@ -440,7 +443,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-select option:checked, .adm-select option:hover { background: ${isDark ? "#1c1c2c" : "#EFE7D6"}; color: ${t.text}; }
     .adm-divider { height: 1px; margin: 18px 0; background: linear-gradient(90deg, transparent 0%, ${t.border} 30%, ${t.border} 70%, transparent 100%); }
 
-    /* User rows */
     .adm-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; gap: 14px; border-bottom: 1px solid ${t.border}; transition: background .15s; flex-wrap: wrap; }
     .adm-row:last-child { border-bottom: none; }
     .adm-row:hover { background: ${isDark ? "rgba(201,169,110,.025)" : "rgba(201,169,110,.03)"}; }
@@ -464,7 +466,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-action-btn:hover { transform: translateY(-1px); }
     .adm-pending-action { display: flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 8px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; transition: all .2s; }
 
-    /* Toast */
     .adm-toast {
       position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
       padding: 12px 20px; border-radius: 14px;
@@ -475,7 +476,6 @@ function GlobalStyles({ t, isDark }) {
     @media (max-width: 480px) { .adm-toast { max-width: 92vw; white-space: normal; bottom: 16px; padding: 11px 16px; } }
     .adm-celula-bar { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 14px; padding: 13px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
-    /* ══ MODAL ══ */
     .adm-modal-backdrop { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px 40px; overflow-y: auto; }
     .adm-modal-box { width: 100%; max-width: 520px; background: ${t.drawerBg}; border: 1px solid ${t.border}; border-radius: 22px; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(201,169,110,.06); position: relative; }
     .adm-modal-header { padding: 26px 28px 22px; border-bottom: 1px solid ${t.border}; position: relative; }
@@ -501,7 +501,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 14px 18px; border-radius: 12px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; transition: all .22s; }
     .adm-btn-ghost:hover { border-color: ${t.borderHov}; color: ${t.text}; }
 
-    /* ══ WHATSAPP PAINEL ══ */
     .wa-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; }
     .wa-p-recebida  { background: rgba(37,211,102,.1);  color: ${AURA.wa}; }
     .wa-p-sent      { background: rgba(0,61,165,.08);   color: ${AURA.blue}; }
@@ -543,7 +542,6 @@ function GlobalStyles({ t, isDark }) {
     @media (max-width: 700px) { .wa-col-id  { display: none; } .wa-col-fone{ width: 110px; } }
     @media (max-width: 500px) { .wa-col-dt  { display: none; } .wa-col-fone{ width: 90px; } }
 
-    /* Drawer detalhe WA */
     .wa-drawer { position: fixed; right: -440px; top: 0; width: 420px; height: 100vh; height: 100dvh; background: ${t.drawerBg}; border-left: 1px solid ${t.border}; z-index: 201; transition: right .25s ease; overflow-y: auto; padding: 0; box-sizing: border-box; }
     .wa-drawer.open { right: 0; }
     .wa-drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 22px 18px; border-bottom: 1px solid ${t.border}; position: sticky; top: 0; background: ${t.drawerBg}; z-index: 5; }
@@ -555,7 +553,6 @@ function GlobalStyles({ t, isDark }) {
     .wa-dv { font-size: 12px; color: ${t.text}; word-break: break-word; flex: 1; }
     .wa-json { background: ${t.bgInput}; border: 1px solid ${t.borderIn}; border-radius: 10px; padding: 12px; font-size: 10.5px; font-family: monospace; color: ${t.textSec}; line-height: 1.65; white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
 
-    /* Mobile */
     @media (max-width: 899px) { .adm-topbar { padding: 0 10px; height: 54px; gap: 8px; } .adm-topbar-l { gap: 8px; } .adm-topbar-r { gap: 5px; } .adm-cta-btn { padding: 9px 12px; } .adm-ico-btn { width: 38px; height: 38px; } }
     @media (max-width: 639px) { .adm-live-pill { display: none !important; } .adm-topbar-sep { display: none !important; } .adm-content { padding: 12px 12px 20px; } .adm-page-head { padding: 14px 12px 0; } .adm-kpi-grid { gap: 9px; } .adm-kpi { padding: 13px 12px; border-radius: 15px; } .adm-kpi-num { font-size: 21px; } .adm-kpi-icon { width: 32px; height: 32px; } .adm-kpi-trend { font-size: 7.5px; } .adm-row { flex-direction: column; align-items: stretch; gap: 10px; padding: 13px 14px; } .adm-row-r { justify-content: flex-stretch; } .adm-row-name { white-space: normal; } .adm-row-email { white-space: normal; word-break: break-all; } .adm-action-btn { width: 36px; height: 36px; } .adm-celula-bar { padding: 11px 14px; } .adm-card-header { padding: 15px 14px !important; } }
     @media (max-width: 380px) { .adm-brand-sub { display: none; } .adm-cta-btn-label { display: none !important; } .adm-cta-btn { padding: 9px 10px; } .adm-exit-modal { padding: 28px 18px 20px !important; } }
@@ -627,9 +624,7 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   WA — helpers de badge/pill
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── WA helpers ─────────────────────────────────────────────────────────── */
 function statusPill(s) {
   const m = {
     recebida:  ["wa-p-recebida",  "Recebida" ],
@@ -655,12 +650,11 @@ function tipoBadge(tipo) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   BOTÃO BLOQUEIO INLINE — usado dentro de cada linha do PainelWhatsApp
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── BotaoBloqueioInline ────────────────────────────────────────────────── */
 function BotaoBloqueioInline({ numero, bloqueados, onBloquear, onDesbloquear }) {
-  const numLimpo = normalizarNumero(numero);
-  const estaBloq = bloqueados.some(b => normalizarNumero(b.numero) === numLimpo);
+  // ← usa normalizarTelBR nos dois lados para ignorar o 9 extra BR
+  const numLimpo = normalizarTelBR(numero);
+  const estaBloq = bloqueados.some(b => normalizarTelBR(b.numero) === numLimpo);
   return estaBloq ? (
       <button
           title="Clique para desbloquear este número"
@@ -698,9 +692,7 @@ function BotaoBloqueioInline({ numero, bloqueados, onBloquear, onDesbloquear }) 
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   MODAL BLOQUEAR NÚMERO
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── ModalBloquear ──────────────────────────────────────────────────────── */
 function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando, t, isDark }) {
   const [numero, setNumero] = useState(numeroInicial || "");
   const [motivo, setMotivo] = useState("");
@@ -739,9 +731,7 @@ function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando,
                       exit={{    opacity: 0, y: -16,  scale: .97 }}
                       transition={{ type: "spring", damping: 28, stiffness: 300 }}
                       style={{ width: "100%", maxWidth: 440, background: t.drawerBg, border: `1px solid ${t.border}`, borderRadius: 22, overflow: "hidden", boxShadow: "0 36px 80px rgba(0,0,0,.6)" }}>
-            {/* faixa */}
             <div style={{ height: 2, background: `linear-gradient(90deg,${AURA.redDark},${AURA.red} 50%,${AURA.gold})` }}/>
-            {/* header */}
             <div style={{ padding: "24px 26px 20px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "flex-start", gap: 16, position: "relative" }}>
               <div style={{ width: 48, height: 48, borderRadius: 14, flexShrink: 0, background: "rgba(200,16,46,.08)", border: "1px solid rgba(200,16,46,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Ban size={22} style={{ color: AURA.red }}/>
@@ -757,9 +747,7 @@ function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando,
                 <X size={14}/>
               </button>
             </div>
-            {/* body */}
             <form id="form-bloqueio" onSubmit={submeter} style={{ padding: "22px 26px" }}>
-              {/* número */}
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: "block", fontSize: 8.5, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(201,169,110,.65)", marginBottom: 7 }}>Número WhatsApp *</label>
                 <div style={{ position: "relative" }}>
@@ -770,7 +758,6 @@ function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando,
                          onBlur={e  => { e.target.style.borderColor = errLocal ? "rgba(200,16,46,.45)" : t.borderIn; e.target.style.boxShadow = ""; }}/>
                 </div>
               </div>
-              {/* motivo */}
               <div style={{ marginBottom: 18 }}>
                 <label style={{ display: "block", fontSize: 8.5, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(201,169,110,.65)", marginBottom: 7 }}>
                   Motivo <span style={{ fontWeight: 400, opacity: .5 }}>(opcional)</span>
@@ -791,13 +778,11 @@ function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando,
                     </motion.div>
                 )}
               </AnimatePresence>
-              {/* aviso */}
               <div style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "10px 14px", background: isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)", border: `1px solid ${t.border}`, borderRadius: 10 }}>
                 <Info size={13} style={{ color: AURA.gold, flexShrink: 0, marginTop: 1 }}/>
                 <p style={{ fontSize: 10.5, color: t.textSec, margin: 0, lineHeight: 1.6 }}>O bloqueio pode ser desfeito a qualquer momento na aba Bloqueios.</p>
               </div>
             </form>
-            {/* footer */}
             <div style={{ padding: "16px 26px 24px", borderTop: `1px solid ${t.border}`, display: "flex", gap: 10 }}>
               <button type="button" onClick={onFechar} className="adm-btn-ghost" style={{ flex: 1, padding: "13px" }}>Cancelar</button>
               <button type="submit" form="form-bloqueio" disabled={salvando}
@@ -812,9 +797,7 @@ function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando,
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   MODAL DESBLOQUEAR
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── ModalDesbloquear ───────────────────────────────────────────────────── */
 function ModalDesbloquear({ item, onFechar, onConfirmar, salvando, isDark, t }) {
   if (!item) return null;
   return createPortal(
@@ -853,9 +836,7 @@ function ModalDesbloquear({ item, onFechar, onConfirmar, salvando, isDark, t }) 
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PAINEL WHATSAPP REGISTROS
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── PainelWhatsApp ─────────────────────────────────────────────────────── */
 function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear, onDesbloquear }) {
   const [registros,  setRegistros]  = useState([]);
   const [filtrados,  setFiltrados]  = useState([]);
@@ -869,12 +850,13 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
   const [detalhes,   setDetalhes]   = useState(null);
   const POR_PAG = 15;
 
+  // ← normalizarTelBR nos dois lados para ignorar o 9 extra BR
   const buscarUsuarioPorTelefone = numero => {
     if (!numero || !usuarios.length) return null;
-    const numLimpo = normalizarNumero(numero);
+    const numLimpo = normalizarTelBR(numero);
     return usuarios.find(u => {
-      const telLimpo = normalizarNumero(u.telefoneWhatsapp || "");
-      return telLimpo === numLimpo || telLimpo.endsWith(numLimpo);
+      const telLimpo = normalizarTelBR(u.telefoneWhatsapp || "");
+      return telLimpo === numLimpo;
     });
   };
 
@@ -1024,8 +1006,9 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
               <AnimatePresence>
                 {slice.map((r, i) => {
                   const textoPreview = extrairTexto(r);
-                  const usuario = buscarUsuarioPorTelefone(r.numeroDestino);
-                  const estaBloqueado = bloqueados.some(b => normalizarNumero(b.numero) === normalizarNumero(r.numeroDestino));
+                  const usuario      = buscarUsuarioPorTelefone(r.numeroDestino);
+                  // ← usa normalizarTelBR para detectar bloqueio ignorando o 9
+                  const estaBloqueado = bloqueados.some(b => normalizarTelBR(b.numero) === normalizarTelBR(r.numeroDestino));
                   return (
                       <motion.div key={r.id} className="wa-row"
                                   initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
@@ -1042,7 +1025,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
                           <span style={{ fontSize: 10, fontFamily: "monospace", color: t.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.idMensagem || "—"}</span>
                           {textoPreview && <span style={{ fontSize: 11.5, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 400 }}>{textoPreview}</span>}
                         </span>
-                        {/* ── STATUS + BOTÃO BLOQUEIO ── */}
                         <span className="wa-col-st" style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start" }}>
                           {statusPill(r.status)}
                           {r.numeroDestino && (
@@ -1076,7 +1058,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
           )}
         </div>
 
-        {/* Drawer detalhe */}
         {createPortal(
             <>
               <div style={{ position: "fixed", inset: 0, zIndex: 200, display: detalhes ? "block" : "none", background: "rgba(0,0,0,.5)", backdropFilter: "blur(6px)" }} onClick={() => setDetalhes(null)}/>
@@ -1117,7 +1098,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
                               </span>
                             </div>
                             <div className="wa-dr"><span className="wa-dl">Status</span><span className="wa-dv">{statusPill(detalhes.status)}</span></div>
-                            {/* Botão bloqueio dentro do drawer */}
                             {detalhes.numeroDestino && (
                                 <div className="wa-dr">
                                   <span className="wa-dl">Acesso</span>
@@ -1160,11 +1140,9 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PAINEL BLOQUEIOS
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── PainelBloqueios ────────────────────────────────────────────────────── */
 function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, onBloquear, onDesbloquear }) {
-  const [busca,    setBusca]    = useState("");
+  const [busca,     setBusca]     = useState("");
   const [filtrados, setFiltrados] = useState(bloqueados);
 
   useEffect(() => {
@@ -1176,11 +1154,10 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {/* KPIs */}
         <div className="adm-kpi-grid" style={{ gridTemplateColumns: "repeat(2,1fr)" }}>
           {[
-            { label: "Total bloqueados", value: bloqueados.length,                               color: AURA.red,        bg: "rgba(200,16,46,.08)",  icon: <Ban size={16}/> },
-            { label: "Com motivo",       value: bloqueados.filter(b => b.motivo).length,          color: AURA.yellowDark, bg: "rgba(196,140,0,.08)",  icon: <AlertTriangle size={16}/> },
+            { label: "Total bloqueados", value: bloqueados.length,                        color: AURA.red,        bg: "rgba(200,16,46,.08)",  icon: <Ban size={16}/> },
+            { label: "Com motivo",       value: bloqueados.filter(b => b.motivo).length,  color: AURA.yellowDark, bg: "rgba(196,140,0,.08)",  icon: <AlertTriangle size={16}/> },
           ].map(k => (
               <div key={k.label} className="adm-kpi">
                 <div className="adm-kpi-top">
@@ -1195,7 +1172,6 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
         </div>
 
         <div className="adm-card">
-          {/* Header */}
           <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(200,16,46,.08)", border: "1px solid rgba(200,16,46,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1219,7 +1195,6 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
             </div>
           </div>
 
-          {/* Busca */}
           <div style={{ padding: "12px 20px", borderBottom: `1px solid ${t.border}` }}>
             <div style={{ position: "relative", maxWidth: 400 }}>
               <Search size={13} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }}/>
@@ -1227,14 +1202,13 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
             </div>
           </div>
 
-          {/* Thead */}
           <div style={{ display: "flex", alignItems: "center", padding: "8px 20px", borderBottom: `1px solid ${t.border}`, background: isDark ? "rgba(255,255,255,.018)" : "rgba(0,0,0,.018)", gap: 12 }}>
             {[
-              { label: "#",            w: 28,    align: "right"  },
-              { label: "Número",       w: 170,   align: "left"   },
-              { label: "Motivo",       flex: 1,  align: "left"   },
-              { label: "Bloqueado em", w: 110,   align: "right"  },
-              { label: "Ação",         w: 90,    align: "right"  },
+              { label: "#",            w: 28,   align: "right" },
+              { label: "Número",       w: 170,  align: "left"  },
+              { label: "Motivo",       flex: 1, align: "left"  },
+              { label: "Bloqueado em", w: 110,  align: "right" },
+              { label: "Ação",         w: 90,   align: "right" },
             ].map(c => (
                 <span key={c.label} style={{ width: c.w, flex: c.flex, fontSize: 9, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, textAlign: c.align, flexShrink: c.flex ? undefined : 0, overflow: "hidden" }}>
                   {c.label}
@@ -1242,7 +1216,6 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
             ))}
           </div>
 
-          {/* Linhas */}
           {carregandoBloq ? (
               <div style={{ padding: "42px 20px", textAlign: "center", color: t.textMuted }}>
                 <Loader2 size={22} style={{ animation: "adm-spin 1s linear infinite", marginBottom: 8 }}/>
@@ -1263,14 +1236,11 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
                                 style={{ display: "flex", alignItems: "center", padding: "13px 20px", gap: 12, borderBottom: `1px solid ${t.border}`, transition: "background .14s" }}
                                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,16,46,.025)"; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = ""; }}>
-                      {/* # */}
                       <span style={{ width: 28, flexShrink: 0, fontSize: 11, color: t.textMuted, textAlign: "right" }}>{i + 1}</span>
-                      {/* Número */}
                       <span style={{ width: 170, flexShrink: 0, display: "flex", alignItems: "center", gap: 7 }}>
                         <span style={{ width: 6, height: 6, borderRadius: "50%", background: AURA.red, flexShrink: 0, boxShadow: `0 0 6px ${AURA.red}88` }}/>
                         <span style={{ fontFamily: "monospace", fontSize: 12, color: t.text }}>{item.numero}</span>
                       </span>
-                      {/* Motivo */}
                       <span style={{ flex: 1, overflow: "hidden" }}>
                         {item.motivo
                             ? <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, color: t.textSec, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -1279,13 +1249,11 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
                             : <span style={{ fontSize: 11, color: t.textMuted, fontStyle: "italic" }}>Sem motivo informado</span>
                         }
                       </span>
-                      {/* Data */}
                       <span style={{ width: 110, flexShrink: 0, fontSize: 11, color: t.textSec, textAlign: "right" }}>
                         <span style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 4 }}>
                           <Clock size={10} style={{ opacity: .5 }}/> {fmtData(item.criadoEm || item.bloqueadoEm)}
                         </span>
                       </span>
-                      {/* Ação */}
                       <span style={{ width: 90, flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
                         <button title="Desbloquear número" onClick={() => onDesbloquear(item)}
                                 style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 8, border: "1px solid rgba(5,150,105,.22)", background: "rgba(5,150,105,.06)", cursor: "pointer", color: AURA.green, fontSize: 9, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", transition: "all .18s", whiteSpace: "nowrap" }}
@@ -1307,33 +1275,32 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
    COMPONENTE PRINCIPAL
 ════════════════════════════════════════════════════════════════════════════ */
 export default function AdminUsers() {
-  const [usuarios,        setUsuarios]        = useState([]);
-  const [pendentes,       setPendentes]       = useState(new Set());
-  const [loading,         setLoading]         = useState(true);
-  const [sending,         setSending]         = useState(false);
-  const [aprovando,       setAprovando]       = useState(null);
-  const [uploadandoFoto,  setUploadandoFoto]  = useState(null);
-  const [erro,            setErro]            = useState("");
-  const [sucesso,         setSucesso]         = useState("");
-  const [drawerOpen,      setDrawerOpen]      = useState(false);
-  const [editandoId,      setEditandoId]      = useState(null);
-  const [exitConfirm,     setExitConfirm]     = useState(false);
-  const [form,            setForm]            = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
-  const [isDark,          setIsDark]          = useState(() => localStorage.getItem("theme") === "dark");
-  const [mobileMenuOpen,  setMobileMenuOpen]  = useState(false);
-  const [megaOpenId,      setMegaOpenId]      = useState(null);
-  const [moduloAtivo,     setModuloAtivo]     = useState("usuarios");
-  const [secaoExpMobile,  setSecaoExpMobile]  = useState("admin");
-  const [celulas,         setCelulas]         = useState([]);
-  const [celulaAdmin,     setCelulaAdmin]     = useState(null);
+  const [usuarios,       setUsuarios]       = useState([]);
+  const [pendentes,      setPendentes]      = useState(new Set());
+  const [loading,        setLoading]        = useState(true);
+  const [sending,        setSending]        = useState(false);
+  const [aprovando,      setAprovando]      = useState(null);
+  const [uploadandoFoto, setUploadandoFoto] = useState(null);
+  const [erro,           setErro]           = useState("");
+  const [sucesso,        setSucesso]        = useState("");
+  const [drawerOpen,     setDrawerOpen]     = useState(false);
+  const [editandoId,     setEditandoId]     = useState(null);
+  const [exitConfirm,    setExitConfirm]    = useState(false);
+  const [form,           setForm]           = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
+  const [isDark,         setIsDark]         = useState(() => localStorage.getItem("theme") === "dark");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [megaOpenId,     setMegaOpenId]     = useState(null);
+  const [moduloAtivo,    setModuloAtivo]    = useState("usuarios");
+  const [secaoExpMobile, setSecaoExpMobile] = useState("admin");
+  const [celulas,        setCelulas]        = useState([]);
+  const [celulaAdmin,    setCelulaAdmin]    = useState(null);
 
-  // ── BLOQUEIOS state ──
-  const [bloqueados,       setBloqueados]       = useState([]);
-  const [carregandoBloq,   setCarregandoBloq]   = useState(false);
-  const [modalBloquear,    setModalBloquear]    = useState(false);
-  const [numBloqueioIni,   setNumBloqueioIni]   = useState("");
-  const [salvandoBloq,     setSalvandoBloq]     = useState(false);
-  const [itemDesbloquear,  setItemDesbloquear]  = useState(null);
+  const [bloqueados,      setBloqueados]      = useState([]);
+  const [carregandoBloq,  setCarregandoBloq]  = useState(false);
+  const [modalBloquear,   setModalBloquear]   = useState(false);
+  const [numBloqueioIni,  setNumBloqueioIni]  = useState("");
+  const [salvandoBloq,    setSalvandoBloq]    = useState(false);
+  const [itemDesbloquear, setItemDesbloquear] = useState(null);
 
   const fotoRef   = useRef(null);
   const fotoIdRef = useRef(null);
@@ -1355,19 +1322,17 @@ export default function AdminUsers() {
     return () => window.removeEventListener("keydown", onKey);
   }, [megaOpenId]);
 
-  /* ── Bloqueios: carregar ── */
   const carregarBloqueios = useCallback(async () => {
     setCarregandoBloq(true);
     try {
       const { data } = await api.get("webhook/whatsapp/registros/bloqueios");
       setBloqueados(Array.isArray(data) ? data : []);
-    } catch { /* silencioso — lista fica vazia */ }
+    } catch { }
     finally { setCarregandoBloq(false); }
   }, []);
 
   useEffect(() => { carregarBloqueios(); }, [carregarBloqueios]);
 
-  /* ── Bloqueios: bloquear / desbloquear ── */
   const confirmarBloqueio = async (numero, motivo) => {
     setSalvandoBloq(true);
     try {
@@ -1380,11 +1345,13 @@ export default function AdminUsers() {
     } finally { setSalvandoBloq(false); }
   };
 
+  // ← normaliza antes de chamar a API para garantir consistência
   const confirmarDesbloqueio = async numero => {
+    const numNormalizado = normalizarTelBR(numero);
     setSalvandoBloq(true);
     try {
-      await api.delete(`webhook/whatsapp/registros/bloqueios/${numero}`);
-      ok(`Número ${numero} desbloqueado.`);
+      await api.delete(`webhook/whatsapp/registros/bloqueios/${numNormalizado}`);
+      ok(`Número ${numNormalizado} desbloqueado.`);
       setItemDesbloquear(null);
       carregarBloqueios();
     } catch { setErro("Erro ao desbloquear número."); }
@@ -1396,7 +1363,6 @@ export default function AdminUsers() {
     setModalBloquear(true);
   };
 
-  /* ── Usuários ── */
   const carregarUsuarios = useCallback(async () => {
     setLoading(true); setErro("");
     try {
@@ -1530,7 +1496,6 @@ export default function AdminUsers() {
         <div className="adm-bg-layer" />
         <div className="adm-noise" />
 
-        {/* ══ HEADER ══ */}
         <div className="adm-header-wrap">
           <div className="adm-header-top-line" />
           <div className="adm-topbar">
@@ -1635,7 +1600,6 @@ export default function AdminUsers() {
           </AnimatePresence>
         </div>
 
-        {/* ══ MOBILE OVERLAY ══ */}
         <AnimatePresence>
           {mobileMenuOpen && (
               <motion.div className="adm-mobile-overlay"
@@ -1708,7 +1672,6 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ══ MAIN ══ */}
         <main className="adm-main">
           <div className="adm-page-head">
             <p className="adm-page-eyebrow">{secaoAtiva?.label || "Admin"}</p>
@@ -1739,7 +1702,6 @@ export default function AdminUsers() {
                           transition={{ duration:.18 }}
                           style={{ marginTop: isLider && celulas.length > 0 ? 0 : 14 }}>
 
-                {/* ─── USUÁRIOS ─── */}
                 {moduloAtivo === "usuarios" && (
                     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
                       <div className="adm-kpi-grid">
@@ -1781,8 +1743,8 @@ export default function AdminUsers() {
                         </div>
                         <AnimatePresence>
                           {usuarios.map((u, i) => {
-                            const temP = pendentes.has(u.id);
-                            const eApr = aprovando === u.id;
+                            const temP  = pendentes.has(u.id);
+                            const eApr  = aprovando === u.id;
                             const eFoto = uploadandoFoto === u.id;
                             return (
                                 <motion.div key={u.id} className="adm-row"
@@ -1832,9 +1794,9 @@ export default function AdminUsers() {
                                         </>
                                     )}
                                     {[
-                                      { icon:<Pencil size={14}/>,  title:"Editar",    fn:() => abrirEdicao(u),       hc:AURA.blue,       hb:"rgba(0,61,165,.08)"  },
-                                      { icon:<Power size={14}/>,   title:"Suspender", fn:() => alternarStatus(u.id), hc:AURA.yellowDark, hb:"rgba(196,140,0,.08)" },
-                                      { icon:<Trash2 size={14}/>,  title:"Excluir",   fn:() => deletarUsuario(u.id), hc:AURA.red,        hb:"rgba(200,16,46,.08)" },
+                                      { icon:<Pencil size={14}/>, title:"Editar",    fn:() => abrirEdicao(u),       hc:AURA.blue,       hb:"rgba(0,61,165,.08)"  },
+                                      { icon:<Power size={14}/>,  title:"Suspender", fn:() => alternarStatus(u.id), hc:AURA.yellowDark, hb:"rgba(196,140,0,.08)" },
+                                      { icon:<Trash2 size={14}/>, title:"Excluir",   fn:() => deletarUsuario(u.id), hc:AURA.red,        hb:"rgba(200,16,46,.08)" },
                                     ].map(btn => (
                                         <button key={btn.title} className="adm-action-btn" onClick={btn.fn} title={btn.title}
                                                 onMouseEnter={e => { e.currentTarget.style.color=btn.hc; e.currentTarget.style.background=btn.hb; e.currentTarget.style.borderColor=btn.hc+"44"; }}
@@ -1851,12 +1813,10 @@ export default function AdminUsers() {
                     </div>
                 )}
 
-                {/* ─── HISTÓRICO ─── */}
                 {moduloAtivo === "historico" && (
                     <div className="adm-card"><HistoricoAuditoria isDark={isDark}/></div>
                 )}
 
-                {/* ─── WHATSAPP ─── */}
                 {moduloAtivo === "wa-registros" && (
                     <PainelWhatsApp
                         isDark={isDark} t={t} usuarios={usuarios}
@@ -1866,7 +1826,6 @@ export default function AdminUsers() {
                     />
                 )}
 
-                {/* ─── BLOQUEIOS ─── */}
                 {moduloAtivo === "bloqueios" && (
                     <PainelBloqueios
                         isDark={isDark} t={t}
@@ -1878,7 +1837,6 @@ export default function AdminUsers() {
                     />
                 )}
 
-                {/* ─── OUTROS MÓDULOS ─── */}
                 {moduloAtivo !== "usuarios" && moduloAtivo !== "historico" && moduloAtivo !== "wa-registros" && moduloAtivo !== "bloqueios" && (
                     <ModuloRenderer moduloKey={moduloAtivo} isDark={isDark} celulaAdmin={celulaAdmin}/>
                 )}
@@ -1891,7 +1849,6 @@ export default function AdminUsers() {
 
         <input ref={fotoRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFoto}/>
 
-        {/* ══ MODAL NOVO/EDITAR USUÁRIO ══ */}
         <AnimatePresence>
           {drawerOpen && (
               <motion.div className="adm-modal-backdrop"
@@ -1930,10 +1887,10 @@ export default function AdminUsers() {
                     <form id="modal-form" onSubmit={editandoId ? salvarEdicao : adicionarUsuario}>
                       <div className="adm-modal-form-grid">
                         {[
-                          { icon:<User size={14}/>,  type:"text",     placeholder:"Nome completo",                              key:"nome",             label:"Nome",     req:true,       col:"1/-1" },
-                          { icon:<Mail size={14}/>,  type:"email",    placeholder:"E-mail",                                    key:"email",            label:"E-mail",   req:true,       col:"1/-1" },
-                          { icon:<Key size={14}/>,   type:"password", placeholder:editandoId?"Manter senha atual":"Senha de acesso", key:"senha",       label:"Senha",    req:!editandoId, col:"1/2"  },
-                          { icon:<Phone size={14}/>, type:"tel",      placeholder:"WhatsApp com DDD",                          key:"telefoneWhatsapp", label:"WhatsApp", req:false,      col:"2/3"  },
+                          { icon:<User size={14}/>,  type:"text",     placeholder:"Nome completo",                                   key:"nome",             label:"Nome",     req:true,        col:"1/-1" },
+                          { icon:<Mail size={14}/>,  type:"email",    placeholder:"E-mail",                                         key:"email",            label:"E-mail",   req:true,        col:"1/-1" },
+                          { icon:<Key size={14}/>,   type:"password", placeholder:editandoId?"Manter senha atual":"Senha de acesso", key:"senha",            label:"Senha",    req:!editandoId, col:"1/2"  },
+                          { icon:<Phone size={14}/>, type:"tel",      placeholder:"WhatsApp com DDD",                               key:"telefoneWhatsapp", label:"WhatsApp", req:false,       col:"2/3"  },
                         ].map(f => (
                             <div key={f.key} style={{ gridColumn:f.col, marginBottom:16 }}>
                               <label className="adm-label">{f.label}</label>
@@ -1974,7 +1931,6 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ══ MODAL SAIR ══ */}
         <AnimatePresence>
           {exitConfirm && (
               <motion.div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}
@@ -2001,7 +1957,6 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
-        {/* ══ MODAIS DE BLOQUEIO (portais globais) ══ */}
         <ModalBloquear
             aberto={modalBloquear}
             numeroInicial={numBloqueioIni}
@@ -2018,7 +1973,6 @@ export default function AdminUsers() {
             t={t} isDark={isDark}
         />
 
-        {/* ══ TOASTS ══ */}
         <AnimatePresence>
           {sucesso && (
               <motion.div className="adm-toast"
