@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// AdminUsers — com painel WhatsApp Registros integrado
+// AdminUsers — com painel WhatsApp Registros + Bloqueios integrado
 // ══════════════════════════════════════════════════════════════════════════════
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -13,9 +13,11 @@ import {
   History, Search, Phone, ChevronDown, Menu, FileText,
   Building2, DollarSign, Home, Flame,
   LayoutDashboard, Share2, Trophy, ClipboardList,
-  BarChart2, TrendingUp, Target, Sparkles, ChevronRight,
-  MessageCircle, Filter, AlertCircle, Wifi, WifiOff, RefreshCw,
-  ChevronLeft, Download, Inbox,
+  BarChart2, TrendingUp, Target, ChevronRight,
+  MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
+  ChevronLeft, Inbox,
+  // ── Bloqueios ──
+  ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info,
 } from "lucide-react";
 
 import Membros                   from "../secretaria/Membros";
@@ -95,6 +97,7 @@ const SECOES = [
       { key:"usuarios",    label:"Usuários",    sub:"Controle de acesso", icon:Users         },
       { key:"historico",   label:"Histórico",   sub:"Log de auditoria",   icon:History       },
       { key:"wa-registros",label:"WhatsApp",    sub:"Mensagens webhook",  icon:MessageCircle },
+      { key:"bloqueios",   label:"Bloqueios",   sub:"Números bloqueados", icon:ShieldOff     },
     ],
   },
   {
@@ -145,6 +148,9 @@ const SECOES = [
 ];
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
+function normalizarNumero(n) {
+  return (n || "").replace(/\D/g, "");
+}
 
 function extrairTexto(r) {
   if (r.textoMensagem) return r.textoMensagem;
@@ -172,6 +178,15 @@ function extrairTipoMsg(r) {
   } catch { return null; }
 }
 
+function fmtData(d) {
+  if (!d) return "—";
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " " +
+        dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  } catch { return d; }
+}
+
 /* ─── Global CSS ─────────────────────────────────────────────────────────── */
 function GlobalStyles({ t, isDark }) {
   return (
@@ -197,7 +212,6 @@ function GlobalStyles({ t, isDark }) {
       transition: background .35s, color .35s;
       isolation: isolate; width: 100%;
     }
-
     .adm-bg-layer {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background:
@@ -223,14 +237,12 @@ function GlobalStyles({ t, isDark }) {
       height: 2px;
       background: linear-gradient(90deg, ${AURA.redDark} 0%, ${AURA.red} 25%, ${AURA.gold} 55%, ${AURA.blue} 100%);
     }
-
     .adm-topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 24px; height: 60px; gap: 14px; position: relative;
     }
     .adm-topbar-l { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
     .adm-topbar-r { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
     .adm-brand { display: flex; align-items: center; gap: 11px; min-width: 0; flex-shrink: 0; }
     .adm-brand-logo {
       width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
@@ -253,9 +265,7 @@ function GlobalStyles({ t, isDark }) {
       text-transform: uppercase; color: ${t.textMuted}; margin: 2px 0 0;
       display: block; white-space: nowrap;
     }
-
     .adm-topbar-sep { width: 1px; height: 22px; flex-shrink: 0; background: ${t.border}; }
-
     .adm-ico-btn {
       width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
@@ -264,7 +274,6 @@ function GlobalStyles({ t, isDark }) {
       transition: all .22s; flex-shrink: 0;
     }
     .adm-ico-btn:hover { border-color: ${AURA.gold}44; color: ${AURA.gold}; background: ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.07)"}; }
-
     .adm-live-pill {
       display: flex; align-items: center; gap: 5px;
       padding: 5px 12px; border-radius: 100px;
@@ -273,7 +282,6 @@ function GlobalStyles({ t, isDark }) {
       font-size: 8px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; flex-shrink: 0;
     }
     .adm-live-dot { width: 6px; height: 6px; border-radius: 50%; background: ${AURA.green}; animation: adm-blink 2.5s ease-in-out infinite; box-shadow: 0 0 6px ${AURA.green}88; }
-
     .adm-cta-btn {
       display: inline-flex; align-items: center; gap: 7px;
       padding: 8px 16px; border-radius: 9px; border: none; cursor: pointer;
@@ -288,7 +296,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-cta-red:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(200,16,46,.35); }
     .adm-cta-btn-label { display: none; }
     @media (min-width: 560px) { .adm-cta-btn-label { display: inline; } }
-
     .adm-user-chip {
       display: none; align-items: center; gap: 8px;
       padding: 6px 12px 6px 8px; border-radius: 100px;
@@ -306,7 +313,6 @@ function GlobalStyles({ t, isDark }) {
       padding: 0 24px; gap: 2px; border-top: 1px solid ${t.border};
     }
     @media (min-width: 900px) { .adm-nav-row { display: flex; } }
-
     .adm-nav-sec-btn {
       display: flex; align-items: center; gap: 8px;
       padding: 11px 16px; border: none; background: transparent; cursor: pointer;
@@ -323,7 +329,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-nav-sec-btn.open { color: ${t.text}; }
     .adm-nav-sec-btn.open::after { transform: scaleX(1); }
     .adm-nav-sec-btn.has-active { color: var(--sc, ${AURA.gold}); }
-
     .adm-nav-sec-badge {
       background: ${AURA.yellow}; color: #080810;
       font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 99px;
@@ -342,7 +347,6 @@ function GlobalStyles({ t, isDark }) {
       gap: 4px; padding: 18px 24px 22px; max-width: 1100px; margin: 0 auto;
     }
     @media (min-width: 1100px) { .adm-megamenu-grid { grid-template-columns: repeat(4, 1fr); } }
-
     .adm-mega-item {
       display: flex; align-items: center; gap: 12px;
       padding: 11px 12px; border-radius: 13px;
@@ -389,10 +393,8 @@ function GlobalStyles({ t, isDark }) {
     .adm-page-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.1; }
     .adm-page-head { padding: 18px 22px 0; }
     @media (min-width: 640px) { .adm-page-head { padding: 22px 32px 0; } }
-
     .adm-content { flex: 1; padding: 16px 22px 24px; padding-bottom: max(36px, env(safe-area-inset-bottom, 36px)); }
     @media (min-width: 640px) { .adm-content { padding: 18px 32px 28px; } }
-
     .adm-card {
       background: ${t.bgEl}; border: 1px solid ${t.border};
       border-radius: 20px; overflow: hidden; position: relative; backdrop-filter: blur(24px);
@@ -418,9 +420,7 @@ function GlobalStyles({ t, isDark }) {
     .adm-kpi-num { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 600; line-height: 1; margin: 0 0 3px; }
     .adm-kpi-lbl { font-size: 8.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${t.textMuted}; }
     .adm-kpi-trend { font-size: 8px; font-weight: 500; color: ${t.textMuted}; margin-top: 2px; }
-
     .adm-label { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(201,169,110,.65); margin: 0 0 7px; }
-
     .adm-input {
       width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderIn};
       color: ${t.text}; padding: 12px 16px 12px 44px; border-radius: 12px;
@@ -429,7 +429,6 @@ function GlobalStyles({ t, isDark }) {
     }
     .adm-input:focus { border-color: rgba(201,169,110,.45); box-shadow: 0 0 0 3px rgba(201,169,110,.07), 0 2px 12px rgba(0,0,0,.08); }
     .adm-input::placeholder { color: ${t.placeholder}; }
-
     .adm-select {
       width: 100%; background: ${t.bgInput}; border: 1px solid ${t.borderIn};
       color: ${t.text}; padding: 12px 14px 12px 44px; border-radius: 12px;
@@ -439,7 +438,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-select:focus { border-color: rgba(201,169,110,.45); box-shadow: 0 0 0 3px rgba(201,169,110,.07); }
     .adm-select option { background: ${t.bgEl}; color: ${t.text}; }
     .adm-select option:checked, .adm-select option:hover { background: ${isDark ? "#1c1c2c" : "#EFE7D6"}; color: ${t.text}; }
-
     .adm-divider { height: 1px; margin: 18px 0; background: linear-gradient(90deg, transparent 0%, ${t.border} 30%, ${t.border} 70%, transparent 100%); }
 
     /* User rows */
@@ -453,22 +451,17 @@ function GlobalStyles({ t, isDark }) {
       .adm-row-r .adm-pending-action { flex: 1; justify-content: center; }
       .adm-row-r .adm-action-btn { flex-shrink: 0; }
     }
-
     .adm-avatar { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; overflow: hidden; position: relative; cursor: pointer; transition: transform .2s; }
     .adm-avatar:hover { transform: scale(1.06); }
     .adm-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .adm-avatar-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: #fff; }
     .adm-avatar-overlay { position: absolute; inset: 0; border-radius: 12px; background: rgba(0,0,0,.52); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .18s; }
     .adm-avatar:hover .adm-avatar-overlay { opacity: 1; }
-
     .adm-row-name { font-size: 12.5px; font-weight: 600; color: ${t.text}; margin: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .adm-row-email { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
     .adm-badge { padding: 3px 10px; border-radius: 99px; font-size: 8px; font-weight: 600; letter-spacing: .1em; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
-
     .adm-action-btn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid ${t.border}; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: ${t.textMuted}; transition: all .18s; }
     .adm-action-btn:hover { transform: translateY(-1px); }
-
     .adm-pending-action { display: flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 8px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; transition: all .2s; }
 
     /* Toast */
@@ -480,7 +473,6 @@ function GlobalStyles({ t, isDark }) {
       max-width: 88vw; white-space: nowrap; backdrop-filter: blur(20px);
     }
     @media (max-width: 480px) { .adm-toast { max-width: 92vw; white-space: normal; bottom: 16px; padding: 11px 16px; } }
-
     .adm-celula-bar { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 14px; padding: 13px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
     /* ══ MODAL ══ */
@@ -491,7 +483,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-modal-body { padding: 24px 28px; }
     .adm-modal-footer { padding: 18px 28px 24px; border-top: 1px solid ${t.border}; display: flex; gap: 10px; }
     .adm-modal-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
-
     @media (max-width: 560px) {
       .adm-modal-backdrop { padding: 16px 10px 28px; align-items: center; }
       .adm-modal-box { border-radius: 18px; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; }
@@ -502,13 +493,11 @@ function GlobalStyles({ t, isDark }) {
       .adm-modal-form-grid { grid-template-columns: 1fr; gap: 0; }
       .adm-modal-form-grid > div { grid-column: 1 / -1 !important; }
     }
-
     .adm-btn-primary { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; transition: all .25s; }
     .adm-btn-primary.blue { background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff; box-shadow: 0 6px 20px rgba(0,61,165,.22); }
     .adm-btn-primary.blue:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(0,61,165,.32); }
     .adm-btn-primary.red { background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red}); color: #fff; box-shadow: 0 6px 20px rgba(200,16,46,.22); }
     .adm-btn-primary.red:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(200,16,46,.32); }
-
     .adm-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 14px 18px; border-radius: 12px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; transition: all .22s; }
     .adm-btn-ghost:hover { border-color: ${t.borderHov}; color: ${t.text}; }
 
@@ -522,26 +511,22 @@ function GlobalStyles({ t, isDark }) {
     .wa-p-status    { background: rgba(196,140,0,.08);  color: ${AURA.yellowDark}; }
     .wa-tipo-badge  { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; border: 0.5px solid ${t.border}; color: ${t.textMuted}; }
     .wa-mono { font-family: monospace; font-size: 11px; color: ${t.textSec}; }
-
     .wa-row { display: flex; align-items: center; padding: 11px 20px; gap: 12px; border-bottom: 1px solid ${t.border}; cursor: pointer; transition: background .14s; }
     .wa-row:last-child { border-bottom: none; }
     .wa-row:hover { background: ${isDark ? "rgba(37,211,102,.025)" : "rgba(37,211,102,.03)"}; }
-
     .wa-col-num  { width: 32px; flex-shrink: 0; font-size: 11px; color: ${t.textMuted}; text-align: right; }
     .wa-col-tipo { width: 90px; flex-shrink: 0; }
     .wa-col-fone { width: 140px; flex-shrink: 0; }
     .wa-col-id   { flex: 1; min-width: 0; overflow: hidden; }
-    .wa-col-st   { width: 86px; flex-shrink: 0; }
+    .wa-col-st   { width: 120px; flex-shrink: 0; }
     .wa-col-dt   { width: 80px; flex-shrink: 0; font-size: 11px; color: ${t.textSec}; text-align: right; }
     .wa-col-arr  { width: 22px; flex-shrink: 0; color: ${t.textMuted}; }
     .wa-th { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: ${t.textMuted}; overflow: hidden; }
     .wa-thead { display: flex; align-items: center; padding: 8px 20px; border-bottom: 1px solid ${t.border}; background: ${isDark ? "rgba(255,255,255,.018)" : "rgba(0,0,0,.018)"}; }
-
     .wa-filtros-row { padding: 12px 20px; border-bottom: 1px solid ${t.border}; display: flex; gap: 8px; flex-wrap: wrap; }
     .wa-filtro-busca { position: relative; flex: 1 1 180px; min-width: 160px; }
     .wa-filtro-select { position: relative; flex: 0 1 130px; min-width: 110px; }
     .wa-filtro-select .adm-select { width: 100%; }
-
     @media (max-width: 480px) {
       .wa-filtros-row { padding: 10px 14px; gap: 6px; }
       .wa-filtro-busca { flex: 1 1 100%; min-width: 100%; }
@@ -555,7 +540,6 @@ function GlobalStyles({ t, isDark }) {
       .wa-tipo-badge { padding: 2px 6px; font-size: 10px; }
       .wa-tipo-badge span { display: none; }
     }
-
     @media (max-width: 700px) { .wa-col-id  { display: none; } .wa-col-fone{ width: 110px; } }
     @media (max-width: 500px) { .wa-col-dt  { display: none; } .wa-col-fone{ width: 90px; } }
 
@@ -577,7 +561,6 @@ function GlobalStyles({ t, isDark }) {
     @media (max-width: 380px) { .adm-brand-sub { display: none; } .adm-cta-btn-label { display: none !important; } .adm-cta-btn { padding: 9px 10px; } .adm-exit-modal { padding: 28px 18px 20px !important; } }
     @media (max-width: 420px) { .wa-drawer { width: 100vw; right: -100vw; } .wa-drawer.open { right: 0; } }
     @media (max-width: 639px) { .adm-input, .adm-select { font-size: 16px !important; } }
-
     .adm-footer-txt { text-align: center; font-size: 7.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; padding: 16px 0 0; color: ${isDark ? "rgba(245,240,232,.07)" : "rgba(26,16,8,.1)"}; }
     `}</style>
   );
@@ -645,10 +628,8 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PAINEL WHATSAPP REGISTROS
-   ✅ CORRIGIDO: usa api (axios) em vez de fetch com localhost:8080
+   WA — helpers de badge/pill
 ═══════════════════════════════════════════════════════════════════════════ */
-
 function statusPill(s) {
   const m = {
     recebida:  ["wa-p-recebida",  "Recebida" ],
@@ -674,16 +655,208 @@ function tipoBadge(tipo) {
   );
 }
 
-function fmtData(d) {
-  if (!d) return "—";
-  try {
-    const dt = new Date(d);
-    return dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " " +
-        dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  } catch { return d; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTÃO BLOQUEIO INLINE — usado dentro de cada linha do PainelWhatsApp
+═══════════════════════════════════════════════════════════════════════════ */
+function BotaoBloqueioInline({ numero, bloqueados, onBloquear, onDesbloquear }) {
+  const numLimpo = normalizarNumero(numero);
+  const estaBloq = bloqueados.some(b => normalizarNumero(b.numero) === numLimpo);
+  return estaBloq ? (
+      <button
+          title="Clique para desbloquear este número"
+          onClick={e => { e.stopPropagation(); onDesbloquear({ numero: numLimpo }); }}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            padding: "3px 9px", borderRadius: 20,
+            border: "1px solid rgba(5,150,105,.25)", background: "rgba(5,150,105,.08)",
+            cursor: "pointer", color: AURA.green,
+            fontSize: 10, fontWeight: 600, letterSpacing: ".05em",
+            transition: "all .18s", whiteSpace: "nowrap",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(5,150,105,.16)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(5,150,105,.08)"; }}
+      >
+        <Unlock size={10}/> Desbloquear
+      </button>
+  ) : (
+      <button
+          title="Bloquear este número"
+          onClick={e => { e.stopPropagation(); onBloquear(numero); }}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            padding: "3px 9px", borderRadius: 20,
+            border: "1px solid rgba(200,16,46,.2)", background: "rgba(200,16,46,.06)",
+            cursor: "pointer", color: AURA.red,
+            fontSize: 10, fontWeight: 600, letterSpacing: ".05em",
+            transition: "all .18s", whiteSpace: "nowrap",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,16,46,.14)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(200,16,46,.06)"; }}
+      >
+        <Ban size={10}/> Bloquear
+      </button>
+  );
 }
 
-function PainelWhatsApp({ isDark, t, usuarios = [] }) {
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL BLOQUEAR NÚMERO
+═══════════════════════════════════════════════════════════════════════════ */
+function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando, t, isDark }) {
+  const [numero, setNumero] = useState(numeroInicial || "");
+  const [motivo, setMotivo] = useState("");
+  const [errLocal, setErrLocal] = useState("");
+
+  useEffect(() => {
+    if (aberto) { setNumero(numeroInicial || ""); setMotivo(""); setErrLocal(""); }
+  }, [aberto, numeroInicial]);
+
+  const submeter = e => {
+    e.preventDefault();
+    const n = normalizarNumero(numero);
+    if (n.length < 10) { setErrLocal("Informe um número válido com DDD (ex: 5571999990000)."); return; }
+    setErrLocal("");
+    onConfirmar(n, motivo.trim());
+  };
+
+  if (!aberto) return null;
+
+  const inputStyle = {
+    width: "100%", background: t.bgInput, border: `1px solid ${t.borderIn}`,
+    color: t.text, borderRadius: 12, outline: "none",
+    fontFamily: "'Inter',sans-serif", fontWeight: 300, transition: "all .22s",
+    boxSizing: "border-box",
+  };
+
+  return createPortal(
+      <AnimatePresence>
+        <motion.div key="mb-backdrop"
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    style={{ position: "fixed", inset: 0, zIndex: 310, background: "rgba(0,0,0,.82)", backdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 16px" }}
+                    onClick={e => { if (e.target === e.currentTarget) onFechar(); }}>
+          <motion.div key="mb-box"
+                      initial={{ opacity: 0, y: -28, scale: .95 }}
+                      animate={{ opacity: 1, y: 0,   scale: 1   }}
+                      exit={{    opacity: 0, y: -16,  scale: .97 }}
+                      transition={{ type: "spring", damping: 28, stiffness: 300 }}
+                      style={{ width: "100%", maxWidth: 440, background: t.drawerBg, border: `1px solid ${t.border}`, borderRadius: 22, overflow: "hidden", boxShadow: "0 36px 80px rgba(0,0,0,.6)" }}>
+            {/* faixa */}
+            <div style={{ height: 2, background: `linear-gradient(90deg,${AURA.redDark},${AURA.red} 50%,${AURA.gold})` }}/>
+            {/* header */}
+            <div style={{ padding: "24px 26px 20px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "flex-start", gap: 16, position: "relative" }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, flexShrink: 0, background: "rgba(200,16,46,.08)", border: "1px solid rgba(200,16,46,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Ban size={22} style={{ color: AURA.red }}/>
+              </div>
+              <div>
+                <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: ".26em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 3px" }}>Controle de acesso</p>
+                <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 2px", lineHeight: 1.1 }}>Bloquear número</h2>
+                <p style={{ fontSize: 11.5, fontWeight: 300, color: t.textMuted, margin: 0 }}>Mensagens deste número serão ignoradas</p>
+              </div>
+              <button onClick={onFechar} style={{ position: "absolute", right: 18, top: 18, width: 32, height: 32, borderRadius: 9, border: `1px solid ${t.border}`, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: t.textMuted, transition: "all .2s" }}
+                      onMouseEnter={e => { e.currentTarget.style.color = AURA.red; e.currentTarget.style.borderColor = "rgba(200,16,46,.3)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = t.textMuted; e.currentTarget.style.borderColor = t.border; }}>
+                <X size={14}/>
+              </button>
+            </div>
+            {/* body */}
+            <form id="form-bloqueio" onSubmit={submeter} style={{ padding: "22px 26px" }}>
+              {/* número */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", fontSize: 8.5, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(201,169,110,.65)", marginBottom: 7 }}>Número WhatsApp *</label>
+                <div style={{ position: "relative" }}>
+                  <Phone size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }}/>
+                  <input type="tel" placeholder="5571999990000 (com código do país)" value={numero} onChange={e => setNumero(e.target.value)} required
+                         style={{ ...inputStyle, padding: "12px 16px 12px 44px", fontSize: 14, borderColor: errLocal ? "rgba(200,16,46,.45)" : t.borderIn }}
+                         onFocus={e => { e.target.style.borderColor = "rgba(200,16,46,.45)"; e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,.07)"; }}
+                         onBlur={e  => { e.target.style.borderColor = errLocal ? "rgba(200,16,46,.45)" : t.borderIn; e.target.style.boxShadow = ""; }}/>
+                </div>
+              </div>
+              {/* motivo */}
+              <div style={{ marginBottom: 18 }}>
+                <label style={{ display: "block", fontSize: 8.5, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(201,169,110,.65)", marginBottom: 7 }}>
+                  Motivo <span style={{ fontWeight: 400, opacity: .5 }}>(opcional)</span>
+                </label>
+                <div style={{ position: "relative" }}>
+                  <AlertTriangle size={14} style={{ position: "absolute", left: 14, top: 14, color: AURA.gold, opacity: .5, pointerEvents: "none" }}/>
+                  <textarea placeholder="Ex: Spam, número desconhecido, abuso..." value={motivo} onChange={e => setMotivo(e.target.value)} rows={3}
+                            style={{ ...inputStyle, padding: "12px 16px 12px 44px", fontSize: 13, lineHeight: 1.6, resize: "vertical" }}
+                            onFocus={e => { e.target.style.borderColor = "rgba(201,169,110,.45)"; e.target.style.boxShadow = "0 0 0 3px rgba(201,169,110,.07)"; }}
+                            onBlur={e  => { e.target.style.borderColor = t.borderIn; e.target.style.boxShadow = ""; }}/>
+                </div>
+              </div>
+              <AnimatePresence>
+                {errLocal && (
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                                style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 14px", background: "rgba(200,16,46,.06)", border: "1px solid rgba(200,16,46,.18)", borderRadius: 10, marginBottom: 14 }}>
+                      <XCircle size={13} style={{ color: AURA.red, flexShrink: 0 }}/> <span style={{ fontSize: 11.5, color: AURA.red }}>{errLocal}</span>
+                    </motion.div>
+                )}
+              </AnimatePresence>
+              {/* aviso */}
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "10px 14px", background: isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)", border: `1px solid ${t.border}`, borderRadius: 10 }}>
+                <Info size={13} style={{ color: AURA.gold, flexShrink: 0, marginTop: 1 }}/>
+                <p style={{ fontSize: 10.5, color: t.textSec, margin: 0, lineHeight: 1.6 }}>O bloqueio pode ser desfeito a qualquer momento na aba Bloqueios.</p>
+              </div>
+            </form>
+            {/* footer */}
+            <div style={{ padding: "16px 26px 24px", borderTop: `1px solid ${t.border}`, display: "flex", gap: 10 }}>
+              <button type="button" onClick={onFechar} className="adm-btn-ghost" style={{ flex: 1, padding: "13px" }}>Cancelar</button>
+              <button type="submit" form="form-bloqueio" disabled={salvando}
+                      className="adm-btn-primary red" style={{ flex: 1.5, opacity: salvando ? .65 : 1, cursor: salvando ? "not-allowed" : "pointer" }}>
+                {salvando ? <><Loader2 size={14} style={{ animation: "adm-spin 1s linear infinite" }}/> Bloqueando…</> : <><Ban size={14}/> Bloquear número</>}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>,
+      document.body
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL DESBLOQUEAR
+═══════════════════════════════════════════════════════════════════════════ */
+function ModalDesbloquear({ item, onFechar, onConfirmar, salvando, isDark, t }) {
+  if (!item) return null;
+  return createPortal(
+      <AnimatePresence>
+        <motion.div key="md-backdrop"
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    style={{ position: "fixed", inset: 0, zIndex: 310, background: "rgba(0,0,0,.82)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 16px" }}
+                    onClick={e => { if (e.target === e.currentTarget) onFechar(); }}>
+          <motion.div key="md-box"
+                      initial={{ scale: .88, opacity: 0, y: 20 }}
+                      animate={{ scale: 1,   opacity: 1, y: 0  }}
+                      exit={{    scale: .92,  opacity: 0        }}
+                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                      style={{ width: "100%", maxWidth: 360, background: t.drawerBg, border: `1px solid ${t.border}`, borderRadius: 22, padding: "36px 28px 28px", textAlign: "center", boxShadow: "0 40px 80px rgba(0,0,0,.7)" }}>
+            <div style={{ width: 60, height: 60, borderRadius: 18, margin: "0 auto 18px", background: "rgba(5,150,105,.08)", border: "1px solid rgba(5,150,105,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Unlock size={26} style={{ color: AURA.green }}/>
+            </div>
+            <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 21, fontWeight: 500, color: t.text, margin: "0 0 8px" }}>Desbloquear número</h3>
+            <p style={{ fontSize: 13, fontWeight: 300, color: t.textSec, margin: "0 0 6px", lineHeight: 1.65 }}>
+              O número <strong style={{ fontFamily: "monospace", fontSize: 12, color: t.text }}>{item.numero}</strong> voltará a receber mensagens.
+            </p>
+            {item.motivo && <p style={{ fontSize: 11, color: t.textMuted, margin: "0 0 20px", fontStyle: "italic" }}>Bloqueado por: "{item.motivo}"</p>}
+            {!item.motivo && <div style={{ marginBottom: 20 }}/>}
+            <div className="adm-divider" style={{ margin: "0 0 20px" }}/>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={onFechar} className="adm-btn-ghost" style={{ flex: 1, padding: "13px" }}>Cancelar</button>
+              <button onClick={() => onConfirmar(item.numero)} disabled={salvando}
+                      style={{ flex: 1.5, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", borderRadius: 12, border: "none", cursor: salvando ? "not-allowed" : "pointer", background: `linear-gradient(135deg,${AURA.greenDark},${AURA.green})`, color: "#fff", boxShadow: "0 6px 20px rgba(5,150,105,.22)", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", opacity: salvando ? .65 : 1, transition: "all .25s" }}>
+                {salvando ? <><Loader2 size={14} style={{ animation: "adm-spin 1s linear infinite" }}/> Liberando…</> : <><ShieldCheck size={14}/> Desbloquear</>}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>,
+      document.body
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAINEL WHATSAPP REGISTROS
+═══════════════════════════════════════════════════════════════════════════ */
+function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear, onDesbloquear }) {
   const [registros,  setRegistros]  = useState([]);
   const [filtrados,  setFiltrados]  = useState([]);
   const [loading,    setLoading]    = useState(true);
@@ -696,50 +869,39 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
   const [detalhes,   setDetalhes]   = useState(null);
   const POR_PAG = 15;
 
-  const buscarUsuarioPorTelefone = (numero) => {
+  const buscarUsuarioPorTelefone = numero => {
     if (!numero || !usuarios.length) return null;
-    const numLimpo = numero.replace(/\D/g, '');
+    const numLimpo = normalizarNumero(numero);
     return usuarios.find(u => {
-      const telLimpo = (u.telefoneWhatsapp || '').replace(/\D/g, '');
+      const telLimpo = normalizarNumero(u.telefoneWhatsapp || "");
       return telLimpo === numLimpo || telLimpo.endsWith(numLimpo);
     });
   };
 
-  // ✅ CORREÇÃO PRINCIPAL: usa api (axios com baseURL do Render) em vez de fetch localhost
   const carregar = useCallback(async () => {
     setLoading(true); setOffline(false);
     try {
       const [resReg, resMet] = await Promise.allSettled([
-        api.get(`webhook/whatsapp/registros/filtrar`, {
-          params: { tipoEvento: filtroTipo, status: filtroSt, busca },
-        }),
+        api.get(`webhook/whatsapp/registros/filtrar`, { params: { tipoEvento: filtroTipo, status: filtroSt, busca } }),
         api.get(`webhook/whatsapp/registros/metricas`),
       ]);
-
       if (resReg.status === "fulfilled") {
         const data = resReg.value.data;
         const arr = Array.isArray(data) ? data : data?.content ?? data?.registros ?? [];
-        setRegistros(arr);
-        setFiltrados(arr);
-      } else {
-        throw new Error("offline");
-      }
-
-      if (resMet.status === "fulfilled") {
-        setMetricas(resMet.value.data);
-      }
+        setRegistros(arr); setFiltrados(arr);
+      } else { throw new Error("offline"); }
+      if (resMet.status === "fulfilled") setMetricas(resMet.value.data);
     } catch {
       setOffline(true);
       const fake = Array.from({ length: 18 }, (_, i) => ({
-        id: i + 1,
-        tipoEvento:    i % 3 === 0 ? "status" : "mensagem",
-        status:        ["recebida","sent","delivered","read","failed"][i % 5],
-        idMensagem:    `wamid.${Math.random().toString(36).slice(2,18)}`,
+        id: i + 1, tipoEvento: i % 3 === 0 ? "status" : "mensagem",
+        status: ["recebida","sent","delivered","read","failed"][i % 5],
+        idMensagem: `wamid.${Math.random().toString(36).slice(2,18)}`,
         numeroDestino: `5571 9${String(90000000 + i * 1234567).slice(0, 8)}`,
-        tipoMensagem:  "text",
+        tipoMensagem: "text",
         textoMensagem: i % 3 !== 0 ? `Olá! Mensagem de exemplo número ${i + 1}` : null,
-        payload:       JSON.stringify({ from: "557191234567", type: "text", text: { body: `Olá! Mensagem de exemplo número ${i + 1}` } }, null, 2),
-        recebidoEm:    new Date(Date.now() - i * 3600000).toISOString(),
+        payload: JSON.stringify({ from: "557191234567", type: "text", text: { body: `Olá! Mensagem de exemplo número ${i + 1}` } }, null, 2),
+        recebidoEm: new Date(Date.now() - i * 3600000).toISOString(),
       }));
       setRegistros(fake); setFiltrados(fake);
       setMetricas({ total: 18, mensagens: 12, statusEvt: 6, failed: 2, ultimas24h: 8 });
@@ -751,11 +913,7 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
   useEffect(() => {
     const q = busca.toLowerCase();
     setFiltrados(registros.filter(r =>
-        (!q ||
-            (r.numeroDestino||"").toLowerCase().includes(q) ||
-            (r.idMensagem||"").toLowerCase().includes(q) ||
-            (extrairTexto(r)||"").toLowerCase().includes(q)
-        ) &&
+        (!q || (r.numeroDestino||"").toLowerCase().includes(q) || (r.idMensagem||"").toLowerCase().includes(q) || (extrairTexto(r)||"").toLowerCase().includes(q)) &&
         (!filtroTipo || (r.tipoEvento||"").toLowerCase() === filtroTipo) &&
         (!filtroSt   || (r.status||"").toLowerCase() === filtroSt)
     ));
@@ -774,16 +932,12 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
         {offline && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 16px", background: "rgba(200,16,46,.06)", border: "1px solid rgba(200,16,46,.18)", borderRadius: 12 }}>
               <WifiOff size={13} style={{ color: AURA.red, flexShrink: 0 }}/>
-              <span style={{ fontSize: 11, color: AURA.red, fontWeight: 500 }}>
-                Servidor offline ou sem dados ainda. Verifique o backend no Render.
-              </span>
+              <span style={{ fontSize: 11, color: AURA.red, fontWeight: 500 }}>Servidor offline ou sem dados ainda. Verifique o backend no Render.</span>
             </div>
         )}
-
         <div className="adm-kpi-grid">
           {kpis.map(k => (
               <div key={k.label} className="adm-kpi">
@@ -799,7 +953,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
         </div>
 
         <div className="adm-card">
-
           <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -824,13 +977,7 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
           <div className="wa-filtros-row">
             <div className="wa-filtro-busca">
               <Search size={13} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }}/>
-              <input
-                  className="adm-input"
-                  style={{ padding: "8px 12px 8px 34px", fontSize: 13, borderRadius: 9 }}
-                  placeholder="Número, ID ou texto da mensagem..."
-                  value={busca}
-                  onChange={e => setBusca(e.target.value)}
-              />
+              <input className="adm-input" style={{ padding: "8px 12px 8px 34px", fontSize: 13, borderRadius: 9 }} placeholder="Número, ID ou texto da mensagem..." value={busca} onChange={e => setBusca(e.target.value)}/>
             </div>
             <div className="wa-filtro-select">
               <Filter size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none", zIndex: 1 }}/>
@@ -858,7 +1005,7 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
             <span className="wa-col-tipo wa-th">Tipo</span>
             <span className="wa-col-fone wa-th">Número</span>
             <span className="wa-col-id wa-th">Mensagem</span>
-            <span className="wa-col-st wa-th">Status</span>
+            <span className="wa-col-st wa-th">Status / Acesso</span>
             <span className="wa-col-dt wa-th" style={{ textAlign: "right" }}>Recebido</span>
             <span className="wa-col-arr wa-th"></span>
           </div>
@@ -878,32 +1025,35 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
                 {slice.map((r, i) => {
                   const textoPreview = extrairTexto(r);
                   const usuario = buscarUsuarioPorTelefone(r.numeroDestino);
+                  const estaBloqueado = bloqueados.some(b => normalizarNumero(b.numero) === normalizarNumero(r.numeroDestino));
                   return (
                       <motion.div key={r.id} className="wa-row"
                                   initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: i * .025 }}
+                                  style={{ borderLeft: estaBloqueado ? `3px solid ${AURA.red}44` : "3px solid transparent" }}
                                   onClick={() => setDetalhes(r)}>
                         <span className="wa-col-num">{(pag - 1) * POR_PAG + i + 1}</span>
                         <span className="wa-col-tipo">{tipoBadge(r.tipoEvento)}</span>
-                        <span className="wa-col-fone" style={{ display: usuario ? 'flex' : 'block', flexDirection: usuario ? 'column' : undefined, gap: usuario ? '3px' : 0 }}>
-                          {usuario && (
-                              <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 11.5 }}>
-                                👤 {usuario.nome}
-                              </span>
-                          )}
+                        <span className="wa-col-fone" style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                          {usuario && <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 11 }}>👤 {usuario.nome}</span>}
                           <span className="wa-mono">{r.numeroDestino || "—"}</span>
                         </span>
                         <span className="wa-col-id" style={{ display: "flex", flexDirection: "column", gap: 2, overflow: "hidden" }}>
-                          <span style={{ fontSize: 10, fontFamily: "monospace", color: t.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {r.idMensagem || "—"}
-                          </span>
-                          {textoPreview && (
-                              <span style={{ fontSize: 11.5, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 400 }}>
-                                {textoPreview}
-                              </span>
+                          <span style={{ fontSize: 10, fontFamily: "monospace", color: t.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.idMensagem || "—"}</span>
+                          {textoPreview && <span style={{ fontSize: 11.5, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 400 }}>{textoPreview}</span>}
+                        </span>
+                        {/* ── STATUS + BOTÃO BLOQUEIO ── */}
+                        <span className="wa-col-st" style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start" }}>
+                          {statusPill(r.status)}
+                          {r.numeroDestino && (
+                              <BotaoBloqueioInline
+                                  numero={r.numeroDestino}
+                                  bloqueados={bloqueados}
+                                  onBloquear={onBloquear}
+                                  onDesbloquear={onDesbloquear}
+                              />
                           )}
                         </span>
-                        <span className="wa-col-st">{statusPill(r.status)}</span>
                         <span className="wa-col-dt">{fmtData(r.recebidoEm)}</span>
                         <span className="wa-col-arr"><ChevronRight size={13}/></span>
                       </motion.div>
@@ -926,20 +1076,18 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
           )}
         </div>
 
+        {/* Drawer detalhe */}
         {createPortal(
             <>
-              <div
-                  style={{ position: "fixed", inset: 0, zIndex: 200, display: detalhes ? "block" : "none", background: "rgba(0,0,0,.5)", backdropFilter: "blur(6px)" }}
-                  onClick={() => setDetalhes(null)}
-              />
+              <div style={{ position: "fixed", inset: 0, zIndex: 200, display: detalhes ? "block" : "none", background: "rgba(0,0,0,.5)", backdropFilter: "blur(6px)" }} onClick={() => setDetalhes(null)}/>
               <div className={`wa-drawer${detalhes ? " open" : ""}`}>
                 {detalhes && (() => {
-                  const texto    = extrairTexto(detalhes);
-                  const tipoMsg  = extrairTipoMsg(detalhes);
-                  const usuarioDetalhe = buscarUsuarioPorTelefone(detalhes.numeroDestino);
+                  const texto   = extrairTexto(detalhes);
+                  const tipoMsg = extrairTipoMsg(detalhes);
+                  const usuDet  = buscarUsuarioPorTelefone(detalhes.numeroDestino);
                   return (
                       <>
-                        <div style={{ height: 2, background: `linear-gradient(90deg, ${AURA.wa}, ${AURA.blue})` }}/>
+                        <div style={{ height: 2, background: `linear-gradient(90deg,${AURA.wa},${AURA.blue})` }}/>
                         <div className="wa-drawer-head">
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -962,27 +1110,32 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
                             <div className="wa-dr">
                               <span className="wa-dl">Número</span>
                               <span className="wa-dv">
-                                {usuarioDetalhe ? (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                      <span style={{ fontWeight: 600, color: AURA.blue, fontSize: 12 }}>👤 {usuarioDetalhe.nome}</span>
-                                      <span style={{ fontFamily: "monospace" }}>{detalhes.numeroDestino || "—"}</span>
-                                    </div>
-                                ) : (
-                                    <span style={{ fontFamily: "monospace" }}>{detalhes.numeroDestino || "—"}</span>
-                                )}
+                                {usuDet
+                                    ? <div style={{ display: "flex", flexDirection: "column", gap: 4 }}><span style={{ fontWeight: 600, color: AURA.blue, fontSize: 12 }}>👤 {usuDet.nome}</span><span style={{ fontFamily: "monospace" }}>{detalhes.numeroDestino || "—"}</span></div>
+                                    : <span style={{ fontFamily: "monospace" }}>{detalhes.numeroDestino || "—"}</span>
+                                }
                               </span>
                             </div>
                             <div className="wa-dr"><span className="wa-dl">Status</span><span className="wa-dv">{statusPill(detalhes.status)}</span></div>
+                            {/* Botão bloqueio dentro do drawer */}
+                            {detalhes.numeroDestino && (
+                                <div className="wa-dr">
+                                  <span className="wa-dl">Acesso</span>
+                                  <span className="wa-dv">
+                                    <BotaoBloqueioInline
+                                        numero={detalhes.numeroDestino}
+                                        bloqueados={bloqueados}
+                                        onBloquear={num => { setDetalhes(null); onBloquear(num); }}
+                                        onDesbloquear={item => { setDetalhes(null); onDesbloquear(item); }}
+                                    />
+                                  </span>
+                                </div>
+                            )}
                           </div>
                           {detalhes.tipoEvento === "mensagem" && (
                               <div className="wa-ds">
                                 <p className="wa-ds-title">Conteúdo da mensagem</p>
-                                {tipoMsg && (
-                                    <div className="wa-dr">
-                                      <span className="wa-dl">Tipo</span>
-                                      <span className="wa-dv"><span className="wa-tipo-badge" style={{ textTransform: "capitalize" }}>{tipoMsg}</span></span>
-                                    </div>
-                                )}
+                                {tipoMsg && <div className="wa-dr"><span className="wa-dl">Tipo</span><span className="wa-dv"><span className="wa-tipo-badge" style={{ textTransform: "capitalize" }}>{tipoMsg}</span></span></div>}
                                 <div className="wa-dr" style={{ alignItems: "flex-start" }}>
                                   <span className="wa-dl" style={{ paddingTop: 10 }}>Texto</span>
                                   <div style={{ flex: 1, background: texto ? "rgba(37,211,102,.06)" : "transparent", border: `1px solid ${texto ? "rgba(37,211,102,.18)" : t.borderIn}`, borderRadius: 10, padding: "10px 14px", fontSize: 13, color: texto ? t.text : t.textMuted, lineHeight: 1.65, wordBreak: "break-word", fontStyle: texto ? "normal" : "italic", minHeight: 42 }}>
@@ -993,9 +1146,7 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
                           )}
                           <div className="wa-ds">
                             <p className="wa-ds-title">Payload original</p>
-                            <div className="wa-json">
-                              {(() => { try { return JSON.stringify(JSON.parse(detalhes.payload), null, 2); } catch { return detalhes.payload || "—"; } })()}
-                            </div>
+                            <div className="wa-json">{(() => { try { return JSON.stringify(JSON.parse(detalhes.payload), null, 2); } catch { return detalhes.payload || "—"; } })()}</div>
                           </div>
                         </div>
                       </>
@@ -1009,29 +1160,180 @@ function PainelWhatsApp({ isDark, t, usuarios = [] }) {
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAINEL BLOQUEIOS
+═══════════════════════════════════════════════════════════════════════════ */
+function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, onBloquear, onDesbloquear }) {
+  const [busca,    setBusca]    = useState("");
+  const [filtrados, setFiltrados] = useState(bloqueados);
+
+  useEffect(() => {
+    const q = busca.toLowerCase();
+    setFiltrados(bloqueados.filter(b =>
+        !q || (b.numero||"").includes(q) || (b.motivo||"").toLowerCase().includes(q)
+    ));
+  }, [busca, bloqueados]);
+
+  return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* KPIs */}
+        <div className="adm-kpi-grid" style={{ gridTemplateColumns: "repeat(2,1fr)" }}>
+          {[
+            { label: "Total bloqueados", value: bloqueados.length,                               color: AURA.red,        bg: "rgba(200,16,46,.08)",  icon: <Ban size={16}/> },
+            { label: "Com motivo",       value: bloqueados.filter(b => b.motivo).length,          color: AURA.yellowDark, bg: "rgba(196,140,0,.08)",  icon: <AlertTriangle size={16}/> },
+          ].map(k => (
+              <div key={k.label} className="adm-kpi">
+                <div className="adm-kpi-top">
+                  <div>
+                    <p className="adm-kpi-num" style={{ color: t.text }}>{carregandoBloq ? "…" : k.value}</p>
+                    <p className="adm-kpi-lbl">{k.label}</p>
+                  </div>
+                  <div className="adm-kpi-icon" style={{ background: k.bg, color: k.color }}>{k.icon}</div>
+                </div>
+              </div>
+          ))}
+        </div>
+
+        <div className="adm-card">
+          {/* Header */}
+          <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(200,16,46,.08)", border: "1px solid rgba(200,16,46,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ShieldOff size={16} style={{ color: AURA.red }}/>
+              </div>
+              <div>
+                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 500, color: t.text, margin: 0, lineHeight: 1.1 }}>Números bloqueados</p>
+                <p style={{ fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "1px 0 0" }}>{filtrados.length} registro{filtrados.length !== 1 ? "s" : ""}</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="adm-btn-ghost" style={{ padding: "7px 13px", fontSize: 8, letterSpacing: ".12em", height: 32 }} onClick={onRecarregar}>
+                <RefreshCcw size={12} style={{ animation: carregandoBloq ? "adm-spin 1s linear infinite" : "none" }}/> Atualizar
+              </button>
+              <button onClick={() => onBloquear("")}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 16px", borderRadius: 9, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.redDark},${AURA.red})`, color: "#fff", boxShadow: "0 4px 16px rgba(200,16,46,.25)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 8px 22px rgba(200,16,46,.35)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 16px rgba(200,16,46,.25)"; }}>
+                <Ban size={13}/> <span className="adm-cta-btn-label">Bloquear número</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Busca */}
+          <div style={{ padding: "12px 20px", borderBottom: `1px solid ${t.border}` }}>
+            <div style={{ position: "relative", maxWidth: 400 }}>
+              <Search size={13} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }}/>
+              <input className="adm-input" style={{ padding: "8px 12px 8px 34px", fontSize: 13, borderRadius: 9 }} placeholder="Buscar por número ou motivo..." value={busca} onChange={e => setBusca(e.target.value)}/>
+            </div>
+          </div>
+
+          {/* Thead */}
+          <div style={{ display: "flex", alignItems: "center", padding: "8px 20px", borderBottom: `1px solid ${t.border}`, background: isDark ? "rgba(255,255,255,.018)" : "rgba(0,0,0,.018)", gap: 12 }}>
+            {[
+              { label: "#",            w: 28,    align: "right"  },
+              { label: "Número",       w: 170,   align: "left"   },
+              { label: "Motivo",       flex: 1,  align: "left"   },
+              { label: "Bloqueado em", w: 110,   align: "right"  },
+              { label: "Ação",         w: 90,    align: "right"  },
+            ].map(c => (
+                <span key={c.label} style={{ width: c.w, flex: c.flex, fontSize: 9, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, textAlign: c.align, flexShrink: c.flex ? undefined : 0, overflow: "hidden" }}>
+                  {c.label}
+                </span>
+            ))}
+          </div>
+
+          {/* Linhas */}
+          {carregandoBloq ? (
+              <div style={{ padding: "42px 20px", textAlign: "center", color: t.textMuted }}>
+                <Loader2 size={22} style={{ animation: "adm-spin 1s linear infinite", marginBottom: 8 }}/>
+                <p style={{ fontSize: 11, margin: 0 }}>Carregando bloqueios…</p>
+              </div>
+          ) : filtrados.length === 0 ? (
+              <div style={{ padding: "52px 20px", textAlign: "center", color: t.textMuted }}>
+                <ShieldCheck size={30} style={{ marginBottom: 12, opacity: .35 }}/>
+                <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 4px", color: t.textSec }}>{busca ? "Nenhum resultado" : "Nenhum número bloqueado"}</p>
+                <p style={{ fontSize: 11, margin: 0 }}>{busca ? "Tente outra busca." : "Todos os números têm acesso liberado."}</p>
+              </div>
+          ) : (
+              <AnimatePresence>
+                {filtrados.map((item, i) => (
+                    <motion.div key={item.id ?? item.numero}
+                                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -16 }}
+                                transition={{ delay: i * .03 }}
+                                style={{ display: "flex", alignItems: "center", padding: "13px 20px", gap: 12, borderBottom: `1px solid ${t.border}`, transition: "background .14s" }}
+                                onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,16,46,.025)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = ""; }}>
+                      {/* # */}
+                      <span style={{ width: 28, flexShrink: 0, fontSize: 11, color: t.textMuted, textAlign: "right" }}>{i + 1}</span>
+                      {/* Número */}
+                      <span style={{ width: 170, flexShrink: 0, display: "flex", alignItems: "center", gap: 7 }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: AURA.red, flexShrink: 0, boxShadow: `0 0 6px ${AURA.red}88` }}/>
+                        <span style={{ fontFamily: "monospace", fontSize: 12, color: t.text }}>{item.numero}</span>
+                      </span>
+                      {/* Motivo */}
+                      <span style={{ flex: 1, overflow: "hidden" }}>
+                        {item.motivo
+                            ? <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, color: t.textSec, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <AlertTriangle size={11} style={{ color: AURA.yellowDark, flexShrink: 0 }}/> {item.motivo}
+                              </span>
+                            : <span style={{ fontSize: 11, color: t.textMuted, fontStyle: "italic" }}>Sem motivo informado</span>
+                        }
+                      </span>
+                      {/* Data */}
+                      <span style={{ width: 110, flexShrink: 0, fontSize: 11, color: t.textSec, textAlign: "right" }}>
+                        <span style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 4 }}>
+                          <Clock size={10} style={{ opacity: .5 }}/> {fmtData(item.criadoEm || item.bloqueadoEm)}
+                        </span>
+                      </span>
+                      {/* Ação */}
+                      <span style={{ width: 90, flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
+                        <button title="Desbloquear número" onClick={() => onDesbloquear(item)}
+                                style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 8, border: "1px solid rgba(5,150,105,.22)", background: "rgba(5,150,105,.06)", cursor: "pointer", color: AURA.green, fontSize: 9, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", transition: "all .18s", whiteSpace: "nowrap" }}
+                                onMouseEnter={e => { e.currentTarget.style.background = "rgba(5,150,105,.14)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(5,150,105,.06)"; e.currentTarget.style.transform = ""; }}>
+                          <Unlock size={11}/> Liberar
+                        </button>
+                      </span>
+                    </motion.div>
+                ))}
+              </AnimatePresence>
+          )}
+        </div>
+      </div>
+  );
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    COMPONENTE PRINCIPAL
 ════════════════════════════════════════════════════════════════════════════ */
 export default function AdminUsers() {
-  const [usuarios,       setUsuarios]       = useState([]);
-  const [pendentes,      setPendentes]      = useState(new Set());
-  const [loading,        setLoading]        = useState(true);
-  const [sending,        setSending]        = useState(false);
-  const [aprovando,      setAprovando]      = useState(null);
-  const [uploadandoFoto, setUploadandoFoto] = useState(null);
-  const [erro,           setErro]           = useState("");
-  const [sucesso,        setSucesso]        = useState("");
-  const [drawerOpen,     setDrawerOpen]     = useState(false);
-  const [editandoId,     setEditandoId]     = useState(null);
-  const [exitConfirm,    setExitConfirm]    = useState(false);
-  const [form,           setForm]           = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
-  const [isDark,         setIsDark]         = useState(() => localStorage.getItem("theme") === "dark");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [megaOpenId,     setMegaOpenId]     = useState(null);
-  const [moduloAtivo,    setModuloAtivo]    = useState("usuarios");
-  const [secaoExpMobile, setSecaoExpMobile] = useState("admin");
-  const [celulas,        setCelulas]        = useState([]);
-  const [celulaAdmin,    setCelulaAdmin]    = useState(null);
+  const [usuarios,        setUsuarios]        = useState([]);
+  const [pendentes,       setPendentes]       = useState(new Set());
+  const [loading,         setLoading]         = useState(true);
+  const [sending,         setSending]         = useState(false);
+  const [aprovando,       setAprovando]       = useState(null);
+  const [uploadandoFoto,  setUploadandoFoto]  = useState(null);
+  const [erro,            setErro]            = useState("");
+  const [sucesso,         setSucesso]         = useState("");
+  const [drawerOpen,      setDrawerOpen]      = useState(false);
+  const [editandoId,      setEditandoId]      = useState(null);
+  const [exitConfirm,     setExitConfirm]     = useState(false);
+  const [form,            setForm]            = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
+  const [isDark,          setIsDark]          = useState(() => localStorage.getItem("theme") === "dark");
+  const [mobileMenuOpen,  setMobileMenuOpen]  = useState(false);
+  const [megaOpenId,      setMegaOpenId]      = useState(null);
+  const [moduloAtivo,     setModuloAtivo]     = useState("usuarios");
+  const [secaoExpMobile,  setSecaoExpMobile]  = useState("admin");
+  const [celulas,         setCelulas]         = useState([]);
+  const [celulaAdmin,     setCelulaAdmin]     = useState(null);
+
+  // ── BLOQUEIOS state ──
+  const [bloqueados,       setBloqueados]       = useState([]);
+  const [carregandoBloq,   setCarregandoBloq]   = useState(false);
+  const [modalBloquear,    setModalBloquear]    = useState(false);
+  const [numBloqueioIni,   setNumBloqueioIni]   = useState("");
+  const [salvandoBloq,     setSalvandoBloq]     = useState(false);
+  const [itemDesbloquear,  setItemDesbloquear]  = useState(null);
 
   const fotoRef   = useRef(null);
   const fotoIdRef = useRef(null);
@@ -1039,7 +1341,6 @@ export default function AdminUsers() {
   const t = theme(isDark);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
-
   useEffect(() => {
     if (mobileMenuOpen) {
       const prev = document.body.style.overflow;
@@ -1047,7 +1348,6 @@ export default function AdminUsers() {
       return () => { document.body.style.overflow = prev; };
     }
   }, [mobileMenuOpen]);
-
   useEffect(() => {
     if (!megaOpenId) return;
     const onKey = e => { if (e.key === "Escape") setMegaOpenId(null); };
@@ -1055,6 +1355,48 @@ export default function AdminUsers() {
     return () => window.removeEventListener("keydown", onKey);
   }, [megaOpenId]);
 
+  /* ── Bloqueios: carregar ── */
+  const carregarBloqueios = useCallback(async () => {
+    setCarregandoBloq(true);
+    try {
+      const { data } = await api.get("webhook/whatsapp/registros/bloqueios");
+      setBloqueados(Array.isArray(data) ? data : []);
+    } catch { /* silencioso — lista fica vazia */ }
+    finally { setCarregandoBloq(false); }
+  }, []);
+
+  useEffect(() => { carregarBloqueios(); }, [carregarBloqueios]);
+
+  /* ── Bloqueios: bloquear / desbloquear ── */
+  const confirmarBloqueio = async (numero, motivo) => {
+    setSalvandoBloq(true);
+    try {
+      await api.post("webhook/whatsapp/registros/bloqueios", { numero, motivo });
+      ok(`Número ${numero} bloqueado.`);
+      setModalBloquear(false);
+      carregarBloqueios();
+    } catch (e) {
+      setErro(e.response?.data?.message || "Erro ao bloquear número.");
+    } finally { setSalvandoBloq(false); }
+  };
+
+  const confirmarDesbloqueio = async numero => {
+    setSalvandoBloq(true);
+    try {
+      await api.delete(`webhook/whatsapp/registros/bloqueios/${numero}`);
+      ok(`Número ${numero} desbloqueado.`);
+      setItemDesbloquear(null);
+      carregarBloqueios();
+    } catch { setErro("Erro ao desbloquear número."); }
+    finally { setSalvandoBloq(false); }
+  };
+
+  const handleAbrirBloquear = numero => {
+    setNumBloqueioIni(numero || "");
+    setModalBloquear(true);
+  };
+
+  /* ── Usuários ── */
   const carregarUsuarios = useCallback(async () => {
     setLoading(true); setErro("");
     try {
@@ -1188,6 +1530,7 @@ export default function AdminUsers() {
         <div className="adm-bg-layer" />
         <div className="adm-noise" />
 
+        {/* ══ HEADER ══ */}
         <div className="adm-header-wrap">
           <div className="adm-header-top-line" />
           <div className="adm-topbar">
@@ -1227,6 +1570,14 @@ export default function AdminUsers() {
                     <div className="adm-topbar-sep"/>
                     <button className="adm-cta-btn adm-cta-red" onClick={abrirNovo}>
                       <UserPlus size={13}/> <span className="adm-cta-btn-label">Novo usuário</span>
+                    </button>
+                  </>
+              )}
+              {moduloAtivo === "bloqueios" && (
+                  <>
+                    <div className="adm-topbar-sep"/>
+                    <button className="adm-cta-btn adm-cta-red" onClick={() => handleAbrirBloquear("")}>
+                      <Ban size={13}/> <span className="adm-cta-btn-label">Bloquear número</span>
                     </button>
                   </>
               )}
@@ -1284,6 +1635,7 @@ export default function AdminUsers() {
           </AnimatePresence>
         </div>
 
+        {/* ══ MOBILE OVERLAY ══ */}
         <AnimatePresence>
           {mobileMenuOpen && (
               <motion.div className="adm-mobile-overlay"
@@ -1356,6 +1708,7 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
+        {/* ══ MAIN ══ */}
         <main className="adm-main">
           <div className="adm-page-head">
             <p className="adm-page-eyebrow">{secaoAtiva?.label || "Admin"}</p>
@@ -1386,6 +1739,7 @@ export default function AdminUsers() {
                           transition={{ duration:.18 }}
                           style={{ marginTop: isLider && celulas.length > 0 ? 0 : 14 }}>
 
+                {/* ─── USUÁRIOS ─── */}
                 {moduloAtivo === "usuarios" && (
                     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
                       <div className="adm-kpi-grid">
@@ -1407,7 +1761,6 @@ export default function AdminUsers() {
                             </div>
                         ))}
                       </div>
-
                       <div className="adm-card">
                         {qtdPend > 0 && (
                             <div style={{ display:"flex", alignItems:"center", gap:8, padding:"9px 22px", background:"rgba(253,184,19,.06)", borderBottom:`1px solid rgba(253,184,19,.15)` }}>
@@ -1498,15 +1851,35 @@ export default function AdminUsers() {
                     </div>
                 )}
 
+                {/* ─── HISTÓRICO ─── */}
                 {moduloAtivo === "historico" && (
                     <div className="adm-card"><HistoricoAuditoria isDark={isDark}/></div>
                 )}
 
+                {/* ─── WHATSAPP ─── */}
                 {moduloAtivo === "wa-registros" && (
-                    <PainelWhatsApp isDark={isDark} t={t} usuarios={usuarios}/>
+                    <PainelWhatsApp
+                        isDark={isDark} t={t} usuarios={usuarios}
+                        bloqueados={bloqueados}
+                        onBloquear={handleAbrirBloquear}
+                        onDesbloquear={setItemDesbloquear}
+                    />
                 )}
 
-                {moduloAtivo !== "usuarios" && moduloAtivo !== "historico" && moduloAtivo !== "wa-registros" && (
+                {/* ─── BLOQUEIOS ─── */}
+                {moduloAtivo === "bloqueios" && (
+                    <PainelBloqueios
+                        isDark={isDark} t={t}
+                        bloqueados={bloqueados}
+                        carregandoBloq={carregandoBloq}
+                        onRecarregar={carregarBloqueios}
+                        onBloquear={handleAbrirBloquear}
+                        onDesbloquear={setItemDesbloquear}
+                    />
+                )}
+
+                {/* ─── OUTROS MÓDULOS ─── */}
+                {moduloAtivo !== "usuarios" && moduloAtivo !== "historico" && moduloAtivo !== "wa-registros" && moduloAtivo !== "bloqueios" && (
                     <ModuloRenderer moduloKey={moduloAtivo} isDark={isDark} celulaAdmin={celulaAdmin}/>
                 )}
               </motion.div>
@@ -1518,6 +1891,7 @@ export default function AdminUsers() {
 
         <input ref={fotoRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFoto}/>
 
+        {/* ══ MODAL NOVO/EDITAR USUÁRIO ══ */}
         <AnimatePresence>
           {drawerOpen && (
               <motion.div className="adm-modal-backdrop"
@@ -1542,24 +1916,13 @@ export default function AdminUsers() {
                       <X size={16}/>
                     </button>
                     <div style={{ display:"flex", alignItems:"center", gap:16, paddingRight:36 }}>
-                      <div style={{
-                        width:52, height:52, borderRadius:15, flexShrink:0,
-                        display:"flex", alignItems:"center", justifyContent:"center",
-                        background:editandoId?`linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`:`linear-gradient(135deg,${AURA.redDark},${AURA.red})`,
-                        boxShadow:editandoId?"0 8px 24px rgba(0,61,165,.28)":"0 8px 24px rgba(200,16,46,.28)",
-                      }}>
+                      <div style={{ width:52, height:52, borderRadius:15, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", background:editandoId?`linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`:`linear-gradient(135deg,${AURA.redDark},${AURA.red})`, boxShadow:editandoId?"0 8px 24px rgba(0,61,165,.28)":"0 8px 24px rgba(200,16,46,.28)" }}>
                         {editandoId ? <Pencil size={20} color="#fff"/> : <UserPlus size={20} color="#fff"/>}
                       </div>
                       <div style={{ minWidth:0 }}>
-                        <p style={{ fontSize:8, fontWeight:700, letterSpacing:".26em", textTransform:"uppercase", color:t.textMuted, margin:"0 0 4px" }}>
-                          {editandoId ? "Editar registro" : "Novo registro"}
-                        </p>
-                        <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:500, color:t.text, margin:"0 0 2px", lineHeight:1.1 }}>
-                          {editandoId ? "Editar Usuário" : "Liberar Acesso"}
-                        </h2>
-                        <p style={{ fontSize:12, fontWeight:300, color:t.textMuted, margin:0 }}>
-                          {editandoId ? `Atualizando dados · ID ${editandoId}` : "Preencha os dados para criar novo acesso"}
-                        </p>
+                        <p style={{ fontSize:8, fontWeight:700, letterSpacing:".26em", textTransform:"uppercase", color:t.textMuted, margin:"0 0 4px" }}>{editandoId ? "Editar registro" : "Novo registro"}</p>
+                        <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:500, color:t.text, margin:"0 0 2px", lineHeight:1.1 }}>{editandoId ? "Editar Usuário" : "Liberar Acesso"}</h2>
+                        <p style={{ fontSize:12, fontWeight:300, color:t.textMuted, margin:0 }}>{editandoId ? `Atualizando dados · ID ${editandoId}` : "Preencha os dados para criar novo acesso"}</p>
                       </div>
                     </div>
                   </div>
@@ -1567,10 +1930,10 @@ export default function AdminUsers() {
                     <form id="modal-form" onSubmit={editandoId ? salvarEdicao : adicionarUsuario}>
                       <div className="adm-modal-form-grid">
                         {[
-                          { icon:<User size={14}/>,  type:"text",     placeholder:"Nome completo",    key:"nome",             label:"Nome",     req:true,  col:"1/-1" },
-                          { icon:<Mail size={14}/>,  type:"email",    placeholder:"E-mail",            key:"email",            label:"E-mail",   req:true,  col:"1/-1" },
-                          { icon:<Key size={14}/>,   type:"password", placeholder:editandoId?"Manter senha atual":"Senha de acesso", key:"senha", label:"Senha", req:!editandoId, col:"1/2" },
-                          { icon:<Phone size={14}/>, type:"tel",      placeholder:"WhatsApp com DDD",  key:"telefoneWhatsapp", label:"WhatsApp", req:false, col:"2/3" },
+                          { icon:<User size={14}/>,  type:"text",     placeholder:"Nome completo",                              key:"nome",             label:"Nome",     req:true,       col:"1/-1" },
+                          { icon:<Mail size={14}/>,  type:"email",    placeholder:"E-mail",                                    key:"email",            label:"E-mail",   req:true,       col:"1/-1" },
+                          { icon:<Key size={14}/>,   type:"password", placeholder:editandoId?"Manter senha atual":"Senha de acesso", key:"senha",       label:"Senha",    req:!editandoId, col:"1/2"  },
+                          { icon:<Phone size={14}/>, type:"tel",      placeholder:"WhatsApp com DDD",                          key:"telefoneWhatsapp", label:"WhatsApp", req:false,      col:"2/3"  },
                         ].map(f => (
                             <div key={f.key} style={{ gridColumn:f.col, marginBottom:16 }}>
                               <label className="adm-label">{f.label}</label>
@@ -1583,9 +1946,7 @@ export default function AdminUsers() {
                       <div style={{ marginBottom:16 }}>
                         <label className="adm-label">Perfil de Acesso</label>
                         <div style={{ position:"relative" }}>
-                          <div style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:AURA.gold, opacity:.5, pointerEvents:"none" }}>
-                            <Shield size={14}/>
-                          </div>
+                          <div style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:AURA.gold, opacity:.5, pointerEvents:"none" }}><Shield size={14}/></div>
                           <select className="adm-select" value={form.perfil} onChange={e => setForm({...form,perfil:e.target.value})}>
                             {perfis.map(p => <option key={p} value={p}>{p.replace(/_/g," ")}</option>)}
                           </select>
@@ -1593,9 +1954,7 @@ export default function AdminUsers() {
                       </div>
                       <div style={{ padding:"12px 16px", borderRadius:12, background:isDark?"rgba(201,169,110,.04)":"rgba(201,169,110,.05)", border:`1px solid ${t.border}` }}>
                         <p style={{ fontSize:10, fontWeight:400, color:t.textSec, margin:0, lineHeight:1.65 }}>
-                          {editandoId
-                              ? "Alterações ficam pendentes de aprovação pelo administrador."
-                              : "O usuário receberá as instruções de primeiro acesso ao sistema."}
+                          {editandoId ? "Alterações ficam pendentes de aprovação pelo administrador." : "O usuário receberá as instruções de primeiro acesso ao sistema."}
                         </p>
                       </div>
                     </form>
@@ -1607,9 +1966,7 @@ export default function AdminUsers() {
                             style={{ opacity:sending?.65:1 }}>
                       {sending
                           ? <><Loader2 size={14} style={{ animation:"adm-spin 1s linear infinite" }}/> Salvando…</>
-                          : editandoId
-                              ? <><Pencil size={14}/> Salvar Alterações</>
-                              : <><UserPlus size={14}/> Liberar Acesso</>}
+                          : editandoId ? <><Pencil size={14}/> Salvar Alterações</> : <><UserPlus size={14}/> Liberar Acesso</>}
                     </button>
                   </div>
                 </motion.div>
@@ -1617,6 +1974,7 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
+        {/* ══ MODAL SAIR ══ */}
         <AnimatePresence>
           {exitConfirm && (
               <motion.div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}
@@ -1634,8 +1992,7 @@ export default function AdminUsers() {
                   <div className="adm-divider" style={{ margin:"0 0 20px" }}/>
                   <div style={{ display:"flex", gap:10 }}>
                     <button onClick={() => setExitConfirm(false)} className="adm-btn-ghost" style={{ flex:1, padding:"13px" }}>Cancelar</button>
-                    <button onClick={() => { localStorage.clear(); window.location.href="/"; }}
-                            className="adm-btn-primary red" style={{ flex:1.5, padding:"13px" }}>
+                    <button onClick={() => { localStorage.clear(); window.location.href="/"; }} className="adm-btn-primary red" style={{ flex:1.5, padding:"13px" }}>
                       <LogOut size={13}/> Sair Agora
                     </button>
                   </div>
@@ -1644,6 +2001,24 @@ export default function AdminUsers() {
           )}
         </AnimatePresence>
 
+        {/* ══ MODAIS DE BLOQUEIO (portais globais) ══ */}
+        <ModalBloquear
+            aberto={modalBloquear}
+            numeroInicial={numBloqueioIni}
+            onFechar={() => setModalBloquear(false)}
+            onConfirmar={confirmarBloqueio}
+            salvando={salvandoBloq}
+            t={t} isDark={isDark}
+        />
+        <ModalDesbloquear
+            item={itemDesbloquear}
+            onFechar={() => setItemDesbloquear(null)}
+            onConfirmar={confirmarDesbloqueio}
+            salvando={salvandoBloq}
+            t={t} isDark={isDark}
+        />
+
+        {/* ══ TOASTS ══ */}
         <AnimatePresence>
           {sucesso && (
               <motion.div className="adm-toast"
