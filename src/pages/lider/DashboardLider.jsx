@@ -29,27 +29,27 @@ const AURA = {
   light:     "#F5F0E8",
   red:       "#C8102E",
   redDark:   "#9B0B1E",
-  blue:      "#003DA5",
+  blue:       "#003DA5",
   blueDark:  "#002470",
   yellow:    "#FDB813",
 };
 
 function theme(isDark) {
   return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    bg:          isDark ? "#0A0A0F"               : "#E8F1FB",
+    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(232,241,251,.95)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,61,165,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(0,61,165,.15)",
+    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(0,61,165,.2)",
+    text:        isDark ? "#FFFFFF"               : "#0A1628",
+    textSec:     isDark ? "#9A9588"                : "#1E3A5F",
+    textMuted:   isDark ? "#6B6658"                : "#4A6585",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(0,61,165,.06)",
     glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(245,240,232,.97)",
-    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-    optionBg:    isDark ? "#12121A"                : "#F0EAE0",
+    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(232,241,251,.97)",
+    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(0,61,165,.3)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(74,101,133,.45)",
+    optionBg:    isDark ? "#12121A"                : "#DCEBFB",
   };
 }
 
@@ -73,8 +73,6 @@ function IEQCross({ size = 36 }) {
 function GlobalStyles({ t, isDark }) {
   return (
       <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
-
       @keyframes dl-spin   { to { transform: rotate(360deg); } }
       @keyframes dl-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
       @keyframes dl-blink  { 0%,100%{opacity:1;} 50%{opacity:.3;} }
@@ -85,7 +83,8 @@ function GlobalStyles({ t, isDark }) {
 
       .dl-root {
         font-family: 'Inter', sans-serif;
-        background: ${t.bg};
+        background: ${isDark ? "-webkit-linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "-webkit-linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
+        background: ${isDark ? "linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
         color: ${t.text};
         min-height: 100vh;
         position: relative;
@@ -507,14 +506,16 @@ function GlobalStyles({ t, isDark }) {
         text-align: center;
         font-size: 9px; font-weight: 500; letter-spacing: .18em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(26,16,8,.15)"};
+        color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(10,22,40,.3)"};
         padding: 16px 0 0;
       }
 
       .dl-loading {
         min-height: 100vh; display: flex;
         align-items: center; justify-content: center;
-        background: ${t.bg}; position: relative;
+        background: ${isDark ? "-webkit-linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "-webkit-linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
+        background: ${isDark ? "linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
+        position: relative;
       }
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }
     `}</style>
@@ -631,7 +632,7 @@ export default function DashboardLider() {
 
   if (loading) {
     return (
-        <div className="dl-loading" style={{ background: t.bg }}>
+        <div className="dl-loading">
           <GlobalStyles t={t} isDark={isDark} />
           <div className="dl-glow" />
           <div className="dl-loading-inner">
