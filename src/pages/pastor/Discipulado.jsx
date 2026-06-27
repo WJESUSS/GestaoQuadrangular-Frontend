@@ -68,8 +68,14 @@ function formatarSemana(inicio, fim) {
 
 function obterSemanaAtual() {
   const hoje = new Date();
-  const dom  = new Date(hoje); dom.setDate(hoje.getDate() - hoje.getDay());
-  const sab  = new Date(dom);  sab.setDate(dom.getDate() + 6);
+  const diaSemana = hoje.getDay(); // 0=dom, 1=seg ... 6=sab
+
+  const dom = new Date(hoje);
+  dom.setDate(hoje.getDate() - diaSemana); // vai para o domingo da semana atual
+
+  const sab = new Date(dom);
+  sab.setDate(dom.getDate() + 6); // domingo + 6 = sábado
+
   return {
     inicio: dom.toISOString().split("T")[0],
     fim:    sab.toISOString().split("T")[0],
