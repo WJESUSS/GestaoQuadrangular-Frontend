@@ -3,14 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
 const BRAND = {
-    blue: "#0077C8",
-    blueDark: "#003D7A",
-    violet: "#5B21B6",
-    violetDeep: "#39068F",
-    dark: "#07060F",
-    stone: "#120E1F",
-    light: "#F5F0EB",
-    muted: "#8A7F9A",
+    blue: "#003DA5",
+    blueDark: "#002470",
+    violet: "#003DA5",
+    violetDeep: "#002470",
+    dark: "#0A0A0F",
+    stone: "#12121A",
+    light: "#E8F1FB",
+    muted: "#4A6585",
+    gold: "#C9A96E",
+    goldLight: "#E8D5A3",
+    red: "#C8102E",
 };
 
 /* ── tiny hook: revela elementos ao entrar na viewport ── */
@@ -57,9 +60,9 @@ function FadeSection({ children, delay = 0, style = {} }) {
 function Divider() {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 auto", maxWidth: 200 }}>
-            <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${BRAND.blue})` }} />
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.blue }} />
-            <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${BRAND.blue})` }} />
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${BRAND.gold})` }} />
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.gold }} />
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${BRAND.gold})` }} />
         </div>
     );
 }
@@ -104,12 +107,12 @@ const IconArrow = () => (
     </svg>
 );
 const IconCross = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={BRAND.blue} strokeWidth="1.5" strokeLinecap="round">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={BRAND.gold} strokeWidth="1.5" strokeLinecap="round">
         <line x1="12" y1="2" x2="12" y2="22" /><line x1="2" y1="9" x2="22" y2="9" />
     </svg>
 );
 const IconCheck = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BRAND.blue} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BRAND.gold} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="20 6 9 17 4 12" />
     </svg>
 );
@@ -157,7 +160,7 @@ export default function Home() {
                 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
             </Helmet>
 
-            <div style={{ fontFamily: "'Manrope', sans-serif", background: BRAND.dark, color: "#fff", overflowX: "hidden" }}>
+            <div style={{ fontFamily: "'Manrope', sans-serif", background: "linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)", color: "#fff", overflowX: "hidden" }}>
 
                 {/* ═══════════════════════════════ NAV ═══════════════════════════════ */}
                 <nav style={{
@@ -167,7 +170,7 @@ export default function Home() {
                     height: 64,
                     background: "rgba(7,6,15,0.92)",
                     backdropFilter: "blur(12px)",
-                    borderBottom: `1px solid rgba(91,33,182,0.18)`,
+                    borderBottom: `1px solid rgba(0,61,165,0.18)`,
                 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <IconCross />
@@ -181,7 +184,7 @@ export default function Home() {
                             onClick={() => navigate("/login")}
                             style={{
                                 padding: "8px 24px",
-                                border: `1px solid ${BRAND.violet}`,
+                                border: `1px solid ${BRAND.blue}`,
                                 borderRadius: 4,
                                 background: "transparent",
                                 color: "#fff",
@@ -192,7 +195,7 @@ export default function Home() {
                                 letterSpacing: "0.05em",
                                 transition: "all 0.25s",
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.background = BRAND.violet; }}
+                            onMouseEnter={e => { e.currentTarget.style.background = BRAND.blue; }}
                             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
                         >
                             ENTRAR
@@ -216,8 +219,8 @@ export default function Home() {
                     <div ref={heroRef} style={{
                         position: "absolute", inset: 0, zIndex: 0,
                         backgroundImage: `
-              linear-gradient(rgba(0,119,200,0.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0,119,200,0.05) 1px, transparent 1px)
+              linear-gradient(rgba(0,61,165,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0,61,165,0.05) 1px, transparent 1px)
             `,
                         backgroundSize: "60px 60px",
                     }} />
@@ -229,7 +232,7 @@ export default function Home() {
                         transform: "translate(-50%, -50%)",
                         width: 600, height: 600,
                         borderRadius: "50%",
-                        background: `radial-gradient(circle, rgba(91,33,182,0.22) 0%, transparent 70%)`,
+                        background: `radial-gradient(circle, rgba(0,61,165,0.22) 0%, transparent 70%)`,
                         zIndex: 0,
                     }} />
 
@@ -237,8 +240,8 @@ export default function Home() {
                         {/* Etiqueta */}
                         <div style={{
                             display: "inline-flex", alignItems: "center", gap: 8,
-                            background: "rgba(0,119,200,0.1)",
-                            border: `1px solid rgba(0,119,200,0.3)`,
+                            background: "rgba(0,61,165,0.1)",
+                            border: `1px solid rgba(0,61,165,0.3)`,
                             borderRadius: 100,
                             padding: "5px 16px",
                             marginBottom: 32,
@@ -259,7 +262,7 @@ export default function Home() {
                             letterSpacing: "-0.02em",
                         }}>
                             Sua Igreja,<br />
-                            <span style={{ background: `linear-gradient(90deg, ${BRAND.blue}, ${BRAND.violet})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Bem Administrada.</span>
+                            <span style={{ background: `linear-gradient(90deg, ${BRAND.blue}, ${BRAND.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Bem Administrada.</span>
                         </h1>
 
                         <p style={{
@@ -282,7 +285,7 @@ export default function Home() {
                                     padding: "14px 32px",
                                     border: "none",
                                     borderRadius: 4,
-                                    background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet})`,
+                                    background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDark})`,
                                     color: "#fff",
                                     cursor: "pointer",
                                     fontFamily: "'Manrope', sans-serif",
@@ -331,8 +334,8 @@ export default function Home() {
                 {/* ═══════════════════════════════ STATS ═══════════════════════════════ */}
                 <section style={{
                     background: BRAND.stone,
-                    borderTop: `1px solid rgba(0,119,200,0.15)`,
-                    borderBottom: `1px solid rgba(0,119,200,0.15)`,
+                    borderTop: `1px solid rgba(0,61,165,0.15)`,
+                    borderBottom: `1px solid rgba(0,61,165,0.15)`,
                     padding: "40px clamp(20px, 5vw, 80px)",
                 }}>
                     <div style={{
@@ -386,7 +389,7 @@ export default function Home() {
                                         transition: "background 0.25s",
                                         cursor: "default",
                                     }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(91,33,182,0.1)"; }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,61,165,0.1)"; }}
                                     onMouseLeave={e => { e.currentTarget.style.background = i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent"; }}
                                 >
                                     <div style={{ color: BRAND.blue, marginBottom: 16 }}>{f.icon}</div>
@@ -402,8 +405,8 @@ export default function Home() {
                 <section style={{
                     padding: "80px clamp(20px, 5vw, 80px)",
                     background: BRAND.stone,
-                    borderTop: `1px solid rgba(0,119,200,0.15)`,
-                    borderBottom: `1px solid rgba(0,119,200,0.15)`,
+                    borderTop: `1px solid rgba(0,61,165,0.15)`,
+                    borderBottom: `1px solid rgba(0,61,165,0.15)`,
                 }}>
                     <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
                         <FadeSection>
@@ -427,15 +430,15 @@ export default function Home() {
 
                         <FadeSection delay={150}>
                             <div style={{
-                                border: `1px solid rgba(91,33,182,0.25)`,
+                                border: `1px solid rgba(0,61,165,0.25)`,
                                 borderRadius: 8,
                                 padding: "40px 36px",
-                                background: "rgba(91,33,182,0.05)",
+                                background: "rgba(0,61,165,0.05)",
                             }}>
                                 <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 32 }}>
                                     <div style={{
                                         width: 44, height: 44, borderRadius: "50%",
-                                        background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet})`,
+                                        background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDark})`,
                                         display: "flex", alignItems: "center", justifyContent: "center",
                                         flexShrink: 0,
                                         fontFamily: "'Playfair Display', serif",
@@ -480,7 +483,7 @@ export default function Home() {
                         transform: "translate(-50%, -50%)",
                         width: 700, height: 400,
                         borderRadius: "50%",
-                        background: `radial-gradient(ellipse, rgba(0,119,200,0.22) 0%, transparent 70%)`,
+                        background: `radial-gradient(ellipse, rgba(0,61,165,0.22) 0%, transparent 70%)`,
                         pointerEvents: "none",
                     }} />
 
@@ -501,7 +504,7 @@ export default function Home() {
                                 padding: "16px 40px",
                                 border: "none",
                                 borderRadius: 4,
-                                background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet})`,
+                                background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDark})`,
                                 color: "#fff",
                                 cursor: "pointer",
                                 fontFamily: "'Manrope', sans-serif",
@@ -510,7 +513,7 @@ export default function Home() {
                                 transition: "transform 0.2s, box-shadow 0.2s",
                                 boxShadow: `0 0 0 0px ${BRAND.blue}`,
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px rgba(0,119,200,0.4)`; }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px rgba(0,61,165,0.4)`; }}
                             onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 0 0 0px ${BRAND.blue}`; }}
                         >
                             Entrar no Sistema <IconArrow />
@@ -535,7 +538,7 @@ export default function Home() {
                         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center" }}>
                             © {new Date().getFullYear()} IEQ Gestão — Sistema Eclesiástico.
                             Suporte:{" "}
-                            <a href="mailto:washquesia@gmail.com" style={{ color: BRAND.blue, textDecoration: "none" }}>
+                             <a href="mailto:washquesia@gmail.com" style={{ color: BRAND.gold, textDecoration: "none" }}>
                                 washquesia@gmail.com
                             </a>
                         </p>

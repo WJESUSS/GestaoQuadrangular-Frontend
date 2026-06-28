@@ -30,18 +30,19 @@ const AURA = {
 
 function theme(isDark) {
   return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "rgba(255,255,255,.97)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    bg:          isDark ? "#0A0A0F"               : "#E8F1FB",
+    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "rgba(232,241,251,.97)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,61,165,.04)",
+    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(0,61,165,.15)",
+    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(0,61,165,.2)",
+    text:        isDark ? "#FFFFFF"               : "#0A1628",
+    textSec:     isDark ? "#9A9588"                : "#1E3A5F",
+    textMuted:   isDark ? "#6B6658"                : "#4A6585",
+    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(0,61,165,.06)",
     glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(245,240,232,.97)",
-    sidebarBg:   isDark ? "rgba(12,10,14,.98)"     : "rgba(252,248,242,.98)",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(232,241,251,.97)",
+    sidebarBg:   isDark ? "rgba(12,10,14,.98)"     : "rgba(232,241,251,.98)",
+    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(74,101,133,.45)",
   };
 }
 
@@ -69,7 +70,8 @@ function GlobalStyles({ t, isDark }) {
 
       .sec2-root {
         font-family: 'Inter', sans-serif;
-        background: ${t.bg};
+        background: ${isDark ? "-webkit-linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "-webkit-linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
+        background: ${isDark ? "linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
         color: ${t.text};
         min-height: 100vh;
         min-height: 100dvh;
@@ -92,9 +94,9 @@ function GlobalStyles({ t, isDark }) {
         position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5;
         background-image: repeating-linear-gradient(
           -55deg,
-          ${isDark ? "rgba(201,169,110,.025)" : "rgba(201,169,110,.04)"} 0 8px,
+          ${isDark ? "rgba(201,169,110,.025)" : "rgba(0,61,165,.035)"} 0 8px,
           transparent 8px 16px,
-          ${isDark ? "rgba(200,16,46,.015)"   : "rgba(200,16,46,.02)"}   16px 24px,
+          ${isDark ? "rgba(200,16,46,.015)"   : "rgba(0,61,165,.02)"}   16px 24px,
           transparent 24px 40px
         );
         background-size: 80px 80px;
