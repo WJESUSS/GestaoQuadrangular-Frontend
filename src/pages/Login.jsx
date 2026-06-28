@@ -7,12 +7,14 @@ import { useAuth }       from "../auth/AuthContext";
 import { useTheme }      from "../context/ThemeContext";
 import api               from "../services/api.js";
 
-/* ─── Paleta idêntica à Home ─── */
+/* ─── Paleta AURA (DashboardLider) ─── */
 const BRAND = {
-    blue:"#0077C8", blueDark:"#003D7A", blueLight:"#2E94DC",
-    violet:"#5B21B6", violetDeep:"#39068F", violetLight:"#7C4DD8",
-    dark:"#07060F", stone:"#120E1F",
-    light:"#F5F0EB", muted:"#8A7F9A",
+    blue:"#003DA5", blueDark:"#002470", blueLight:"#2E94DC",
+    violet:"#003DA5", violetDeep:"#002470", violetLight:"#4A6585",
+    dark:"#0A0A0F", stone:"#12121A",
+    light:"#E8F1FB", muted:"#4A6585",
+    gold:"#C9A96E", goldLight:"#E8D5A3",
+    red:"#C8102E", redDark:"#9B0B1E",
 };
 
 /* ─── Mini-hook fade-in (igual ao da Home) ─── */
@@ -125,9 +127,9 @@ export default function Login() {
     /* helpers */
     const trocarAba = a => { setAba(a); setErrLogin(null); setErrCad(null); setErrAlt(null); setOkCad(false); setOkAlt(false); };
 
-    const errBg     = e => e?.tipo==="limite" ? "rgba(91,33,182,.1)" : "rgba(0,119,200,.1)";
-    const errBorder = e => e?.tipo==="limite" ? "rgba(91,33,182,.35)" : "rgba(0,119,200,.3)";
-    const errColor  = e => e?.tipo==="limite" ? BRAND.violetLight : BRAND.blue;
+    const errBg     = e => e?.tipo==="limite" ? "rgba(201,169,110,.1)" : "rgba(0,61,165,.1)";
+    const errBorder = e => e?.tipo==="limite" ? "rgba(201,169,110,.35)" : "rgba(0,61,165,.3)";
+    const errColor  = e => e?.tipo==="limite" ? BRAND.gold : BRAND.blue;
 
     /* ── handlers ── */
     const handleLogin = async e => {
@@ -235,7 +237,8 @@ export default function Login() {
         /* ── font base ── */
         .ieq-login-root {
           font-family:'Manrope',sans-serif;
-          background:${bg};
+          background:${dark ? "-webkit-linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "-webkit-linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
+          background:${dark ? "linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
           min-height:100vh;
           display:flex;
           align-items:center;
@@ -249,8 +252,8 @@ export default function Login() {
         .grid-bg {
           position:fixed; inset:0; pointer-events:none; z-index:0;
           background-image:
-            linear-gradient(rgba(0,119,200,.05) 1px,transparent 1px),
-            linear-gradient(90deg,rgba(0,119,200,.05) 1px,transparent 1px);
+            linear-gradient(rgba(0,61,165,.05) 1px,transparent 1px),
+            linear-gradient(90deg,rgba(0,61,165,.05) 1px,transparent 1px);
           background-size:60px 60px;
           transition:transform .3s linear;
         }
@@ -260,13 +263,13 @@ export default function Login() {
           position:fixed; top:50%; left:50%;
           transform:translate(-50%,-50%);
           width:700px; height:700px; border-radius:50%;
-          background:radial-gradient(circle,rgba(0,119,200,.18) 0%,transparent 68%);
+          background:radial-gradient(circle,rgba(0,61,165,.18) 0%,transparent 68%);
           pointer-events:none; z-index:0;
         }
         .glow-blue {
           position:fixed; top:30%; right:10%;
           width:400px; height:400px; border-radius:50%;
-          background:radial-gradient(circle,rgba(91,33,182,.16) 0%,transparent 70%);
+          background:radial-gradient(circle,rgba(0,36,112,.16) 0%,transparent 70%);
           pointer-events:none; z-index:0;
         }
 
@@ -286,7 +289,7 @@ export default function Login() {
           box-shadow:
             0 2px 1px rgba(0,0,0,.04),
             0 8px 32px rgba(0,0,0,.12),
-            0 0 0 1px rgba(0,119,200,.08);
+            0 0 0 1px rgba(0,61,165,.08);
         }
 
         /* ── tabs ── */
@@ -306,9 +309,9 @@ export default function Login() {
           transition:all .25s;
         }
         .tab-btn.active {
-          background:linear-gradient(135deg, ${BRAND.blue}, ${BRAND.violet});
+          background:linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDark});
           color:#fff;
-          box-shadow:0 3px 12px rgba(0,119,200,.35);
+          box-shadow:0 3px 12px rgba(0,61,165,.35);
         }
         .tab-btn.inactive {
           background:transparent;
@@ -326,13 +329,13 @@ export default function Login() {
           letter-spacing:.12em; text-transform:uppercase;
           color:${BRAND.blue}; font-family:'Manrope',sans-serif;
         }
-        .fld-label.blue { color:${BRAND.violet}; }
+        .fld-label.blue { color: ${BRAND.blueDark}; }
 
         /* ── inputs ── */
         .ieq-input {
           width:100%;
           background:${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
-          border:1px solid ${dark?"rgba(0,119,200,.15)":"rgba(91,33,182,.14)"};
+          border:1px solid ${dark?"rgba(0,61,165,.15)":"rgba(0,61,165,.14)"};
           color:${txt};
           padding:13px 13px 13px 43px;
           border-radius:6px; outline:none;
@@ -341,15 +344,15 @@ export default function Login() {
         }
         .ieq-input:focus {
           border-color:${BRAND.blue};
-          box-shadow:0 0 0 3px rgba(0,119,200,.14);
-          background:${dark?"rgba(255,255,255,.06)":"rgba(0,119,200,.02)"};
+          box-shadow:0 0 0 3px rgba(0,61,165,.14);
+          background:${dark?"rgba(255,255,255,.06)":"rgba(0,61,165,.02)"};
         }
         .ieq-input.blue:focus {
-          border-color:${BRAND.violet};
-          box-shadow:0 0 0 3px rgba(91,33,182,.14);
+          border-color:${BRAND.blue};
+          box-shadow:0 0 0 3px rgba(0,61,165,.14);
         }
         .ieq-input.error { border-color:${BRAND.violetLight}; }
-        .ieq-input::placeholder { color:${dark?"rgba(245,240,235,.22)":"rgba(7,6,15,.22)"}; }
+        .ieq-input::placeholder { color:${dark?"rgba(245,240,235,.22)":"rgba(10,22,40,.22)"}; }
 
         /* ── botão principal ── */
         .btn-primary {
@@ -361,10 +364,10 @@ export default function Login() {
         }
         .btn-primary:hover:not(:disabled) {
           opacity:.88; transform:translateY(-2px);
-          box-shadow:0 8px 28px rgba(0,119,200,.35);
+          box-shadow:0 8px 28px rgba(0,61,165,.35);
         }
         .btn-primary:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
-        .btn-primary.blue:hover:not(:disabled) { box-shadow:0 8px 28px rgba(91,33,182,.35); }
+        .btn-primary.blue:hover:not(:disabled) { box-shadow:0 8px 28px rgba(0,36,112,.35); }
 
         /* ── caixa de erro ── */
         .err-box {
@@ -394,7 +397,7 @@ export default function Login() {
         }
         .divider::before,.divider::after {
           content:""; flex:1; height:1px;
-          background:${dark?"rgba(0,119,200,.12)":"rgba(7,6,15,.09)"};
+          background:${dark?"rgba(0,61,165,.12)":"rgba(10,22,40,.09)"};
         }
 
         /* ── força senha ── */
@@ -419,23 +422,23 @@ export default function Login() {
         /* ── pulse ring da cruz ── */
         .pulse-ring {
           position:absolute; border-radius:50%;
-          border:1px solid rgba(0,119,200,.32);
+          border:1px solid rgba(0,61,165,.32);
           animation:pulse 3s ease-in-out infinite;
         }
 
         /* ── tag badge ── */
         .badge {
           display:inline-flex; align-items:center; gap:7px;
-          background:rgba(91,33,182,.08);
-          border:1px solid rgba(91,33,182,.25);
+          background:rgba(0,61,165,.08);
+          border:1px solid rgba(0,61,165,.25);
           border-radius:100px; padding:5px 14px;
           font-size:11px; font-weight:700;
           letter-spacing:.1em; text-transform:uppercase;
-          color:${BRAND.violetLight};
+          color:${BRAND.blue};
         }
         .badge-dot {
           width:6px; height:6px; border-radius:50%;
-          background:${BRAND.violetLight};
+          background:${BRAND.blue};
           animation:pulse 2s ease-in-out infinite;
         }
 
@@ -459,7 +462,7 @@ export default function Login() {
                     style={{
                         position:"fixed", top:22, right:22, zIndex:50,
                         background:"none", border:"none", cursor:"pointer",
-                        color:dark?BRAND.violetLight:BRAND.blue, transition:"color .3s",
+                        color:dark?BRAND.blue:BRAND.gold, transition:"color .3s",
                     }}
                 >
                     {dark ? <Sun size={22}/> : <Moon size={22}/>}
@@ -480,7 +483,7 @@ export default function Login() {
                             <div style={{
                                 width:62, height:62, borderRadius:"50%",
                                 background:dark?"rgba(18,14,31,.9)":"#fff",
-                                border:`1px solid rgba(0,119,200,.28)`,
+                                border:`1px solid rgba(0,61,165,.28)`,
                                 display:"flex", alignItems:"center", justifyContent:"center",
                             }}>
                                 <IEQCross size={44}/>
@@ -504,7 +507,7 @@ export default function Login() {
                             color:txt, margin:0,
                         }}>
                             Sua Igreja,{" "}
-                            <span style={{ background:`linear-gradient(90deg, ${BRAND.blue}, ${BRAND.violet})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>Bem Administrada.</span>
+                            <span style={{ background:`linear-gradient(90deg, ${BRAND.blue}, ${BRAND.gold})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>Bem Administrada.</span>
                         </h1>
                         <p style={{
                             marginTop:8, fontSize:12,
@@ -519,9 +522,9 @@ export default function Login() {
                     <div style={{
                         display:"flex", alignItems:"center", gap:12, marginBottom:24,
                     }}>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to right,transparent,${BRAND.blue})` }}/>
-                        <div style={{ width:6, height:6, borderRadius:"50%", background:BRAND.blue }}/>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to left,transparent,${BRAND.blue})` }}/>
+                        <div style={{ flex:1, height:1, background:`linear-gradient(to right,transparent,${BRAND.gold})` }}/>
+                        <div style={{ width:6, height:6, borderRadius:"50%", background:BRAND.gold }}/>
+                        <div style={{ flex:1, height:1, background:`linear-gradient(to left,transparent,${BRAND.gold})` }}/>
                     </div>
 
                     {/* ── tabs ── */}
@@ -604,11 +607,11 @@ export default function Login() {
                             {/* aviso roxo */}
                             <div style={{
                                 marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:dark?"rgba(91,33,182,.1)":"rgba(91,33,182,.06)",
-                                border:`1px solid ${dark?"rgba(91,33,182,.3)":"rgba(91,33,182,.18)"}`,
+                                background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
+                                border:`1px solid ${dark?"rgba(0,61,165,.3)":"rgba(0,61,165,.18)"}`,
                                 display:"flex", gap:9, alignItems:"flex-start",
                             }}>
-                <span style={{ color:BRAND.violet, flexShrink:0, marginTop:2 }}>
+                <span style={{ color:BRAND.blue, flexShrink:0, marginTop:2 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </span>
                                 <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>
@@ -620,8 +623,8 @@ export default function Login() {
                             {okCad ? (
                                 <div className="pop-in" style={{
                                     textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:dark?"rgba(0,119,200,.1)":"rgba(0,119,200,.06)",
-                                    border:`1px solid ${dark?"rgba(0,119,200,.32)":"rgba(0,119,200,.18)"}`,
+                                    background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
+                                    border:`1px solid ${dark?"rgba(0,61,165,.32)":"rgba(0,61,165,.18)"}`,
                                 }}>
                                     <CheckCircle2 size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
                                     <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color:BRAND.blue, marginBottom:8 }}>Solicitação Enviada!</p>
@@ -707,7 +710,7 @@ export default function Login() {
                                     )}
                                     {/* botão */}
                                     <button type="submit" className="btn-primary blue" disabled={loadCad}
-                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.violetDeep},${BRAND.violet})` }}>
+                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.blueDark},${BRAND.blue})` }}>
                                         {loadCad ? <><Loader2 size={16} className="spin"/> Enviando...</> : "Solicitar Acesso"}
                                     </button>
                                 </form>
@@ -718,14 +721,14 @@ export default function Login() {
                     {/* ════ ABA: ALTERAR DADOS ════ */}
                     {aba === "alterar" && (
                         <div className="tab-content">
-                            {/* aviso violeta */}
+                            {/* aviso */}
                             <div style={{
                                 marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:dark?"rgba(91,33,182,.08)":"rgba(91,33,182,.09)",
-                                border:`1px solid ${dark?"rgba(91,33,182,.25)":"rgba(91,33,182,.28)"}`,
+                                background:dark?"rgba(0,61,165,.08)":"rgba(0,61,165,.09)",
+                                border:`1px solid ${dark?"rgba(0,61,165,.25)":"rgba(0,61,165,.28)"}`,
                                 display:"flex", gap:9, alignItems:"flex-start",
                             }}>
-                <span style={{ color:BRAND.violetLight, flexShrink:0, marginTop:2 }}>
+                <span style={{ color:BRAND.blue, flexShrink:0, marginTop:2 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </span>
                                 <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>
@@ -737,8 +740,8 @@ export default function Login() {
                             {okAlt ? (
                                 <div className="pop-in" style={{
                                     textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:dark?"rgba(0,119,200,.1)":"rgba(0,119,200,.06)",
-                                    border:`1px solid ${dark?"rgba(0,119,200,.32)":"rgba(0,119,200,.18)"}`,
+                                    background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
+                                    border:`1px solid ${dark?"rgba(0,61,165,.32)":"rgba(0,61,165,.18)"}`,
                                 }}>
                                     <ShieldCheck size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
                                     <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color:BRAND.blue, marginBottom:8 }}>Solicitação Enviada!</p>
