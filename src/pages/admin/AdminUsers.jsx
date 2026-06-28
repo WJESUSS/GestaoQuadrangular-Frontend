@@ -1325,8 +1325,13 @@ export default function AdminUsers() {
   const carregarBloqueios = useCallback(async () => {
     setCarregandoBloq(true);
     try {
-      const { data } = await api.get("webhook/whatsapp/registros/bloqueios");
-      setBloqueados(Array.isArray(data) ? data : []);
+      const { data } = await api.get("webhook/whatsapp/registros/bloqueios", {
+        params: { size: 1000 }, // backend retorna Page<>, então pedimos uma página grande
+      });
+      // Backend retorna Page<NumeroBloqueado> => { content: [...], totalElements, ... }
+      // Aceita tanto array puro quanto objeto paginado, pra não quebrar se o backend mudar.
+      const lista = Array.isArray(data) ? data : data?.content ?? [];
+      setBloqueados(lista);
     } catch { }
     finally { setCarregandoBloq(false); }
   }, []);
