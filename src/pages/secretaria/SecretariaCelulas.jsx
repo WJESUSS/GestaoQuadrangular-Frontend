@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
   Users, Loader2, Search, ChevronDown, Trash2, Plus,
-  MapPin, Clock, Star,
+  MapPin, Clock, Star, X, Building2,
 } from "lucide-react";
 
 /* ─── AURA Design Tokens ─────────────────────────────────────────── */
@@ -332,6 +332,8 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
   const [novoMembroId,      setNovoMembroId]      = useState("");
   const [loading,           setLoading]           = useState(false);
   const [loadingAcao,       setLoadingAcao]       = useState(false);
+  const [modalAberto,       setModalAberto]       = useState(false);
+  const [buscaCelula,       setBuscaCelula]       = useState("");
 
   const t = themeSecretaria(isDark);
 
@@ -467,34 +469,249 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
             <div className="sec-card" style={{ marginBottom: 20 }}>
               <div className="sec-card-header">
                 <div>
-                  <h3 className="sec-card-title">Selecionar Célula</h3>
+                  <h3 className="sec-card-title">Célula Selecionada</h3>
                   <p className="sec-card-sub">{celulas.length} células disponíveis</p>
                 </div>
               </div>
               <div style={{ padding: "16px 20px" }}>
-                <div className="sec-select-wrap">
-                  <Search className="sec-search-icon" size={15} />
-                  <select
-                      className="sec-select"
-                      style={{ paddingLeft: 44 }}
-                      value={celulaSelecionada?.id || ""}
-                      onChange={(e) => {
-                        const id = parseInt(e.target.value);
-                        setCelulaSelecionada(celulas.find(c => c.id === id) || null);
-                      }}
-                  >
-                    <option value="">SELECIONE UMA CÉLULA…</option>
-                    {Array.isArray(celulas) && celulas.map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.nome}{c.bairro ? ` • ${c.bairro}` : ""} — {c.nomeLider || "Sem líder"}
-                        </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="sec-select-icon" size={16} />
-                </div>
+                {celulaSelecionada ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                        background: `linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark})`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "#fff",
+                      }}>
+                        <Building2 size={20} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: t.text }}>{celulaSelecionada.nome}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: 12, color: t.textSec }}>
+                          {celulaSelecionada.bairro && `${celulaSelecionada.bairro} • `}
+                          {celulaSelecionada.nomeLider || "Sem líder"}
+                        </p>
+                      </div>
+                      <button
+                          onClick={() => setModalAberto(true)}
+                          style={{
+                            padding: "10px 18px", borderRadius: 10, border: `1px solid ${t.border}`,
+                            background: t.bgInput, color: t.text, cursor: "pointer",
+                            fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 500,
+                            whiteSpace: "nowrap", transition: "all .2s",
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.borderColor = AURA.gold}
+                          onMouseLeave={(e) => e.currentTarget.style.borderColor = t.border}
+                      >
+                        Trocar
+                      </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setModalAberto(true)}
+                        style={{
+                          width: "100%", padding: "16px 20px", borderRadius: 12,
+                          border: `2px dashed ${t.borderInput}`,
+                          background: "transparent", color: t.textSec, cursor: "pointer",
+                          fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500,
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                          transition: "all .25s",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = AURA.gold;
+                          e.currentTarget.style.color = AURA.gold;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = t.borderInput;
+                          e.currentTarget.style.color = t.textSec;
+                        }}
+                    >
+                      <Search size={18} />
+                      Buscar Célula…
+                    </button>
+                )}
               </div>
             </div>
           </motion.div>
+
+          {/* ── Modal de Busca ── */}
+          <AnimatePresence>
+            {modalAberto && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: .2 }}
+                    style={{
+                      position: "fixed", inset: 0, zIndex: 9999,
+                      background: "rgba(0,0,0,.6)",
+                      backdropFilter: "blur(6px)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      padding: 16, boxSizing: "border-box",
+                    }}
+                    onClick={() => { setModalAberto(false); setBuscaCelula(""); }}
+                >
+                  <motion.div
+                      initial={{ opacity: 0, scale: .92, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: .95, y: 10 }}
+                      transition={{ duration: .25 }}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        width: "100%",
+                        maxWidth: 520,
+                        maxHeight: "min(80vh, 600px)",
+                        background: isDark ? "#12121A" : "#FFFFFF",
+                        borderRadius: 20,
+                        border: isDark ? "1px solid rgba(201,169,110,.12)" : "1px solid rgba(0,0,0,.06)",
+                        overflow: "hidden",
+                        display: "flex",
+                        flexDirection: "column",
+                        boxShadow: "0 24px 80px rgba(0,0,0,.35)",
+                      }}
+                  >
+                    {/* Header */}
+                    <div style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      gap: 12, padding: "18px 20px 14px", flexShrink: 0,
+                      borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)"}`,
+                    }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <p style={{
+                          margin: 0, fontSize: 9, fontWeight: 600,
+                          letterSpacing: ".2em", textTransform: "uppercase",
+                          color: "rgba(201,169,110,.55)",
+                        }}>Selecionar</p>
+                        <h2 style={{
+                          margin: "2px 0 0", fontSize: 17, fontWeight: 600,
+                          color: t.text, fontFamily: "'Inter', sans-serif",
+                        }}>
+                          Célula
+                        </h2>
+                      </div>
+                      <button
+                          onClick={() => { setModalAberto(false); setBuscaCelula(""); }}
+                          style={{
+                            width: 36, height: 36, borderRadius: 10, border: "none",
+                            background: isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.05)",
+                            color: t.textSec, cursor: "pointer", flexShrink: 0,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    {/* Search */}
+                    <div style={{ padding: "12px 20px", flexShrink: 0 }}>
+                      <div style={{ position: "relative" }}>
+                        <Search size={15} style={{
+                          position: "absolute", left: 14, top: "50%",
+                          transform: "translateY(-50%)", color: AURA.gold, opacity: .5,
+                          pointerEvents: "none",
+                        }} />
+                        <input
+                            autoFocus
+                            placeholder="Buscar por nome ou bairro…"
+                            value={buscaCelula}
+                            onChange={(e) => setBuscaCelula(e.target.value)}
+                            style={{
+                              width: "100%", boxSizing: "border-box", padding: "13px 16px 13px 44px",
+                              borderRadius: 12, border: `1px solid ${isDark ? "rgba(201,169,110,.15)" : "rgba(0,0,0,.1)"}`,
+                              background: isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)",
+                              color: t.text, outline: "none",
+                              fontFamily: "'Inter', sans-serif", fontSize: 14,
+                            }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* List */}
+                    <div style={{
+                      flex: 1, overflowY: "auto",
+                      padding: "4px 20px 20px",
+                      display: "flex", flexDirection: "column", gap: 8,
+                    }}>
+                      {celulas
+                          .filter((c) => {
+                            const q = buscaCelula.toLowerCase();
+                            return !q || c.nome?.toLowerCase().includes(q) || c.bairro?.toLowerCase().includes(q);
+                          })
+                          .map((c) => {
+                            const selecionada = celulaSelecionada?.id === c.id;
+                            return (
+                                <motion.button
+                                    key={c.id}
+                                    onClick={() => {
+                                      setCelulaSelecionada(c);
+                                      setModalAberto(false);
+                                      setBuscaCelula("");
+                                    }}
+                                    whileHover={{ scale: 1.01 }}
+                                    whileTap={{ scale: .98 }}
+                                    style={{
+                                      width: "100%", textAlign: "left", cursor: "pointer",
+                                      padding: "14px 16px", borderRadius: 14,
+                                      border: selecionada
+                                          ? `1.5px solid ${AURA.gold}`
+                                          : `1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)"}`,
+                                      background: selecionada
+                                          ? isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.08)"
+                                          : isDark ? "rgba(255,255,255,.02)" : "rgba(0,0,0,.02)",
+                                      display: "flex", alignItems: "center", gap: 12,
+                                      fontFamily: "'Inter', sans-serif",
+                                      transition: "border-color .2s, background .2s",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (!selecionada) e.currentTarget.style.borderColor = "rgba(201,169,110,.3)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (!selecionada) e.currentTarget.style.borderColor = isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)";
+                                    }}
+                                >
+                                  <div style={{
+                                    width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+                                    background: selecionada
+                                        ? `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`
+                                        : `linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark})`,
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    color: selecionada ? "#1A0A0D" : "#fff",
+                                    fontSize: 14, fontWeight: 600,
+                                  }}>
+                                    <Building2 size={18} />
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: t.text }}>
+                                      {c.nome}
+                                      {selecionada && (
+                                          <span style={{ color: AURA.gold, fontSize: 11, marginLeft: 8, fontWeight: 500 }}>
+                                            ✓ Atual
+                                          </span>
+                                      )}
+                                    </p>
+                                    <p style={{ margin: "3px 0 0", fontSize: 12, color: t.textSec }}>
+                                      {c.bairro ? `${c.bairro} • ` : ""}
+                                      {c.nomeLider ? `Líder: ${c.nomeLider}` : "Sem líder"}
+                                    </p>
+                                  </div>
+                                </motion.button>
+                            );
+                          })}
+
+                      {buscaCelula && celulas.filter(c =>
+                          c.nome?.toLowerCase().includes(buscaCelula.toLowerCase()) ||
+                          c.bairro?.toLowerCase().includes(buscaCelula.toLowerCase())
+                      ).length === 0 && (
+                          <div style={{ textAlign: "center", padding: "32px 16px" }}>
+                            <p style={{ margin: 0, fontSize: 13, color: t.textMuted, fontStyle: "italic" }}>
+                              Nenhuma célula encontrada para "{buscaCelula}"
+                            </p>
+                          </div>
+                      )}
+                    </div>
+                  </motion.div>
+                </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* ── Conteúdo ── */}
           <AnimatePresence mode="wait">
