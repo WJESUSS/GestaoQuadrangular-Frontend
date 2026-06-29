@@ -1355,14 +1355,22 @@ export default function AdminUsers() {
     const numNormalizado = normalizarTelBR(numero);
     setSalvandoBloq(true);
     try {
-      await api.delete(`webhook/whatsapp/registros/bloqueios/${numNormalizado}`);
-      ok(`Número ${numNormalizado} desbloqueado.`);
+      const { data } = await api.delete(`webhook/whatsapp/registros/bloqueios/${numNormalizado}`);
+
+      if (!data.metaOk) {
+        // Aviso amarelo em vez de sucesso verde
+        setErro("⚠️ Número desbloqueado localmente, mas a Meta pode levar até 24h para liberar. Isso ocorre quando o número não enviou mensagem recentemente.");
+      } else {
+        ok(`Número ${numNormalizado} desbloqueado com sucesso.`);
+      }
       setItemDesbloquear(null);
       carregarBloqueios();
-    } catch { setErro("Erro ao desbloquear número."); }
-    finally { setSalvandoBloq(false); }
+    } catch {
+      setErro("Erro ao desbloquear número.");
+    } finally {
+      setSalvandoBloq(false);
+    }
   };
-
   const handleAbrirBloquear = numero => {
     setNumBloqueioIni(numero || "");
     setModalBloquear(true);
