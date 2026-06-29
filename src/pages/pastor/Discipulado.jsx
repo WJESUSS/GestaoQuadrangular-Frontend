@@ -560,7 +560,7 @@ export default function Discipulado({ isDark = false }) {
     try {
       setLoading(true); setErro(null);
       const res = await api.get("/relatorios/todos-relatorios");
-      setRelatorios(res.data || []);
+      setRelatorios(Array.isArray(res.data) ? res.data : []);
       setPage(0); // volta à 1ª página ao recarregar
     } catch (e) {
       setErro({ status: e.response?.status, msg: "Não foi possível carregar os relatórios." });

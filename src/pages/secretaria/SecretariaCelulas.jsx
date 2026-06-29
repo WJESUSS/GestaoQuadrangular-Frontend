@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
   Users, Loader2, Search, ChevronDown, Trash2, Plus,
-  Building2, User, MapPin, Clock, Star,
+  MapPin, Clock, Star,
 } from "lucide-react";
 
 /* ─── AURA Design Tokens ─────────────────────────────────────────── */
@@ -222,6 +222,9 @@ function GlobalStylesSecretaria({ t, isDark }) {
         display: flex; align-items: center; justify-content: center; gap: 6px;
       }
       .sec-btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(5,150,105,.25); }
+      .sec-btn-add:disabled {
+        opacity: 0.6; cursor: not-allowed; transform: none;
+      }
 
       .sec-btn-remove {
         width: 36px; height: 36px; border-radius: 8px; border: none;
@@ -232,6 +235,9 @@ function GlobalStylesSecretaria({ t, isDark }) {
       .sec-btn-remove:hover {
         background: ${AURA.red};
         color: #fff;
+      }
+      .sec-btn-remove:disabled {
+        opacity: 0.6; cursor: not-allowed;
       }
 
       .sec-table {
@@ -332,15 +338,25 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
   const carregarCelulas = useCallback(async () => {
     try {
       const res = await api.get("/celulas");
-      setCelulas(res.data);
-    } catch (err) { console.error(err); }
+      // ✅ Garantir que é sempre um array
+      const dados = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      setCelulas(dados);
+    } catch (err) {
+      console.error(err);
+      setCelulas([]);
+    }
   }, []);
 
   const carregarMembrosSemCelula = useCallback(async () => {
     try {
       const res = await api.get("/membros/sem-celula");
-      setMembrosSemCelula(res.data);
-    } catch (err) { console.error(err); }
+      // ✅ Garantir que é sempre um array
+      const dados = Array.isArray(res.data) ? res.data : (res.data?.content || res.data?.data || []);
+      setMembrosSemCelula(dados);
+    } catch (err) {
+      console.error(err);
+      setMembrosSemCelula([]); // ✅ Fallback para array vazio
+    }
   }, []);
 
   const carregarMembrosDaCelula = useCallback(async (celulaId) => {
@@ -348,8 +364,13 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
     setLoading(true);
     try {
       const res = await api.get(`/celulas/${celulaId}/membros`);
-      setMembros(res.data);
-    } catch (err) { console.error(err); }
+      // ✅ Garantir que é sempre um array
+      const dados = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      setMembros(dados);
+    } catch (err) {
+      console.error(err);
+      setMembros([]); // ✅ Fallback para array vazio
+    }
     finally { setLoading(false); }
   }, []);
 
@@ -463,7 +484,7 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
                       }}
                   >
                     <option value="">SELECIONE UMA CÉLULA…</option>
-                    {celulas.map(c => (
+                    {Array.isArray(celulas) && celulas.map(c => (
                         <option key={c.id} value={c.id}>
                           {c.nome}{c.bairro ? ` • ${c.bairro}` : ""} — {c.nomeLider || "Sem líder"}
                         </option>
@@ -558,7 +579,7 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
                               onChange={e => setNovoMembroId(e.target.value)}
                           >
                             <option value="">BUSCAR MEMBRO…</option>
-                            {membrosSemCelula.map(m => (
+                            {Array.isArray(membrosSemCelula) && membrosSemCelula.map(m => (
                                 <option key={m.id} value={m.id}>{m.nome}</option>
                             ))}
                           </select>
@@ -608,7 +629,7 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
                             </tr>
                             </thead>
                             <tbody>
-                            {membros.map((m, i) => {
+                            {Array.isArray(membros) && membros.map((m, i) => {
                               const isLider = Number(m.id) === Number(celulaSelecionada.liderId);
                               return (
                                   <motion.tr
@@ -686,16 +707,77 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
 
           {!celulaSelecionada && (
               <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: .2 }}
-                  className="sec-empty"
-                  style={{ paddingTop: 60 }}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: .4 }}
               >
-                <Building2 size={48} style={{ color: t.textMuted, marginBottom: 16 }} />
-                <p className="sec-empty-text">
-                  Selecione uma célula para começar
-                </p>
+                <div className="sec-card">
+                  <div className="sec-card-header">
+                    <div>
+                      <h3 className="sec-card-title">Membros sem Célula</h3>
+                      <p className="sec-card-sub">{membrosSemCelula.length} membros disponíveis</p>
+                    </div>
+                  </div>
+
+                  {membrosSemCelula.length === 0 ? (
+                      <div className="sec-empty">
+                        <Users size={32} style={{ color: t.textMuted, marginBottom: 12 }} />
+                        <p className="sec-empty-text">Nenhum membro sem célula.</p>
+                      </div>
+                  ) : (
+                      <div style={{ overflowX: "auto" }}>
+                        <table className="sec-table">
+                          <thead>
+                          <tr>
+                            <th className="sec-th">NOME</th>
+                            <th className="sec-th">CONTATO</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          {membrosSemCelula.map((m, i) => (
+                              <motion.tr
+                                  key={m.id}
+                                  className="sec-tr"
+                                  initial={{ opacity: 0, y: 6 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: i * 0.04 }}
+                              >
+                                <td className="sec-td">
+                                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <div className="sec-member-avatar"
+                                         style={{
+                                           background: `linear-gradient(135deg, ${AURA.red}, ${AURA.blue})`,
+                                           color: "#fff",
+                                         }}>
+                                      {m.nome?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span style={{
+                                      fontFamily: "'Inter', sans-serif",
+                                      fontSize: 13, fontWeight: 500,
+                                      color: t.text, overflow: "hidden",
+                                      textOverflow: "ellipsis", whiteSpace: "nowrap",
+                                      maxWidth: 200,
+                                    }}>
+                                      {m.nome}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="sec-td">
+                                  <span style={{
+                                    fontFamily: "'Inter', sans-serif",
+                                    fontSize: 12, fontWeight: 300,
+                                    color: t.textSec,
+                                  }}>
+                                    {m.telefone || m.email || "—"}
+                                  </span>
+                                </td>
+                              </motion.tr>
+                          ))}
+                          </tbody>
+                        </table>
+                      </div>
+                  )}
+                </div>
               </motion.div>
           )}
 
