@@ -151,8 +151,6 @@ function normalizarNumero(n) {
   return (n || "").replace(/\D/g, "");
 }
 
-// Remove o 9 extra de celular BR:
-// 5571 9XXXXXXXX (13 dígitos) → 5571XXXXXXXX (12 dígitos)
 function normalizarTelBR(n) {
   const d = (n || "").replace(/\D/g, "");
   if (d.length === 13 && d.startsWith("55")) {
@@ -652,7 +650,6 @@ function tipoBadge(tipo) {
 
 /* ─── BotaoBloqueioInline ────────────────────────────────────────────────── */
 function BotaoBloqueioInline({ numero, bloqueados, onBloquear, onDesbloquear }) {
-  // ← usa normalizarTelBR nos dois lados para ignorar o 9 extra BR
   const numLimpo = normalizarTelBR(numero);
   const estaBloq = bloqueados.some(b => normalizarTelBR(b.numero) === numLimpo);
   return estaBloq ? (
@@ -850,7 +847,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
   const [detalhes,   setDetalhes]   = useState(null);
   const POR_PAG = 15;
 
-  // ← normalizarTelBR nos dois lados para ignorar o 9 extra BR
   const buscarUsuarioPorTelefone = numero => {
     if (!numero || !usuarios.length) return null;
     const numLimpo = normalizarTelBR(numero);
@@ -860,11 +856,12 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
     });
   };
 
+  // ── CORREÇÃO 1: size:200 para buscar todos os registros de uma vez ──
   const carregar = useCallback(async () => {
     setLoading(true); setOffline(false);
     try {
       const [resReg, resMet] = await Promise.allSettled([
-        api.get(`webhook/whatsapp/registros/filtrar`, { params: { tipoEvento: filtroTipo, status: filtroSt, busca } }),
+        api.get(`webhook/whatsapp/registros/filtrar`, { params: { tipoEvento: filtroTipo, status: filtroSt, busca, size: 200, page: 0 } }),
         api.get(`webhook/whatsapp/registros/metricas`),
       ]);
       if (resReg.status === "fulfilled") {
@@ -1007,7 +1004,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
                 {slice.map((r, i) => {
                   const textoPreview = extrairTexto(r);
                   const usuario      = buscarUsuarioPorTelefone(r.numeroDestino);
-                  // ← usa normalizarTelBR para detectar bloqueio ignorando o 9
                   const estaBloqueado = bloqueados.some(b => normalizarTelBR(b.numero) === normalizarTelBR(r.numeroDestino));
                   return (
                       <motion.div key={r.id} className="wa-row"
@@ -1044,15 +1040,78 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
               </AnimatePresence>
           )}
 
+          {/* ── CORREÇÃO 2: Paginação elegante com reticências + "Ir para" ── */}
           {totalPags > 1 && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", borderTop: `1px solid ${t.border}` }}>
-                <span style={{ fontSize: 11, color: t.textMuted }}>{filtrados.length} registros</span>
-                <div style={{ display: "flex", gap: 4 }}>
-                  <button className="adm-ico-btn" style={{ width: 28, height: 28 }} disabled={pag === 1} onClick={() => setPag(p => p - 1)}><ChevronLeft size={12}/></button>
-                  {Array.from({ length: Math.min(totalPags, 7) }, (_, i) => i + 1).map(p => (
-                      <button key={p} onClick={() => setPag(p)} style={{ width: 28, height: 28, borderRadius: 8, border: `1px solid ${pag === p ? AURA.wa : t.border}`, background: pag === p ? AURA.wa : "transparent", color: pag === p ? "#fff" : t.textSec, fontSize: 11, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>{p}</button>
-                  ))}
-                  <button className="adm-ico-btn" style={{ width: 28, height: 28 }} disabled={pag === totalPags} onClick={() => setPag(p => p + 1)}><ChevronRight size={12}/></button>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 20px", borderTop:`1px solid ${t.border}`, flexWrap:"wrap", gap:8 }}>
+                {/* Contagem */}
+                <span style={{ fontSize:11, color:t.textMuted, whiteSpace:"nowrap" }}>
+                  {(pag-1)*POR_PAG+1}–{Math.min(pag*POR_PAG, filtrados.length)} de {filtrados.length} registros
+                </span>
+
+                {/* Números com reticências dinâmicas */}
+                <div style={{ display:"flex", gap:4, alignItems:"center" }}>
+                  <button className="adm-ico-btn" style={{ width:30, height:30 }}
+                          disabled={pag===1} onClick={() => setPag(p => p-1)}>
+                    <ChevronLeft size={13}/>
+                  </button>
+
+                  {(() => {
+                    const range = [];
+                    for (let i = 1; i <= totalPags; i++) {
+                      if (i===1 || i===totalPags || (i>=pag-1 && i<=pag+1)) range.push(i);
+                    }
+                    const pages = [];
+                    let prev = null;
+                    for (const p of range) {
+                      if (prev !== null && p - prev > 1) {
+                        pages.push(
+                            <span key={`e${p}`} style={{ width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:t.textMuted }}>…</span>
+                        );
+                      }
+                      pages.push(
+                          <button key={p} onClick={() => setPag(p)} style={{
+                            width:30, height:30, borderRadius:8,
+                            border:`1px solid ${pag===p ? AURA.wa : t.border}`,
+                            background: pag===p ? AURA.wa : "transparent",
+                            color: pag===p ? "#fff" : t.textSec,
+                            fontSize:11, cursor:"pointer",
+                            fontFamily:"'Inter',sans-serif",
+                            fontWeight: pag===p ? 600 : 400,
+                            transition:"all .18s",
+                          }}>{p}</button>
+                      );
+                      prev = p;
+                    }
+                    return pages;
+                  })()}
+
+                  <button className="adm-ico-btn" style={{ width:30, height:30 }}
+                          disabled={pag===totalPags} onClick={() => setPag(p => p+1)}>
+                    <ChevronRight size={13}/>
+                  </button>
+                </div>
+
+                {/* Ir para página */}
+                <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                  <span style={{ fontSize:11, color:t.textMuted, whiteSpace:"nowrap" }}>Ir para</span>
+                  <input
+                      type="number" min={1} max={totalPags}
+                      placeholder={String(pag)}
+                      onKeyDown={e => {
+                        if (e.key==="Enter") {
+                          const v = Number(e.target.value);
+                          if (v>=1 && v<=totalPags) setPag(v);
+                          e.target.value = "";
+                        }
+                      }}
+                      style={{
+                        width:48, height:28, borderRadius:7,
+                        border:`1px solid ${t.borderIn}`,
+                        background:t.bgInput, color:t.text,
+                        fontSize:12, textAlign:"center",
+                        outline:"none", fontFamily:"'Inter',sans-serif",
+                      }}
+                  />
                 </div>
               </div>
           )}
@@ -1326,10 +1385,8 @@ export default function AdminUsers() {
     setCarregandoBloq(true);
     try {
       const { data } = await api.get("webhook/whatsapp/registros/bloqueios", {
-        params: { size: 1000 }, // backend retorna Page<>, então pedimos uma página grande
+        params: { size: 1000 },
       });
-      // Backend retorna Page<NumeroBloqueado> => { content: [...], totalElements, ... }
-      // Aceita tanto array puro quanto objeto paginado, pra não quebrar se o backend mudar.
       const lista = Array.isArray(data) ? data : data?.content ?? [];
       setBloqueados(lista);
     } catch { }
@@ -1350,15 +1407,12 @@ export default function AdminUsers() {
     } finally { setSalvandoBloq(false); }
   };
 
-  // ← normaliza antes de chamar a API para garantir consistência
   const confirmarDesbloqueio = async numero => {
     const numNormalizado = normalizarTelBR(numero);
     setSalvandoBloq(true);
     try {
       const { data } = await api.delete(`webhook/whatsapp/registros/bloqueios/${numNormalizado}`);
-
       if (!data.metaOk) {
-        // Aviso amarelo em vez de sucesso verde
         setErro("⚠️ Número desbloqueado localmente, mas a Meta pode levar até 24h para liberar. Isso ocorre quando o número não enviou mensagem recentemente.");
       } else {
         ok(`Número ${numNormalizado} desbloqueado com sucesso.`);
@@ -1371,6 +1425,7 @@ export default function AdminUsers() {
       setSalvandoBloq(false);
     }
   };
+
   const handleAbrirBloquear = numero => {
     setNumBloqueioIni(numero || "");
     setModalBloquear(true);
