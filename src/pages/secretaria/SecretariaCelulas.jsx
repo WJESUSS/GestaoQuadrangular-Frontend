@@ -376,6 +376,11 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
         pagina++;
       }
 
+      // ✅ Ordena por nome, ignorando acentos e maiúsculas/minúsculas
+      todos.sort((a, b) =>
+          (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" })
+      );
+
       setMembrosSemCelula(todos);
     } catch (err) {
       console.error(err);
