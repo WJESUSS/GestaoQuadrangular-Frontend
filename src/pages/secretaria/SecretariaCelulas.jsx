@@ -351,13 +351,35 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
 
   const carregarMembrosSemCelula = useCallback(async () => {
     try {
-      const res = await api.get("/membros/sem-celula");
-      // ✅ Garantir que é sempre um array
-      const dados = Array.isArray(res.data) ? res.data : (res.data?.content || res.data?.data || []);
-      setMembrosSemCelula(dados);
+      let todos = [];
+      let pagina = 0;
+      let temMais = true;
+      const TAMANHO_PAGINA = 100; // pode subir esse valor se quiser menos requisições
+
+      while (temMais) {
+        const res = await api.get("/membros/sem-celula", {
+          params: { page: pagina, size: TAMANHO_PAGINA },
+        });
+
+        const conteudo = Array.isArray(res.data)
+            ? res.data
+            : (res.data?.content || res.data?.data || []);
+
+        todos = [...todos, ...conteudo];
+
+        // Se a resposta não for paginada (array puro) ou já veio a última página, para
+        const ultimaPagina = Array.isArray(res.data)
+            ? true
+            : (res.data?.last ?? conteudo.length < TAMANHO_PAGINA);
+
+        temMais = !ultimaPagina && conteudo.length > 0;
+        pagina++;
+      }
+
+      setMembrosSemCelula(todos);
     } catch (err) {
       console.error(err);
-      setMembrosSemCelula([]); // ✅ Fallback para array vazio
+      setMembrosSemCelula([]);
     }
   }, []);
 
