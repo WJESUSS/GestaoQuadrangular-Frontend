@@ -388,10 +388,11 @@ export default function Login() {
 
     /* ── Cores base (mesmas da Home) ── */
     const bg    = dark ? BRAND.dark  : BRAND.light;
-    const cardBg= dark ? "rgba(18,14,31,.85)" : "rgba(255,255,255,.80)";
+    /* ── card mais transparente ── */
+    const cardBg= dark ? "rgba(18,14,31,.18)" : "rgba(255,255,255,.12)";
     const txt   = dark ? BRAND.light : BRAND.dark;
     const sub   = dark ? "rgba(245,240,235,.5)" : "rgba(7,6,15,.45)";
-    const border= dark ? "rgba(0,119,200,.16)" : "rgba(91,33,182,.15)";
+    const border= dark ? "rgba(0,119,200,.12)" : "rgba(91,33,182,.10)";
 
     /* ── Força senha ── */
     const fc = calcForca(cSenha);
@@ -526,8 +527,8 @@ export default function Login() {
           width:100%; max-width:480px;
           margin:24px;
           background:${cardBg};
-          backdrop-filter:blur(32px) saturate(1.2);
-          -webkit-backdrop-filter:blur(32px) saturate(1.2);
+          backdrop-filter:blur(6px) saturate(1.1);
+          -webkit-backdrop-filter:blur(6px) saturate(1.1);
           border:1px solid ${border};
           border-radius:16px;
           padding:44px 44px 36px;
@@ -535,21 +536,21 @@ export default function Login() {
           transition:opacity .7s ease, transform .7s ease,
                       background .4s, border-color .4s, box-shadow .4s;
           box-shadow:
-            0 1px 2px rgba(0,0,0,.04),
-            0 4px 8px rgba(0,0,0,.06),
-            0 16px 32px rgba(0,0,0,.08),
-            0 32px 64px rgba(0,0,0,.10),
-            0 0 0 1px rgba(0,61,165,.06);
+            0 1px 2px rgba(0,0,0,.03),
+            0 4px 8px rgba(0,0,0,.04),
+            0 16px 32px rgba(0,0,0,.05),
+            0 32px 64px rgba(0,0,0,.06),
+            0 0 0 1px rgba(0,61,165,.04);
         }
         .login-card::before {
           content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
-          background:linear-gradient(135deg, rgba(255,255,255,.12) 0%, transparent 50%, rgba(0,61,165,.06) 100%);
+          background:linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 50%, rgba(0,61,165,.04) 100%);
           pointer-events:none;
         }
         .login-card::after {
           content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
           padding:1px;
-          background:linear-gradient(135deg, rgba(255,255,255,.15) 0%, transparent 40%, rgba(0,61,165,.08) 100%);
+          background:linear-gradient(135deg, rgba(255,255,255,.10) 0%, transparent 40%, rgba(0,61,165,.06) 100%);
           -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite:xor;
           mask-composite:exclude;
@@ -595,11 +596,13 @@ export default function Login() {
         }
         .fld-label.blue { color: ${BRAND.blueDark}; }
 
-        /* ── inputs ── */
+        /* ── inputs (e-mail e senha mais transparentes, efeito vidro) ── */
         .ieq-input {
           width:100%;
-          background:${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)"};
-          border:1px solid ${dark?"rgba(0,61,165,.15)":"rgba(0,61,165,.14)"};
+          background:${dark?"rgba(255,255,255,.01)":"rgba(255,255,255,.03)"};
+          backdrop-filter:blur(4px);
+          -webkit-backdrop-filter:blur(4px);
+          border:1px solid ${dark?"rgba(0,61,165,.12)":"rgba(0,61,165,.11)"};
           color:${txt};
           padding:13px 13px 13px 43px;
           border-radius:6px; outline:none;
@@ -608,15 +611,15 @@ export default function Login() {
         }
         .ieq-input:focus {
           border-color:${BRAND.blue};
-          box-shadow:0 0 0 3px rgba(0,61,165,.14);
-          background:${dark?"rgba(255,255,255,.06)":"rgba(0,61,165,.02)"};
+          box-shadow:0 0 0 3px rgba(0,61,165,.12);
+          background:${dark?"rgba(255,255,255,.02)":"rgba(0,61,165,.01)"};
         }
         .ieq-input.blue:focus {
           border-color:${BRAND.blue};
-          box-shadow:0 0 0 3px rgba(0,61,165,.14);
+          box-shadow:0 0 0 3px rgba(0,61,165,.12);
         }
         .ieq-input.error { border-color:${BRAND.violetLight}; }
-        .ieq-input::placeholder { color:${dark?"rgba(245,240,235,.22)":"rgba(10,22,40,.22)"}; }
+        .ieq-input::placeholder { color:${dark?"rgba(245,240,235,.2)":"rgba(10,22,40,.2)"}; }
 
         /* ── botão principal ── */
         .btn-primary {
