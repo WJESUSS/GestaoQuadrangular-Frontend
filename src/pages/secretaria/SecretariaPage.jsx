@@ -584,18 +584,6 @@ export default function SecretariaPage() {
                 <div className="sec2-divider-dot" />
               </div>
 
-              <div className="sec2-user-chip">
-                <div className="sec2-user-chip-dot" />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p className="sec2-user-chip-name">
-                    {usuarioLogado?.nome || "Secretaria"}
-                  </p>
-                  <p className="sec2-user-chip-role">
-                    {usuarioLogado?.perfil?.replace("ROLE_", "") || "Secretário(a)"}
-                  </p>
-                </div>
-              </div>
-
               {/* Botão Sair elegante */}
               <button
                   className="sec2-btn-exit"
@@ -666,23 +654,6 @@ export default function SecretariaPage() {
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {usuarioLogado && (
-                    <div style={{
-                      display: "flex", alignItems: "center", gap: 9,
-                      padding: "6px 12px 6px 8px", borderRadius: 100,
-                      background: isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.07)",
-                      border: `1px solid ${t.border}`,
-                    }}>
-                      <IEQAvatar usuario={usuarioLogado} size={24} />
-                      <span style={{
-                        fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
-                        letterSpacing: ".12em", textTransform: "uppercase", color: t.text,
-                      }}>
-                    {usuarioLogado.nome?.split(" ")[0]}
-                  </span>
-                    </div>
-                )}
-
                 <div className="sec2-online">
                   <div className="sec2-online-dot" />
                   Online
