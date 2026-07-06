@@ -336,6 +336,15 @@ function GlobalStylesMembers({ t, isDark }) {
       .mem-btn-outline:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
       .mem-btn-outline:disabled { opacity: .5; cursor: not-allowed; }
 
+      /* ── Sentinela do scroll infinito ── */
+      .mem-scroll-sentinel {
+        display: flex; align-items: center; justify-content: center;
+        gap: 8px;
+        padding: 18px 0 6px;
+        min-height: 40px;
+        font-size: 11px; font-weight: 300; color: ${t.textMuted};
+      }
+
       .mem-card {
         background: ${t.bgEl}; border: 1px solid ${t.border};
         border-radius: 16px; overflow: hidden; margin-bottom: 12px;
@@ -1005,6 +1014,9 @@ export default function MembrosRefatorado({ isDark = false }) {
 
   const t = themeMembers(isDark);
 
+  // ✅ Sentinela para scroll infinito (substitui o botão "Carregar mais")
+  const sentinelRef = useRef(null);
+
   const carregarPagina = useCallback(async (numeroPagina, reset) => {
     if (reset) setLoading(true);
     else setCarregandoMais(true);
@@ -1041,10 +1053,29 @@ export default function MembrosRefatorado({ isDark = false }) {
     carregarPagina(0, true);
   }, [carregarPagina]);
 
-  const carregarMais = () => {
+  const carregarMais = useCallback(() => {
     if (!temMais || carregandoMais) return;
     carregarPagina(pagina + 1, false);
-  };
+  }, [temMais, carregandoMais, pagina, carregarPagina]);
+
+  // ✅ Observa a sentinela e dispara carregarMais() automaticamente
+  // quando ela entra na viewport (scroll infinito, sem botão).
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !temMais) return;
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            carregarMais();
+          }
+        },
+        { rootMargin: "250px" } // começa a carregar um pouco antes de chegar ao fim
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [temMais, carregarMais]);
 
   const recarregar = () => carregarPagina(0, true);
 
@@ -1250,25 +1281,22 @@ export default function MembrosRefatorado({ isDark = false }) {
                   })}
                 </motion.div>
 
-                {/* ── Carregar mais ── */}
+                {/* ── Scroll infinito: sentinela invisível que dispara o carregamento ── */}
                 {temMais && (
-                    <button
-                        className="mem-btn-outline"
-                        onClick={carregarMais}
-                        disabled={carregandoMais}
-                    >
-                      {carregandoMais ? (
-                          <><Loader2 size={14} className="dl-spin" /> Carregando...</>
-                      ) : (
-                          <>Carregar mais membros</>
+                    <div ref={sentinelRef} className="mem-scroll-sentinel">
+                      {carregandoMais && (
+                          <>
+                            <Loader2 size={14} className="dl-spin" style={{ color: AURA.gold }} />
+                            Carregando mais membros...
+                          </>
                       )}
-                    </button>
+                    </div>
                 )}
 
                 {/* ── Info de contagem ── */}
                 <p className="mem-info-bar">
                   {membros.length} de {totalRegistros} membro{totalRegistros === 1 ? "" : "s"} carregado{membros.length === 1 ? "" : "s"}
-                  {buscaPodeEstarIncompleta && " — carregue mais para ampliar a busca"}
+                  {buscaPodeEstarIncompleta && " — continue rolando para ampliar a busca"}
                 </p>
               </>
           ) : (
@@ -1284,18 +1312,14 @@ export default function MembrosRefatorado({ isDark = false }) {
                   {filtro ? "Nenhum membro encontrado." : "Nenhum membro cadastrado."}
                 </p>
                 {filtro && temMais && (
-                    <button
-                        className="mem-btn-outline"
-                        onClick={carregarMais}
-                        disabled={carregandoMais}
-                        style={{ marginTop: 12 }}
-                    >
-                      {carregandoMais ? (
-                          <><Loader2 size={14} className="dl-spin" /> Carregando...</>
-                      ) : (
-                          <>Carregar mais para buscar</>
+                    <div ref={sentinelRef} className="mem-scroll-sentinel" style={{ marginTop: 12 }}>
+                      {carregandoMais && (
+                          <>
+                            <Loader2 size={14} className="dl-spin" style={{ color: AURA.gold }} />
+                            Carregando mais para buscar...
+                          </>
                       )}
-                    </button>
+                    </div>
                 )}
                 <button className="mem-btn-gold" style={{ marginTop: 16 }} onClick={abrirNovo}>
                   <Plus size={13} /> Adicionar Membro
