@@ -6,7 +6,7 @@ import {
   Plus, X, User, Phone, Trash2, Loader2, Search,
   CreditCard, Heart, ChevronRight, Users, CalendarDays,
   MapPin, BookOpen, Briefcase, Cross, Star, FileText,
-  ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle2,
+  ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle2, Filter,
 } from "lucide-react";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
@@ -49,6 +49,14 @@ const STATUS_COLORS = {
 };
 
 const statusOptions = ["ATIVO", "INATIVO", "AFASTADO", "TRANSFERIDO", "FALECIDO"];
+
+const STATUS_LABELS = {
+  ATIVO:       "Ativos",
+  INATIVO:     "Inativos",
+  AFASTADO:    "Afastados",
+  TRANSFERIDO: "Transferidos",
+  FALECIDO:    "Falecidos",
+};
 
 const estadoCivilOptions = [
   { value: "SOLTEIRO",      label: "Solteiro(a)"   },
@@ -335,10 +343,72 @@ function GlobalStylesMembers({ t, isDark }) {
       }
       .mem-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
 
-      .mem-search-wrap {
-        position: relative; margin-bottom: 18px;
+      .mem-search-row {
+        display: flex; align-items: flex-start; gap: 8px;
+        margin-bottom: 12px;
       }
-      
+
+      .mem-search-wrap {
+        position: relative; flex: 1; min-width: 0;
+      }
+
+      .mem-filter-btn {
+        position: relative; flex-shrink: 0;
+        width: 48px; height: 48px; border-radius: 13px;
+        background: ${t.bgInput};
+        border: 1px solid ${t.borderInput};
+        color: ${t.textMuted}; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: all .25s;
+      }
+      .mem-filter-btn:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .mem-filter-btn.active { border-color: ${AURA.gold}; color: ${AURA.gold}; background: rgba(201,169,110,.08); }
+
+      .mem-filter-dot {
+        position: absolute; top: 7px; right: 7px;
+        width: 8px; height: 8px; border-radius: 50%;
+        border: 2px solid ${t.bgEl};
+      }
+
+      .mem-filter-chip {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 7px 8px 7px 14px; border-radius: 100px;
+        font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 500;
+        margin-bottom: 16px;
+      }
+
+      .mem-filter-chip button {
+        background: rgba(0,0,0,.12);
+        border: none; border-radius: 50%;
+        width: 20px; height: 20px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: inherit;
+      }
+
+      .mem-filter-pills {
+        display: flex; flex-direction: column; gap: 8px;
+        width: 100%; margin: 6px 0 18px;
+      }
+
+      .mem-filter-pill {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 13px 16px; border-radius: 13px;
+        border: 1px solid ${t.borderInput};
+        background: ${t.bgInput};
+        cursor: pointer; transition: all .2s;
+      }
+      .mem-filter-pill:hover { border-color: rgba(201,169,110,.4); }
+
+      .mem-filter-pill-label {
+        display: flex; align-items: center; gap: 10px;
+        font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500;
+        color: ${t.text};
+      }
+
+      .mem-filter-dot-lg {
+        width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+      }
+
       .mem-search-icon {
         position: absolute; left: 14px; top: 50%;
         transform: translateY(-50%); color: ${AURA.gold}; opacity: .5;
@@ -1316,6 +1386,84 @@ function ConfirmarStatusModal({ status, nome, onConfirmar, onCancelar, loading }
   return createPortal(content, document.body);
 }
 
+/* ─── Modal de Filtro por Status (NOVO) ─────────────────────────── */
+function FiltroStatusModal({ t, filtroAtual, onSelecionar, onFechar }) {
+  const opcoes = [
+    { value: null, label: "Todos os membros" },
+    ...statusOptions.map(s => ({ value: s, label: STATUS_LABELS[s] })),
+  ];
+
+  const content = (
+      <motion.div
+          className="mem-confirm-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onFechar}
+      >
+        <motion.div
+            className="mem-confirm-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+        />
+        <motion.div
+            className="mem-confirm-box"
+            initial={{ scale: .92, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: .92, opacity: 0, y: 10 }}
+            transition={{ type: "tween", duration: 0.22 }}
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: 380, borderColor: `${AURA.gold}30` }}
+        >
+          <div className="mem-status-icon" style={{ background: "rgba(201,169,110,.12)", color: AURA.gold }}>
+            <Filter size={22} />
+          </div>
+
+          <h3 className="mem-confirm-title">Filtrar por status</h3>
+          <p className="mem-confirm-text" style={{ marginBottom: 4 }}>
+            Escolha quais membros deseja visualizar na lista.
+          </p>
+
+          <div className="mem-filter-pills">
+            {opcoes.map(o => {
+              const sc = o.value ? (STATUS_COLORS[o.value] || STATUS_COLORS.INATIVO) : null;
+              const ativo = filtroAtual === o.value;
+              return (
+                  <div
+                      key={o.label}
+                      className="mem-filter-pill"
+                      onClick={() => { onSelecionar(o.value); onFechar(); }}
+                      style={ativo ? {
+                        borderColor: sc ? sc.border : `${AURA.gold}60`,
+                        background: sc ? sc.bg : "rgba(201,169,110,.1)",
+                      } : {}}
+                  >
+                    <span className="mem-filter-pill-label">
+                      {sc
+                          ? <span className="mem-filter-dot-lg" style={{ background: sc.text }} />
+                          : <Users size={14} style={{ color: AURA.gold }} />
+                      }
+                      {o.label}
+                    </span>
+                    {ativo && (
+                        <CheckCircle2 size={17} style={{ color: sc ? sc.text : AURA.gold }} />
+                    )}
+                  </div>
+              );
+            })}
+          </div>
+
+          <button type="button" className="mem-confirm-btn-cancel" style={{ width: "100%" }} onClick={onFechar}>
+            Fechar
+          </button>
+        </motion.div>
+      </motion.div>
+  );
+
+  return createPortal(content, document.body);
+}
+
 /* ─── Toast de status ────────────────────────────────────────────── */
 function ToastStatus({ toast }) {
   if (!toast) return null;
@@ -1363,6 +1511,10 @@ export default function MembrosRefatorado({ isDark = false }) {
   // (substitui o window.confirm nativo que aparecia feio no navegador)
   const [confirmandoStatus, setConfirmandoStatus] = useState(false);
   const [dadosPendentes,    setDadosPendentes]    = useState(null); // { dados, novoStatus }
+
+  // ✅ NOVO: filtro por status (Ativo, Inativo, Afastado, Transferido, Falecido)
+  const [filtroStatus,      setFiltroStatus]      = useState(null); // null = todos
+  const [filtroModalAberto, setFiltroModalAberto] = useState(false);
 
   const t = themeMembers(isDark);
 
@@ -1601,12 +1753,15 @@ export default function MembrosRefatorado({ isDark = false }) {
   const membrosFiltrados = useMemo(() =>
           membros
               .filter(m =>
-                  m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
-                  m.cpf?.includes(filtro) ||
-                  m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
+                  (!filtroStatus || m.status === filtroStatus) &&
+                  (
+                      m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
+                      m.cpf?.includes(filtro) ||
+                      m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
+                  )
               )
               .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" })),
-      [membros, filtro]
+      [membros, filtro, filtroStatus]
   );
 
   const buscaPodeEstarIncompleta = filtro.trim() !== "" && temMais;
@@ -1644,21 +1799,52 @@ export default function MembrosRefatorado({ isDark = false }) {
             </button>
           </motion.header>
 
-          {/* ── Busca ── */}
+          {/* ── Busca + Filtro por Status ── */}
           <motion.div
-              className="mem-search-wrap"
+              className="mem-search-row"
               initial={{ opacity: 0, y: -14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: .4, delay: .08 }}
           >
-            <Search className="mem-search-icon" size={16} />
-            <input
-                className="mem-input"
-                placeholder="Buscar por nome, CPF ou célula…"
-                value={filtro}
-                onChange={e => setFiltro(e.target.value)}
-            />
+            <div className="mem-search-wrap">
+              <Search className="mem-search-icon" size={16} />
+              <input
+                  className="mem-input"
+                  placeholder="Buscar por nome, CPF ou célula…"
+                  value={filtro}
+                  onChange={e => setFiltro(e.target.value)}
+              />
+            </div>
+            <button
+                type="button"
+                className={`mem-filter-btn ${filtroStatus ? "active" : ""}`}
+                onClick={() => setFiltroModalAberto(true)}
+                title="Filtrar por status"
+            >
+              <Filter size={16} />
+              {filtroStatus && (
+                  <span
+                      className="mem-filter-dot"
+                      style={{ background: (STATUS_COLORS[filtroStatus] || STATUS_COLORS.INATIVO).text }}
+                  />
+              )}
+            </button>
           </motion.div>
+
+          {/* ── Chip do filtro ativo ── */}
+          {filtroStatus && (
+              (() => {
+                const sc = STATUS_COLORS[filtroStatus] || STATUS_COLORS.INATIVO;
+                return (
+                    <div className="mem-filter-chip" style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>
+                      Mostrando: {STATUS_LABELS[filtroStatus]}
+                      <button onClick={() => setFiltroStatus(null)} title="Remover filtro">
+                        <X size={12} />
+                      </button>
+                    </div>
+                );
+              })()
+          )}
 
           {/* ── Cards/Loading ── */}
           {loading ? (
@@ -1746,7 +1932,11 @@ export default function MembrosRefatorado({ isDark = false }) {
                   <Users size={32} />
                 </div>
                 <p className="mem-empty-text">
-                  {filtro ? "Nenhum membro encontrado." : "Nenhum membro cadastrado."}
+                  {filtro
+                      ? "Nenhum membro encontrado."
+                      : filtroStatus
+                          ? `Nenhum membro com status "${STATUS_LABELS[filtroStatus]}".`
+                          : "Nenhum membro cadastrado."}
                 </p>
                 {filtro && temMais && (
                     <div ref={sentinelRef} className="mem-scroll-sentinel" style={{ marginTop: 12 }}>
@@ -1780,6 +1970,18 @@ export default function MembrosRefatorado({ isDark = false }) {
                   nomeCelula={nomeCelula}
                   nomeLider={nomeLider}
                   loading={salvando}
+              />
+          )}
+        </AnimatePresence>
+
+        {/* ── Modal de Filtro por Status (NOVO) ── */}
+        <AnimatePresence>
+          {filtroModalAberto && (
+              <FiltroStatusModal
+                  t={t}
+                  filtroAtual={filtroStatus}
+                  onSelecionar={setFiltroStatus}
+                  onFechar={() => setFiltroModalAberto(false)}
               />
           )}
         </AnimatePresence>
