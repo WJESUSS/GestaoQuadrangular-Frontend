@@ -580,6 +580,101 @@ function GlobalStylesMembers({ t, isDark }) {
         font-family: 'Inter', sans-serif; font-size: 14px;
         color: ${t.text}; cursor: pointer;
       }
+
+      /* ── Modal de Confirmação de Exclusão ── */
+      .mem-confirm-backdrop {
+        position: fixed; inset: 0; z-index: 10050;
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px;
+      }
+
+      .mem-confirm-overlay {
+        position: fixed; inset: 0;
+        background: rgba(10,10,15,.92); z-index: 0;
+        backdrop-filter: blur(4px);
+      }
+
+      .mem-confirm-box {
+        position: relative; z-index: 10;
+        width: 100%; max-width: 380px;
+        background: ${t.bgEl}; border: 1px solid rgba(200,16,46,.25);
+        border-radius: 20px; padding: 28px 24px 24px;
+        display: flex; flex-direction: column; align-items: center;
+        text-align: center;
+      }
+
+      .mem-confirm-icon {
+        width: 56px; height: 56px; border-radius: 14px;
+        background: rgba(200,16,46,.12);
+        display: flex; align-items: center; justify-content: center;
+        color: ${AURA.red}; margin-bottom: 16px;
+      }
+
+      .mem-confirm-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 17px; font-weight: 500; color: ${t.text};
+        margin: 0 0 8px;
+      }
+
+      .mem-confirm-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px; font-weight: 300; line-height: 1.6;
+        color: ${t.textSec}; margin: 0 0 4px;
+      }
+
+      .mem-confirm-name {
+        font-weight: 600; color: ${t.text};
+      }
+
+      .mem-confirm-warning {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px; font-weight: 500; letter-spacing: .04em;
+        color: ${AURA.red}; margin: 10px 0 20px;
+        display: flex; align-items: center; gap: 6px;
+      }
+
+      /* ── Bloco de erro (vínculo impedindo exclusão) ── */
+      .mem-confirm-error-box {
+        width: 100%; box-sizing: border-box;
+        background: rgba(200,16,46,.08);
+        border: 1px solid rgba(200,16,46,.25);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin: 6px 0 20px;
+        display: flex; gap: 10px; text-align: left;
+      }
+
+      .mem-confirm-error-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 12.5px; font-weight: 400; line-height: 1.5;
+        color: ${AURA.red}; margin: 0;
+      }
+
+      .mem-confirm-actions {
+        display: flex; gap: 10px; width: 100%;
+      }
+
+      .mem-confirm-btn-cancel {
+        flex: 1; padding: 13px; border-radius: 10px;
+        border: 1px solid ${t.borderInput};
+        background: ${t.bgInput};
+        color: ${t.text}; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; cursor: pointer; transition: all .25s;
+      }
+      .mem-confirm-btn-cancel:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .mem-confirm-btn-cancel:disabled { opacity: .5; cursor: not-allowed; }
+
+      .mem-confirm-btn-delete {
+        flex: 1; padding: 13px; border-radius: 10px; border: none;
+        background: linear-gradient(135deg, ${AURA.red}, ${AURA.redDark});
+        color: #fff; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; cursor: pointer; transition: all .25s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .mem-confirm-btn-delete:hover { opacity: .9; transform: translateY(-1px); }
+      .mem-confirm-btn-delete:disabled { opacity: .6; cursor: not-allowed; transform: none; }
     `}</style>
   );
 }
@@ -993,6 +1088,88 @@ function MembroModalRefatorado({
   return createPortal(content, document.body);
 }
 
+/* ─── Modal de Confirmação de Exclusão ──────────────────────────── */
+function ConfirmarExclusaoModal({ nomeMembro, onConfirmar, onCancelar, loading, erro }) {
+  const content = (
+      <motion.div
+          className="mem-confirm-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onCancelar}
+      >
+        <motion.div
+            className="mem-confirm-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+        />
+        <motion.div
+            className="mem-confirm-box"
+            initial={{ scale: .92, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: .92, opacity: 0, y: 10 }}
+            transition={{ type: "tween", duration: 0.22 }}
+            onClick={e => e.stopPropagation()}
+        >
+          <div className="mem-confirm-icon">
+            <Trash2 size={24} />
+          </div>
+
+          <h3 className="mem-confirm-title">Excluir membro?</h3>
+
+          <p className="mem-confirm-text">
+            Você está prestes a excluir permanentemente{" "}
+            <span className="mem-confirm-name">
+              {nomeMembro || "este membro"}
+            </span>{" "}
+            do cadastro.
+          </p>
+
+          {erro ? (
+              // ── Bloco de erro: vínculo impede a exclusão ──
+              <div className="mem-confirm-error-box">
+                <AlertCircle size={16} style={{ color: "#C8102E", flexShrink: 0, marginTop: 1 }} />
+                <p className="mem-confirm-error-text">{erro}</p>
+              </div>
+          ) : (
+              <p className="mem-confirm-warning">
+                <AlertCircle size={13} />
+                Essa ação não pode ser desfeita
+              </p>
+          )}
+
+          <div className="mem-confirm-actions">
+            <button
+                type="button"
+                className="mem-confirm-btn-cancel"
+                onClick={onCancelar}
+                disabled={loading}
+            >
+              {erro ? "Fechar" : "Cancelar"}
+            </button>
+            {!erro && (
+                <button
+                    type="button"
+                    className="mem-confirm-btn-delete"
+                    onClick={onConfirmar}
+                    disabled={loading}
+                >
+                  {loading ? (
+                      <><Loader2 size={13} className="dl-spin" /> Excluindo...</>
+                  ) : (
+                      <><Trash2 size={13} /> Excluir</>
+                  )}
+                </button>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+  );
+
+  return createPortal(content, document.body);
+}
+
 /* ─── Componente Principal ──────────────────────────────────────── */
 const TAMANHO_PAGINA = 50;
 
@@ -1011,6 +1188,9 @@ export default function MembrosRefatorado({ isDark = false }) {
   const [nomeLider,      setNomeLider]      = useState(null);
   const [statusOriginal, setStatusOriginal] = useState(null);
   const [salvando,       setSalvando]       = useState(false);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [excluindo,      setExcluindo]      = useState(false);
+  const [erroExclusao,   setErroExclusao]   = useState(null);
 
   const t = themeMembers(isDark);
 
@@ -1158,17 +1338,48 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   };
 
-  const excluir = async () => {
-    if (!window.confirm("Excluir permanentemente?")) return;
-    setSalvando(true);
+  const pedirConfirmacaoExclusao = () => {
+    setErroExclusao(null);
+    setConfirmandoExclusao(true);
+  };
+
+  const cancelarExclusao = () => {
+    if (excluindo) return;
+    setConfirmandoExclusao(false);
+    setErroExclusao(null);
+  };
+
+  const confirmarExclusao = async () => {
+    setExcluindo(true);
+    setErroExclusao(null);
     try {
       await api.delete(`/membros/${editandoId}`);
+      setConfirmandoExclusao(false);
       fecharModal(); recarregar();
     } catch (err) {
-      const mensagem = err.response?.data?.message || err.response?.data?.error || err.message;
-      alert(`Erro ao excluir:\n\n${mensagem}`);
+      const backendMsg = err.response?.data?.message || err.response?.data?.error || err.message || "";
+      const status = err.response?.status;
+
+      // Detecta violação de FK (célula, discipulado, etc.) mesmo quando
+      // o backend ainda não trata a exceção e devolve a stacktrace crua.
+      const ehConflitoDeVinculo =
+          status === 409 ||
+          status === 500 ||
+          /constraint|foreign key|violates|referenced from table/i.test(backendMsg);
+
+      if (ehConflitoDeVinculo) {
+        let motivo = "Este membro ainda possui vínculos ativos no sistema.";
+        if (/discipulado/i.test(backendMsg)) {
+          motivo = "Este membro possui registros de discipulado vinculados.";
+        } else if (/celula|c[eé]lula/i.test(backendMsg)) {
+          motivo = "Este membro ainda está vinculado a uma célula.";
+        }
+        setErroExclusao(`${motivo} Desvincule-o (remova da célula e/ou do discipulado) antes de tentar excluir novamente.`);
+      } else {
+        setErroExclusao(backendMsg || "Erro desconhecido ao excluir.");
+      }
     } finally {
-      setSalvando(false);
+      setExcluindo(false);
     }
   };
 
@@ -1338,11 +1549,24 @@ export default function MembrosRefatorado({ isDark = false }) {
                   form={form}
                   setForm={setForm}
                   onSalvar={salvar}
-                  onExcluir={excluir}
+                  onExcluir={pedirConfirmacaoExclusao}
                   onFechar={fecharModal}
                   nomeCelula={nomeCelula}
                   nomeLider={nomeLider}
                   loading={salvando}
+              />
+          )}
+        </AnimatePresence>
+
+        {/* ── Confirmação de Exclusão (personalizada) ── */}
+        <AnimatePresence>
+          {confirmandoExclusao && (
+              <ConfirmarExclusaoModal
+                  nomeMembro={form.nome}
+                  onConfirmar={confirmarExclusao}
+                  onCancelar={cancelarExclusao}
+                  loading={excluindo}
+                  erro={erroExclusao}
               />
           )}
         </AnimatePresence>
