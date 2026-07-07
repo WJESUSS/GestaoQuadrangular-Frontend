@@ -1569,23 +1569,51 @@ export default function MembrosRefatorado({ isDark = false }) {
     carregarPagina(pagina + 1, false);
   }, [temMais, carregandoMais, pagina, carregarPagina]);
 
-  // ✅ Observa a sentinela e dispara carregarMais() automaticamente
-  // quando ela entra na viewport (scroll infinito, sem botão).
+  // ✅ Detecta o scroll (na janela OU em um container interno com scroll próprio,
+  // como costuma acontecer dentro de layouts de dashboard) e dispara carregarMais()
+  // automaticamente conforme o usuário desce a página — sem depender de root do
+  // IntersectionObserver, que falhava quando o scroll real acontecia num container pai.
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !temMais) return;
 
-    const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            carregarMais();
-          }
-        },
-        { rootMargin: "250px" } // começa a carregar um pouco antes de chegar ao fim
-    );
+    const encontrarContainerComScroll = (node) => {
+      let parent = node.parentElement;
+      while (parent) {
+        const estilo = window.getComputedStyle(parent);
+        const rolavel = /(auto|scroll)/.test(estilo.overflowY);
+        if (rolavel && parent.scrollHeight > parent.clientHeight + 4) {
+          return parent;
+        }
+        parent = parent.parentElement;
+      }
+      return window;
+    };
 
-    observer.observe(el);
-    return () => observer.disconnect();
+    const containerScroll = encontrarContainerComScroll(el);
+
+    const verificarEcarregar = () => {
+      const rect = el.getBoundingClientRect();
+      const alturaVisivel = containerScroll === window
+          ? window.innerHeight
+          : containerScroll.getBoundingClientRect().bottom;
+      // Dispara quando a sentinela está a até 300px de entrar na área visível
+      if (rect.top - alturaVisivel < 300) {
+        carregarMais();
+      }
+    };
+
+    // Roda uma vez logo de cara — cobre o caso da lista ainda não preencher
+    // a tela inteira (nesse caso o scroll nunca dispararia sozinho).
+    verificarEcarregar();
+
+    containerScroll.addEventListener("scroll", verificarEcarregar, { passive: true });
+    window.addEventListener("resize", verificarEcarregar);
+
+    return () => {
+      containerScroll.removeEventListener("scroll", verificarEcarregar);
+      window.removeEventListener("resize", verificarEcarregar);
+    };
   }, [temMais, carregarMais]);
 
   const recarregar = () => carregarPagina(0, true);
@@ -1764,7 +1792,7 @@ export default function MembrosRefatorado({ isDark = false }) {
       [membros, filtro, filtroStatus]
   );
 
-  const buscaPodeEstarIncompleta = filtro.trim() !== "" && temMais;
+  const buscaPodeEstarIncompleta = (filtro.trim() !== "" || filtroStatus) && temMais;
 
   return (
       <div className="mem-root">
@@ -1938,7 +1966,7 @@ export default function MembrosRefatorado({ isDark = false }) {
                           ? `Nenhum membro com status "${STATUS_LABELS[filtroStatus]}".`
                           : "Nenhum membro cadastrado."}
                 </p>
-                {filtro && temMais && (
+                {(filtro || filtroStatus) && temMais && (
                     <div ref={sentinelRef} className="mem-scroll-sentinel" style={{ marginTop: 12 }}>
                       {carregandoMais && (
                           <>
