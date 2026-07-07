@@ -6,7 +6,7 @@ import {
   Plus, X, User, Phone, Trash2, Loader2, Search,
   CreditCard, Heart, ChevronRight, Users, CalendarDays,
   MapPin, BookOpen, Briefcase, Cross, Star, FileText,
-  ArrowLeft, Eye, EyeOff, AlertCircle,
+  ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle2,
 } from "lucide-react";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
@@ -93,6 +93,58 @@ const formInicial = {
   tipoArrolamento: "", jurisdicaoArrolamento: "", arroladoPor: "",
   observacoes: "",
 };
+
+/* ─── Mensagens personalizadas por mudança de status ──────────────── */
+function primeiroNomeDe(nomeCompleto) {
+  return (nomeCompleto || "").trim().split(" ")[0] || "Membro";
+}
+
+function mensagemStatus(status, nomeCompleto) {
+  const nome = primeiroNomeDe(nomeCompleto);
+  switch (status) {
+    case "ATIVO":
+      return `${nome} está ativo novamente! 🎉`;
+    case "INATIVO":
+      return `${nome} foi marcado como inativo.`;
+    case "AFASTADO":
+      return `${nome} está afastado no momento.`;
+    case "TRANSFERIDO":
+      return `${nome} foi transferido de igreja.`;
+    case "FALECIDO":
+      return `Que a memória de ${nome} seja em bênção. 🕊️`;
+    default:
+      return `Status de ${nome} atualizado.`;
+  }
+}
+
+function confirmacaoStatus(status, nomeCompleto) {
+  const nome = nomeCompleto?.trim() || "este membro";
+  switch (status) {
+    case "ATIVO":
+      return `Reativar ${nome}? Ele voltará a constar como membro ativo.`;
+    case "INATIVO":
+      return `Inativar ${nome}? Ele será removido de células ativas.`;
+    case "AFASTADO":
+      return `Marcar ${nome} como afastado? Ele será removido de células ativas até retornar.`;
+    case "TRANSFERIDO":
+      return `Marcar ${nome} como transferido? Ele será removido das células atuais.`;
+    case "FALECIDO":
+      return `Registrar o falecimento de ${nome}? Ele será removido de todas as vinculações ativas.`;
+    default:
+      return `Alterar o status de ${nome}? Isso pode removê-lo de células ativas.`;
+  }
+}
+
+function tituloConfirmacaoStatus(status) {
+  switch (status) {
+    case "ATIVO":       return "Reativar membro?";
+    case "INATIVO":     return "Inativar membro?";
+    case "AFASTADO":     return "Marcar como afastado?";
+    case "TRANSFERIDO": return "Marcar como transferido?";
+    case "FALECIDO":    return "Registrar falecimento?";
+    default:            return "Alterar status?";
+  }
+}
 
 /* ─── Helpers de Data ─────────────────────────────────────────────── */
 function formatarDataInput(dataISO) {
@@ -347,6 +399,7 @@ function GlobalStylesMembers({ t, isDark }) {
 
       .mem-card {
         background: ${t.bgEl}; border: 1px solid ${t.border};
+        border-left: 3px solid transparent;
         border-radius: 16px; overflow: hidden; margin-bottom: 12px;
         backdrop-filter: blur(24px); position: relative; cursor: pointer;
         transition: all .35s cubic-bezier(.4,0,.2,1);
@@ -357,7 +410,6 @@ function GlobalStylesMembers({ t, isDark }) {
       }
       .mem-card:active {
         transform: scale(.98);
-        border-color: ${t.cardHover};
         box-shadow: 0 8px 24px rgba(0,0,0,${isDark ? ".3" : ".1"});
       }
 
@@ -373,6 +425,7 @@ function GlobalStylesMembers({ t, isDark }) {
         display: flex; align-items: center; justify-content: center;
         color: #fff; font-family: 'Playfair Display', serif;
         font-weight: 600; font-size: 18px;
+        transition: background .35s;
       }
 
       .mem-card-content {
@@ -429,6 +482,23 @@ function GlobalStylesMembers({ t, isDark }) {
       .mem-info-bar {
         text-align: center; padding: 10px 0 4px;
         font-size: 11px; font-weight: 300; color: ${t.textMuted};
+      }
+
+      /* ── Toast de mudança de status ── */
+      .mem-toast {
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+        z-index: 10100; max-width: min(92vw, 380px);
+        display: flex; align-items: center; gap: 10px;
+        padding: 13px 18px; border-radius: 14px;
+        background: ${t.bgEl};
+        box-shadow: 0 14px 34px rgba(0,0,0,${isDark ? ".45" : ".18"});
+        font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500;
+        color: ${t.text};
+        backdrop-filter: blur(18px);
+      }
+
+      .mem-toast-dot {
+        width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
       }
 
       .mem-modal-backdrop {
@@ -542,6 +612,7 @@ function GlobalStylesMembers({ t, isDark }) {
         display: flex; align-items: center; justify-content: center; gap: 6px;
       }
       .mem-btn-save:hover { opacity: .9; transform: translateY(-1px); }
+      .mem-btn-save:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
       .mem-btn-delete {
         flex: 1; padding: 13px; border-radius: 10px; border: none;
@@ -552,6 +623,7 @@ function GlobalStylesMembers({ t, isDark }) {
         display: flex; align-items: center; justify-content: center; gap: 6px;
       }
       .mem-btn-delete:hover { background: rgba(200,16,46,.2); }
+      .mem-btn-delete:disabled { opacity: .6; cursor: not-allowed; }
 
       .mem-section-title {
         font-family: 'Playfair Display', serif;
@@ -675,6 +747,13 @@ function GlobalStylesMembers({ t, isDark }) {
       }
       .mem-confirm-btn-delete:hover { opacity: .9; transform: translateY(-1px); }
       .mem-confirm-btn-delete:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+      /* ── Modal de Confirmação de Status (novo) ── */
+      .mem-status-icon {
+        width: 56px; height: 56px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 16px;
+      }
     `}</style>
   );
 }
@@ -1170,6 +1249,93 @@ function ConfirmarExclusaoModal({ nomeMembro, onConfirmar, onCancelar, loading, 
   return createPortal(content, document.body);
 }
 
+/* ─── Modal de Confirmação de Mudança de Status (NOVO — substitui window.confirm) ─── */
+function ConfirmarStatusModal({ status, nome, onConfirmar, onCancelar, loading }) {
+  const sc = STATUS_COLORS[status] || STATUS_COLORS.INATIVO;
+
+  const content = (
+      <motion.div
+          className="mem-confirm-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onCancelar}
+      >
+        <motion.div
+            className="mem-confirm-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+        />
+        <motion.div
+            className="mem-confirm-box"
+            initial={{ scale: .92, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: .92, opacity: 0, y: 10 }}
+            transition={{ type: "tween", duration: 0.22 }}
+            onClick={e => e.stopPropagation()}
+            style={{ borderColor: `${sc.text}40` }}
+        >
+          <div className="mem-status-icon" style={{ background: sc.bg, color: sc.text }}>
+            <Users size={24} />
+          </div>
+
+          <h3 className="mem-confirm-title">{tituloConfirmacaoStatus(status)}</h3>
+
+          <p className="mem-confirm-text">
+            {confirmacaoStatus(status, nome)}
+          </p>
+
+          <div className="mem-confirm-actions" style={{ marginTop: 16 }}>
+            <button
+                type="button"
+                className="mem-confirm-btn-cancel"
+                onClick={onCancelar}
+                disabled={loading}
+            >
+              Cancelar
+            </button>
+            <button
+                type="button"
+                className="mem-confirm-btn-delete"
+                onClick={onConfirmar}
+                disabled={loading}
+                style={{ background: `linear-gradient(135deg, ${sc.text}, ${sc.text}CC)` }}
+            >
+              {loading ? (
+                  <><Loader2 size={13} className="dl-spin" /> Salvando...</>
+              ) : (
+                  <><CheckCircle2 size={13} /> Confirmar</>
+              )}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+  );
+
+  return createPortal(content, document.body);
+}
+
+/* ─── Toast de status ────────────────────────────────────────────── */
+function ToastStatus({ toast }) {
+  if (!toast) return null;
+  const sc = STATUS_COLORS[toast.status] || STATUS_COLORS.INATIVO;
+  const content = (
+      <motion.div
+          className="mem-toast"
+          initial={{ opacity: 0, y: 30, scale: .95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: .95 }}
+          transition={{ type: "tween", duration: 0.25 }}
+          style={{ border: `1px solid ${sc.border}` }}
+      >
+        <span className="mem-toast-dot" style={{ background: sc.text }} />
+        {toast.message}
+      </motion.div>
+  );
+  return createPortal(content, document.body);
+}
+
 /* ─── Componente Principal ──────────────────────────────────────── */
 const TAMANHO_PAGINA = 50;
 
@@ -1191,11 +1357,24 @@ export default function MembrosRefatorado({ isDark = false }) {
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
   const [excluindo,      setExcluindo]      = useState(false);
   const [erroExclusao,   setErroExclusao]   = useState(null);
+  const [toast,          setToast]          = useState(null); // { message, status }
+
+  // ✅ NOVO: estado para o modal de confirmação de mudança de status
+  // (substitui o window.confirm nativo que aparecia feio no navegador)
+  const [confirmandoStatus, setConfirmandoStatus] = useState(false);
+  const [dadosPendentes,    setDadosPendentes]    = useState(null); // { dados, novoStatus }
 
   const t = themeMembers(isDark);
 
   // ✅ Sentinela para scroll infinito (substitui o botão "Carregar mais")
   const sentinelRef = useRef(null);
+
+  // ✅ Some sozinho depois de alguns segundos
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 3800);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const carregarPagina = useCallback(async (numeroPagina, reset) => {
     if (reset) setLoading(true);
@@ -1312,30 +1491,66 @@ export default function MembrosRefatorado({ isDark = false }) {
     setNomeCelula(null); setNomeLider(null);
   };
 
-  const salvar = async (e) => {
-    e.preventDefault();
+  // ✅ Executa de fato a gravação (chamado direto, ou após confirmar o modal de status)
+  const executarSalvamento = async (dados, statusMudou, novoStatus) => {
     setSalvando(true);
     try {
-      const dados = prepararFormParaEnvio(form);
       if (editandoId) {
-        if (form.status !== statusOriginal) {
-          if (!window.confirm("Alterar o status removerá o membro de células. Continuar?")) {
-            setSalvando(false);
-            return;
-          }
-          await api.put(`/membros/${editandoId}/status`, null, { params: { status: form.status } });
+        if (statusMudou) {
+          await api.put(`/membros/${editandoId}/status`, null, { params: { status: novoStatus } });
         }
         await api.put(`/membros/${editandoId}`, dados);
       } else {
         await api.post("/membros", dados);
       }
-      fecharModal(); recarregar();
+
+      // ✅ Mensagem personalizada quando o status é alterado
+      if (statusMudou) {
+        setToast({ message: mensagemStatus(novoStatus, form.nome), status: novoStatus });
+      }
+
+      fecharModal();
+      recarregar();
     } catch (err) {
       const mensagem = err.response?.data?.message || err.response?.data?.error || err.message || "Erro desconhecido";
       alert(`Erro ao salvar:\n\n${mensagem}`);
     } finally {
       setSalvando(false);
+      setConfirmandoStatus(false);
+      setDadosPendentes(null);
     }
+  };
+
+  // ✅ Submit do form: se o status mudou, abre o modal personalizado
+  // em vez do window.confirm() nativo do navegador.
+  const salvar = async (e) => {
+    e.preventDefault();
+    try {
+      const dados = prepararFormParaEnvio(form);
+      const statusMudou = Boolean(editandoId) && form.status !== statusOriginal;
+
+      if (statusMudou) {
+        setDadosPendentes({ dados, novoStatus: form.status });
+        setConfirmandoStatus(true);
+        return;
+      }
+
+      await executarSalvamento(dados, false, null);
+    } catch (err) {
+      alert(`Erro ao salvar:\n\n${err.message}`);
+    }
+  };
+
+  // ✅ Usuário confirmou a mudança de status no modal personalizado
+  const confirmarMudancaStatus = () => {
+    if (!dadosPendentes) return;
+    executarSalvamento(dadosPendentes.dados, true, dadosPendentes.novoStatus);
+  };
+
+  // ✅ Usuário cancelou — mantém o modal de edição aberto, sem salvar nada
+  const cancelarMudancaStatus = () => {
+    setConfirmandoStatus(false);
+    setDadosPendentes(null);
   };
 
   const pedirConfirmacaoExclusao = () => {
@@ -1467,9 +1682,20 @@ export default function MembrosRefatorado({ isDark = false }) {
                             onClick={() => abrirEdicao(m)}
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: .98 }}
+                            style={{
+                              // ✅ Card inteiro reflete a cor do status atual do membro
+                              borderColor: sc.border,
+                              borderLeftColor: sc.text,
+                              background: isDark
+                                  ? `linear-gradient(135deg, ${sc.bg}, rgba(18,18,26,.95) 65%)`
+                                  : `linear-gradient(135deg, ${sc.bg}, rgba(255,255,255,.95) 65%)`,
+                            }}
                         >
                           <div className="mem-card-inner">
-                            <div className="mem-card-avatar">
+                            <div
+                                className="mem-card-avatar"
+                                style={{ background: `linear-gradient(135deg, ${sc.text}, ${sc.text}CC)` }}
+                            >
                               {m.nome?.charAt(0).toUpperCase()}
                             </div>
                             <div className="mem-card-content">
@@ -1558,6 +1784,19 @@ export default function MembrosRefatorado({ isDark = false }) {
           )}
         </AnimatePresence>
 
+        {/* ── Confirmação de Mudança de Status (NOVO — substitui window.confirm nativo) ── */}
+        <AnimatePresence>
+          {confirmandoStatus && dadosPendentes && (
+              <ConfirmarStatusModal
+                  status={dadosPendentes.novoStatus}
+                  nome={form.nome}
+                  onConfirmar={confirmarMudancaStatus}
+                  onCancelar={cancelarMudancaStatus}
+                  loading={salvando}
+              />
+          )}
+        </AnimatePresence>
+
         {/* ── Confirmação de Exclusão (personalizada) ── */}
         <AnimatePresence>
           {confirmandoExclusao && (
@@ -1569,6 +1808,11 @@ export default function MembrosRefatorado({ isDark = false }) {
                   erro={erroExclusao}
               />
           )}
+        </AnimatePresence>
+
+        {/* ── Toast de mudança de status ── */}
+        <AnimatePresence>
+          {toast && <ToastStatus toast={toast} />}
         </AnimatePresence>
 
       </div>
