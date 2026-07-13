@@ -309,6 +309,8 @@ function gerarPDFReal(grupo) {
             doc.line(14, cy, W - 14, cy);
             cy += 4;
 
+            const eqCount = (lider ? 1 : 0) + (auxiliar ? 1 : 0);
+
             doc.setFont("helvetica", "bold");
             doc.setFontSize(7);
             doc.setTextColor(120, 120, 120);
@@ -317,9 +319,7 @@ function gerarPDFReal(grupo) {
             doc.setFont("helvetica", "normal");
             doc.setFontSize(8);
             doc.setTextColor(30, 30, 30);
-            let eqTexto = lider ? `Líder: ${lider}` : "";
-            if (auxiliar) eqTexto += `   |   Auxiliar: ${auxiliar}`;
-            doc.text(eqTexto, 27, cy);
+            doc.text(`${eqCount} pessoa${eqCount !== 1 ? "s" : ""}`, 27, cy);
             cy += 3;
         }
 
@@ -448,24 +448,17 @@ function CasaCard({ casa, t }) {
                     <Div t={t} />
                     <div style={{ marginBottom: 4 }}>
                         <div className="rdcp-eyebrow" style={{ color: t.textMuted, marginBottom: 9 }}>EQUIPE RESPONSÁVEL</div>
-                        {lider && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                                <Avatar name={lider} />
-                                <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, color: t.text, fontWeight: 400, wordBreak: "break-word" }}>{lider}</div>
-                                    <div className="rdcp-eyebrow" style={{ color: t.textMuted }}>LÍDER</div>
-                                </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 28, fontWeight: 600, color: t.text, lineHeight: 1 }}>
+                                {(lider ? 1 : 0) + (auxiliar ? 1 : 0)}
                             </div>
-                        )}
-                        {auxiliar && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <Avatar name={auxiliar} blue />
-                                <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, color: t.text, fontWeight: 400, wordBreak: "break-word" }}>{auxiliar}</div>
-                                    <div className="rdcp-eyebrow" style={{ color: t.textMuted }}>AUXILIAR</div>
+                            <div>
+                                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: t.text, fontWeight: 400 }}>
+                                    pessoa{((lider ? 1 : 0) + (auxiliar ? 1 : 0)) !== 1 ? "s" : ""}
                                 </div>
+                                <div className="rdcp-eyebrow" style={{ color: t.textMuted }}>NA EQUIPE</div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </>
             )}
