@@ -1,0 +1,54 @@
+/* ─── Tokens da marca — as quatro cores da Quadrangular ─────────────────
+   Azul: cura divina · Ouro: batismo no Espírito Santo
+   Roxo: a volta do Rei Jesus · Vermelho: o sangue de Cristo             */
+export const AURA = {
+  moss:      "#1E3F66",
+  mossDeep:  "#12283F",
+  mossLight: "#4C7EB0",
+  gold:      "#B8892E",
+  goldLight: "#D9AE5E",
+  roxo:      "#5B2A6E",
+  roxoDeep:  "#3B1B49",
+  roxoLight: "#8B5A9E",
+  dark:      "#12131C",
+  darkEl:    "#1A2236",
+  light:     "#F3F1EA",
+  clay:      "#9E2A2B",
+  clayDeep:  "#6E1D1E",
+  red:       "#9E2A2B",
+  redDark:   "#6E1D1E",
+  redLight:  "#C45253",
+  blue:      "#1E3F66",
+  blueDark:  "#12283F",
+  blueLight: "#4C7EB0",
+  yellow:    "#D9AE5E",
+  yellowDark:"#B8892E",
+  green:     "#4A7C5C",
+  greenDark: "#2E5439",
+  sage:      "#7A9E7E",
+  teal:      "#2E8B8B",
+  purple:    "#5B2A6E",
+  purpleDark:"#3B1B49",
+  white:     "#FFFFFF",
+  offWhite:  "#F3F1EA",
+  darkCard:  "#1A2236",
+};
+
+export function theme(isDark) {
+  return {
+    bg:          isDark ? "#12131C"                : "#F3F1EA",
+    bgEl:        isDark ? "rgba(26,34,54,.95)"      : "rgba(243,241,234,.95)",
+    bgInput:     isDark ? "rgba(255,255,255,.04)"   : "rgba(30,63,102,.05)",
+    border:      isDark ? "rgba(184,137,46,.14)"    : "rgba(27,35,51,.10)",
+    borderInput: isDark ? "rgba(184,137,46,.18)"    : "rgba(27,35,51,.16)",
+    text:        isDark ? "#F3F1EA"                 : "#1B2333",
+    textSec:     isDark ? "#C7CBBC"                 : "#3E4A5E",
+    textMuted:   isDark ? "#8B93A0"                 : "#8B93A0",
+    glow1:       isDark ? "rgba(184,137,46,.06)"    : "rgba(30,63,102,.06)",
+    glow2:       isDark ? "rgba(76,126,176,.05)"   : "rgba(184,137,46,.05)",
+    headerBg:    isDark ? "rgba(18,19,28,.97)"      : "rgba(243,241,234,.97)",
+    cardHover:   isDark ? "rgba(184,137,46,.28)"    : "rgba(30,63,102,.3)",
+    placeholder: isDark ? "rgba(199,203,188,.35)"   : "rgba(62,74,94,.45)",
+    optionBg:    isDark ? "#1A2236"                 : "#E9E4D6",
+  };
+}

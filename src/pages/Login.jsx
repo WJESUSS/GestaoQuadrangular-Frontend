@@ -9,12 +9,11 @@ import api               from "../services/api.js";
 
 /* ─── Paleta AURA (DashboardLider) ─── */
 const BRAND = {
-    blue:"#003DA5", blueDark:"#002470", blueLight:"#2E94DC",
-    violet:"#003DA5", violetDeep:"#002470", violetLight:"#4A6585",
-    dark:"#0A0A0F", stone:"#12121A",
-    light:"#E8F1FB", muted:"#4A6585",
-    gold:"#C9A96E", goldLight:"#E8D5A3",
-    red:"#C8102E", redDark:"#9B0B1E",
+    moss:"#1E3F66", mossDeep:"#12283F", mossLight:"#4C7EB0",
+    dark:"#12131C", stone:"#1A2236",
+    light:"#F3F1EA", muted:"#8B93A0",
+    gold:"#B8892E", goldLight:"#D9AE5E",
+    red:"#9E2A2B", redDark:"#6E1D1E",
 };
 
 /* ─── Mini-hook fade-in (igual ao da Home) ─── */
@@ -53,35 +52,35 @@ function IEQCross({ size = 300, src = "/quadrangular.png" }) {
 }
 
 /* ─── Cena animada de fundo (céu, nuvens, pássaros, vaga-lumes, folhas, igreja com sino) ───
-   Cores calculadas a partir da paleta AURA, ajustadas para tema claro/escuro. */
+   Cores calculadas a partir da paleta CÉLULA, ajustadas para tema claro/escuro. */
 function AnimatedScene({ dark }) {
     const layerRef = useRef(null);
     const spawnedRef = useRef(false);
 
     const c = dark ? {
-        skyTop:"#05050a", skyBot:"#0a1226", skyGround:"#080c18",
-        hillBack:"#0e162e", hillFront:"#090f20", trunk:"#3d2c1e",
-        foliage1:"#0d3448", foliage2:"#0a2838",
+        skyTop:"#080A14", skyBot:"#0D1220", skyGround:"#0A0E1A",
+        hillBack:"#0e1f2a", hillFront:"#0c1a24", trunk:"#3d2c1e",
+        foliage1:"#1a3a4a", foliage2:"#122a3a",
         churchWall:"#e0d9c8", churchRoof:"#3d2e20", churchTrim:"#221a10",
         churchDoor:"#221a10", churchOpen:"#151008",
-        sunMoon:"radial-gradient(circle at 35% 30%, #e8ecff, #b8c8e8 50%, #5a7aaa)",
-        sunMoonGlow:"0 0 60px 20px rgba(46,148,220,0.25)",
+        sunMoon:"radial-gradient(circle at 35% 30%, #e8ecff, #b8c8e8 50%, #7d9a86)",
+        sunMoonGlow:"0 0 60px 20px rgba(76,126,176,0.25)",
         birdColor: BRAND.light,
         fireflyOn:true,
     } : {
         skyTop:"#a8ccee", skyBot:"#d8e8f6", skyGround:"#c8dcec",
-        hillBack:"#94bde0", hillFront:"#6ea0d4", trunk:"#6e4628",
-        foliage1:"#265e7a", foliage2:"#1e4c64",
+        hillBack:"#9CC4A0", hillFront:"#6FA377", trunk:"#6e4628",
+        foliage1:"#2E6B44", foliage2:"#1F4A2E",
         churchWall:"#f5efe0", churchRoof:"#5e4028", churchTrim:"#3e2a1a",
         churchDoor:"#3e2a1a", churchOpen:"#221810",
         sunMoon:`radial-gradient(circle at 35% 30%, #fff8e0, ${BRAND.goldLight} 55%, ${BRAND.gold})`,
-        sunMoonGlow:"0 0 70px 25px rgba(201,169,110,0.4)",
+        sunMoonGlow:"0 0 70px 25px rgba(184,137,46,0.4)",
         birdColor: BRAND.dark,
         fireflyOn:false,
     };
     const bellColor = BRAND.gold;
     const glassWarm = BRAND.goldLight;
-    const glassCool = BRAND.blueLight;
+    const glassCool = BRAND.mossLight;
 
     useEffect(() => {
         const layer = layerRef.current;
@@ -127,7 +126,7 @@ function AnimatedScene({ dark }) {
             const el = document.createElement("div");
             el.className = "scn-leaf";
             el.textContent = leafGlyphs[i % 2];
-            el.style.color = BRAND.blueLight;
+            el.style.color = BRAND.mossLight;
             el.style.left = rand(0, 100) + "%";
             el.style.fontSize = rand(11, 18) + "px";
             el.style.animationDuration = rand(13, 24) + "s";
@@ -174,7 +173,7 @@ function AnimatedScene({ dark }) {
     }, []);
 
     return (
-        <div className="scene" style={{ background:`linear-gradient(180deg, ${c.skyTop}, ${c.skyBot} 60%, ${c.skyGround})` }}>
+        <div className="scene" style={{ background:"transparent" }}>
             <div className="sun-moon" style={{ background:c.sunMoon, boxShadow:c.sunMoonGlow }} />
             <div className="parallax-layer" ref={layerRef} />
 
@@ -254,7 +253,7 @@ function ErrIcon({ t }) {
 /* ─── Cálculo de força de senha ─── */
 const calcForca   = s => s.length < 6 ? 1 : s.length < 8 ? 2 : /[A-Z]/.test(s) && /[0-9]/.test(s) ? 4 : 3;
 const forcaLabel  = ["","Muito curta","Fraca","Média","Forte"];
-const forcaColor  = ["",BRAND.violet,BRAND.blueLight,"#22c55e",BRAND.blue];
+const forcaColor  = ["",BRAND.red,BRAND.gold,"#22c55e",BRAND.moss];
 
 /* ══════════════════════════════════════════════════════════════ */
 export default function Login() {
@@ -303,9 +302,9 @@ export default function Login() {
     /* helpers */
     const trocarAba = a => { setAba(a); setErrLogin(null); setErrCad(null); setErrAlt(null); setOkCad(false); setOkAlt(false); };
 
-    const errBg     = e => e?.tipo==="limite" ? "rgba(201,169,110,.1)" : "rgba(0,61,165,.1)";
-    const errBorder = e => e?.tipo==="limite" ? "rgba(201,169,110,.35)" : "rgba(0,61,165,.3)";
-    const errColor  = e => e?.tipo==="limite" ? BRAND.gold : BRAND.blue;
+    const errBg     = e => e?.tipo==="limite" ? "rgba(184,137,46,.12)" : "rgba(158,42,43,.12)";
+    const errBorder = e => e?.tipo==="limite" ? "rgba(184,137,46,.4)" : "rgba(158,42,43,.4)";
+    const errColor  = e => e?.tipo==="limite" ? BRAND.gold : BRAND.red;
 
     /* ── handlers ── */
     const handleLogin = async e => {
@@ -389,10 +388,10 @@ export default function Login() {
     /* ── Cores base (mesmas da Home) ── */
     const bg    = dark ? BRAND.dark  : BRAND.light;
     /* ── card mais transparente ── */
-    const cardBg= dark ? "rgba(18,14,31,.18)" : "rgba(255,255,255,.12)";
+    const cardBg= dark ? "rgba(26,34,54,.35)" : "rgba(255,255,255,.22)";
     const txt   = dark ? BRAND.light : BRAND.dark;
-    const sub   = dark ? "rgba(245,240,235,.5)" : "rgba(7,6,15,.45)";
-    const border= dark ? "rgba(0,119,200,.12)" : "rgba(91,33,182,.10)";
+    const sub   = dark ? "rgba(243,241,234,.5)" : "rgba(27,35,51,.45)";
+    const border= dark ? "rgba(30,63,102,.12)" : "rgba(30,63,102,.10)";
 
     /* ── Força senha ── */
     const fc = calcForca(cSenha);
@@ -405,7 +404,7 @@ export default function Login() {
                 <meta name="description" content="Portal administrativo da Igreja do Evangelho Quadrangular de Pituaçu."/>
                 <link rel="preconnect" href="https://fonts.googleapis.com"/>
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"/>
-                <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+                <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
             </Helmet>
 
             <style>{`
@@ -413,7 +412,7 @@ export default function Login() {
 
         /* ── font base ── */
         .ieq-login-root {
-          font-family:'Manrope',sans-serif;
+          font-family:'Inter',sans-serif;
           min-height:100vh;
           display:flex;
           align-items:center;
@@ -488,21 +487,21 @@ export default function Login() {
           position:fixed; top:50%; left:50%;
           transform:translate(-50%,-50%);
           width:800px; height:800px; border-radius:50%;
-          background:radial-gradient(circle,rgba(0,61,165,.15) 0%,rgba(46,148,220,.08) 40%,transparent 70%);
+          background:radial-gradient(circle,rgba(30,63,102,.15) 0%,rgba(76,126,176,.08) 40%,transparent 70%);
           pointer-events:none; z-index:0;
           animation:glowPulse 6s ease-in-out infinite;
         }
         .glow-secondary {
           position:fixed; top:20%; right:5%;
           width:500px; height:500px; border-radius:50%;
-          background:radial-gradient(circle,rgba(201,169,110,.1) 0%,rgba(201,169,110,.05) 30%,transparent 65%);
+          background:radial-gradient(circle,rgba(184,137,46,.1) 0%,rgba(184,137,46,.05) 30%,transparent 65%);
           pointer-events:none; z-index:0;
           animation:glowPulse 8s ease-in-out infinite reverse;
         }
         .glow-tertiary {
           position:fixed; bottom:-10%; left:-5%;
           width:600px; height:600px; border-radius:50%;
-          background:radial-gradient(circle,rgba(46,148,220,.08) 0%,transparent 60%);
+          background:radial-gradient(circle,rgba(76,126,176,.08) 0%,transparent 60%);
           pointer-events:none; z-index:0;
           animation:glowPulse 10s ease-in-out infinite;
         }
@@ -527,30 +526,30 @@ export default function Login() {
           width:100%; max-width:480px;
           margin:24px;
           background:${cardBg};
-          backdrop-filter:blur(6px) saturate(1.1);
-          -webkit-backdrop-filter:blur(6px) saturate(1.1);
-          border:1px solid ${border};
+          backdrop-filter:blur(16px) saturate(1.2);
+          -webkit-backdrop-filter:blur(16px) saturate(1.2);
+          border:1px solid rgba(255,255,255,.2);
           border-radius:16px;
           padding:44px 44px 36px;
           opacity:0; transform:translateY(28px);
           transition:opacity .7s ease, transform .7s ease,
                       background .4s, border-color .4s, box-shadow .4s;
           box-shadow:
-            0 1px 2px rgba(0,0,0,.03),
-            0 4px 8px rgba(0,0,0,.04),
-            0 16px 32px rgba(0,0,0,.05),
-            0 32px 64px rgba(0,0,0,.06),
-            0 0 0 1px rgba(0,61,165,.04);
+            0 1px 2px rgba(0,0,0,.05),
+            0 4px 8px rgba(0,0,0,.06),
+            0 16px 32px rgba(0,0,0,.08),
+            0 32px 64px rgba(0,0,0,.10),
+            inset 0 1px 0 rgba(255,255,255,.15);
         }
         .login-card::before {
           content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
-          background:linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 50%, rgba(0,61,165,.04) 100%);
+          background:linear-gradient(135deg, rgba(255,255,255,.12) 0%, transparent 50%, rgba(30,63,102,.06) 100%);
           pointer-events:none;
         }
         .login-card::after {
           content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
           padding:1px;
-          background:linear-gradient(135deg, rgba(255,255,255,.10) 0%, transparent 40%, rgba(0,61,165,.06) 100%);
+          background:linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 40%, rgba(30,63,102,.10) 100%);
           -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite:xor;
           mask-composite:exclude;
@@ -560,7 +559,7 @@ export default function Login() {
         /* ── tabs ── */
         .tabs-row {
           display:flex;
-          background:${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.04)"};
+          background:rgba(255,255,255,.08);
           border-radius:8px;
           padding:3px;
           gap:3px;
@@ -569,22 +568,22 @@ export default function Login() {
         .tab-btn {
           flex:1; padding:10px 6px; border:none; cursor:pointer;
           border-radius:6px;
-          font-family:'Manrope',sans-serif; font-size:9.5px;
+          font-family:'Inter',sans-serif; font-size:9.5px;
           font-weight:700; letter-spacing:.13em; text-transform:uppercase;
           transition:all .25s;
         }
         .tab-btn.active {
-          background:linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDark});
+          background:linear-gradient(135deg, ${BRAND.moss}, ${BRAND.mossDeep});
           color:#fff;
-          box-shadow:0 3px 12px rgba(0,61,165,.35);
+          box-shadow:0 3px 12px rgba(30,63,102,.35);
         }
         .tab-btn.inactive {
           background:transparent;
-          color:${sub};
+          color:rgba(255,255,255,.55);
         }
         .tab-btn.inactive:hover {
           background:${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)"};
-          color:${BRAND.blue};
+          color:${BRAND.moss};
         }
 
         /* ── label ── */
@@ -592,49 +591,49 @@ export default function Login() {
           display:block; margin-bottom:6px;
           font-size:10px; font-weight:700;
           letter-spacing:.12em; text-transform:uppercase;
-          color:${BRAND.blue}; font-family:'Manrope',sans-serif;
+          color:rgba(255,255,255,.7); font-family:'Inter',sans-serif;
         }
-        .fld-label.blue { color: ${BRAND.blueDark}; }
+        .fld-label.blue { color: rgba(255,255,255,.8); }
 
         /* ── inputs (e-mail e senha mais transparentes, efeito vidro) ── */
         .ieq-input {
           width:100%;
-          background:${dark?"rgba(255,255,255,.01)":"rgba(255,255,255,.03)"};
-          backdrop-filter:blur(4px);
-          -webkit-backdrop-filter:blur(4px);
-          border:1px solid ${dark?"rgba(0,61,165,.12)":"rgba(0,61,165,.11)"};
-          color:${txt};
+          background:rgba(255,255,255,.08);
+          backdrop-filter:blur(8px);
+          -webkit-backdrop-filter:blur(8px);
+          border:1px solid rgba(255,255,255,.2);
+          color:#fff;
           padding:13px 13px 13px 43px;
           border-radius:6px; outline:none;
-          font-size:14px; font-family:'Manrope',sans-serif;
+          font-size:14px; font-family:'Inter',sans-serif;
           transition:border-color .2s, box-shadow .2s, background .2s;
         }
         .ieq-input:focus {
-          border-color:${BRAND.blue};
-          box-shadow:0 0 0 3px rgba(0,61,165,.12);
-          background:${dark?"rgba(255,255,255,.02)":"rgba(0,61,165,.01)"};
+          border-color:${BRAND.goldLight};
+          box-shadow:0 0 0 3px rgba(201,169,110,.15);
+          background:rgba(255,255,255,.12);
         }
         .ieq-input.blue:focus {
-          border-color:${BRAND.blue};
-          box-shadow:0 0 0 3px rgba(0,61,165,.12);
+          border-color:${BRAND.goldLight};
+          box-shadow:0 0 0 3px rgba(201,169,110,.15);
         }
-        .ieq-input.error { border-color:${BRAND.violetLight}; }
-        .ieq-input::placeholder { color:${dark?"rgba(245,240,235,.2)":"rgba(10,22,40,.2)"}; }
+        .ieq-input.error { border-color:${BRAND.red}; }
+        .ieq-input::placeholder { color:rgba(255,255,255,.4); }
 
         /* ── botão principal ── */
         .btn-primary {
           width:100%; padding:14px; border:none; border-radius:6px;
-          font-family:'Manrope',sans-serif; font-size:11px; font-weight:700;
+          font-family:'Inter',sans-serif; font-size:11px; font-weight:700;
           letter-spacing:.2em; text-transform:uppercase; cursor:pointer; color:#fff;
           display:flex; align-items:center; justify-content:center; gap:8px;
           transition:opacity .2s, transform .2s, box-shadow .2s;
         }
         .btn-primary:hover:not(:disabled) {
           opacity:.88; transform:translateY(-2px);
-          box-shadow:0 8px 28px rgba(0,61,165,.35);
+          box-shadow:0 8px 28px rgba(30,63,102,.35);
         }
         .btn-primary:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
-        .btn-primary.blue:hover:not(:disabled) { box-shadow:0 8px 28px rgba(0,36,112,.35); }
+        .btn-primary.blue:hover:not(:disabled) { box-shadow:0 8px 28px rgba(18,40,63,.35); }
 
         /* ── caixa de erro ── */
         .err-box {
@@ -664,7 +663,7 @@ export default function Login() {
         }
         .divider::before,.divider::after {
           content:""; flex:1; height:1px;
-          background:${dark?"rgba(0,61,165,.12)":"rgba(10,22,40,.09)"};
+          background:${dark?"rgba(30,63,102,.12)":"rgba(27,35,51,.09)"};
         }
 
         /* ── força senha ── */
@@ -689,23 +688,24 @@ export default function Login() {
         /* ── pulse ring da cruz ── */
         .pulse-ring {
           position:absolute; border-radius:50%;
-          border:1px solid rgba(0,61,165,.32);
+          border:1px solid rgba(255,255,255,.25);
           animation:pulse 3s ease-in-out infinite;
         }
 
         /* ── tag badge ── */
         .badge {
           display:inline-flex; align-items:center; gap:7px;
-          background:rgba(0,61,165,.08);
-          border:1px solid rgba(0,61,165,.25);
+          background:rgba(255,255,255,.12);
+          border:1px solid rgba(255,255,255,.25);
           border-radius:100px; padding:5px 14px;
           font-size:11px; font-weight:700;
           letter-spacing:.1em; text-transform:uppercase;
-          color:${BRAND.blue};
+          color:${BRAND.goldLight};
+          backdrop-filter:blur(8px);
         }
         .badge-dot {
           width:6px; height:6px; border-radius:50%;
-          background:${BRAND.blue};
+          background:${BRAND.goldLight};
           animation:pulse 2s ease-in-out infinite;
         }
 
@@ -717,6 +717,22 @@ export default function Login() {
       `}</style>
 
             <div className="ieq-login-root">
+                {/* ── vídeo de fundo ── */}
+                <video
+                    autoPlay muted loop playsInline
+                    src="/videos/noite-primicias-bolandeira.mp4"
+                    style={{
+                        position:"fixed", inset:0, width:"100%", height:"100%",
+                        objectFit:"cover", zIndex:0,
+                    }}
+                />
+                <div style={{
+                    position:"fixed", inset:0, zIndex:0,
+                    background: dark
+                        ? "linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.15) 50%, rgba(0,0,0,.30) 100%)"
+                        : "linear-gradient(180deg, rgba(0,0,0,.20) 0%, rgba(0,0,0,.10) 50%, rgba(0,0,0,.25) 100%)",
+                }} />
+
                 {/* ── fundo animado + grade + glows ── */}
                 <AnimatedScene dark={dark}/>
                 <div className="noise-overlay"/>
@@ -731,7 +747,7 @@ export default function Login() {
                     style={{
                         position:"fixed", top:22, right:22, zIndex:50,
                         background:"none", border:"none", cursor:"pointer",
-                        color:dark?BRAND.blue:BRAND.gold, transition:"color .3s",
+                        color:dark?BRAND.moss:BRAND.gold, transition:"color .3s",
                     }}
                 >
                     {dark ? <Sun size={22}/> : <Moon size={22}/>}
@@ -751,8 +767,9 @@ export default function Login() {
                             <div className="pulse-ring" style={{ width:72, height:72, animationDelay:"1s" }}/>
                             <div style={{
                                 width:62, height:62, borderRadius:"50%",
-                                background:dark?"rgba(18,14,31,.9)":"#fff",
-                                border:`1px solid rgba(0,61,165,.28)`,
+                                background:"rgba(255,255,255,.15)",
+                                border:`1px solid rgba(255,255,255,.3)`,
+                                backdropFilter:"blur(8px)",
                                 display:"flex", alignItems:"center", justifyContent:"center",
                             }}>
                                 <IEQCross size={44}/>
@@ -769,19 +786,21 @@ export default function Login() {
 
                         {/* título igual à Home */}
                         <h1 style={{
-                            fontFamily:"'Playfair Display',serif",
+                            fontFamily:"'Fraunces',serif",
                             fontSize:"clamp(26px,5vw,32px)",
                             fontWeight:700, lineHeight:1.1,
                             letterSpacing:"-.02em",
-                            color:txt, margin:0,
+                            color:"#fff", margin:0,
+                            textShadow:"0 2px 16px rgba(0,0,0,.6)",
                         }}>
                             Sua Igreja,{" "}
-                            <span style={{ background:`linear-gradient(90deg, ${BRAND.blue}, ${BRAND.gold})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>Bem Administrada.</span>
+                            <span style={{ color:BRAND.goldLight, fontStyle:"italic" }}>Bem Administrada.</span>
                         </h1>
                         <p style={{
                             marginTop:8, fontSize:12,
-                            color:sub, letterSpacing:".06em",
-                            fontFamily:"'Manrope',sans-serif",
+                            color:"rgba(255,255,255,.7)", letterSpacing:".06em",
+                            fontFamily:"'Inter',sans-serif",
+                            textShadow:"0 1px 8px rgba(0,0,0,.4)",
                         }}>
                             Portal Administrativo · IEQ Pituaçu
                         </p>
@@ -791,9 +810,9 @@ export default function Login() {
                     <div style={{
                         display:"flex", alignItems:"center", gap:12, marginBottom:24,
                     }}>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to right,transparent,${BRAND.gold})` }}/>
-                        <div style={{ width:6, height:6, borderRadius:"50%", background:BRAND.gold }}/>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to left,transparent,${BRAND.gold})` }}/>
+                        <div style={{ flex:1, height:1, background:`linear-gradient(to right,transparent,rgba(217,174,94,.5))` }}/>
+                        <div style={{ width:6, height:6, borderRadius:"50%", background:BRAND.goldLight }}/>
+                        <div style={{ flex:1, height:1, background:`linear-gradient(to left,transparent,rgba(217,174,94,.5))` }}/>
                     </div>
 
                     {/* ── tabs ── */}
@@ -819,7 +838,7 @@ export default function Login() {
                                 <div>
                                     <label className="fld-label">E-mail</label>
                                     <div style={{ position:"relative" }}>
-                                        <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                        <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                         <input
                                             className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
                                             type="email" placeholder="usuario@ieq.com"
@@ -833,7 +852,7 @@ export default function Login() {
                                 <div>
                                     <label className="fld-label">Senha</label>
                                     <div style={{ position:"relative" }}>
-                                        <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                        <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                         <input
                                             className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
                                             type={showPass?"text":"password"} placeholder="••••••••"
@@ -841,7 +860,7 @@ export default function Login() {
                                             required autoComplete="current-password"
                                         />
                                         <button type="button" onClick={()=>setShowPass(!showPass)}
-                                                style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
+                                                style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
                                             <EyeIcon open={showPass}/>
                                         </button>
                                     </div>
@@ -853,15 +872,15 @@ export default function Login() {
                                          style={{ background:errBg(errLogin), border:`1px solid ${errBorder(errLogin)}` }}>
                                         <span style={{ color:errColor(errLogin), flexShrink:0, marginTop:1 }}><ErrIcon t={errLogin.tipo}/></span>
                                         <div>
-                                            <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errLogin), letterSpacing:".05em", fontFamily:"'Manrope',sans-serif", marginBottom:3 }}>{errLogin.titulo}</p>
-                                            <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>{errLogin.msg}</p>
+                                            <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errLogin), letterSpacing:".05em", fontFamily:"'Inter',sans-serif", marginBottom:3 }}>{errLogin.titulo}</p>
+                                            <p style={{ fontSize:12.5, color:"rgba(255,255,255,.65)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>{errLogin.msg}</p>
                                         </div>
                                     </div>
                                 )}
 
                                 {/* botão */}
                                 <button type="submit" className="btn-primary" disabled={loadLogin}
-                                        style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.blueDark},${BRAND.blue})` }}>
+                                        style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.mossDeep},${BRAND.moss})` }}>
                                     {loadLogin
                                         ? <><Loader2 size={16} className="spin"/> Verificando...</>
                                         : "Acessar Sistema"}
@@ -876,15 +895,16 @@ export default function Login() {
                             {/* aviso roxo */}
                             <div style={{
                                 marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
-                                border:`1px solid ${dark?"rgba(0,61,165,.3)":"rgba(0,61,165,.18)"}`,
+                                background:"rgba(255,255,255,.08)",
+                                border:"1px solid rgba(255,255,255,.15)",
+                                backdropFilter:"blur(6px)",
                                 display:"flex", gap:9, alignItems:"flex-start",
                             }}>
-                <span style={{ color:BRAND.blue, flexShrink:0, marginTop:2 }}>
+                <span style={{ color:BRAND.goldLight, flexShrink:0, marginTop:2 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </span>
-                                <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>
-                                    Exclusivo para <strong style={{ color:txt }}>líderes de célula</strong>. Após o envio, aguarde a aprovação do administrador para acessar o sistema.
+                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>
+                                    Exclusivo para <strong style={{ color:"#fff" }}>líderes de célula</strong>. Após o envio, aguarde a aprovação do administrador para acessar o sistema.
                                 </p>
                             </div>
 
@@ -892,18 +912,19 @@ export default function Login() {
                             {okCad ? (
                                 <div className="pop-in" style={{
                                     textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
-                                    border:`1px solid ${dark?"rgba(0,61,165,.32)":"rgba(0,61,165,.18)"}`,
+                                    background:"rgba(255,255,255,.08)",
+                                    border:"1px solid rgba(255,255,255,.15)",
+                                    backdropFilter:"blur(6px)",
                                 }}>
                                     <CheckCircle2 size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
-                                    <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color:BRAND.blue, marginBottom:8 }}>Solicitação Enviada!</p>
-                                    <p style={{ fontSize:13, color:sub, lineHeight:1.6, fontFamily:"'Manrope',sans-serif", marginBottom:18 }}>
+                                    <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:700, color:BRAND.goldLight, marginBottom:8 }}>Solicitação Enviada!</p>
+                                    <p style={{ fontSize:13, color:"rgba(255,255,255,.6)", lineHeight:1.6, fontFamily:"'Inter',sans-serif", marginBottom:18 }}>
                                         Sua solicitação foi recebida. O administrador irá analisar e liberar seu acesso em breve.
                                     </p>
                                     <button onClick={()=>trocarAba("login")} style={{
-                                        background:"none", border:`1px solid ${BRAND.blue}`, color:BRAND.blue,
+                                        background:"none", border:`1px solid rgba(255,255,255,.3)`, color:"#fff",
                                         borderRadius:6, padding:"9px 22px", cursor:"pointer",
-                                        fontFamily:"'Manrope',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".12em",
+                                        fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".12em",
                                     }}>IR PARA LOGIN</button>
                                 </div>
                             ) : (
@@ -912,7 +933,7 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">Nome Completo</label>
                                         <div style={{ position:"relative" }}>
-                                            <User size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                            <User size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                             <input className="ieq-input" type="text" placeholder="Seu nome completo"
                                                    value={cNome} onChange={e=>{setCNome(e.target.value);if(errCad)setErrCad(null);}} required autoComplete="name"/>
                                         </div>
@@ -921,7 +942,7 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">E-mail</label>
                                         <div style={{ position:"relative" }}>
-                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                             <input className="ieq-input" type="email" placeholder="seu@email.com"
                                                    value={cEmail} onChange={e=>{setCEmail(e.target.value);if(errCad)setErrCad(null);}} required autoComplete="email"/>
                                         </div>
@@ -930,12 +951,12 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">Senha</label>
                                         <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                             <input className={`ieq-input${errCad?.tipo==="senha"?" error":""}`}
                                                    type={showCP?"text":"password"} placeholder="Mínimo 6 caracteres"
                                                    value={cSenha} onChange={e=>{setCSenha(e.target.value);if(errCad)setErrCad(null);}} required/>
                                             <button type="button" onClick={()=>setShowCP(!showCP)}
-                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
+                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
                                                 <EyeIcon open={showCP}/>
                                             </button>
                                         </div>
@@ -947,7 +968,7 @@ export default function Login() {
                                                              style={{ background:i<=fc?forcaColor[fc]:(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.07)") }}/>
                                                     ))}
                                                 </div>
-                                                <p style={{ fontSize:10, color:forcaColor[fc], fontFamily:"'Manrope',sans-serif", fontWeight:700, letterSpacing:".07em" }}>{forcaLabel[fc]}</p>
+                                                <p style={{ fontSize:10, color:forcaColor[fc], fontFamily:"'Inter',sans-serif", fontWeight:700, letterSpacing:".07em" }}>{forcaLabel[fc]}</p>
                                             </div>
                                         )}
                                     </div>
@@ -955,13 +976,13 @@ export default function Login() {
                                     <div>
                                         <label className="fld-label">Confirmar Senha</label>
                                         <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                             <input className={`ieq-input${cConf.length>0&&cSenha!==cConf?" error":""}`}
                                                    type={showCP?"text":"password"} placeholder="Repita a senha"
                                                    value={cConf} onChange={e=>{setCConf(e.target.value);if(errCad)setErrCad(null);}} required/>
                                         </div>
                                         {cConf.length > 0 && (
-                                            <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Manrope',sans-serif", color:cSenha===cConf?"#22c55e":BRAND.violetLight }}>
+                                            <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Inter',sans-serif", color:cSenha===cConf?"#22c55e":BRAND.red }}>
                                                 {cSenha===cConf?"✓ Senhas conferem":"✗ Senhas não conferem"}
                                             </p>
                                         )}
@@ -972,14 +993,14 @@ export default function Login() {
                                              style={{ background:errBg(errCad), border:`1px solid ${errBorder(errCad)}` }}>
                                             <span style={{ color:errColor(errCad), flexShrink:0, marginTop:1 }}><ErrIcon t={errCad.tipo}/></span>
                                             <div>
-                                                <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errCad), letterSpacing:".05em", fontFamily:"'Manrope',sans-serif", marginBottom:3 }}>{errCad.titulo}</p>
-                                                <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>{errCad.msg}</p>
+                                                <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errCad), letterSpacing:".05em", fontFamily:"'Inter',sans-serif", marginBottom:3 }}>{errCad.titulo}</p>
+                                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>{errCad.msg}</p>
                                             </div>
                                         </div>
                                     )}
                                     {/* botão */}
                                     <button type="submit" className="btn-primary blue" disabled={loadCad}
-                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.blueDark},${BRAND.blue})` }}>
+                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.mossDeep},${BRAND.moss})` }}>
                                         {loadCad ? <><Loader2 size={16} className="spin"/> Enviando...</> : "Solicitar Acesso"}
                                     </button>
                                 </form>
@@ -993,14 +1014,14 @@ export default function Login() {
                             {/* aviso */}
                             <div style={{
                                 marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:dark?"rgba(0,61,165,.08)":"rgba(0,61,165,.09)",
-                                border:`1px solid ${dark?"rgba(0,61,165,.25)":"rgba(0,61,165,.28)"}`,
+                                background:dark?"rgba(30,63,102,.08)":"rgba(30,63,102,.09)",
+                                border:`1px solid ${dark?"rgba(30,63,102,.25)":"rgba(30,63,102,.28)"}`,
                                 display:"flex", gap:9, alignItems:"flex-start",
                             }}>
-                <span style={{ color:BRAND.blue, flexShrink:0, marginTop:2 }}>
+                <span style={{ color:BRAND.moss, flexShrink:0, marginTop:2 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </span>
-                                <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>
+                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>
                                     As alterações ficam <strong style={{ color:txt }}>pendentes de aprovação</strong> do administrador antes de serem aplicadas.
                                 </p>
                             </div>
@@ -1009,27 +1030,27 @@ export default function Login() {
                             {okAlt ? (
                                 <div className="pop-in" style={{
                                     textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:dark?"rgba(0,61,165,.1)":"rgba(0,61,165,.06)",
-                                    border:`1px solid ${dark?"rgba(0,61,165,.32)":"rgba(0,61,165,.18)"}`,
+                                    background:dark?"rgba(30,63,102,.1)":"rgba(30,63,102,.06)",
+                                    border:`1px solid ${dark?"rgba(30,63,102,.32)":"rgba(30,63,102,.18)"}`,
                                 }}>
                                     <ShieldCheck size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
-                                    <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color:BRAND.blue, marginBottom:8 }}>Solicitação Enviada!</p>
-                                    <p style={{ fontSize:13, color:sub, lineHeight:1.6, fontFamily:"'Manrope',sans-serif", marginBottom:18 }}>
+                                    <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:700, color:BRAND.moss, marginBottom:8 }}>Solicitação Enviada!</p>
+                                    <p style={{ fontSize:13, color:sub, lineHeight:1.6, fontFamily:"'Inter',sans-serif", marginBottom:18 }}>
                                         O administrador irá analisar e aplicar as mudanças em breve.
                                     </p>
                                     <button onClick={()=>trocarAba("login")} style={{
-                                        background:"none", border:`1px solid ${BRAND.blue}`, color:BRAND.blue,
+                                        background:"none", border:`1px solid ${BRAND.moss}`, color:BRAND.moss,
                                         borderRadius:6, padding:"9px 22px", cursor:"pointer",
-                                        fontFamily:"'Manrope',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".12em",
+                                        fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".12em",
                                     }}>IR PARA LOGIN</button>
                                 </div>
                             ) : (
                                 <form onSubmit={handleAlt} style={{ display:"flex", flexDirection:"column", gap:0 }}>
                                     {/* e-mail atual */}
                                     <div style={{ marginBottom:14 }}>
-                                        <label className="fld-label">Seu E-mail <span style={{ color:BRAND.violetLight }}>*</span></label>
+                                        <label className="fld-label">Seu E-mail <span style={{ color:BRAND.red }}>*</span></label>
                                         <div style={{ position:"relative" }}>
-                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                             <input className={`ieq-input${errAlt&&(errAlt.titulo==="E-mail obrigatório"||errAlt.titulo==="E-mail não encontrado")?" error":""}`}
                                                    type="email" placeholder="seu@email.com"
                                                    value={aEmail} onChange={e=>{setAEmail(e.target.value);if(errAlt)setErrAlt(null);}} required autoComplete="email"/>
@@ -1037,14 +1058,14 @@ export default function Login() {
                                     </div>
                                     {/* senha atual */}
                                     <div style={{ marginBottom:18 }}>
-                                        <label className="fld-label">Senha Atual <span style={{ color:BRAND.violetLight }}>*</span></label>
+                                        <label className="fld-label">Senha Atual <span style={{ color:BRAND.red }}>*</span></label>
                                         <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.blue, opacity:.55 }}/>
+                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                             <input className={`ieq-input${errAlt?.tipo==="senha"?" error":""}`}
                                                    type={showAA?"text":"password"} placeholder="Confirme sua identidade"
                                                    value={aAtual} onChange={e=>{setAAtual(e.target.value);if(errAlt)setErrAlt(null);}} required autoComplete="current-password"/>
                                             <button type="button" onClick={()=>setShowAA(!showAA)}
-                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.blue }}>
+                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
                                                 <EyeIcon open={showAA}/>
                                             </button>
                                         </div>
@@ -1052,7 +1073,7 @@ export default function Login() {
 
                                     {/* divisor */}
                                     <div className="divider" style={{ marginBottom:14 }}>
-                    <span style={{ fontSize:9.5, fontWeight:700, letterSpacing:".13em", color:sub, whiteSpace:"nowrap", fontFamily:"'Manrope',sans-serif" }}>
+                    <span style={{ fontSize:9.5, fontWeight:700, letterSpacing:".13em", color:sub, whiteSpace:"nowrap", fontFamily:"'Inter',sans-serif" }}>
                       O QUE DESEJA ALTERAR?
                     </span>
                                     </div>
@@ -1067,22 +1088,22 @@ export default function Login() {
                                                  onClick={()=>{set(!state);setErrAlt(null);}}
                                                  style={{
                                                      background: state
-                                                         ? (dark?"rgba(0,119,200,.1)":"rgba(0,119,200,.06)")
-                                                         : (dark?"rgba(255,255,255,.02)":"rgba(0,0,0,.02)"),
-                                                     border:`1px solid ${state?"rgba(0,119,200,.35)":(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.07)")}`,
+                                                         ? "rgba(255,255,255,.1)"
+                                                         : "rgba(255,255,255,.04)",
+                                                     border:`1px solid ${state?"rgba(255,255,255,.3)":"rgba(255,255,255,.1)"}`,
                                                  }}
                                             >
                                                 <div className="check-box"
                                                      style={{
-                                                         background:state?BRAND.blue:"transparent",
-                                                         border:`2px solid ${state?BRAND.blue:(dark?"rgba(255,255,255,.2)":"rgba(0,0,0,.18)")}`,
+                                                         background:state?BRAND.moss:"transparent",
+                                                         border:`2px solid ${state?BRAND.moss:"rgba(255,255,255,.25)"}`,
                                                      }}>
                                                     {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
                                                 </div>
                                                 {key==="email"
-                                                    ? <Mail size={14} color={state?BRAND.blue:sub} style={{ flexShrink:0 }}/>
-                                                    : <Lock size={14} color={state?BRAND.blue:sub} style={{ flexShrink:0 }}/>}
-                                                <span style={{ fontSize:11, fontWeight:700, letterSpacing:".1em", fontFamily:"'Manrope',sans-serif", color:state?txt:sub }}>{label}</span>
+                                                    ? <Mail size={14} color={state?"#fff":"rgba(255,255,255,.4)"} style={{ flexShrink:0 }}/>
+                                                    : <Lock size={14} color={state?"#fff":"rgba(255,255,255,.4)"} style={{ flexShrink:0 }}/>}
+                                                <span style={{ fontSize:11, fontWeight:700, letterSpacing:".1em", fontFamily:"'Inter',sans-serif", color:state?"#fff":"rgba(255,255,255,.5)" }}>{label}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -1092,7 +1113,7 @@ export default function Login() {
                                         <div style={{ marginBottom:14, animation:"slideDown .25s ease both" }}>
                                             <label className="fld-label blue">Novo E-mail</label>
                                             <div style={{ position:"relative" }}>
-                                                <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.violet, opacity:.55 }}/>
+                                        <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                                 <input className="ieq-input blue" type="email" placeholder="novo@email.com"
                                                        value={aEmailN} onChange={e=>{setAEmailN(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="email"/>
                                             </div>
@@ -1105,11 +1126,11 @@ export default function Login() {
                                             <div>
                                                 <label className="fld-label blue">Nova Senha</label>
                                                 <div style={{ position:"relative" }}>
-                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.violet, opacity:.55 }}/>
+                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                                     <input className="ieq-input blue" type={showAN?"text":"password"} placeholder="Mínimo 6 caracteres"
                                                            value={aNova} onChange={e=>{setANova(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="new-password"/>
                                                     <button type="button" onClick={()=>setShowAN(!showAN)}
-                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.violet }}>
+                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
                                                         <EyeIcon open={showAN}/>
                                                     </button>
                                                 </div>
@@ -1121,24 +1142,24 @@ export default function Login() {
                                                                      style={{ background:i<=fa?forcaColor[fa]:(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.07)") }}/>
                                                             ))}
                                                         </div>
-                                                        <p style={{ fontSize:10, color:forcaColor[fa], fontFamily:"'Manrope',sans-serif", fontWeight:700, letterSpacing:".07em" }}>{forcaLabel[fa]}</p>
+                                                        <p style={{ fontSize:10, color:forcaColor[fa], fontFamily:"'Inter',sans-serif", fontWeight:700, letterSpacing:".07em" }}>{forcaLabel[fa]}</p>
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
                                                 <label className="fld-label blue">Confirmar Nova Senha</label>
                                                 <div style={{ position:"relative" }}>
-                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:BRAND.violet, opacity:.55 }}/>
+                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
                                                     <input className={`ieq-input blue${aConf.length>0&&aNova!==aConf?" error":""}`}
                                                            type={showAC?"text":"password"} placeholder="Repita a nova senha"
                                                            value={aConf} onChange={e=>{setAConf(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="new-password"/>
                                                     <button type="button" onClick={()=>setShowAC(!showAC)}
-                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.violet }}>
+                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
                                                         <EyeIcon open={showAC}/>
                                                     </button>
                                                 </div>
                                                 {aConf.length > 0 && (
-                                                    <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Manrope',sans-serif", color:aNova===aConf?"#22c55e":BRAND.violetLight }}>
+                                                    <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Inter',sans-serif", color:aNova===aConf?"#22c55e":BRAND.red }}>
                                                         {aNova===aConf?"✓ Senhas conferem":"✗ Senhas não conferem"}
                                                     </p>
                                                 )}
@@ -1151,15 +1172,15 @@ export default function Login() {
                                         <div className="err-box" role="alert" style={{ background:errBg(errAlt), border:`1px solid ${errBorder(errAlt)}`, marginBottom:12 }}>
                                             <span style={{ color:errColor(errAlt), flexShrink:0, marginTop:1 }}><ErrIcon t={errAlt.tipo}/></span>
                                             <div>
-                                                <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errAlt), letterSpacing:".05em", fontFamily:"'Manrope',sans-serif", marginBottom:3 }}>{errAlt.titulo}</p>
-                                                <p style={{ fontSize:12.5, color:sub, lineHeight:1.55, fontFamily:"'Manrope',sans-serif" }}>{errAlt.msg}</p>
+                                                <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errAlt), letterSpacing:".05em", fontFamily:"'Inter',sans-serif", marginBottom:3 }}>{errAlt.titulo}</p>
+                                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>{errAlt.msg}</p>
                                             </div>
                                         </div>
                                     )}
 
                                     {/* botão */}
                                     <button type="submit" className="btn-primary" disabled={loadAlt||(!altEmail&&!altSenha)}
-                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.blueDark},${BRAND.blue})` }}>
+                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.mossDeep},${BRAND.moss})` }}>
                                         {loadAlt
                                             ? <><Loader2 size={16} className="spin"/> Enviando...</>
                                             : <><CheckCircle2 size={15}/> Enviar Solicitação</>}
@@ -1172,8 +1193,8 @@ export default function Login() {
                     {/* ── rodapé ── */}
                     <p style={{
                         marginTop:28, textAlign:"center",
-                        fontSize:10, letterSpacing:".15em", fontFamily:"'Manrope',sans-serif",
-                        color:dark?"rgba(245,240,235,.15)":"rgba(7,6,15,.18)",
+                        fontSize:10, letterSpacing:".15em", fontFamily:"'Inter',sans-serif",
+                        color:dark?"rgba(243,241,234,.15)":"rgba(27,35,51,.18)",
                         textTransform:"uppercase",
                     }}>
                         © {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico

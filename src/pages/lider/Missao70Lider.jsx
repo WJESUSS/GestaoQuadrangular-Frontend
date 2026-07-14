@@ -2,22 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Plus, X, Loader2, CheckCircle2, ChevronDown, Search, Calendar, History, Pencil, Trash2, Ban } from "lucide-react";
-
-/* ─── Tokens AURA ─── */
-const AURA = {
-    gold:      "#C9A96E",
-    goldLight: "#E8D5A3",
-    dark:      "#0A0A0F",
-    red:       "#C8102E",
-    redDark:   "#9B0B1E",
-    blue:      "#003DA5",
-    blueDark:  "#002470",
-    yellow:    "#FDB813",
-    sage:      "#7A9E7E",
-    teal:      "#2E8B8B",
-    purple:    "#8B5CF6",
-    purpleDark:"#6D28D9",
-};
+import { AURA, theme } from "./liderTheme";
 
 /* ─── Evento global de sincronização de decisão espiritual ───────────────
    O mesmo evento é usado pela tela de Visitantes. Quando qualquer uma
@@ -35,21 +20,6 @@ function corEstagio(realizados) {
     if (realizados === 2) return AURA.yellow;
     if (realizados === 1) return AURA.red;
     return AURA.gold;
-}
-
-function theme(isDark) {
-    return {
-        bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-        bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-        border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-        borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-        text:        isDark ? "#F5F0E8"                : "#1A1008",
-        textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-        textMuted:   isDark ? "#6B6658"                : "#9A9080",
-        placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-        optionBg:    isDark ? "#12121A"                : "#F0EAE0",
-    };
 }
 
 const TOTAL_SEMANAS = 4;

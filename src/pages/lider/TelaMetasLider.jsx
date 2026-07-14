@@ -1,25 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
+import { AURA, theme } from "./liderTheme";
 import {
     Target, Plus, Trash2, Pencil, CheckCircle2,
     ChevronUp, ChevronDown, X, Loader2, Trophy,
     Clock, TrendingUp, AlertTriangle, RotateCcw, Calendar,
 } from "lucide-react";
 
-const IEQ = {
-    red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
-    yellow: "#FDB813", yellowDark: "#C48C00",
-    blue: "#003DA5", blueDark: "#002470", blueLight: "#1A56C4",
-    white: "#FFFFFF", offWhite: "#F5F0E8",
-    dark: "#0A0608", darkCard: "#110A0D",
-};
-
 const TIPO_CONFIG = {
-    BATISMO:       { emoji: "🕊️", label: "Batismo",       color: IEQ.blue    },
-    CONVERSAO:     { emoji: "🔥",  label: "Conversão",     color: IEQ.red     },
-    RECONCILIACAO: { emoji: "🕊",  label: "Reconciliação", color: IEQ.yellow  },
-    DISCIPULADO:   { emoji: "📖",  label: "Discipulado",   color: IEQ.redDark },
+    BATISMO:       { emoji: "🕊️", label: "Batismo",       color: AURA.blue    },
+    CONVERSAO:     { emoji: "🔥",  label: "Conversão",     color: AURA.red     },
+    RECONCILIACAO: { emoji: "🕊",  label: "Reconciliação", color: AURA.yellow  },
+    DISCIPULADO:   { emoji: "📖",  label: "Discipulado",   color: AURA.redDark },
 };
 
 // ── Formata "YYYY-MM-DD" → "02 de junho de 2026" (sem bug de fuso)
@@ -52,26 +45,26 @@ const calcularDiasRestantes = (mesAno) => {
 const getMensagemMotivacional = (diasRestantes, pct, metaConcluida, faltam) => {
     if (metaConcluida) return { texto: "🏆 Meta alcançada! Glória a Deus!", cor: "#22c55e" };
     if (diasRestantes === null) return null;
-    if (diasRestantes < 0)   return { texto: `⚠️ Meta vencida há ${Math.abs(diasRestantes)} dia${Math.abs(diasRestantes) > 1 ? "s" : ""}. Revise seu planejamento.`, cor: IEQ.red };
-    if (diasRestantes === 0) return { texto: `🔔 Último dia! Ainda faltam ${faltam} pessoa${faltam > 1 ? "s" : ""}. Não desista!`, cor: IEQ.red };
-    if (diasRestantes <= 3)  return { texto: `🔥 Urgente! ${diasRestantes} dia${diasRestantes > 1 ? "s" : ""} restante${diasRestantes > 1 ? "s" : ""} e faltam ${faltam} pessoa${faltam > 1 ? "s" : ""}!`, cor: IEQ.red };
-    if (diasRestantes <= 7)  return { texto: `⏳ ${diasRestantes} dias para bater a meta. Mobilize sua célula!`, cor: IEQ.yellowDark };
-    if (diasRestantes <= 15) return { texto: `📅 ${diasRestantes} dias restantes. Continue firme!`, cor: IEQ.blue };
+    if (diasRestantes < 0)   return { texto: `⚠️ Meta vencida há ${Math.abs(diasRestantes)} dia${Math.abs(diasRestantes) > 1 ? "s" : ""}. Revise seu planejamento.`, cor: AURA.red };
+    if (diasRestantes === 0) return { texto: `🔔 Último dia! Ainda faltam ${faltam} pessoa${faltam > 1 ? "s" : ""}. Não desista!`, cor: AURA.red };
+    if (diasRestantes <= 3)  return { texto: `🔥 Urgente! ${diasRestantes} dia${diasRestantes > 1 ? "s" : ""} restante${diasRestantes > 1 ? "s" : ""} e faltam ${faltam} pessoa${faltam > 1 ? "s" : ""}!`, cor: AURA.red };
+    if (diasRestantes <= 7)  return { texto: `⏳ ${diasRestantes} dias para bater a meta. Mobilize sua célula!`, cor: AURA.yellowDark };
+    if (diasRestantes <= 15) return { texto: `📅 ${diasRestantes} dias restantes. Continue firme!`, cor: AURA.blue };
     if (pct >= 80)           return { texto: `🎯 Quase lá! ${diasRestantes} dias e você já está em ${pct}%!`, cor: "#22c55e" };
-    return { texto: `📅 ${diasRestantes} dias para bater sua meta. Você consegue!`, cor: IEQ.blue };
+    return { texto: `📅 ${diasRestantes} dias para bater sua meta. Você consegue!`, cor: AURA.blue };
 };
 
 const statusMeta = (meta) => {
     const pct = meta.progressoPercentual ?? 0;
     if (meta.metaConcluida) return { label: "CONCLUÍDA",    color: "#22c55e",  icon: <CheckCircle2 size={12} /> };
-    if (pct >= 80)          return { label: "QUASE LÁ!",   color: IEQ.yellow, icon: <TrendingUp   size={12} /> };
-    if (pct < 50)           return { label: "EM ATRASO",   color: IEQ.red,    icon: <AlertTriangle size={12} /> };
-    return                         { label: "EM ANDAMENTO", color: IEQ.blue,   icon: <Clock size={12} /> };
+    if (pct >= 80)          return { label: "QUASE LÁ!",   color: AURA.yellow, icon: <TrendingUp   size={12} /> };
+    if (pct < 50)           return { label: "EM ATRASO",   color: AURA.red,    icon: <AlertTriangle size={12} /> };
+    return                         { label: "EM ANDAMENTO", color: AURA.blue,   icon: <Clock size={12} /> };
 };
 
 const CSS = `
   .metas-wrap * { box-sizing: border-box; }
-  .metas-wrap { font-family: 'EB Garamond', serif; }
+  .metas-wrap { font-family: 'Fraunces', serif; }
   @keyframes metas-fadeup { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
   @keyframes metas-spin   { to { transform:rotate(360deg); } }
   @keyframes metas-pulse  { 0%,100%{opacity:1} 50%{opacity:.6} }
@@ -83,73 +76,73 @@ const CSS = `
 
   .metas-card { border-radius:14px; overflow:hidden; transition:box-shadow .3s, transform .25s; position:relative; }
   .metas-card:hover { transform:translateY(-3px); }
-  .metas-card.dark  { background:#110A0D; border:1px solid rgba(200,16,46,.15); box-shadow:0 4px 24px rgba(0,0,0,.35); }
-  .metas-card.light { background:#fff;    border:1px solid rgba(200,16,46,.12); box-shadow:0 4px 24px rgba(200,16,46,.07); }
-  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(200,16,46,.18); border-color:rgba(200,16,46,.3); }
-  .metas-card:hover.light { box-shadow:0 12px 40px rgba(200,16,46,.14); border-color:rgba(200,16,46,.28); }
+  .metas-card.dark  { background:#1A2236; border:1px solid rgba(158,42,43,.15); box-shadow:0 4px 24px rgba(0,0,0,.35); }
+  .metas-card.light { background:#fff;    border:1px solid rgba(158,42,43,.12); box-shadow:0 4px 24px rgba(158,42,43,.07); }
+  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(158,42,43,.18); border-color:rgba(158,42,43,.3); }
+  .metas-card:hover.light { box-shadow:0 12px 40px rgba(158,42,43,.14); border-color:rgba(158,42,43,.28); }
 
-  .metas-btn { display:inline-flex; align-items:center; gap:7px; border:none; border-radius:8px; cursor:pointer; transition:all .22s; font-family:'Cinzel',serif; font-weight:700; letter-spacing:.14em; }
+  .metas-btn { display:inline-flex; align-items:center; gap:7px; border:none; border-radius:8px; cursor:pointer; transition:all .22s; font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.14em; }
   .metas-btn:hover:not(:disabled) { filter:brightness(1.12); transform:translateY(-1px); }
   .metas-btn:disabled { opacity:.55; cursor:not-allowed; }
-  .metas-btn-red    { background:linear-gradient(135deg,#8B0B1F,#C8102E); color:#fff; font-size:10px; padding:11px 18px; }
-  .metas-btn-blue   { background:linear-gradient(135deg,#002470,#003DA5); color:#fff; font-size:10px; padding:11px 18px; }
+  .metas-btn-red    { background:linear-gradient(135deg,#6E1D1E,#9E2A2B); color:#fff; font-size:10px; padding:11px 18px; }
+  .metas-btn-blue   { background:linear-gradient(135deg,#12283F,#1E3F66); color:#fff; font-size:10px; padding:11px 18px; }
   .metas-btn-ghost  { font-size:9.5px; padding:10px 16px; }
-  .metas-btn-ghost.dark  { background:rgba(255,255,255,.05); color:#F5F0E8; border:1px solid rgba(200,16,46,.2); }
-  .metas-btn-ghost.light { background:rgba(200,16,46,.06); color:#8B0B1F;  border:1px solid rgba(200,16,46,.18); }
-  .metas-btn-ghost:hover { border-color:#C8102E !important; background:rgba(200,16,46,.1) !important; }
+  .metas-btn-ghost.dark  { background:rgba(255,255,255,.05); color:#F3F1EA; border:1px solid rgba(158,42,43,.2); }
+  .metas-btn-ghost.light { background:rgba(158,42,43,.06); color:#6E1D1E;  border:1px solid rgba(158,42,43,.18); }
+  .metas-btn-ghost:hover { border-color:#9E2A2B !important; background:rgba(158,42,43,.1) !important; }
 
   .metas-icon-btn { background:none; border:none; cursor:pointer; padding:6px; border-radius:6px; display:flex; align-items:center; justify-content:center; transition:all .2s; }
-  .metas-icon-btn:hover { background:rgba(200,16,46,.12); }
+  .metas-icon-btn:hover { background:rgba(158,42,43,.12); }
 
-  .metas-input { width:100%; padding:11px 14px; border-radius:8px; outline:none; font-family:'EB Garamond',serif; font-size:14px; transition:border-color .2s, box-shadow .2s; }
-  .metas-input.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(200,16,46,.2); color:#F5F0E8; }
-  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(200,16,46,.18); color:#1A0A0D; }
-  .metas-input:focus { border-color:#C8102E !important; box-shadow:0 0 0 3px rgba(200,16,46,.12); }
+  .metas-input { width:100%; padding:11px 14px; border-radius:8px; outline:none; font-family:'Inter',sans-serif; font-size:14px; transition:border-color .2s, box-shadow .2s; }
+  .metas-input.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(158,42,43,.2); color:#F3F1EA; }
+  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(158,42,43,.18); color:#1A0A0D; }
+  .metas-input:focus { border-color:#9E2A2B !important; box-shadow:0 0 0 3px rgba(158,42,43,.12); }
   .metas-input.dark::placeholder  { color:rgba(245,240,232,.25); }
   .metas-input.light::placeholder { color:rgba(26,10,13,.3); }
 
-  .metas-label { font-family:'Cinzel',serif; font-size:9.5px; font-weight:700; letter-spacing:.14em; display:block; margin-bottom:7px; }
-  .metas-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-family:'Cinzel',serif; font-size:8.5px; font-weight:700; letter-spacing:.14em; border:1px solid; }
+  .metas-label { font-family:'Inter',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.14em; display:block; margin-bottom:7px; }
+  .metas-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-family:'Inter',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.14em; border:1px solid; }
   .metas-progress-track { height:7px; border-radius:99px; overflow:hidden; }
   .metas-progress-track.dark  { background:rgba(255,255,255,.08); }
-  .metas-progress-track.light { background:rgba(200,16,46,.1); }
-  .metas-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(200,16,46,.2),transparent); }
+  .metas-progress-track.light { background:rgba(158,42,43,.1); }
+  .metas-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(158,42,43,.2),transparent); }
 
   .metas-empty { border-radius:14px; padding:48px 24px; text-align:center; }
-  .metas-empty.dark  { border:1.5px dashed rgba(200,16,46,.2);  background:rgba(255,255,255,.015); }
-  .metas-empty.light { border:1.5px dashed rgba(200,16,46,.18); background:rgba(200,16,46,.03); }
+  .metas-empty.dark  { border:1.5px dashed rgba(158,42,43,.2);  background:rgba(255,255,255,.015); }
+  .metas-empty.light { border:1.5px dashed rgba(158,42,43,.18); background:rgba(158,42,43,.03); }
 
   .metas-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
   @media(max-width:480px) { .metas-summary-grid { grid-template-columns:1fr 1fr; } }
 
   .metas-summary-card { border-radius:12px; padding:16px; text-align:center; }
-  .metas-summary-card.dark  { background:rgba(255,255,255,.03); border:1px solid rgba(200,16,46,.12); }
-  .metas-summary-card.light { background:rgba(200,16,46,.04);   border:1px solid rgba(200,16,46,.1); }
+  .metas-summary-card.dark  { background:rgba(255,255,255,.03); border:1px solid rgba(158,42,43,.12); }
+  .metas-summary-card.light { background:rgba(158,42,43,.04);   border:1px solid rgba(158,42,43,.1); }
 
   .metas-hist-item { border-radius:10px; padding:14px 16px; }
   .metas-hist-item.dark  { background:rgba(34,197,94,.05); border:1px solid rgba(34,197,94,.2); }
   .metas-hist-item.light { background:rgba(34,197,94,.06); border:1px solid rgba(34,197,94,.22); }
 
   .metas-banner { border-radius:12px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:flex-start; gap:12px; }
-  .metas-banner.dark  { background:rgba(253,184,19,.07); border:1px solid rgba(253,184,19,.22); }
-  .metas-banner.light { background:rgba(253,184,19,.1);  border:1px solid rgba(253,184,19,.28); }
+  .metas-banner.dark  { background:rgba(217,174,94,.07); border:1px solid rgba(217,174,94,.22); }
+  .metas-banner.light { background:rgba(217,174,94,.1);  border:1px solid rgba(217,174,94,.28); }
 
   .metas-backdrop { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:16px; }
   .metas-modal { border-radius:16px; padding:32px 28px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; position:relative; z-index:1; }
-  .metas-modal.dark  { background:linear-gradient(135deg,#110A0D,#0A0608); border:1px solid rgba(200,16,46,.2); box-shadow:0 30px 60px rgba(200,16,46,.15); }
-  .metas-modal.light { background:linear-gradient(135deg,#fff,#F5F0E8);    border:1px solid rgba(200,16,46,.15); box-shadow:0 30px 60px rgba(200,16,46,.12); }
+  .metas-modal.dark  { background:linear-gradient(135deg,#1A2236,#12131C); border:1px solid rgba(158,42,43,.2); box-shadow:0 30px 60px rgba(158,42,43,.15); }
+  .metas-modal.light { background:linear-gradient(135deg,#fff,#F3F1EA);    border:1px solid rgba(158,42,43,.15); box-shadow:0 30px 60px rgba(158,42,43,.12); }
 
   .tipo-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .tipo-opt { border-radius:8px; padding:10px 8px; text-align:center; cursor:pointer; transition:all .2s; border:2px solid transparent; }
   .tipo-opt.dark  { background:rgba(255,255,255,.03); }
-  .tipo-opt.light { background:rgba(200,16,46,.04); }
+  .tipo-opt.light { background:rgba(158,42,43,.04); }
   .tipo-opt.selected { border-color:var(--tc); background:color-mix(in srgb, var(--tc) 12%, transparent); }
   .tipo-opt:hover { border-color:var(--tc); }
 `;
 
 export default function TelaMetasLider({ celula, isDark }) {
     const t = isDark ? "dark" : "light";
-    const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
+    const textPrimary   = isDark ? AURA.offWhite : "#1A0A0D";
     const textSecondary = isDark ? "rgba(245,240,232,.42)" : "rgba(26,10,13,.42)";
 
     const [metas,        setMetas]        = useState([]);
@@ -289,14 +282,14 @@ export default function TelaMetasLider({ celula, isDark }) {
                 style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12, marginBottom:28 }}
             >
                 <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                    <div style={{ width:42, height:42, borderRadius:10, background:`${IEQ.red}18`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                        <Target size={22} style={{ color:IEQ.red }} />
+                    <div style={{ width:42, height:42, borderRadius:10, background:`${AURA.red}18`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                        <Target size={22} style={{ color:AURA.red }} />
                     </div>
                     <div>
-                        <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>
+                        <h2 style={{ fontFamily:"'Fraunces',serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>
                             METAS DA CÉLULA
                         </h2>
-                        <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:0 }}>
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:textSecondary, margin:0 }}>
                             {celula?.nome || "---"} — Gerencie seus objetivos
                         </p>
                     </div>
@@ -315,10 +308,10 @@ export default function TelaMetasLider({ celula, isDark }) {
                 >
                     <div style={{ fontSize:22, lineHeight:1, flexShrink:0 }}>🎯</div>
                     <div>
-                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".16em", color:IEQ.yellowDark, margin:"0 0 4px" }}>
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:9, letterSpacing:".16em", color:AURA.yellowDark, margin:"0 0 4px" }}>
                             FOCO DA CÉLULA — {TIPO_CONFIG[metaMaisUrgente.tipoMeta]?.label?.toUpperCase()}
                         </p>
-                        <p style={{ fontFamily:"'EB Garamond',serif", fontSize:15, color:mensagemBanner.cor, fontWeight:600, margin:0 }}>
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:15, color:mensagemBanner.cor, fontWeight:600, margin:0 }}>
                             {mensagemBanner.texto}
                         </p>
                     </div>
@@ -328,14 +321,14 @@ export default function TelaMetasLider({ celula, isDark }) {
             {/* Resumo */}
             <motion.div className="metas-summary-grid" initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:.1 }}>
                 {[
-                    { label:"ATIVAS",     value:total,      color:IEQ.blue,  icon:<Target size={16} /> },
+                    { label:"ATIVAS",     value:total,      color:AURA.blue,  icon:<Target size={16} /> },
                     { label:"CONCLUÍDAS", value:concluidas, color:"#22c55e", icon:<Trophy size={16} /> },
-                    { label:"EM ATRASO",  value:emAtraso,   color:IEQ.red,   icon:<AlertTriangle size={16} /> },
+                    { label:"EM ATRASO",  value:emAtraso,   color:AURA.red,   icon:<AlertTriangle size={16} /> },
                 ].map(({ label, value, color, icon }) => (
                     <div key={label} className={`metas-summary-card ${t}`}>
                         <div style={{ color, marginBottom:8 }}>{icon}</div>
-                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:22, fontWeight:700, color, margin:0, lineHeight:1 }}>{value}</p>
-                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"6px 0 0" }}>{label}</p>
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:22, fontWeight:700, color, margin:0, lineHeight:1 }}>{value}</p>
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"6px 0 0" }}>{label}</p>
                     </div>
                 ))}
             </motion.div>
@@ -356,16 +349,16 @@ export default function TelaMetasLider({ celula, isDark }) {
                 {loading ? (
                     <motion.div key="load" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
                                 style={{ textAlign:"center", padding:"48px 0" }}>
-                        <Loader2 size={32} className="metas-spin" style={{ color:IEQ.red }} />
-                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".2em", color:textSecondary, marginTop:14 }}>CARREGANDO...</p>
+                        <Loader2 size={32} className="metas-spin" style={{ color:AURA.red }} />
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:10, letterSpacing:".2em", color:textSecondary, marginTop:14 }}>CARREGANDO...</p>
                     </motion.div>
                 ) : aba === "ativas" ? (
                     <motion.div key="ativas" initial={{ opacity:0, x:16 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-16 }}>
                         {metas.length === 0 ? (
                             <div className={`metas-empty ${t}`}>
                                 <Target size={36} style={{ color:textSecondary, opacity:.4, marginBottom:12 }} />
-                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>NENHUMA META ATIVA</p>
-                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:textSecondary, margin:"8px 0 20px", fontStyle:"italic" }}>Comece definindo o primeiro objetivo da sua célula.</p>
+                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>NENHUMA META ATIVA</p>
+                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:14, color:textSecondary, margin:"8px 0 20px", fontStyle:"italic" }}>Comece definindo o primeiro objetivo da sua célula.</p>
                                 <button className="metas-btn metas-btn-red" onClick={abrirNova}><Plus size={13} /> CRIAR PRIMEIRA META</button>
                             </div>
                         ) : (
@@ -391,8 +384,8 @@ export default function TelaMetasLider({ celula, isDark }) {
                         {historico.length === 0 ? (
                             <div className={`metas-empty ${t}`}>
                                 <Trophy size={36} style={{ color:textSecondary, opacity:.4, marginBottom:12 }} />
-                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>SEM HISTÓRICO AINDA</p>
-                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:14, color:textSecondary, margin:"8px 0 0", fontStyle:"italic" }}>Metas concluídas aparecerão aqui.</p>
+                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>SEM HISTÓRICO AINDA</p>
+                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:14, color:textSecondary, margin:"8px 0 0", fontStyle:"italic" }}>Metas concluídas aparecerão aqui.</p>
                             </div>
                         ) : (
                             <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
@@ -404,21 +397,21 @@ export default function TelaMetasLider({ celula, isDark }) {
                                         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                                             <span style={{ fontSize:22 }}>{TIPO_CONFIG[meta.tipoMeta]?.emoji}</span>
                                             <div>
-                                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".12em", color:TIPO_CONFIG[meta.tipoMeta]?.color, margin:0 }}>
+                                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:11, fontWeight:700, letterSpacing:".12em", color:TIPO_CONFIG[meta.tipoMeta]?.color, margin:0 }}>
                                                     {TIPO_CONFIG[meta.tipoMeta]?.label?.toUpperCase()}
                                                 </p>
-                                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:"2px 0 0" }}>
+                                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:textSecondary, margin:"2px 0 0" }}>
                                                     Limite: {fmtData(meta.mesAno)} — {meta.metaAlcancada}/{meta.metaTotal} pessoas
                                                 </p>
                                                 {meta.dataCriacao && (
-                                                    <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"2px 0 0", opacity:.7 }}>
+                                                    <p style={{ fontFamily:"'Fraunces',serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"2px 0 0", opacity:.7 }}>
                                                         Criada em: {fmtDataCurta(meta.dataCriacao)}
                                                     </p>
                                                 )}
                                             </div>
                                         </div>
                                         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                                            <span style={{ fontFamily:"'Cinzel',serif", fontSize:10, color:"#22c55e", letterSpacing:".1em" }}>✓ CONCLUÍDA</span>
+                                            <span style={{ fontFamily:"'Fraunces',serif", fontSize:10, color:"#22c55e", letterSpacing:".1em" }}>✓ CONCLUÍDA</span>
                                             <button className="metas-icon-btn" onClick={() => deletar(meta.id)} style={{ color:textSecondary }}>
                                                 <Trash2 size={14} />
                                             </button>
@@ -437,7 +430,7 @@ export default function TelaMetasLider({ celula, isDark }) {
                     <div className="metas-backdrop">
                         <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
                                     onClick={() => setModalAberto(null)}
-                                    style={{ position:"fixed", inset:0, background: isDark ? "rgba(10,6,8,.9)" : "rgba(0,0,0,.7)", backdropFilter:"blur(20px)", zIndex:0 }} />
+                                    style={{ position:"fixed", inset:0, background: isDark ? "rgba(18,19,28,.9)" : "rgba(0,0,0,.7)", backdropFilter:"blur(20px)", zIndex:0 }} />
                         <motion.div className={`metas-modal ${t}`}
                                     initial={{ opacity:0, scale:.88, y:32 }} animate={{ opacity:1, scale:1, y:0 }}
                                     exit={{ opacity:0, scale:.88, y:32 }}
@@ -447,10 +440,10 @@ export default function TelaMetasLider({ celula, isDark }) {
                                 <X size={18} />
                             </button>
 
-                            <h3 style={{ fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"0 0 4px" }}>
+                            <h3 style={{ fontFamily:"'Fraunces',serif", fontSize:14, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"0 0 4px" }}>
                                 {modalAberto === "nova" ? "NOVA META" : "EDITAR META"}
                             </h3>
-                            <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:textSecondary, margin:"0 0 22px" }}>
+                            <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:textSecondary, margin:"0 0 22px" }}>
                                 {modalAberto === "nova" ? "Defina o tipo e a quantidade de pessoas" : "Altere as informações da meta"}
                             </p>
                             <div className="metas-divider" style={{ marginBottom:20 }} />
@@ -461,7 +454,7 @@ export default function TelaMetasLider({ celula, isDark }) {
                                     <div key={key} className={`tipo-opt ${t} ${form.tipoMeta === key ? "selected" : ""}`}
                                          style={{ "--tc": cfg.color }} onClick={() => setForm(f => ({ ...f, tipoMeta: key }))}>
                                         <span style={{ fontSize:20, display:"block", marginBottom:4 }}>{cfg.emoji}</span>
-                                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, fontWeight:700, letterSpacing:".12em", color: form.tipoMeta === key ? cfg.color : textSecondary, margin:0 }}>
+                                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:9, fontWeight:700, letterSpacing:".12em", color: form.tipoMeta === key ? cfg.color : textSecondary, margin:0 }}>
                                             {cfg.label.toUpperCase()}
                                         </p>
                                     </div>
@@ -486,17 +479,17 @@ export default function TelaMetasLider({ celula, isDark }) {
                             {form.mesAno && (() => {
                                 const dias = calcularDiasRestantes(form.mesAno);
                                 if (dias === null) return null;
-                                const cor = dias < 0 ? IEQ.red : dias <= 7 ? IEQ.yellowDark : "#22c55e";
+                                const cor = dias < 0 ? AURA.red : dias <= 7 ? AURA.yellowDark : "#22c55e";
                                 const txt = dias < 0
                                     ? `⚠ Meta já vencida há ${Math.abs(dias)} dia${Math.abs(dias) > 1 ? "s" : ""}`
                                     : dias === 0 ? "⚡ Último dia da meta!"
                                         : `✓ ${dias} dia${dias > 1 ? "s" : ""} restante${dias > 1 ? "s" : ""} a partir de hoje`;
                                 return (
                                     <div style={{ marginBottom:18, padding:"8px 12px", borderRadius:8, background:`${cor}10`, border:`1px solid ${cor}30` }}>
-                                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".12em", color:cor, margin:"0 0 3px" }}>
+                                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:9, letterSpacing:".12em", color:cor, margin:"0 0 3px" }}>
                                             {txt}
                                         </p>
-                                        <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:cor, margin:0, opacity:.85 }}>
+                                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, color:cor, margin:0, opacity:.85 }}>
                                             Limite: {fmtData(form.mesAno)}
                                         </p>
                                     </div>
@@ -528,9 +521,9 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
     const mensagem      = getMensagemMotivacional(diasRestantes, pct, meta.metaConcluida, meta.faltam);
 
     const corDias = diasRestantes === null ? textSecondary
-        : diasRestantes < 0  ? IEQ.red
-            : diasRestantes <= 3 ? IEQ.red
-                : diasRestantes <= 7 ? IEQ.yellowDark
+        : diasRestantes < 0  ? AURA.red
+            : diasRestantes <= 3 ? AURA.red
+                : diasRestantes <= 7 ? AURA.yellowDark
                     : "#22c55e";
 
     return (
@@ -547,18 +540,18 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                         <span style={{ fontSize:26 }}>{cfg.emoji}</span>
                         <div>
-                            <p style={{ fontFamily:"'Cinzel',serif", fontSize:11, fontWeight:700, letterSpacing:".13em", color:cfg.color, margin:0 }}>
+                            <p style={{ fontFamily:"'Fraunces',serif", fontSize:11, fontWeight:700, letterSpacing:".13em", color:cfg.color, margin:0 }}>
                                 {cfg.label.toUpperCase()}
                             </p>
                             {/* Data limite + dias restantes */}
                             <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:3, flexWrap:"wrap" }}>
                                 <Calendar size={10} style={{ color:corDias }} />
-                                <p style={{ fontFamily:"'EB Garamond',serif", fontSize:12, color:textSecondary, margin:0 }}>
+                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, color:textSecondary, margin:0 }}>
                                     {fmtData(meta.mesAno)}
                                 </p>
                                 {diasRestantes !== null && !meta.metaConcluida && (
                                     <span style={{
-                                        fontFamily:"'Cinzel',serif", fontSize:8, fontWeight:700,
+                                        fontFamily:"'Fraunces',serif", fontSize:8, fontWeight:700,
                                         letterSpacing:".1em", color:corDias,
                                         background:`${corDias}18`, border:`1px solid ${corDias}44`,
                                         padding:"1px 7px", borderRadius:99,
@@ -571,7 +564,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                             </div>
                             {/* Data de criação */}
                             {meta.dataCriacao && (
-                                <p style={{ fontFamily:"'Cinzel',serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"3px 0 0", opacity:.65 }}>
+                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"3px 0 0", opacity:.65 }}>
                                     Criada em: {fmtDataCurta(meta.dataCriacao)}
                                 </p>
                             )}
@@ -581,7 +574,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                     <div style={{ display:"flex", gap:2 }}>
                         <button className="metas-icon-btn" onClick={onSincronizar} title="Sincronizar"
                                 style={{ color:textSecondary, opacity: ajustando ? .4 : 1 }} disabled={ajustando}>
-                            {ajustando ? <Loader2 size={14} className="metas-spin" style={{ color:IEQ.blue }} /> : <RotateCcw size={14} />}
+                            {ajustando ? <Loader2 size={14} className="metas-spin" style={{ color:AURA.blue }} /> : <RotateCcw size={14} />}
                         </button>
                         <button className="metas-icon-btn" onClick={onEditar}  style={{ color:textSecondary }}><Pencil size={14} /></button>
                         <button className="metas-icon-btn" onClick={onDeletar} style={{ color:textSecondary }}><Trash2 size={14} /></button>
@@ -591,9 +584,9 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                 {/* Número + controles */}
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
                     <div>
-                        <p style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:".1em", color:textSecondary, margin:0 }}>FALTAM</p>
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:10, letterSpacing:".1em", color:textSecondary, margin:0 }}>FALTAM</p>
                         <motion.p key={meta.faltam} initial={{ scale:.7, opacity:0 }} animate={{ scale:1, opacity:1 }}
-                                  style={{ fontFamily:"'Cinzel',serif", fontSize:38, fontWeight:700, margin:"2px 0 0", lineHeight:1,
+                                  style={{ fontFamily:"'Fraunces',serif", fontSize:38, fontWeight:700, margin:"2px 0 0", lineHeight:1,
                                       color: meta.metaConcluida ? "#22c55e" : cfg.color,
                                       textShadow: meta.metaConcluida ? "0 0 16px rgba(34,197,94,.3)" : undefined }}>
                             {meta.metaConcluida ? "✓" : meta.faltam}
@@ -610,17 +603,17 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                                 onMouseLeave={e => { e.currentTarget.style.background = `${cfg.color}18`; }}>
                             {ajustando ? <Loader2 size={14} className="metas-spin" /> : <ChevronUp size={18} />}
                         </button>
-                        <span style={{ fontFamily:"'Cinzel',serif", fontSize:10, color:textSecondary, letterSpacing:".08em" }}>
+                        <span style={{ fontFamily:"'Fraunces',serif", fontSize:10, color:textSecondary, letterSpacing:".08em" }}>
                             {meta.metaAlcancada}/{meta.metaTotal}
                         </span>
                         <button onClick={onDecrementar} disabled={ajustando || meta.metaAlcancada <= 0}
-                                style={{ width:36, height:36, borderRadius:8, border:"2px solid rgba(200,16,46,.3)",
-                                    background:"rgba(200,16,46,.08)", color:IEQ.red,
+                                style={{ width:36, height:36, borderRadius:8, border:"2px solid rgba(158,42,43,.3)",
+                                    background:"rgba(158,42,43,.08)", color:AURA.red,
                                     cursor: meta.metaAlcancada <= 0 ? "default" : "pointer",
                                     display:"flex", alignItems:"center", justifyContent:"center",
                                     transition:"all .18s", opacity: meta.metaAlcancada <= 0 ? .3 : 1 }}
-                                onMouseEnter={e => { if (meta.metaAlcancada > 0) e.currentTarget.style.background = "rgba(200,16,46,.16)"; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(200,16,46,.08)"; }}>
+                                onMouseEnter={e => { if (meta.metaAlcancada > 0) e.currentTarget.style.background = "rgba(158,42,43,.16)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(158,42,43,.08)"; }}>
                             <ChevronDown size={18} />
                         </button>
                     </div>
@@ -631,7 +624,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                     <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
                                 style={{ padding:"8px 12px", borderRadius:8, marginBottom:12,
                                     background:`${mensagem.cor}10`, border:`1px solid ${mensagem.cor}30` }}>
-                        <p style={{ fontFamily:"'EB Garamond',serif", fontSize:13, color:mensagem.cor, margin:0, fontStyle:"italic" }}>
+                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:mensagem.cor, margin:0, fontStyle:"italic" }}>
                             {mensagem.texto}
                         </p>
                     </motion.div>
@@ -646,7 +639,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
 
                 {/* Barra de progresso */}
                 <div>
-                    <div style={{ display:"flex", justifyContent:"space-between", fontFamily:"'Cinzel',serif", fontSize:8.5, letterSpacing:".12em", color:textSecondary, marginBottom:6 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", fontFamily:"'Fraunces',serif", fontSize:8.5, letterSpacing:".12em", color:textSecondary, marginBottom:6 }}>
                         <span>PROGRESSO</span><span>{pct}%</span>
                     </div>
                     <div className={`metas-progress-track ${t}`}>
@@ -660,7 +653,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                 <AnimatePresence>
                     {meta.metaConcluida && (
                         <motion.p initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-                                  style={{ fontFamily:"'Cinzel',serif", fontSize:9.5, letterSpacing:".14em", color:"#22c55e", textAlign:"center", marginTop:10, marginBottom:0 }}>
+                                  style={{ fontFamily:"'Fraunces',serif", fontSize:9.5, letterSpacing:".14em", color:"#22c55e", textAlign:"center", marginTop:10, marginBottom:0 }}>
                             ✦ META CONCLUÍDA COM SUCESSO!
                         </motion.p>
                     )}

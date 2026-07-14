@@ -5,26 +5,7 @@ import {
   Loader2, CheckCircle2, User, Mail, Phone, MapPin, Calendar,
   FileText, RefreshCw, AlertCircle, Heart, BookOpen,
 } from "lucide-react";
-
-const AURA = {
-  gold:    "#C9A96E",
-  red:     "#C8102E",
-  redDark: "#9B0B1E",
-};
-
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"              : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.95)"    : "rgba(255,255,255,.95)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"  : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.15)" : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"               : "#1A1008",
-    textSec:     isDark ? "#9A9588"               : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"               : "#9A9080",
-    optionBg:    isDark ? "#12121A"               : "#F0EAE0",
-  };
-}
+import { AURA, theme } from "./liderTheme";
 
 const ESTADOS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
 const ESTADO_CIVIL = ["SOLTEIRO","CASADO","DIVORCIADO","VIUVO","SEPARADO","UNIAO_ESTAVEL"];

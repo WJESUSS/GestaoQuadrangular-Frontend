@@ -19,39 +19,7 @@ import {
   Sun, Moon, CheckCircle2, Home, Flame,
   CalendarDays, ChevronRight, ClipboardList,
 } from "lucide-react";
-
-/* ─── Tokens AURA ──────────────────────────────────────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:       "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-};
-
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"               : "#E8F1FB",
-    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(232,241,251,.95)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,61,165,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(0,61,165,.15)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(0,61,165,.2)",
-    text:        isDark ? "#FFFFFF"               : "#0A1628",
-    textSec:     isDark ? "#9A9588"                : "#1E3A5F",
-    textMuted:   isDark ? "#6B6658"                : "#4A6585",
-    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(0,61,165,.06)",
-    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(232,241,251,.97)",
-    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(0,61,165,.3)",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(74,101,133,.45)",
-    optionBg:    isDark ? "#12121A"                : "#DCEBFB",
-  };
-}
+import { AURA, theme } from "./liderTheme";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
@@ -73,6 +41,8 @@ function IEQCross({ size = 36 }) {
 function GlobalStyles({ t, isDark }) {
   return (
       <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
       @keyframes dl-spin   { to { transform: rotate(360deg); } }
       @keyframes dl-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
       @keyframes dl-blink  { 0%,100%{opacity:1;} 50%{opacity:.3;} }
@@ -83,8 +53,7 @@ function GlobalStyles({ t, isDark }) {
 
       .dl-root {
         font-family: 'Inter', sans-serif;
-        background: ${isDark ? "-webkit-linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "-webkit-linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
-        background: ${isDark ? "linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
+        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F3F1EA 0%, #E9E4D6 100%)"};
         color: ${t.text};
         min-height: 100vh;
         position: relative;
@@ -118,13 +87,13 @@ function GlobalStyles({ t, isDark }) {
       .dl-avatar-wrap { position: relative; flex-shrink: 0; }
       .dl-ring {
         position: absolute; border-radius: 50%;
-        border: 1px solid rgba(201,169,110,.22);
+        border: 1px solid rgba(184,137,46,.24);
         top: 50%; left: 50%; transform: translate(-50%,-50%);
       }
       .dl-avatar {
         width: 52px; height: 52px; border-radius: 50%;
-        border: 1.5px solid rgba(201,169,110,.28);
-        background: ${isDark ? "rgba(18,18,26,.99)" : "#fff"};
+        border: 1.5px solid rgba(184,137,46,.3);
+        background: ${isDark ? "rgba(26,34,54,.99)" : "#fff"};
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
       }
@@ -132,11 +101,11 @@ function GlobalStyles({ t, isDark }) {
       .dl-title-block { flex: 1; min-width: 0; }
       .dl-eyebrow {
         font-size: 9px; font-weight: 500; letter-spacing: .2em;
-        text-transform: uppercase; color: rgba(201,169,110,.55);
+        text-transform: uppercase; color: rgba(184,137,46,.65);
         margin: 0 0 3px;
       }
       .dl-title {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Fraunces', serif;
         font-size: clamp(17px, 4vw, 22px);
         font-weight: 500; color: ${t.text};
         margin: 0; line-height: 1.2; letter-spacing: .02em;
@@ -151,7 +120,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 8px; flex-shrink: 0;
       }
       .dl-btn-ico {
-        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
+        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(30,63,102,.06)"};
         border: 1px solid ${t.border};
         border-radius: 12px; width: 38px; height: 38px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -162,11 +131,11 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 7px;
         padding: 0 16px; height: 38px; border-radius: 100px; border: none;
         cursor: pointer;
-        background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
+        background: linear-gradient(135deg, ${AURA.clayDeep}, ${AURA.clay});
         color: #fff; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .3s; flex-shrink: 0;
-        box-shadow: 0 6px 20px rgba(200,16,46,.25);
+        box-shadow: 0 6px 20px rgba(158,42,43,.25);
       }
       .dl-btn-exit:hover { opacity: .88; transform: translateY(-1px); }
 
@@ -175,7 +144,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; justify-content: center;
         width: 32px; height: 32px; border-radius: 10px;
         border: 1px solid ${t.border}; cursor: pointer;
-        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
+        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(30,63,102,.06)"};
         color: ${t.textMuted}; font-size: 14px;
         transition: all .25s; flex-shrink: 0;
       }
@@ -196,8 +165,8 @@ function GlobalStyles({ t, isDark }) {
 
       .dl-badge {
         display: inline-flex; align-items: center; gap: 7px;
-        background: rgba(201,169,110,.07);
-        border: 1px solid rgba(201,169,110,.2);
+        background: rgba(184,137,46,.08);
+        border: 1px solid rgba(184,137,46,.22);
         border-radius: 100px; padding: 8px 18px;
         font-size: 10px; font-weight: 500; letter-spacing: .1em;
         text-transform: uppercase; color: ${AURA.gold};
@@ -208,11 +177,11 @@ function GlobalStyles({ t, isDark }) {
 
       .dl-alert-aprovado {
         margin-bottom: 24px; padding: 16px 22px; border-radius: 16px;
-        background: linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark});
+        background: linear-gradient(135deg, ${AURA.roxo}, ${AURA.roxoDeep});
         color: #fff; display: flex; align-items: center; gap: 12px;
         font-family: 'Inter', sans-serif; font-size: 11px;
         font-weight: 500; letter-spacing: .1em;
-        border: 1px solid rgba(201,169,110,.15);
+        border: 1px solid rgba(139,90,158,.25);
       }
 
       .dl-kpi-grid {
@@ -222,8 +191,8 @@ function GlobalStyles({ t, isDark }) {
       @media(max-width: 480px) { .dl-kpi-grid { grid-template-columns: 1fr; } }
 
       .dl-kpi-hero {
-        background: linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark});
-        border: 1px solid rgba(201,169,110,.12);
+        background: linear-gradient(135deg, ${AURA.moss}, ${AURA.mossDeep});
+        border: 1px solid rgba(184,137,46,.16);
         border-radius: 20px; padding: 26px 22px; position: relative; overflow: hidden;
       }
       .dl-kpi-stripes {
@@ -234,7 +203,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-kpi-inner { position: relative; z-index: 1; }
       .dl-big-num {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Fraunces', serif;
         font-size: clamp(44px, 10vw, 58px);
         font-weight: 600; color: #fff; line-height: 1; margin: 10px 0 6px;
       }
@@ -243,25 +212,25 @@ function GlobalStyles({ t, isDark }) {
         text-transform: uppercase; color: rgba(255,255,255,.55);
       }
       .dl-kpi-desc {
-        font-size: 11px; font-weight: 300; color: rgba(255,255,255,.45);
+        font-size: 11px; font-weight: 300; color: rgba(255,255,255,.5);
         margin-top: 8px; line-height: 1.55; max-width: 240px;
       }
       .dl-progress-wrap { margin-top: 16px; }
       .dl-progress-top {
         display: flex; justify-content: space-between;
         font-size: 9px; font-weight: 600; letter-spacing: .14em;
-        text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 7px;
+        text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 7px;
       }
       .dl-progress-track {
         height: 5px; border-radius: 99px;
-        background: rgba(255,255,255,.1); overflow: hidden;
+        background: rgba(255,255,255,.12); overflow: hidden;
       }
       .dl-progress-fill {
         height: 100%; border-radius: 99px;
-        background: linear-gradient(90deg, ${AURA.red}, ${AURA.yellow});
+        background: linear-gradient(90deg, ${AURA.gold}, ${AURA.goldLight});
         transition: width 1.2s cubic-bezier(.4,0,.2,1);
       }
-      .dl-progress-fill.done { background: ${AURA.yellow}; }
+      .dl-progress-fill.done { background: ${AURA.goldLight}; }
 
       .dl-kpi-action {
         background: ${t.bgEl}; border: 1px solid ${t.border};
@@ -283,11 +252,11 @@ function GlobalStyles({ t, isDark }) {
       .dl-kpi-action-btn {
         margin-top: 18px; width: 100%; padding: 12px; border-radius: 100px;
         border: none; cursor: pointer;
-        background: linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark});
+        background: linear-gradient(135deg, ${AURA.moss}, ${AURA.mossDeep});
         color: #fff; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .3s;
-        box-shadow: 0 6px 20px rgba(0,61,165,.25);
+        box-shadow: 0 6px 20px rgba(30,63,102,.28);
       }
       .dl-kpi-action-btn:hover { opacity: .88; transform: translateY(-1px); }
       .dl-kpi-action-btn-ghost {
@@ -303,7 +272,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
       }
       .dl-section-title {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Fraunces', serif;
         font-size: 15px; font-weight: 500; color: ${t.text};
       }
 
@@ -330,7 +299,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-menu-card:hover {
         transform: translateY(-5px);
         border-color: ${t.cardHover};
-        box-shadow: 0 14px 36px rgba(0,0,0,${isDark ? ".45" : ".12"});
+        box-shadow: 0 14px 36px rgba(0,0,0,${isDark ? ".45" : ".08"});
       }
       .dl-menu-card:hover::before { opacity: 1; }
       .dl-menu-icon {
@@ -353,7 +322,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+        background: linear-gradient(90deg, transparent, rgba(184,137,46,.22), transparent);
       }
       .dl-card-head {
         padding: 20px 22px;
@@ -362,7 +331,7 @@ function GlobalStyles({ t, isDark }) {
         flex-wrap: wrap; gap: 12px;
       }
       .dl-card-head-title {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Fraunces', serif;
         font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0;
       }
       .dl-card-head-sub {
@@ -373,12 +342,12 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 7px;
         padding: 11px 20px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-        color: #0A0A0F; font-family: 'Inter', sans-serif;
+        color: #12131C; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .35s;
-        box-shadow: 0 6px 22px rgba(201,169,110,.22); flex-shrink: 0;
+        box-shadow: 0 6px 22px rgba(184,137,46,.24); flex-shrink: 0;
       }
-      .dl-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,169,110,.32); }
+      .dl-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(184,137,46,.34); }
       .dl-btn-ghost {
         display: flex; align-items: center; gap: 7px;
         padding: 11px 18px; border-radius: 100px;
@@ -396,18 +365,18 @@ function GlobalStyles({ t, isDark }) {
       .dl-member-row {
         display: flex; align-items: center; justify-content: space-between;
         padding: 12px 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(201,169,110,.04)"};
-        border: 1px solid ${isDark ? "rgba(201,169,110,.07)" : "rgba(201,169,110,.12)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(30,63,102,.045)"};
+        border: 1px solid ${isDark ? "rgba(184,137,46,.09)" : "rgba(30,63,102,.12)"};
         border-radius: 13px; transition: border-color .2s; gap: 10px;
         min-width: 0; width: 100%;
       }
-      .dl-member-row:hover { border-color: rgba(201,169,110,.3); }
+      .dl-member-row:hover { border-color: rgba(184,137,46,.35); }
       .dl-member-avatar {
         width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(201,169,110,.2), rgba(201,169,110,.06));
-        border: 1px solid rgba(201,169,110,.22);
+        background: linear-gradient(135deg, rgba(184,137,46,.22), rgba(184,137,46,.07));
+        border: 1px solid rgba(184,137,46,.24);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Playfair Display', serif; font-weight: 600;
+        font-family: 'Fraunces', serif; font-weight: 600;
         font-size: 15px; color: ${AURA.gold};
       }
       .dl-member-name {
@@ -420,10 +389,10 @@ function GlobalStyles({ t, isDark }) {
         color: ${t.textMuted}; padding: 5px; border-radius: 8px;
         display: flex; align-items: center; flex-shrink: 0; transition: color .2s;
       }
-      .dl-btn-del:hover { color: #e07070; }
+      .dl-btn-del:hover { color: ${AURA.clay}; }
       .dl-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(201,169,110,.15), transparent);
+        background: linear-gradient(90deg, transparent, rgba(184,137,46,.16), transparent);
         margin: 2px 0;
       }
 
@@ -442,9 +411,9 @@ function GlobalStyles({ t, isDark }) {
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .dl-input:focus {
-        border-color: rgba(201,169,110,.5);
-        background: rgba(201,169,110,.04);
-        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+        border-color: rgba(184,137,46,.5);
+        background: rgba(184,137,46,.05);
+        box-shadow: 0 0 0 3px rgba(184,137,46,.09);
       }
       .dl-input::placeholder { color: ${t.placeholder}; }
 
@@ -457,7 +426,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-modal-overlay {
         position: fixed; inset: 0;
-        background: rgba(10,10,15,.88); z-index: 0;
+        background: rgba(18,19,28,.88); z-index: 0;
         backdrop-filter: blur(4px);
       }
       .dl-modal-box {
@@ -497,8 +466,8 @@ function GlobalStyles({ t, isDark }) {
         transition: all .25s;
       }
       .dl-textarea:focus {
-        border-color: rgba(201,169,110,.5);
-        box-shadow: 0 0 0 3px rgba(201,169,110,.08);
+        border-color: rgba(184,137,46,.5);
+        box-shadow: 0 0 0 3px rgba(184,137,46,.09);
       }
       .dl-textarea::placeholder { color: ${t.placeholder}; }
 
@@ -506,15 +475,14 @@ function GlobalStyles({ t, isDark }) {
         text-align: center;
         font-size: 9px; font-weight: 500; letter-spacing: .18em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(10,22,40,.3)"};
+        color: ${isDark ? "rgba(243,241,234,.14)" : "rgba(27,35,51,.3)"};
         padding: 16px 0 0;
       }
 
       .dl-loading {
         min-height: 100vh; display: flex;
         align-items: center; justify-content: center;
-        background: ${isDark ? "-webkit-linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "-webkit-linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
-        background: ${isDark ? "linear-gradient(90deg, #5c5c5c,#333333,#000000,#000000,#000000)" : "linear-gradient(90deg, #ffffff,#ffffff,#928672)"};
+        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F3F1EA 0%, #E9E4D6 100%)"};
         position: relative;
       }
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }
@@ -637,13 +605,13 @@ export default function DashboardLider() {
           <div className="dl-glow" />
           <div className="dl-loading-inner">
             <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-              <div className="dl-ring dl-pulse" style={{ width: 80, height: 80, position: "absolute", border: `1px solid rgba(201,169,110,.25)`, borderRadius: "50%" }} />
-              <div className="dl-ring dl-pulse" style={{ width: 62, height: 62, position: "absolute", border: `1px solid rgba(201,169,110,.2)`, borderRadius: "50%", animationDelay: ".9s" }} />
-              <div style={{ width: 50, height: 50, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(201,169,110,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+              <div className="dl-ring dl-pulse" style={{ width: 80, height: 80, position: "absolute", border: `1px solid rgba(184,137,46,.28)`, borderRadius: "50%" }} />
+              <div className="dl-ring dl-pulse" style={{ width: 62, height: 62, position: "absolute", border: `1px solid rgba(184,137,46,.22)`, borderRadius: "50%", animationDelay: ".9s" }} />
+              <div style={{ width: 50, height: 50, borderRadius: "50%", background: isDark ? "rgba(26,34,54,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
                 <IEQCross size={36} />
               </div>
             </div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7 }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .75 }}>
               Carregando…
             </p>
           </div>
@@ -653,14 +621,14 @@ export default function DashboardLider() {
 
   /* ── 7 módulos (Histórico removido) ── */
   const menuItems = [
-    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: AURA.red,  gradient: `${AURA.redDark},${AURA.red}` },
-    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: "#7090e8", gradient: `${AURA.blueDark},${AURA.blue}` },
-    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.red,  gradient: `${AURA.redDark},${AURA.red}` },
-    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold, gradient: `rgba(201,169,110,.8),${AURA.gold}` },
-    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#c8a010", gradient: `#a07800,#c8a010` },
-    { icon: <Home size={18} />,         name: "Casas de Paz", desc: "Evangelismo", aba: "casas",       color: "#7090e8", gradient: `${AURA.blueDark},${AURA.blue}` },
-    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#c8a010", gradient: `#a07800,#c8a010` },
-    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#7090e8", gradient: `${AURA.blueDark},${AURA.blue}` },
+    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: AURA.clay,      gradient: `${AURA.clayDeep},${AURA.clay}` },
+    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
+    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.clay,      gradient: `${AURA.clayDeep},${AURA.clay}` },
+    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold,      gradient: `rgba(184,137,46,.8),${AURA.gold}` },
+    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
+    { icon: <Home size={18} />,         name: "Casas de Paz", desc: "Evangelismo", aba: "casas",       color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
+    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
+    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
   ];
 
   return (
@@ -759,7 +727,7 @@ export default function DashboardLider() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
                         >
-                          <Sparkles size={16} style={{ color: AURA.yellow, flexShrink: 0 }} />
+                          <Sparkles size={16} style={{ color: AURA.goldLight, opacity: .95, flexShrink: 0 }} />
                           Multiplicação aprovada! Organize os membros para a nova célula.
                         </motion.div>
                     )}
@@ -805,9 +773,9 @@ export default function DashboardLider() {
                         <div
                             className="dl-kpi-action-icon"
                             style={{
-                              background: isAprovado ? "rgba(0,61,165,.1)" : isAnalise ? "rgba(253,184,19,.1)" : "rgba(201,169,110,.08)",
-                              color: isAprovado ? AURA.blue : isAnalise ? "#c8a010" : AURA.gold,
-                              border: `1px solid ${isAprovado ? "rgba(0,61,165,.25)" : isAnalise ? "rgba(253,184,19,.25)" : "rgba(201,169,110,.2)"}`,
+                              background: isAprovado ? "rgba(91,42,110,.14)" : isAnalise ? "rgba(217,174,94,.12)" : "rgba(184,137,46,.09)",
+                              color: isAprovado ? AURA.roxoLight : isAnalise ? AURA.goldLight : AURA.gold,
+                              border: `1px solid ${isAprovado ? "rgba(91,42,110,.3)" : isAnalise ? "rgba(217,174,94,.28)" : "rgba(184,137,46,.22)"}`,
                             }}
                         >
                           {isAprovado
@@ -823,11 +791,15 @@ export default function DashboardLider() {
                       </div>
                       <div>
                         {isAnalise ? (
-                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(253,184,19,.08)", border: "1px solid rgba(253,184,19,.25)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "#c8a010" }}>
+                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(217,174,94,.09)", border: "1px solid rgba(217,174,94,.28)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
                               Consultando Pastor…
                             </div>
                         ) : podeSolicitar ? (
-                            <button className="dl-kpi-action-btn" onClick={() => setShowModalMultiplicacao(true)}>
+                            <button
+                                className="dl-kpi-action-btn"
+                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.roxo}, ${AURA.roxoDeep})`, boxShadow: "0 6px 20px rgba(91,42,110,.28)" } : undefined}
+                                onClick={() => setShowModalMultiplicacao(true)}
+                            >
                               {isAprovado ? "Nova Solicitação" : "Solicitar Mult."}
                             </button>
                         ) : (
@@ -943,13 +915,13 @@ export default function DashboardLider() {
                 <motion.div className="dl-modal-multi-box" initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: "tween", duration: .28 }}>
                   <div style={{ textAlign: "center", marginBottom: 26 }}>
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(201,169,110,.22)", borderRadius: "50%" }} />
-                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(201,169,110,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
-                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(201,169,110,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(184,137,46,.26)", borderRadius: "50%" }} />
+                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(184,137,46,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
+                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(26,34,54,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
                         <IEQCross size={32} />
                       </div>
                     </div>
-                    <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
+                    <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
                       Plano de Multiplicação
                     </h2>
                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.textSec }}>
@@ -961,7 +933,7 @@ export default function DashboardLider() {
                   <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
                     <button className="dl-btn-ghost" style={{ flex: 1 }} onClick={() => setShowModalMultiplicacao(false)}>Cancelar</button>
                     <button
-                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", border: "none", borderRadius: "100px", cursor: "pointer", background: `linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`, color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .3s", opacity: solicitandoMulti ? .6 : 1 }}
+                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", border: "none", borderRadius: "100px", cursor: "pointer", background: `linear-gradient(135deg,${AURA.mossDeep},${AURA.moss})`, color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .3s", opacity: solicitandoMulti ? .6 : 1 }}
                         onClick={solicitarMultiplicacao}
                         disabled={solicitandoMulti}
                     >
@@ -1013,8 +985,8 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
       <div style={{ padding: "22px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexShrink: 0 }}>
           <div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(201,169,110,.55)", margin: "0 0 4px" }}>Vincular</p>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(184,137,46,.65)", margin: "0 0 4px" }}>Vincular</p>
+            <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex" }}>
             <X size={20} />
@@ -1040,12 +1012,12 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
               filtrados.map((m) => (
                   <div
                       key={m.id}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(201,169,110,.04)", border: `1px solid ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.14)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,169,110,.35)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.14)"; }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(30,63,102,.045)", border: `1px solid ${isDark ? "rgba(184,137,46,.09)" : "rgba(30,63,102,.13)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(184,137,46,.4)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(184,137,46,.09)" : "rgba(30,63,102,.13)"; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(201,169,110,.2),rgba(201,169,110,.06))", border: "1px solid rgba(201,169,110,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 14, color: AURA.gold }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(184,137,46,.22),rgba(184,137,46,.07))", border: "1px solid rgba(184,137,46,.24)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fraunces',serif", fontWeight: 600, fontSize: 14, color: AURA.gold }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
                       <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -1054,7 +1026,7 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
                     </div>
                     <button
                         onClick={() => vincular(m.id)}
-                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})`, color: "#0A0A0F", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
+                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})`, color: "#12131C", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
                     >
                       <Plus size={11} /> Vincular
                     </button>

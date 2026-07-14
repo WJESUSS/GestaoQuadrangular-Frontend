@@ -4,36 +4,7 @@ import {
   Calendar, Loader2, RefreshCw, CheckCircle2, FileText,
   Sparkles, Heart, MapPin, User,
 } from "lucide-react";
-
-/* ─── Tokens AURA (mesmos do dashboard) ─── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-};
-
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-    optionBg:    isDark ? "#12121A"                : "#F0EAE0",
-  };
-}
+import { AURA, theme } from "./liderTheme";
 
 function IEQCross({ size = 36 }) {
   return (

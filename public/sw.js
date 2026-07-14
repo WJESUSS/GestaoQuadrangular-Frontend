@@ -39,9 +39,11 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                // Atualiza o cache com a resposta mais recente
-                const clone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                // Only cache complete (200) responses — skip 206 Partial Content
+                if (response && response.status === 200 && response.type === "basic") {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                }
                 return response;
             })
             .catch(() => caches.match(event.request))
