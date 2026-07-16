@@ -1497,6 +1497,7 @@ export default function MembrosRefatorado({ isDark = false }) {
   const [isModalOpen,    setIsModalOpen]    = useState(false);
   const [editandoId,     setEditandoId]     = useState(null);
   const [filtro,         setFiltro]         = useState("");
+  const [filtroBusca,    setFiltroBusca]    = useState(""); // valor debounced usado no filtro/carregamento
   const [form,           setForm]           = useState(formInicial);
   const [nomeCelula,     setNomeCelula]     = useState(null);
   const [nomeLider,      setNomeLider]      = useState(null);
@@ -1516,10 +1517,17 @@ export default function MembrosRefatorado({ isDark = false }) {
   const [filtroStatus,      setFiltroStatus]      = useState(null); // null = todos
   const [filtroModalAberto, setFiltroModalAberto] = useState(false);
 
+  // ✅ NOVO: indica que estamos varrendo o restante das páginas por causa de uma busca
+  const [buscandoTudo, setBuscandoTudo] = useState(false);
+
   const t = themeMembers(isDark);
 
   // ✅ Sentinela para scroll infinito (substitui o botão "Carregar mais")
   const sentinelRef = useRef(null);
+
+  // ✅ Guarda a versão mais recente da paginação para o loop de busca completa
+  // não trabalhar com valores "presos" (stale closures) do momento em que foi criado.
+  const paginacaoRef = useRef({ pagina: 0, temMais: false });
 
   // ✅ Some sozinho depois de alguns segundos
   useEffect(() => {
@@ -1551,9 +1559,15 @@ export default function MembrosRefatorado({ isDark = false }) {
       setTemMais(!ultimaPagina);
       setTotalRegistros(total);
       setPagina(numeroPagina);
+
+      // mantém a ref sincronizada para o loop de "buscar tudo" usar valores atuais
+      paginacaoRef.current = { pagina: numeroPagina, temMais: !ultimaPagina };
+
+      return { ultimaPagina, numeroPagina };
     } catch (err) {
       console.error("Erro ao listar membros:", err);
       if (reset) setMembros([]);
+      return { ultimaPagina: true, numeroPagina };
     } finally {
       setLoading(false);
       setCarregandoMais(false);
@@ -1568,6 +1582,52 @@ export default function MembrosRefatorado({ isDark = false }) {
     if (!temMais || carregandoMais) return;
     carregarPagina(pagina + 1, false);
   }, [temMais, carregandoMais, pagina, carregarPagina]);
+
+  // ─────────────────────────────────────────────────────────────────
+  // ✅ CORREÇÃO PRINCIPAL DO BUG DE BUSCA
+  //
+  // Antes, a busca (`filtro`) só filtrava os membros que JÁ estavam
+  // carregados em memória (a página atual do scroll infinito). Se a
+  // pessoa buscada estivesse numa página ainda não carregada (ex:
+  // registro 120 de 300, com páginas de 50 em 50 = página 3), a busca
+  // simplesmente não encontrava, mesmo o membro existindo no banco.
+  //
+  // Agora: sempre que o usuário digita algo na busca (com um pequeno
+  // debounce de 350ms) ou aplica um filtro de status, disparamos um
+  // carregamento automático de TODAS as páginas restantes em segundo
+  // plano, até não haver mais páginas (`temMais === false`). Assim a
+  // busca/filtro sempre enxerga a lista completa.
+  // ─────────────────────────────────────────────────────────────────
+  const carregarTodasAsPaginas = useCallback(async () => {
+    setBuscandoTudo(true);
+    try {
+      // usa a ref para sempre operar com o estado mais recente,
+      // evitando o problema de "closure presa" em loops assíncronos
+      while (paginacaoRef.current.temMais) {
+        const proximaPagina = paginacaoRef.current.pagina + 1;
+        const { ultimaPagina } = await carregarPagina(proximaPagina, false);
+        if (ultimaPagina) break;
+      }
+    } finally {
+      setBuscandoTudo(false);
+    }
+  }, [carregarPagina]);
+
+  // ✅ Debounce: espera o usuário parar de digitar por 350ms antes de
+  // considerar a busca "ativa" (evita disparar carregamento a cada tecla)
+  useEffect(() => {
+    const timer = setTimeout(() => setFiltroBusca(filtro.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [filtro]);
+
+  // ✅ Sempre que houver busca por texto OU filtro de status ativo,
+  // garante que a lista completa esteja carregada antes de filtrar.
+  useEffect(() => {
+    const temBuscaAtiva = filtroBusca !== "" || Boolean(filtroStatus);
+    if (temBuscaAtiva && paginacaoRef.current.temMais) {
+      carregarTodasAsPaginas();
+    }
+  }, [filtroBusca, filtroStatus, carregarTodasAsPaginas]);
 
   // ✅ Detecta o scroll (na janela OU em um container interno com scroll próprio,
   // como costuma acontecer dentro de layouts de dashboard) e dispara carregarMais()
@@ -1778,21 +1838,27 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   };
 
+  // ✅ Agora filtra usando o valor com debounce (filtroBusca), garantindo
+  // que a lista já foi totalmente carregada (via carregarTodasAsPaginas)
+  // antes do filtro rodar sobre ela.
   const membrosFiltrados = useMemo(() =>
           membros
               .filter(m =>
                   (!filtroStatus || m.status === filtroStatus) &&
                   (
-                      m.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
-                      m.cpf?.includes(filtro) ||
-                      m.nomeCelula?.toLowerCase().includes(filtro.toLowerCase())
+                      m.nome?.toLowerCase().includes(filtroBusca.toLowerCase()) ||
+                      m.cpf?.includes(filtroBusca) ||
+                      m.nomeCelula?.toLowerCase().includes(filtroBusca.toLowerCase())
                   )
               )
               .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" })),
-      [membros, filtro, filtroStatus]
+      [membros, filtroBusca, filtroStatus]
   );
 
-  const buscaPodeEstarIncompleta = (filtro.trim() !== "" || filtroStatus) && temMais;
+  // ✅ Só fica "incompleta" enquanto o carregamento automático de todas
+  // as páginas ainda não terminou (agora é raro aparecer, pois o efeito
+  // acima já busca tudo sozinho assim que o usuário digita).
+  const buscaPodeEstarIncompleta = (filtroBusca !== "" || filtroStatus) && temMais && buscandoTudo;
 
   return (
       <div className="mem-root">
@@ -1842,6 +1908,16 @@ export default function MembrosRefatorado({ isDark = false }) {
                   value={filtro}
                   onChange={e => setFiltro(e.target.value)}
               />
+              {buscandoTudo && (
+                  <Loader2
+                      size={15}
+                      className="dl-spin"
+                      style={{
+                        position: "absolute", right: 14, top: "50%",
+                        transform: "translateY(-50%)", color: AURA.gold,
+                      }}
+                  />
+              )}
             </div>
             <button
                 type="button"
@@ -1935,7 +2011,7 @@ export default function MembrosRefatorado({ isDark = false }) {
                 {/* ── Scroll infinito: sentinela invisível que dispara o carregamento ── */}
                 {temMais && (
                     <div ref={sentinelRef} className="mem-scroll-sentinel">
-                      {carregandoMais && (
+                      {(carregandoMais || buscandoTudo) && (
                           <>
                             <Loader2 size={14} className="dl-spin" style={{ color: AURA.gold }} />
                             Carregando mais membros...
@@ -1947,7 +2023,7 @@ export default function MembrosRefatorado({ isDark = false }) {
                 {/* ── Info de contagem ── */}
                 <p className="mem-info-bar">
                   {membros.length} de {totalRegistros} membro{totalRegistros === 1 ? "" : "s"} carregado{membros.length === 1 ? "" : "s"}
-                  {buscaPodeEstarIncompleta && " — continue rolando para ampliar a busca"}
+                  {buscaPodeEstarIncompleta && " — buscando em todas as páginas…"}
                 </p>
               </>
           ) : (
@@ -1960,20 +2036,17 @@ export default function MembrosRefatorado({ isDark = false }) {
                   <Users size={32} />
                 </div>
                 <p className="mem-empty-text">
-                  {filtro
-                      ? "Nenhum membro encontrado."
-                      : filtroStatus
-                          ? `Nenhum membro com status "${STATUS_LABELS[filtroStatus]}".`
-                          : "Nenhum membro cadastrado."}
+                  {buscandoTudo
+                      ? "Buscando em todos os registros..."
+                      : filtro
+                          ? "Nenhum membro encontrado."
+                          : filtroStatus
+                              ? `Nenhum membro com status "${STATUS_LABELS[filtroStatus]}".`
+                              : "Nenhum membro cadastrado."}
                 </p>
-                {(filtro || filtroStatus) && temMais && (
-                    <div ref={sentinelRef} className="mem-scroll-sentinel" style={{ marginTop: 12 }}>
-                      {carregandoMais && (
-                          <>
-                            <Loader2 size={14} className="dl-spin" style={{ color: AURA.gold }} />
-                            Carregando mais para buscar...
-                          </>
-                      )}
+                {buscandoTudo && (
+                    <div style={{ marginTop: 12, display: "flex", justifyContent: "center" }}>
+                      <Loader2 size={18} className="dl-spin" style={{ color: AURA.gold }} />
                     </div>
                 )}
                 <button className="mem-btn-gold" style={{ marginTop: 16 }} onClick={abrirNovo}>
