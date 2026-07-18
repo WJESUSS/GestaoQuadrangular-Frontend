@@ -53,7 +53,7 @@ function GlobalStyles({ t, isDark }) {
 
       .dl-root {
         font-family: 'Inter', sans-serif;
-        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F3F1EA 0%, #E9E4D6 100%)"};
+        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F5F5F5 0%, #E8E8E8 55%, #DADADA 100%)"};
         color: ${t.text};
         min-height: 100vh;
         position: relative;
@@ -482,7 +482,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-loading {
         min-height: 100vh; display: flex;
         align-items: center; justify-content: center;
-        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F3F1EA 0%, #E9E4D6 100%)"};
+        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F5F5F5 0%, #E8E8E8 55%, #DADADA 100%)"};
         position: relative;
       }
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }
