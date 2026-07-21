@@ -152,6 +152,7 @@ function RDStyles({ t, isDark }) {
       padding: 10px 18px; border-radius: 100px; border: none; cursor: pointer;
       font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
       letter-spacing: .14em; text-transform: uppercase; transition: all .25s;
+      white-space: nowrap;
     }
     .rd-tab-active {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
@@ -173,6 +174,7 @@ function RDStyles({ t, isDark }) {
       font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
       letter-spacing: .08em; color: ${t.text}; cursor: pointer;
       color-scheme: ${isDark ? "dark" : "light"};
+      max-width: 140px;
     }
     .rd-date-sep { font-size: 11px; font-weight: 300; color: ${t.textMuted}; }
 
@@ -317,22 +319,33 @@ function RDStyles({ t, isDark }) {
       padding: 18px 22px;
       border-bottom: 1px solid ${t.border};
       display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; animation: rd-fadeUp .4s ease both;
+      gap: 12px; flex-wrap: wrap;
+      animation: rd-fadeUp .4s ease both;
     }
     .rd-hist-row:last-child { border-bottom: none; }
+    .rd-hist-info { flex: 1 1 200px; min-width: 0; }
     .rd-hist-date {
       font-size: 10px; font-weight: 600; letter-spacing: .14em;
       text-transform: uppercase; color: ${t.text}; margin: 0 0 6px;
+      white-space: normal; word-break: break-word;
     }
-    .rd-hist-stats { display: flex; gap: 14px; align-items: center; }
+    .rd-hist-stats {
+      display: flex; gap: 10px; align-items: center;
+      flex-wrap: wrap; row-gap: 4px;
+    }
     .rd-hist-stat {
       font-size: 9px; font-weight: 500; letter-spacing: .12em;
       text-transform: uppercase; color: ${t.textMuted};
+      white-space: nowrap;
     }
     .rd-hist-bar {
       height: 3px; border-radius: 99px; margin-top: 10px;
       background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(201,169,110,.1)"};
       overflow: hidden;
+    }
+    .rd-hist-head {
+      padding: 20px 22px; border-bottom: 1px solid ${t.border};
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     }
 
     /* ── Paginação histórico ── */
@@ -344,15 +357,16 @@ function RDStyles({ t, isDark }) {
     .rd-pag-info {
       font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500;
       letter-spacing: .1em; color: ${t.textMuted};
+      white-space: nowrap;
     }
-    .rd-pag-btns { display: flex; gap: 5px; align-items: center; }
+    .rd-pag-btns { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; row-gap: 6px; }
     .rd-pag-btn {
       width: 32px; height: 32px; border-radius: 8px;
       border: 1px solid ${t.border}; background: transparent;
       color: ${t.textMuted}; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
-      transition: all .2s;
+      transition: all .2s; flex-shrink: 0;
     }
     .rd-pag-btn:hover:not(:disabled) { border-color: ${AURA.gold}; color: ${AURA.gold}; }
     .rd-pag-btn:disabled { opacity: .3; cursor: not-allowed; }
@@ -368,7 +382,7 @@ function RDStyles({ t, isDark }) {
       cursor: pointer; background: transparent; color: ${t.textMuted};
       font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
       letter-spacing: .14em; text-transform: uppercase; transition: all .25s;
-      flex-shrink: 0;
+      flex-shrink: 0; white-space: nowrap;
     }
     .rd-btn-icon:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
     .rd-btn-edit-gold {
@@ -377,7 +391,7 @@ function RDStyles({ t, isDark }) {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
       color: #0A0A0F; font-family: 'Inter', sans-serif;
       font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
-      transition: all .25s; flex-shrink: 0;
+      transition: all .25s; flex-shrink: 0; white-space: nowrap;
       box-shadow: 0 4px 14px rgba(201,169,110,.2);
     }
     .rd-btn-edit-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(201,169,110,.3); }
@@ -391,6 +405,42 @@ function RDStyles({ t, isDark }) {
       .rd-detail-grid { grid-template-columns: 1fr repeat(5, 40px); padding: 10px 14px; }
       .rd-table-head  { grid-template-columns: 1fr repeat(5, 40px); padding: 10px 14px; }
       .rd-member-row  { padding: 16px 14px; }
+
+      .rd-hist-row   { padding: 14px 16px; gap: 8px; }
+      .rd-hist-head  { padding: 14px 16px; }
+      .rd-hist-stats { gap: 8px; }
+      .rd-hist-date  { font-size: 9.5px; }
+
+      .rd-pag        { padding: 12px 14px; }
+      .rd-pag-info   { font-size: 9px; }
+
+      .rd-header     { padding: 20px 16px; gap: 12px; }
+      .rd-tabs       { width: 100%; }
+      .rd-tab        { flex: 1; justify-content: center; padding: 9px 8px; font-size: 9px; }
+
+      .rd-date-bar   { padding: 14px 16px; }
+      .rd-date-input { max-width: 118px; font-size: 11px; }
+    }
+
+    /* ── Scroll horizontal das tabelas (evita corte de colunas no mobile) ── */
+    .rd-table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .rd-table-scroll::-webkit-scrollbar { height: 4px; }
+    .rd-table-scroll::-webkit-scrollbar-thumb {
+      background: rgba(201,169,110,.35);
+      border-radius: 99px;
+    }
+    .rd-table-inner {
+      min-width: 640px; /* garante que as 5 colunas de presença nunca sejam cortadas */
+    }
+    .rd-table-inner-sm {
+      min-width: 460px; /* versão compacta usada no detalhe do histórico */
+    }
+    @media(max-width: 480px) {
+      .rd-table-inner    { min-width: 560px; }
+      .rd-table-inner-sm { min-width: 420px; }
     }
 
     /* ── Modal justificativa ── */
@@ -658,14 +708,14 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
   return (
       <div className="rd-card" style={{ overflow: "hidden" }}>
         {/* Cabeçalho do card */}
-        <div style={{ padding: "20px 22px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(201,169,110,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: AURA.gold }}>
+        <div className="rd-hist-head">
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(201,169,110,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: AURA.gold, flexShrink: 0 }}>
             <History size={14} />
           </div>
           <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text }}>
           Histórico de Discipulado
         </span>
-          <span style={{ marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
+          <span style={{ marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, whiteSpace: "nowrap" }}>
           {totalElements} semana{totalElements !== 1 ? "s" : ""} registrada{totalElements !== 1 ? "s" : ""}
         </span>
         </div>
@@ -686,9 +736,9 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
               );
               return (
                   <div key={item.id} className="rd-hist-row">
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="rd-hist-info">
                       {/* Período */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
                         <Calendar size={12} style={{ color: AURA.gold, flexShrink: 0 }} />
                         <span className="rd-hist-date">
                     {item.inicio} → {item.fim}
@@ -702,6 +752,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                           fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
                           letterSpacing: ".12em", textTransform: "uppercase",
                           color: pct > 60 ? AURA.gold : AURA.red,
+                          whiteSpace: "nowrap",
                         }}>
                     {pct}% freq.
                   </span>
@@ -796,14 +847,14 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <div className="rd-card" style={{ padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button onClick={onVoltar} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: AURA.gold, display: "flex", alignItems: "center" }}>
+        <div className="rd-card" style={{ padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+            <button onClick={onVoltar} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: AURA.gold, display: "flex", alignItems: "center", flexShrink: 0 }}>
               <ChevronLeft size={20} />
             </button>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <p className="rd-eyebrow">Relatório</p>
-              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0 }}>
+              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0, wordBreak: "break-word" }}>
                 {item.inicio} → {item.fim}
               </p>
             </div>
@@ -819,44 +870,48 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
             </p>
         ) : (
             <div className="rd-card" style={{ overflow: "hidden" }}>
-              <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
-                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
-                {COLUNAS.map(({ label, emoji }) => (
-                    <div key={label} className="rd-table-col-label">
-                      <div style={{ fontSize: 14, marginBottom: 3 }}>{emoji}</div>
-                      {label}
-                    </div>
-                ))}
-              </div>
-              {presencas.map((p, i) => {
-                const nome  = p.nomeMembro ?? p.nome ?? "?";
-                const total = COLUNAS.filter((c) => p[c.campo]).length;
-                return (
-                    <div key={p.membroId ?? i} style={{ borderBottom: i < presencas.length - 1 ? `1px solid ${t.border}` : "none" }}>
-                      <div className="rd-detail-grid" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <div className="rd-member-avatar" style={{ width: 34, height: 34, fontSize: 14 }}>{nome.charAt(0)}</div>
-                          <div>
-                            <p className="rd-member-name" style={{ fontSize: 14 }}>{nome}</p>
-                            <p className="rd-member-id">{total}/{COLUNAS.length} presenças</p>
+              <div className="rd-table-scroll">
+                <div className="rd-table-inner-sm">
+                  <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
+                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
+                    {COLUNAS.map(({ label, emoji }) => (
+                        <div key={label} className="rd-table-col-label">
+                          <div style={{ fontSize: 14, marginBottom: 3 }}>{emoji}</div>
+                          {label}
+                        </div>
+                    ))}
+                  </div>
+                  {presencas.map((p, i) => {
+                    const nome  = p.nomeMembro ?? p.nome ?? "?";
+                    const total = COLUNAS.filter((c) => p[c.campo]).length;
+                    return (
+                        <div key={p.membroId ?? i} style={{ borderBottom: i < presencas.length - 1 ? `1px solid ${t.border}` : "none" }}>
+                          <div className="rd-detail-grid" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                              <div className="rd-member-avatar" style={{ width: 34, height: 34, fontSize: 14 }}>{nome.charAt(0)}</div>
+                              <div style={{ minWidth: 0 }}>
+                                <p className="rd-member-name" style={{ fontSize: 14 }}>{nome}</p>
+                                <p className="rd-member-id">{total}/{COLUNAS.length} presenças</p>
+                              </div>
+                            </div>
+                            {COLUNAS.map(({ campo, emoji, justField }) => (
+                                <div key={campo} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontSize: 18, filter: p[campo] ? "none" : "grayscale(1)", opacity: p[campo] ? 1 : 0.25 }}>
+                            {p[campo] ? "✅" : emoji}
+                          </span>
+                                  {!p[campo] && p[justField] && (
+                                      <div style={{ fontSize: 8, color: AURA.gold, fontFamily: "'Inter',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(201,169,110,.1)", borderRadius: 99, border: "1px solid rgba(201,169,110,.25)" }}>
+                                        {p[justField]}
+                                      </div>
+                                  )}
+                                </div>
+                            ))}
                           </div>
                         </div>
-                        {COLUNAS.map(({ campo, emoji, justField }) => (
-                            <div key={campo} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                      <span style={{ fontSize: 18, filter: p[campo] ? "none" : "grayscale(1)", opacity: p[campo] ? 1 : 0.25 }}>
-                        {p[campo] ? "✅" : emoji}
-                      </span>
-                              {!p[campo] && p[justField] && (
-                                  <div style={{ fontSize: 8, color: AURA.gold, fontFamily: "'Inter',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(201,169,110,.1)", borderRadius: 99, border: "1px solid rgba(201,169,110,.25)" }}>
-                                    {p[justField]}
-                                  </div>
-                              )}
-                            </div>
-                        ))}
-                      </div>
-                    </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              </div>
             </div>
         )}
       </div>
@@ -1239,66 +1294,70 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
                 {/* Tabela */}
                 <div className="rd-card" style={{ overflow: "hidden", opacity: relatorioExistente && !modoEdicao ? 0.4 : 1, pointerEvents: relatorioExistente && !modoEdicao ? "none" : "auto", transition: "opacity .3s" }}>
-                  <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 1fr)" }}>
-                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
-                    {COLUNAS.map(({ label, emoji }) => (
-                        <div key={label} className="rd-table-col-label">
-                          <div style={{ fontSize: 15, marginBottom: 3 }}>{emoji}</div>
-                          {label}
-                        </div>
-                    ))}
-                  </div>
+                  <div className="rd-table-scroll">
+                    <div className="rd-table-inner">
+                      <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 1fr)" }}>
+                        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
+                        {COLUNAS.map(({ label, emoji }) => (
+                            <div key={label} className="rd-table-col-label">
+                              <div style={{ fontSize: 15, marginBottom: 3 }}>{emoji}</div>
+                              {label}
+                            </div>
+                        ))}
+                      </div>
 
-                  {membros.map((m, i) => {
-                    const p     = presencas[i];
-                    const total = p ? COLUNAS.filter((c) => p[c.campo]).length : 0;
-                    const pct   = Math.round((total / COLUNAS.length) * 100);
-                    return (
-                        <div key={m.id} className="rd-member-row" style={{ animationDelay: `${i * 0.04}s` }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                              <div className="rd-member-avatar">{m.nome.charAt(0)}</div>
-                              <div>
-                                <p className="rd-member-name">{m.nome}</p>
-                                <p className="rd-member-id">ID #{m.id}</p>
+                      {membros.map((m, i) => {
+                        const p     = presencas[i];
+                        const total = p ? COLUNAS.filter((c) => p[c.campo]).length : 0;
+                        const pct   = Math.round((total / COLUNAS.length) * 100);
+                        return (
+                            <div key={m.id} className="rd-member-row" style={{ animationDelay: `${i * 0.04}s` }}>
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                  <div className="rd-member-avatar">{m.nome.charAt(0)}</div>
+                                  <div>
+                                    <p className="rd-member-name">{m.nome}</p>
+                                    <p className="rd-member-id">ID #{m.id}</p>
+                                  </div>
+                                </div>
+                                <div style={{ padding: "4px 14px", borderRadius: 100, background: total === COLUNAS.length ? `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})` : (isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.08)"), border: `1px solid ${total === COLUNAS.length ? "transparent" : t.border}` }}>
+                            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: total === COLUNAS.length ? "#0A0A0F" : t.textMuted }}>
+                              {total}/{COLUNAS.length}
+                            </span>
+                                </div>
+                              </div>
+                              <div className="rd-progress-track">
+                                <div className="rd-progress-fill" style={{ width: `${pct}%`, background: pct === 100 ? `linear-gradient(90deg,${AURA.gold},${AURA.goldLight})` : `linear-gradient(90deg,${AURA.red},${AURA.blue})` }} />
+                              </div>
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
+                                {COLUNAS.map(({ campo, label, emoji, justField }) => {
+                                  const marcado = p?.[campo];
+                                  const justVal = p?.[justField] ?? "";
+                                  const temJust = !marcado && !!justVal;
+                                  return (
+                                      <div key={campo} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                        <button className="rd-presence-btn" onClick={() => alterarPresenca(i, campo)} style={{ borderColor: marcado ? "rgba(201,169,110,.5)" : t.border, background: marcado ? (isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.07)") : "transparent", transform: marcado ? "scale(1.04)" : "scale(1)" }}>
+                                  <span style={{ fontSize: 18, filter: marcado ? "none" : "grayscale(1)", opacity: marcado ? 1 : 0.4, transition: "all .2s" }}>
+                                    {marcado ? "✅" : emoji}
+                                  </span>
+                                          <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 7.5, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: marcado ? AURA.gold : t.textMuted }}>
+                                    {label}
+                                  </span>
+                                        </button>
+                                        {!marcado && (
+                                            <button className={`rd-just-btn${temJust ? " rd-just-btn-filled" : ""}`} onClick={() => abrirModalJust(i, campo, justField, m.nome, label)}>
+                                              {temJust ? <>{EMOJIS_JUST[justVal] || "📝"} {justVal}</> : <>📋 Motivo</>}
+                                            </button>
+                                        )}
+                                      </div>
+                                  );
+                                })}
                               </div>
                             </div>
-                            <div style={{ padding: "4px 14px", borderRadius: 100, background: total === COLUNAS.length ? `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})` : (isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.08)"), border: `1px solid ${total === COLUNAS.length ? "transparent" : t.border}` }}>
-                        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: total === COLUNAS.length ? "#0A0A0F" : t.textMuted }}>
-                          {total}/{COLUNAS.length}
-                        </span>
-                            </div>
-                          </div>
-                          <div className="rd-progress-track">
-                            <div className="rd-progress-fill" style={{ width: `${pct}%`, background: pct === 100 ? `linear-gradient(90deg,${AURA.gold},${AURA.goldLight})` : `linear-gradient(90deg,${AURA.red},${AURA.blue})` }} />
-                          </div>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
-                            {COLUNAS.map(({ campo, label, emoji, justField }) => {
-                              const marcado = p?.[campo];
-                              const justVal = p?.[justField] ?? "";
-                              const temJust = !marcado && !!justVal;
-                              return (
-                                  <div key={campo} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                    <button className="rd-presence-btn" onClick={() => alterarPresenca(i, campo)} style={{ borderColor: marcado ? "rgba(201,169,110,.5)" : t.border, background: marcado ? (isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.07)") : "transparent", transform: marcado ? "scale(1.04)" : "scale(1)" }}>
-                              <span style={{ fontSize: 18, filter: marcado ? "none" : "grayscale(1)", opacity: marcado ? 1 : 0.4, transition: "all .2s" }}>
-                                {marcado ? "✅" : emoji}
-                              </span>
-                                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 7.5, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: marcado ? AURA.gold : t.textMuted }}>
-                                {label}
-                              </span>
-                                    </button>
-                                    {!marcado && (
-                                        <button className={`rd-just-btn${temJust ? " rd-just-btn-filled" : ""}`} onClick={() => abrirModalJust(i, campo, justField, m.nome, label)}>
-                                          {temJust ? <>{EMOJIS_JUST[justVal] || "📝"} {justVal}</> : <>📋 Motivo</>}
-                                        </button>
-                                    )}
-                                  </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Botão enviar */}
