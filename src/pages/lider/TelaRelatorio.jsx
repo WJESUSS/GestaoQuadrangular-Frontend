@@ -367,7 +367,13 @@ function DecisaoReadOnly({ decisao, t }) {
 }
 
 /* ─── Modal Elegante: Célula REALIZADA ───────────────────────────── */
-function ModalRealizadaSucesso({ total, estudo, nomeCelula, onClose }) {
+function ModalRealizadaSucesso({
+                                 total, estudo, nomeCelula, onClose,
+                                 tituloTopo = "Glória a Deus",
+                                 titulo = "Célula Realizada",
+                                 subtitulo,
+                                 botaoTexto = "Perfeito, obrigado!",
+                               }) {
   const [saindo, setSaindo] = useState(false);
 
   useEffect(() => {
@@ -425,11 +431,11 @@ function ModalRealizadaSucesso({ total, estudo, nomeCelula, onClose }) {
 
             {/* Título */}
             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(232,213,163,.75)", textAlign: "center", margin: "0 0 8px" }}>
-              Glória a Deus
+              {tituloTopo}
             </p>
-            <h2 className="aura-modal-title-v2">Célula Realizada</h2>
+            <h2 className="aura-modal-title-v2">{titulo}</h2>
             <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.5)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5, wordBreak: "break-word" }}>
-              {nomeCelula || "O Senhor viu cada presença."}
+              {subtitulo || nomeCelula || "O Senhor viu cada presença."}
             </p>
 
             <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(201,169,110,.25), transparent)" }} />
@@ -468,7 +474,7 @@ function ModalRealizadaSucesso({ total, estudo, nomeCelula, onClose }) {
                 onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
             >
-              Perfeito, obrigado!
+              {botaoTexto}
             </button>
           </div>
         </div>
@@ -477,7 +483,13 @@ function ModalRealizadaSucesso({ total, estudo, nomeCelula, onClose }) {
 }
 
 /* ─── Modal Elegante: Célula NÃO REALIZADA ───────────────────────── */
-function ModalNaoRealizadaSucesso({ motivo, nomeCelula, onClose }) {
+function ModalNaoRealizadaSucesso({
+                                    motivo, nomeCelula, onClose,
+                                    tituloTopo = "Ausência registrada",
+                                    titulo = "Célula Não Realizada",
+                                    subtitulo = "Deus conhece cada circunstância.",
+                                    botaoTexto = "Entendido",
+                                  }) {
   const [saindo, setSaindo] = useState(false);
   const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
 
@@ -533,11 +545,11 @@ function ModalNaoRealizadaSucesso({ motivo, nomeCelula, onClose }) {
 
             {/* Título */}
             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(216,140,90,.75)", textAlign: "center", margin: "0 0 8px" }}>
-              Ausência registrada
+              {tituloTopo}
             </p>
-            <h2 className="aura-modal-title-v2">Célula Não Realizada</h2>
+            <h2 className="aura-modal-title-v2">{titulo}</h2>
             <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.45)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5 }}>
-              Deus conhece cada circunstância.
+              {subtitulo}
             </p>
 
             <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(216,140,90,.25), transparent)" }} />
@@ -583,7 +595,7 @@ function ModalNaoRealizadaSucesso({ motivo, nomeCelula, onClose }) {
                 onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
             >
-              Entendido
+              {botaoTexto}
             </button>
           </div>
         </div>
@@ -752,7 +764,6 @@ function SeletorMotivo({ value, onChange, t }) {
                       padding: "13px 14px", borderRadius: 12, cursor: "pointer",
                       textAlign: "left", transition: "all .2s",
                       fontFamily: "'Inter',sans-serif",
-                      /* ✅ border definido UMA só vez — sem duplicata */
                       border: selecionado ? "none" : `1px solid ${t.borderInput}`,
                       background: selecionado
                           ? `linear-gradient(135deg, #c8a010, ${AURA.yellow})`
@@ -941,7 +952,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const [nomeCelula, setNomeCelula] = useState("");
   const [nomeLider, setNomeLider]   = useState("");
   const [celulaId, setCelulaId]     = useState(null);
-  const [sucesso, setSucesso]       = useState(false);
   const [processingIds, setProcessingIds] = useState(new Set());
   const [decisoesVisitantes, setDecisoesVisitantes] = useState({});
   const [justificativas, setJustificativas] = useState({});
@@ -949,6 +959,10 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
   const [relatorioRealizada, setRelatorioRealizada] = useState(true);
   const [motivoNaoRealizacao, setMotivoNaoRealizacao] = useState(null);
   const [form, setForm] = useState({ dataReuniao: "", estudo: "", selecionadosKeys: [] });
+
+  /* ── Modais elegantes de resultado (edição) ── */
+  const [modalRealizada,    setModalRealizada]    = useState(null); // { total, estudo, nomeCelula }
+  const [modalNaoRealizada, setModalNaoRealizada] = useState(null); // { motivo, nomeCelula }
 
   const carregarDados = useCallback(async () => {
     try {
@@ -1023,17 +1037,42 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
     try {
       setSalvando(true);
       const token = localStorage.getItem("token")?.replace(/"/g, "").trim();
+
+      const totalEnviado  = total;
+      const estudoEnviado = form.estudo.trim();
+      const motivoEnviado = motivoNaoRealizacao;
+
       const payload = relatorioRealizada
           ? {
-            celulaId: Number(celulaId), dataReuniao: normalizarData(form.dataReuniao), estudo: form.estudo.trim(),
+            celulaId: Number(celulaId), dataReuniao: normalizarData(form.dataReuniao), estudo: estudoEnviado,
             membrosPresentesIds: form.selecionadosKeys.filter(k => k.startsWith("MEMBRO-")).map(k => Number(k.replace("MEMBRO-", ""))),
             visitantesPresentes: form.selecionadosKeys.filter(k => k.startsWith("VISITANTE-")).map(k => { const id = Number(k.replace("VISITANTE-", "")); return { id, decisaoEspiritual: decisoesVisitantes[id] ?? "NENHUMA" }; }),
             membrosAusentes: pessoas.filter(p => p.tipo === "MEMBRO").filter(p => !form.selecionadosKeys.includes(p.uKey) && justificativas[p.id]).map(p => ({ membroId: p.id, justificativa: justificativas[p.id] })),
           }
           : { celulaId: Number(celulaId), dataReuniao: normalizarData(form.dataReuniao), realizada: false, motivoNaoRealizacao };
       await api.put(`/relatorios/${relatorioId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
-      setSucesso(true);
-      setTimeout(() => { setSucesso(false); if (onSalvo) onSalvo(); }, 2200);
+
+      // ✅ Abre modal elegante de confirmação, com textos ajustados para edição
+      if (relatorioRealizada) {
+        setModalRealizada({
+          total: totalEnviado,
+          estudo: estudoEnviado,
+          nomeCelula,
+          tituloTopo: "Alterações Salvas",
+          titulo: "Relatório Atualizado",
+          subtitulo: nomeCelula || "As alterações foram salvas com sucesso.",
+          botaoTexto: "Perfeito, obrigado!",
+        });
+      } else {
+        setModalNaoRealizada({
+          motivo: motivoEnviado,
+          nomeCelula,
+          tituloTopo: "Alterações Salvas",
+          titulo: "Relatório Atualizado",
+          subtitulo: "As alterações foram salvas com sucesso.",
+          botaoTexto: "Entendido",
+        });
+      }
     } catch (err) {
       alert(err.response?.data?.message || "Erro ao salvar alterações.");
     } finally { setSalvando(false); }
@@ -1057,9 +1096,34 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
       <div style={{ position: "relative" }}>
         <AuraStyles t={t} isDark={isDark} />
         <div className="aura-glow" />
+
+        {/* ✅ Modais elegantes de confirmação da edição */}
+        {modalRealizada && (
+            <ModalRealizadaSucesso
+                total={modalRealizada.total}
+                estudo={modalRealizada.estudo}
+                nomeCelula={modalRealizada.nomeCelula}
+                tituloTopo={modalRealizada.tituloTopo}
+                titulo={modalRealizada.titulo}
+                subtitulo={modalRealizada.subtitulo}
+                botaoTexto={modalRealizada.botaoTexto}
+                onClose={() => { setModalRealizada(null); if (onSalvo) onSalvo(); }}
+            />
+        )}
+        {modalNaoRealizada && (
+            <ModalNaoRealizadaSucesso
+                motivo={modalNaoRealizada.motivo}
+                nomeCelula={modalNaoRealizada.nomeCelula}
+                tituloTopo={modalNaoRealizada.tituloTopo}
+                titulo={modalNaoRealizada.titulo}
+                subtitulo={modalNaoRealizada.subtitulo}
+                botaoTexto={modalNaoRealizada.botaoTexto}
+                onClose={() => { setModalNaoRealizada(null); if (onSalvo) onSalvo(); }}
+            />
+        )}
+
         <div className="aura-content" style={{ paddingTop: 20 }}>
           <button className="aura-btn-back" onClick={onVoltar}><ArrowLeft size={13} /> Voltar</button>
-          {sucesso && <div className="aura-alert-success"><CheckCircle2 size={16} style={{ flexShrink: 0 }} />Relatório atualizado com sucesso!</div>}
           <div className="aura-alert-warn"><AlertTriangle size={15} style={{ flexShrink: 0, color: AURA.yellow }} />Modo edição — você está alterando um relatório já enviado.</div>
 
           <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})` }}>
@@ -1281,7 +1345,6 @@ export default function TelaRelatorio({ isDark = false }) {
           membrosAusentes: pessoas.filter(p => p.tipo === "MEMBRO").filter(p => !form.selecionadosKeys.includes(p.uKey) && justificativas[p.id]).map(p => ({ membroId: p.id, justificativa: justificativas[p.id] })),
         }, { headers: { Authorization: `Bearer ${token}` } });
       } else {
-        // ✅ URL corrigida: /relatorios/nao-realizada
         await api.post("/relatorios/nao-realizada", {
           celulaId: Number(form.celulaId),
           dataReuniao: form.dataReuniao,

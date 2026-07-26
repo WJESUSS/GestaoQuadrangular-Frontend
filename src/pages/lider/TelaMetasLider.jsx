@@ -206,6 +206,7 @@ export default function TelaMetasLider({ celula, isDark }) {
                 });
             } else {
                 await api.put(`/metas/${metaEditando.id}`, {
+                    celulaId:  celula.id,
                     tipoMeta:  form.tipoMeta,
                     metaTotal: parseInt(form.metaTotal),
                     mesAno:    form.mesAno,

@@ -9,15 +9,16 @@ import { AURA, theme } from "./liderTheme";
 
 /* ─── Constantes ───────────────────────────────────────────────────────── */
 const COLUNAS = [
-  { campo: "escolaBiblica", label: "EBQ",       labelSm: "EBQ", emoji: "📚", justField: "justEscolaBiblica" },
-  { campo: "quartaNoite",   label: "Quarta",     labelSm: "4ª",  emoji: "🌙", justField: "justQuartaNoite"   },
-  { campo: "quintaNoite",   label: "Quinta",     labelSm: "5ª",  emoji: "⭐", justField: "justQuintaNoite"   },
-  { campo: "domingoManha",  label: "Dom. Manhã", labelSm: "D.M", emoji: "🌅", justField: "justDomingoManha"  },
-  { campo: "domingoNoite",  label: "Dom. Noite", labelSm: "D.N", emoji: "🌟", justField: "justDomingoNoite"  },
+  { campo: "escolaBiblica", tipoLabel: "Escola", diaLabel: "Bíblica", label: "Escola Bíblica",    emoji: "📚", justField: "justEscolaBiblica" },
+  { campo: "quartaNoite",   tipoLabel: "Culto",   diaLabel: "Quarta",  label: "Culto de Quarta",   emoji: "🌙", justField: "justQuartaNoite"   },
+  { campo: "quintaNoite",   tipoLabel: "Culto",   diaLabel: "Quinta",  label: "Culto de Quinta",   emoji: "⭐", justField: "justQuintaNoite"   },
+  { campo: "domingoManha",  tipoLabel: "Manhã",   diaLabel: "Domingo", label: "Domingo de Manhã",  emoji: "🌅", justField: "justDomingoManha"  },
+  { campo: "domingoNoite",  tipoLabel: "Noite",   diaLabel: "Domingo", label: "Domingo à Noite",   emoji: "🌟", justField: "justDomingoNoite"  },
 ];
 
 const JUSTIFICATIVAS  = ["Trabalho", "Doença", "Viagem", "Outro"];
 const EMOJIS_JUST     = { Trabalho: "💼", Doença: "🤒", Viagem: "✈️", Outro: "📝" };
+const CORES_JUST      = { Trabalho: "#3D9BFF", Doença: "#FF4757", Viagem: "#22D3EE", Outro: "#FFB84D" };
 const HIST_PAGE_SIZE  = 5; // itens por página no histórico
 
 const draftKey      = (celulaId, inicio) => `ieq_discipulado_draft_${celulaId}_${inicio}`;
@@ -75,11 +76,15 @@ function RDStyles({ t, isDark }) {
     .rd-spin  { animation: rd-spin 1s linear infinite; }
     .rd-blink { animation: rd-blink 2s ease-in-out infinite; }
 
+    * { box-sizing: border-box; }
+
     .rd-root {
       font-family: 'Inter', sans-serif;
       position: relative;
       padding-bottom: 56px;
       color: ${t.text};
+      width: 100%;
+      overflow-x: hidden;
     }
     .rd-glow {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -92,6 +97,7 @@ function RDStyles({ t, isDark }) {
       max-width: 800px; margin: 0 auto;
       padding: 0 16px;
       display: flex; flex-direction: column; gap: 16px;
+      width: 100%;
     }
 
     /* ── Cards ── */
@@ -102,6 +108,7 @@ function RDStyles({ t, isDark }) {
       backdrop-filter: blur(24px);
       position: relative;
       overflow: hidden;
+      width: 100%;
     }
     .rd-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -225,9 +232,13 @@ function RDStyles({ t, isDark }) {
     }
     .rd-table-col-label {
       text-align: center;
-      font-size: 7.5px; font-weight: 600; letter-spacing: .12em;
+      font-size: 7.5px; font-weight: 600; letter-spacing: .1em;
       text-transform: uppercase; color: ${t.textMuted};
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
     }
+    .rd-table-col-tipo { font-weight: 700; color: ${t.textSec}; }
+    .rd-table-col-dia  { font-weight: 400; opacity: .75; }
+
     .rd-member-row {
       padding: 20px 22px;
       border-bottom: 1px solid ${t.border};
@@ -245,6 +256,7 @@ function RDStyles({ t, isDark }) {
     .rd-member-name {
       font-family: 'Playfair Display', serif;
       font-size: 15px; font-weight: 500; color: ${t.text}; margin: 0;
+      transition: color .3s ease, font-weight .3s ease;
     }
     .rd-member-id {
       font-size: 9px; font-weight: 500; letter-spacing: .14em;
@@ -257,33 +269,47 @@ function RDStyles({ t, isDark }) {
     }
     .rd-progress-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
 
-    /* ── Grid de presença (5 colunas responsivas) ── */
+    /* ── Grid de presença (5 colunas responsivas, sempre visíveis) ── */
     .rd-presence-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      width: 100%;
     }
     .rd-presence-btn {
       display: flex; flex-direction: column; align-items: center; gap: 6px;
-      padding: 10px 6px; border-radius: 12px; border: 1px solid; cursor: pointer;
+      padding: 10px 4px; border-radius: 12px; border: 1px solid; cursor: pointer;
       transition: all .2s; background: none; width: 100%; min-width: 0;
     }
     .rd-pb-emoji {
       font-size: 18px; transition: all .2s;
     }
+
+    /* Label do culto sempre empilhada: tipo em cima, dia embaixo */
     .rd-pb-label {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0;
       font-family: 'Inter', sans-serif;
-      font-size: 7.5px; font-weight: 600; letter-spacing: .1em;
-      text-transform: uppercase; white-space: nowrap;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.3;
+      width: 100%;
+      min-width: 0;
     }
-    .rd-pb-label-sm   { display: none; }
-    .rd-pb-label-full { display: inline; }
+    .rd-pb-label-tipo {
+      font-size: 7.6px; font-weight: 700; letter-spacing: .06em;
+      max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .rd-pb-label-dia {
+      font-size: 7px; font-weight: 500; letter-spacing: .04em; opacity: .8;
+      max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
 
     .rd-just-btn {
-      margin-top: 5px; padding: 3px 7px; border-radius: 99px;
+      margin-top: 5px; padding: 3px 6px; border-radius: 99px;
       border: 1px solid rgba(201,169,110,.25); background: transparent; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: 7px; font-weight: 500;
-      letter-spacing: .1em; display: flex; align-items: center; gap: 3px;
+      font-family: 'Inter', sans-serif; font-size: 6.8px; font-weight: 500;
+      letter-spacing: .08em; display: flex; align-items: center; gap: 3px;
       transition: all .15s; white-space: nowrap; color: ${t.textMuted};
       max-width: 100%; overflow: hidden; text-overflow: ellipsis;
     }
@@ -417,14 +443,15 @@ function RDStyles({ t, isDark }) {
 
     /* ── Detalhe histórico ── */
     .rd-detail-grid {
-      display: grid; grid-template-columns: 1fr repeat(5, 54px);
-      padding: 12px 22px; gap: 8px; align-items: center;
+      display: grid; grid-template-columns: 1fr repeat(5, minmax(0,1fr));
+      padding: 12px 22px; gap: 6px; align-items: center;
     }
 
     /* ── Scroll horizontal das tabelas (desktop apenas — ver override mobile abaixo) ── */
     .rd-table-scroll {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      width: 100%;
     }
     .rd-table-scroll::-webkit-scrollbar { height: 4px; }
     .rd-table-scroll::-webkit-scrollbar-thumb {
@@ -439,28 +466,38 @@ function RDStyles({ t, isDark }) {
     }
 
     /* ══════════════════════════════════════════════════════════════════
+       TABLET / TELAS MÉDIAS (<= 700px)
+       Reduz paddings e fontes para acomodar melhor a grade de presença.
+    ══════════════════════════════════════════════════════════════════ */
+    @media(max-width: 700px) {
+      .rd-content { padding: 0 12px; }
+      .rd-member-row { padding: 18px 16px; }
+      .rd-presence-grid { gap: 5px; }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
        MOBILE (<= 480px)
        A tabela deixa de ter largura mínima fixa e de rolar horizontalmente.
-       As colunas encolhem proporcionalmente (fr) para caber na tela toda,
-       o cabeçalho de coluna é ocultado (cada botão já mostra seu próprio
-       rótulo abreviado) e o texto do rótulo desaparece em telas muito
-       estreitas, restando apenas o ícone.
+       As colunas encolhem proporcionalmente (fr) para caber na tela toda
+       e o cabeçalho de coluna (desktop) é ocultado — cada botão já mostra
+       seu próprio rótulo empilhado (tipo do culto + dia).
     ══════════════════════════════════════════════════════════════════ */
     @media(max-width: 480px) {
-      .rd-header     { padding: 20px 16px; gap: 12px; }
+      .rd-header     { padding: 20px 14px; gap: 12px; }
       .rd-tabs       { width: 100%; }
       .rd-tab        { flex: 1; justify-content: center; padding: 9px 8px; font-size: 9px; }
 
-      .rd-date-bar   { padding: 14px 16px; }
-      .rd-date-input { max-width: 118px; font-size: 11px; }
+      .rd-date-bar   { padding: 14px 14px; }
+      .rd-date-input { max-width: 108px; font-size: 10.5px; }
 
-      .rd-hist-row   { padding: 14px 16px; gap: 8px; }
-      .rd-hist-head  { padding: 14px 16px; }
+      .rd-hist-row   { padding: 14px 14px; gap: 8px; }
+      .rd-hist-head  { padding: 14px 14px; }
       .rd-hist-stats { gap: 8px; }
       .rd-hist-date  { font-size: 9.5px; }
 
-      .rd-pag        { padding: 12px 14px; }
-      .rd-pag-info   { font-size: 9px; }
+      .rd-pag        { padding: 12px 12px; }
+      .rd-pag-info   { font-size: 8.5px; }
+      .rd-pag-btn    { width: 29px; height: 29px; }
 
       /* tabela principal: sem scroll, sem largura mínima */
       .rd-table-scroll { overflow-x: visible; }
@@ -469,29 +506,41 @@ function RDStyles({ t, isDark }) {
 
       .rd-table-head { display: none; }
 
-      .rd-member-row     { padding: 16px 12px; }
-      .rd-member-avatar  { width: 34px; height: 34px; font-size: 14px; border-radius: 9px; }
-      .rd-member-name    { font-size: 13.5px; }
-      .rd-member-id      { font-size: 8px; }
+      .rd-member-row     { padding: 15px 10px; }
+      .rd-member-avatar  { width: 32px; height: 32px; font-size: 13px; border-radius: 9px; }
+      .rd-member-name    { font-size: 13px; }
+      .rd-member-id      { font-size: 7.5px; }
 
-      .rd-presence-grid  { gap: 5px; }
-      .rd-presence-btn   { padding: 8px 2px 7px; border-radius: 10px; gap: 3px; }
+      .rd-presence-grid  { gap: 4px; }
+      .rd-presence-btn   { padding: 7px 2px 6px; border-radius: 10px; gap: 4px; }
       .rd-pb-emoji       { font-size: 15px; }
-      .rd-pb-label       { font-size: 6.3px; letter-spacing: .04em; }
-      .rd-pb-label-full  { display: none; }
-      .rd-pb-label-sm    { display: inline; }
+      .rd-pb-label-tipo  { font-size: 6.6px; }
+      .rd-pb-label-dia   { font-size: 6px; }
 
-      .rd-just-btn { margin-top: 3px; padding: 2px 3px; font-size: 6px; }
+      .rd-just-btn { margin-top: 3px; padding: 2px 4px; font-size: 5.6px; }
 
       /* detalhe do histórico segue a mesma lógica de colunas fluidas */
       .rd-detail-grid {
         grid-template-columns: 1fr repeat(5, minmax(0,1fr));
-        padding: 12px 10px; gap: 4px;
+        padding: 12px 8px; gap: 3px;
       }
     }
 
+    /* ══════════════════════════════════════════════════════════════════
+       TELAS MUITO ESTREITAS (<= 360px) — ex: iPhone SE
+    ══════════════════════════════════════════════════════════════════ */
     @media(max-width: 360px) {
-      .rd-pb-label { display: none; } /* telas muito estreitas: só o ícone */
+      .rd-member-row     { padding: 13px 8px; }
+      .rd-presence-btn   { padding: 6px 1px 5px; }
+      .rd-pb-emoji       { font-size: 14px; }
+      .rd-pb-label-tipo  { font-size: 6px; }
+      .rd-pb-label-dia   { font-size: 5.4px; }
+      .rd-just-btn       { font-size: 5px; padding: 2px 3px; }
+      .rd-member-name    { font-size: 12px; }
+    }
+
+    @media(max-width: 320px) {
+      .rd-pb-label-dia { display: none; } /* telas extremamente estreitas: só tipo + ícone */
     }
 
     /* ── Modal justificativa ── */
@@ -569,10 +618,10 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
               margin: "0 auto 14px", fontSize: 22,
             }}>📋</div>
             <p className="rd-eyebrow" style={{ marginBottom: 6 }}>Justificativa de Falta</p>
-            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 500, color: t.text, margin: "0 0 3px" }}>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontWeight: 600, color: selecionado ? CORES_JUST[selecionado] : AURA.goldLight, textShadow: selecionado ? `0 0 16px ${CORES_JUST[selecionado]}66` : "0 0 16px rgba(201,169,110,.5)", margin: "0 0 3px", transition: "color .25s, text-shadow .25s" }}>
               {nomeMembro}
             </p>
-            <p style={{ fontSize: 10, fontWeight: 500, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: 0 }}>
+            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "#D97757", textShadow: "0 0 10px rgba(217,119,87,.4)", margin: 0 }}>
               {labelCulto}
             </p>
           </div>
@@ -925,10 +974,11 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                 <div className="rd-table-inner-sm">
                   <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
                     <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
-                    {COLUNAS.map(({ label, emoji }) => (
-                        <div key={label} className="rd-table-col-label">
-                          <div style={{ fontSize: 14, marginBottom: 3 }}>{emoji}</div>
-                          {label}
+                    {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo }) => (
+                        <div key={campo} className="rd-table-col-label">
+                          <div style={{ fontSize: 14, marginBottom: 2 }}>{emoji}</div>
+                          <span className="rd-table-col-tipo">{tipoLabel}</span>
+                          <span className="rd-table-col-dia">{diaLabel}</span>
                         </div>
                     ))}
                   </div>
@@ -1349,10 +1399,11 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                     <div className="rd-table-inner">
                       <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 1fr)" }}>
                         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
-                        {COLUNAS.map(({ label, emoji }) => (
-                            <div key={label} className="rd-table-col-label">
-                              <div style={{ fontSize: 15, marginBottom: 3 }}>{emoji}</div>
-                              {label}
+                        {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo }) => (
+                            <div key={campo} className="rd-table-col-label">
+                              <div style={{ fontSize: 15, marginBottom: 2 }}>{emoji}</div>
+                              <span className="rd-table-col-tipo">{tipoLabel}</span>
+                              <span className="rd-table-col-dia">{diaLabel}</span>
                             </div>
                         ))}
                       </div>
@@ -1361,13 +1412,34 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                         const p     = presencas[i];
                         const total = p ? COLUNAS.filter((c) => p[c.campo]).length : 0;
                         const pct   = Math.round((total / COLUNAS.length) * 100);
+                        /* cor do nome do membro reage às marcações de presença — tons vívidos */
+                        const nomeCor = total === COLUNAS.length
+                            ? "#2ED573"  // verde vívido — presença completa
+                            : total > 0
+                                ? "#D97757"  // terracota/rosé elegante — presença parcial
+                                : t.text;
+                        const avatarBg = total === COLUNAS.length
+                            ? "linear-gradient(135deg, rgba(46,213,115,.28), rgba(46,213,115,.08))"
+                            : total > 0
+                                ? "linear-gradient(135deg, rgba(217,119,87,.28), rgba(217,119,87,.08))"
+                                : "linear-gradient(135deg, rgba(201,169,110,.2), rgba(201,169,110,.06))";
+                        const avatarBorder = total === COLUNAS.length
+                            ? "rgba(46,213,115,.45)"
+                            : total > 0
+                                ? "rgba(217,119,87,.45)"
+                                : "rgba(201,169,110,.22)";
+                        const nomeGlow = total === COLUNAS.length
+                            ? "0 0 14px rgba(46,213,115,.45)"
+                            : total > 0
+                                ? "0 0 14px rgba(217,119,87,.4)"
+                                : "none";
                         return (
                             <div key={m.id} className="rd-member-row" style={{ animationDelay: `${i * 0.04}s` }}>
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                  <div className="rd-member-avatar">{m.nome.charAt(0)}</div>
+                                  <div className="rd-member-avatar" style={{ background: avatarBg, borderColor: avatarBorder, color: nomeCor, transition: "background .3s, border-color .3s, color .3s" }}>{m.nome.charAt(0)}</div>
                                   <div>
-                                    <p className="rd-member-name">{m.nome}</p>
+                                    <p className="rd-member-name" style={{ color: nomeCor, fontWeight: total > 0 ? 700 : 500, textShadow: nomeGlow }}>{m.nome}</p>
                                     <p className="rd-member-id">ID #{m.id}</p>
                                   </div>
                                 </div>
@@ -1382,28 +1454,37 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                               </div>
 
                               <div className="rd-presence-grid">
-                                {COLUNAS.map(({ campo, label, labelSm, emoji, justField }) => {
+                                {COLUNAS.map(({ campo, tipoLabel, diaLabel, label, emoji, justField }) => {
                                   const marcado = p?.[campo];
                                   const justVal = p?.[justField] ?? "";
                                   const temJust = !marcado && !!justVal;
                                   return (
-                                      <div key={campo} style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+                                      <div key={campo} style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0, width: "100%" }}>
                                         <button
                                             className="rd-presence-btn"
                                             onClick={() => alterarPresenca(i, campo)}
-                                            title={label}
+                                            title={temJust ? `${label} — ${justVal}` : label}
                                             style={{
-                                              borderColor: marcado ? "rgba(201,169,110,.5)" : t.border,
-                                              background: marcado ? (isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.07)") : "transparent",
+                                              borderColor: marcado
+                                                  ? "rgba(201,169,110,.5)"
+                                                  : temJust
+                                                      ? `${CORES_JUST[justVal]}66`
+                                                      : t.border,
+                                              background: marcado
+                                                  ? (isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.07)")
+                                                  : temJust
+                                                      ? `${CORES_JUST[justVal]}14`
+                                                      : "transparent",
                                               transform: marcado ? "scale(1.04)" : "scale(1)",
                                             }}
                                         >
-                                          <span className="rd-pb-emoji" style={{ opacity: marcado ? 1 : 0.4, filter: marcado ? "none" : "grayscale(1)" }}>
-                                            {marcado ? "✅" : emoji}
+                                          <span className="rd-pb-emoji" style={{ opacity: marcado || temJust ? 1 : 0.4, filter: marcado || temJust ? "none" : "grayscale(1)" }}>
+                                            {marcado ? "✅" : temJust ? EMOJIS_JUST[justVal] : emoji}
                                           </span>
-                                          <span className="rd-pb-label" style={{ color: marcado ? AURA.gold : t.textMuted }}>
-                                            <span className="rd-pb-label-full">{label}</span>
-                                            <span className="rd-pb-label-sm">{labelSm}</span>
+                                          {/* Label sempre empilhada: tipo do culto em cima, dia embaixo */}
+                                          <span className="rd-pb-label" style={{ color: marcado ? AURA.gold : temJust ? CORES_JUST[justVal] : t.textMuted }}>
+                                            <span className="rd-pb-label-tipo">{tipoLabel}</span>
+                                            <span className="rd-pb-label-dia">{diaLabel}</span>
                                           </span>
                                         </button>
                                         {!marcado && (
