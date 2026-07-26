@@ -306,10 +306,10 @@ function RDStyles({ t, isDark }) {
     }
 
     .rd-just-btn {
-      margin-top: 5px; padding: 3px 6px; border-radius: 99px;
+      margin-top: 5px; padding: 4px 8px; border-radius: 99px;
       border: 1px solid rgba(201,169,110,.25); background: transparent; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: 6.8px; font-weight: 500;
-      letter-spacing: .08em; display: flex; align-items: center; gap: 3px;
+      font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 600;
+      letter-spacing: .05em; display: flex; align-items: center; gap: 4px;
       transition: all .15s; white-space: nowrap; color: ${t.textMuted};
       max-width: 100%; overflow: hidden; text-overflow: ellipsis;
     }
@@ -517,7 +517,7 @@ function RDStyles({ t, isDark }) {
       .rd-pb-label-tipo  { font-size: 6.6px; }
       .rd-pb-label-dia   { font-size: 6px; }
 
-      .rd-just-btn { margin-top: 3px; padding: 2px 4px; font-size: 5.6px; }
+      .rd-just-btn { margin-top: 4px; padding: 3px 7px; font-size: 8px; }
 
       /* detalhe do histórico segue a mesma lógica de colunas fluidas */
       .rd-detail-grid {
@@ -535,7 +535,7 @@ function RDStyles({ t, isDark }) {
       .rd-pb-emoji       { font-size: 14px; }
       .rd-pb-label-tipo  { font-size: 6px; }
       .rd-pb-label-dia   { font-size: 5.4px; }
-      .rd-just-btn       { font-size: 5px; padding: 2px 3px; }
+      .rd-just-btn       { font-size: 7px; padding: 3px 6px; }
       .rd-member-name    { font-size: 12px; }
     }
 
