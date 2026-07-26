@@ -1126,30 +1126,6 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
           <button className="aura-btn-back" onClick={onVoltar}><ArrowLeft size={13} /> Voltar</button>
           <div className="aura-alert-warn"><AlertTriangle size={15} style={{ flexShrink: 0, color: AURA.yellow }} />Modo edição — você está alterando um relatório já enviado.</div>
 
-          <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})` }}>
-            <div className="aura-hero-stripes" />
-            <div className="aura-hero-inner">
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,.12)", border: "1.5px solid rgba(255,255,255,.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Edit3 size={22} style={{ color: "#fff" }} />
-                </div>
-                <div>
-                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>Editando Relatório #{relatorioId}</p>
-                  <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0 }}>{nomeCelula}</h2>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <UserCheck size={16} style={{ color: "#fff" }} />
-                </div>
-                <div>
-                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 2px" }}>Líder</p>
-                  <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: "#fff", margin: 0 }}>{nomeLider}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className="aura-card" style={{ padding: "22px 24px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
               <div>
@@ -1555,33 +1531,6 @@ export default function TelaRelatorio({ isDark = false }) {
                       Rascunho restaurado — suas marcações anteriores foram recuperadas.
                     </div>
                 )}
-
-                <div className="aura-hero" style={{ background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` }}>
-                  <div className="aura-hero-stripes" />
-                  <div className="aura-hero-inner">
-                    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-                      <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                        <div className="aura-pulse" style={{ width: 66, height: 66, position: "absolute", border: "1px solid rgba(201,169,110,.35)", borderRadius: "50%" }} />
-                        <div style={{ width: 50, height: 50, borderRadius: "50%", background: "rgba(255,255,255,.1)", border: "1.5px solid rgba(255,255,255,.25)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-                          <IEQCross size={34} />
-                        </div>
-                      </div>
-                      <div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 4px" }}>Relatório Semanal</p>
-                        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0 }}>{nomeCelula}</h2>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <UserCheck size={16} style={{ color: "#fff" }} />
-                      </div>
-                      <div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 2px" }}>Líder Responsável</p>
-                        <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: "#fff", margin: 0 }}>{nomeLider}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
                 <div className="aura-card" style={{ padding: "22px 24px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>

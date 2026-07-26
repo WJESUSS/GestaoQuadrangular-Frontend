@@ -669,14 +669,6 @@ export default function DashboardLider() {
               </div>
               <div className="dl-title-block">
                 <p className="dl-eyebrow">Painel do Líder</p>
-
-                <p className="dl-subtitle" style={{ fontSize: 13, fontWeight: 500, color: t.textSec }}>
-                  {" "}
-
-                </p>
-                <p className="dl-subtitle" style={{ fontSize: 12, fontWeight: 400, color: t.textMuted }}>
-                  👤 {usuarioLogado?.nome || ""}
-                </p>
               </div>
             </div>
 
@@ -697,8 +689,18 @@ export default function DashboardLider() {
             </div>
           </motion.header>
 
-          {/* ── Divider + Badge ── */}
+          {/* ── Divider + Nome do Líder em destaque + Badge da Célula ── */}
           <div className="dl-divider"><div className="dl-divider-dot" /></div>
+
+          <div style={{ textAlign: "center", marginBottom: 14, padding: "0 12px" }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: AURA.gold, opacity: .75, margin: "0 0 5px" }}>
+              Líder Responsável
+            </p>
+            <p style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(18px, 4.5vw, 23px)", fontWeight: 600, color: t.text, margin: 0, lineHeight: 1.25, wordBreak: "break-word" }}>
+              {usuarioLogado?.nome || "Líder"}
+            </p>
+          </div>
+
           <div className="dl-badge-center">
             <span className="dl-badge">
               <span className="dl-badge-dot dl-blink" />

@@ -34,7 +34,7 @@ function obterSemanaAtual() {
   return { inicio: fmt(dom), fim: fmt(sab) };
 }
 
-/* ─── Logo IEQ ─────────────────────────────────────────────────────────── */
+/* ─── Logo IEQ (mantida apenas para o toast de sucesso e loading) ──────── */
 function IEQCross({ size = 28 }) {
   return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -119,21 +119,13 @@ function RDStyles({ t, isDark }) {
     .rd-header {
       padding: 26px 28px;
       display: flex; flex-wrap: wrap; align-items: center;
-      justify-content: space-between; gap: 16px;
+      justify-content: flex-end; gap: 16px;
     }
-    .rd-avatar-wrap { position: relative; flex-shrink: 0; }
-    .rd-ring {
-      position: absolute; border-radius: 50%;
-      border: 1px solid rgba(201,169,110,.22);
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-      animation: rd-pulse 3s ease-in-out infinite;
-    }
-    .rd-logo-circle {
-      width: 50px; height: 50px; border-radius: 50%;
-      border: 1.5px solid rgba(201,169,110,.28);
-      background: ${isDark ? "rgba(18,18,26,.99)" : "#fff"};
-      display: flex; align-items: center; justify-content: center;
-      position: relative; z-index: 1;
+    .rd-saved-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 8.5px; font-weight: 500; letter-spacing: .14em;
+      text-transform: uppercase; color: ${AURA.gold};
+      animation: rd-blink 1.2s ease 2;
     }
     .rd-eyebrow {
       font-size: 9px; font-weight: 500; letter-spacing: .2em;
@@ -145,12 +137,6 @@ function RDStyles({ t, isDark }) {
       margin: 0; letter-spacing: .02em; line-height: 1.2;
     }
     .rd-sub { font-size: 11px; font-weight: 300; color: ${t.textSec}; margin: 3px 0 0; }
-    .rd-saved-badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 8.5px; font-weight: 500; letter-spacing: .14em;
-      text-transform: uppercase; color: ${AURA.gold};
-      animation: rd-blink 1.2s ease 2;
-    }
 
     /* ── Abas ── */
     .rd-tabs { display: flex; gap: 8px; }
@@ -1299,22 +1285,11 @@ export default function RelatorioDiscipulado({ isDark = false }) {
               </div>
           )}
 
-          {/* ── Header ── */}
+          {/* ── Header (sem nome da célula e sem logo — apenas indicador de salvo + abas) ── */}
           <div className="rd-card">
             <div className="rd-header">
-              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <div className="rd-avatar-wrap">
-                  <div className="rd-ring" style={{ width: 66, height: 66 }} />
-                  <div className="rd-ring" style={{ width: 52, height: 52, animationDelay: ".9s" }} />
-                  <div className="rd-logo-circle"><IEQCross size={28} /></div>
-                </div>
-                <div>
-                  <p className="rd-eyebrow">Discipulado</p>
-                  <h2 className="rd-title">{celula?.nome || "Célula"}</h2>
-                  <div style={{ height: 16, marginTop: 3 }}>
-                    {salvouAgora && <span className="rd-saved-badge"><Save size={10} /> Rascunho salvo</span>}
-                  </div>
-                </div>
+              <div style={{ height: 16 }}>
+                {salvouAgora && <span className="rd-saved-badge"><Save size={10} /> Rascunho salvo</span>}
               </div>
               <div className="rd-tabs">
                 <button className={`rd-tab ${aba === "relatorio" ? "rd-tab-active" : "rd-tab-inactive"}`}
