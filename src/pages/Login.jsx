@@ -326,7 +326,7 @@ export default function Login() {
             if (st===429) { setErrLogin({ tipo:"limite", titulo:"Acesso bloqueado temporariamente", msg:bd?.mensagem??"Aguarde alguns minutos antes de tentar novamente." }); }
             else if (st===403 && bd?.erro) {
                 /* Conta suspensa/desativada — backend retorna { erro, mensagem } */
-                setErrLogin({ tipo:"suspensa", titulo:bd.erro, msg:bd?.mensagem??"Sua conta está inativa. Entre em contato com o administrador." });
+                setErrLogin({ tipo:"suspensa", titulo:bd.erro, msg:bd?.mensagem??"Sua conta foi suspensa por ficar 2 semanas sem acesso. Entre em contato com o administrador para reativá-la." });
             }
             else if (st===401||st===403) {
                 const rest = bd?.tentativasRestantes??0;
