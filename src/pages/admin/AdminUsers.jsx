@@ -1,6 +1,3 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// AdminUsers — com painel WhatsApp Registros + Bloqueios integrado
-// ══════════════════════════════════════════════════════════════════════════════
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import api from "../../services/api.js";
@@ -46,7 +43,7 @@ import TesourariaDizimistas      from "../tesouraria/TesourariaDizimistas";
 import TesourariaComparativo     from "../tesouraria/TesourariaComparativo";
 import HistoricoAuditoria        from "./HistoricoAuditoria";
 
-/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+
 const AURA = {
   gold:       "#C9A96E",
   goldLight:  "#E8D5A3",
@@ -441,9 +438,9 @@ function GlobalStyles({ t, isDark }) {
     .adm-select option:checked, .adm-select option:hover { background: ${isDark ? "#1c1c2c" : "#EFE7D6"}; color: ${t.text}; }
     .adm-divider { height: 1px; margin: 18px 0; background: linear-gradient(90deg, transparent 0%, ${t.border} 30%, ${t.border} 70%, transparent 100%); }
 
-    .adm-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; gap: 14px; border-bottom: 1px solid ${t.border}; transition: background .15s; flex-wrap: wrap; }
+    .adm-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; gap: 14px; border-bottom: 1px solid ${t.border}; transition: background .18s ease; flex-wrap: wrap; }
     .adm-row:last-child { border-bottom: none; }
-    .adm-row:hover { background: ${isDark ? "rgba(201,169,110,.025)" : "rgba(201,169,110,.03)"}; }
+    .adm-row:hover { background: inherit; }
     .adm-row-l { display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; }
     .adm-row-r { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
     @media (max-width: 639px) {
@@ -457,7 +454,7 @@ function GlobalStyles({ t, isDark }) {
     .adm-avatar-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: #fff; }
     .adm-avatar-overlay { position: absolute; inset: 0; border-radius: 12px; background: rgba(0,0,0,.52); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .18s; }
     .adm-avatar:hover .adm-avatar-overlay { opacity: 1; }
-    .adm-row-name { font-size: 12.5px; font-weight: 600; color: ${t.text}; margin: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .adm-row-name { font-size: 12.5px; font-weight: 600; color: ${t.text}; margin: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; }
     .adm-row-email { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .adm-badge { padding: 3px 10px; border-radius: 99px; font-size: 8px; font-weight: 600; letter-spacing: .1em; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
     .adm-action-btn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid ${t.border}; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: ${t.textMuted}; transition: all .18s; }
@@ -508,9 +505,9 @@ function GlobalStyles({ t, isDark }) {
     .wa-p-status    { background: rgba(196,140,0,.08);  color: ${AURA.yellowDark}; }
     .wa-tipo-badge  { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; border: 0.5px solid ${t.border}; color: ${t.textMuted}; }
     .wa-mono { font-family: monospace; font-size: 11px; color: ${t.textSec}; }
-    .wa-row { display: flex; align-items: center; padding: 11px 20px; gap: 12px; border-bottom: 1px solid ${t.border}; cursor: pointer; transition: background .14s; }
+    .wa-row { display: flex; align-items: center; padding: 11px 20px; gap: 12px; border-bottom: 1px solid ${t.border}; cursor: pointer; transition: background .18s ease; }
     .wa-row:last-child { border-bottom: none; }
-    .wa-row:hover { background: ${isDark ? "rgba(37,211,102,.025)" : "rgba(37,211,102,.03)"}; }
+    .wa-row:hover { background: ${isDark ? "rgba(37,211,102,.12)" : "rgba(37,211,102,.13)"}; }
     .wa-col-num  { width: 32px; flex-shrink: 0; font-size: 11px; color: ${t.textMuted}; text-align: right; }
     .wa-col-tipo { width: 90px; flex-shrink: 0; }
     .wa-col-fone { width: 140px; flex-shrink: 0; }
@@ -856,7 +853,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
     });
   };
 
-  // ── CORREÇÃO 1: size:200 para buscar todos os registros de uma vez ──
   const carregar = useCallback(async () => {
     setLoading(true); setOffline(false);
     try {
@@ -1040,15 +1036,12 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
               </AnimatePresence>
           )}
 
-          {/* ── CORREÇÃO 2: Paginação elegante com reticências + "Ir para" ── */}
           {totalPags > 1 && (
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 20px", borderTop:`1px solid ${t.border}`, flexWrap:"wrap", gap:8 }}>
-                {/* Contagem */}
                 <span style={{ fontSize:11, color:t.textMuted, whiteSpace:"nowrap" }}>
                   {(pag-1)*POR_PAG+1}–{Math.min(pag*POR_PAG, filtrados.length)} de {filtrados.length} registros
                 </span>
 
-                {/* Números com reticências dinâmicas */}
                 <div style={{ display:"flex", gap:4, alignItems:"center" }}>
                   <button className="adm-ico-btn" style={{ width:30, height:30 }}
                           disabled={pag===1} onClick={() => setPag(p => p-1)}>
@@ -1091,7 +1084,6 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
                   </button>
                 </div>
 
-                {/* Ir para página */}
                 <div style={{ display:"flex", alignItems:"center", gap:6 }}>
                   <span style={{ fontSize:11, color:t.textMuted, whiteSpace:"nowrap" }}>Ir para</span>
                   <input
@@ -1292,8 +1284,8 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
                     <motion.div key={item.id ?? item.numero}
                                 initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -16 }}
                                 transition={{ delay: i * .03 }}
-                                style={{ display: "flex", alignItems: "center", padding: "13px 20px", gap: 12, borderBottom: `1px solid ${t.border}`, transition: "background .14s" }}
-                                onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,16,46,.025)"; }}
+                                style={{ display: "flex", alignItems: "center", padding: "13px 20px", gap: 12, borderBottom: `1px solid ${t.border}`, transition: "background .18s ease" }}
+                                onMouseEnter={e => { e.currentTarget.style.background = isDark ? "rgba(200,16,46,.10)" : "rgba(200,16,46,.09)"; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = ""; }}>
                       <span style={{ width: 28, flexShrink: 0, fontSize: 11, color: t.textMuted, textAlign: "right" }}>{i + 1}</span>
                       <span style={{ width: 170, flexShrink: 0, display: "flex", alignItems: "center", gap: 7 }}>
@@ -1346,6 +1338,8 @@ export default function AdminUsers() {
   const [editandoId,     setEditandoId]     = useState(null);
   const [exitConfirm,    setExitConfirm]    = useState(false);
   const [form,           setForm]           = useState({ nome:"", email:"", senha:"", perfil:"LIDER_CELULA", telefoneWhatsapp:"55" });
+  const [buscaUsu,       setBuscaUsu]       = useState("");
+  const [filtroStatusUsu,setFiltroStatusUsu]= useState(""); // "", "ativo", "suspenso"
   const [isDark,         setIsDark]         = useState(() => localStorage.getItem("theme") === "dark");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [megaOpenId,     setMegaOpenId]     = useState(null);
@@ -1546,6 +1540,18 @@ export default function AdminUsers() {
   const itemAtivo  = SECOES.flatMap(s => s.itens).find(i => i.key === moduloAtivo);
   const ativos     = usuarios.filter(u =>  u.ativo).length;
   const suspensos  = usuarios.filter(u => !u.ativo).length;
+
+  // ── Ordenação alfabética + busca + filtro de status ──
+  const usuariosExibidos = usuarios
+      .filter(u => {
+        const q = buscaUsu.trim().toLowerCase();
+        const bateBusca = !q || (u.nome||"").toLowerCase().includes(q) || (u.email||"").toLowerCase().includes(q);
+        const bateStatus = !filtroStatusUsu
+            || (filtroStatusUsu === "ativo"    && u.ativo)
+            || (filtroStatusUsu === "suspenso" && !u.ativo);
+        return bateBusca && bateStatus;
+      })
+      .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "pt-BR", { sensitivity: "base" }));
 
   if (loading && usuarios.length === 0) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? "#080810" : "#F2EDE4" }}>
@@ -1803,22 +1809,78 @@ export default function AdminUsers() {
                         <div className="adm-card-header" style={{ padding:"18px 22px", borderBottom:`1px solid ${t.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap" }}>
                           <div>
                             <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:17, fontWeight:500, color:t.text, margin:0, lineHeight:1.1 }}>Base de Usuários</h3>
-                            <p style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:"2px 0 0" }}>{usuarios.length} registros</p>
+                            <p style={{ fontSize:11, fontWeight:300, color:t.textMuted, margin:"2px 0 0" }}>
+                              {usuariosExibidos.length} de {usuarios.length} registro{usuarios.length !== 1 ? "s" : ""}
+                            </p>
                           </div>
                           <button className="adm-btn-ghost" style={{ padding:"8px 14px", fontSize:8, letterSpacing:".14em" }} onClick={carregarUsuarios}>
                             <RefreshCcw size={12} style={{ animation:loading?"adm-spin 1s linear infinite":"none" }}/> Atualizar
                           </button>
                         </div>
+
+                        <div style={{ padding:"12px 22px", borderBottom:`1px solid ${t.border}`, display:"flex", gap:8, flexWrap:"wrap" }}>
+                          <div style={{ position:"relative", flex:"1 1 220px", minWidth:180 }}>
+                            <Search size={13} style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:AURA.gold, opacity:.5, pointerEvents:"none" }}/>
+                            <input
+                                className="adm-input"
+                                style={{ padding:"9px 12px 9px 34px", fontSize:13, borderRadius:9 }}
+                                placeholder="Buscar por nome ou e-mail..."
+                                value={buscaUsu}
+                                onChange={e => setBuscaUsu(e.target.value)}
+                            />
+                          </div>
+                          <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+                            {[
+                              { key:"",         label:"Todos",     count:usuarios.length },
+                              { key:"ativo",    label:"Ativos",    count:ativos          },
+                              { key:"suspenso", label:"Suspensos", count:suspensos       },
+                            ].map(f => {
+                              const on = filtroStatusUsu === f.key;
+                              const cor = f.key === "ativo" ? AURA.green : f.key === "suspenso" ? AURA.red : AURA.blue;
+                              return (
+                                  <button key={f.key} onClick={() => setFiltroStatusUsu(f.key)}
+                                          style={{
+                                            display:"flex", alignItems:"center", gap:6,
+                                            padding:"8px 13px", borderRadius:9, cursor:"pointer",
+                                            fontFamily:"'Inter',sans-serif", fontSize:10.5, fontWeight:600, letterSpacing:".04em",
+                                            whiteSpace:"nowrap", transition:"all .18s",
+                                            border:`1px solid ${on ? cor+"55" : t.border}`,
+                                            background: on ? cor+"14" : "transparent",
+                                            color: on ? cor : t.textSec,
+                                          }}>
+                                    {f.label}
+                                    <span style={{
+                                      fontSize:9, fontWeight:700, padding:"1px 6px", borderRadius:99,
+                                      background: on ? cor+"22" : (isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)"),
+                                      color: on ? cor : t.textMuted,
+                                    }}>{f.count}</span>
+                                  </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
                         <AnimatePresence>
-                          {usuarios.map((u, i) => {
+                          {usuariosExibidos.length === 0 ? (
+                              <div style={{ padding:"52px 20px", textAlign:"center", color:t.textMuted }}>
+                                <Users size={28} style={{ marginBottom:10, opacity:.35 }}/>
+                                <p style={{ fontSize:13, fontWeight:500, margin:"0 0 4px", color:t.textSec }}>Nenhum usuário encontrado</p>
+                                <p style={{ fontSize:11, margin:0 }}>Ajuste a busca ou o filtro de status.</p>
+                              </div>
+                          ) : usuariosExibidos.map((u, i) => {
                             const temP  = pendentes.has(u.id);
                             const eApr  = aprovando === u.id;
                             const eFoto = uploadandoFoto === u.id;
                             return (
                                 <motion.div key={u.id} className="adm-row"
-                                            initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-16 }}
-                                            transition={{ delay: i*.025 }}
-                                            style={{ borderLeft:`3px solid ${temP ? AURA.yellow : "transparent"}` }}>
+                                             initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-16 }}
+                                             transition={{ delay: i*.025 }}
+                                             onMouseEnter={e => { e.currentTarget.style.background = temP ? (isDark?"rgba(196,140,0,.22)":"rgba(196,140,0,.25)") : (u.ativo ? (isDark?"rgba(5,150,105,.30)":"rgba(5,150,105,.35)") : (isDark?"rgba(200,16,46,.30)":"rgba(200,16,46,.35)")); e.currentTarget.style.boxShadow = `inset 0 0 0 1px ${temP ? AURA.yellow+"44" : u.ativo ? AURA.green+"44" : AURA.red+"44"}`; }}
+                                             onMouseLeave={e => { e.currentTarget.style.background = temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")); e.currentTarget.style.boxShadow = "none"; }}
+                                             style={{
+                                               borderLeft:`3px solid ${temP ? AURA.yellow : u.ativo ? AURA.green+"55" : AURA.red+"55"}`,
+                                               background: temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")),
+                                             }}>
                                   <div className="adm-row-l">
                                     <div className="adm-avatar"
                                          style={{ border:`1.5px solid ${temP?AURA.yellow+"55":t.border}`, opacity:u.ativo?1:.5 }}
@@ -1835,7 +1897,9 @@ export default function AdminUsers() {
                                       </div>
                                     </div>
                                     <div style={{ flex:1, minWidth:0 }}>
-                                      <p className="adm-row-name">{u.nome}</p>
+                                      <p className="adm-row-name">
+                                        {u.nome}
+                                      </p>
                                       <p className="adm-row-email">{u.email}</p>
                                     </div>
                                   </div>
@@ -1862,13 +1926,13 @@ export default function AdminUsers() {
                                         </>
                                     )}
                                     {[
-                                      { icon:<Pencil size={14}/>, title:"Editar",    fn:() => abrirEdicao(u),       hc:AURA.blue,       hb:"rgba(0,61,165,.08)"  },
-                                      { icon:<Power size={14}/>,  title:"Suspender", fn:() => alternarStatus(u.id), hc:AURA.yellowDark, hb:"rgba(196,140,0,.08)" },
-                                      { icon:<Trash2 size={14}/>, title:"Excluir",   fn:() => deletarUsuario(u.id), hc:AURA.red,        hb:"rgba(200,16,46,.08)" },
+                                      { icon:<Pencil size={14}/>, title:"Editar",    fn:() => abrirEdicao(u),       hc:AURA.blue,       hb:"rgba(0,61,165,.14)"  },
+                                      { icon:<Power size={14}/>,  title:"Suspender", fn:() => alternarStatus(u.id), hc:AURA.yellowDark, hb:"rgba(196,140,0,.14)" },
+                                      { icon:<Trash2 size={14}/>, title:"Excluir",   fn:() => deletarUsuario(u.id), hc:AURA.red,        hb:"rgba(200,16,46,.14)" },
                                     ].map(btn => (
                                         <button key={btn.title} className="adm-action-btn" onClick={btn.fn} title={btn.title}
-                                                onMouseEnter={e => { e.currentTarget.style.color=btn.hc; e.currentTarget.style.background=btn.hb; e.currentTarget.style.borderColor=btn.hc+"44"; }}
-                                                onMouseLeave={e => { e.currentTarget.style.color=t.textMuted; e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor=t.border; }}>
+                                                onMouseEnter={e => { e.currentTarget.style.color=btn.hc; e.currentTarget.style.background=btn.hb; e.currentTarget.style.borderColor=btn.hc+"55"; e.currentTarget.style.transform="translateY(-1px)"; e.currentTarget.style.boxShadow=`0 4px 12px ${btn.hc}22`; }}
+                                                onMouseLeave={e => { e.currentTarget.style.color=t.textMuted; e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor=t.border; e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
                                           {btn.icon}
                                         </button>
                                     ))}
