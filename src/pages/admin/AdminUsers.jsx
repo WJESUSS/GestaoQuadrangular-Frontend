@@ -438,9 +438,8 @@ function GlobalStyles({ t, isDark }) {
     .adm-select option:checked, .adm-select option:hover { background: ${isDark ? "#1c1c2c" : "#EFE7D6"}; color: ${t.text}; }
     .adm-divider { height: 1px; margin: 18px 0; background: linear-gradient(90deg, transparent 0%, ${t.border} 30%, ${t.border} 70%, transparent 100%); }
 
-    .adm-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; gap: 14px; border-bottom: 1px solid ${t.border}; transition: background .18s ease; flex-wrap: wrap; }
-    .adm-row:last-child { border-bottom: none; }
-    .adm-row:hover { background: inherit; }
+    .adm-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; gap: 14px; border-bottom: 1px solid ${t.border}; transition: all .25s ease; flex-wrap: wrap; border-radius: 12px; margin-bottom: 4px; }
+    .adm-row:last-child { border-bottom: none; margin-bottom: 0; }
     .adm-row-l { display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; }
     .adm-row-r { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
     @media (max-width: 639px) {
@@ -454,11 +453,11 @@ function GlobalStyles({ t, isDark }) {
     .adm-avatar-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: #fff; }
     .adm-avatar-overlay { position: absolute; inset: 0; border-radius: 12px; background: rgba(0,0,0,.52); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .18s; }
     .adm-avatar:hover .adm-avatar-overlay { opacity: 1; }
-    .adm-row-name { font-size: 12.5px; font-weight: 600; color: ${t.text}; margin: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; }
-    .adm-row-email { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .adm-row-name { font-size: 13px; font-weight: 600; color: ${t.text}; margin: 0; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; letter-spacing: .01em; }
+    .adm-row-email { font-size: 11.5px; font-weight: 400; color: ${t.textMuted}; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .adm-badge { padding: 3px 10px; border-radius: 99px; font-size: 8px; font-weight: 600; letter-spacing: .1em; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
-    .adm-action-btn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid ${t.border}; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: ${t.textMuted}; transition: all .18s; }
-    .adm-action-btn:hover { transform: translateY(-1px); }
+    .adm-action-btn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid ${t.border}; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: ${t.textMuted}; transition: all .2s ease; }
+    .adm-action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
     .adm-pending-action { display: flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 8px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; transition: all .2s; }
 
     .adm-toast {
@@ -1875,8 +1874,8 @@ export default function AdminUsers() {
                                 <motion.div key={u.id} className="adm-row"
                                              initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-16 }}
                                              transition={{ delay: i*.025 }}
-                                             onMouseEnter={e => { e.currentTarget.style.background = temP ? (isDark?"rgba(196,140,0,.22)":"rgba(196,140,0,.25)") : (u.ativo ? (isDark?"rgba(5,150,105,.30)":"rgba(5,150,105,.35)") : (isDark?"rgba(200,16,46,.30)":"rgba(200,16,46,.35)")); e.currentTarget.style.boxShadow = `inset 0 0 0 1px ${temP ? AURA.yellow+"44" : u.ativo ? AURA.green+"44" : AURA.red+"44"}`; }}
-                                             onMouseLeave={e => { e.currentTarget.style.background = temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")); e.currentTarget.style.boxShadow = "none"; }}
+                                             onMouseEnter={e => { e.currentTarget.style.background = temP ? (isDark?"rgba(196,140,0,.15)":"rgba(196,140,0,.18)") : (u.ativo ? (isDark?"rgba(5,150,105,.18)":"rgba(5,150,105,.20)") : (isDark?"rgba(200,16,46,.18)":"rgba(200,16,46,.20)")); e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = `4px 0 16px ${temP ? "rgba(196,140,0,.12)" : u.ativo ? "rgba(5,150,105,.15)" : "rgba(200,16,46,.15)"}`; }}
+                                             onMouseLeave={e => { e.currentTarget.style.background = temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")); e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
                                              style={{
                                                borderLeft:`3px solid ${temP ? AURA.yellow : u.ativo ? AURA.green+"55" : AURA.red+"55"}`,
                                                background: temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")),
@@ -1931,7 +1930,7 @@ export default function AdminUsers() {
                                       { icon:<Trash2 size={14}/>, title:"Excluir",   fn:() => deletarUsuario(u.id), hc:AURA.red,        hb:"rgba(200,16,46,.14)" },
                                     ].map(btn => (
                                         <button key={btn.title} className="adm-action-btn" onClick={btn.fn} title={btn.title}
-                                                onMouseEnter={e => { e.currentTarget.style.color=btn.hc; e.currentTarget.style.background=btn.hb; e.currentTarget.style.borderColor=btn.hc+"55"; e.currentTarget.style.transform="translateY(-1px)"; e.currentTarget.style.boxShadow=`0 4px 12px ${btn.hc}22`; }}
+                                                onMouseEnter={e => { e.currentTarget.style.color=btn.hc; e.currentTarget.style.background=btn.hb; e.currentTarget.style.borderColor=btn.hc+"44"; e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow=`0 4px 12px ${btn.hc}22`; }}
                                                 onMouseLeave={e => { e.currentTarget.style.color=t.textMuted; e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor=t.border; e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
                                           {btn.icon}
                                         </button>
