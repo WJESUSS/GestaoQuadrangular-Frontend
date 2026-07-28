@@ -2,11 +2,14 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Plus, X, User, Phone, Trash2, Loader2, Search,
   CreditCard, Heart, ChevronRight, Users, CalendarDays,
   MapPin, BookOpen, Briefcase, Cross, Star, FileText,
-  ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle2, Filter,
+  ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle2, Filter, ChevronDown,
+  Download,
 } from "lucide-react";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
@@ -87,6 +90,28 @@ const tipoArrolamentoOptions = [
   { value: "TRANSFERENCIA",   label: "Transferência"   },
 ];
 
+/* ─── Cargos (NOVO) ────────────────────────────────────────────────
+   Enum de cargos que um membro pode assumir na igreja. Um membro pode
+   ter zero, um ou vários cargos simultaneamente — por isso é um
+   multi-select que grava um array de strings (`cargos: string[]`). */
+const cargoOptions = [
+  { value: "DIACONO",                          label: "Diácono"                    },
+  { value: "DIREITO_DIACONATO",                label: "Direito ao Diaconato"       },
+  { value: "LIDER_GRUPO_MISSIONARIO_HOMEM",    label: "Líder GM — Homens"          },
+  { value: "LIDER_GRUPO_MISSIONARIO_MULHER",   label: "Líder GM — Mulheres"        },
+  { value: "LIDER_GRUPO_MISSIONARIO_CRIANCA",  label: "Líder GM — Crianças"        },
+  { value: "LIDER_GRUPO_MISSIONARIO_JOVEM",    label: "Líder GM — Jovens"          },
+  { value: "LIDER",                            label: "Líder"                      },
+  { value: "SECRETARIA",                       label: "Secretaria"                 },
+  { value: "TESOURARIA_FINANCEIRO",            label: "Tesouraria / Financeiro"    },
+  { value: "LIDER_GRUPO_CASAIS",               label: "Líder Grupo de Casais"      },
+];
+
+const CARGO_LABELS = cargoOptions.reduce((acc, o) => {
+  acc[o.value] = o.label;
+  return acc;
+}, {});
+
 const formInicial = {
   nome: "", email: "", telefone: "", cpf: "", rg: "",
   estadoCivil: "SOLTEIRO", status: "ATIVO",
@@ -99,6 +124,7 @@ const formInicial = {
   batizadoNasAguas: false, dataBatizadoNasAguas: "", igrejaBatizadoNasAguas: "",
   batizadoEspiritoSanto: false,
   tipoArrolamento: "", jurisdicaoArrolamento: "", arroladoPor: "",
+  cargos: [],
   observacoes: "",
 };
 
@@ -193,6 +219,7 @@ function prepararFormParaEnvio(form) {
   if (!dados.dataBatismo)          dados.dataBatismo          = null;
   if (!dados.dataBatizadoNasAguas) dados.dataBatizadoNasAguas = null;
   if (!dados.tipoArrolamento)      dados.tipoArrolamento      = null;
+  dados.cargos = Array.isArray(dados.cargos) ? dados.cargos : [];
   if (!dados.nome || dados.nome.trim() === "") throw new Error("Nome completo é obrigatório");
   return dados;
 }
@@ -205,6 +232,99 @@ function deduplicarPorId(lista) {
     seen.add(m.id);
     return true;
   });
+}
+
+/* ─── Helper: gera e baixa o PDF da lista de membros ──────────────── */
+function cargosParaTexto(m) {
+  return (m.cargos || []).map(c => CARGO_LABELS[c] || c).join(", ");
+}
+
+function nascimentoParaTexto(m) {
+  const br = isoParaBr(formatarDataInput(m.dataNascimento));
+  return br || "-";
+}
+
+function gerarPdfMembros(lista, tipo) {
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+  const dataGeracao = new Date().toLocaleDateString("pt-BR");
+
+  doc.setFontSize(15);
+  doc.setTextColor(26, 16, 8);
+  doc.text("Lista de Membros", 40, 36);
+
+  doc.setFontSize(9);
+  doc.setTextColor(107, 94, 74);
+  doc.text(
+      `Gerado em ${dataGeracao} — ${lista.length} membro${lista.length === 1 ? "" : "s"} — Relatório ${tipo === "completo" ? "completo" : "simples"}`,
+      40, 52
+  );
+
+  // ✅ Lista simples: só Nome, Telefone e uma coluna "Assinatura" com uma
+  // linha desenhada dentro da célula (não é mais só espaço em branco).
+  const colunasSimples = ["Nome", "Telefone", "Assinatura"];
+  const colunasCompletas = [
+    "Nome", "CPF", "RG", "Status", "Estado Civil", "Nascimento",
+    "Telefone", "E-mail", "Célula", "Endereço", "Cidade/UF", "Profissão", "Cargos",
+  ];
+
+  const linhas = lista.map(m => {
+    if (tipo === "simples") {
+      return [
+        m.nome || "-",
+        m.telefone || "-",
+        "", // ✅ coluna de assinatura: conteúdo vazio, a linha é desenhada abaixo
+      ];
+    }
+    return [
+      m.nome || "-",
+      m.cpf || "-",
+      m.rg || "-",
+      m.status || "-",
+      m.estadoCivil || "-",
+      nascimentoParaTexto(m),
+      m.telefone || "-",
+      m.email || "-",
+      m.nomeCelula || "-",
+      [m.endereco, m.numero].filter(Boolean).join(", ") || "-",
+      [m.cidade, m.uf].filter(Boolean).join("/") || "-",
+      m.profissao || "-",
+      cargosParaTexto(m) || "-",
+    ];
+  });
+
+  autoTable(doc, {
+    startY: 64,
+    head: [tipo === "simples" ? colunasSimples : colunasCompletas],
+    body: linhas,
+    styles: { fontSize: 7.5, cellPadding: 4, textColor: [26, 16, 8], minCellHeight: tipo === "simples" ? 28 : undefined },
+    headStyles: { fillColor: [0, 61, 165], textColor: [255, 255, 255], fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 240, 232] },
+    margin: { left: 40, right: 40 },
+    // ✅ Reserva bastante largura para a coluna de assinatura (índice 2 no
+    // relatório simples) e a deixa sempre em branco/sem preenchimento de fundo.
+    columnStyles: tipo === "simples"
+        ? { 2: { cellWidth: 200, fillColor: [255, 255, 255] } }
+        : undefined,
+    // ✅ Desenha uma linha física dentro da célula de assinatura, para o
+    // membro assinar em cima dela (em vez de deixar só um espaço vazio).
+    didDrawCell: (data) => {
+      if (tipo === "simples" && data.column.index === 2 && data.row.section === "body") {
+        const margemLateral = 10;
+        const yLinha = data.cell.y + data.cell.height - 7;
+        doc.setDrawColor(150, 150, 150);
+        doc.setLineWidth(0.5);
+        doc.line(
+            data.cell.x + margemLateral,
+            yLinha,
+            data.cell.x + data.cell.width - margemLateral,
+            yLinha
+        );
+      }
+    },
+  });
+
+  const nomeArquivo = `membros_${tipo}_${new Date().toISOString().slice(0, 10)}.pdf`;
+  doc.save(nomeArquivo);
 }
 
 /* ─── DateInput ──────────────────────────────────────────────────── */
@@ -519,6 +639,16 @@ function GlobalStylesMembers({ t, isDark }) {
         text-transform: uppercase;
       }
 
+      .mem-badge-cargo {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 10px; border-radius: 6px;
+        font-size: 9px; font-weight: 600; letter-spacing: .06em;
+        text-transform: uppercase;
+        background: rgba(0,61,165,.1);
+        color: ${AURA.blue};
+        border: 1px solid rgba(0,61,165,.28);
+      }
+
       .mem-card-arrow {
         color: ${t.textMuted}; flex-shrink: 0;
       }
@@ -609,6 +739,16 @@ function GlobalStylesMembers({ t, isDark }) {
         font-family: 'Playfair Display', serif;
         font-size: 18px; font-weight: 500; color: ${t.text};
         margin: 0;
+      }
+
+      .mem-modal-eyebrow {
+        font-size: 9px; font-weight: 600; letter-spacing: .18em;
+        text-transform: uppercase; color: rgba(0,61,165,.6);
+        margin: 0 0 3px;
+      }
+
+      .mem-modal-title-row {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       }
 
       .mem-modal-body {
@@ -723,6 +863,85 @@ function GlobalStylesMembers({ t, isDark }) {
         color: ${t.text}; cursor: pointer;
       }
 
+      /* ── Multi-select de cargos (dropdown) ── */
+      .mem-cargo-select {
+        position: relative;
+      }
+
+      .mem-cargo-selected-chips {
+        display: flex; flex-wrap: wrap; gap: 6px;
+        margin-bottom: 8px;
+      }
+
+      .mem-cargo-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 8px 6px 12px; border-radius: 100px;
+        background: rgba(0,61,165,.1);
+        border: 1px solid rgba(0,61,165,.3);
+        color: ${AURA.blue};
+        font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 500;
+      }
+
+      .mem-cargo-chip button {
+        background: rgba(0,61,165,.14);
+        border: none; border-radius: 50%;
+        width: 17px; height: 17px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: inherit; padding: 0;
+      }
+      .mem-cargo-chip button:hover { background: rgba(0,61,165,.25); }
+
+      .mem-cargo-select-trigger {
+        width: 100%; box-sizing: border-box;
+        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: ${t.bgInput};
+        border: 1px solid ${t.borderInput};
+        color: ${t.textMuted};
+        padding: 11px 14px; border-radius: 10px;
+        font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400;
+        cursor: pointer; transition: all .2s; text-align: left;
+      }
+      .mem-cargo-select-trigger:hover,
+      .mem-cargo-select-trigger.open {
+        border-color: rgba(0,61,165,.45);
+      }
+      .mem-cargo-select-trigger .chevron {
+        flex-shrink: 0; transition: transform .2s; color: ${AURA.blue};
+      }
+      .mem-cargo-select-trigger.open .chevron { transform: rotate(180deg); }
+
+      .mem-cargo-select-panel {
+        position: absolute; z-index: 20;
+        top: calc(100% + 6px); left: 0; right: 0;
+        max-height: 240px; overflow-y: auto;
+        background: ${t.bgEl};
+        border: 1px solid rgba(0,61,165,.3);
+        border-radius: 12px;
+        box-shadow: 0 14px 34px rgba(0,0,0,${isDark ? ".45" : ".18"});
+        padding: 6px;
+        display: flex; flex-direction: column; gap: 2px;
+      }
+
+      .mem-cargo-option {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 10px; border-radius: 8px;
+        cursor: pointer; transition: background .15s;
+        font-family: 'Inter', sans-serif; font-size: 13px;
+        color: ${t.text};
+      }
+      .mem-cargo-option:hover { background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)"}; }
+      .mem-cargo-option.selected { color: ${AURA.blue}; font-weight: 500; }
+
+      .mem-cargo-option-check {
+        width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0;
+        border: 2px solid ${t.borderInput};
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; transition: all .15s;
+      }
+      .mem-cargo-option.selected .mem-cargo-option-check {
+        background: ${AURA.blue}; border-color: ${AURA.blue};
+      }
+
       /* ── Modal de Confirmação de Exclusão ── */
       .mem-confirm-backdrop {
         position: fixed; inset: 0; z-index: 10050;
@@ -824,6 +1043,51 @@ function GlobalStylesMembers({ t, isDark }) {
         display: flex; align-items: center; justify-content: center;
         margin-bottom: 16px;
       }
+
+      /* ── Ações do header (Novo + Baixar PDF) ── */
+      .mem-header-actions {
+        display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      }
+
+      .mem-btn-pdf {
+        display: flex; align-items: center; gap: 7px;
+        padding: 11px 18px; border-radius: 100px; cursor: pointer;
+        background: ${t.bgInput};
+        border: 1px solid ${t.borderInput};
+        color: ${t.text}; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .1em;
+        text-transform: uppercase; transition: all .25s; flex-shrink: 0;
+      }
+      .mem-btn-pdf:hover { border-color: ${AURA.blue}; color: ${AURA.blue}; }
+      .mem-btn-pdf:disabled { opacity: .55; cursor: not-allowed; }
+
+      /* ── Opções do modal "Baixar PDF" ── */
+      .mem-export-option {
+        width: 100%; box-sizing: border-box;
+        display: flex; align-items: center; gap: 12px;
+        padding: 14px 16px; border-radius: 13px;
+        border: 1px solid ${t.borderInput};
+        background: ${t.bgInput};
+        cursor: pointer; transition: all .2s; text-align: left;
+      }
+      .mem-export-option:hover { border-color: ${AURA.blue}; background: rgba(0,61,165,.06); }
+      .mem-export-option:disabled { opacity: .55; cursor: not-allowed; }
+
+      .mem-export-option-icon {
+        width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+        background: rgba(0,61,165,.12); color: ${AURA.blue};
+        display: flex; align-items: center; justify-content: center;
+      }
+
+      .mem-export-option-title {
+        font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+        color: ${t.text}; margin: 0 0 2px;
+      }
+
+      .mem-export-option-desc {
+        font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 300;
+        color: ${t.textMuted}; margin: 0;
+      }
     `}</style>
   );
 }
@@ -837,6 +1101,39 @@ function MembroModalRefatorado({
   const t = themeMembers(isDark);
 
   const f = v => setForm(p => ({ ...p, ...v }));
+
+  const toggleCargo = (valor) => {
+    setForm(p => {
+      const atual = Array.isArray(p.cargos) ? p.cargos : [];
+      const jaSelecionado = atual.includes(valor);
+      return {
+        ...p,
+        cargos: jaSelecionado
+            ? atual.filter(c => c !== valor)
+            : [...atual, valor],
+      };
+    });
+  };
+
+  const removerCargo = (valor) => {
+    setForm(p => ({ ...p, cargos: (p.cargos || []).filter(c => c !== valor) }));
+  };
+
+  // ✅ Dropdown de cargos: abre a lista só quando o usuário clica no
+  // campo, em vez de mostrar todas as opções soltas na tela o tempo todo.
+  const [cargoDropdownAberto, setCargoDropdownAberto] = useState(false);
+  const cargoSelectRef = useRef(null);
+
+  useEffect(() => {
+    if (!cargoDropdownAberto) return;
+    const aoClicarFora = (e) => {
+      if (cargoSelectRef.current && !cargoSelectRef.current.contains(e.target)) {
+        setCargoDropdownAberto(false);
+      }
+    };
+    document.addEventListener("mousedown", aoClicarFora);
+    return () => document.removeEventListener("mousedown", aoClicarFora);
+  }, [cargoDropdownAberto]);
 
   const content = (
       <motion.div
@@ -862,15 +1159,25 @@ function MembroModalRefatorado({
             onClick={e => e.stopPropagation()}
         >
           <div className="mem-modal-header">
-            <h2 className="mem-modal-title">
-              {editandoId ? "Editar Perfil" : "Novo Membro"}
-            </h2>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {editandoId && <p className="mem-modal-eyebrow">Editar Perfil</p>}
+              <div className="mem-modal-title-row">
+                <h2 className="mem-modal-title">
+                  {editandoId ? (form.nome || "Sem nome") : "Novo Membro"}
+                </h2>
+                {editandoId && (form.cargos || []).map(c => (
+                    <span key={c} className="mem-badge-cargo">
+                      {CARGO_LABELS[c] || c}
+                    </span>
+                ))}
+              </div>
+            </div>
             <button
                 onClick={onFechar}
                 style={{
                   background: "none", border: "none", cursor: "pointer",
                   color: t.textMuted, display: "flex", padding: 0,
-                  transition: "color .2s"
+                  transition: "color .2s", flexShrink: 0,
                 }}
             >
               <X size={20} />
@@ -1202,6 +1509,68 @@ function MembroModalRefatorado({
               </div>
             </div>
 
+            {/* ── Cargos (dropdown) ── */}
+            <div>
+              <p className="mem-section-title">Cargos</p>
+              <div className="mem-form-section">
+                <label className="mem-form-label">CARGOS OCUPADOS (opcional, múltipla escolha)</label>
+
+                {(form.cargos || []).length > 0 && (
+                    <div className="mem-cargo-selected-chips">
+                      {form.cargos.map(c => (
+                          <span key={c} className="mem-cargo-chip">
+                            {CARGO_LABELS[c] || c}
+                            <button type="button" onClick={() => removerCargo(c)} title="Remover">
+                              <X size={11} />
+                            </button>
+                          </span>
+                      ))}
+                    </div>
+                )}
+
+                <div className="mem-cargo-select" ref={cargoSelectRef}>
+                  <button
+                      type="button"
+                      className={`mem-cargo-select-trigger ${cargoDropdownAberto ? "open" : ""}`}
+                      onClick={() => setCargoDropdownAberto(v => !v)}
+                  >
+                    {(form.cargos || []).length > 0
+                        ? `${form.cargos.length} cargo${form.cargos.length > 1 ? "s" : ""} selecionado${form.cargos.length > 1 ? "s" : ""}`
+                        : "Selecione os cargos..."}
+                    <ChevronDown size={16} className="chevron" />
+                  </button>
+
+                  <AnimatePresence>
+                    {cargoDropdownAberto && (
+                        <motion.div
+                            className="mem-cargo-select-panel"
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.15 }}
+                        >
+                          {cargoOptions.map(o => {
+                            const selecionado = (form.cargos || []).includes(o.value);
+                            return (
+                                <div
+                                    key={o.value}
+                                    className={`mem-cargo-option ${selecionado ? "selected" : ""}`}
+                                    onClick={() => toggleCargo(o.value)}
+                                >
+                                  <span className="mem-cargo-option-check">
+                                    {selecionado && <CheckCircle2 size={13} />}
+                                  </span>
+                                  {o.label}
+                                </div>
+                            );
+                          })}
+                        </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+
             {/* ── Observações ── */}
             <div>
               <p className="mem-section-title">Observações</p>
@@ -1464,6 +1833,180 @@ function FiltroStatusModal({ t, filtroAtual, onSelecionar, onFechar }) {
   return createPortal(content, document.body);
 }
 
+/* ─── Modal de Filtro por Cargo (NOVO) ────────────────────────────── */
+function FiltroCargoModal({ selecionados, onAplicar, onFechar }) {
+  const [locais, setLocais] = useState(selecionados);
+
+  const toggle = (valor) => {
+    setLocais(prev => prev.includes(valor) ? prev.filter(c => c !== valor) : [...prev, valor]);
+  };
+
+  const content = (
+      <motion.div
+          className="mem-confirm-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onFechar}
+      >
+        <motion.div
+            className="mem-confirm-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+        />
+        <motion.div
+            className="mem-confirm-box"
+            initial={{ scale: .92, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: .92, opacity: 0, y: 10 }}
+            transition={{ type: "tween", duration: 0.22 }}
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: 400, borderColor: "rgba(0,61,165,.3)" }}
+        >
+          <div className="mem-status-icon" style={{ background: "rgba(0,61,165,.12)", color: AURA.blue }}>
+            <Briefcase size={22} />
+          </div>
+
+          <h3 className="mem-confirm-title">Filtrar por cargo</h3>
+          <p className="mem-confirm-text" style={{ marginBottom: 4 }}>
+            Selecione um ou mais cargos para filtrar a lista.
+          </p>
+
+          <div
+              style={{
+                width: "100%", maxHeight: 260, overflowY: "auto",
+                display: "flex", flexDirection: "column", gap: 2,
+                margin: "12px 0 18px", textAlign: "left",
+              }}
+          >
+            {cargoOptions.map(o => {
+              const ativo = locais.includes(o.value);
+              return (
+                  <div
+                      key={o.value}
+                      className={`mem-cargo-option ${ativo ? "selected" : ""}`}
+                      onClick={() => toggle(o.value)}
+                  >
+                    <span className="mem-cargo-option-check">
+                      {ativo && <CheckCircle2 size={13} />}
+                    </span>
+                    {o.label}
+                  </div>
+              );
+            })}
+          </div>
+
+          <div className="mem-confirm-actions">
+            <button
+                type="button"
+                className="mem-confirm-btn-cancel"
+                onClick={() => { setLocais([]); onAplicar([]); onFechar(); }}
+            >
+              Limpar
+            </button>
+            <button
+                type="button"
+                className="mem-confirm-btn-delete"
+                style={{ background: `linear-gradient(135deg, ${AURA.blue}, ${AURA.blueDark})` }}
+                onClick={() => { onAplicar(locais); onFechar(); }}
+            >
+              <CheckCircle2 size={13} /> Aplicar
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+  );
+
+  return createPortal(content, document.body);
+}
+
+/* ─── Modal de Exportação em PDF (NOVO) ───────────────────────────── */
+function ExportarPdfModal({ onExportar, onFechar, exportando, quantidadeAtual }) {
+  const content = (
+      <motion.div
+          className="mem-confirm-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={exportando ? undefined : onFechar}
+      >
+        <motion.div
+            className="mem-confirm-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+        />
+        <motion.div
+            className="mem-confirm-box"
+            initial={{ scale: .92, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: .92, opacity: 0, y: 10 }}
+            transition={{ type: "tween", duration: 0.22 }}
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: 400, borderColor: "rgba(0,61,165,.3)" }}
+        >
+          <div className="mem-status-icon" style={{ background: "rgba(0,61,165,.12)", color: AURA.blue }}>
+            <Download size={22} />
+          </div>
+
+          <h3 className="mem-confirm-title">Baixar lista em PDF</h3>
+          <p className="mem-confirm-text" style={{ marginBottom: 16 }}>
+            Serão exportados os {quantidadeAtual} membro{quantidadeAtual === 1 ? "" : "s"} que correspondem
+            à busca e aos filtros aplicados atualmente.
+          </p>
+
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
+            <button
+                type="button"
+                className="mem-export-option"
+                disabled={exportando}
+                onClick={() => onExportar("simples")}
+            >
+              <div className="mem-export-option-icon"><FileText size={17} /></div>
+              <div>
+                <p className="mem-export-option-title">Lista simples</p>
+                <p className="mem-export-option-desc">Nome, telefone e linha para assinatura</p>
+              </div>
+            </button>
+
+            <button
+                type="button"
+                className="mem-export-option"
+                disabled={exportando}
+                onClick={() => onExportar("completo")}
+            >
+              <div className="mem-export-option-icon"><FileText size={17} /></div>
+              <div>
+                <p className="mem-export-option-title">Lista completa</p>
+                <p className="mem-export-option-desc">Todos os dados cadastrais de cada membro</p>
+              </div>
+            </button>
+          </div>
+
+          {exportando && (
+              <p className="mem-confirm-text" style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 12 }}>
+                <Loader2 size={14} className="dl-spin" style={{ color: AURA.blue }} />
+                Preparando o PDF...
+              </p>
+          )}
+
+          <button
+              type="button"
+              className="mem-confirm-btn-cancel"
+              style={{ width: "100%" }}
+              onClick={onFechar}
+              disabled={exportando}
+          >
+            Cancelar
+          </button>
+        </motion.div>
+      </motion.div>
+  );
+
+  return createPortal(content, document.body);
+}
+
 /* ─── Toast de status ────────────────────────────────────────────── */
 function ToastStatus({ toast }) {
   if (!toast) return null;
@@ -1508,16 +2051,24 @@ export default function MembrosRefatorado({ isDark = false }) {
   const [erroExclusao,   setErroExclusao]   = useState(null);
   const [toast,          setToast]          = useState(null); // { message, status }
 
-  // ✅ NOVO: estado para o modal de confirmação de mudança de status
+  // ✅ estado para o modal de confirmação de mudança de status
   // (substitui o window.confirm nativo que aparecia feio no navegador)
   const [confirmandoStatus, setConfirmandoStatus] = useState(false);
   const [dadosPendentes,    setDadosPendentes]    = useState(null); // { dados, novoStatus }
 
-  // ✅ NOVO: filtro por status (Ativo, Inativo, Afastado, Transferido, Falecido)
+  // ✅ filtro por status (Ativo, Inativo, Afastado, Transferido, Falecido)
   const [filtroStatus,      setFiltroStatus]      = useState(null); // null = todos
   const [filtroModalAberto, setFiltroModalAberto] = useState(false);
 
-  // ✅ NOVO: indica que estamos varrendo o restante das páginas por causa de uma busca
+  // ✅ filtro por cargo (multi-seleção — mostra membro se tiver QUALQUER um dos cargos marcados)
+  const [filtroCargos,       setFiltroCargos]       = useState([]); // [] = todos
+  const [filtroCargoAberto,  setFiltroCargoAberto]  = useState(false);
+
+  // ✅ exportação em PDF (lista completa ou simples)
+  const [exportModalAberto, setExportModalAberto] = useState(false);
+  const [exportando,        setExportando]        = useState(false);
+
+  // ✅ indica que estamos varrendo o restante das páginas por causa de uma busca
   const [buscandoTudo, setBuscandoTudo] = useState(false);
 
   const t = themeMembers(isDark);
@@ -1528,6 +2079,11 @@ export default function MembrosRefatorado({ isDark = false }) {
   // ✅ Guarda a versão mais recente da paginação para o loop de busca completa
   // não trabalhar com valores "presos" (stale closures) do momento em que foi criado.
   const paginacaoRef = useRef({ pagina: 0, temMais: false });
+
+  // ✅ Espelha a lista de membros mais atual de forma SÍNCRONA (a fonte de
+  // verdade, na verdade), para a exportação em PDF conseguir ler os dados
+  // recém-carregados sem depender de um ciclo de render/callback do React.
+  const membrosRef = useRef([]);
 
   // ✅ Some sozinho depois de alguns segundos
   useEffect(() => {
@@ -1551,11 +2107,27 @@ export default function MembrosRefatorado({ isDark = false }) {
           : (res.data.last ?? (conteudo.length < TAMANHO_PAGINA));
       const total = Array.isArray(res.data) ? conteudo.length : (res.data.totalElements ?? conteudo.length);
 
-      // ✅ CORREÇÃO: deduplica por id ao acumular páginas
-      setMembros(prev => {
-        const merged = reset ? conteudo : [...prev, ...conteudo];
-        return deduplicarPorId(merged);
-      });
+      // ─────────────────────────────────────────────────────────────
+      // ✅ CORREÇÃO DO BUG DO PDF SEM DADOS
+      //
+      // Antes, a `membrosRef` só era atualizada DENTRO do callback
+      // passado para `setMembros(prev => {...})`. Esse callback roda
+      // durante o processamento do estado pelo React, o que não é
+      // garantidamente síncrono em relação ao restante do código
+      // assíncrono (ex: o `await` dentro de `carregarTodasAsPaginas`).
+      // Resultado: quando `exportarPdf` lia `membrosRef.current` logo
+      // após o carregamento terminar, às vezes pegava a lista antiga
+      // (vazia ou incompleta) — daí o PDF saía sem dados.
+      //
+      // Agora: calculamos a lista mesclada de forma SÍNCRONA, usando a
+      // própria ref como fonte de verdade, e atualizamos ref + estado
+      // juntos, no mesmo instante — sem depender do callback do setState.
+      // ─────────────────────────────────────────────────────────────
+      const merged = reset ? conteudo : [...membrosRef.current, ...conteudo];
+      const dedup = deduplicarPorId(merged);
+      membrosRef.current = dedup;
+      setMembros(dedup);
+
       setTemMais(!ultimaPagina);
       setTotalRegistros(total);
       setPagina(numeroPagina);
@@ -1566,7 +2138,10 @@ export default function MembrosRefatorado({ isDark = false }) {
       return { ultimaPagina, numeroPagina };
     } catch (err) {
       console.error("Erro ao listar membros:", err);
-      if (reset) setMembros([]);
+      if (reset) {
+        membrosRef.current = [];
+        setMembros([]);
+      }
       return { ultimaPagina: true, numeroPagina };
     } finally {
       setLoading(false);
@@ -1584,7 +2159,7 @@ export default function MembrosRefatorado({ isDark = false }) {
   }, [temMais, carregandoMais, pagina, carregarPagina]);
 
   // ─────────────────────────────────────────────────────────────────
-  // ✅ CORREÇÃO PRINCIPAL DO BUG DE BUSCA
+  // ✅ CORREÇÃO DO BUG DE BUSCA
   //
   // Antes, a busca (`filtro`) só filtrava os membros que JÁ estavam
   // carregados em memória (a página atual do scroll infinito). Se a
@@ -1593,10 +2168,10 @@ export default function MembrosRefatorado({ isDark = false }) {
   // simplesmente não encontrava, mesmo o membro existindo no banco.
   //
   // Agora: sempre que o usuário digita algo na busca (com um pequeno
-  // debounce de 350ms) ou aplica um filtro de status, disparamos um
-  // carregamento automático de TODAS as páginas restantes em segundo
-  // plano, até não haver mais páginas (`temMais === false`). Assim a
-  // busca/filtro sempre enxerga a lista completa.
+  // debounce de 350ms) ou aplica um filtro de status/cargo, disparamos
+  // um carregamento automático de TODAS as páginas restantes em
+  // segundo plano, até não haver mais páginas (`temMais === false`).
+  // Assim a busca/filtro sempre enxerga a lista completa.
   // ─────────────────────────────────────────────────────────────────
   const carregarTodasAsPaginas = useCallback(async () => {
     setBuscandoTudo(true);
@@ -1620,14 +2195,14 @@ export default function MembrosRefatorado({ isDark = false }) {
     return () => clearTimeout(timer);
   }, [filtro]);
 
-  // ✅ Sempre que houver busca por texto OU filtro de status ativo,
-  // garante que a lista completa esteja carregada antes de filtrar.
+  // ✅ Sempre que houver busca por texto, filtro de status OU filtro de cargo
+  // ativo, garante que a lista completa esteja carregada antes de filtrar.
   useEffect(() => {
-    const temBuscaAtiva = filtroBusca !== "" || Boolean(filtroStatus);
+    const temBuscaAtiva = filtroBusca !== "" || Boolean(filtroStatus) || filtroCargos.length > 0;
     if (temBuscaAtiva && paginacaoRef.current.temMais) {
       carregarTodasAsPaginas();
     }
-  }, [filtroBusca, filtroStatus, carregarTodasAsPaginas]);
+  }, [filtroBusca, filtroStatus, filtroCargos, carregarTodasAsPaginas]);
 
   // ✅ Detecta o scroll (na janela OU em um container interno com scroll próprio,
   // como costuma acontecer dentro de layouts de dashboard) e dispara carregarMais()
@@ -1721,6 +2296,7 @@ export default function MembrosRefatorado({ isDark = false }) {
       tipoArrolamento:        m.tipoArrolamento        ?? "",
       jurisdicaoArrolamento:  m.jurisdicaoArrolamento  ?? "",
       arroladoPor:            m.arroladoPor            ?? "",
+      cargos:                 Array.isArray(m.cargos) ? m.cargos : [],
       observacoes:            m.observacoes            ?? "",
     });
     setIsModalOpen(true);
@@ -1845,6 +2421,7 @@ export default function MembrosRefatorado({ isDark = false }) {
           membros
               .filter(m =>
                   (!filtroStatus || m.status === filtroStatus) &&
+                  (filtroCargos.length === 0 || (m.cargos || []).some(c => filtroCargos.includes(c))) &&
                   (
                       m.nome?.toLowerCase().includes(filtroBusca.toLowerCase()) ||
                       m.cpf?.includes(filtroBusca) ||
@@ -1852,13 +2429,52 @@ export default function MembrosRefatorado({ isDark = false }) {
                   )
               )
               .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" })),
-      [membros, filtroBusca, filtroStatus]
+      [membros, filtroBusca, filtroStatus, filtroCargos]
   );
 
   // ✅ Só fica "incompleta" enquanto o carregamento automático de todas
   // as páginas ainda não terminou (agora é raro aparecer, pois o efeito
   // acima já busca tudo sozinho assim que o usuário digita).
-  const buscaPodeEstarIncompleta = (filtroBusca !== "" || filtroStatus) && temMais && buscandoTudo;
+  const buscaPodeEstarIncompleta = (filtroBusca !== "" || filtroStatus || filtroCargos.length > 0) && temMais && buscandoTudo;
+
+  // ✅ Dispara a geração do PDF. Garante que todas as páginas estejam
+  // carregadas antes de exportar, para o relatório não sair incompleto,
+  // e agora inclui um safeguard caso a lista resultante fique vazia.
+  const exportarPdf = async (tipo) => {
+    setExportando(true);
+    try {
+      if (paginacaoRef.current.temMais) {
+        await carregarTodasAsPaginas();
+      }
+      const listaCompleta = membrosRef.current;
+      const listaParaExportar = listaCompleta
+          .filter(m =>
+              (!filtroStatus || m.status === filtroStatus) &&
+              (filtroCargos.length === 0 || (m.cargos || []).some(c => filtroCargos.includes(c))) &&
+              (
+                  m.nome?.toLowerCase().includes(filtroBusca.toLowerCase()) ||
+                  m.cpf?.includes(filtroBusca) ||
+                  m.nomeCelula?.toLowerCase().includes(filtroBusca.toLowerCase())
+              )
+          )
+          .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" }));
+
+      // ✅ Safeguard: avisa se por algum motivo não sobrou ninguém para
+      // exportar, em vez de baixar silenciosamente um PDF só com o cabeçalho.
+      if (listaParaExportar.length === 0) {
+        alert("Nenhum membro encontrado para exportar com os filtros atuais.");
+        return;
+      }
+
+      gerarPdfMembros(listaParaExportar, tipo);
+      setExportModalAberto(false);
+    } catch (err) {
+      console.error("Erro ao gerar PDF:", err);
+      alert("Não foi possível gerar o PDF. Tente novamente.");
+    } finally {
+      setExportando(false);
+    }
+  };
 
   return (
       <div className="mem-root">
@@ -1888,12 +2504,21 @@ export default function MembrosRefatorado({ isDark = false }) {
                 <h1 className="mem-title">Membros</h1>
               </div>
             </div>
-            <button className="mem-btn-gold" onClick={abrirNovo}>
-              <Plus size={13} /> Novo
-            </button>
+            <div className="mem-header-actions">
+              <button
+                  className="mem-btn-pdf"
+                  onClick={() => setExportModalAberto(true)}
+                  title="Baixar lista em PDF"
+              >
+                <Download size={13} /> PDF
+              </button>
+              <button className="mem-btn-gold" onClick={abrirNovo}>
+                <Plus size={13} /> Novo
+              </button>
+            </div>
           </motion.header>
 
-          {/* ── Busca + Filtro por Status ── */}
+          {/* ── Busca + Filtro por Status + Filtro por Cargo ── */}
           <motion.div
               className="mem-search-row"
               initial={{ opacity: 0, y: -14 }}
@@ -1933,9 +2558,20 @@ export default function MembrosRefatorado({ isDark = false }) {
                   />
               )}
             </button>
+            <button
+                type="button"
+                className={`mem-filter-btn ${filtroCargos.length > 0 ? "active" : ""}`}
+                onClick={() => setFiltroCargoAberto(true)}
+                title="Filtrar por cargo"
+            >
+              <Briefcase size={16} />
+              {filtroCargos.length > 0 && (
+                  <span className="mem-filter-dot" style={{ background: AURA.blue }} />
+              )}
+            </button>
           </motion.div>
 
-          {/* ── Chip do filtro ativo ── */}
+          {/* ── Chip do filtro ativo (status) ── */}
           {filtroStatus && (
               (() => {
                 const sc = STATUS_COLORS[filtroStatus] || STATUS_COLORS.INATIVO;
@@ -1948,6 +2584,16 @@ export default function MembrosRefatorado({ isDark = false }) {
                     </div>
                 );
               })()
+          )}
+
+          {/* ── Chip do filtro ativo (cargo) ── */}
+          {filtroCargos.length > 0 && (
+              <div className="mem-filter-chip" style={{ background: "rgba(0,61,165,.1)", color: AURA.blue, border: "1px solid rgba(0,61,165,.3)" }}>
+                Cargos: {filtroCargos.map(c => CARGO_LABELS[c] || c).join(", ")}
+                <button onClick={() => setFiltroCargos([])} title="Remover filtro">
+                  <X size={12} />
+                </button>
+              </div>
           )}
 
           {/* ── Cards/Loading ── */}
@@ -1964,6 +2610,8 @@ export default function MembrosRefatorado({ isDark = false }) {
                 >
                   {membrosFiltrados.map(m => {
                     const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
+                    const cargosDoMembro = Array.isArray(m.cargos) ? m.cargos : [];
+                    const CARGOS_VISIVEIS = 2;
                     return (
                         <motion.div
                             key={m.id}
@@ -1997,6 +2645,17 @@ export default function MembrosRefatorado({ isDark = false }) {
                                 {m.profissao && (
                                     <span className="mem-badge" style={{ background: `${AURA.gold}12`, color: AURA.gold, border: `1px solid ${AURA.gold}30` }}>
                                       {m.profissao.slice(0, 12)}
+                                    </span>
+                                )}
+                                {/* ── Cargos: badges azuis ao lado do nome ── */}
+                                {cargosDoMembro.slice(0, CARGOS_VISIVEIS).map(c => (
+                                    <span key={c} className="mem-badge-cargo">
+                                      {CARGO_LABELS[c] || c}
+                                    </span>
+                                ))}
+                                {cargosDoMembro.length > CARGOS_VISIVEIS && (
+                                    <span className="mem-badge-cargo">
+                                      +{cargosDoMembro.length - CARGOS_VISIVEIS}
                                     </span>
                                 )}
                               </div>
@@ -2075,7 +2734,7 @@ export default function MembrosRefatorado({ isDark = false }) {
           )}
         </AnimatePresence>
 
-        {/* ── Modal de Filtro por Status (NOVO) ── */}
+        {/* ── Modal de Filtro por Status ── */}
         <AnimatePresence>
           {filtroModalAberto && (
               <FiltroStatusModal
@@ -2087,7 +2746,30 @@ export default function MembrosRefatorado({ isDark = false }) {
           )}
         </AnimatePresence>
 
-        {/* ── Confirmação de Mudança de Status (NOVO — substitui window.confirm nativo) ── */}
+        {/* ── Modal de Filtro por Cargo ── */}
+        <AnimatePresence>
+          {filtroCargoAberto && (
+              <FiltroCargoModal
+                  selecionados={filtroCargos}
+                  onAplicar={setFiltroCargos}
+                  onFechar={() => setFiltroCargoAberto(false)}
+              />
+          )}
+        </AnimatePresence>
+
+        {/* ── Modal de Exportação em PDF ── */}
+        <AnimatePresence>
+          {exportModalAberto && (
+              <ExportarPdfModal
+                  onExportar={exportarPdf}
+                  onFechar={() => !exportando && setExportModalAberto(false)}
+                  exportando={exportando}
+                  quantidadeAtual={membrosFiltrados.length}
+              />
+          )}
+        </AnimatePresence>
+
+        {/* ── Confirmação de Mudança de Status (substitui window.confirm nativo) ── */}
         <AnimatePresence>
           {confirmandoStatus && dadosPendentes && (
               <ConfirmarStatusModal
@@ -2120,4 +2802,4 @@ export default function MembrosRefatorado({ isDark = false }) {
 
       </div>
   );
-}
+}git
