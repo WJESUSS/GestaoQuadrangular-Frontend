@@ -51,189 +51,6 @@ function IEQCross({ size = 300, src = "/quadrangular.png" }) {
     );
 }
 
-/* ─── Cena animada de fundo (céu, nuvens, pássaros, vaga-lumes, folhas, igreja com sino) ───
-   Cores calculadas a partir da paleta CÉLULA, ajustadas para tema claro/escuro. */
-function AnimatedScene({ dark }) {
-    const layerRef = useRef(null);
-    const spawnedRef = useRef(false);
-
-    const c = dark ? {
-        skyTop:"#080A14", skyBot:"#0D1220", skyGround:"#0A0E1A",
-        hillBack:"#0e1f2a", hillFront:"#0c1a24", trunk:"#3d2c1e",
-        foliage1:"#1a3a4a", foliage2:"#122a3a",
-        churchWall:"#e0d9c8", churchRoof:"#3d2e20", churchTrim:"#221a10",
-        churchDoor:"#221a10", churchOpen:"#151008",
-        sunMoon:"radial-gradient(circle at 35% 30%, #e8ecff, #b8c8e8 50%, #7d9a86)",
-        sunMoonGlow:"0 0 60px 20px rgba(76,126,176,0.25)",
-        birdColor: BRAND.light,
-        fireflyOn:true,
-    } : {
-        skyTop:"#a8ccee", skyBot:"#d8e8f6", skyGround:"#c8dcec",
-        hillBack:"#9CC4A0", hillFront:"#6FA377", trunk:"#6e4628",
-        foliage1:"#2E6B44", foliage2:"#1F4A2E",
-        churchWall:"#f5efe0", churchRoof:"#5e4028", churchTrim:"#3e2a1a",
-        churchDoor:"#3e2a1a", churchOpen:"#221810",
-        sunMoon:`radial-gradient(circle at 35% 30%, #fff8e0, ${BRAND.goldLight} 55%, ${BRAND.gold})`,
-        sunMoonGlow:"0 0 70px 25px rgba(184,137,46,0.4)",
-        birdColor: BRAND.dark,
-        fireflyOn:false,
-    };
-    const bellColor = BRAND.gold;
-    const glassWarm = BRAND.goldLight;
-    const glassCool = BRAND.mossLight;
-
-    useEffect(() => {
-        const layer = layerRef.current;
-        if (!layer || spawnedRef.current) return;
-        spawnedRef.current = true;
-        const rand = (min, max) => Math.random() * (max - min) + min;
-
-        const cloudSVG = (w) => `
-            <svg viewBox="0 0 200 90" width="${w}" height="${w * 0.45}">
-              <ellipse cx="60" cy="55" rx="55" ry="30" fill="rgba(255,255,255,0.85)"></ellipse>
-              <ellipse cx="115" cy="40" rx="45" ry="34" fill="rgba(255,255,255,0.85)"></ellipse>
-              <ellipse cx="150" cy="58" rx="40" ry="24" fill="rgba(255,255,255,0.85)"></ellipse>
-            </svg>`;
-        for (let i = 0; i < 5; i++) {
-            const el = document.createElement("div");
-            el.className = "scn-cloud";
-            const w = rand(120, 260);
-            el.style.width = w + "px";
-            el.style.top = rand(4, 34) + "%";
-            el.style.left = rand(-25, -5) + "%";
-            el.style.animationDuration = rand(45, 90) + "s";
-            el.style.animationDelay = "-" + rand(0, 70) + "s";
-            el.innerHTML = cloudSVG(w);
-            layer.appendChild(el);
-        }
-
-        const birdSVG = `<svg viewBox="0 0 40 20" width="26" height="13">
-            <path d="M0,10 Q10,-4 20,10 Q30,-4 40,10 Q30,4 20,10 Q10,4 0,10 Z" fill="${c.birdColor}" opacity="0.55"></path>
-          </svg>`;
-        for (let i = 0; i < 4; i++) {
-            const el = document.createElement("div");
-            el.className = "scn-bird";
-            el.style.top = rand(10, 30) + "%";
-            el.style.left = "0";
-            el.style.animationDuration = rand(14, 24) + "s";
-            el.style.animationDelay = "-" + rand(0, 18) + "s";
-            el.innerHTML = birdSVG;
-            layer.appendChild(el);
-        }
-
-        const leafGlyphs = ["✦", "✧"];
-        for (let i = 0; i < 10; i++) {
-            const el = document.createElement("div");
-            el.className = "scn-leaf";
-            el.textContent = leafGlyphs[i % 2];
-            el.style.color = BRAND.mossLight;
-            el.style.left = rand(0, 100) + "%";
-            el.style.fontSize = rand(11, 18) + "px";
-            el.style.animationDuration = rand(13, 24) + "s";
-            el.style.animationDelay = "-" + rand(0, 20) + "s";
-            layer.appendChild(el);
-        }
-
-        if (c.fireflyOn) {
-            for (let i = 0; i < 20; i++) {
-                const el = document.createElement("div");
-                const size = rand(2, 4);
-                el.className = "scn-firefly";
-                el.style.width = size + "px";
-                el.style.height = size + "px";
-                el.style.background = BRAND.gold;
-                el.style.boxShadow = `0 0 10px 3px ${BRAND.gold}`;
-                el.style.left = rand(5, 95) + "%";
-                el.style.bottom = rand(2, 30) + "%";
-                el.style.animationDuration = rand(4, 8) + "s";
-                el.style.animationDelay = "-" + rand(0, 8) + "s";
-                layer.appendChild(el);
-            }
-        }
-
-        let targetX = 0, targetY = 0, curX = 0, curY = 0, raf;
-        const onMove = (e) => {
-            targetX = (e.clientX / window.innerWidth - 0.5) * 22;
-            targetY = (e.clientY / window.innerHeight - 0.5) * 22;
-        };
-        window.addEventListener("mousemove", onMove);
-        const tick = () => {
-            curX += (targetX - curX) * 0.06;
-            curY += (targetY - curY) * 0.06;
-            layer.style.transform = `translate(${curX}px, ${curY}px)`;
-            raf = requestAnimationFrame(tick);
-        };
-        raf = requestAnimationFrame(tick);
-
-        return () => {
-            window.removeEventListener("mousemove", onMove);
-            cancelAnimationFrame(raf);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return (
-        <div className="scene" style={{ background:"transparent" }}>
-            <div className="sun-moon" style={{ background:c.sunMoon, boxShadow:c.sunMoonGlow }} />
-            <div className="parallax-layer" ref={layerRef} />
-
-            <svg className="hills-back" viewBox="0 0 1440 260" preserveAspectRatio="none">
-                <path d="M0,120 C240,40 420,180 720,90 C1020,10 1200,150 1440,80 L1440,260 L0,260 Z" fill={c.hillBack}/>
-            </svg>
-            <svg className="hills-front" viewBox="0 0 1440 220" preserveAspectRatio="none">
-                <path d="M0,140 C260,80 480,190 760,110 C1040,30 1260,170 1440,110 L1440,220 L0,220 Z" fill={c.hillFront}/>
-            </svg>
-
-            <div className="scn-church">
-                <svg viewBox="0 0 340 320" width="100%">
-                    <rect x="140" y="30" width="60" height="110" fill={c.churchWall}/>
-                    <polygon points="140,30 170,0 200,30" fill={c.churchRoof}/>
-                    <line x1="170" y1="0" x2="170" y2="-26" stroke={c.churchRoof} strokeWidth="5"/>
-                    <line x1="160" y1="-16" x2="180" y2="-16" stroke={c.churchRoof} strokeWidth="5"/>
-                    <path d="M158,55 Q158,38 170,38 Q182,38 182,55 L182,80 L158,80 Z" fill={c.churchOpen}/>
-                    <g className="scn-bell">
-                        <path d="M164,52 Q164,44 170,44 Q176,44 176,52 L178,66 L162,66 Z" fill={bellColor}/>
-                        <circle cx="170" cy="68" r="2.5" fill={bellColor}/>
-                    </g>
-                    <rect x="60" y="140" width="220" height="150" fill={c.churchWall}/>
-                    <polygon points="60,140 170,90 280,140" fill={c.churchRoof}/>
-                    <circle className="scn-glow-window" cx="170" cy="175" r="26" fill={glassWarm}/>
-                    <circle cx="170" cy="175" r="26" fill="none" stroke={c.churchTrim} strokeWidth="3"/>
-                    <path className="scn-glow-window" d="M95,225 Q95,205 105,205 Q115,205 115,225 L115,260 L95,260 Z" fill={glassCool}/>
-                    <path d="M95,225 Q95,205 105,205 Q115,205 115,225 L115,260 L95,260 Z" fill="none" stroke={c.churchTrim} strokeWidth="2.5"/>
-                    <path className="scn-glow-window" d="M225,225 Q225,205 235,205 Q245,205 245,225 L245,260 L225,260 Z" fill={glassCool}/>
-                    <path d="M225,225 Q225,205 235,205 Q245,205 245,225 L245,260 L225,260 Z" fill="none" stroke={c.churchTrim} strokeWidth="2.5"/>
-                    <path d="M148,290 Q148,255 170,255 Q192,255 192,290 Z" fill={c.churchDoor}/>
-                    <line x1="170" y1="255" x2="170" y2="290" stroke={c.churchTrim} strokeWidth="2"/>
-                    <rect x="130" y="290" width="80" height="8" fill={c.churchTrim}/>
-                    <rect x="120" y="298" width="100" height="8" fill={c.churchTrim}/>
-                </svg>
-            </div>
-
-            <div className="scn-tree scn-tree-left">
-                <svg viewBox="0 0 70 160" width="100%" height="100%">
-                    <rect x="30" y="90" width="10" height="70" fill={c.trunk}/>
-                    <g className="scn-foliage">
-                        <circle cx="35" cy="55" r="38" fill={c.foliage1}/>
-                        <circle cx="14" cy="75" r="24" fill={c.foliage2}/>
-                        <circle cx="56" cy="75" r="24" fill={c.foliage2}/>
-                    </g>
-                </svg>
-            </div>
-            <div className="scn-tree scn-tree-right">
-                <svg viewBox="0 0 70 160" width="100%" height="100%">
-                    <rect x="30" y="95" width="10" height="65" fill={c.trunk}/>
-                    <g className="scn-foliage">
-                        <circle cx="35" cy="60" r="32" fill={c.foliage1}/>
-                        <circle cx="16" cy="78" r="20" fill={c.foliage2}/>
-                        <circle cx="54" cy="78" r="20" fill={c.foliage2}/>
-                    </g>
-                </svg>
-            </div>
-        </div>
-    );
-}
-
 /* ─── Ícone olho ─── */
 function EyeIcon({ open }) {
     return open
@@ -393,7 +210,7 @@ export default function Login() {
     /* ── Cores base (mesmas da Home) ── */
     const bg    = dark ? BRAND.dark  : BRAND.light;
     /* ── card mais transparente ── */
-    const cardBg= dark ? "rgba(26,34,54,.35)" : "rgba(255,255,255,.22)";
+    const cardBg= dark ? "rgba(26,34,54,.07)" : "rgba(255,255,255,.05)";
     const txt   = dark ? BRAND.light : BRAND.dark;
     const sub   = dark ? "rgba(243,241,234,.5)" : "rgba(27,35,51,.45)";
     const border= dark ? "rgba(30,63,102,.12)" : "rgba(30,63,102,.10)";
@@ -426,58 +243,6 @@ export default function Login() {
           position:relative;
           transition:background .4s;
         }
-
-        /* ── cena animada de fundo (céu, igreja, natureza) ── */
-        .scene{ position:fixed; inset:0; z-index:0; overflow:hidden; transition:background .4s; }
-        .parallax-layer{ position:absolute; inset:0; transition:transform .25s ease-out; }
-
-        .sun-moon{
-          position:absolute; top:6%; left:50%; width:120px; height:120px; border-radius:50%;
-          animation:scnFloaty 7s ease-in-out infinite;
-          transition:opacity .5s, background .5s, box-shadow .5s;
-          filter:blur(1px);
-        }
-        @keyframes scnFloaty{ 0%,100%{ transform:translateY(0) rotate(0deg);} 50%{ transform:translateY(-6px) rotate(3deg);} }
-
-        .scn-cloud{ position:absolute; opacity:.9; animation:scnDrift linear infinite; }
-        @keyframes scnDrift{ from{ transform:translateX(-15vw);} to{ transform:translateX(115vw);} }
-
-        .scn-bird{ position:absolute; animation:scnFly linear infinite; opacity:.7; }
-        @keyframes scnFly{ from{ transform:translate(-10vw,0);} to{ transform:translate(115vw,-40px);} }
-        .scn-bird svg{ animation:scnFlap .5s ease-in-out infinite; transform-origin:center; }
-        @keyframes scnFlap{ 0%,100%{ transform:scaleY(1);} 50%{ transform:scaleY(0.55);} }
-
-        .hills-back, .hills-front{ position:absolute; bottom:0; left:0; width:100%; }
-        .hills-back{ height:26vh; }
-        .hills-front{ height:19vh; }
-
-        .scn-tree{ position:absolute; bottom:0; transform-origin:bottom center; animation:scnSway ease-in-out infinite; }
-        @keyframes scnSway{ 0%,100%{ transform:rotate(-2deg);} 50%{ transform:rotate(2deg);} }
-        .scn-foliage{ animation:scnRustle 3s ease-in-out infinite; transform-origin:center; }
-        @keyframes scnRustle{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.03);} }
-        .scn-tree-left{ left:4%; height:13vh; width:60px; animation-duration:5s; }
-        .scn-tree-right{ right:5%; height:10vh; width:48px; animation-duration:4.3s; animation-delay:-1.2s; }
-
-        .scn-firefly{ position:absolute; border-radius:50%; opacity:0; animation:scnSpark linear infinite; }
-        @keyframes scnSpark{
-          0%{ transform:translateY(0) translateX(0); opacity:0; }
-          15%{ opacity:.9; } 50%{ transform:translateY(-40px) translateX(10px); }
-          85%{ opacity:.4; } 100%{ transform:translateY(-90px) translateX(-8px); opacity:0; }
-        }
-
-        .scn-leaf{ position:absolute; top:-40px; opacity:.55; animation:scnFall linear infinite; will-change:transform; }
-        @keyframes scnFall{
-          0%{ transform:translate(0,0) rotate(0deg); opacity:0; }
-          8%{ opacity:.6; }
-          100%{ transform:translate(60px,115vh) rotate(340deg); opacity:0; }
-        }
-
-        .scn-church{ position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:min(46vw, 340px); z-index:1; }
-        .scn-church svg{ filter:drop-shadow(0 8px 18px rgba(0,0,0,0.3)); }
-        .scn-bell{ transform-origin:170px 50px; animation:scnBellSwing 2.6s ease-in-out infinite; }
-        @keyframes scnBellSwing{ 0%,100%{ transform:rotate(-6deg);} 50%{ transform:rotate(6deg);} }
-        .scn-glow-window{ animation:scnWindowGlow 3.4s ease-in-out infinite; }
-        @keyframes scnWindowGlow{ 0%,100%{ opacity:0.75;} 50%{ opacity:1; filter:drop-shadow(0 0 8px currentColor);} }
 
         /* ── glow azul central ── */
         /* ── noise grain ── */
@@ -531,30 +296,30 @@ export default function Login() {
           width:100%; max-width:480px;
           margin:24px;
           background:${cardBg};
-          backdrop-filter:blur(16px) saturate(1.2);
-          -webkit-backdrop-filter:blur(16px) saturate(1.2);
-          border:1px solid rgba(255,255,255,.2);
+          backdrop-filter:blur(20px) saturate(1.2);
+          -webkit-backdrop-filter:blur(20px) saturate(1.2);
+          border:1px solid rgba(255,255,255,.10);
           border-radius:16px;
           padding:44px 44px 36px;
           opacity:0; transform:translateY(28px);
           transition:opacity .7s ease, transform .7s ease,
                       background .4s, border-color .4s, box-shadow .4s;
           box-shadow:
-            0 1px 2px rgba(0,0,0,.05),
-            0 4px 8px rgba(0,0,0,.06),
-            0 16px 32px rgba(0,0,0,.08),
-            0 32px 64px rgba(0,0,0,.10),
-            inset 0 1px 0 rgba(255,255,255,.15);
+            0 1px 2px rgba(0,0,0,.04),
+            0 4px 8px rgba(0,0,0,.05),
+            0 16px 32px rgba(0,0,0,.06),
+            0 32px 64px rgba(0,0,0,.08),
+            inset 0 1px 0 rgba(255,255,255,.08);
         }
         .login-card::before {
           content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
-          background:linear-gradient(135deg, rgba(255,255,255,.12) 0%, transparent 50%, rgba(30,63,102,.06) 100%);
+          background:linear-gradient(135deg, rgba(255,255,255,.09) 0%, transparent 50%, rgba(30,63,102,.05) 100%);
           pointer-events:none;
         }
         .login-card::after {
           content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
           padding:1px;
-          background:linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 40%, rgba(30,63,102,.10) 100%);
+          background:linear-gradient(135deg, rgba(255,255,255,.20) 0%, transparent 40%, rgba(30,63,102,.08) 100%);
           -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite:xor;
           mask-composite:exclude;
@@ -738,8 +503,7 @@ export default function Login() {
                         : "linear-gradient(180deg, rgba(0,0,0,.20) 0%, rgba(0,0,0,.10) 50%, rgba(0,0,0,.25) 100%)",
                 }} />
 
-                {/* ── fundo animado + grade + glows ── */}
-                <AnimatedScene dark={dark}/>
+                {/* ── grade + glows (sem a cena de igreja/nuvens) ── */}
                 <div className="noise-overlay"/>
                 <div className="glow-primary"/>
                 <div className="glow-secondary"/>
