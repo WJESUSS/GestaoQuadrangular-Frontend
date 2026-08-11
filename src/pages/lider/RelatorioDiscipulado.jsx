@@ -9,12 +9,33 @@ import { AURA, theme } from "./liderTheme";
 
 /* ─── Constantes ───────────────────────────────────────────────────────── */
 const COLUNAS = [
-  { campo: "escolaBiblica", tipoLabel: "Escola", diaLabel: "Bíblica", label: "Escola Bíblica",    emoji: "📚", justField: "justEscolaBiblica" },
-  { campo: "quartaNoite",   tipoLabel: "Culto",   diaLabel: "Quarta",  label: "Culto de Quarta",   emoji: "🌙", justField: "justQuartaNoite"   },
-  { campo: "quintaNoite",   tipoLabel: "Culto",   diaLabel: "Quinta",  label: "Culto de Quinta",   emoji: "⭐", justField: "justQuintaNoite"   },
-  { campo: "domingoManha",  tipoLabel: "Manhã",   diaLabel: "Domingo", label: "Domingo de Manhã",  emoji: "🌅", justField: "justDomingoManha"  },
-  { campo: "domingoNoite",  tipoLabel: "Noite",   diaLabel: "Domingo", label: "Domingo à Noite",   emoji: "🌟", justField: "justDomingoNoite"  },
+  { campo: "domingoManha",  tipoLabel: "Manhã",   diaLabel: "Domingo", label: "Domingo de Manhã",  emoji: "🌅", justField: "justDomingoManha",  offset: 0 },
+  { campo: "domingoNoite",  tipoLabel: "Noite",   diaLabel: "Domingo", label: "Domingo à Noite",   emoji: "🌟", justField: "justDomingoNoite",  offset: 0 },
+  { campo: "escolaBiblica", tipoLabel: "Escola",  diaLabel: "Segunda", label: "Escola Bíblica",    emoji: "📚", justField: "justEscolaBiblica", offset: 1 },
+  { campo: "quartaNoite",   tipoLabel: "Culto",   diaLabel: "Quarta",  label: "Culto de Quarta",   emoji: "🌙", justField: "justQuartaNoite",   offset: 3 },
+  { campo: "quintaNoite",   tipoLabel: "Culto",   diaLabel: "Quinta",  label: "Culto de Quinta",   emoji: "⭐", justField: "justQuintaNoite",   offset: 4 },
 ];
+
+function dataCulto(inicio, offset) {
+  if (!inicio || typeof offset !== "number") return "";
+  const [ano, mes, dia] = inicio.split("-").map(Number);
+  const dt = new Date(ano, mes - 1, dia + offset);
+  return `${String(dt.getDate()).padStart(2, "0")}/${String(dt.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/* soma (ou subtrai) dias a uma data no formato YYYY-MM-DD */
+function addDias(dataStr, dias) {
+  const [ano, mes, dia] = dataStr.split("-").map(Number);
+  const dt = new Date(ano, mes - 1, dia + dias);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+}
+
+/* formata YYYY-MM-DD para DD/MM/AAAA */
+function formatarDataBR(dataStr) {
+  if (!dataStr) return "";
+  const [ano, mes, dia] = dataStr.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
 
 const JUSTIFICATIVAS  = ["Trabalho", "Doença", "Viagem", "Outro"];
 const EMOJIS_JUST     = { Trabalho: "💼", Doença: "🤒", Viagem: "✈️", Outro: "📝" };
@@ -157,10 +178,11 @@ function RDStyles({ t, isDark }) {
     }
     .rd-tab-inactive:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
 
-    /* ── Datas ── */
+    /* ── Datas / navegação de semana ── */
     .rd-date-bar {
       padding: 16px 22px;
       display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      justify-content: space-between;
     }
     .rd-date-input {
       background: transparent; border: none; outline: none;
@@ -170,6 +192,26 @@ function RDStyles({ t, isDark }) {
       max-width: 140px;
     }
     .rd-date-sep { font-size: 11px; font-weight: 300; color: ${t.textMuted}; }
+
+    .rd-week-display {
+      display: flex; align-items: center; gap: 8px;
+      flex: 1; justify-content: center; min-width: 0;
+    }
+    .rd-week-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 600; letter-spacing: .06em;
+      color: ${t.text}; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .rd-week-nav-btn {
+      width: 30px; height: 30px; border-radius: 9px;
+      border: 1px solid ${t.border}; background: transparent;
+      color: ${t.textMuted}; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s; flex-shrink: 0;
+    }
+    .rd-week-nav-btn:hover:not(:disabled) { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+    .rd-week-nav-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     /* ── KPI ── */
     .rd-kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
@@ -224,6 +266,10 @@ function RDStyles({ t, isDark }) {
     }
     .rd-table-col-tipo { font-weight: 700; color: ${t.textSec}; }
     .rd-table-col-dia  { font-weight: 400; opacity: .75; }
+    .rd-table-col-data {
+      font-size: 8px; font-weight: 700; letter-spacing: .08em;
+      color: ${AURA.gold};
+    }
 
     .rd-member-row {
       padding: 20px 22px;
@@ -284,6 +330,11 @@ function RDStyles({ t, isDark }) {
     }
     .rd-pb-label-tipo {
       font-size: 7.6px; font-weight: 700; letter-spacing: .06em;
+      max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .rd-pb-label-data {
+      font-size: 6.5px; font-weight: 700; letter-spacing: .04em;
+      color: ${AURA.gold}; opacity: .9;
       max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .rd-pb-label-dia {
@@ -475,6 +526,8 @@ function RDStyles({ t, isDark }) {
 
       .rd-date-bar   { padding: 14px 14px; }
       .rd-date-input { max-width: 108px; font-size: 10.5px; }
+      .rd-week-label { font-size: 10.5px; }
+      .rd-week-nav-btn { width: 26px; height: 26px; }
 
       .rd-hist-row   { padding: 14px 14px; gap: 8px; }
       .rd-hist-head  { padding: 14px 14px; }
@@ -502,6 +555,7 @@ function RDStyles({ t, isDark }) {
       .rd-pb-emoji       { font-size: 15px; }
       .rd-pb-label-tipo  { font-size: 6.6px; }
       .rd-pb-label-dia   { font-size: 6px; }
+      .rd-pb-label-data  { font-size: 6px; }
 
       .rd-just-btn { margin-top: 4px; padding: 3px 7px; font-size: 8px; }
 
@@ -960,8 +1014,9 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                 <div className="rd-table-inner-sm">
                   <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
                     <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
-                    {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo }) => (
+                    {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo, offset }) => (
                         <div key={campo} className="rd-table-col-label">
+                          <span className="rd-table-col-data">{dataCulto(item.inicio, offset)}</span>
                           <div style={{ fontSize: 14, marginBottom: 2 }}>{emoji}</div>
                           <span className="rd-table-col-tipo">{tipoLabel}</span>
                           <span className="rd-table-col-dia">{diaLabel}</span>
@@ -1119,29 +1174,37 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
 
-  const handleInicioChange = useCallback(async (novoInicio) => {
+  /* ── Navegação semana a semana (substitui a edição livre de data) ──
+     Sempre avança/retrocede em blocos de 7 dias, mantendo o intervalo
+     fixo domingo → sábado (ex: 09 a 15). Reaproveita rascunho e
+     verificação de relatório já existente para a semana navegada. ── */
+  const navegarSemana = useCallback(async (direcao) => {
+    const base = inicioRef.current || inicio;
+    if (!base) return;
+    const novoInicio    = addDias(base, direcao * 7);
+    const novoFimPadrao = addDias(novoInicio, 6);
+
     carregouRef.current = false;
     setInicio(novoInicio);
     inicioRef.current = novoInicio;
+
     const draft = lsDraftLoad(draftKey(celulaIdRef.current, novoInicio));
     if (draft?.presencas) {
       setPresencas(draft.presencas);
-      const f = draft.fim || fimRef.current;
-      setFim(f); fimRef.current = f;
+      const f = draft.fim || novoFimPadrao;
+      setFim(f);
+      fimRef.current = f;
       setRascunhoCarregado(true);
       setTimeout(() => setRascunhoCarregado(false), 5000);
     } else {
+      setFim(novoFimPadrao);
+      fimRef.current = novoFimPadrao;
       setMembros((prev) => { setPresencas(inicializarPresencas(prev)); return prev; });
     }
+
     carregouRef.current = true;
     await verificarExistente(novoInicio, fimRef.current);
-  }, [inicializarPresencas, verificarExistente]);
-
-  const handleFimChange = useCallback((novoFim) => {
-    setFim(novoFim);
-    fimRef.current = novoFim;
-    setPresencas((prev) => { agendarSave(prev, novoFim); return prev; });
-  }, [agendarSave]);
+  }, [inicio, inicializarPresencas, verificarExistente]);
 
   const alterarPresenca = useCallback((index, campo) => {
     setPresencas((prev) => {
@@ -1314,13 +1377,34 @@ export default function RelatorioDiscipulado({ isDark = false }) {
           {/* ── ABA RELATÓRIO ── */}
           {aba === "relatorio" && (
               <>
-                {/* Datas */}
+                {/* Navegação de semana — bloqueada para edição livre, só avança/retrocede 7 dias */}
                 <div className="rd-card rd-date-bar">
-                  <Calendar size={14} style={{ color: AURA.gold, flexShrink: 0 }} />
-                  <input type="date" className="rd-date-input" value={inicio} onChange={(e) => handleInicioChange(e.target.value)} />
-                  <span className="rd-date-sep">→</span>
-                  <input type="date" className="rd-date-input" value={fim} onChange={(e) => handleFimChange(e.target.value)} />
-                  {verificandoExist && <Loader2 size={13} className="rd-spin" style={{ color: AURA.gold, marginLeft: "auto" }} />}
+                  <button
+                      className="rd-week-nav-btn"
+                      onClick={() => navegarSemana(-1)}
+                      disabled={verificandoExist || (modoEdicao)}
+                      aria-label="Semana anterior"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+
+                  <div className="rd-week-display">
+                    <Calendar size={14} style={{ color: AURA.gold, flexShrink: 0 }} />
+                    <span className="rd-week-label">
+                      {formatarDataBR(inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(fim)}
+                    </span>
+                  </div>
+
+                  <button
+                      className="rd-week-nav-btn"
+                      onClick={() => navegarSemana(1)}
+                      disabled={verificandoExist || (modoEdicao)}
+                      aria-label="Próxima semana"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+
+                  {verificandoExist && <Loader2 size={13} className="rd-spin" style={{ color: AURA.gold }} />}
                 </div>
 
                 {/* Banner existente */}
@@ -1374,8 +1458,9 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                     <div className="rd-table-inner">
                       <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 1fr)" }}>
                         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
-                        {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo }) => (
+                        {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo, offset }) => (
                             <div key={campo} className="rd-table-col-label">
+                              <span className="rd-table-col-data">{dataCulto(inicio, offset)}</span>
                               <div style={{ fontSize: 15, marginBottom: 2 }}>{emoji}</div>
                               <span className="rd-table-col-tipo">{tipoLabel}</span>
                               <span className="rd-table-col-dia">{diaLabel}</span>
@@ -1429,7 +1514,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                               </div>
 
                               <div className="rd-presence-grid">
-                                {COLUNAS.map(({ campo, tipoLabel, diaLabel, label, emoji, justField }) => {
+                                {COLUNAS.map(({ campo, tipoLabel, diaLabel, label, emoji, justField, offset }) => {
                                   const marcado = p?.[campo];
                                   const justVal = p?.[justField] ?? "";
                                   const temJust = !marcado && !!justVal;
@@ -1456,8 +1541,9 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                                           <span className="rd-pb-emoji" style={{ opacity: marcado || temJust ? 1 : 0.4, filter: marcado || temJust ? "none" : "grayscale(1)" }}>
                                             {marcado ? "✅" : temJust ? EMOJIS_JUST[justVal] : emoji}
                                           </span>
-                                          {/* Label sempre empilhada: tipo do culto em cima, dia embaixo */}
+                                          {/* Label sempre empilhada: data + tipo do culto + dia */}
                                           <span className="rd-pb-label" style={{ color: marcado ? AURA.gold : temJust ? CORES_JUST[justVal] : t.textMuted }}>
+                                            <span className="rd-pb-label-data">{dataCulto(inicio, offset)}</span>
                                             <span className="rd-pb-label-tipo">{tipoLabel}</span>
                                             <span className="rd-pb-label-dia">{diaLabel}</span>
                                           </span>
