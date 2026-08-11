@@ -267,7 +267,7 @@ function RDStyles({ t, isDark }) {
     .rd-table-col-tipo { font-weight: 700; color: ${t.textSec}; }
     .rd-table-col-dia  { font-weight: 400; opacity: .75; }
     .rd-table-col-data {
-      font-size: 8px; font-weight: 700; letter-spacing: .08em;
+      font-size: 11px; font-weight: 700; letter-spacing: .06em;
       color: ${AURA.gold};
     }
 
@@ -333,7 +333,7 @@ function RDStyles({ t, isDark }) {
       max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .rd-pb-label-data {
-      font-size: 6.5px; font-weight: 700; letter-spacing: .04em;
+      font-size: 8px; font-weight: 700; letter-spacing: .04em;
       color: ${AURA.gold}; opacity: .9;
       max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
@@ -555,7 +555,7 @@ function RDStyles({ t, isDark }) {
       .rd-pb-emoji       { font-size: 15px; }
       .rd-pb-label-tipo  { font-size: 6.6px; }
       .rd-pb-label-dia   { font-size: 6px; }
-      .rd-pb-label-data  { font-size: 6px; }
+      .rd-pb-label-data  { font-size: 7.5px; }
 
       .rd-just-btn { margin-top: 4px; padding: 3px 7px; font-size: 8px; }
 
