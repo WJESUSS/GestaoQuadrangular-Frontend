@@ -85,9 +85,10 @@ const grauEscolaridadeOptions = [
 ];
 
 const tipoArrolamentoOptions = [
-  { value: "",                label: "Não informado"    },
+  { value: "",             label: "Não informado"    },
   { value: "PROFISSAO_DE_FE", label: "Profissão de Fé" },
   { value: "TRANSFERENCIA",   label: "Transferência"   },
+  { value: "ACLAMACAO",       label: "Aclamação"       },
 ];
 
 /* ─── Cargos (NOVO) ────────────────────────────────────────────────
