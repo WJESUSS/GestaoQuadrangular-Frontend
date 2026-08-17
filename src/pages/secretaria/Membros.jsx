@@ -127,6 +127,10 @@ const formInicial = {
   tipoArrolamento: "", jurisdicaoArrolamento: "", arroladoPor: "",
   cargos: [],
   observacoes: "",
+  // ✅ NOVO: motivo da última mudança de status (somente leitura na ficha,
+  // preenchido a partir do que vem do backend em `abrirEdicao`)
+  observacaoStatus: "",
+  dataAtualizacaoStatus: null,
 };
 
 /* ─── Mensagens personalizadas por mudança de status ──────────────── */
@@ -222,6 +226,17 @@ function prepararFormParaEnvio(form) {
   if (!dados.tipoArrolamento)      dados.tipoArrolamento      = null;
   dados.cargos = Array.isArray(dados.cargos) ? dados.cargos : [];
   if (!dados.nome || dados.nome.trim() === "") throw new Error("Nome completo é obrigatório");
+
+  // ✅ CRÍTICO: observacaoStatus e dataAtualizacaoStatus são campos
+  // somente-leitura no front — quem grava neles de verdade é o endpoint
+  // dedicado PUT /membros/{id}/status (MembroService.alterarStatus).
+  // Se mandássemos esses campos também no PUT /membros/{id} normal, o
+  // backend (copiarDtoParaEntidade -> membro.setObservacaoStatus(...))
+  // sobrescreveria com o valor ANTIGO (carregado quando a ficha abriu),
+  // apagando a observação que acabou de ser salva pela troca de status.
+  delete dados.observacaoStatus;
+  delete dados.dataAtualizacaoStatus;
+
   return dados;
 }
 
@@ -650,6 +665,14 @@ function GlobalStylesMembers({ t, isDark }) {
         border: 1px solid rgba(0,61,165,.28);
       }
 
+      .mem-card-obs {
+        margin-top: 6px;
+        font-size: 10px; font-weight: 300; color: ${t.textMuted};
+        overflow: hidden; text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+      }
+
       .mem-card-arrow {
         color: ${t.textMuted}; flex-shrink: 0;
       }
@@ -809,6 +832,8 @@ function GlobalStylesMembers({ t, isDark }) {
         border-color: rgba(201,169,110,.5);
         box-shadow: 0 0 0 3px rgba(201,169,110,.08);
       }
+      .mem-form-textarea::placeholder { color: ${t.placeholder}; }
+      .mem-form-textarea:disabled { opacity: .6; cursor: not-allowed; }
 
       .mem-form-actions {
         display: flex; gap: 10px; padding-top: 8px;
@@ -1089,6 +1114,34 @@ function GlobalStylesMembers({ t, isDark }) {
         font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 300;
         color: ${t.textMuted}; margin: 0;
       }
+
+      /* ── Bloco de observação do status atual (NOVO) ── */
+      .mem-status-obs-box {
+        display: flex; gap: 10px; align-items: flex-start;
+        padding: 14px 16px; border-radius: 12px;
+        border: 1px solid; margin: 0;
+      }
+
+      .mem-status-obs-icon {
+        width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+
+      .mem-status-obs-title {
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700;
+        letter-spacing: .1em; text-transform: uppercase;
+        margin: 0 0 4px;
+      }
+
+      .mem-status-obs-text {
+        font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400;
+        line-height: 1.5; margin: 0;
+      }
+
+      .mem-status-obs-date {
+        font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 400;
+        margin: 6px 0 0; opacity: .75;
+      }
     `}</style>
   );
 }
@@ -1135,6 +1188,22 @@ function MembroModalRefatorado({
     document.addEventListener("mousedown", aoClicarFora);
     return () => document.removeEventListener("mousedown", aoClicarFora);
   }, [cargoDropdownAberto]);
+
+  // ✅ NOVO: formata a data/hora da última mudança de status, se existir,
+  // para mostrar junto da observação (ex: "Atualizado em 17/08/2026 às 14:32").
+  const dataStatusFormatada = (() => {
+    if (!form.dataAtualizacaoStatus) return "";
+    try {
+      const d = new Date(form.dataAtualizacaoStatus);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    } catch { return ""; }
+  })();
+
+  // ✅ NOVO: só faz sentido mostrar o card de observação quando o membro
+  // está editando (já existe) e há uma observação de status registrada.
+  const scStatusAtual = STATUS_COLORS[form.status] || STATUS_COLORS.INATIVO;
+  const temObservacaoStatus = Boolean(editandoId) && Boolean((form.observacaoStatus || "").trim());
 
   const content = (
       <motion.div
@@ -1186,6 +1255,37 @@ function MembroModalRefatorado({
           </div>
 
           <form className="mem-modal-body" onSubmit={onSalvar}>
+
+            {/* ── NOVO: Observação do status atual (motivo do afastamento,
+                transferência, etc.) — sempre visível ao abrir a ficha ── */}
+            {temObservacaoStatus && (
+                <motion.div
+                    className="mem-status-obs-box"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      background: scStatusAtual.bg,
+                      borderColor: scStatusAtual.border,
+                    }}
+                >
+                  <div className="mem-status-obs-icon" style={{ background: `${scStatusAtual.text}1F`, color: scStatusAtual.text }}>
+                    <AlertCircle size={16} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p className="mem-status-obs-title" style={{ color: scStatusAtual.text }}>
+                      Motivo — {STATUS_LABELS[form.status] || form.status}
+                    </p>
+                    <p className="mem-status-obs-text" style={{ color: t.text }}>
+                      {form.observacaoStatus}
+                    </p>
+                    {dataStatusFormatada && (
+                        <p className="mem-status-obs-date" style={{ color: scStatusAtual.text }}>
+                          Atualizado em {dataStatusFormatada}
+                        </p>
+                    )}
+                  </div>
+                </motion.div>
+            )}
 
             {nomeCelula && editandoId && (
                 <motion.div
@@ -1689,9 +1789,14 @@ function ConfirmarExclusaoModal({ nomeMembro, onConfirmar, onCancelar, loading, 
   return createPortal(content, document.body);
 }
 
-/* ─── Modal de Confirmação de Mudança de Status (NOVO — substitui window.confirm) ─── */
+/* ─── Modal de Confirmação de Mudança de Status (com observação opcional) ─── */
 function ConfirmarStatusModal({ status, nome, onConfirmar, onCancelar, loading }) {
   const sc = STATUS_COLORS[status] || STATUS_COLORS.INATIVO;
+
+  // ✅ observação opcional digitada no momento da confirmação de status.
+  // Fica guardada localmente no modal e só é repassada pra cima quando o
+  // usuário confirma a mudança (onConfirmar recebe o texto como argumento).
+  const [observacao, setObservacao] = useState("");
 
   const content = (
       <motion.div
@@ -1726,7 +1831,23 @@ function ConfirmarStatusModal({ status, nome, onConfirmar, onCancelar, loading }
             {confirmacaoStatus(status, nome)}
           </p>
 
-          <div className="mem-confirm-actions" style={{ marginTop: 16 }}>
+          {/* ── campo de observação opcional ── */}
+          <div style={{ width: "100%", textAlign: "left", margin: "14px 0 4px" }}>
+            <label className="mem-form-label">OBSERVAÇÃO (opcional)</label>
+            <textarea
+                className="mem-form-textarea"
+                style={{ minHeight: 72 }}
+                placeholder="Ex: Ausente por motivo de saúde, mudou de cidade, pedido de afastamento..."
+                value={observacao}
+                onChange={e => setObservacao(e.target.value)}
+                disabled={loading}
+            />
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10.5, fontWeight: 300, color: sc.text, margin: "6px 0 0" }}>
+              Essa observação ficará visível na ficha do membro, explicando o motivo do status.
+            </p>
+          </div>
+
+          <div className="mem-confirm-actions" style={{ marginTop: 6 }}>
             <button
                 type="button"
                 className="mem-confirm-btn-cancel"
@@ -1738,7 +1859,7 @@ function ConfirmarStatusModal({ status, nome, onConfirmar, onCancelar, loading }
             <button
                 type="button"
                 className="mem-confirm-btn-delete"
-                onClick={onConfirmar}
+                onClick={() => onConfirmar(observacao)}
                 disabled={loading}
                 style={{ background: `linear-gradient(135deg, ${sc.text}, ${sc.text}CC)` }}
             >
@@ -1756,7 +1877,7 @@ function ConfirmarStatusModal({ status, nome, onConfirmar, onCancelar, loading }
   return createPortal(content, document.body);
 }
 
-/* ─── Modal de Filtro por Status (NOVO) ─────────────────────────── */
+/* ─── Modal de Filtro por Status ─────────────────────────── */
 function FiltroStatusModal({ t, filtroAtual, onSelecionar, onFechar }) {
   const opcoes = [
     { value: null, label: "Todos os membros" },
@@ -1834,7 +1955,7 @@ function FiltroStatusModal({ t, filtroAtual, onSelecionar, onFechar }) {
   return createPortal(content, document.body);
 }
 
-/* ─── Modal de Filtro por Cargo (NOVO) ────────────────────────────── */
+/* ─── Modal de Filtro por Cargo ────────────────────────────── */
 function FiltroCargoModal({ selecionados, onAplicar, onFechar }) {
   const [locais, setLocais] = useState(selecionados);
 
@@ -1922,7 +2043,7 @@ function FiltroCargoModal({ selecionados, onAplicar, onFechar }) {
   return createPortal(content, document.body);
 }
 
-/* ─── Modal de Exportação em PDF (NOVO) ───────────────────────────── */
+/* ─── Modal de Exportação em PDF ───────────────────────────── */
 function ExportarPdfModal({ onExportar, onFechar, exportando, quantidadeAtual }) {
   const content = (
       <motion.div
@@ -2053,7 +2174,6 @@ export default function MembrosRefatorado({ isDark = false }) {
   const [toast,          setToast]          = useState(null); // { message, status }
 
   // ✅ estado para o modal de confirmação de mudança de status
-  // (substitui o window.confirm nativo que aparecia feio no navegador)
   const [confirmandoStatus, setConfirmandoStatus] = useState(false);
   const [dadosPendentes,    setDadosPendentes]    = useState(null); // { dados, novoStatus }
 
@@ -2074,19 +2194,10 @@ export default function MembrosRefatorado({ isDark = false }) {
 
   const t = themeMembers(isDark);
 
-  // ✅ Sentinela para scroll infinito (substitui o botão "Carregar mais")
   const sentinelRef = useRef(null);
-
-  // ✅ Guarda a versão mais recente da paginação para o loop de busca completa
-  // não trabalhar com valores "presos" (stale closures) do momento em que foi criado.
   const paginacaoRef = useRef({ pagina: 0, temMais: false });
-
-  // ✅ Espelha a lista de membros mais atual de forma SÍNCRONA (a fonte de
-  // verdade, na verdade), para a exportação em PDF conseguir ler os dados
-  // recém-carregados sem depender de um ciclo de render/callback do React.
   const membrosRef = useRef([]);
 
-  // ✅ Some sozinho depois de alguns segundos
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(null), 3800);
@@ -2108,22 +2219,6 @@ export default function MembrosRefatorado({ isDark = false }) {
           : (res.data.last ?? (conteudo.length < TAMANHO_PAGINA));
       const total = Array.isArray(res.data) ? conteudo.length : (res.data.totalElements ?? conteudo.length);
 
-      // ─────────────────────────────────────────────────────────────
-      // ✅ CORREÇÃO DO BUG DO PDF SEM DADOS
-      //
-      // Antes, a `membrosRef` só era atualizada DENTRO do callback
-      // passado para `setMembros(prev => {...})`. Esse callback roda
-      // durante o processamento do estado pelo React, o que não é
-      // garantidamente síncrono em relação ao restante do código
-      // assíncrono (ex: o `await` dentro de `carregarTodasAsPaginas`).
-      // Resultado: quando `exportarPdf` lia `membrosRef.current` logo
-      // após o carregamento terminar, às vezes pegava a lista antiga
-      // (vazia ou incompleta) — daí o PDF saía sem dados.
-      //
-      // Agora: calculamos a lista mesclada de forma SÍNCRONA, usando a
-      // própria ref como fonte de verdade, e atualizamos ref + estado
-      // juntos, no mesmo instante — sem depender do callback do setState.
-      // ─────────────────────────────────────────────────────────────
       const merged = reset ? conteudo : [...membrosRef.current, ...conteudo];
       const dedup = deduplicarPorId(merged);
       membrosRef.current = dedup;
@@ -2133,7 +2228,6 @@ export default function MembrosRefatorado({ isDark = false }) {
       setTotalRegistros(total);
       setPagina(numeroPagina);
 
-      // mantém a ref sincronizada para o loop de "buscar tudo" usar valores atuais
       paginacaoRef.current = { pagina: numeroPagina, temMais: !ultimaPagina };
 
       return { ultimaPagina, numeroPagina };
@@ -2159,26 +2253,9 @@ export default function MembrosRefatorado({ isDark = false }) {
     carregarPagina(pagina + 1, false);
   }, [temMais, carregandoMais, pagina, carregarPagina]);
 
-  // ─────────────────────────────────────────────────────────────────
-  // ✅ CORREÇÃO DO BUG DE BUSCA
-  //
-  // Antes, a busca (`filtro`) só filtrava os membros que JÁ estavam
-  // carregados em memória (a página atual do scroll infinito). Se a
-  // pessoa buscada estivesse numa página ainda não carregada (ex:
-  // registro 120 de 300, com páginas de 50 em 50 = página 3), a busca
-  // simplesmente não encontrava, mesmo o membro existindo no banco.
-  //
-  // Agora: sempre que o usuário digita algo na busca (com um pequeno
-  // debounce de 350ms) ou aplica um filtro de status/cargo, disparamos
-  // um carregamento automático de TODAS as páginas restantes em
-  // segundo plano, até não haver mais páginas (`temMais === false`).
-  // Assim a busca/filtro sempre enxerga a lista completa.
-  // ─────────────────────────────────────────────────────────────────
   const carregarTodasAsPaginas = useCallback(async () => {
     setBuscandoTudo(true);
     try {
-      // usa a ref para sempre operar com o estado mais recente,
-      // evitando o problema de "closure presa" em loops assíncronos
       while (paginacaoRef.current.temMais) {
         const proximaPagina = paginacaoRef.current.pagina + 1;
         const { ultimaPagina } = await carregarPagina(proximaPagina, false);
@@ -2189,15 +2266,11 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   }, [carregarPagina]);
 
-  // ✅ Debounce: espera o usuário parar de digitar por 350ms antes de
-  // considerar a busca "ativa" (evita disparar carregamento a cada tecla)
   useEffect(() => {
     const timer = setTimeout(() => setFiltroBusca(filtro.trim()), 350);
     return () => clearTimeout(timer);
   }, [filtro]);
 
-  // ✅ Sempre que houver busca por texto, filtro de status OU filtro de cargo
-  // ativo, garante que a lista completa esteja carregada antes de filtrar.
   useEffect(() => {
     const temBuscaAtiva = filtroBusca !== "" || Boolean(filtroStatus) || filtroCargos.length > 0;
     if (temBuscaAtiva && paginacaoRef.current.temMais) {
@@ -2205,10 +2278,6 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   }, [filtroBusca, filtroStatus, filtroCargos, carregarTodasAsPaginas]);
 
-  // ✅ Detecta o scroll (na janela OU em um container interno com scroll próprio,
-  // como costuma acontecer dentro de layouts de dashboard) e dispara carregarMais()
-  // automaticamente conforme o usuário desce a página — sem depender de root do
-  // IntersectionObserver, que falhava quando o scroll real acontecia num container pai.
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !temMais) return;
@@ -2233,14 +2302,11 @@ export default function MembrosRefatorado({ isDark = false }) {
       const alturaVisivel = containerScroll === window
           ? window.innerHeight
           : containerScroll.getBoundingClientRect().bottom;
-      // Dispara quando a sentinela está a até 300px de entrar na área visível
       if (rect.top - alturaVisivel < 300) {
         carregarMais();
       }
     };
 
-    // Roda uma vez logo de cara — cobre o caso da lista ainda não preencher
-    // a tela inteira (nesse caso o scroll nunca dispararia sozinho).
     verificarEcarregar();
 
     containerScroll.addEventListener("scroll", verificarEcarregar, { passive: true });
@@ -2299,6 +2365,11 @@ export default function MembrosRefatorado({ isDark = false }) {
       arroladoPor:            m.arroladoPor            ?? "",
       cargos:                 Array.isArray(m.cargos) ? m.cargos : [],
       observacoes:            m.observacoes            ?? "",
+      // ✅ NOVO: motivo/observação da última mudança de status, e quando
+      // ela aconteceu — vêm prontos do backend junto com o membro, e são
+      // exibidos (somente leitura) no topo da ficha ao abrir para edição.
+      observacaoStatus:       m.observacaoStatus       ?? "",
+      dataAtualizacaoStatus:  m.dataAtualizacaoStatus  ?? m.dataStatus ?? null,
     });
     setIsModalOpen(true);
   };
@@ -2308,20 +2379,24 @@ export default function MembrosRefatorado({ isDark = false }) {
     setNomeCelula(null); setNomeLider(null);
   };
 
-  // ✅ Executa de fato a gravação (chamado direto, ou após confirmar o modal de status)
-  const executarSalvamento = async (dados, statusMudou, novoStatus) => {
+  const executarSalvamento = async (dados, statusMudou, novoStatus, observacaoStatus) => {
     setSalvando(true);
     try {
       if (editandoId) {
         if (statusMudou) {
-          await api.put(`/membros/${editandoId}/status`, null, { params: { status: novoStatus } });
+          const temObservacao = observacaoStatus && observacaoStatus.trim() !== "";
+          await api.put(`/membros/${editandoId}/status`, null, {
+            params: {
+              status: novoStatus,
+              ...(temObservacao ? { observacao: observacaoStatus.trim() } : {}),
+            },
+          });
         }
         await api.put(`/membros/${editandoId}`, dados);
       } else {
         await api.post("/membros", dados);
       }
 
-      // ✅ Mensagem personalizada quando o status é alterado
       if (statusMudou) {
         setToast({ message: mensagemStatus(novoStatus, form.nome), status: novoStatus });
       }
@@ -2338,8 +2413,6 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   };
 
-  // ✅ Submit do form: se o status mudou, abre o modal personalizado
-  // em vez do window.confirm() nativo do navegador.
   const salvar = async (e) => {
     e.preventDefault();
     try {
@@ -2358,13 +2431,11 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   };
 
-  // ✅ Usuário confirmou a mudança de status no modal personalizado
-  const confirmarMudancaStatus = () => {
+  const confirmarMudancaStatus = (observacao) => {
     if (!dadosPendentes) return;
-    executarSalvamento(dadosPendentes.dados, true, dadosPendentes.novoStatus);
+    executarSalvamento(dadosPendentes.dados, true, dadosPendentes.novoStatus, observacao);
   };
 
-  // ✅ Usuário cancelou — mantém o modal de edição aberto, sem salvar nada
   const cancelarMudancaStatus = () => {
     setConfirmandoStatus(false);
     setDadosPendentes(null);
@@ -2392,8 +2463,6 @@ export default function MembrosRefatorado({ isDark = false }) {
       const backendMsg = err.response?.data?.message || err.response?.data?.error || err.message || "";
       const status = err.response?.status;
 
-      // Detecta violação de FK (célula, discipulado, etc.) mesmo quando
-      // o backend ainda não trata a exceção e devolve a stacktrace crua.
       const ehConflitoDeVinculo =
           status === 409 ||
           status === 500 ||
@@ -2415,9 +2484,6 @@ export default function MembrosRefatorado({ isDark = false }) {
     }
   };
 
-  // ✅ Agora filtra usando o valor com debounce (filtroBusca), garantindo
-  // que a lista já foi totalmente carregada (via carregarTodasAsPaginas)
-  // antes do filtro rodar sobre ela.
   const membrosFiltrados = useMemo(() =>
           membros
               .filter(m =>
@@ -2433,14 +2499,8 @@ export default function MembrosRefatorado({ isDark = false }) {
       [membros, filtroBusca, filtroStatus, filtroCargos]
   );
 
-  // ✅ Só fica "incompleta" enquanto o carregamento automático de todas
-  // as páginas ainda não terminou (agora é raro aparecer, pois o efeito
-  // acima já busca tudo sozinho assim que o usuário digita).
   const buscaPodeEstarIncompleta = (filtroBusca !== "" || filtroStatus || filtroCargos.length > 0) && temMais && buscandoTudo;
 
-  // ✅ Dispara a geração do PDF. Garante que todas as páginas estejam
-  // carregadas antes de exportar, para o relatório não sair incompleto,
-  // e agora inclui um safeguard caso a lista resultante fique vazia.
   const exportarPdf = async (tipo) => {
     setExportando(true);
     try {
@@ -2460,8 +2520,6 @@ export default function MembrosRefatorado({ isDark = false }) {
           )
           .sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR", { sensitivity: "base" }));
 
-      // ✅ Safeguard: avisa se por algum motivo não sobrou ninguém para
-      // exportar, em vez de baixar silenciosamente um PDF só com o cabeçalho.
       if (listaParaExportar.length === 0) {
         alert("Nenhum membro encontrado para exportar com os filtros atuais.");
         return;
@@ -2613,6 +2671,12 @@ export default function MembrosRefatorado({ isDark = false }) {
                     const sc = STATUS_COLORS[m.status] || STATUS_COLORS.INATIVO;
                     const cargosDoMembro = Array.isArray(m.cargos) ? m.cargos : [];
                     const CARGOS_VISIVEIS = 2;
+                    // ✅ NOVO: prévia da observação exibida no card da lista —
+                    // prioriza o motivo do status (mais relevante quando o
+                    // membro não está ATIVO); cai para observações gerais.
+                    const observacaoPreview = m.status !== "ATIVO" && m.observacaoStatus
+                        ? m.observacaoStatus
+                        : (m.observacoes || "");
                     return (
                         <motion.div
                             key={m.id}
@@ -2622,7 +2686,6 @@ export default function MembrosRefatorado({ isDark = false }) {
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: .98 }}
                             style={{
-                              // ✅ Card inteiro reflete a cor do status atual do membro
                               borderColor: sc.border,
                               borderLeftColor: sc.text,
                               background: isDark
@@ -2648,7 +2711,6 @@ export default function MembrosRefatorado({ isDark = false }) {
                                       {m.profissao.slice(0, 12)}
                                     </span>
                                 )}
-                                {/* ── Cargos: badges azuis ao lado do nome ── */}
                                 {cargosDoMembro.slice(0, CARGOS_VISIVEIS).map(c => (
                                     <span key={c} className="mem-badge-cargo">
                                       {CARGO_LABELS[c] || c}
@@ -2660,6 +2722,12 @@ export default function MembrosRefatorado({ isDark = false }) {
                                     </span>
                                 )}
                               </div>
+                              {/* ✅ NOVO: prévia da observação diretamente no card */}
+                              {observacaoPreview && (
+                                  <p className="mem-card-obs" title={observacaoPreview}>
+                                    {observacaoPreview}
+                                  </p>
+                              )}
                             </div>
                             <ChevronRight className="mem-card-arrow" size={18} />
                           </div>
@@ -2668,7 +2736,7 @@ export default function MembrosRefatorado({ isDark = false }) {
                   })}
                 </motion.div>
 
-                {/* ── Scroll infinito: sentinela invisível que dispara o carregamento ── */}
+                {/* ── Scroll infinito ── */}
                 {temMais && (
                     <div ref={sentinelRef} className="mem-scroll-sentinel">
                       {(carregandoMais || buscandoTudo) && (
@@ -2770,7 +2838,7 @@ export default function MembrosRefatorado({ isDark = false }) {
           )}
         </AnimatePresence>
 
-        {/* ── Confirmação de Mudança de Status (substitui window.confirm nativo) ── */}
+        {/* ── Confirmação de Mudança de Status ── */}
         <AnimatePresence>
           {confirmandoStatus && dadosPendentes && (
               <ConfirmarStatusModal
@@ -2783,7 +2851,7 @@ export default function MembrosRefatorado({ isDark = false }) {
           )}
         </AnimatePresence>
 
-        {/* ── Confirmação de Exclusão (personalizada) ── */}
+        {/* ── Confirmação de Exclusão ── */}
         <AnimatePresence>
           {confirmandoExclusao && (
               <ConfirmarExclusaoModal
