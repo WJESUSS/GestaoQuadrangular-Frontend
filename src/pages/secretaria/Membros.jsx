@@ -667,10 +667,14 @@ function GlobalStylesMembers({ t, isDark }) {
 
       .mem-card-obs {
         margin-top: 6px;
-        font-size: 10px; font-weight: 300; color: ${t.textMuted};
+        font-size: 10px; font-weight: 400; color: ${t.textMuted};
         overflow: hidden; text-overflow: ellipsis;
         white-space: nowrap;
         max-width: 100%;
+        padding: 4px 8px;
+        background: rgba(201,169,110,.08);
+        border-left: 2px solid ${AURA.gold};
+        border-radius: 0 4px 4px 0;
       }
 
       .mem-card-arrow {
@@ -1675,7 +1679,27 @@ function MembroModalRefatorado({
             {/* ── Observações ── */}
             <div>
               <p className="mem-section-title">Observações</p>
-              <div className="mem-form-section">
+              <div className="mem-form-section" style={form.observacoes ? {
+                border: `1px solid ${AURA.gold}50`,
+                background: `linear-gradient(135deg, ${AURA.gold}12, ${AURA.gold}06)`,
+                position: 'relative',
+                overflow: 'hidden'
+              } : {}}>
+                {form.observacoes && (
+                  <div style={{
+                    position: 'absolute', top: 8, right: 8,
+                    background: `${AURA.gold}20`,
+                    color: AURA.gold,
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    fontSize: 9,
+                    fontWeight: 600,
+                    letterSpacing: '.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    ● Com observação
+                  </div>
+                )}
                 <label className="mem-form-label">OBSERVAÇÕES GERAIS</label>
                 <textarea className="mem-form-textarea"
                           value={form.observacoes} onChange={e => f({ observacoes: e.target.value })}
@@ -2724,9 +2748,10 @@ export default function MembrosRefatorado({ isDark = false }) {
                               </div>
                               {/* ✅ NOVO: prévia da observação diretamente no card */}
                               {observacaoPreview && (
-                                  <p className="mem-card-obs" title={observacaoPreview}>
-                                    {observacaoPreview}
-                                  </p>
+                                  <div className="mem-card-obs" title={observacaoPreview} style={{ display: 'flex', alignItems: 'flex-start', gap: 4 }}>
+                                    <span style={{ color: AURA.gold, flexShrink: 0, marginTop: 1 }}>●</span>
+                                    <span>{observacaoPreview}</span>
+                                  </div>
                               )}
                             </div>
                             <ChevronRight className="mem-card-arrow" size={18} />
