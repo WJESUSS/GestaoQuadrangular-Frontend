@@ -492,6 +492,12 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
 
   useEffect(() => { carregarRanking(); setExpandido(null); }, [carregarRanking]);
 
+  useEffect(() => {
+    const handler = () => carregarRanking(true);
+    window.addEventListener("ieq:ranking:atualizado", handler);
+    return () => window.removeEventListener("ieq:ranking:atualizado", handler);
+  }, [carregarRanking]);
+
   const buscaLower = busca.trim().toLowerCase();
 
   /* Garante ordenação por pontuação e atribui posição quando o backend não fornece */

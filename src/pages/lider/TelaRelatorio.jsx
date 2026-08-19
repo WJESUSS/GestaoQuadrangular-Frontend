@@ -1052,6 +1052,8 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
           : { celulaId: Number(celulaId), dataReuniao: normalizarData(form.dataReuniao), realizada: false, motivoNaoRealizacao };
       await api.put(`/relatorios/${relatorioId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
 
+      window.dispatchEvent(new CustomEvent("ieq:ranking:atualizado", { detail: { celulaId: Number(celulaId) } }));
+
       // ✅ Abre modal elegante de confirmação, com textos ajustados para edição
       if (relatorioRealizada) {
         setModalRealizada({
@@ -1333,6 +1335,8 @@ export default function TelaRelatorio({ isDark = false }) {
         await api.put(`/metas/celula/${form.celulaId}/recalcular`, {}, { headers: { Authorization: `Bearer ${token}` } });
         dispararAtualizacaoMetas(form.celulaId);
       } catch (err) { console.warn("Não foi possível recalcular metas:", err); }
+
+      window.dispatchEvent(new CustomEvent("ieq:ranking:atualizado", { detail: { celulaId: Number(form.celulaId) } }));
 
       try { localStorage.removeItem(draftKey(form.celulaId)); } catch (_) {}
       prontoParaSalvar.current = false;
