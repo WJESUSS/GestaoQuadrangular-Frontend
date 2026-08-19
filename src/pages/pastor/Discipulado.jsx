@@ -225,119 +225,133 @@ function pagBtnStyle(active, disabled, t) {
   };
 }
 
-/* ─── Modal de detalhe ──────────────────────────────────────────────────── */
+/* ─── estilos th ────────────────────────────────────────────────────────── */
+function thStyle(t, align = "left") {
+  return {
+    padding: "11px 8px", textAlign: align,
+    fontSize: 9, fontWeight: 700, letterSpacing: ".12em",
+    color: t.textMuted, borderBottom: `1px solid ${t.border}`,
+    whiteSpace: "nowrap",
+  };
+}
+
+/* ─── Modal de detalhe (versão responsiva, rola como bloco único) ──────── */
 function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
   if (!rel) return null;
   const presencas = rel.presencas || [];
   const pct       = frequencia(presencas);
+  const freqColor = pct >= 70 ? AURA.green : pct >= 50 ? AURA.gold : AURA.red;
 
   return (
       <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          style={{
-            position: "fixed", inset: 0, zIndex: 9999,
-            background: "rgba(10,10,15,.88)", backdropFilter: "blur(16px)",
-            display: "flex", alignItems: "flex-start", justifyContent: "center",
-            padding: "env(safe-area-inset-top,12px) 10px 10px",
-            overflowY: "auto", WebkitOverflowScrolling: "touch",
-          }}
+          transition={{ duration: .25 }}
+          className="disc-modal-overlay"
           onClick={onClose}
       >
         <motion.div
-            initial={{ y: -32, opacity: 0, scale: .97 }}
-            animate={{ y: 0,   opacity: 1, scale: 1   }}
-            exit={{    y: -32, opacity: 0, scale: .97 }}
-            transition={{ type: "spring", stiffness: 320, damping: 30 }}
+            initial={{ y: 18, opacity: 0, scale: .96 }}
+            animate={{ y: 0,  opacity: 1, scale: 1   }}
+            exit={{    y: 12, opacity: 0, scale: .97 }}
+            transition={{ type: "spring", stiffness: 260, damping: 28, mass: .8 }}
             onClick={e => e.stopPropagation()}
+            className="disc-modal"
             style={{
-              width: "100%", maxWidth: 860, marginTop: 8, marginBottom: 16,
-              background: t.bgEl, border: `1px solid ${t.border}`,
-              borderRadius: 22, overflow: "hidden",
-              boxShadow: "0 32px 80px rgba(0,0,0,.55)",
+              boxShadow: isDark
+                  ? "0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(201,169,110,.06)"
+                  : "0 40px 100px rgba(26,16,8,.18), 0 0 0 1px rgba(201,169,110,.08)",
             }}
         >
-          {/* Header azul */}
-          <div style={{
-            padding: "16px 18px",
-            background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`,
-            display: "flex", justifyContent: "space-between",
-            alignItems: "center", gap: 12,
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
+          {/* fio dourado no topo, como nos cards */}
+          <div style={{ height: 3, background: `linear-gradient(90deg, ${AURA.blue}, ${AURA.gold})`, flexShrink: 0 }} />
+
+          {/* Header */}
+          <div className="disc-modal-header">
+            <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
               <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: "rgba(255,255,255,.15)",
-                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                width: 44, height: 44, borderRadius: 13, flexShrink: 0,
+                background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: `0 8px 20px ${AURA.blue}35`,
               }}>
-                <BookOpen size={19} style={{ color: "#fff" }} />
+                <BookOpen size={20} style={{ color: "#fff" }} />
               </div>
               <div style={{ minWidth: 0 }}>
-                <h3 style={{
-                  fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 700,
-                  color: "#fff", margin: "0 0 2px",
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                <p style={{
+                  fontSize: 9, letterSpacing: ".16em", fontWeight: 700,
+                  color: `${AURA.gold}99`, margin: "0 0 4px", textTransform: "uppercase",
                 }}>
                   {rel.nomeCelula}
-                </h3>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,.65)", margin: 0 }}>
-                  {rel.nomeLider} · {formatarSemana(rel.dataInicio, rel.dataFim)}
                 </p>
+                <h3 style={{
+                  fontFamily: "'Playfair Display', serif", fontSize: 19, fontWeight: 500,
+                  color: t.text, margin: "0 0 5px", lineHeight: 1.2,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {rel.nomeLider}
+                </h3>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <Calendar size={12} style={{ color: t.textMuted, flexShrink: 0 }} />
+                  <p style={{ fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>
+                    {formatarSemana(rel.dataInicio, rel.dataFim)}
+                  </p>
+                </div>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 7, flexShrink: 0 }}>
-              <button
-                  onClick={() => onPDF(rel)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    padding: "8px 13px",
-                    background: "rgba(201,169,110,.2)", border: `1px solid ${AURA.gold}50`,
-                    borderRadius: 9, cursor: "pointer", color: AURA.gold,
-                    fontSize: 9, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase",
-                  }}
-              >
-                <Download size={12} /> PDF
-              </button>
-              <button
-                  onClick={onClose}
-                  style={{
-                    background: "rgba(255,255,255,.15)", border: "none",
-                    color: "#fff", padding: 9, borderRadius: 9, cursor: "pointer",
-                    display: "flex",
-                  }}
-                  aria-label="Fechar"
-              >
-                <X size={17} />
-              </button>
-            </div>
+
+            <button
+                onClick={onClose}
+                style={{
+                  background: t.bgInput, border: `1px solid ${t.border}`,
+                  color: t.textSec, padding: 9, borderRadius: 11, cursor: "pointer",
+                  display: "flex", flexShrink: 0, transition: "all .2s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = `${AURA.red}50`; e.currentTarget.style.color = AURA.red; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.textSec; }}
+                aria-label="Fechar"
+            >
+              <X size={16} />
+            </button>
           </div>
 
-          {/* KPIs */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${t.border}` }}>
+          {/* KPIs — cartões soltos com respiro */}
+          <div className="disc-kpis">
             {[
-              { label: "MEMBROS",   value: presencas.length, color: t.text            },
-              { label: "PRESENTES", value: presencas.filter(p => COLUNAS.some(c => p[c.campo])).length, color: AURA.green },
-              { label: "FREQUÊNCIA",value: `${pct}%`,        color: pct >= 70 ? AURA.green : pct >= 50 ? AURA.gold : AURA.red },
+              { label: "Membros",   value: presencas.length, color: t.text, icon: Users },
+              { label: "Presentes", value: presencas.filter(p => COLUNAS.some(c => p[c.campo])).length, color: AURA.green, icon: CheckCircle2 },
+              { label: "Frequência",value: `${pct}%`, color: freqColor, icon: null },
             ].map((k, i) => (
                 <div key={i} style={{
-                  padding: "12px 10px", textAlign: "center",
-                  borderRight: i < 2 ? `1px solid ${t.border}` : "none",
+                  padding: "14px 12px", borderRadius: 14,
+                  background: t.bgInput, border: `1px solid ${t.border}`,
+                  display: "flex", flexDirection: "column", gap: 6, minWidth: 0,
                 }}>
-                  <p style={{ fontSize: 20, fontWeight: 700, color: k.color, margin: 0 }}>{k.value}</p>
-                  <p style={{ fontSize: 8, letterSpacing: ".12em", color: t.textMuted, margin: "3px 0 0" }}>{k.label}</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 9, letterSpacing: ".1em", color: t.textMuted, fontWeight: 700, textTransform: "uppercase" }}>
+                      {k.label}
+                    </span>
+                    {k.icon && <k.icon size={12} style={{ color: k.color, opacity: .6 }} />}
+                  </div>
+                  <p style={{ fontSize: 22, fontWeight: 700, color: k.color, margin: 0, lineHeight: 1, fontFamily: "'Playfair Display', serif" }}>
+                    {k.value}
+                  </p>
                 </div>
             ))}
           </div>
 
-          {/* Tabela scroll */}
-          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 440 }}>
+          {/* Tabela — sem altura máxima fixa; rola junto com o modal inteiro */}
+          <div className="disc-modal-table-wrap">
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 460 }}>
               <thead>
-              <tr style={{ background: isDark ? "rgba(255,255,255,.03)" : "rgba(201,169,110,.05)" }}>
-                <th style={thStyle(t, "left")}>MEMBRO</th>
+              <tr style={{
+                background: isDark ? "rgba(255,255,255,.025)" : "rgba(201,169,110,.045)",
+                position: "sticky", top: 0, zIndex: 1,
+              }}>
+                <th style={thStyle(t, "left")}>Membro</th>
                 {COLUNAS.map(c => (
                     <th key={c.campo} style={thStyle(t, "center")}>{c.label}</th>
                 ))}
-                <th style={thStyle(t, "center")}>%</th>
+                <th style={thStyle(t, "center")}>Freq.</th>
               </tr>
               </thead>
               <tbody>
@@ -351,17 +365,18 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
                         onMouseEnter={e => e.currentTarget.style.background = t.rowHov}
                         onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                     >
-                      <td style={{ padding: "8px 14px", whiteSpace: "nowrap" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                      <td style={{ padding: "10px 16px", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <div style={{
-                            width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                            background: `linear-gradient(135deg,${AURA.blue}28,${AURA.gold}18)`,
+                            width: 30, height: 30, borderRadius: 9, flexShrink: 0,
+                            background: `linear-gradient(135deg,${AURA.blue}22,${AURA.gold}16)`,
+                            border: `1px solid ${AURA.gold}22`,
                             display: "flex", alignItems: "center", justifyContent: "center",
                             fontSize: 12, fontWeight: 700, color: AURA.gold,
                           }}>
                             {p.nomeMembro?.charAt(0) || "?"}
                           </div>
-                          <span style={{ fontSize: 13, fontWeight: 500, color: t.text }}>{p.nomeMembro}</span>
+                          <span style={{ fontSize: 13.5, fontWeight: 500, color: t.text }}>{p.nomeMembro}</span>
                         </div>
                       </td>
                       {COLUNAS.map(col => (
@@ -369,7 +384,7 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
                             <CelulaPresenca membro={p} coluna={col} isDark={isDark} t={t} />
                           </td>
                       ))}
-                      <td style={{ textAlign: "center", padding: "6px 10px" }}>
+                      <td style={{ textAlign: "center", padding: "6px 12px" }}>
                         <FreqBar pct={pctM} />
                       </td>
                     </tr>
@@ -378,7 +393,7 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
               {presencas.length === 0 && (
                   <tr>
                     <td colSpan={COLUNAS.length + 2} style={{
-                      padding: 32, textAlign: "center",
+                      padding: 40, textAlign: "center",
                       fontSize: 13, fontStyle: "italic", color: t.textMuted,
                     }}>
                       Nenhuma presença registrada.
@@ -389,35 +404,42 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
             </table>
           </div>
 
-          {/* Rodapé */}
-          <div style={{ padding: "14px 18px", borderTop: `1px solid ${t.border}` }}>
+          {/* Rodapé — duas ações lado a lado (empilha em telas muito pequenas) */}
+          <div className="disc-modal-footer">
             <button
                 onClick={onClose}
                 style={{
-                  width: "100%", padding: "11px", borderRadius: 100,
+                  flex: 1, padding: "12px", borderRadius: 100,
                   border: `1px solid ${t.border}`, cursor: "pointer",
                   background: "transparent", color: t.textSec,
-                  fontSize: 11, fontWeight: 600, letterSpacing: ".14em",
-                  textTransform: "uppercase",
+                  fontSize: 11, fontWeight: 600, letterSpacing: ".12em",
+                  textTransform: "uppercase", transition: "all .2s",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = t.textMuted; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; }}
             >
-              <X size={13} /> Fechar
+              Fechar
+            </button>
+            <button
+                onClick={() => onPDF(rel)}
+                style={{
+                  flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                  padding: "12px", borderRadius: 100, border: "none", cursor: "pointer",
+                  background: `linear-gradient(135deg, ${AURA.yellowDark}, ${AURA.gold})`,
+                  color: "#241A00", fontSize: 11, fontWeight: 700, letterSpacing: ".12em",
+                  textTransform: "uppercase", transition: "opacity .2s, transform .2s",
+                  boxShadow: `0 8px 22px ${AURA.gold}35`,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
+            >
+              <Download size={13} /> Exportar PDF
             </button>
           </div>
         </motion.div>
       </motion.div>
   );
-}
-
-/* ─── estilos th ────────────────────────────────────────────────────────── */
-function thStyle(t, align = "left") {
-  return {
-    padding: "11px 8px", textAlign: align,
-    fontSize: 9, fontWeight: 700, letterSpacing: ".12em",
-    color: t.textMuted, borderBottom: `1px solid ${t.border}`,
-    whiteSpace: "nowrap",
-  };
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -553,6 +575,63 @@ export default function Discipulado({ isDark = false }) {
       background: linear-gradient(90deg, transparent, ${AURA.gold}50, transparent);
       margin: 18px 0;
     }
+
+    /* ── Modal responsivo ──────────────────────────────────────────────
+       O overlay é o ÚNICO elemento com scroll (overflow-y: auto).
+       O modal em si não tem altura/scroll próprio, por isso nada fica
+       "preso" dentro de uma área pequena no celular — o dedo sempre
+       rola a página toda até o fim, incluindo os botões do rodapé.  */
+    .disc-modal-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(8,8,12,.72);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: env(safe-area-inset-top, 16px) 0 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .disc-modal {
+      width: 100%; max-width: 820px; margin: 0 auto;
+      background: ${t.bgEl}; border: 1px solid ${t.border};
+      overflow: hidden; display: flex; flex-direction: column;
+      min-height: 100%;
+    }
+    @media (min-width: 640px) {
+      .disc-modal-overlay { padding: env(safe-area-inset-top, 24px) 16px 24px; }
+      .disc-modal { border-radius: 24px; min-height: auto; margin-top: 3vh; }
+    }
+    .disc-modal-header {
+      padding: 18px 16px 16px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+      border-bottom: 1px solid ${t.border};
+    }
+    @media (min-width: 640px) { .disc-modal-header { padding: 22px 26px 20px; } }
+
+    .disc-kpis {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+      padding: 14px 16px; border-bottom: 1px solid ${t.border};
+    }
+    @media (min-width: 640px) { .disc-kpis { gap: 10px; padding: 18px 26px; } }
+    @media (max-width: 380px) {
+      .disc-kpis { grid-template-columns: 1fr 1fr; }
+      .disc-kpis > div:last-child { grid-column: 1 / -1; }
+    }
+
+    /* Tabela: só rola na horizontal (para caber as colunas em telas
+       estreitas). A rolagem vertical é a do overlay inteiro. */
+    .disc-modal-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .disc-modal-footer {
+      display: flex; gap: 10px; padding: 16px;
+      border-top: 1px solid ${t.border};
+      margin-top: auto;
+    }
+    @media (min-width: 640px) { .disc-modal-footer { padding: 18px 26px; } }
+    @media (max-width: 400px) { .disc-modal-footer { flex-direction: column; } }
   `;
 
   /* ── fetch ──────────────────────────────────────────────────────────── */
