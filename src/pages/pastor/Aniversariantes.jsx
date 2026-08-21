@@ -96,7 +96,6 @@ export default function AniversariantesPremium({ isDark = false }) {
         transparent 30px 40px
       );
       background-size:60px 60px;
-      animation: stripe 8s linear infinite;
     }
     .ieq-input-aniv {
       width:100%;

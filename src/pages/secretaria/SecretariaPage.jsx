@@ -101,7 +101,6 @@ function GlobalStyles({ t, isDark }) {
           transparent 24px 40px
         );
         background-size: 80px 80px;
-        animation: sec-stripe 12s linear infinite;
       }
 
       /* ── SIDEBAR ── */

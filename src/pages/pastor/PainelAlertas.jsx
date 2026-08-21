@@ -72,7 +72,6 @@ export default function PainelAlertas({ isDark = false }) {
         transparent 30px 40px
       );
       background-size:60px 60px;
-      animation: stripe 8s linear infinite;
     }
     .ieq-card-alerts {
       background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};

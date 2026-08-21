@@ -87,7 +87,6 @@ function GlobalStyles({ tk, isDark }) {
           transparent 10px 30px
         );
         background-size: 60px 60px;
-        animation: tp-stripe 14s linear infinite;
         opacity: .5;
       }
 

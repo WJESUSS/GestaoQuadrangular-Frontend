@@ -52,7 +52,6 @@ function makeStyles(t, isDark) {
       background: repeating-linear-gradient(-55deg,
         ${isDark?"rgba(201,169,110,.03)":"rgba(201,169,110,.04)"} 0 10px, transparent 10px 20px);
       background-size: 60px 60px;
-      animation: tv-stripe 10s linear infinite;
     }
     .tv-content {
       position: relative; z-index: 1;
