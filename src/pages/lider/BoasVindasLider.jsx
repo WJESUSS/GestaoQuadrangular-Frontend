@@ -307,6 +307,21 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                             </p>
                         </motion.div>
 
+                        {/* ── Imagem pequena de destaque ── */}
+                        {/* ── Imagem pequena de destaque ── */}
+                        <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:.45 }}
+                                    style={{ display:"flex", justifyContent:"center", marginTop:20 }}>
+                            <img
+                                src="/40dias-milagres.png"
+                                alt="40 Dias de Milagres — Avante e Sem Parar"
+                                style={{
+                                    width:400, height:"auto", borderRadius:14,
+                                    border:`1px solid ${t.border}`,
+                                    boxShadow:`0 8px 24px rgba(0,0,0,${isDark?.35:.15})`,
+                                }}
+                            />
+                        </motion.div>
+
                         {/* ── Botão fechar (rodapé) ── */}
                         <button onClick={onClose} style={{
                             width:"100%", marginTop:24,
