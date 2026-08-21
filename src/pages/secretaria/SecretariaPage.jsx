@@ -13,6 +13,7 @@ import Visitantes        from "./Visitante";
 import FichasEncontro    from "./FichasEncontro";
 import SecretariaCelulas from "./SecretariaCelulas";
 import AprovacaoFichasMembro from "./AprovacaoFichasMembro";
+import BoasVindas            from "../../components/BoasVindas.jsx";
 
 /* ─── Tokens (espelhados do DashboardLider) ──────────────────────────── */
 const AURA = {
@@ -457,6 +458,9 @@ export default function SecretariaPage() {
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [pendentesCount, setPendentesCount] = useState(0);
+  const [showBoasVindas, setShowBoasVindas] = useState(
+      () => sessionStorage.getItem("boas_vindas_pendente") === "1"
+  );
 
   const carregarPendentes = useCallback(async () => {
     try {
@@ -490,6 +494,10 @@ export default function SecretariaPage() {
     api.get("/usuarios/me").then(r => setUsuarioLogado(r.data)).catch(() => {});
   }, []);
 
+  useEffect(() => { sessionStorage.removeItem("boas_vindas_pendente"); }, []);
+
+  const fecharBoasVindas = () => setShowBoasVindas(false);
+
   /* Fechar sidebar ao mudar módulo no mobile */
   const trocarModulo = (id) => { setModuloAtivo(id); setMenuOpen(false); };
 
@@ -506,6 +514,18 @@ export default function SecretariaPage() {
         <GlobalStyles t={t} isDark={isDark} />
         <div className="sec2-bg" />
         <div className="sec2-stripes" />
+
+        <AnimatePresence>
+          {showBoasVindas && (
+              <BoasVindas
+                  usuarioLogado={usuarioLogado}
+                  cargo="Secretaria"
+                  mensagem="Um bom registro hoje é uma bênção amanhã. Tenha um dia produtivo e abençoado!"
+                  isDark={isDark}
+                  onClose={fecharBoasVindas}
+              />
+          )}
+        </AnimatePresence>
 
         {/* Overlay mobile */}
         <AnimatePresence>

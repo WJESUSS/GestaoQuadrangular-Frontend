@@ -14,6 +14,7 @@ import Discipulado                from "./Discipulado.jsx";
 import TelaPendencias             from "./TelaPendencias.jsx";
 import RelatorioCasasDePaz        from "./RelatorioCasasDePaz.jsx";
 import RelatorioMissao70Pastor    from "./RelatorioMissao70Pastor.jsx";
+import BoasVindas                 from "../../components/BoasVindas.jsx";
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
@@ -721,11 +722,18 @@ export default function PastorPage() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
+  const [showBoasVindas, setShowBoasVindas] = useState(
+      () => sessionStorage.getItem("boas_vindas_pendente") === "1"
+  );
   const location = useLocation();
 
   const t = theme(isDark);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
+
+  useEffect(() => { sessionStorage.removeItem("boas_vindas_pendente"); }, []);
+
+  const fecharBoasVindas = () => setShowBoasVindas(false);
 
   useEffect(() => {
     (async () => {
@@ -778,6 +786,18 @@ export default function PastorPage() {
       <div className="pp-root">
         <GlobalStyles t={t} isDark={isDark} />
         <div className="pp-glow" />
+
+        <AnimatePresence>
+          {showBoasVindas && (
+              <BoasVindas
+                  usuarioLogado={usuarioLogado}
+                  cargo="Pastor"
+                  mensagem="“Apascenta o rebanho de Deus que está entre ti.” — 1 Pedro 5:2. Tenha um dia de conquista e bênção!"
+                  isDark={isDark}
+                  onClose={fecharBoasVindas}
+              />
+          )}
+        </AnimatePresence>
 
         {/* ════ HEADER ════ */}
         <header className="pp-header">

@@ -234,129 +234,28 @@ export default function Home() {
                     padding: "80px clamp(20px, 5vw, 80px) 60px",
                     textAlign: "center",
                 }}>
-                    {/* Vídeo de fundo — sem som, autoplay, loop */}
-                    <video
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        src="/videos/santaceia.mp4"
-                        style={{
-                            position: "absolute",
-                            inset: 0,
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            zIndex: 0,
-                        }}
-                    />
-
-                    {/* Véu leve — apenas para contraste sutil do texto */}
+                    {/* fundo desfocado — preenche a seção sem cortar a imagem */}
                     <div style={{
                         position: "absolute", inset: 0, zIndex: 0,
-                        background: "linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.10) 40%, rgba(0,0,0,.30) 100%)",
+                        backgroundImage: "url(/40dias-milagres.png)",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        filter: "blur(38px) brightness(.7) saturate(1.1)",
+                        transform: "scale(1.15)",
                     }} />
 
-                    <div style={{ position: "relative", zIndex: 1, maxWidth: 800 }}>
-                        {/* Etiqueta */}
-                        <div style={{
-                            display: "inline-flex", alignItems: "center", gap: 8,
-                            background: "rgba(255,255,255,.12)",
-                            border: `1px solid rgba(255,255,255,.25)`,
-                            borderRadius: 100,
-                            padding: "5px 16px",
-                            marginBottom: 32,
-                            fontSize: 12, fontWeight: 600, letterSpacing: "0.1em",
-                            color: BRAND.goldLight,
-                            textTransform: "uppercase",
-                            backdropFilter: "blur(8px)",
-                        }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.gold, display: "inline-block", animation: "pulse 2s infinite" }} />
-                            Sistema exclusivo para a IEQ
-                        </div>
-
-                        <h1 style={{
-                            fontFamily: "'Fraunces', serif",
-                            fontSize: "clamp(38px, 7vw, 76px)",
-                            fontWeight: 600,
-                            lineHeight: 1.08,
-                            margin: "0 0 24px",
-                            letterSpacing: "-0.01em",
-                            color: "#fff",
-                            textShadow: "0 2px 20px rgba(0,0,0,.5)",
-                        }}>
-                            Sua Igreja,<br />
-                            <span style={{ color: BRAND.goldLight, fontStyle: "italic" }}>Bem Administrada.</span>
-                        </h1>
-
-                        <p style={{
-                            fontSize: "clamp(15px, 2vw, 18px)",
-                            color: "rgba(255,255,255,.8)",
-                            lineHeight: 1.8,
-                            maxWidth: 560,
-                            margin: "0 auto 48px",
-                            textShadow: "0 1px 10px rgba(0,0,0,.4)",
-                        }}>
-                            Plataforma criada especialmente para igrejas em células.
-                            Controle membros, células, discipulado e financeiro
-                            com simplicidade e segurança.
-                        </p>
-
-                        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-                            <button
-                                onClick={() => navigate("/login")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: 10,
-                                    padding: "14px 32px",
-                                    border: "none",
-                                    borderRadius: 4,
-                                    background: `linear-gradient(135deg, ${BRAND.moss}, ${BRAND.mossDeep})`,
-                                    color: "#fff",
-                                    cursor: "pointer",
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: 15, fontWeight: 700,
-                                    letterSpacing: "0.04em",
-                                    boxShadow: "0 4px 20px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.12) inset",
-                                    transition: "transform 0.2s, box-shadow 0.2s",
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.18) inset"; }}
-                                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.12) inset"; }}
-                            >
-                                Acessar agora <IconArrow />
-                            </button>
-
-                            <button
-                                onClick={() => document.getElementById("funcionalidades").scrollIntoView({ behavior: "smooth" })}
-                                style={{
-                                    padding: "14px 32px",
-                                    border: `1px solid rgba(255,255,255,0.4)`,
-                                    borderRadius: 4,
-                                    background: "rgba(255,255,255,0.12)",
-                                    color: "#fff",
-                                    cursor: "pointer",
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: 15, fontWeight: 500,
-                                    backdropFilter: "blur(10px)",
-                                    boxShadow: "0 2px 12px rgba(0,0,0,.25)",
-                                    transition: "border-color 0.2s, background 0.2s",
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = BRAND.goldLight; e.currentTarget.style.background = "rgba(255,255,255,0.2)"; }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)"; e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
-                            >
-                                Ver funcionalidades
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Scroll indicator */}
-                    <div style={{
-                        position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)",
-                        display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-                        color: "rgba(255,255,255,.5)", fontSize: 11, letterSpacing: "0.1em", zIndex: 1,
-                    }}>
-                        <span>ROLE PARA BAIXO</span>
-                        <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(255,255,255,.5), transparent)", animation: "scrollDown 1.5s ease-in-out infinite" }} />
-                    </div>
+                    {/* imagem nítida, centralizada, sem cortes */}
+                    <img
+                        src="/40dias-milagres.png"
+                        alt="40 Dias de Milagres — Avante e Sem Parar"
+                        style={{
+                            position: "absolute", inset: 0, margin: "auto",
+                            width: "100%", height: "100%",
+                            objectFit: "contain",
+                            zIndex: 0,
+                            filter: "drop-shadow(0 20px 60px rgba(0,0,0,.5))",
+                        }}
+                    />
                 </section>
 
                 {/* ═══════════════════════════════ STATS ═══════════════════════════════ */}

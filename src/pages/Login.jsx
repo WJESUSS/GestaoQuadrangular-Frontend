@@ -135,7 +135,10 @@ export default function Login() {
             localStorage.setItem("user", JSON.stringify({ id:d.id, username:d.sub, perfil:d.perfil }));
             const p = d.perfil?.replace("ROLE_","").toUpperCase();
             const map = { ADMIN:"/admin", PASTOR:"/pastor", LIDER_CELULA:"/lider", TESOUREIRO:"/tesouraria", SECRETARIO:"/secretaria" };
-            if (map[p]) navigate(map[p]);
+            if (map[p]) {
+                sessionStorage.setItem("boas_vindas_pendente", "1");
+                navigate(map[p]);
+            }
             else setErrLogin({ tipo:"geral", titulo:"Perfil não autorizado", msg:`Perfil "${p}" sem acesso. Contate o administrador.` });
         } catch(err) {
             const st = err?.response?.status;
@@ -485,24 +488,36 @@ export default function Login() {
           .tab-btn   { font-size:8.5px; letter-spacing:.07em; }
         }
       `}</style>
-
             <div className="ieq-login-root">
-                {/* ── vídeo de fundo ── */}
-                <video
-                    autoPlay muted loop playsInline
-                    src="/videos/santaceia.mp4"
+                {/* ── fundo desfocado (preenche a tela sem cortar) ── */}
+                <div style={{
+                    position:"fixed", inset:0, zIndex:0,
+                    backgroundImage:"url(/40dias-milagres.png)",
+                    backgroundSize:"cover",
+                    backgroundPosition:"center",
+                    filter:"blur(38px) brightness(.7) saturate(1.1)",
+                    transform:"scale(1.15)",
+                }} />
+
+                {/* ── imagem nítida, centralizada, sem cortes ── */}
+                <img
+                    src="/40dias-milagres.png"
+                    alt="40 Dias de Milagres — Avante e Sem Parar"
                     style={{
-                        position:"fixed", inset:0, width:"100%", height:"100%",
-                        objectFit:"cover", zIndex:0,
+                        position:"fixed", inset:0, margin:"auto",
+                        width:"100%", height:"100%",
+                        objectFit:"contain",
+                        zIndex:0,
+                        filter:"drop-shadow(0 20px 60px rgba(0,0,0,.5))",
                     }}
                 />
+
                 <div style={{
                     position:"fixed", inset:0, zIndex:0,
                     background: dark
                         ? "linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.15) 50%, rgba(0,0,0,.30) 100%)"
                         : "linear-gradient(180deg, rgba(0,0,0,.20) 0%, rgba(0,0,0,.10) 50%, rgba(0,0,0,.25) 100%)",
                 }} />
-
                 {/* ── grade + glows (sem a cena de igreja/nuvens) ── */}
                 <div className="noise-overlay"/>
                 <div className="glow-primary"/>
