@@ -54,6 +54,13 @@ const JUSTIFICATIVAS = {
 function getMotivoLabel(m) { return MOTIVO_LABELS[m] || { label: m || "Não informado", icone: "📋" }; }
 function getJustificativaInfo(v) { return JUSTIFICATIVAS[v] || { label: v || "Outro", icon: <HelpCircle size={11} />, cor: "#9A9080", bg: "rgba(154,144,128,.1)", borda: "rgba(154,144,128,.28)" }; }
 
+/* Retorna "Primeiro Último" nome de um nome completo. Ignora nomes do meio. */
+function primeiroEUltimoNome(nomeCompleto) {
+    if (!nomeCompleto) return "";
+    const partes = nomeCompleto.trim().split(/\s+/);
+    return partes.length > 1 ? `${partes[0]} ${partes[partes.length - 1]}` : partes[0];
+}
+
 function BadgeJustificativa({ valor }) {
     const cfg = getJustificativaInfo(valor);
     return (
@@ -236,6 +243,7 @@ function GlobalStylesRel({ t, isDark }) {
       .rl-card-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
       .rl-card-title { font-family:'Playfair Display',serif; font-size:15px; font-weight:500; letter-spacing:.02em; color:${t.text}; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .rl-card-date { font-size:12px; color:${t.textSec}; margin:0; font-family:'Inter',sans-serif; }
+      .rl-card-lider { font-size:11.5px; color:${AURA.gold}; margin:0; font-family:'Inter',sans-serif; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .rl-card-tag { display:flex; align-items:center; gap:7px; padding:8px 11px; border-radius:10px; font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; }
       .rl-card-stats { display:grid; grid-template-columns:1fr 1fr 1fr; border-top:1px solid ${t.border}; }
       .rl-card-stat { padding:12px 8px; text-align:center; }
@@ -798,7 +806,7 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                                             <span className="rl-info-value" style={{fontStyle:rel.estudo?"normal":"italic",color:rel.estudo?t.text:t.textMuted}}>{rel.estudo||"Não informado"}</span>
                                         </div>
                                         {rel.local     && <div className="rl-info-row"><span className="rl-info-label">Local</span><span className="rl-info-value">{rel.local}</span></div>}
-                                        {rel.lider     && <div className="rl-info-row"><span className="rl-info-label">Líder</span><span className="rl-info-value">{rel.lider}</span></div>}
+                                        {rel.nomeLider && <div className="rl-info-row"><span className="rl-info-label">Líder</span><span className="rl-info-value">{rel.nomeLider}</span></div>}
                                         {rel.anfitriao && <div className="rl-info-row"><span className="rl-info-label">Anfitrião</span><span className="rl-info-value">{rel.anfitriao}</span></div>}
                                         <div className="rl-info-row">
                                             <span className="rl-info-label">Situação</span>
@@ -1152,6 +1160,7 @@ export default function RelatorioCelula({ isDark = false }) {
                         <div className="rl-grid">
                             {naoRealizadas.map((rel,i) => {
                                 const mot = getMotivoLabel(rel.motivoNaoRealizacao);
+                                const nomeLiderCurto = rel.nomeLider && rel.nomeLider !== "Sem líder" ? primeiroEUltimoNome(rel.nomeLider) : null;
                                 return (
                                     <motion.div key={rel.id} initial={{opacity:0,y:14}} animate={{opacity:1,y:0}} transition={{delay:i*.04}} className="rl-card" onClick={() => handleVerDetalhes(rel)}>
                                         <div className="rl-card-strip" style={{background:`linear-gradient(90deg,#c8a010,${AURA.yellow})`}} />
@@ -1164,7 +1173,8 @@ export default function RelatorioCelula({ isDark = false }) {
                                                 </div>
                                             </div>
                                             <h3 className="rl-card-title" style={{marginBottom:2}}>{rel.nomeCelula}</h3>
-                                            {rel.nomeLider && rel.nomeLider !== "Sem líder" && <p className="rl-card-date" style={{marginBottom:10}}>{rel.nomeLider.split(" ").slice(0,2).join(" ")}</p>}                                            <div className="rl-card-tag" style={{background:"rgba(253,184,19,.1)",border:"1px solid rgba(253,184,19,.25)",color:"#c8a010"}}>
+                                            {nomeLiderCurto && <p className="rl-card-lider" style={{marginBottom:10}}>{nomeLiderCurto}</p>}
+                                            <div className="rl-card-tag" style={{background:"rgba(253,184,19,.1)",border:"1px solid rgba(253,184,19,.25)",color:"#c8a010"}}>
                                                 <Ban size={11} /> {mot.label}
                                             </div>
                                         </div>
@@ -1193,6 +1203,7 @@ export default function RelatorioCelula({ isDark = false }) {
                                 const v        = (rel.visitantesPresentes?.length||0)+(rel.quantidadeVisitantes||0);
                                 const decisoes = (rel.visitantesPresentes||[]).filter(vt=>vt.decisaoEspiritual&&vt.decisaoEspiritual!=="NENHUMA");
                                 const ausentesJ= (rel.membrosAusentes||[]).filter(a=>a.justificativaFalta);
+                                const nomeLiderCurto = rel.nomeLider && rel.nomeLider !== "Sem líder" ? primeiroEUltimoNome(rel.nomeLider) : null;
                                 return (
                                     <motion.div key={rel.id} initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{delay:i*.03}} className="rl-card" onClick={() => handleVerDetalhes(rel)}>
                                         <div className="rl-card-body" style={{paddingBottom:14}}>
@@ -1204,7 +1215,8 @@ export default function RelatorioCelula({ isDark = false }) {
                                                 </div>
                                             </div>
                                             <h3 className="rl-card-title" style={{marginBottom:2}}>{rel.nomeCelula}</h3>
-                                            {rel.nomeLider && rel.nomeLider !== "Sem líder" && <p className="rl-card-date" style={{marginBottom:10}}>{rel.nomeLider.split(" ").slice(0,2).join(" ")}</p>}                                            <div className="rl-card-tag" style={{background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.06)",border:`1px solid ${t.border}`,color:t.textSec,marginBottom:(decisoes.length>0||ausentesJ.length>0)?8:0}}>
+                                            {nomeLiderCurto && <p className="rl-card-lider" style={{marginBottom:10}}>{nomeLiderCurto}</p>}
+                                            <div className="rl-card-tag" style={{background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.06)",border:`1px solid ${t.border}`,color:t.textSec,marginBottom:(decisoes.length>0||ausentesJ.length>0)?8:0}}>
                                                 <BookOpen size={11} style={{flexShrink:0}} />
                                                 <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{rel.estudo||"Sem estudo informado"}</span>
                                             </div>
