@@ -76,15 +76,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                         <div style={{ height:1, background:`linear-gradient(90deg,transparent,${t.border},transparent)`, margin:"0 0 28px" }} />
 
                         {/* ── Mensagem ── */}
-                        <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:.2 }}
-                                    style={{ padding:16, borderRadius:14,
-                                        background: isDark?"rgba(0,61,165,.07)":"rgba(0,61,165,.05)",
-                                        border:`1px solid ${isDark?"rgba(0,61,165,.18)":"rgba(0,61,165,.12)"}`,
-                                        textAlign:"center" }}>
-                            <p style={{ fontFamily:"'Playfair Display',serif", fontSize:14, fontStyle:"italic", color:t.textSec, margin:0, lineHeight:1.65 }}>
-                                "Toda célula que cresce glorifica a Deus. Trabalhe com foco e dedicação!"
-                            </p>
-                        </motion.div>
+
 
                         {/* ── Imagem pequena de destaque ── */}
                         <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:.3 }}
