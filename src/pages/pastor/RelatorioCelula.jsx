@@ -1163,7 +1163,8 @@ export default function RelatorioCelula({ isDark = false }) {
                                                     <p className="rl-card-date">{fmtShort(rel.dataReuniao)}</p>
                                                 </div>
                                             </div>
-                                            <h3 className="rl-card-title" style={{marginBottom:10}}>{rel.nomeCelula}</h3>
+                                            <h3 className="rl-card-title" style={{marginBottom:2}}>{rel.nomeCelula}</h3>
+                                            {rel.nomeLider && rel.nomeLider !== "Sem líder" && <p className="rl-card-date" style={{marginBottom:10}}>{rel.nomeLider.split(" ")[0]}</p>}
                                             <div className="rl-card-tag" style={{background:"rgba(253,184,19,.1)",border:"1px solid rgba(253,184,19,.25)",color:"#c8a010"}}>
                                                 <Ban size={11} /> {mot.label}
                                             </div>
@@ -1203,7 +1204,8 @@ export default function RelatorioCelula({ isDark = false }) {
                                                     <p className="rl-card-date">{fmtShort(rel.dataReuniao)}</p>
                                                 </div>
                                             </div>
-                                            <h3 className="rl-card-title" style={{marginBottom:10}}>{rel.nomeCelula}</h3>
+                                            <h3 className="rl-card-title" style={{marginBottom:2}}>{rel.nomeCelula}</h3>
+                                            {rel.nomeLider && rel.nomeLider !== "Sem líder" && <p className="rl-card-date" style={{marginBottom:10}}>{rel.nomeLider.split(" ")[0]}</p>}
                                             <div className="rl-card-tag" style={{background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.06)",border:`1px solid ${t.border}`,color:t.textSec,marginBottom:(decisoes.length>0||ausentesJ.length>0)?8:0}}>
                                                 <BookOpen size={11} style={{flexShrink:0}} />
                                                 <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{rel.estudo||"Sem estudo informado"}</span>
