@@ -1033,8 +1033,8 @@ export default function RelatorioCelula({ isDark = false }) {
         doc.text(`Período: ${fmtShort(dataInicio)} a ${fmtShort(dataFim)}  |  Membros: ${totais.membros}  |  Visitantes: ${totais.visitantes}  |  Total: ${totais.geral}  |  Faltas: ${totais.justificadas}`,14,28);
         autoTable(doc,{
             startY:34,
-            head:[["Célula","Data","Membros","Visitas","Total","Estudo","Faltas Just."]],
-            body:realizadas.map(r=>[r.nomeCelula,new Date(r.dataReuniao).toLocaleDateString("pt-BR"),r.membrosPresentes?.length||0,(r.visitantesPresentes?.length||0)+(r.quantidadeVisitantes||0),(r.membrosPresentes?.length||0)+(r.visitantesPresentes?.length||0)+(r.quantidadeVisitantes||0),r.estudo||"N/A",(r.membrosAusentes||[]).filter(a=>a.justificativaFalta).length]),
+            head:[["Célula","Líder","Data","Membros","Visitas","Total","Estudo","Faltas Just."]],
+            body:realizadas.map(r=>[r.nomeCelula,r.nomeLider&&r.nomeLider!=="Sem líder"?primeiroEUltimoNome(r.nomeLider):"—",new Date(r.dataReuniao).toLocaleDateString("pt-BR"),r.membrosPresentes?.length||0,(r.visitantesPresentes?.length||0)+(r.quantidadeVisitantes||0),(r.membrosPresentes?.length||0)+(r.visitantesPresentes?.length||0)+(r.quantidadeVisitantes||0),r.estudo||"N/A",(r.membrosAusentes||[]).filter(a=>a.justificativaFalta).length]),
             theme:"grid",headStyles:{fillColor:[0,36,112]},
         });
         if(naoRealizadas.length>0){
