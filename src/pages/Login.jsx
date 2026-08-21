@@ -117,6 +117,16 @@ export default function Login() {
 
     const cardRef = useFadeIn();
 
+    /* Adia as camadas pesadas (blur/drop-shadow) para depois do 1º paint — evita travar a navegação */
+    const [bgReady, setBgReady] = useState(false);
+    useEffect(() => {
+        let raf2;
+        const raf1 = requestAnimationFrame(() => {
+            raf2 = requestAnimationFrame(() => setBgReady(true));
+        });
+        return () => { cancelAnimationFrame(raf1); if (raf2) cancelAnimationFrame(raf2); };
+    }, []);
+
     /* helpers */
     const trocarAba = a => { setAba(a); setErrLogin(null); setErrCad(null); setErrAlt(null); setOkCad(false); setOkAlt(false); };
 
@@ -227,9 +237,6 @@ export default function Login() {
             <Helmet>
                 <title>IEQ Gestão — Acesso ao Sistema</title>
                 <meta name="description" content="Portal administrativo da Igreja do Evangelho Quadrangular de Pituaçu."/>
-                <link rel="preconnect" href="https://fonts.googleapis.com"/>
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"/>
-                <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
             </Helmet>
 
             <style>{`
@@ -447,6 +454,7 @@ export default function Login() {
 
         /* ── animações ── */
         @keyframes fadeUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes ieqFadeIn { to { opacity:1; } }
         @keyframes popIn   { from{opacity:0;transform:scale(.9)} to{opacity:1;transform:scale(1)} }
         @keyframes shakeX  { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
         @keyframes tabIn   { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
@@ -489,28 +497,44 @@ export default function Login() {
         }
       `}</style>
             <div className="ieq-login-root">
-                {/* ── fundo desfocado (preenche a tela sem cortar) ── */}
+                {/* ── base gradiente instantânea (pinta no 1º frame, custo zero) ── */}
                 <div style={{
                     position:"fixed", inset:0, zIndex:0,
-                    backgroundImage:"url(/40dias-milagres.png)",
-                    backgroundSize:"cover",
-                    backgroundPosition:"center",
-                    filter:"blur(38px) brightness(.7) saturate(1.1)",
-                    transform:"scale(1.15)",
+                    background: dark
+                        ? "linear-gradient(160deg,#1E3F66 0%,#12283F 45%,#12131C 100%)"
+                        : "linear-gradient(160deg,#4C7EB0 0%,#1E3F66 55%,#12283F 100%)",
                 }} />
 
-                {/* ── imagem nítida, centralizada, sem cortes ── */}
-                <img
-                    src="/40dias-milagres.png"
-                    alt="40 Dias de Milagres — Avante e Sem Parar"
-                    style={{
-                        position:"fixed", inset:0, margin:"auto",
-                        width:"100%", height:"100%",
-                        objectFit:"contain",
-                        zIndex:0,
-                        filter:"drop-shadow(0 20px 60px rgba(0,0,0,.5))",
-                    }}
-                />
+                {/* ── fundo desfocado + imagem nítida (entram depois, com fade) ── */}
+                {bgReady && (
+                    <>
+                        <div style={{
+                            position:"fixed", inset:0, zIndex:0,
+                            backgroundImage:"url(/40dias-milagres.png)",
+                            backgroundSize:"cover",
+                            backgroundPosition:"center",
+                            filter:"blur(38px) brightness(.7) saturate(1.1)",
+                            transform:"scale(1.15)",
+                            opacity:0,
+                            animation:"ieqFadeIn .5s ease forwards",
+                        }} />
+
+                        <img
+                            src="/40dias-milagres.png"
+                            alt="40 Dias de Milagres — Avante e Sem Parar"
+                            decoding="async"
+                            style={{
+                                position:"fixed", inset:0, margin:"auto",
+                                width:"100%", height:"100%",
+                                objectFit:"contain",
+                                zIndex:0,
+                                filter:"drop-shadow(0 20px 60px rgba(0,0,0,.5))",
+                                opacity:0,
+                                animation:"ieqFadeIn .5s ease .08s forwards",
+                            }}
+                        />
+                    </>
+                )}
 
                 <div style={{
                     position:"fixed", inset:0, zIndex:0,
