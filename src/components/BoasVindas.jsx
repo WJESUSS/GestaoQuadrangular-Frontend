@@ -24,23 +24,17 @@ function theme(isDark) {
   };
 }
 
-function saudacaoHorario() {
-  const h = new Date().getHours();
-  if (h >= 5 && h < 12) return "Bom dia";
-  if (h < 18)           return "Boa tarde";
-  return "Boa noite";
-}
-
-function dataHoje() {
-  const d = new Intl.DateTimeFormat("pt-BR", {
-    weekday: "long", day: "2-digit", month: "long", year: "numeric",
-  }).format(new Date());
-  return d.charAt(0).toUpperCase() + d.slice(1);
+/* ─── Detecta gênero pelo cargo (ex: "Pastora", "Secretária") ─── */
+function isFeminino(cargo) {
+  if (!cargo) return false;
+  const c = cargo.trim().toLowerCase();
+  return c.endsWith("a") || c.endsWith("ã") || c.includes("secretária");
 }
 
 /* ─── Modal de boas-vindas (Pastor / Secretaria) ──────────────────────── */
-export default function BoasVindas({ usuarioLogado, cargo = "", mensagem, isDark, onClose }) {
+export default function BoasVindas({ usuarioLogado, cargo = "", isDark, onClose }) {
   const t = theme(isDark);
+  const feminino = isFeminino(cargo);
 
   return (
       <motion.div
@@ -81,7 +75,6 @@ export default function BoasVindas({ usuarioLogado, cargo = "", mensagem, isDark
               fontFamily: "'Inter',sans-serif",
             }}
         >
-          {/* ...restante do card permanece igual... */}
           {/* Faixa topo */}
           <div style={{
             position: "absolute", top: 0, left: 0, right: 0, height: 3,
@@ -138,34 +131,18 @@ export default function BoasVindas({ usuarioLogado, cargo = "", mensagem, isDark
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
               margin: "0 0 12px",
             }}>
-              {saudacaoHorario()}{cargo ? `, ${cargo}` : ""}!
+              Seja bem-vind{feminino ? "a" : "o"}{cargo ? `, ${cargo}` : ""}!
             </h1>
             <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 19, fontWeight: 500, color: t.text, margin: 0 }}>
               {usuarioLogado?.nome || cargo || "Usuário"}
-            </p>
-            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: AURA.gold, margin: "10px 0 0" }}>
-              {dataHoje()}
             </p>
           </motion.div>
 
           <div style={{ height: 1, background: `linear-gradient(90deg,transparent,${t.border},transparent)`, margin: "26px 0" }} />
 
-
-          {/* Mensagem */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }}
-                      style={{
-                        padding: 12, borderRadius: 10,
-                        background: isDark ? "rgba(0,61,165,.07)" : "rgba(0,61,165,.05)",
-                        border: `1px solid ${isDark ? "rgba(0,61,165,.18)" : "rgba(0,61,165,.12)"}`,
-                      }}>
-            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: "italic", color: t.textSec, margin: 0, lineHeight: 1.65 }}>
-              {mensagem || "\u201CQue a paz do Senhor esteja contigo. Tenha um dia abençoado!\u201D"}
-            </p>
-          </motion.div>
-
           {/* ── Imagem pequena de destaque ── */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .35 }}
-                      style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .3 }}
+                      style={{ display: "flex", justifyContent: "center" }}>
             <img
                 src="/40dias-milagres.png"
                 alt="40 Dias de Milagres — Avante e Sem Parar"
