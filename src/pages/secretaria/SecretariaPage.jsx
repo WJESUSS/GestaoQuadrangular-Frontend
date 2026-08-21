@@ -458,9 +458,7 @@ export default function SecretariaPage() {
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [pendentesCount, setPendentesCount] = useState(0);
-  const [showBoasVindas, setShowBoasVindas] = useState(
-      () => sessionStorage.getItem("boas_vindas_pendente") === "1"
-  );
+  const [showBoasVindas, setShowBoasVindas] = useState(false);
 
   const carregarPendentes = useCallback(async () => {
     try {
@@ -494,7 +492,15 @@ export default function SecretariaPage() {
     api.get("/usuarios/me").then(r => setUsuarioLogado(r.data)).catch(() => {});
   }, []);
 
-  useEffect(() => { sessionStorage.removeItem("boas_vindas_pendente"); }, []);
+  /* Aguarda a página assentar antes de abrir as boas-vindas (evita travadas) */
+  useEffect(() => {
+    if (sessionStorage.getItem("boas_vindas_pendente") !== "1") return;
+    const id = setTimeout(() => {
+      sessionStorage.removeItem("boas_vindas_pendente");
+      setShowBoasVindas(true);
+    }, 600);
+    return () => clearTimeout(id);
+  }, []);
 
   const fecharBoasVindas = () => setShowBoasVindas(false);
 

@@ -722,16 +722,22 @@ export default function PastorPage() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
-  const [showBoasVindas, setShowBoasVindas] = useState(
-      () => sessionStorage.getItem("boas_vindas_pendente") === "1"
-  );
+  const [showBoasVindas, setShowBoasVindas] = useState(false);
   const location = useLocation();
 
   const t = theme(isDark);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
 
-  useEffect(() => { sessionStorage.removeItem("boas_vindas_pendente"); }, []);
+  /* Aguarda o dashboard assentar antes de abrir as boas-vindas (evita travadas) */
+  useEffect(() => {
+    if (sessionStorage.getItem("boas_vindas_pendente") !== "1") return;
+    const id = setTimeout(() => {
+      sessionStorage.removeItem("boas_vindas_pendente");
+      setShowBoasVindas(true);
+    }, 600);
+    return () => clearTimeout(id);
+  }, []);
 
   const fecharBoasVindas = () => setShowBoasVindas(false);
 

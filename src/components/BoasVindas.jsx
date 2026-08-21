@@ -48,8 +48,7 @@ export default function BoasVindas({ usuarioLogado, cargo = "", mensagem, isDark
           onClick={onClose}
           style={{
             position: "fixed", inset: 0,
-            background: isDark ? "rgba(10,10,15,.92)" : "rgba(0,0,0,.78)",
-            backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+            background: isDark ? "rgba(10,10,15,.94)" : "rgba(0,0,0,.82)",
             zIndex: 999, overflowY: "auto",
             display: "flex", alignItems: "flex-start", justifyContent: "center",
             padding: "40px 20px",
@@ -120,6 +119,7 @@ export default function BoasVindas({ usuarioLogado, cargo = "", mensagem, isDark
             }}>
               {usuarioLogado?.fotoPerfil ? (
                   <img src={getFotoUrl(usuarioLogado.fotoPerfil)} alt={usuarioLogado?.nome || cargo}
+                       decoding="async"
                        style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
                   <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 600, color: AURA.gold }}>
