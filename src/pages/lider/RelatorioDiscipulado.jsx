@@ -881,7 +881,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
                         <Calendar size={12} style={{ color: AURA.gold, flexShrink: 0 }} />
                         <span className="rd-hist-date">
-                    {item.inicio} → {item.fim}
+                {formatarDataBR(item.inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(item.fim)}
                   </span>
                       </div>
                       {/* Stats */}
@@ -995,7 +995,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
             <div style={{ minWidth: 0 }}>
               <p className="rd-eyebrow">Relatório</p>
               <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0, wordBreak: "break-word" }}>
-                {item.inicio} → {item.fim}
+                    {formatarDataBR(item.inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(item.fim)}
               </p>
             </div>
           </div>
