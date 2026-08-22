@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Plus, X, Building2, Clock, Search, ChevronRight, Loader2,
-  Calendar, MapPin, Users, ArrowLeft, Trash2, Edit2,
+  Calendar, MapPin, Users, ArrowLeft, Trash2, Edit2, FileDown,
 } from "lucide-react";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
@@ -99,6 +101,10 @@ function GlobalStylesCelulas({ t, isDark }) {
       .cel-header-left {
         display: flex; align-items: center; gap: 12px; flex: 1;
       }
+
+      .cel-header-actions {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      }
       
       .cel-title-block {
         flex: 1; min-width: 0;
@@ -127,6 +133,23 @@ function GlobalStylesCelulas({ t, isDark }) {
         box-shadow: 0 6px 22px rgba(5,150,105,.22); flex-shrink: 0;
       }
       .cel-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(5,150,105,.32); }
+      .cel-btn-gold:disabled {
+        opacity: .6; cursor: not-allowed; transform: none;
+        box-shadow: none;
+      }
+
+      .cel-btn-outline {
+        display: flex; align-items: center; gap: 7px;
+        padding: 11px 18px; border-radius: 100px; cursor: pointer;
+        background: ${t.bgInput}; border: 1px solid ${t.border};
+        color: ${t.text}; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; transition: all .3s; flex-shrink: 0;
+      }
+      .cel-btn-outline:hover { border-color: ${AURA.gold}; }
+      .cel-btn-outline:disabled {
+        opacity: .5; cursor: not-allowed;
+      }
 
       .cel-search-wrap {
         position: relative; margin-bottom: 18px;
@@ -503,6 +526,7 @@ export default function CelulasRefatorado({ isDark = false }) {
   const [filtro,             setFiltro]             = useState("");
   const [form,               setForm]               = useState(formInicial);
   const [salvando,           setSalvando]           = useState(false);
+  const [exportandoPdf,      setExportandoPdf]      = useState(false);
 
   const t = themeCelulas(isDark);
 
@@ -591,6 +615,67 @@ export default function CelulasRefatorado({ isDark = false }) {
       c.bairro?.toLowerCase().includes(filtro.toLowerCase())
   );
 
+  // ✅ Exportar PDF com a lista de células (respeita o filtro atual)
+  const handleExportarPDF = useCallback(() => {
+    if (celulasFiltradas.length === 0) return;
+    setExportandoPdf(true);
+    try {
+      const doc = new jsPDF();
+      const corVerde = [5, 150, 105]; // AURA.green em RGB
+
+      // Cabeçalho
+      doc.setFillColor(...corVerde);
+      doc.rect(0, 0, 210, 30, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(17);
+      doc.text("Relatório de Células", 14, 15);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      const dataGeracao = new Date().toLocaleString("pt-BR");
+      const subtitulo = filtro
+          ? `Filtro: "${filtro}"   •   Gerado em ${dataGeracao}`
+          : `Gerado em ${dataGeracao}`;
+      doc.text(subtitulo, 14, 22);
+
+      // Total
+      doc.setTextColor(30, 30, 30);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total de células: ${celulasFiltradas.length}`, 14, 40);
+
+      // Tabela
+      autoTable(doc, {
+        startY: 46,
+        head: [["#", "Nome", "Líder", "Bairro", "Dia", "Horário"]],
+        body: celulasFiltradas.map((c, i) => [
+          String(i + 1),
+          c.nome || "-",
+          c.nomeLider || "-",
+          c.bairro || "-",
+          DIAS[c.diaSemana] || c.diaSemana || "-",
+          c.horario ? `${c.horario}h` : "-",
+        ]),
+        headStyles: { fillColor: corVerde, textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [245, 245, 248] },
+        styles: { fontSize: 9, cellPadding: 5 },
+        columnStyles: {
+          0: { cellWidth: 10, halign: "center" },
+        },
+      });
+
+      const nomeArquivo = `celulas-${new Date().toISOString().slice(0, 10)}.pdf`;
+      doc.save(nomeArquivo);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao gerar o PDF.");
+    } finally {
+      setExportandoPdf(false);
+    }
+  }, [celulasFiltradas, filtro]);
+
   return (
       <div className="cel-root">
         <GlobalStylesCelulas t={t} isDark={isDark} />
@@ -619,9 +704,22 @@ export default function CelulasRefatorado({ isDark = false }) {
                 <h1 className="cel-title">Células</h1>
               </div>
             </div>
-            <button className="cel-btn-gold" onClick={abrirNovo}>
-              <Plus size={13} /> Novo
-            </button>
+
+            <div className="cel-header-actions">
+              <button
+                  className="cel-btn-outline"
+                  onClick={handleExportarPDF}
+                  disabled={exportandoPdf || loading || celulasFiltradas.length === 0}
+              >
+                {exportandoPdf
+                    ? <><Loader2 size={13} className="dl-spin" /> Gerando…</>
+                    : <><FileDown size={13} /> PDF</>
+                }
+              </button>
+              <button className="cel-btn-gold" onClick={abrirNovo}>
+                <Plus size={13} /> Novo
+              </button>
+            </div>
           </motion.header>
 
           {/* ── Busca ── */}
