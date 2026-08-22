@@ -7,6 +7,7 @@ import autoTable from "jspdf-autotable";
 import {
   Plus, X, Building2, Clock, Search, ChevronRight, Loader2,
   Calendar, MapPin, Users, ArrowLeft, Trash2, Edit2, FileDown,
+  Check, Square, CheckSquare, ListFilter,
 } from "lucide-react";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
@@ -55,6 +56,16 @@ const formInicial = {
   nome: "", liderId: "", anfitriao: "", endereco: "",
   bairro: "", diaSemana: "MONDAY", horario: "19:30",
 };
+
+/* ─── Opções de colunas exportáveis no PDF (Nome é sempre fixo) ──── */
+const COLUNAS_PDF_OPCOES = [
+  { key: "lider",   label: "Líder"   },
+  { key: "bairro",  label: "Bairro"  },
+  { key: "dia",     label: "Dia"     },
+  { key: "horario", label: "Horário" },
+];
+
+const colunasPdfInicial = { lider: true, bairro: true, dia: true, horario: true };
 
 /* ─── GlobalStyles ────────────────────────────────────────────────── */
 function GlobalStylesCelulas({ t, isDark }) {
@@ -365,6 +376,131 @@ function GlobalStylesCelulas({ t, isDark }) {
         font-size: 13px; font-weight: 500; color: ${t.text};
         margin: 8px 0 0;
       }
+
+      /* ── Export Modal ── */
+      .exp-filters {
+        display: flex; gap: 8px; padding: 14px 20px 10px; flex-shrink: 0;
+        border-bottom: 1px solid ${t.border};
+      }
+
+      .exp-select-wrap {
+        position: relative; flex-shrink: 0; width: 42%;
+      }
+
+      .exp-select {
+        width: 100%; box-sizing: border-box;
+        background: ${t.bgEl}; border: 1px solid ${t.border};
+        color: ${t.text}; padding: 11px 30px 11px 12px;
+        border-radius: 10px; outline: none;
+        font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+        appearance: none; cursor: pointer;
+      }
+      select.exp-select option {
+        background: ${isDark ? "#12121A" : "#F5F0E8"};
+        color: ${t.text};
+      }
+
+      /* ── Colunas do PDF (toggle pills) ── */
+      .exp-col-toggles {
+        display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+        padding: 10px 20px; border-bottom: 1px solid ${t.border};
+      }
+
+      .exp-col-toggles-label {
+        font-size: 9.5px; font-weight: 600; letter-spacing: .12em;
+        text-transform: uppercase; color: ${t.textSec}; margin-right: 1px;
+      }
+
+      .exp-col-pill {
+        display: flex; align-items: center; gap: 4px;
+        padding: 5px 9px; border-radius: 100px; cursor: pointer;
+        border: 1px solid ${t.border}; background: ${t.bgInput};
+        color: ${t.textSec}; font-family: 'Inter', sans-serif;
+        font-size: 10.5px; font-weight: 600; transition: all .2s;
+      }
+      .exp-col-pill:hover { border-color: rgba(201,169,110,.4); }
+      .exp-col-pill.active {
+        border-color: ${AURA.gold}; color: ${AURA.gold};
+        background: rgba(201,169,110,.1);
+      }
+
+      .exp-toolbar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 20px; flex-shrink: 0;
+      }
+
+      .exp-toolbar-count {
+        font-size: 11px; font-weight: 600; color: ${t.textSec};
+        letter-spacing: .04em;
+      }
+
+      .exp-toolbar-count strong { color: ${AURA.gold}; }
+
+      .exp-toolbar-btn {
+        background: none; border: none; cursor: pointer;
+        font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 600;
+        letter-spacing: .06em; color: ${AURA.gold}; padding: 4px 0;
+      }
+      .exp-toolbar-btn:hover { text-decoration: underline; }
+
+      .exp-list {
+        flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        padding: 0 14px 14px;
+        display: flex; flex-direction: column; gap: 6px;
+      }
+
+      .exp-item {
+        display: flex; align-items: center; gap: 11px;
+        padding: 11px 12px; border-radius: 12px; cursor: pointer;
+        border: 1px solid transparent; transition: all .18s;
+      }
+      .exp-item:hover { background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.02)"}; }
+      .exp-item.checked {
+        background: ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.07)"};
+        border-color: rgba(201,169,110,.3);
+      }
+
+      .exp-checkbox {
+        width: 19px; height: 19px; border-radius: 6px; flex-shrink: 0;
+        border: 1.6px solid ${t.borderInput};
+        display: flex; align-items: center; justify-content: center;
+        transition: all .18s;
+      }
+      .exp-item.checked .exp-checkbox {
+        background: ${AURA.gold}; border-color: ${AURA.gold};
+      }
+
+      .exp-item-info { flex: 1; min-width: 0; }
+
+      .exp-item-name {
+        font-size: 13px; font-weight: 600; color: ${t.text};
+        margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+
+      .exp-item-meta {
+        font-size: 11px; color: ${t.textMuted}; margin: 2px 0 0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+
+      .exp-footer {
+        padding: 14px 20px; border-top: 1px solid ${t.border}; flex-shrink: 0;
+      }
+
+      .exp-btn-generate {
+        width: 100%; padding: 14px; border-radius: 12px; border: none;
+        background: linear-gradient(135deg, ${AURA.gold}, #B8935A);
+        color: #1A0A0D; font-family: 'Inter', sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: .12em;
+        text-transform: uppercase; cursor: pointer; transition: all .3s;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+      }
+      .exp-btn-generate:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(201,169,110,.3); }
+      .exp-btn-generate:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+      .exp-empty {
+        text-align: center; padding: 40px 20px;
+        font-size: 12.5px; color: ${t.textMuted}; font-style: italic;
+      }
     `}</style>
   );
 }
@@ -516,6 +652,204 @@ function CelulaModalRefatorado({
   return createPortal(content, document.body);
 }
 
+/* ─── Modal de Exportação (seleção de líder / células / colunas) ──── */
+function ExportPdfModal({
+                          isDark, celulas, selecionadas, setSelecionadas,
+                          colunasPdf, setColunasPdf,
+                          onFechar, onGerar, gerando,
+                        }) {
+  const t = themeCelulas(isDark);
+  const [filtroLider, setFiltroLider] = useState("");
+  const [busca, setBusca] = useState("");
+
+  const lideresUnicos = [...new Set(celulas.map(c => c.nomeLider).filter(Boolean))].sort();
+
+  const visiveis = celulas.filter(c => {
+    const okLider = !filtroLider || c.nomeLider === filtroLider;
+    const q = busca.toLowerCase();
+    const okBusca = !q || c.nome?.toLowerCase().includes(q) || c.bairro?.toLowerCase().includes(q);
+    return okLider && okBusca;
+  });
+
+  const toggle = (id) => {
+    setSelecionadas(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const selecionarTodosVisiveis = () => {
+    setSelecionadas(prev => {
+      const next = new Set(prev);
+      visiveis.forEach(c => next.add(c.id));
+      return next;
+    });
+  };
+
+  const limparVisiveis = () => {
+    setSelecionadas(prev => {
+      const next = new Set(prev);
+      visiveis.forEach(c => next.delete(c.id));
+      return next;
+    });
+  };
+
+  const toggleColuna = (key) => {
+    setColunasPdf(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const content = (
+      <motion.div
+          className="cel-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onFechar}
+      >
+        <motion.div
+            className="cel-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onFechar}
+        />
+        <motion.div
+            className="cel-modal-box"
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            transition={{ type: "tween", duration: 0.28 }}
+            onClick={e => e.stopPropagation()}
+        >
+          <div className="cel-modal-header">
+            <div>
+              <p className="cel-eyebrow" style={{ marginBottom: 2 }}>Exportar</p>
+              <h2 className="cel-modal-title">Selecionar Células</h2>
+            </div>
+            <button
+                onClick={onFechar}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  color: t.textMuted, display: "flex", padding: 0,
+                }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Filtros */}
+          <div className="exp-filters">
+            <div style={{ position: "relative", flex: 1 }}>
+              <Search size={14} style={{
+                position: "absolute", left: 12, top: "50%",
+                transform: "translateY(-50%)", color: AURA.gold, opacity: .5,
+              }} />
+              <input
+                  className="cel-input"
+                  style={{ padding: "11px 12px 11px 34px", fontSize: 12.5, marginBottom: 0 }}
+                  placeholder="Buscar por nome ou bairro…"
+                  value={busca}
+                  onChange={e => setBusca(e.target.value)}
+              />
+            </div>
+            <div className="exp-select-wrap">
+              <select
+                  className="exp-select"
+                  value={filtroLider}
+                  onChange={e => setFiltroLider(e.target.value)}
+              >
+                <option value="">Todos os líderes</option>
+                {lideresUnicos.map(nome => (
+                    <option key={nome} value={nome}>{nome}</option>
+                ))}
+              </select>
+              <ChevronRight size={13} style={{
+                position: "absolute", right: 12, top: "50%",
+                transform: "translateY(-50%) rotate(90deg)", color: t.textMuted, pointerEvents: "none",
+              }} />
+            </div>
+          </div>
+
+          {/* Colunas do PDF */}
+          <div className="exp-col-toggles">
+            <span className="exp-col-toggles-label">Incluir no PDF:</span>
+            {COLUNAS_PDF_OPCOES.map(col => {
+              const ativo = colunasPdf[col.key];
+              return (
+                  <button
+                      key={col.key}
+                      type="button"
+                      className={`exp-col-pill${ativo ? " active" : ""}`}
+                      onClick={() => toggleColuna(col.key)}
+                  >
+                    {ativo ? <CheckSquare size={12} /> : <Square size={12} />}
+                    {col.label}
+                  </button>
+              );
+            })}
+          </div>
+
+          {/* Toolbar */}
+          <div className="exp-toolbar">
+            <span className="exp-toolbar-count">
+              <strong>{selecionadas.size}</strong> de {celulas.length} selecionadas
+            </span>
+            <div style={{ display: "flex", gap: 14 }}>
+              <button className="exp-toolbar-btn" onClick={selecionarTodosVisiveis}>Marcar tudo</button>
+              <button className="exp-toolbar-btn" onClick={limparVisiveis}>Limpar</button>
+            </div>
+          </div>
+
+          {/* Lista */}
+          <div className="exp-list">
+            {visiveis.length === 0 ? (
+                <div className="exp-empty">Nenhuma célula encontrada.</div>
+            ) : visiveis.map(c => {
+              const checked = selecionadas.has(c.id);
+              return (
+                  <div
+                      key={c.id}
+                      className={`exp-item${checked ? " checked" : ""}`}
+                      onClick={() => toggle(c.id)}
+                  >
+                    <div className="exp-checkbox">
+                      {checked && <Check size={13} color="#1A0A0D" strokeWidth={3} />}
+                    </div>
+                    <div className="exp-item-info">
+                      <p className="exp-item-name">{c.nome}</p>
+                      <p className="exp-item-meta">
+                        {c.nomeLider || "Sem líder"}
+                        {c.bairro ? ` • ${c.bairro}` : ""}
+                        {DIAS[c.diaSemana] ? ` • ${DIAS[c.diaSemana]}` : ""}
+                      </p>
+                    </div>
+                  </div>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="exp-footer">
+            <button
+                className="exp-btn-generate"
+                onClick={onGerar}
+                disabled={selecionadas.size === 0 || gerando}
+            >
+              {gerando ? (
+                  <><Loader2 size={15} className="dl-spin" /> Gerando PDF…</>
+              ) : (
+                  <><FileDown size={15} /> Gerar PDF ({selecionadas.size})</>
+              )}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+  );
+
+  return createPortal(content, document.body);
+}
+
 /* ─── Componente Principal ──────────────────────────────────────── */
 export default function CelulasRefatorado({ isDark = false }) {
   const [celulas,            setCelulas]            = useState([]);
@@ -527,6 +861,9 @@ export default function CelulasRefatorado({ isDark = false }) {
   const [form,               setForm]               = useState(formInicial);
   const [salvando,           setSalvando]           = useState(false);
   const [exportandoPdf,      setExportandoPdf]      = useState(false);
+  const [exportModalOpen,    setExportModalOpen]    = useState(false);
+  const [selecionadasPdf,    setSelecionadasPdf]    = useState(new Set());
+  const [colunasPdf,         setColunasPdf]         = useState(colunasPdfInicial);
 
   const t = themeCelulas(isDark);
 
@@ -615,66 +952,197 @@ export default function CelulasRefatorado({ isDark = false }) {
       c.bairro?.toLowerCase().includes(filtro.toLowerCase())
   );
 
-  // ✅ Exportar PDF com a lista de células (respeita o filtro atual)
+  // ✅ Abre o modal de exportação, pré-selecionando o que está visível na busca atual
+  const abrirExportacao = () => {
+    setSelecionadasPdf(new Set(celulasFiltradas.map(c => c.id)));
+    setExportModalOpen(true);
+  };
+
+  // ✅ Exportar PDF elegante apenas com as células e colunas selecionadas no modal
   const handleExportarPDF = useCallback(() => {
-    if (celulasFiltradas.length === 0) return;
+    const celulasParaExportar = celulas.filter(c => selecionadasPdf.has(c.id));
+    if (celulasParaExportar.length === 0) return;
     setExportandoPdf(true);
     try {
-      const doc = new jsPDF();
-      const corVerde = [5, 150, 105]; // AURA.green em RGB
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const marginX = 12;
 
-      // Cabeçalho
-      doc.setFillColor(...corVerde);
-      doc.rect(0, 0, 210, 30, "F");
+      // Paleta (AURA)
+      const dark      = [10, 10, 15];
+      const gold      = [201, 169, 110];
+      const goldLight = [232, 213, 163];
+      const green     = [5, 150, 105];
+      const greenDark = [4, 120, 87];
+      const textMain  = [26, 16, 8];
+      const textSoft  = [110, 100, 84];
+      const rowAlt    = [250, 248, 244];
+      const rowLine   = [228, 220, 204];
 
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(17);
-      doc.text("Relatório de Células", 14, 15);
+      /* ── Cabeçalho compacto (faixa fina, sem selo) ── */
+      const headerH = 20;
+      doc.setFillColor(...dark);
+      doc.rect(0, 0, pageW, headerH, "F");
+      doc.setFillColor(...gold);
+      doc.rect(0, headerH, pageW, 0.6, "F");
+
+      // Título
+      doc.setTextColor(245, 240, 232);
+      doc.setFont("times", "bold");
+      doc.setFontSize(13.5);
+      doc.text("Relatório de Células", marginX, 9);
 
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      const dataGeracao = new Date().toLocaleString("pt-BR");
-      const subtitulo = filtro
-          ? `Filtro: "${filtro}"   •   Gerado em ${dataGeracao}`
-          : `Gerado em ${dataGeracao}`;
-      doc.text(subtitulo, 14, 22);
+      doc.setFontSize(7);
+      doc.setTextColor(...goldLight);
+      const dataGeracao = new Date().toLocaleString("pt-BR", {
+        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+      });
+      const subtitulo = celulasParaExportar.length === celulas.length
+          ? `Todas as células  •  Gerado em ${dataGeracao}`
+          : `${celulasParaExportar.length} de ${celulas.length} células  •  Gerado em ${dataGeracao}`;
+      doc.text(subtitulo, marginX, 15);
 
-      // Total
-      doc.setTextColor(30, 30, 30);
-      doc.setFontSize(11);
+      // Contagem no canto direito
+      doc.setFont("times", "bold");
+      doc.setFontSize(15);
+      doc.setTextColor(255, 255, 255);
+      doc.text(String(celulasParaExportar.length), pageW - marginX, 10.5, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6);
+      doc.setTextColor(...goldLight);
+      doc.text("CÉLULAS", pageW - marginX, 14.5, { align: "right" });
+
+      /* ── Faixa de resumo (uma linha só, sem cards grandes) ── */
+      const diasCount = celulasParaExportar.reduce((acc, c) => {
+        const d = DIAS[c.diaSemana] || c.diaSemana || "—";
+        acc[d] = (acc[d] || 0) + 1;
+        return acc;
+      }, {});
+      const diaMaisComum = Object.entries(diasCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+      const bairrosUnicos = new Set(celulasParaExportar.map(c => c.bairro).filter(Boolean)).size;
+      const comLider = celulasParaExportar.filter(c => c.nomeLider).length;
+
+      const resumoY = headerH + 8;
+      doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
-      doc.text(`Total de células: ${celulasFiltradas.length}`, 14, 40);
+      const resumoItens = [
+        `BAIRROS: ${bairrosUnicos}`,
+        `COM LÍDER: ${comLider}/${celulasParaExportar.length}`,
+        `DIA MAIS COMUM: ${diaMaisComum}`,
+      ];
+      let rx = marginX;
+      resumoItens.forEach((item, i) => {
+        doc.setTextColor(...textSoft);
+        doc.text(item, rx, resumoY);
+        rx += doc.getTextWidth(item) + 6;
+        if (i < resumoItens.length - 1) {
+          doc.setDrawColor(...rowLine);
+          doc.setLineWidth(0.2);
+          doc.line(rx - 3, resumoY - 2.6, rx - 3, resumoY + 0.6);
+        }
+      });
+      doc.setDrawColor(...rowLine);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, resumoY + 3, pageW - marginX, resumoY + 3);
 
-      // Tabela
+      /* ── Colunas dinâmicas (Nome é sempre fixo; o resto depende da seleção) ── */
+      const colunasAtivas = [
+        { key: "nome", label: "Nome da Célula" },
+        ...COLUNAS_PDF_OPCOES.filter(c => colunasPdf[c.key]),
+      ];
+
+      const getValorColuna = (c, key) => {
+        switch (key) {
+          case "nome":    return c.nome || "—";
+          case "lider":   return c.nomeLider || "—";
+          case "bairro":  return c.bairro || "—";
+          case "dia":     return DIAS[c.diaSemana] || c.diaSemana || "—";
+          case "horario": return c.horario ? `${c.horario}` : "—";
+          default:        return "—";
+        }
+      };
+
+      const liderColIndex = colunasAtivas.findIndex(c => c.key === "lider");
+      const diaColIndex     = colunasAtivas.findIndex(c => c.key === "dia");
+      const horarioColIndex = colunasAtivas.findIndex(c => c.key === "horario");
+
+      // +1 em todos os índices de coluna porque a coluna 0 é sempre "#"
+      const columnStyles = {
+        0: { cellWidth: 10, halign: "center", textColor: gold, fontStyle: "bold" },
+        1: { fontStyle: "bold" }, // Nome
+      };
+      if (diaColIndex     !== -1) columnStyles[diaColIndex + 1]     = { cellWidth: 24 };
+      if (horarioColIndex !== -1) columnStyles[horarioColIndex + 1] = { cellWidth: 20, halign: "center" };
+
+      /* ── Tabela (compacta, para economizar papel) ── */
       autoTable(doc, {
-        startY: 46,
-        head: [["#", "Nome", "Líder", "Bairro", "Dia", "Horário"]],
-        body: celulasFiltradas.map((c, i) => [
-          String(i + 1),
-          c.nome || "-",
-          c.nomeLider || "-",
-          c.bairro || "-",
-          DIAS[c.diaSemana] || c.diaSemana || "-",
-          c.horario ? `${c.horario}h` : "-",
+        startY: resumoY + 7,
+        margin: { left: marginX, right: marginX, bottom: 12 },
+        head: [["#", ...colunasAtivas.map(c => c.label)]],
+        body: celulasParaExportar.map((c, i) => [
+          String(i + 1).padStart(2, "0"),
+          ...colunasAtivas.map(col => getValorColuna(c, col.key)),
         ]),
-        headStyles: { fillColor: corVerde, textColor: 255, fontStyle: "bold" },
-        alternateRowStyles: { fillColor: [245, 245, 248] },
-        styles: { fontSize: 9, cellPadding: 5 },
-        columnStyles: {
-          0: { cellWidth: 10, halign: "center" },
+        theme: "plain",
+        styles: {
+          font: "helvetica",
+          fontSize: 8,
+          cellPadding: { top: 2, bottom: 2, left: 4, right: 4 },
+          textColor: textMain,
+          lineColor: rowLine,
+          lineWidth: { bottom: 0.1 },
+        },
+        headStyles: {
+          fillColor: dark,
+          textColor: [245, 240, 232],
+          fontStyle: "bold",
+          fontSize: 7.3,
+          halign: "left",
+          cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+        },
+        alternateRowStyles: { fillColor: rowAlt },
+        columnStyles,
+        didParseCell: (data) => {
+          // Realça o nome do líder ausente (se a coluna estiver ativa)
+          if (
+              liderColIndex !== -1 &&
+              data.section === "body" &&
+              data.column.index === liderColIndex + 1 &&
+              data.cell.raw === "—"
+          ) {
+            data.cell.styles.textColor = [190, 160, 130];
+            data.cell.styles.fontStyle = "italic";
+          }
+        },
+        didDrawPage: () => {
+          /* ── Rodapé fino em cada página ── */
+          const pageCount = doc.internal.getNumberOfPages();
+          const pageCurrent = doc.internal.getCurrentPageInfo().pageNumber;
+
+          doc.setDrawColor(...rowLine);
+          doc.setLineWidth(0.15);
+          doc.line(marginX, pageH - 8, pageW - marginX, pageH - 8);
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(6.3);
+          doc.setTextColor(...textSoft);
+          doc.text("Relatório de Células", marginX, pageH - 4.5);
+          doc.text(`Página ${pageCurrent} de ${pageCount}`, pageW - marginX, pageH - 4.5, { align: "right" });
         },
       });
 
       const nomeArquivo = `celulas-${new Date().toISOString().slice(0, 10)}.pdf`;
       doc.save(nomeArquivo);
+      setExportModalOpen(false);
     } catch (err) {
       console.error(err);
       alert("Erro ao gerar o PDF.");
     } finally {
       setExportandoPdf(false);
     }
-  }, [celulasFiltradas, filtro]);
+  }, [celulas, selecionadasPdf, colunasPdf]);
 
   return (
       <div className="cel-root">
@@ -708,13 +1176,10 @@ export default function CelulasRefatorado({ isDark = false }) {
             <div className="cel-header-actions">
               <button
                   className="cel-btn-outline"
-                  onClick={handleExportarPDF}
-                  disabled={exportandoPdf || loading || celulasFiltradas.length === 0}
+                  onClick={abrirExportacao}
+                  disabled={loading || celulas.length === 0}
               >
-                {exportandoPdf
-                    ? <><Loader2 size={13} className="dl-spin" /> Gerando…</>
-                    : <><FileDown size={13} /> PDF</>
-                }
+                <FileDown size={13} /> PDF
               </button>
               <button className="cel-btn-gold" onClick={abrirNovo}>
                 <Plus size={13} /> Novo
@@ -808,7 +1273,7 @@ export default function CelulasRefatorado({ isDark = false }) {
 
         </div>
 
-        {/* ── Modal ── */}
+        {/* ── Modal Célula ── */}
         <AnimatePresence>
           {isModalOpen && (
               <CelulaModalRefatorado
@@ -821,6 +1286,23 @@ export default function CelulasRefatorado({ isDark = false }) {
                   onExcluir={excluir}
                   onFechar={fecharModal}
                   loading={salvando}
+              />
+          )}
+        </AnimatePresence>
+
+        {/* ── Modal Exportação PDF ── */}
+        <AnimatePresence>
+          {exportModalOpen && (
+              <ExportPdfModal
+                  isDark={isDark}
+                  celulas={celulas}
+                  selecionadas={selecionadasPdf}
+                  setSelecionadas={setSelecionadasPdf}
+                  colunasPdf={colunasPdf}
+                  setColunasPdf={setColunasPdf}
+                  onFechar={() => setExportModalOpen(false)}
+                  onGerar={handleExportarPDF}
+                  gerando={exportandoPdf}
               />
           )}
         </AnimatePresence>
