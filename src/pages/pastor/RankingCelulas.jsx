@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import api from "../../services/api.js";
 import { motion, AnimatePresence } from "framer-motion";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   Trophy, Crown, Medal, Award, Search, Users, Flame, Star,
   ChevronLeft, ChevronRight, ChevronDown, Loader2, Sparkles,
   RefreshCw, Info, UserPlus, HeartHandshake, Droplet, Droplets,
-  Handshake, GitBranch,
+  Handshake, GitBranch, Download, Image as ImageIcon, FileText, X,
 } from "lucide-react";
 
 /* ─── Tokens AURA (mesmos do Dashboard) ────────────────────────────────── */
@@ -115,6 +117,7 @@ function GlobalStyles({ t, isDark }) {
         color: ${AURA.dark};
         box-shadow: 0 8px 22px rgba(201,169,110,.28);
       }
+      .rk-hd-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
       .rk-eyebrow {
         font-size: 9px; font-weight: 500; letter-spacing: .2em;
         text-transform: uppercase; color: rgba(201,169,110,.55); margin: 0 0 3px;
@@ -129,15 +132,63 @@ function GlobalStyles({ t, isDark }) {
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       }
 
-      .rk-btn-refresh {
-        width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+      .rk-btn-refresh, .rk-btn-export {
+        height: 38px; border-radius: 12px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
         background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
         border: 1px solid ${t.border}; color: ${t.textMuted};
         cursor: pointer; transition: all .25s;
       }
+      .rk-btn-refresh { width: 38px; }
+      .rk-btn-export {
+        width: auto; padding: 0 14px; gap: 7px;
+        font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600;
+        color: ${AURA.gold}; border-color: rgba(201,169,110,.3);
+        background: rgba(201,169,110,.08);
+      }
       .rk-btn-refresh:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
-      .rk-btn-refresh:disabled { opacity: .5; cursor: default; }
+      .rk-btn-export:hover { background: rgba(201,169,110,.16); }
+      .rk-btn-refresh:disabled, .rk-btn-export:disabled { opacity: .5; cursor: default; }
+
+      /* ── Modal de exportação ── */
+      .rk-export-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,.6);
+        backdrop-filter: blur(4px); z-index: 1000;
+        display: flex; align-items: center; justify-content: center; padding: 20px;
+      }
+      .rk-export-modal {
+        width: 100%; max-width: 380px; background: ${isDark ? "#12121A" : "#fff"};
+        border: 1px solid ${t.border}; border-radius: 20px; padding: 20px;
+      }
+      .rk-export-modal-head {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 14px;
+      }
+      .rk-export-modal-title {
+        font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500;
+        color: ${t.text}; margin: 0;
+      }
+      .rk-export-close {
+        width: 28px; height: 28px; border-radius: 8px; border: none; cursor: pointer;
+        background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.05)"};
+        color: ${t.textMuted}; display: flex; align-items: center; justify-content: center;
+      }
+      .rk-export-option {
+        width: 100%; display: flex; align-items: center; gap: 12px;
+        padding: 13px 14px; border-radius: 13px; margin-bottom: 8px;
+        background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(201,169,110,.05)"};
+        border: 1px solid ${t.border}; cursor: pointer; transition: all .2s;
+        font-family: 'Inter', sans-serif; text-align: left;
+      }
+      .rk-export-option:hover:not(:disabled) { border-color: ${AURA.gold}; background: rgba(201,169,110,.1); }
+      .rk-export-option:disabled { opacity: .5; cursor: default; }
+      .rk-export-option-icon {
+        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(201,169,110,.12); color: ${AURA.gold};
+      }
+      .rk-export-option-label { font-size: 13px; font-weight: 500; color: ${t.text}; margin: 0; }
+      .rk-export-option-sub { font-size: 10.5px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; }
 
       /* ── Navegador de mês ── */
       .rk-month-nav {
@@ -444,6 +495,73 @@ function GlobalStyles({ t, isDark }) {
         padding: 6px 0 16px;
       }
 
+      /* ── Cartaz de exportação (fora da tela, capturado pelo html2canvas) ── */
+      .pxp-stage {
+        position: fixed; top: 0; left: -99999px;
+        width: 1600px; height: 900px;
+        font-family: 'Inter', sans-serif;
+        background: radial-gradient(circle at 50% 0%, rgba(201,169,110,.16), transparent 55%), #0A0A0F;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 60px; box-sizing: border-box; overflow: hidden;
+      }
+      .pxp-eyebrow {
+        font-size: 15px; font-weight: 600; letter-spacing: .35em; text-transform: uppercase;
+        color: rgba(201,169,110,.65); margin: 0 0 14px;
+      }
+      .pxp-title {
+        font-family: 'Playfair Display', serif; font-size: 56px; font-weight: 600;
+        color: #F5F0E8; margin: 0 0 6px; letter-spacing: .01em;
+      }
+      .pxp-subtitle {
+        font-size: 18px; font-weight: 300; color: #9A9588; margin: 0 0 56px;
+      }
+      .pxp-podium {
+        display: flex; align-items: flex-end; justify-content: center; gap: 40px; width: 100%;
+      }
+      .pxp-card {
+        width: 340px; border-radius: 28px; padding: 40px 26px 34px; text-align: center;
+        background: rgba(255,255,255,.03); border: 1px solid rgba(201,169,110,.18);
+        position: relative;
+      }
+      .pxp-card-1 { padding-top: 52px; padding-bottom: 44px; transform: translateY(-24px); z-index: 2; }
+      .pxp-medal {
+        width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 22px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .pxp-card-1 .pxp-medal { width: 104px; height: 104px; }
+      .pxp-avatar {
+        width: 96px; height: 96px; border-radius: 24px; margin: 0 auto 20px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 40px;
+        background: linear-gradient(135deg, rgba(201,169,110,.22), rgba(201,169,110,.06));
+        border: 1px solid rgba(201,169,110,.3); color: #C9A96E;
+      }
+      .pxp-card-1 .pxp-avatar { width: 118px; height: 118px; font-size: 48px; }
+      .pxp-name {
+        font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600;
+        color: #F5F0E8; margin: 0 0 6px; line-height: 1.2;
+      }
+      .pxp-card-1 .pxp-name { font-size: 32px; }
+      .pxp-lider { font-size: 15px; font-weight: 300; color: #8A8578; margin: 0 0 20px; }
+      .pxp-score {
+        display: inline-flex; align-items: baseline; gap: 6px;
+        font-family: 'Playfair Display', serif; font-weight: 700; color: #F5F0E8;
+      }
+      .pxp-score-num { font-size: 40px; line-height: 1; }
+      .pxp-card-1 .pxp-score-num { font-size: 52px; }
+      .pxp-score-unit {
+        font-size: 12px; font-weight: 600; letter-spacing: .1em;
+        text-transform: uppercase; color: #6B6658;
+      }
+      .pxp-rank-num {
+        position: absolute; top: 18px; right: 22px;
+        font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px;
+      }
+      .pxp-footer {
+        margin-top: 54px; font-size: 12px; font-weight: 500; letter-spacing: .2em;
+        text-transform: uppercase; color: rgba(245,240,232,.25);
+      }
+
       @media(max-width: 360px) {
         .rk-podium-name  { font-size: 11.5px; }
         .rk-podium-1 .rk-podium-name { font-size: 13px; }
@@ -453,6 +571,43 @@ function GlobalStyles({ t, isDark }) {
         .rk-row-lider { display: none; }
       }
     `}</style>
+  );
+}
+
+/* ─── Cartaz de exportação (renderizado fora da tela e capturado como imagem) ── */
+function PodiumPoster({ top3, mesRef, forwardedRef }) {
+  return (
+      <div className="pxp-stage" ref={forwardedRef}>
+        <p className="pxp-eyebrow">IEQ Pituaçu · Comunidade</p>
+        <h1 className="pxp-title">Pódio de Células</h1>
+        <p className="pxp-subtitle">{formatMesAno(mesRef)}</p>
+
+        <div className="pxp-podium">
+          {[2, 1, 3].map((posicao) => {
+            const c = top3[posicao - 1];
+            if (!c) return null;
+            const style = RANK_STYLE[posicao];
+            const Icon = style.Icon;
+            return (
+                <div key={posicao} className={`pxp-card ${posicao === 1 ? "pxp-card-1" : ""}`}>
+                  <span className="pxp-rank-num" style={{ color: style.main }}>{posicao}º</span>
+                  <div className="pxp-medal" style={{ background: `linear-gradient(135deg, ${style.grad})`, color: posicao === 1 ? AURA.dark : "#fff" }}>
+                    <Icon size={posicao === 1 ? 44 : 36} />
+                  </div>
+                  <div className="pxp-avatar">{c.nomeCelula?.charAt(0).toUpperCase()}</div>
+                  <p className="pxp-name">{c.nomeCelula}</p>
+                  <p className="pxp-lider">{c.lider || "—"}</p>
+                  <div className="pxp-score">
+                    <span className="pxp-score-num">{c.pontuacao ?? 0}</span>
+                    <span className="pxp-score-unit">pts</span>
+                  </div>
+                </div>
+            );
+          })}
+        </div>
+
+        <p className="pxp-footer">Sistema Eclesiástico · Gerado em {new Date().toLocaleDateString("pt-BR")}</p>
+      </div>
   );
 }
 
@@ -466,6 +621,11 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
   const [mesRef,    setMesRef]    = useState(() => new Date());
   const [expandido, setExpandido] = useState(null);
   const [infoAberto,setInfoAberto]= useState(false);
+
+  // ── estado da exportação do pódio (imagem / PDF para exibir em tela) ──
+  const [modalExportAberto, setModalExportAberto] = useState(false);
+  const [gerandoExport, setGerandoExport] = useState(false);
+  const posterRef = useRef(null);
 
   const t = theme(isDark);
 
@@ -515,6 +675,7 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
   const mostrarPodio = buscaLower === "" && ordenado.length >= 3;
   const top3 = mostrarPodio ? ordenado.slice(0, 3) : [];
   const restantes = mostrarPodio ? filtrado.slice(3) : filtrado;
+  const podeExportar = top3.length === 3;
 
   const navegarMes = (delta) => {
     setMesRef((prev) => {
@@ -525,6 +686,41 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
   };
 
   const toggleExpandido = (id) => setExpandido((prev) => (prev === id ? null : id));
+
+  /* ── Gera o cartaz (imagem ou PDF) a partir do PodiumPoster renderizado fora da tela ── */
+  const exportarPodio = async (formato) => {
+    if (!podeExportar || !posterRef.current) return;
+    setGerandoExport(true);
+    try {
+      // pequena espera garante que fontes/estilos já pintaram antes da captura
+      await new Promise((r) => setTimeout(r, 50));
+      const canvas = await html2canvas(posterRef.current, {
+        scale: 2,
+        backgroundColor: "#0A0A0F",
+        useCORS: true,
+        width: 1600,
+        height: 900,
+      });
+
+      const nomeArquivo = `podio-celulas-${toMesParam(mesRef)}`;
+
+      if (formato === "imagem") {
+        const link = document.createElement("a");
+        link.download = `${nomeArquivo}.png`;
+        link.href = canvas.toDataURL("image/png", 1.0);
+        link.click();
+      } else {
+        const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [1600, 900] });
+        pdf.addImage(canvas.toDataURL("image/png", 1.0), "PNG", 0, 0, 1600, 900);
+        pdf.save(`${nomeArquivo}.pdf`);
+      }
+      setModalExportAberto(false);
+    } catch (err) {
+      console.error("Erro ao gerar exportação do pódio:", err);
+    } finally {
+      setGerandoExport(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -562,9 +758,17 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
               <p className="rk-subtitle">{formatMesAno(mesRef)}</p>
             </div>
           </div>
-          <button className="rk-btn-refresh" onClick={() => carregarRanking(true)} disabled={refreshing} title="Atualizar">
-            <RefreshCw size={15} className={refreshing ? "dl-spin" : ""} />
-          </button>
+          <div className="rk-hd-actions">
+            {podeExportar && (
+                <button className="rk-btn-export" onClick={() => setModalExportAberto(true)} title="Exportar pódio para tela">
+                  <Download size={14} />
+                  Pódio
+                </button>
+            )}
+            <button className="rk-btn-refresh" onClick={() => carregarRanking(true)} disabled={refreshing} title="Atualizar">
+              <RefreshCw size={15} className={refreshing ? "dl-spin" : ""} />
+            </button>
+          </div>
         </div>
 
         {/* ── Navegador de mês ── */}
@@ -782,6 +986,59 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
         </div>
 
         <p className="rk-footer">© {new Date().getFullYear()} IEQ Pituaçu — Sistema Eclesiástico</p>
+
+        {/* ── Cartaz fora da tela, sempre pronto para ser capturado ── */}
+        {podeExportar && <PodiumPoster top3={top3} mesRef={mesRef} forwardedRef={posterRef} />}
+
+        {/* ── Modal: escolher formato de exportação ── */}
+        <AnimatePresence>
+          {modalExportAberto && (
+              <motion.div
+                  className="rk-export-overlay"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => !gerandoExport && setModalExportAberto(false)}
+              >
+                <motion.div
+                    className="rk-export-modal"
+                    initial={{ scale: .95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: .95, opacity: 0 }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="rk-export-modal-head">
+                    <h3 className="rk-export-modal-title">Exportar pódio</h3>
+                    <button className="rk-export-close" onClick={() => !gerandoExport && setModalExportAberto(false)}>
+                      <X size={15} />
+                    </button>
+                  </div>
+
+                  <button className="rk-export-option" disabled={gerandoExport} onClick={() => exportarPodio("imagem")}>
+                    <div className="rk-export-option-icon"><ImageIcon size={17} /></div>
+                    <div>
+                      <p className="rk-export-option-label">Imagem (PNG)</p>
+                      <p className="rk-export-option-sub">Pronta para projetar direto na tela</p>
+                    </div>
+                  </button>
+
+                  <button className="rk-export-option" disabled={gerandoExport} onClick={() => exportarPodio("pdf")}>
+                    <div className="rk-export-option-icon"><FileText size={17} /></div>
+                    <div>
+                      <p className="rk-export-option-label">PDF</p>
+                      <p className="rk-export-option-sub">Para imprimir ou enviar por e-mail</p>
+                    </div>
+                  </button>
+
+                  {gerandoExport && (
+                      <p style={{ textAlign: "center", fontSize: 11, color: t.textMuted, marginTop: 10 }}>
+                        Gerando…
+                      </p>
+                  )}
+                </motion.div>
+              </motion.div>
+          )}
+        </AnimatePresence>
       </div>
   );
 }
