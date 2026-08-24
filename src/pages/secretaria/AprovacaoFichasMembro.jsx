@@ -71,6 +71,7 @@ export default function AprovacaoFichasMembro({ isDark }) {
     try {
       await api.patch(`/solicitacoes-ficha/${id}/decidir`, payload);
       ok(aprovado ? "Membro cadastrado com sucesso!" : "Solicitação rejeitada.");
+      window.dispatchEvent(new Event("solicitacoes:updated"));
       setRejeitando(null);
       setMotivoRejeicao("");
       setDetalhe(null);

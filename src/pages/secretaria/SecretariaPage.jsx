@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Users, UserPlus, Home, FileText, Building2,
-  Sun, Moon, LogOut, Menu, X, ChevronRight, ClipboardList,
+  Sun, Moon, LogOut, Menu, X, ChevronRight, ClipboardList, Droplets,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
@@ -13,6 +13,7 @@ import Visitantes        from "./Visitante";
 import FichasEncontro    from "./FichasEncontro";
 import SecretariaCelulas from "./SecretariaCelulas";
 import AprovacaoFichasMembro from "./AprovacaoFichasMembro";
+import FichasConvertido from "./FichasConvertido";
 import BoasVindas            from "../../components/BoasVindas.jsx";
 
 /* ─── Tokens (espelhados do DashboardLider) ──────────────────────────── */
@@ -54,6 +55,7 @@ const modulos = [
   { id: "FICHAS",            label: "Fichas",     sub: "Encontro",    icon: <FileText size={17}/>,  color: AURA.yellow    },
   { id: "SECRETARIACELULAS", label: "Secretaria", sub: "Controle",    icon: <Building2 size={17}/>, color: "#7090e8"      },
   { id: "APROVACAO_FICHAS",  label: "Aprov. Fichas", sub: "Membros",  icon: <ClipboardList size={17}/>, color: AURA.red    },
+  { id: "FICHAS_CONVERTIDO", label: "Convertidos", sub: "Novas Vidas", icon: <Droplets size={17}/>,  color: "#059669"      },
 ];
 
 /* ─── CSS Global ─────────────────────────────────────────────────────── */
@@ -457,13 +459,14 @@ export default function SecretariaPage() {
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [pendentesCount, setPendentesCount] = useState(0);
+  const [pendentesConvertidosCount, setPendentesConvertidosCount] = useState(0); // NOVO
   const [showBoasVindas, setShowBoasVindas] = useState(false);
 
   const carregarPendentes = useCallback(async () => {
     try {
       const res = await api.get("/solicitacoes-ficha/pendentes", { params: { page: 0, size: 1 } });
       const data = res.data;
-      const count = data?.totalElements ?? data?.content?.length ?? 0;
+      const count = Number(data?.totalElements ?? data?.content?.length ?? 0);
       setPendentesCount(count);
     } catch (err) {
       console.warn("Erro ao carregar pendentes:", err?.response?.status, err?.message);
@@ -471,8 +474,39 @@ export default function SecretariaPage() {
     }
   }, []);
 
+  // Carrega quantidade de convertidos aguardando batismo
+  const carregarPendentesConvertidos = useCallback(async () => {
+    try {
+      const res = await api.get("/convertidos", { params: { status: "AGUARDANDO_BATISMO", page: 0, size: 1 } });
+      const data = res.data;
+      const count = Number(data?.totalElements ?? data?.content?.length ?? 0);
+      setPendentesConvertidosCount(count);
+    } catch (err) {
+      console.warn("Erro ao carregar convertidos pendentes:", err?.response?.status, err?.message);
+      setPendentesConvertidosCount(0);
+    }
+  }, []);
+
   useEffect(() => { carregarPendentes(); }, [carregarPendentes]);
   useEffect(() => { if (moduloAtivo === "APROVACAO_FICHAS") carregarPendentes(); }, [moduloAtivo, carregarPendentes]);
+
+  // NOVO: dispara ao montar e sempre que o módulo de convertidos for aberto
+  useEffect(() => { carregarPendentesConvertidos(); }, [carregarPendentesConvertidos]);
+  useEffect(() => {
+    if (moduloAtivo === "FICHAS_CONVERTIDO") carregarPendentesConvertidos();
+  }, [moduloAtivo, carregarPendentesConvertidos]);
+
+  // Atualiza os badges em tempo real quando as telas alteram as fichas
+  useEffect(() => {
+    const onSolicitacoes = () => carregarPendentes();
+    const onConvertidos = () => carregarPendentesConvertidos();
+    window.addEventListener("solicitacoes:updated", onSolicitacoes);
+    window.addEventListener("convertidos:updated", onConvertidos);
+    return () => {
+      window.removeEventListener("solicitacoes:updated", onSolicitacoes);
+      window.removeEventListener("convertidos:updated", onConvertidos);
+    };
+  }, [carregarPendentes, carregarPendentesConvertidos]);
 
   /* Botão voltar Android/PWA */
   useEffect(() => {
@@ -596,7 +630,10 @@ export default function SecretariaPage() {
                   <span className="sec2-nav-text-sub">{m.sub}</span>
                 </span>
                     {m.id === "APROVACAO_FICHAS" && pendentesCount > 0 && (
-                      <span className="sec2-nav-badge">{pendentesCount}</span>
+                        <span className="sec2-nav-badge">{pendentesCount}</span>
+                    )}
+                    {m.id === "FICHAS_CONVERTIDO" && pendentesConvertidosCount > 0 && (
+                        <span className="sec2-nav-badge">{pendentesConvertidosCount}</span>
                     )}
                     <ChevronRight size={13} className="sec2-nav-chevron" />
                   </button>
@@ -712,6 +749,7 @@ export default function SecretariaPage() {
                 {moduloAtivo === "FICHAS"             && <FichasEncontro isDark={isDark} />}
                 {moduloAtivo === "SECRETARIACELULAS"  && <SecretariaCelulas isDark={isDark} />}
                 {moduloAtivo === "APROVACAO_FICHAS"  && <AprovacaoFichasMembro isDark={isDark} />}
+                {moduloAtivo === "FICHAS_CONVERTIDO"  && <FichasConvertido isDark={isDark} />}
               </motion.div>
             </AnimatePresence>
           </main>
@@ -809,20 +847,17 @@ export default function SecretariaPage() {
                     <button
                         onClick={handleLogout}
                         style={{
-                          flex: 1.5, padding: "13px", borderRadius: 100, border: "none",
-                          cursor: "pointer",
+                          flex: 1, padding: "13px", borderRadius: 100,
+                          border: "none", cursor: "pointer",
                           background: `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})`,
                           color: "#fff",
                           fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
                           letterSpacing: ".14em", textTransform: "uppercase",
-                          boxShadow: "0 8px 24px rgba(200,16,46,.35)",
+                          boxShadow: "0 8px 24px rgba(200,16,46,.3)",
                           transition: "all .25s",
-                          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
                     >
-                      <LogOut size={13} /> Sair Agora
+                      Sair
                     </button>
                   </div>
                 </motion.div>
