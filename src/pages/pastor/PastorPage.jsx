@@ -12,15 +12,14 @@ import RankingCelulas             from "./RankingCelulas";
 import PainelAlertas              from "./PainelAlertas";
 import Discipulado                from "./Discipulado.jsx";
 import TelaPendencias             from "./TelaPendencias.jsx";
-import RelatorioCasasDePaz        from "./RelatorioCasasDePaz.jsx";
 import RelatorioMissao70Pastor    from "./RelatorioMissao70Pastor.jsx";
-import BoasVindas                 from "../../components/BoasVindas.jsx";
+import RelatoriosDiscipuladoCelulas from "./RelatoriosDiscipuladoCelulas.jsx";
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, LogOut, Sun, Moon,
-  ClipboardList, Home, Flame,
-  Cake, Bell, Send, Check, X, ChevronRight,
+  ClipboardList, Flame,
+  Cake, Bell, Send, Check, X, ChevronRight, UserCheck,
 } from "lucide-react";
 
 /* ─── Tokens AURA ────────────────────────────────────────────────── */
@@ -60,9 +59,9 @@ const NAV_ITEMS = [
   { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",    color: AURA.blue,   end: true  },
   { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",   color: AURA.red                },
   { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria",   color: "#8B5CF6"               },
+  { to: "/pastor/acompanhamento-discipulado", icon: UserCheck, label: "Discipulado", color: AURA.blue             },
   { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Mult.",        color: "#059669"               },
   { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking",      color: AURA.yellow             },
-  { to: "/pastor/casas-de-paz",      icon: Home,            label: "Casas de Paz", color: "#5DCAA5"               },
   { to: "/pastor/missao70",          icon: Flame,           label: "Missão 70",    color: AURA.yellow             },
   { to: "/pastor/pendencias",        icon: ClipboardList,   label: "Pendências",   color: "#F97316"               },
   { to: "/pastor/alertas",           icon: AlertTriangle,   label: "Alertas",      color: AURA.red, alert: true   },
@@ -72,11 +71,11 @@ const PAGE_TITLES = {
   "pastor":            "Dashboard Geral",
   "relatorio-celulas": "Relatórios de Células",
   "discipulado":       "Secretaria",
+  "acompanhamento-discipulado": "Relatórios de Discipulado das Células",
   "multiplicacoes":    "Multiplicações",
   "ranking-celulas":   "Ranking",
   "alertas":           "Alertas",
   "pendencias":        "Pendências",
-  "casas-de-paz":      "Casas de Paz",
   "missao70":          "Missão 70",
 };
 
@@ -722,24 +721,11 @@ export default function PastorPage() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
-  const [showBoasVindas, setShowBoasVindas] = useState(false);
   const location = useLocation();
 
   const t = theme(isDark);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
-
-  /* Aguarda o dashboard assentar antes de abrir as boas-vindas (evita travadas) */
-  useEffect(() => {
-    if (sessionStorage.getItem("boas_vindas_pendente") !== "1") return;
-    const id = setTimeout(() => {
-      sessionStorage.removeItem("boas_vindas_pendente");
-      setShowBoasVindas(true);
-    }, 600);
-    return () => clearTimeout(id);
-  }, []);
-
-  const fecharBoasVindas = () => setShowBoasVindas(false);
 
   useEffect(() => {
     (async () => {
@@ -792,18 +778,6 @@ export default function PastorPage() {
       <div className="pp-root">
         <GlobalStyles t={t} isDark={isDark} />
         <div className="pp-glow" />
-
-        <AnimatePresence>
-          {showBoasVindas && (
-              <BoasVindas
-                  usuarioLogado={usuarioLogado}
-                  cargo="Pastor"
-                  mensagem="“Apascenta o rebanho de Deus que está entre ti.” — 1 Pedro 5:2. Tenha um dia de conquista e bênção!"
-                  isDark={isDark}
-                  onClose={fecharBoasVindas}
-              />
-          )}
-        </AnimatePresence>
 
         {/* ════ HEADER ════ */}
         <header className="pp-header">
@@ -917,11 +891,11 @@ export default function PastorPage() {
                   <Route index                    element={<PainelPastor              isDark={isDark} />} />
                   <Route path="relatorio-celulas" element={<RelatorioCelula           isDark={isDark} />} />
                   <Route path="discipulado"       element={<Discipulado               isDark={isDark} />} />
+                  <Route path="acompanhamento-discipulado" element={<RelatoriosDiscipuladoCelulas isDark={isDark} />} />
                   <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao isDark={isDark} />} />
                   <Route path="ranking-celulas"   element={<RankingCelulas            isDark={isDark} />} />
                   <Route path="alertas"           element={<PainelAlertas             isDark={isDark} />} />
                   <Route path="pendencias"        element={<TelaPendencias            isDark={isDark} />} />
-                  <Route path="casas-de-paz"      element={<RelatorioCasasDePaz       isDark={isDark} />} />
                   <Route path="missao70"          element={<RelatorioMissao70Pastor   isDark={isDark} />} />
                 </Routes>
 

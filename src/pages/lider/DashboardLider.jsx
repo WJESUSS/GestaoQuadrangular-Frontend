@@ -7,7 +7,7 @@ import TelaRelatorio from "./TelaRelatorio";
 import TelaVisitantes from "./TelaVisitantes";
 import TelaFichas from "./TelaFichas";
 import RelatorioDiscipulado from "./RelatorioDiscipulado";
-import CasasDePazLider from "./CasasDePazLider";
+import AcompanhamentoDiscipulado from "./AcompanhamentoDiscipulado";
 import Missao70Lider from "./Missao70Lider";
 import SolicitarFichaMembro from "./SolicitarFichaMembro";
 import SinoAniversariantes from "./SinoAniversariantes";
@@ -16,8 +16,9 @@ import TelaMetasLider from "./TelaMetasLider";
 import {
   Trash2, Loader2, Users, Plus, Search, X,
   TrendingUp, Target, Sparkles, LogOut,
-  Sun, Moon, CheckCircle2, Home, Flame,
+  Sun, Moon, CheckCircle2, Flame,
   CalendarDays, ChevronRight, ClipboardList,
+  UserCheck,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
 
@@ -499,6 +500,7 @@ export default function DashboardLider() {
   const [loading,                setLoading]                 = useState(true);
   const [showModalAddMembro,     setShowModalAddMembro]      = useState(false);
   const [showModalMultiplicacao, setShowModalMultiplicacao]  = useState(false);
+  const [showAcompanhamento,     setShowAcompanhamento]      = useState(false);
   const [motivoMultiplicacao,    setMotivoMultiplicacao]     = useState("");
   const [solicitandoMulti,       setSolicitandoMulti]        = useState(false);
   const [isDark,                 setIsDark]                  = useState(
@@ -626,9 +628,9 @@ export default function DashboardLider() {
     { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.clay,      gradient: `${AURA.clayDeep},${AURA.clay}` },
     { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold,      gradient: `rgba(184,137,46,.8),${AURA.gold}` },
     { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
-    { icon: <Home size={18} />,         name: "Casas de Paz", desc: "Evangelismo", aba: "casas",       color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
     { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
     { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
+    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
   ];
 
   return (
@@ -824,7 +826,7 @@ export default function DashboardLider() {
                             className="dl-menu-card"
                             whileHover={{ y: -5 }}
                             whileTap={{ scale: .96 }}
-                            onClick={() => setAbaAtiva(aba)}
+                            onClick={() => (aba === "acompanhamento-modal" ? setShowAcompanhamento(true) : setAbaAtiva(aba))}
                         >
                           <style>{`.dl-menu-card:hover::before{ background: linear-gradient(135deg,${gradient}); }`}</style>
                           <div className="dl-menu-icon" style={{ background: `${color}18`, color }}>
@@ -889,7 +891,6 @@ export default function DashboardLider() {
                   {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}     isDark={isDark} />}
                   {abaAtiva === "visitantes"  && <TelaVisitantes       celulaId={celula?.id} isDark={isDark} />}
                   {abaAtiva === "fichas"      && <TelaFichas           celula={celula}       isDark={isDark} />}
-                  {abaAtiva === "casas"       && <CasasDePazLider      celulaId={celula?.id} isDark={isDark} />}
                   {abaAtiva === "missao70"    && <Missao70Lider        celulaId={celula?.id} isDark={isDark} />}
                   {abaAtiva === "solicitar-ficha" && <SolicitarFichaMembro isDark={isDark} />}
                 </motion.div>
@@ -947,6 +948,13 @@ export default function DashboardLider() {
               document.body
           )}
         </AnimatePresence>
+
+        {/* ── Modal único: Acompanhamento de Discipulado ── */}
+        <AcompanhamentoDiscipulado
+            isDark={isDark}
+            open={showAcompanhamento}
+            onClose={() => setShowAcompanhamento(false)}
+        />
       </div>
   );
 }

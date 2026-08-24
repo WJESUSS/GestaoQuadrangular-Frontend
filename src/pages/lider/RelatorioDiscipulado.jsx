@@ -9,12 +9,15 @@ import { AURA, theme } from "./liderTheme";
 
 /* ─── Constantes ───────────────────────────────────────────────────────── */
 const COLUNAS = [
-  { campo: "domingoManha",  tipoLabel: "Manhã",   diaLabel: "Domingo", label: "Domingo de Manhã",  emoji: "🌅", justField: "justDomingoManha",  offset: 0 },
-  { campo: "domingoNoite",  tipoLabel: "Noite",   diaLabel: "Domingo", label: "Domingo à Noite",   emoji: "🌟", justField: "justDomingoNoite",  offset: 0 },
-  { campo: "escolaBiblica", tipoLabel: "Escola",  diaLabel: "Segunda", label: "Escola Bíblica",    emoji: "📚", justField: "justEscolaBiblica", offset: 1 },
-  { campo: "quartaNoite",   tipoLabel: "Culto",   diaLabel: "Quarta",  label: "Culto de Quarta",   emoji: "🌙", justField: "justQuartaNoite",   offset: 3 },
-  { campo: "quintaNoite",   tipoLabel: "Culto",   diaLabel: "Quinta",  label: "Culto de Quinta",   emoji: "⭐", justField: "justQuintaNoite",   offset: 4 },
+  { campo: "domingoManha",  tipoLabel: "Manhã",   diaLabel: "Domingo", label: "Domingo de Manhã",  emoji: "🌅", justField: "justDomingoManha",  offset: 0, pontos: 4 },
+  { campo: "domingoNoite",  tipoLabel: "Noite",   diaLabel: "Domingo", label: "Domingo à Noite",   emoji: "🌟", justField: "justDomingoNoite",  offset: 0, pontos: 4 },
+  { campo: "escolaBiblica", tipoLabel: "Escola",  diaLabel: "Segunda", label: "Escola Bíblica",    emoji: "📚", justField: "justEscolaBiblica", offset: 1, pontos: 5 },
+  { campo: "quartaNoite",   tipoLabel: "Culto",   diaLabel: "Quarta",  label: "Culto de Quarta",   emoji: "🌙", justField: "justQuartaNoite",   offset: 3, pontos: 2 },
+  { campo: "quintaNoite",   tipoLabel: "Culto",   diaLabel: "Quinta",  label: "Culto de Quinta",   emoji: "⭐", justField: "justQuintaNoite",   offset: 4, pontos: 2 },
 ];
+
+/* pontuação ao vivo: quarta=2 · quinta=2 · domingo=4 · escola bíblica=5 */
+const calcPontos = (p = {}) => COLUNAS.reduce((acc, c) => acc + (p[c.campo] ? c.pontos : 0), 0);
 
 function dataCulto(inicio, offset) {
   if (!inicio || typeof offset !== "number") return "";
@@ -706,7 +709,7 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
 }
 
 /* ─── Toast Sucesso ─────────────────────────────────────────────────────── */
-function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modoEdicao, onClose }) {
+function ToastSucessoDiscipulado({ totalPresencas, totalPontos, porcentagem, nomeCelula, modoEdicao, onClose }) {
   const [saindo, setSaindo] = useState(false);
   useEffect(() => {
     const tmr = setTimeout(() => {
@@ -751,6 +754,9 @@ function ToastSucessoDiscipulado({ totalPresencas, porcentagem, nomeCelula, modo
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
               <div style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.9)", display: "flex", alignItems: "center", gap: 6 }}>
                 <Users2 size={11} /> {totalPresencas} Presenças
+              </div>
+              <div style={{ background: "rgba(201,169,110,.25)", border: "1px solid rgba(201,169,110,.4)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight, display: "flex", alignItems: "center", gap: 6 }}>
+                ⭐ {totalPontos} Pontos
               </div>
               <div style={{ background: porcentagem >= 60 ? "rgba(201,169,110,.2)" : "rgba(200,16,46,.15)", border: `1px solid ${porcentagem >= 60 ? "rgba(201,169,110,.35)" : "rgba(200,16,46,.3)"}`, borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: porcentagem >= 60 ? AURA.gold : "rgba(255,255,255,.85)", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={11} /> {porcentagem}% Freq.
@@ -888,6 +894,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                       <div className="rd-hist-stats">
                         <span className="rd-hist-stat">{item.totalMembros ?? "?"} membros</span>
                         <span className="rd-hist-stat">{item.totalPresencas ?? 0} presenças</span>
+                        <span className="rd-hist-stat" style={{ color: AURA.gold, fontWeight: 700 }}>{item.totalPontos ?? 0} pts</span>
                         <span style={{
                           fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
                           letterSpacing: ".12em", textTransform: "uppercase",
@@ -1026,6 +1033,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                   {presencas.map((p, i) => {
                     const nome  = p.nomeMembro ?? p.nome ?? "?";
                     const total = COLUNAS.filter((c) => p[c.campo]).length;
+                    const pts   = p.totalPontos ?? calcPontos(p);
                     return (
                         <div key={p.membroId ?? i} style={{ borderBottom: i < presencas.length - 1 ? `1px solid ${t.border}` : "none" }}>
                           <div className="rd-detail-grid" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
@@ -1033,7 +1041,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                               <div className="rd-member-avatar" style={{ width: 34, height: 34, fontSize: 14 }}>{nome.charAt(0)}</div>
                               <div style={{ minWidth: 0 }}>
                                 <p className="rd-member-name" style={{ fontSize: 14 }}>{nome}</p>
-                                <p className="rd-member-id">{total}/{COLUNAS.length} presenças</p>
+                                <p className="rd-member-id">{total}/{COLUNAS.length} presenças · <span style={{ color: AURA.gold, fontWeight: 700 }}>{pts} pts</span></p>
                               </div>
                             </div>
                             {COLUNAS.map(({ campo, emoji, justField }) => (
@@ -1235,9 +1243,10 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
   const stats = useMemo(() => {
     const totalGeral    = presencas.reduce((acc, p) => acc + COLUNAS.filter((c) => p[c.campo]).length, 0);
+    const pontosGerais  = presencas.reduce((acc, p) => acc + calcPontos(p), 0);
     const totalPossivel = presencas.length * COLUNAS.length;
     const porcentagem   = totalPossivel > 0 ? Math.round((totalGeral / totalPossivel) * 100) : 0;
-    return { totalGeral, porcentagem };
+    return { totalGeral, pontosGerais, porcentagem };
   }, [presencas]);
 
   const entrarModoEdicao = useCallback(async (item, detalhePreCarregado) => {
@@ -1266,6 +1275,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
     if (!inicio || !fim || !celula?.id || presencas.length === 0) return setErro("Verifique os dados.");
     setEnviando(true);
     const totalEnviado = stats.totalGeral;
+    const pontosEnviado = stats.pontosGerais;
     const pctEnviado   = stats.porcentagem;
     const nomeCell     = celula?.nome || "";
     const eraEdicao    = modoEdicao;
@@ -1295,7 +1305,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
       setMembros((prev) => { setPresencas(inicializarPresencas(prev)); return prev; });
       carregouRef.current = true;
       await verificarExistente(inicio, fim);
-      setToastSucesso({ totalPresencas: totalEnviado, porcentagem: pctEnviado, nomeCelula: nomeCell, modoEdicao: eraEdicao });
+      setToastSucesso({ totalPresencas: totalEnviado, totalPontos: pontosEnviado, porcentagem: pctEnviado, nomeCelula: nomeCell, modoEdicao: eraEdicao });
     } catch (e) {
       setErro(e?.response?.data?.message || "Erro no envio.");
     } finally {
@@ -1322,6 +1332,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
         {toastSucesso && (
             <ToastSucessoDiscipulado
                 totalPresencas={toastSucesso.totalPresencas}
+                totalPontos={toastSucesso.totalPontos}
                 porcentagem={toastSucesso.porcentagem}
                 nomeCelula={toastSucesso.nomeCelula}
                 modoEdicao={toastSucesso.modoEdicao}
@@ -1441,6 +1452,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                   {[
                     { label: "Membros",    val: membros.length,          color: AURA.gold  },
                     { label: "Presenças",  val: stats.totalGeral,        color: AURA.blue  },
+                    { label: "Pontos",     val: stats.pontosGerais,      color: AURA.gold },
                     { label: "Frequência", val: `${stats.porcentagem}%`, color: stats.porcentagem > 60 ? AURA.gold : AURA.red, highlight: stats.porcentagem > 60 },
                   ].map(({ label, val, color, highlight }) => (
                       <div key={label} className="rd-kpi" style={highlight ? { background: `linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`, border: "none" } : {}}>

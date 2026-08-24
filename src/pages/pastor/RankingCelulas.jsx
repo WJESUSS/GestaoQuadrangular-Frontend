@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, ChevronDown, Loader2, Sparkles,
   RefreshCw, Info, UserPlus, HeartHandshake, Droplet, Droplets,
   Handshake, GitBranch, Download, Image as ImageIcon, FileText, X,
+  UserCheck, Church,
 } from "lucide-react";
 
 /* ─── Tokens AURA (mesmos do Dashboard) ────────────────────────────────── */
@@ -22,6 +23,7 @@ const AURA = {
   blue:      "#003DA5",
   blueDark:  "#002470",
   yellow:    "#FDB813",
+  moss:      "#4A7C5C",
 };
 
 function theme(isDark) {
@@ -50,13 +52,15 @@ const RANK_STYLE = {
 
 /* Critérios que compõem a pontuação mensal */
 const CRITERIOS = [
-  { key: "presencaMedia", label: "Presença Média",   Icon: Users,         color: AURA.blue },
-  { key: "visitantes",    label: "Visitantes",        Icon: UserPlus,      color: "#c8a010" },
-  { key: "consolidados",  label: "Consolidados",      Icon: HeartHandshake,color: AURA.red },
-  { key: "aceitouJesus",  label: "Aceitaram Jesus",    Icon: Sparkles,      color: AURA.gold },
-  { key: "desejaBatismo", label: "Desejam Batismo",    Icon: Droplet,       color: AURA.blue },
-  { key: "batismos",      label: "Batismos",           Icon: Droplets,      color: AURA.blue },
-  { key: "reconciliou",   label: "Reconciliações",     Icon: Handshake,     color: AURA.red },
+  { key: "presencaMedia",     label: "Presença Média",   Icon: Users,         color: AURA.blue },
+  { key: "visitantes",        label: "Visitantes",        Icon: UserPlus,      color: "#c8a010" },
+  { key: "consolidados",      label: "Consolidados",      Icon: HeartHandshake,color: AURA.red },
+  { key: "aceitouJesus",      label: "Aceitaram Jesus",    Icon: Sparkles,      color: AURA.gold },
+  { key: "desejaBatismo",     label: "Desejam Batismo",    Icon: Droplet,       color: AURA.blue },
+  { key: "batismos",          label: "Batismos",           Icon: Droplets,      color: AURA.blue },
+  { key: "reconciliou",       label: "Reconciliações",     Icon: Handshake,     color: AURA.red },
+  { key: "quantidadeDiscipulados", label: "Discipulado",       Icon: UserCheck,     color: AURA.moss },
+  { key: "pontosCultos",      label: "Cultos & EBD",      Icon: Church,        color: AURA.gold },
 ];
 
 const MESES_PT = [
@@ -977,7 +981,7 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
                       <span>Multiplicação da célula no mês</span>
                     </div>
                     <p style={{ margin: "12px 0 0", fontSize: 11, fontWeight: 300, color: t.textMuted, lineHeight: 1.6 }}>
-                      A pontuação é calculada automaticamente com base nos relatórios lançados pela célula durante o mês selecionado.
+                      A pontuação é calculada automaticamente com base nos relatórios lançados pela célula durante o mês selecionado, incluindo os discipulados individuais e coletivos registrados pelo líder.
                     </p>
                   </div>
                 </motion.div>

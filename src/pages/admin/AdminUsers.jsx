@@ -13,7 +13,7 @@ import {
   BarChart2, TrendingUp, Target, ChevronRight,
   MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
   ChevronLeft, Inbox,
-  ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info,
+  ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info, UserCheck,
 } from "lucide-react";
 
 import Membros                   from "../secretaria/Membros";
@@ -28,14 +28,14 @@ import RankingCelulas            from "../pastor/RankingCelulas";
 import PainelAlertas             from "../pastor/PainelAlertas";
 import Discipulado               from "../pastor/Discipulado";
 import TelaPendencias            from "../pastor/TelaPendencias";
-import RelatorioCasasDePaz       from "../pastor/RelatorioCasasDePaz";
 import RelatorioMissao70Pastor   from "../pastor/RelatorioMissao70Pastor";
+import RelatoriosDiscipuladoCelulas from "../pastor/RelatoriosDiscipuladoCelulas";
 import TelaRelatorio             from "../lider/TelaRelatorio";
 import RelatorioDiscipulado      from "../lider/RelatorioDiscipulado";
 import TelaVisitantes            from "../lider/TelaVisitantes";
 import TelaFichas                from "../lider/TelaFichas";
-import CasasDePazLider           from "../lider/CasasDePazLider";
 import Missao70Lider             from "../lider/Missao70Lider";
+import AcompanhamentoDiscipulado from "../lider/AcompanhamentoDiscipulado";
 import TesourariaDashboard       from "../tesouraria/TesourariaDashboard";
 import TesourariaLancamento      from "../tesouraria/TesourariaLancamento";
 import TesourariaRelatorio       from "../tesouraria/TesourariaRelatorio";
@@ -112,9 +112,9 @@ const SECOES = [
       { key:"painel-pastor",  label:"Dashboard",    sub:"Visão geral",     icon:LayoutDashboard },
       { key:"relatorios",     label:"Relatórios",   sub:"Células",         icon:FileText        },
       { key:"discipulado",    label:"Discipulado",  sub:"Secretaria",      icon:Users           },
+      { key:"acompanhamento", label:"Acompanhamento", sub:"Discipulado",   icon:UserCheck       },
       { key:"multiplicacoes", label:"Multiplicação",sub:"Solicitações",    icon:Share2          },
       { key:"ranking",        label:"Ranking",      sub:"Células",         icon:Trophy          },
-      { key:"casas-de-paz",   label:"Casas de Paz", sub:"Evangelismo",     icon:Home            },
       { key:"missao70",       label:"Missão 70",    sub:"Evangelismo",     icon:Flame           },
       { key:"pendencias",     label:"Pendências",   sub:"Semana atual",    icon:ClipboardList   },
       { key:"alertas",        label:"Alertas",      sub:"Sistema",         icon:Shield          },
@@ -125,9 +125,9 @@ const SECOES = [
     itens:[
       { key:"lider-relatorio",   label:"Relatório",   sub:"Semanal",      icon:FileText },
       { key:"lider-discipulado", label:"Discipulado", sub:"Membros",      icon:Users    },
+      { key:"lider-acompanhamento", label:"Acompanhamento", sub:"Membro", icon:UserCheck },
       { key:"lider-visitantes",  label:"Visitantes",  sub:"Novas vidas",  icon:UserPlus },
       { key:"lider-fichas",      label:"Fichas",      sub:"Encontro",     icon:FileText },
-      { key:"lider-casas",       label:"Casas de Paz",sub:"Evangelismo",  icon:Home     },
       { key:"lider-missao70",    label:"Missão 70",   sub:"Evangelismo",  icon:Flame    },
     ],
   },
@@ -364,7 +364,7 @@ function GlobalStyles({ t, isDark }) {
 
     .adm-mobile-overlay { position: fixed; inset: 0; z-index: 250; background: ${t.overlayBg}; display: flex; flex-direction: column; }
     .adm-mobile-overlay-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; flex-shrink: 0; border-bottom: 1px solid rgba(201,169,110,.08); }
-    .adm-mobile-overlay-body { flex: 1; overflow-y: auto; padding: 8px 0 24px; }
+    .adm-mobile-overlay-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 0 24px; }
     .adm-mobile-sec-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; user-select: none; min-height: 48px; }
     .adm-mobile-sec-left { display: flex; align-items: center; gap: 9px; }
     .adm-mobile-sec-label { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; color: rgba(245,240,232,.85); }
@@ -392,7 +392,7 @@ function GlobalStyles({ t, isDark }) {
     .adm-page-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.1; }
     .adm-page-head { padding: 18px 22px 0; }
     @media (min-width: 640px) { .adm-page-head { padding: 22px 32px 0; } }
-    .adm-content { flex: 1; padding: 16px 22px 24px; padding-bottom: max(36px, env(safe-area-inset-bottom, 36px)); }
+    .adm-content { flex: 1; padding: 16px 22px 24px; padding-bottom: max(36px, env(safe-area-inset-bottom, 36px)); -webkit-overflow-scrolling: touch; }
     @media (min-width: 640px) { .adm-content { padding: 18px 32px 28px; } }
     .adm-card {
       background: ${t.bgEl}; border: 1px solid ${t.border};
@@ -586,6 +586,23 @@ function InputField({ icon, type = "text", value, onChange, placeholder, require
 }
 
 /* ─── ModuloRenderer ─────────────────────────────────────────────────────── */
+/* ─── Wrapper: Acompanhamento (modal) dentro do painel Admin ─────────────── */
+function AdminAcompanhamentoDiscipulado({ isDark }) {
+  const [open, setOpen] = useState(true);
+  return (
+      <>
+        <AcompanhamentoDiscipulado isDark={isDark} open={open} onClose={() => setOpen(false)} />
+        {!open && (
+            <div style={{ textAlign: "center", padding: "60px 20px" }}>
+              <button className="adm-btn-primary blue" style={{ display: "inline-flex", width: "auto" }} onClick={() => setOpen(true)}>
+                <UserCheck size={14} /> Abrir Acompanhamento
+              </button>
+            </div>
+        )}
+      </>
+  );
+}
+
 function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
   const p = { isDark };
   switch (moduloKey) {
@@ -597,17 +614,17 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
     case "painel-pastor":     return <PainelPastor {...p}/>;
     case "relatorios":        return <RelatorioCelula {...p}/>;
     case "discipulado":       return <Discipulado {...p}/>;
+    case "acompanhamento":    return <RelatoriosDiscipuladoCelulas {...p}/>;
     case "multiplicacoes":    return <SolicitacoesMultiplicacao {...p}/>;
     case "ranking":           return <RankingCelulas {...p}/>;
-    case "casas-de-paz":      return <RelatorioCasasDePaz {...p}/>;
     case "missao70":          return <RelatorioMissao70Pastor {...p}/>;
     case "pendencias":        return <TelaPendencias {...p}/>;
     case "alertas":           return <PainelAlertas {...p}/>;
     case "lider-relatorio":   return <TelaRelatorio celula={celulaAdmin} {...p}/>;
     case "lider-discipulado": return <RelatorioDiscipulado membros={[]} {...p}/>;
+    case "lider-acompanhamento": return <AdminAcompanhamentoDiscipulado {...p}/>;
     case "lider-visitantes":  return <TelaVisitantes celulaId={celulaAdmin?.id} {...p}/>;
     case "lider-fichas":      return <TelaFichas celula={celulaAdmin} {...p}/>;
-    case "lider-casas":       return <CasasDePazLider celulaId={celulaAdmin?.id} {...p}/>;
     case "lider-missao70":    return <Missao70Lider celulaId={celulaAdmin?.id} {...p}/>;
     case "teso-dashboard":    return <TesourariaDashboard {...p}/>;
     case "teso-lancamento":   return <TesourariaLancamento {...p}/>;
@@ -1360,11 +1377,16 @@ export default function AdminUsers() {
   const t = theme(isDark);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
+  // Segurança: garante que a rolagem nunca fique travada ao entrar/sair da página
+  useEffect(() => {
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
   useEffect(() => {
     if (mobileMenuOpen) {
-      const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = prev; };
+      return () => { document.body.style.overflow = ""; };
     }
   }, [mobileMenuOpen]);
   useEffect(() => {
@@ -1872,14 +1894,14 @@ export default function AdminUsers() {
                             const eFoto = uploadandoFoto === u.id;
                             return (
                                 <motion.div key={u.id} className="adm-row"
-                                             initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-16 }}
-                                             transition={{ delay: i*.025 }}
-                                             onMouseEnter={e => { e.currentTarget.style.background = temP ? (isDark?"rgba(196,140,0,.15)":"rgba(196,140,0,.18)") : (u.ativo ? (isDark?"rgba(5,150,105,.18)":"rgba(5,150,105,.20)") : (isDark?"rgba(200,16,46,.18)":"rgba(200,16,46,.20)")); e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = `4px 0 16px ${temP ? "rgba(196,140,0,.12)" : u.ativo ? "rgba(5,150,105,.15)" : "rgba(200,16,46,.15)"}`; }}
-                                             onMouseLeave={e => { e.currentTarget.style.background = temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")); e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
-                                             style={{
-                                               borderLeft:`3px solid ${temP ? AURA.yellow : u.ativo ? AURA.green+"55" : AURA.red+"55"}`,
-                                               background: temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")),
-                                             }}>
+                                            initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, x:-16 }}
+                                            transition={{ delay: i*.025 }}
+                                            onMouseEnter={e => { e.currentTarget.style.background = temP ? (isDark?"rgba(196,140,0,.15)":"rgba(196,140,0,.18)") : (u.ativo ? (isDark?"rgba(5,150,105,.18)":"rgba(5,150,105,.20)") : (isDark?"rgba(200,16,46,.18)":"rgba(200,16,46,.20)")); e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = `4px 0 16px ${temP ? "rgba(196,140,0,.12)" : u.ativo ? "rgba(5,150,105,.15)" : "rgba(200,16,46,.15)"}`; }}
+                                            onMouseLeave={e => { e.currentTarget.style.background = temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")); e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                                            style={{
+                                              borderLeft:`3px solid ${temP ? AURA.yellow : u.ativo ? AURA.green+"55" : AURA.red+"55"}`,
+                                              background: temP ? undefined : (u.ativo ? (isDark?"rgba(5,150,105,.025)":"rgba(5,150,105,.02)") : (isDark?"rgba(200,16,46,.025)":"rgba(200,16,46,.02)")),
+                                            }}>
                                   <div className="adm-row-l">
                                     <div className="adm-avatar"
                                          style={{ border:`1.5px solid ${temP?AURA.yellow+"55":t.border}`, opacity:u.ativo?1:.5 }}
