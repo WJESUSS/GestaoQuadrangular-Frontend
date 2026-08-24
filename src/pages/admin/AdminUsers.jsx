@@ -14,6 +14,7 @@ import {
   MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
   ChevronLeft, Inbox,
   ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info, UserCheck,
+  Droplets,
 } from "lucide-react";
 
 import Membros                   from "../secretaria/Membros";
@@ -42,6 +43,7 @@ import TesourariaRelatorio       from "../tesouraria/TesourariaRelatorio";
 import TesourariaDizimistas      from "../tesouraria/TesourariaDizimistas";
 import TesourariaComparativo     from "../tesouraria/TesourariaComparativo";
 import HistoricoAuditoria        from "./HistoricoAuditoria";
+import FichasConvertido          from "../secretaria/FichasConvertido";
 
 
 const AURA = {
@@ -104,6 +106,7 @@ const SECOES = [
       { key:"celulas",           label:"Células",      sub:"Grupos de oração", icon:Home     },
       { key:"fichas",            label:"Fichas",       sub:"Encontro",         icon:FileText },
       { key:"secretariacelulas", label:"Sec. Células", sub:"Secretaria",       icon:Building2},
+      { key:"fichas-convertido", label:"Convertidos",  sub:"Novas vidas",     icon:Droplets },
     ],
   },
   {
@@ -615,6 +618,7 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
     case "celulas":           return <Celulas {...p}/>;
     case "fichas":            return <FichasEncontro {...p}/>;
     case "secretariacelulas": return <SecretariaCelulas {...p}/>;
+    case "fichas-convertido": return <FichasConvertido {...p}/>;
     case "painel-pastor":     return <PainelPastor {...p}/>;
     case "relatorios":        return <RelatorioCelula {...p}/>;
     case "discipulado":       return <Discipulado {...p}/>;
