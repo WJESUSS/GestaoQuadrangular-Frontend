@@ -9,6 +9,7 @@ import {
   PartyPopper, Church,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const JUSTIFICATIVAS = [
   { value: "TRABALHO", label: "Trabalho",  icon: <Briefcase  size={13} />, cor: "#6366F1", bg: "rgba(99,102,241,.08)",  borda: "rgba(99,102,241,.25)"  },
@@ -1082,15 +1083,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
 
   if (loading) return (
       <div className="aura-loading">
-        <div style={{ textAlign: "center" }}>
-          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            <div className="aura-pulse" style={{ width: 72, height: 72, position: "absolute", border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
-            <div style={{ width: 52, height: 52, borderRadius: "50%", background: t.bgEl, border: `1.5px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-              <IEQCross size={36} />
-            </div>
-          </div>
-          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>Carregando…</p>
-        </div>
+        <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
       </div>
   );
 
@@ -1402,15 +1395,7 @@ export default function TelaRelatorio({ isDark = false }) {
       <div className="aura-loading">
         <AuraStyles t={t} isDark={isDark} />
         <div className="aura-glow" />
-        <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
-          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            <div className="aura-pulse" style={{ width: 72, height: 72, position: "absolute", border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
-            <div style={{ width: 52, height: 52, borderRadius: "50%", background: t.bgEl, border: `1.5px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-              <IEQCross size={36} />
-            </div>
-          </div>
-          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>Carregando…</p>
-        </div>
+        <TelaCarregando isDark={isDark} minHeight="100vh" background="transparent" />
       </div>
   );
 

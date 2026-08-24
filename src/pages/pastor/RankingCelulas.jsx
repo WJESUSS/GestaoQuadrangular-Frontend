@@ -10,6 +10,7 @@ import {
   Handshake, GitBranch, Download, Image as ImageIcon, FileText, X,
   UserCheck, Church,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA (mesmos do Dashboard) ────────────────────────────────── */
 const AURA = {
@@ -730,18 +731,7 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
     return (
         <div className="rk-root">
           <GlobalStyles t={t} isDark={isDark} />
-          <div className="rk-loading">
-            <div className="rk-loading-rings">
-              <div className="dl-pulse" style={{ position: "absolute", width: 80, height: 80, border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
-              <div className="dl-pulse" style={{ position: "absolute", width: 62, height: 62, border: "1px solid rgba(201,169,110,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
-              <div style={{ width: 50, height: 50, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(201,169,110,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-                <IEQCross size={36} />
-              </div>
-            </div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7, margin: 0 }}>
-              Carregando ranking…
-            </p>
-          </div>
+          <TelaCarregando isDark={isDark} texto="Carregando ranking…" minHeight="60vh" background="transparent" />
         </div>
     );
   }

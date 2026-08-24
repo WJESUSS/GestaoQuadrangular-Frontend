@@ -9,6 +9,7 @@ import {
     Clock, XCircle, Activity, Filter, RotateCcw,
     Star, Droplets, Heart, FileDown, Loader2,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA (mesma paleta do Dashboard) ─────────────────────────── */
 const AURA = {
@@ -987,12 +988,7 @@ export default function RelatorioCasasDePaz({ isDark = true }) {
 
             {/* Conteúdo */}
             {loading ? (
-                <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                    <Loader2 size={28} className="rdcp-spin" style={{ color: AURA.red }} />
-                    <p className="rdcp-eyebrow" style={{ color: t.textMuted, marginTop: 14 }}>
-                        CARREGANDO RELATÓRIO...
-                    </p>
-                </div>
+                <TelaCarregando isDark={isDark} texto="Carregando relatório…" minHeight="40vh" background="transparent" />
             ) : dados.length === 0 ? (
                 <div className="rdcp-empty">
                     <Home size={32} color={t.textMuted} style={{ marginBottom: 14, opacity: .5 }} />

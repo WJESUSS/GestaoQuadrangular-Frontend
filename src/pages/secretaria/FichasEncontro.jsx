@@ -6,6 +6,7 @@ import autoTable from "jspdf-autotable";
 import {
   FileText, Download, Calendar, Search, Phone, ShieldAlert, ChevronRight, Loader2, User
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Design Tokens IEQ ─── */
 const IEQ = {
@@ -156,10 +157,7 @@ export default function FichasEncontro({ isDark = false }) {
 
         {/* Conteúdo */}
         {loading ? (
-            <div style={{ textAlign:"center", padding:"48px 0" }}>
-              <Loader2 size={30} className="spin-icon" style={{ color:orange, display:"inline-block" }}/>
-              <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em", color:textSec, marginTop:12 }}>BUSCANDO FICHAS...</p>
-            </div>
+            <TelaCarregando isDark={isDark} texto="Buscando fichas…" minHeight="40vh" background="transparent" />
         ) : fichas.length === 0 ? (
             <div style={{ textAlign:"center", padding:"48px 24px", borderRadius:12,
               border:`2px dashed ${border}`, background:isDark?"rgba(255,255,255,.02)":"rgba(200,16,46,.02)" }}>

@@ -21,6 +21,7 @@ import {
   ClipboardList, Flame,
   Cake, Bell, Send, Check, X, ChevronRight, UserCheck,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA ────────────────────────────────────────────────── */
 const AURA = {
@@ -756,18 +757,7 @@ export default function PastorPage() {
         <div className="pp-loading" style={{ background: t.bg }}>
           <GlobalStyles t={t} isDark={isDark} />
           <div className="pp-glow" />
-          <div style={{ textAlign: "center", position: "relative", zIndex: 10 }}>
-            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-              <div className="pp-ring pp-pulse" style={{ width: 80, height: 80, position: "absolute", border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%" }} />
-              <div className="pp-ring pp-pulse" style={{ width: 62, height: 62, position: "absolute", border: "1px solid rgba(201,169,110,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
-              <div style={{ width: 50, height: 50, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(201,169,110,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-                <IEQCross size={36} />
-              </div>
-            </div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .7 }}>
-              Carregando…
-            </p>
-          </div>
+          <TelaCarregando isDark={isDark} minHeight="100vh" background="transparent" />
         </div>
     );
   }

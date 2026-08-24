@@ -5,6 +5,7 @@ import {
   Users, Loader2, Search, ChevronDown, Trash2, Plus,
   MapPin, Clock, Star, X, Building2,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── AURA Design Tokens ─────────────────────────────────────────── */
 const AURA = {
@@ -854,9 +855,7 @@ export default function SecretariaCelulasRefatorada({ isDark = false }) {
 
                     {/* Tabela */}
                     {loading ? (
-                        <div className="sec-loading">
-                          <Loader2 size={28} className="dl-spin" style={{ color: AURA.gold }} />
-                        </div>
+                        <TelaCarregando isDark={isDark} minHeight="30vh" background="transparent" />
                     ) : membros.length === 0 ? (
                         <div className="sec-empty">
                           <Users size={32} style={{ color: t.textMuted, marginBottom: 12 }} />

@@ -204,6 +204,7 @@ function GlobalStyles({ t, isDark }) {
     @keyframes adm-blink   { 0%,100%{opacity:1} 50%{opacity:.25} }
     @keyframes adm-shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
     @keyframes adm-float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    @keyframes adm-loader-pulse { 0%,100%{ opacity:.55; transform:scale(1); } 50%{ opacity:1; transform:scale(1.05); } }
 
     *, *::before, *::after { box-sizing: border-box; }
     html, body { overflow-x: hidden; }
@@ -564,6 +565,26 @@ function GlobalStyles({ t, isDark }) {
   );
 }
 
+/* ─── Spinner elegante reutilizável ──────────────────────────────────────── */
+function AdmSpinner({ size = 14, color = AURA.gold }) {
+  return (
+      <span style={{ position: "relative", display: "inline-block", width: size, height: size, flexShrink: 0 }}>
+        <span style={{
+          position: "absolute", inset: 0, borderRadius: "50%",
+          background: `conic-gradient(from 0deg, transparent 0deg, ${color} 100deg, transparent 280deg)`,
+          animation: "adm-spin .8s cubic-bezier(.5,0,.5,1) infinite",
+          WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px))",
+          mask: "radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px))",
+        }}/>
+        <span style={{
+          position: "absolute", inset: size * 0.32, borderRadius: "50%",
+          background: color, opacity: .35,
+          animation: "adm-loader-pulse 1.4s ease-in-out infinite",
+        }}/>
+      </span>
+  );
+}
+
 /* ─── InputField ─────────────────────────────────────────────────────────── */
 function InputField({ icon, type = "text", value, onChange, placeholder, required, isDark, t }) {
   const [show, setShow] = useState(false);
@@ -805,7 +826,7 @@ function ModalBloquear({ aberto, numeroInicial, onFechar, onConfirmar, salvando,
               <button type="button" onClick={onFechar} className="adm-btn-ghost" style={{ flex: 1, padding: "13px" }}>Cancelar</button>
               <button type="submit" form="form-bloqueio" disabled={salvando}
                       className="adm-btn-primary red" style={{ flex: 1.5, opacity: salvando ? .65 : 1, cursor: salvando ? "not-allowed" : "pointer" }}>
-                {salvando ? <><Loader2 size={14} style={{ animation: "adm-spin 1s linear infinite" }}/> Bloqueando…</> : <><Ban size={14}/> Bloquear número</>}
+                {salvando ? <><AdmSpinner size={14} color="#fff"/> Bloqueando…</> : <><Ban size={14}/> Bloquear número</>}
               </button>
             </div>
           </motion.div>
@@ -844,7 +865,7 @@ function ModalDesbloquear({ item, onFechar, onConfirmar, salvando, isDark, t }) 
               <button onClick={onFechar} className="adm-btn-ghost" style={{ flex: 1, padding: "13px" }}>Cancelar</button>
               <button onClick={() => onConfirmar(item.numero)} disabled={salvando}
                       style={{ flex: 1.5, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", borderRadius: 12, border: "none", cursor: salvando ? "not-allowed" : "pointer", background: `linear-gradient(135deg,${AURA.greenDark},${AURA.green})`, color: "#fff", boxShadow: "0 6px 20px rgba(5,150,105,.22)", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", opacity: salvando ? .65 : 1, transition: "all .25s" }}>
-                {salvando ? <><Loader2 size={14} style={{ animation: "adm-spin 1s linear infinite" }}/> Liberando…</> : <><ShieldCheck size={14}/> Desbloquear</>}
+                {salvando ? <><AdmSpinner size={14} color="#fff"/> Liberando…</> : <><ShieldCheck size={14}/> Desbloquear</>}
               </button>
             </div>
           </motion.div>
@@ -1011,8 +1032,8 @@ function PainelWhatsApp({ isDark, t, usuarios = [], bloqueados = [], onBloquear,
 
           {loading ? (
               <div style={{ padding: "40px 20px", textAlign: "center", color: t.textMuted }}>
-                <Loader2 size={22} style={{ animation: "adm-spin 1s linear infinite", marginBottom: 8 }}/>
-                <p style={{ fontSize: 11, margin: 0 }}>Carregando registros…</p>
+                <AdmSpinner size={22}/>
+                <p style={{ fontSize: 11, margin: "8px 0 0" }}>Carregando registros…</p>
               </div>
           ) : filtrados.length === 0 ? (
               <div style={{ padding: "48px 20px", textAlign: "center", color: t.textMuted }}>
@@ -1293,8 +1314,8 @@ function PainelBloqueios({ isDark, t, bloqueados, carregandoBloq, onRecarregar, 
 
           {carregandoBloq ? (
               <div style={{ padding: "42px 20px", textAlign: "center", color: t.textMuted }}>
-                <Loader2 size={22} style={{ animation: "adm-spin 1s linear infinite", marginBottom: 8 }}/>
-                <p style={{ fontSize: 11, margin: 0 }}>Carregando bloqueios…</p>
+                <AdmSpinner size={22}/>
+                <p style={{ fontSize: 11, margin: "8px 0 0" }}>Carregando bloqueios…</p>
               </div>
           ) : filtrados.length === 0 ? (
               <div style={{ padding: "52px 20px", textAlign: "center", color: t.textMuted }}>
@@ -1383,6 +1404,30 @@ export default function AdminUsers() {
   const fotoIdRef = useRef(null);
   const navRowRef = useRef(null);
   const t = theme(isDark);
+
+  // Controla o botão "voltar" do celular/navegador: fecha menus/modais abertos
+  // ou volta para a tela inicial ("usuarios") em vez de sair do app.
+  useEffect(() => {
+    window.history.pushState({ admPanel: true }, "");
+
+    const handlePopState = () => {
+      if (exitConfirm)     { setExitConfirm(false);   window.history.pushState({ admPanel: true }, ""); return; }
+      if (itemDesbloquear) { setItemDesbloquear(null); window.history.pushState({ admPanel: true }, ""); return; }
+      if (modalBloquear)   { setModalBloquear(false);  window.history.pushState({ admPanel: true }, ""); return; }
+      if (drawerOpen)      { setDrawerOpen(false);     window.history.pushState({ admPanel: true }, ""); return; }
+      if (mobileMenuOpen)  { setMobileMenuOpen(false); window.history.pushState({ admPanel: true }, ""); return; }
+      if (megaOpenId)      { setMegaOpenId(null);      window.history.pushState({ admPanel: true }, ""); return; }
+      if (moduloAtivo !== "usuarios") {
+        setModuloAtivo("usuarios");
+        window.history.pushState({ admPanel: true }, "");
+        return;
+      }
+      // Já está na tela inicial sem nada aberto: aqui o navegador segue o padrão dele
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [exitConfirm, itemDesbloquear, modalBloquear, drawerOpen, mobileMenuOpen, megaOpenId, moduloAtivo]);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
   // Segurança: garante que a rolagem nunca fique travada ao entrar/sair da página
@@ -1589,11 +1634,42 @@ export default function AdminUsers() {
 
   if (loading && usuarios.length === 0) return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background: isDark ? "#080810" : "#F2EDE4" }}>
+        <style>{`
+          @keyframes adm-loader-spin  { to { transform: rotate(360deg); } }
+          @keyframes adm-loader-pulse { 0%,100%{ opacity:.55; transform:scale(1); } 50%{ opacity:1; transform:scale(1.05); } }
+          @keyframes adm-loader-fade  { 0%,100%{ opacity:.35; } 50%{ opacity:1; } }
+        `}</style>
         <div style={{ textAlign:"center" }}>
-          <div style={{ width:56, height:56, borderRadius:16, background:`linear-gradient(135deg,${AURA.redDark},${AURA.blue})`, margin:"0 auto 18px", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:`0 16px 40px rgba(200,16,46,.3)` }}>
-            <Shield size={24} color="#fff"/>
+          <div style={{ position:"relative", width:76, height:76, margin:"0 auto 24px" }}>
+            {/* Anel externo giratório com gradiente */}
+            <div style={{
+              position:"absolute", inset:0, borderRadius:"50%",
+              background:`conic-gradient(from 0deg, transparent 0deg, ${AURA.gold} 90deg, ${AURA.red} 200deg, transparent 360deg)`,
+              animation:"adm-loader-spin 1.3s linear infinite",
+              WebkitMask:"radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px))",
+              mask:"radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px))",
+            }}/>
+            {/* Trilho fixo sutil, por baixo */}
+            <div style={{
+              position:"absolute", inset:0, borderRadius:"50%",
+              border:`1px solid ${isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.18)"}`,
+            }}/>
+            {/* Núcleo com o ícone, pulsando suavemente */}
+            <div style={{
+              position:"absolute", inset:11, borderRadius:"50%",
+              background: isDark ? "#0C0C14" : "#FBF8F1",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              animation:"adm-loader-pulse 2.4s ease-in-out infinite",
+              boxShadow: isDark ? "0 0 22px rgba(201,169,110,.14)" : "0 0 20px rgba(201,169,110,.2)",
+            }}>
+              <Shield size={20} style={{ color: AURA.gold }}/>
+            </div>
           </div>
-          <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:600, letterSpacing:".22em", fontSize:9, color: isDark ? AURA.gold : AURA.redDark, textTransform:"uppercase", margin:0 }}>Carregando…</p>
+          <p style={{
+            fontFamily:"'Inter',sans-serif", fontWeight:600, letterSpacing:".24em", fontSize:9,
+            color: isDark ? AURA.gold : AURA.redDark, textTransform:"uppercase", margin:0,
+            animation:"adm-loader-fade 1.8s ease-in-out infinite",
+          }}>Carregando…</p>
         </div>
       </div>
   );
@@ -1927,7 +2003,7 @@ export default function AdminUsers() {
                                           </div>
                                       }
                                       <div className="adm-avatar-overlay">
-                                        {eFoto ? <Loader2 size={13} color="#fff" style={{ animation:"adm-spin 1s linear infinite" }}/> : <Camera size={13} color="#fff"/>}
+                                        {eFoto ? <AdmSpinner size={13} color="#fff"/> : <Camera size={13} color="#fff"/>}
                                       </div>
                                     </div>
                                     <div style={{ flex:1, minWidth:0 }}>
@@ -1950,12 +2026,12 @@ export default function AdminUsers() {
                                           <button disabled={eApr} onClick={() => aprovarAlteracao(u.id, u.nome)}
                                                   className="adm-pending-action"
                                                   style={{ background:"rgba(5,150,105,.07)", border:"1px solid rgba(5,150,105,.22)", color:AURA.green }}>
-                                            {eApr?<Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/>:<CheckCircle size={11}/>} Aprovar
+                                            {eApr?<AdmSpinner size={11}/>:<CheckCircle size={11}/>} Aprovar
                                           </button>
                                           <button disabled={eApr} onClick={() => rejeitarAlteracao(u.id, u.nome)}
                                                   className="adm-pending-action"
                                                   style={{ background:"rgba(200,16,46,.07)", border:"1px solid rgba(200,16,46,.22)", color:AURA.red }}>
-                                            {eApr?<Loader2 size={11} style={{ animation:"adm-spin 1s linear infinite" }}/>:<XCircle size={11}/>} Rejeitar
+                                            {eApr?<AdmSpinner size={11}/>:<XCircle size={11}/>} Rejeitar
                                           </button>
                                         </>
                                     )}
@@ -2088,7 +2164,7 @@ export default function AdminUsers() {
                             className={`adm-btn-primary ${editandoId?"blue":"red"}`}
                             style={{ opacity:sending?.65:1 }}>
                       {sending
-                          ? <><Loader2 size={14} style={{ animation:"adm-spin 1s linear infinite" }}/> Salvando…</>
+                          ? <><AdmSpinner size={14} color="#fff"/> Salvando…</>
                           : editandoId ? <><Pencil size={14}/> Salvar Alterações</> : <><UserPlus size={14}/> Liberar Acesso</>}
                     </button>
                   </div>

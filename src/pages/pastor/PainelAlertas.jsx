@@ -9,6 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, Cell,
 } from "recharts";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const IEQ = {
   red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
@@ -136,14 +137,7 @@ export default function PainelAlertas({ isDark = false }) {
   };
 
   if (loading) return (
-      <div style={{ minHeight:"60vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background: bg }}>
-        <style>{globalStyles}</style>
-        <QuadrangularCross size={42} />
-        <p style={{ fontFamily:"'Cinzel',serif", color: isDark ? IEQ.offWhite : IEQ.redDark, marginTop:16, letterSpacing:".2em", fontSize:11 }}>
-          ANALISANDO SAÚDE DAS CÉLULAS...
-        </p>
-        <Loader2 size={24} style={{ color:IEQ.red, marginTop:12, animation:"spin 1s linear infinite" }} />
-      </div>
+      <TelaCarregando isDark={isDark} texto="Analisando saúde das células…" minHeight="60vh" background="transparent" />
   );
 
   return (

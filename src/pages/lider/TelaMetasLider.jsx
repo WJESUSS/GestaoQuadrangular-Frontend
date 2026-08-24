@@ -7,6 +7,7 @@ import {
     ChevronUp, ChevronDown, X, Loader2, Trophy,
     Clock, TrendingUp, AlertTriangle, RotateCcw, Calendar,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const TIPO_CONFIG = {
     BATISMO:       { emoji: "🕊️", label: "Batismo",       color: AURA.blue    },
@@ -348,10 +349,8 @@ export default function TelaMetasLider({ celula, isDark }) {
             {/* Conteúdo */}
             <AnimatePresence mode="wait">
                 {loading ? (
-                    <motion.div key="load" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                                style={{ textAlign:"center", padding:"48px 0" }}>
-                        <Loader2 size={32} className="metas-spin" style={{ color:AURA.red }} />
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:10, letterSpacing:".2em", color:textSecondary, marginTop:14 }}>CARREGANDO...</p>
+                    <motion.div key="load" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
+                        <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
                     </motion.div>
                 ) : aba === "ativas" ? (
                     <motion.div key="ativas" initial={{ opacity:0, x:16 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-16 }}>

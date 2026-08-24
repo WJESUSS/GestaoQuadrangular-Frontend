@@ -9,6 +9,7 @@ import {
   Calendar, MapPin, Users, ArrowLeft, Trash2, Edit2, FileDown,
   Check, Square, CheckSquare, ListFilter,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
 const AURA = {
@@ -1205,9 +1206,7 @@ export default function CelulasRefatorado({ isDark = false }) {
 
           {/* ── Cards/Loading ── */}
           {loading ? (
-              <div className="cel-loading">
-                <Loader2 size={28} className="dl-spin" style={{ color: AURA.gold }} />
-              </div>
+              <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
           ) : celulasFiltradas.length > 0 ? (
               <motion.div
                   className="cel-grid"

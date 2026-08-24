@@ -6,6 +6,7 @@ import {
     Search, Calendar, Lock, Info,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const TOTAL_ENCONTROS = 7;
 
@@ -669,13 +670,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
 
     /* ── Loading ──────────────────────────────────────────────────────── */
     if (loading) return (
-        <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <style>{globalCss}</style>
-            <Loader2 size={28} style={{ animation: "dl-spin 1s linear infinite", color: AURA.gold }} />
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: t.textMuted, marginTop: 14 }}>
-                Carregando casas de paz...
-            </p>
-        </div>
+        <TelaCarregando isDark={isDark} texto="Carregando casas de paz…" minHeight="40vh" background="transparent" />
     );
 
     /* ══════════════════════════════════════════════════════════════════ */

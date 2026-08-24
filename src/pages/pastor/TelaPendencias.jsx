@@ -17,6 +17,7 @@ import {
     FileText, BookOpen, MapPin, User, ClipboardList,
     CalendarDays, ChevronLeft, ChevronRight, Radio,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const IEQ = {
     red:        "#C8102E",
@@ -578,9 +579,7 @@ export default function TelaPendencias({ isDark = false }) {
 
                     {/* corpo */}
                     {loading ? (
-                        <div style={{ padding: 56, display: "flex", justifyContent: "center" }}>
-                            <Loader2 size={30} style={{ animation: "spin 1s linear infinite", color: IEQ.red }} />
-                        </div>
+                        <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
                     ) : erro ? (
                         <div style={{ padding: 40, textAlign: "center" }}>
                             <AlertTriangle size={28} style={{ color: IEQ.red, margin: "0 auto 10px" }} />

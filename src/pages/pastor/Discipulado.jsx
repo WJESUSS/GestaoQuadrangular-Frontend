@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Paleta ───────────────────────────────────────────────────────────── */
 const AURA = {
@@ -768,34 +769,7 @@ export default function Discipulado({ isDark = false }) {
 
   /* ── Loading ────────────────────────────────────────────────────────── */
   if (loading) return (
-      <div style={{
-        minHeight: "60vh", display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center", background: t.bg,
-      }}>
-        <style>{css}</style>
-        <div style={{ position: "relative", display: "inline-flex", marginBottom: 20 }}>
-          <div style={{
-            position: "absolute", width: 80, height: 80, top: "50%", left: "50%",
-            transform: "translate(-50%,-50%)",
-            border: "1px solid rgba(201,169,110,.25)", borderRadius: "50%",
-            animation: "aura-pulse 3s ease-in-out infinite",
-          }} />
-          <div style={{
-            width: 52, height: 52, borderRadius: "50%",
-            background: isDark ? "rgba(18,18,26,.99)" : "#fff",
-            border: "1.5px solid rgba(201,169,110,.28)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <BookOpen size={24} style={{ color: AURA.gold }} />
-          </div>
-        </div>
-        <p style={{
-          fontSize: 9, fontWeight: 600, letterSpacing: ".25em",
-          textTransform: "uppercase", color: AURA.gold, opacity: .7,
-        }}>
-          Carregando discipulado…
-        </p>
-      </div>
+      <TelaCarregando isDark={isDark} texto="Carregando discipulado…" minHeight="60vh" background="transparent" />
   );
 
   /* ── Render ─────────────────────────────────────────────────────────── */

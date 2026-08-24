@@ -6,6 +6,7 @@ import {
     Tooltip, Legend, CartesianGrid,
 } from "recharts";
 import { BarChart3, Calendar, TrendingUp, Wallet, ArrowUpRight, TableIcon } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA (Mesmo do Dashboard) ──────────────────────────────── */
 const AURA = {
@@ -299,14 +300,7 @@ export default function TesourariaComparativo({ isDark = false }) {
                 <GlobalStyles t={t} isDark={isDark} />
                 <div className="tc-glow" />
                 <div className="tc-content">
-                    <div className="tc-loading">
-                        <div className="tc-skel-block" style={{ height: 52, width: "40%", marginBottom: 28, marginLeft: "auto", marginRight: "auto" }} />
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 20 }}>
-                            {[1, 2, 3].map(i => <div key={i} className="tc-skel-block" style={{ height: 140 }} />)}
-                        </div>
-                        <div className="tc-skel-block" style={{ height: 280, marginBottom: 20 }} />
-                        <div className="tc-skel-block" style={{ height: 240 }} />
-                    </div>
+                    <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
                 </div>
             </div>
         );

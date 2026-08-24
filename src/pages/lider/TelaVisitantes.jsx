@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api.js";
 import { AURA, theme } from "./liderTheme";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 import {
   Plus, Phone, X, Search,
   Loader2, UserCheck, Mail, ExternalLink, Trash2, AlertTriangle,
@@ -352,10 +353,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
 
           {/* ── Grid ── */}
           {loading && visitantes.length === 0 ? (
-              <div style={{ textAlign:"center", padding:"60px 0", color:t.textMuted }}>
-                <Loader2 size={36} style={{ color:AURA.gold, animation:"tv-spin 1s linear infinite", margin:"0 auto 12px" }} />
-                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:10, fontWeight:600, letterSpacing:".2em", textTransform:"uppercase" }}>Carregando visitantes...</p>
-              </div>
+              <TelaCarregando isDark={isDark} texto="Carregando visitantes…" minHeight="40vh" background="transparent" />
           ) : filtrados.length === 0 ? (
               <div style={{ textAlign:"center", padding:"60px 0" }}>
                 <p style={{ fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:300, fontStyle:"italic", color:t.textMuted }}>Nenhum visitante encontrado.</p>

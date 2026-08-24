@@ -7,6 +7,7 @@ import {
     ChevronDown, ChevronUp, Loader2,
 } from "lucide-react";
 import api from "../../services/api.js";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA ─────────────────────────────────────────────────────── */
 const AURA = {
@@ -560,10 +561,7 @@ function FiltrosPanel({ filtros, setFiltro, aplicar, limpar, t }) {
 /* ─── Tabela ────────────────────────────────────────────────────────────── */
 function TabelaAuditoria({ registros, loading, erro, isDark, t, onRetry }) {
     if (loading) return (
-        <div className="aud-empty">
-            <Loader2 size={32} className="dl-spin aud-empty-icon" style={{ color: AURA.gold }} />
-            <p className="aud-empty-text">Carregando histórico…</p>
-        </div>
+        <TelaCarregando isDark={isDark} texto="Carregando histórico…" minHeight="30vh" background="transparent" />
     );
     if (erro) return (
         <div className="aud-empty">

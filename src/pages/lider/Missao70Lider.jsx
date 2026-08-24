@@ -3,6 +3,7 @@ import api from "../../services/api.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Plus, X, Loader2, CheckCircle2, ChevronDown, Search, Calendar, History, Pencil, Trash2, Ban } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Evento global de sincronização de decisão espiritual ───────────────
    O mesmo evento é usado pela tela de Visitantes. Quando qualquer uma
@@ -1195,11 +1196,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
     };
 
     if (loading) return (
-        <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <GlobalStyles t={t} isDark={isDark} />
-            <Loader2 size={28} className="m70-spin" style={{ color: AURA.gold }} />
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: t.textMuted, marginTop: 14 }}>Carregando Missão 70...</p>
-        </div>
+        <TelaCarregando isDark={isDark} texto="Carregando Missão 70…" minHeight="40vh" background="transparent" />
     );
 
     return (

@@ -10,6 +10,7 @@ import {
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA (idênticos ao CasasDePaz) ───────────────────────────── */
 const AURA = {
@@ -1673,12 +1674,7 @@ export default function RelatorioMissao70Pastor({ isDark = true }) {
 
             {/* ── Conteúdo ── */}
             {loading ? (
-                <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                    <Loader2 size={28} className="m70-spin" style={{ color: AURA.red }} />
-                    <p className="m70-eyebrow" style={{ color: t.textMuted, marginTop: 14 }}>
-                        CARREGANDO RELATÓRIO…
-                    </p>
-                </div>
+                <TelaCarregando isDark={isDark} texto="Carregando relatório…" minHeight="40vh" background="transparent" />
             ) : dadosFiltrados.length === 0 ? (
                 <div className="m70-empty">
                     <Flame size={32} color={t.textMuted} style={{ marginBottom: 14, opacity: .5 }} />

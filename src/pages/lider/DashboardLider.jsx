@@ -21,6 +21,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
@@ -605,18 +606,7 @@ export default function DashboardLider() {
         <div className="dl-loading">
           <GlobalStyles t={t} isDark={isDark} />
           <div className="dl-glow" />
-          <div className="dl-loading-inner">
-            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-              <div className="dl-ring dl-pulse" style={{ width: 80, height: 80, position: "absolute", border: `1px solid rgba(184,137,46,.28)`, borderRadius: "50%" }} />
-              <div className="dl-ring dl-pulse" style={{ width: 62, height: 62, position: "absolute", border: `1px solid rgba(184,137,46,.22)`, borderRadius: "50%", animationDelay: ".9s" }} />
-              <div style={{ width: 50, height: 50, borderRadius: "50%", background: isDark ? "rgba(26,34,54,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-                <IEQCross size={36} />
-              </div>
-            </div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: AURA.gold, opacity: .75 }}>
-              Carregando…
-            </p>
-          </div>
+          <TelaCarregando isDark={isDark} minHeight="100vh" background="transparent" />
         </div>
     );
   }

@@ -11,6 +11,7 @@ import {
   ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle2, Filter, ChevronDown,
   Download,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
 const AURA = {
@@ -2681,9 +2682,7 @@ export default function MembrosRefatorado({ isDark = false }) {
 
           {/* ── Cards/Loading ── */}
           {loading ? (
-              <div className="mem-loading">
-                <Loader2 size={28} className="dl-spin" style={{ color: AURA.gold }} />
-              </div>
+              <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
           ) : membrosFiltrados.length > 0 ? (
               <>
                 <motion.div

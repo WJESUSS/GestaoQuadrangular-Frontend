@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const AURA = {
     gold: "#C9A96E", goldLight: "#E8D5A3", dark: "#0A0A0F", darkEl: "#12121A",
@@ -1065,14 +1066,7 @@ export default function RelatorioCelula({ isDark = false }) {
         <div className="rl-root">
             <GlobalStylesRel t={t} isDark={isDark} />
             <div className="rl-glow" />
-            <div className="rl-loading">
-                <div style={{position:"relative",width:80,height:80,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                    <div style={{position:"absolute",width:80,height:80,borderRadius:"50%",border:"1px solid rgba(201,169,110,.25)",animation:"rl-pulse 3s ease-in-out infinite"}} />
-                    <div style={{position:"absolute",width:60,height:60,borderRadius:"50%",border:"1px solid rgba(201,169,110,.18)",animation:"rl-pulse 3s ease-in-out infinite",animationDelay:".9s"}} />
-                    <Loader2 size={28} className="rl-spin" style={{color:AURA.gold,position:"relative",zIndex:1}} />
-                </div>
-                <p style={{fontFamily:"'Inter',sans-serif",fontSize:9,fontWeight:600,letterSpacing:".25em",textTransform:"uppercase",color:AURA.gold,opacity:.7,margin:0}}>Sincronizando…</p>
-            </div>
+            <TelaCarregando isDark={isDark} texto="Sincronizando…" minHeight="60vh" background="transparent" />
         </div>
     );
 

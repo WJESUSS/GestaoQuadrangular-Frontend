@@ -6,6 +6,7 @@ import {
     Users, Calendar, CheckCircle2, XCircle, ChevronRight, Filter, RotateCcw,
     Loader2, History, Star, AlertCircle, X, Building2, TrendingUp, Award,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA (mesmo padrão do PastorPage / PainelPastor) ─────────── */
 const AURA = {
@@ -389,7 +390,7 @@ export default function RelatoriosDiscipuladoCelulas({ isDark = true }) {
                 </div>
 
                 {loadingHistorico ? (
-                    <div className="rdc-loading"><Loader2 size={22} className="rdc-spin" /></div>
+                    <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
                 ) : listaFiltrada.length === 0 ? (
                     <div className="rdc-empty"><History size={26} /> Nenhum registro encontrado para os filtros aplicados.</div>
                 ) : (

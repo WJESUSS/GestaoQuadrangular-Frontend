@@ -6,6 +6,7 @@ import {
   FileText, RefreshCw, AlertCircle, Heart, BookOpen, XCircle,
   Search, Droplets, ChevronLeft, ChevronRight,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const AURA = {
   gold:      "#C9A96E",
@@ -417,7 +418,7 @@ export default function FichasConvertido({ isDark }) {
           </div>
 
           {loading ? (
-              <div style={{ textAlign: "center", padding: 32 }}><Loader2 size={24} style={{ animation: "dl-spin 1s linear infinite", color: AURA.gold }} /></div>
+              <TelaCarregando isDark={isDark} minHeight="30vh" background="transparent" />
           ) : filtrados.length === 0 ? (
               <p style={{ textAlign: "center", fontSize: 13, color: t.textMuted, fontStyle: "italic", padding: 24 }}>Nenhum convertido registrado.</p>
           ) : (

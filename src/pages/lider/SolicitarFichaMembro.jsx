@@ -6,6 +6,7 @@ import {
   FileText, RefreshCw, AlertCircle, Heart, BookOpen,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const ESTADOS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
 const ESTADO_CIVIL = ["SOLTEIRO","CASADO","DIVORCIADO","VIUVO","SEPARADO","UNIAO_ESTAVEL"];
@@ -326,7 +327,7 @@ export default function SolicitarFichaMembro({ isDark }) {
           </div>
 
           {loading ? (
-              <div style={{ textAlign: "center", padding: 32 }}><Loader2 size={24} style={{ animation: "dl-spin 1s linear infinite", color: AURA.gold }} /></div>
+              <TelaCarregando isDark={isDark} minHeight="30vh" background="transparent" />
           ) : minhas.length === 0 ? (
               <p style={{ textAlign: "center", fontSize: 13, color: t.textMuted, fontStyle: "italic", padding: 24 }}>Nenhuma solicitação encontrada.</p>
           ) : (

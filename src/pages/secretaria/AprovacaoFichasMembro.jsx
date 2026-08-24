@@ -5,6 +5,7 @@ import {
   Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw,
   User, Clock, Search, FileText, ChevronLeft, ChevronRight,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const AURA = {
   gold:      "#C9A96E",
@@ -239,7 +240,7 @@ export default function AprovacaoFichasMembro({ isDark }) {
 
       {/* Cards */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 40 }}><Loader2 size={28} style={{ animation: "dl-spin 1s linear infinite", color: AURA.gold }} /></div>
+        <TelaCarregando isDark={isDark} minHeight="30vh" background="transparent" />
       ) : filtradas.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 20px" }}>
           <div style={{ fontSize: 48, marginBottom: 12, opacity: .3 }}><FileText size={48} /></div>

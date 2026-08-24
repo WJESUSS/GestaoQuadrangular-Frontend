@@ -7,6 +7,7 @@ import {
   ChevronRight, Sparkles, TrendingUp, Loader2, X,
 } from "lucide-react";
 import api from "../../services/api.js";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA (mesmo do DashboardLider) ───────────────────────────── */
 const AURA = {
@@ -425,9 +426,7 @@ export default function PainelPastor({ isDark = false }) {
     return (
         <div className="pp-wrap">
           <GlobalStyles t={t} isDark={isDark} />
-          <div className="pp-loading">
-            <Loader2 size={32} className="pp-spin" style={{ color: AURA.gold }} />
-          </div>
+          <TelaCarregando isDark={isDark} minHeight="60vh" background="transparent" />
         </div>
     );
   }

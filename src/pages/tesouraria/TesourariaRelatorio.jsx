@@ -5,6 +5,7 @@ import {
   CalendarDays, ChevronLeft, ChevronRight,
   RefreshCcw, Search, FileSpreadsheet, Loader2, Database, Coins
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Tokens AURA (Mesmo do Dashboard) ──────────────────────────────── */
 const AURA = {
@@ -451,9 +452,7 @@ export default function TesourariaRegistrosMensal({ isDark = false }) {
               transition={{ duration: 0.4, delay: 0.2 }}
           >
             {loading ? (
-                <div className="tr-loading">
-                  <Loader2 size={28} className="dl-spin tr-loading-spinner" style={{ color: AURA.gold }} />
-                </div>
+                <TelaCarregando isDark={isDark} minHeight="30vh" background="transparent" />
             ) : (
                 <div className="tr-table-wrap">
                   <table className="tr-table">

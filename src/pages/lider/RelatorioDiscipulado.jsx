@@ -6,6 +6,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Constantes ───────────────────────────────────────────────────────── */
 const COLUNAS = [
@@ -813,9 +814,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
 
   /* ── loading inicial ── */
   if (loading) return (
-      <div style={{ display: "flex", justifyContent: "center", padding: "48px 0" }}>
-        <Loader2 size={24} className="rd-spin" style={{ color: AURA.gold }} />
-      </div>
+      <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
   );
 
   /* ── erro ── */
@@ -985,9 +984,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
   }, [item.id]);
 
   if (loading) return (
-      <div style={{ display: "flex", justifyContent: "center", padding: "48px 0" }}>
-        <Loader2 size={24} className="rd-spin" style={{ color: AURA.gold }} />
-      </div>
+      <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
   );
 
   const presencas = detalhe?.presencas ?? detalhe?.membros ?? [];
@@ -1315,13 +1312,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
 
   /* ── Loading ── */
   if (loading) return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "64px 0", gap: 14 }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap'); @keyframes rd-spin{to{transform:rotate(360deg)}} .rd-spin{animation:rd-spin 1s linear infinite}`}</style>
-        <IEQCross size={40} />
-        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: AURA.gold }}>
-          Carregando membros…
-        </p>
-      </div>
+      <TelaCarregando isDark={isDark} texto="Carregando membros…" minHeight="40vh" background="transparent" />
   );
 
   return (

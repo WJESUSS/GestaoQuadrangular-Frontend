@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, CheckCircle2, Search, MessageCircle, Sparkles, Gift
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const IEQ = {
   red: "#C8102E", redDark: "#8B0B1F", redLight: "#E8294A",
@@ -162,13 +163,7 @@ export default function AniversariantesPremium({ isDark = false }) {
   const pendentes = lista.filter(m => !enviados.has(m.id) && obterLink(m));
 
   if (loading) return (
-      <div style={{ minHeight:"60vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:bg }}>
-        <style>{globalStyles}</style>
-        <QuadrangularCross size={42} />
-        <p style={{ fontFamily:"'Cinzel',serif", color:isDark ? IEQ.offWhite : IEQ.redDark, marginTop:16, letterSpacing:".2em", fontSize:11 }}>
-          CARREGANDO CELEBRAÇÕES...
-        </p>
-      </div>
+      <TelaCarregando isDark={isDark} texto="Carregando celebrações…" minHeight="60vh" background="transparent" />
   );
 
   return (

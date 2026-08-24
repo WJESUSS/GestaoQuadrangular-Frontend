@@ -6,6 +6,7 @@ import {
   Archive, ArchiveRestore, ArchiveX,
   Heart, Home, X, Loader2,
 } from "lucide-react";
+import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 /* ─── Paleta IEQ ─── */
 const IEQ = {
@@ -661,11 +662,7 @@ export default function Visitantes({ celulaId, isDark = false }) {
           {abaAtiva === "arquivados" ? (
               <ArquivadosLista isDark={isDark} celulaId={celulaId} onDesarquivar={desarquivar} />
           ) : loading ? (
-              <div style={{ textAlign:"center", padding:"64px 0" }}>
-                <Loader2 size={32} className="spin-icon" style={{ color:purple, display:"inline-block" }} />
-                <p style={{ fontFamily:"'Cinzel',serif", fontSize:9, letterSpacing:".2em",
-                  color:textSec, marginTop:12 }}>CARREGANDO...</p>
-              </div>
+              <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
           ) : visitantesFiltrados.length === 0 ? (
               <div className="v-empty">
                 <div style={{ width:56, height:56, borderRadius:14, background:`${purple}18`,
