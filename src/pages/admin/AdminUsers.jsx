@@ -211,8 +211,12 @@ function GlobalStyles({ t, isDark }) {
       font-family: 'Inter', sans-serif;
       background: ${t.bg};
       color: ${t.text};
-      min-height: 100vh; min-height: 100dvh;
-      display: flex; flex-direction: column; position: relative; overflow-x: hidden;
+      height: 100vh; height: 100dvh;
+      display: flex; flex-direction: column; position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
       transition: background .35s, color .35s;
       isolation: isolate; width: 100%;
     }
@@ -387,7 +391,7 @@ function GlobalStyles({ t, isDark }) {
     .adm-mobile-nav-badge { margin-left: auto; background: ${AURA.yellow}; color: #080810; font-size: 8.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
     .adm-mobile-overlay-foot { padding: 14px 18px 22px; flex-shrink: 0; border-top: 1px solid rgba(201,169,110,.08); }
 
-    .adm-main { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; min-width: 0; }
+    .adm-main { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; z-index: 1; min-width: 0; }
     .adm-page-eyebrow { font-size: 7.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 2px; }
     .adm-page-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.1; }
     .adm-page-head { padding: 18px 22px 0; }
@@ -1381,7 +1385,12 @@ export default function AdminUsers() {
   useEffect(() => {
     document.body.style.overflow = "";
     document.documentElement.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
+    document.body.style.position = "";
+    document.body.style.touchAction = "";
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
   }, []);
   useEffect(() => {
     if (mobileMenuOpen) {
