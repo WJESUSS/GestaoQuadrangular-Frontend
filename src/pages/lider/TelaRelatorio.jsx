@@ -1241,20 +1241,55 @@ export default function TelaRelatorio({ isDark = false }) {
       }));
       setDecisoesVisitantes(decisoesMap);
 
+      // ── Restauração de rascunho (CORRIGIDO) ──────────────────────────
+      // Só restaura o rascunho salvo se ele for do MESMO DIA de hoje.
+      // Antes, um rascunho esquecido de um dia anterior sobrescrevia a
+      // data atual, dando a impressão de que "a data não é preenchida
+      // automaticamente" — na real, ela era preenchida e depois
+      // substituída pela data velha do rascunho.
       let restaurou = false;
+      const hoje = new Date();
+      const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+
       try {
         const raw = localStorage.getItem(draftKey(dadosCelula.id));
         if (raw) {
           const draft = JSON.parse(raw);
-          const hoje = new Date();
-          setForm({ celulaId: dadosCelula.id, dataReuniao: draft.dataReuniao || `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`, estudo: draft.estudo || "", selecionadosKeys: draft.selecionadosKeys || [] });
-          if (draft.realizada !== undefined) setRealizada(draft.realizada);
-          if (draft.motivoNaoRealizacao) setMotivoNaoRealizacao(draft.motivoNaoRealizacao);
-          restaurou = true; setRascunhoCarregado(true);
-          setTimeout(() => setRascunhoCarregado(false), 4000);
+          const draftEhDeHoje = draft.dataReuniao === hojeStr;
+
+          if (draftEhDeHoje) {
+            // Rascunho é de hoje: restaura normalmente.
+            setForm({
+              celulaId: dadosCelula.id,
+              dataReuniao: draft.dataReuniao,
+              estudo: draft.estudo || "",
+              selecionadosKeys: draft.selecionadosKeys || [],
+            });
+            if (draft.realizada !== undefined) setRealizada(draft.realizada);
+            if (draft.motivoNaoRealizacao) setMotivoNaoRealizacao(draft.motivoNaoRealizacao);
+            restaurou = true;
+            setRascunhoCarregado(true);
+            setTimeout(() => setRascunhoCarregado(false), 4000);
+          } else {
+            // Rascunho de um dia anterior (esquecido): descarta.
+            try { localStorage.removeItem(draftKey(dadosCelula.id)); } catch (_) {}
+          }
         }
-      } catch (err) { console.warn("Erro ao ler rascunho:", err); }
-      if (!restaurou) setForm(prev => ({ ...prev, celulaId: dadosCelula.id }));
+      } catch (err) {
+        console.warn("Erro ao ler rascunho:", err);
+      }
+
+      if (!restaurou) {
+        setForm(prev => ({
+          ...prev,
+          celulaId: dadosCelula.id,
+          dataReuniao: hojeStr,
+          estudo: "",
+          selecionadosKeys: [],
+        }));
+      }
+      // ───────────────────────────────────────────────────────────────
+
       setTimeout(() => { prontoParaSalvar.current = true; }, 0);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
