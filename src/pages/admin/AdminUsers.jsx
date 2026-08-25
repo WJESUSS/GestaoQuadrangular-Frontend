@@ -14,7 +14,7 @@ import {
   MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
   ChevronLeft, Inbox,
   ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info, UserCheck,
-  Droplets,
+  Droplets, Wifi,
 } from "lucide-react";
 
 import Membros                   from "../secretaria/Membros";
@@ -96,6 +96,7 @@ const SECOES = [
       { key:"historico",   label:"Histórico",   sub:"Log de auditoria",   icon:History       },
       { key:"wa-registros",label:"WhatsApp",    sub:"Mensagens webhook",  icon:MessageCircle },
       { key:"bloqueios",   label:"Bloqueios",   sub:"Números bloqueados", icon:ShieldOff     },
+      { key:"online",      label:"Online",      sub:"Usuários ativos",   icon:Wifi, href:"/online" },
     ],
   },
   {
@@ -1608,6 +1609,11 @@ export default function AdminUsers() {
   };
 
   const selecionarModulo = key => {
+    const item = SECOES.flatMap(s => s.itens).find(i => i.key === key);
+    if (item?.href) {
+      window.location.href = item.href;
+      return;
+    }
     setModuloAtivo(key);
     setMegaOpenId(null);
     setMobileMenuOpen(false);

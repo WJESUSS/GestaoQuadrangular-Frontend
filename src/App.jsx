@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import usePresence from "./hooks/usePresence";
 
 // Carrega imediatamente — são as telas de entrada
 import Home  from "./pages/Home";
@@ -12,6 +13,7 @@ const PastorPage     = lazy(() => import("./pages/pastor/PastorPage"));
 const SecretariaPage = lazy(() => import("./pages/secretaria/SecretariaPage"));
 const DashboardLider = lazy(() => import("./pages/lider/DashboardLider"));
 const TesourariaPage = lazy(() => import("./pages/tesouraria/TesourariaPage"));
+const OnlineUsers    = lazy(() => import("./pages/admin/OnlineUsers"));
 
 const PrivateRoute = ({ children, allowedRoles }) => {
     const token = localStorage.getItem("token");
@@ -63,6 +65,8 @@ function CarregandoTela() {
 }
 
 export default function App() {
+    usePresence();
+
     return (
         <BrowserRouter>
             <Suspense fallback={<CarregandoTela />}>
@@ -108,6 +112,16 @@ export default function App() {
                         element={
                             <PrivateRoute allowedRoles="TESOUREIRO">
                                 <TesourariaPage />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    {/* USUÁRIOS ONLINE */}
+                    <Route
+                        path="/online"
+                        element={
+                            <PrivateRoute allowedRoles={["ADMIN", "PASTOR"]}>
+                                <OnlineUsers />
                             </PrivateRoute>
                         }
                     />
