@@ -73,6 +73,23 @@ const TEMAS_FIXOS = [
 
 const normalizarData = (d) => d ? String(d).substring(0, 10) : "";
 
+/* ── Semana corrente (domingo a sábado) ──────────────────────────── */
+const dataLocalHojeStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+const domingoSemanaAtualStr = () => {
+  const d = new Date();
+  const dom = new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
+  return `${dom.getFullYear()}-${String(dom.getMonth() + 1).padStart(2, "0")}-${String(dom.getDate()).padStart(2, "0")}`;
+};
+const sabadoSemanaAtualStr = () => {
+  const d = new Date();
+  const sab = new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay() + 6);
+  return `${sab.getFullYear()}-${String(sab.getMonth() + 1).padStart(2, "0")}-${String(sab.getDate()).padStart(2, "0")}`;
+};
+const fmtDataBr = (iso) => iso ? iso.split("-").reverse().join("/") : "";
+
 function dispararAtualizacaoMetas(celulaId) {
   window.dispatchEvent(new CustomEvent("ieq:metas:recalculadas", { detail: { celulaId: Number(celulaId) } }));
 }
@@ -803,7 +820,6 @@ function AlertaErro({ erro, onFechar, t }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: cfg.cor, margin: "0 0 6px", letterSpacing: ".05em" }}>{erro.titulo}</p>
           <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, lineHeight: 1.5, margin: 0 }}>{erro.mensagem}</p>
-          {erro.codigo && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 500, color: t.textMuted, margin: "8px 0 0", letterSpacing: ".08em", textTransform: "uppercase" }}>Código: {erro.codigo}</p>}
         </div>
         <button onClick={onFechar} style={{ background: "none", border: "none", cursor: "pointer", color: cfg.cor, padding: 0, flexShrink: 0, fontSize: 18, transition: "opacity .2s" }}
                 onMouseEnter={e => e.target.style.opacity = ".6"}
@@ -1332,6 +1348,33 @@ export default function TelaRelatorio({ isDark = false }) {
     if (realizada && !form.estudo.trim()) return alert("Informe o tema ou referência bíblica do estudo.");
     if (!realizada && !motivoNaoRealizacao) return alert("Selecione o motivo da não realização da célula.");
 
+    // ── Validação da semana corrente (domingo a sábado, sem data futura) ──
+    const hojeStr = dataLocalHojeStr();
+    const inicioSemanaStr = domingoSemanaAtualStr();
+    const fimSemanaStr = sabadoSemanaAtualStr();
+    const dataInformada = normalizarData(form.dataReuniao);
+
+    if (dataInformada < inicioSemanaStr) {
+      setErroAlerta({
+        tipo: "validacao",
+        titulo: "Relatório em atraso",
+        mensagem: `Não é possível enviar relatórios de semanas anteriores. O relatório deve ter data entre ${fmtDataBr(inicioSemanaStr)} e ${fmtDataBr(fimSemanaStr)} (domingo a sábado da semana atual).`,
+        codigo: "REPORT_LATE",
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (dataInformada > hojeStr) {
+      setErroAlerta({
+        tipo: "validacao",
+        titulo: "Data futura não permitida",
+        mensagem: `O relatório deve ser enviado após a reunião realizada, com data igual ou anterior ao dia de hoje (${fmtDataBr(hojeStr)}), dentro da semana atual (domingo a sábado).`,
+        codigo: "FUTURE_DATE",
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     try {
       setEnviando(true);
       setErroAlerta(null);
@@ -1402,6 +1445,14 @@ export default function TelaRelatorio({ isDark = false }) {
           } catch (_) {}
         } else {
           setErroAlerta({ tipo: "conflito", titulo: errorData?.title || "Erro de conflito", mensagem: errorData?.message || "Não foi possível enviar o relatório", codigo: errorCode });
+        }
+      } else if (err.response?.status === 400) {
+        const errorData = err.response.data;
+        if (errorData?.errorCode === "REPORT_LATE" || errorData?.errorCode === "FUTURE_DATE") {
+          setErroAlerta({ tipo: "validacao", titulo: errorData?.title || "Erro de validação", mensagem: errorData?.message || "Data fora da semana atual", codigo: errorData?.errorCode });
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          setErroAlerta({ tipo: "generico", titulo: err.response?.data?.title || "Erro", mensagem: err.response?.data?.message || "Erro ao enviar relatório" });
         }
       } else if (err.response?.status === 422) {
         setErroAlerta({ tipo: "validacao", titulo: "Erro de validação", mensagem: err.response.data?.message || "Alguns campos estão inválidos" });
@@ -1560,7 +1611,7 @@ export default function TelaRelatorio({ isDark = false }) {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
                     <div>
                       <label className="aura-label"><Calendar size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />Data da Reunião</label>
-                      <input className="aura-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }} value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
+                      <input className="aura-input" type="date" style={{ colorScheme: isDark ? "dark" : "light" }} min={domingoSemanaAtualStr()} max={dataLocalHojeStr()} value={form.dataReuniao} onChange={e => setForm({ ...form, dataReuniao: e.target.value })} />
                     </div>
                     {realizada && (
                         <SeletorReferenciaBiblica value={form.estudo} onChange={val => setForm({ ...form, estudo: val })} t={t} isDark={isDark} />
