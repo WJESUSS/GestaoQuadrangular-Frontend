@@ -43,14 +43,14 @@ export function theme(isDark) {
     borderInput: isDark ? "rgba(184,137,46,.18)"    : "rgba(27,35,51,.16)",
     text:        isDark ? "#F3F1EA"                 : "#1B2333",
     textSec:     isDark ? "#C7CBBC"                 : "#3E4A5E",
-    textMuted:   isDark ? "#8B93A0"                 : "#8B93A0",
+    textMuted:   isDark ? "#8B93A0"                 : "#374151",
     glow1:       isDark ? "rgba(184,137,46,.06)"    : "rgba(30,63,102,.06)",
     glow2:       isDark ? "rgba(76,126,176,.05)"   : "rgba(184,137,46,.05)",
     headerBg:    isDark ? "rgba(18,19,28,.97)"      : "rgba(243,241,234,.97)",
     cardHover:   isDark ? "rgba(184,137,46,.28)"    : "rgba(30,63,102,.3)",
     placeholder: isDark ? "rgba(199,203,188,.35)"   : "rgba(62,74,94,.45)",
     optionBg:    isDark ? "#1A2236"                 : "#E9E4D6",
-    cardBg:      isDark ? "rgba(26,34,54,.95)"      : "#d8dce3",
+    cardBg:      isDark ? "rgba(26,34,54,.95)"      : "#c2c8d2",
     cardBorder:  isDark ? "rgba(184,137,46,.14)"    : "#b9bfcb",
   };
 }
