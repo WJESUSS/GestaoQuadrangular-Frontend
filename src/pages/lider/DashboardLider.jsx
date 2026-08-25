@@ -283,7 +283,7 @@ function GlobalStyles({ t, isDark }) {
         grid-template-columns: repeat(4, 1fr);
         gap: 10px; margin-bottom: 22px;
       }
-      @media(max-width: 360px) { .dl-menu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+      @media(max-width: 480px) { .dl-menu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
 
       .dl-menu-card {
         background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
@@ -291,7 +291,7 @@ function GlobalStyles({ t, isDark }) {
         cursor: pointer; display: flex; flex-direction: column;
         align-items: center; gap: 9px;
         transition: all .35s cubic-bezier(.4,0,.2,1);
-        text-align: center; position: relative; overflow: hidden;
+        text-align: center; position: relative;
         backdrop-filter: blur(20px);
       }
       .dl-menu-card::before {
@@ -309,8 +309,9 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; justify-content: center; margin: 0 auto;
       }
       .dl-menu-name {
-        font-size: 9px; font-weight: 600; letter-spacing: .14em;
+        font-size: 9px; font-weight: 600; letter-spacing: .06em;
         text-transform: uppercase; color: ${t.text}; margin: 0;
+        word-break: break-word;
       }
       .dl-menu-desc {
         font-size: 8px; letter-spacing: .1em;
