@@ -412,7 +412,7 @@ export default function AcompanhamentoDiscipulado({ isDark = true, open, onClose
                                 {atual.view === "individual-historico" && (
                                     <HistoricoIndividual
                                         t={t} membroId={atual.membroId} membroNome={atual.membroNome}
-                                        notify={notify} onCancelado={recarregarTudo}
+                                        notify={notify}
                                     />
                                 )}
 
@@ -434,7 +434,7 @@ export default function AcompanhamentoDiscipulado({ isDark = true, open, onClose
 
                                 {atual.view === "coletivo-detalhe" && (
                                     <DetalheColetivo
-                                        t={t} id={atual.id} notify={notify} onCancelado={recarregarTudo}
+                                        t={t} id={atual.id} notify={notify}
                                     />
                                 )}
 
@@ -671,10 +671,9 @@ function FormIndividual({ t, membros, membroPre, onSalvo, onErro }) {
 /* ════════════════════════════════════════════════════════════════════
    HISTÓRICO DO MEMBRO (individual)
    ════════════════════════════════════════════════════════════════════ */
-function HistoricoIndividual({ t, membroId, membroNome, notify, onCancelado }) {
+function HistoricoIndividual({ t, membroId, membroNome, notify }) {
     const [dados, setDados] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [cancelandoId, setCancelandoId] = useState(null);
 
     const carregar = useCallback(async () => {
         setLoading(true);
@@ -689,21 +688,6 @@ function HistoricoIndividual({ t, membroId, membroNome, notify, onCancelado }) {
     }, [membroId, notify]);
 
     useEffect(() => { carregar(); }, [carregar]);
-
-    const cancelar = async (item) => {
-        if (!window.confirm(`Cancelar o discipulado de ${formatarDataBR(item.data)}? Esta ação não pode ser desfeita.`)) return;
-        setCancelandoId(item.id);
-        try {
-            await api.patch(`${BASE}/individual/${item.id}/cancelar`);
-            notify("Discipulado cancelado.");
-            await carregar();
-            onCancelado?.();
-        } catch (err) {
-            notify(extrairErro(err), "error");
-        } finally {
-            setCancelandoId(null);
-        }
-    };
 
     const itens = dados?.itens || dados?.historico || dados?.content || [];
     if (loading) return <div className="ad-loading-wrap"><Loader2 size={20} className="ad-spin" /></div>;
@@ -736,13 +720,6 @@ function HistoricoIndividual({ t, membroId, membroNome, notify, onCancelado }) {
                         <p style={{ margin: "0 0 4px", fontSize: 12.5, color: t.text, fontWeight: 600 }}>{item.tema}</p>
                         {item.local && <p style={{ margin: "0 0 4px", fontSize: 11.5, color: t.textSec }}>📍 {item.local}</p>}
                         {item.observacoes && <p style={{ margin: "0 0 8px", fontSize: 11.5, color: t.textSec }}>{item.observacoes}</p>}
-                        {item.status === "CONCLUIDO" && (
-                            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                                <button className="ad-btn ad-btn-danger ad-btn-sm" disabled={cancelandoId === item.id} onClick={() => cancelar(item)}>
-                                    {cancelandoId === item.id ? <Loader2 size={12} className="ad-spin" /> : <X size={12} />} Cancelar
-                                </button>
-                            </div>
-                        )}
                     </div>
                 ))
             )}
@@ -946,10 +923,9 @@ function FormColetivo({ t, membros, onSalvo, onErro }) {
 /* ════════════════════════════════════════════════════════════════════
    DETALHES DO COLETIVO
    ════════════════════════════════════════════════════════════════════ */
-function DetalheColetivo({ t, id, notify, onCancelado }) {
+function DetalheColetivo({ t, id, notify }) {
     const [dados, setDados] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [cancelando, setCancelando] = useState(false);
 
     const carregar = useCallback(async () => {
         setLoading(true);
@@ -964,21 +940,6 @@ function DetalheColetivo({ t, id, notify, onCancelado }) {
     }, [id, notify]);
 
     useEffect(() => { carregar(); }, [carregar]);
-
-    const cancelar = async () => {
-        if (!window.confirm("Cancelar este discipulado coletivo? Esta ação não pode ser desfeita.")) return;
-        setCancelando(true);
-        try {
-            await api.patch(`${BASE}/coletivo/${id}/cancelar`);
-            notify("Discipulado coletivo cancelado.");
-            await carregar();
-            onCancelado?.();
-        } catch (err) {
-            notify(extrairErro(err), "error");
-        } finally {
-            setCancelando(false);
-        }
-    };
 
     if (loading) return <div className="ad-loading-wrap"><Loader2 size={20} className="ad-spin" /></div>;
     const presentes = dados?.presentes || [];
@@ -1034,11 +995,6 @@ function DetalheColetivo({ t, id, notify, onCancelado }) {
           <span className={`ad-badge ${dados?.status === "CANCELADO" ? "ad-badge-off" : "ad-badge-ok"}`}>
             {dados?.status === "CANCELADO" ? "Cancelado" : "Concluído"}
           </span>
-                {dados?.status === "CONCLUIDO" && (
-                    <button className="ad-btn ad-btn-danger ad-btn-sm" disabled={cancelando} onClick={cancelar}>
-                        {cancelando ? <Loader2 size={12} className="ad-spin" /> : <X size={12} />} Cancelar encontro
-                    </button>
-                )}
             </div>
         </div>
     );
