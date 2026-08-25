@@ -50,5 +50,7 @@ export function theme(isDark) {
     cardHover:   isDark ? "rgba(184,137,46,.28)"    : "rgba(30,63,102,.3)",
     placeholder: isDark ? "rgba(199,203,188,.35)"   : "rgba(62,74,94,.45)",
     optionBg:    isDark ? "#1A2236"                 : "#E9E4D6",
+    cardBg:      isDark ? "rgba(26,34,54,.95)"      : "#d8dce3",
+    cardBorder:  isDark ? "rgba(184,137,46,.14)"    : "#b9bfcb",
   };
 }

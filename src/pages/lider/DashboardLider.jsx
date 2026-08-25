@@ -55,7 +55,7 @@ function GlobalStyles({ t, isDark }) {
 
       .dl-root {
         font-family: 'Inter', sans-serif;
-        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F5F5F5 0%, #E8E8E8 55%, #DADADA 100%)"};
+        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #ECECEF 0%, #E0E0E5 55%, #D2D2D8 100%)"};
         color: ${t.text};
         min-height: 100vh;
         position: relative;
@@ -235,7 +235,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-progress-fill.done { background: ${AURA.goldLight}; }
 
       .dl-kpi-action {
-        background: ${t.bgEl}; border: 1px solid ${t.border};
+        background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
         border-radius: 20px; padding: 22px 18px;
         display: flex; flex-direction: column; justify-content: space-between;
         backdrop-filter: blur(20px);
@@ -286,7 +286,7 @@ function GlobalStyles({ t, isDark }) {
       @media(max-width: 360px) { .dl-menu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
 
       .dl-menu-card {
-        background: ${t.bgEl}; border: 1px solid ${t.border};
+        background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
         border-radius: 16px; padding: 16px 8px;
         cursor: pointer; display: flex; flex-direction: column;
         align-items: center; gap: 9px;
@@ -318,7 +318,7 @@ function GlobalStyles({ t, isDark }) {
       }
 
       .dl-card {
-        background: ${t.bgEl}; border: 1px solid ${t.border};
+        background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
         border-radius: 20px; overflow: hidden; margin-bottom: 20px;
         backdrop-filter: blur(24px); position: relative;
       }
@@ -328,7 +328,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-card-head {
         padding: 20px 22px;
-        border-bottom: 1px solid ${t.border};
+        border-bottom: 1px solid ${t.cardBorder};
         display: flex; align-items: center; justify-content: space-between;
         flex-wrap: wrap; gap: 12px;
       }
@@ -484,7 +484,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-loading {
         min-height: 100vh; display: flex;
         align-items: center; justify-content: center;
-        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #F5F5F5 0%, #E8E8E8 55%, #DADADA 100%)"};
+        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #ECECEF 0%, #E0E0E5 55%, #D2D2D8 100%)"};
         position: relative;
       }
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }

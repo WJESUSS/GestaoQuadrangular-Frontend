@@ -202,7 +202,7 @@ function GlobalStyles({ t, isDark }) {
         display:flex; align-items:center; gap:10px; padding:18px 18px 14px;
         border-bottom:1px solid ${t.border}; position:sticky; top:0; background:${isDark ? "#161B29" : "#FBFAF6"}; z-index:1;
       }
-      .ad-modal-title { font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin:0; color:${t.text}; flex:1; }
+      .ad-modal-title { font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin:0; color:${t.text}; flex:1; min-width:0; word-break:break-word; }
       .ad-modal-body { padding:16px 18px 22px; }
       .ad-icon-btn {
         width:32px; height:32px; border-radius:50%; border:1px solid ${t.border}; background:transparent;
