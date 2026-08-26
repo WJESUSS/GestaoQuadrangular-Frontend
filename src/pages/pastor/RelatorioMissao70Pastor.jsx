@@ -48,6 +48,7 @@ function theme(isDark) {
         progressTrack: isDark ? "rgba(255,255,255,.08)"  : "rgba(0,0,0,.06)",
         tagBg:         isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.035)",
         hoverBg:       isDark ? "rgba(201,169,110,.06)"  : "rgba(201,169,110,.07)",
+        gold:          isDark ? "#C9A96E"                : "#3D3218",
     };
 }
 
@@ -626,7 +627,7 @@ function MiniStat({ label, value, sub, color, t }) {
 function Avatar({ name, blue = false, green = false }) {
     const bg    = green ? "rgba(93,202,165,.12)" : blue ? "rgba(0,61,165,.12)" : "rgba(201,169,110,.14)";
     const brd   = green ? "rgba(93,202,165,.25)" : blue ? "rgba(0,61,165,.25)" : "rgba(201,169,110,.28)";
-    const color = green ? AURA.teal : blue ? AURA.blueFade : AURA.gold;
+    const color = green ? AURA.teal : blue ? AURA.blueFade : t.gold;
     return (
         <div style={{
             width: 30, height: 30, borderRadius: 8, flexShrink: 0,
@@ -831,7 +832,7 @@ function LiderCasasCard({ liderNome, casas, t, onAbrir }) {
                     display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0,
                     padding: "5px 12px", borderRadius: 99,
                     fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".1em",
-                    textTransform: "uppercase", color: AURA.gold,
+                    textTransform: "uppercase", color: t.gold,
                     background: "rgba(201,169,110,.1)", border: "1px solid rgba(201,169,110,.28)",
                 }}>
                     Ver casas <ChevronDown size={12} />
@@ -865,14 +866,14 @@ function ModalCasasDoLider({ open, onClose, dados, t }) {
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={onClose}
-                style={{ position: "fixed", inset: 0, background: "rgba(10,10,15,.82)", backdropFilter: "blur(6px)" }}
+                style={{ position: "fixed", inset: 0, background: isDark ? "rgba(10,10,15,.82)" : "rgba(245,240,232,.82)", backdropFilter: "blur(6px)" }}
             />
             <motion.div
                 initial={{ scale: .96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: .96, opacity: 0 }}
                 transition={{ duration: .18 }}
                 style={{
                     position: "relative", zIndex: 10, width: "100%", maxWidth: 340,
-                    background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 18,
+                    background: t.bg, border: `1px solid ${t.border}`, borderRadius: 18,
                     boxShadow: "0 24px 64px rgba(0,0,0,.45)",
                     maxHeight: "78vh", display: "flex", flexDirection: "column",
                     boxSizing: "border-box", overflow: "hidden",
@@ -884,7 +885,7 @@ function ModalCasasDoLider({ open, onClose, dados, t }) {
                     gap: 10, padding: "16px 16px 12px", borderBottom: `1px solid ${t.border}`, flexShrink: 0,
                 }}>
                     <div style={{ minWidth: 0 }}>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: AURA.gold, margin: "0 0 3px" }}>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.gold, margin: "0 0 3px" }}>
                             {celulaName}
                         </p>
                         <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 600, color: t.text, margin: 0, wordBreak: "break-word", lineHeight: 1.2 }}>
@@ -1003,14 +1004,14 @@ function ModalCelulaDetalhe({ open, onClose, grupo, t }) {
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={onClose}
-                style={{ position: "fixed", inset: 0, background: "rgba(10,10,15,.82)", backdropFilter: "blur(6px)" }}
+                style={{ position: "fixed", inset: 0, background: isDark ? "rgba(10,10,15,.82)" : "rgba(245,240,232,.82)", backdropFilter: "blur(6px)" }}
             />
             <motion.div
                 initial={{ scale: .96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: .96, opacity: 0 }}
                 transition={{ duration: .18 }}
                 style={{
                     position: "relative", zIndex: 10, width: "100%", maxWidth: 560,
-                    background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 18,
+                    background: t.bg, border: `1px solid ${t.border}`, borderRadius: 18,
                     boxShadow: "0 24px 64px rgba(0,0,0,.45)",
                     maxHeight: "86vh", display: "flex", flexDirection: "column",
                     boxSizing: "border-box", overflow: "hidden", overflowX: "hidden",
@@ -1029,7 +1030,7 @@ function ModalCelulaDetalhe({ open, onClose, grupo, t }) {
                                     background: "rgba(201,169,110,.1)", border: "1px solid rgba(201,169,110,.28)",
                                     borderRadius: 8, width: 28, height: 28, flexShrink: 0,
                                     display: "flex", alignItems: "center", justifyContent: "center",
-                                    cursor: "pointer", color: AURA.gold,
+                                    cursor: "pointer", color: t.gold,
                                 }}
                                 title="Voltar para as casas"
                             >
@@ -1037,7 +1038,7 @@ function ModalCelulaDetalhe({ open, onClose, grupo, t }) {
                             </button>
                         )}
                         <div style={{ minWidth: 0 }}>
-                            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: AURA.gold, margin: "0 0 3px" }}>
+                            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.gold, margin: "0 0 3px" }}>
                                 {grupo.celulaName}
                             </p>
                             <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 600, color: t.text, margin: 0, wordBreak: "break-word", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -1125,7 +1126,7 @@ function CelulaSection({ grupo, t, isDark, onAbrirCelula }) {
                         width: 38, height: 38, borderRadius: 10, flexShrink: 0,
                         background: "rgba(201,169,110,.1)", border: "1px solid rgba(201,169,110,.25)",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 700, color: AURA.gold,
+                        fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 700, color: t.gold,
                     }}>
                         {initials(grupo.celulaName)}
                     </div>
@@ -1387,7 +1388,7 @@ export default function RelatorioMissao70Pastor({ isDark = true }) {
         @media (max-width: 640px) { .m70-search-wrap { min-width: 100%; } }
         .m70-search-icon {
             position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-            color: ${AURA.gold}; opacity: .5; pointer-events: none;
+            color: ${t.gold}; opacity: .5; pointer-events: none;
         }
         .m70-search-input {
             background: ${t.bgInput}; border: 1px solid ${t.borderInput};
@@ -1427,7 +1428,7 @@ export default function RelatorioMissao70Pastor({ isDark = true }) {
             text-transform: uppercase; cursor: pointer; transition: all .3s;
             padding: 12px 18px; white-space: nowrap;
         }
-        .m70-btn-clear:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+        .m70-btn-clear:hover { border-color: ${t.gold}; color: ${t.gold}; }
 
         /* ── Cards / Células ── */
         .m70-card {
@@ -1579,7 +1580,7 @@ export default function RelatorioMissao70Pastor({ isDark = true }) {
                 <div>
                     <p className="m70-title-eyebrow">IEQ PITUAÇU · PAINEL PASTORAL</p>
                     <h2 className="m70-title">
-                        Relatórios <span style={{ color: AURA.gold }}>· Missão 70</span>
+                        Relatórios <span style={{ color: t.gold }}>· Missão 70</span>
                     </h2>
                 </div>
 

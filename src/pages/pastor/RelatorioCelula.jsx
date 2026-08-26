@@ -21,13 +21,18 @@ const AURA = {
 function theme(isDark) {
     return {
         bg:          isDark ? "#0A0A0F"              : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.97)"   : "rgba(255,255,255,.97)",
+        bgEl:        isDark ? "rgba(18,18,26,.97)"   : "#D8D4CC",
         bgInput:     isDark ? "rgba(255,255,255,.05)": "rgba(0,0,0,.04)",
         border:      isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.2)",
         borderInput: isDark ? "rgba(201,169,110,.18)": "rgba(201,169,110,.28)",
         text:        isDark ? "#F5F0E8"              : "#1A1008",
         textSec:     isDark ? "#9A9588"              : "#6B5E4A",
         textMuted:   isDark ? "#6B6658"              : "#9A9080",
+        gold:        isDark ? "#C9A96E"              : "#3D3218",
+        goldLight:   isDark ? "#E8D5A3"              : "#A68B4B",
+        goldSoft:    isDark ? "rgba(201,169,110,.06)": "rgba(122,101,48,.08)",
+        goldHover:   isDark ? "rgba(201,169,110,.12)": "rgba(122,101,48,.14)",
+        yellow:      isDark ? "#FDB813"              : "#9A7A0E",
         glow1:       isDark ? "rgba(201,169,110,.05)": "rgba(201,169,110,.08)",
         glow2:       isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
         cardHover:   isDark ? "rgba(201,169,110,.2)" : "rgba(201,169,110,.35)",
@@ -94,25 +99,19 @@ function GlobalStylesRel({ t, isDark }) {
       .rl-pulse { animation: rl-pulse 3s ease-in-out infinite; }
       .rl-bell  { animation: rl-bell .6s ease infinite; }
 
+      /* ── Root: SEM fundo/gradiente/min-height/isolation próprios.
+         Este componente é renderizado DENTRO do PastorPage (.pp-root),
+         que já fornece o fundo (t.bg) e o brilho (.pp-glow) da página.
+         Ter os dois juntos criava o efeito de "tela dentro de tela". ── */
       .rl-root {
         font-family: 'Inter', sans-serif;
-        background: ${t.bg};
         color: ${t.text};
-        min-height: 100vh;
-        min-height: 100dvh;
         position: relative;
         overflow-x: hidden;
         padding-bottom: max(60px, env(safe-area-inset-bottom, 60px));
-        transition: background .3s, color .3s;
-        isolation: isolate;
+        transition: color .3s;
         -webkit-tap-highlight-color: transparent;
         -webkit-text-size-adjust: 100%;
-      }
-      .rl-glow {
-        position: fixed; inset: 0; pointer-events: none; z-index: 0;
-        background:
-          radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
-          radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
       }
       .rl-content {
         position: relative; z-index: 1;
@@ -131,7 +130,7 @@ function GlobalStylesRel({ t, isDark }) {
       .rl-btn-gold {
         display: flex; align-items: center; gap: 6px;
         padding: 12px 18px; border-radius: 100px; border: none; cursor: pointer;
-        background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
+        background: linear-gradient(135deg, ${t.gold}, ${t.goldLight});
         color: #0A0A0F; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
         transition: all .25s; box-shadow: 0 4px 18px rgba(201,169,110,.25);
@@ -151,7 +150,7 @@ function GlobalStylesRel({ t, isDark }) {
         transition: all .25s; -webkit-user-select: none; user-select: none;
         touch-action: manipulation; min-height: 44px;
       }
-      .rl-btn-ghost:active { transform: scale(.96); border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .rl-btn-ghost:active { transform: scale(.96); border-color: ${t.gold}; color: ${t.gold}; }
 
       /* ── Sino ── */
       .rl-bell-btn {
@@ -159,16 +158,16 @@ function GlobalStylesRel({ t, isDark }) {
         padding: 12px 14px; border-radius: 100px; cursor: pointer; transition: all .2s;
         -webkit-user-select: none; user-select: none; touch-action: manipulation;
       }
-      .rl-bell-btn.active  { background: linear-gradient(135deg, ${AURA.yellow}, #c8a010); border: none; color: #1A1008; box-shadow: 0 4px 18px rgba(253,184,19,.28); }
+      .rl-bell-btn.active  { background: linear-gradient(135deg, ${AURA.yellow}, ${t.yellow}); border: none; color: #1A1008; box-shadow: 0 4px 18px rgba(253,184,19,.28); }
       .rl-bell-btn.inactive { background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"}; border: 1px solid ${t.border}; color: ${t.textSec}; }
       .rl-bell-btn.active:active, .rl-bell-btn.inactive:active { transform: scale(.94); }
-      .rl-bell-count { background: #fff; color: #c8a010; border-radius: 99px; font-family:'Inter',sans-serif; font-size:10px; font-weight:700; padding:1px 7px; min-width:20px; text-align:center; }
+      .rl-bell-count { background: #fff; color: ${t.yellow}; border-radius: 99px; font-family:'Inter',sans-serif; font-size:10px; font-weight:700; padding:1px 7px; min-width:20px; text-align:center; }
 
       /* ── Divider ── */
       .rl-divider { display:flex; align-items:center; gap:10px; margin:0 0 16px; }
-      .rl-divider::before,.rl-divider::after { content:''; flex:1; height:1px; background:linear-gradient(to right,transparent,${AURA.gold}); }
-      .rl-divider::after { background:linear-gradient(to left,transparent,${AURA.gold}); }
-      .rl-divider-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; flex-shrink:0; }
+      .rl-divider::before,.rl-divider::after { content:''; flex:1; height:1px; background:linear-gradient(to right,transparent,${t.gold}); }
+      .rl-divider::after { background:linear-gradient(to left,transparent,${t.gold}); }
+      .rl-divider-dot { width:5px; height:5px; border-radius:50%; background:${t.gold}; flex-shrink:0; }
 
       /* ── Filtros ── */
       .rl-filters {
@@ -211,7 +210,7 @@ function GlobalStylesRel({ t, isDark }) {
       .rl-kpi-card.hero { background:linear-gradient(135deg,${AURA.blue},${AURA.blueDark}); border:1px solid rgba(201,169,110,.12); }
       .rl-kpi-card.hero .rl-kpi-label { color:rgba(255,255,255,.6); }
       .rl-kpi-card.hero .rl-kpi-value { color:#fff; }
-      .rl-kpi-card.alert { background:linear-gradient(135deg,${AURA.yellow},#c8a010); border:none; }
+      .rl-kpi-card.alert { background:linear-gradient(135deg,${AURA.yellow},${t.yellow}); border:none; }
       .rl-kpi-card.alert .rl-kpi-label { color:rgba(26,16,8,.65); }
       .rl-kpi-card.alert .rl-kpi-value { color:#1A1008; }
 
@@ -244,7 +243,7 @@ function GlobalStylesRel({ t, isDark }) {
       .rl-card-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
       .rl-card-title { font-family:'Playfair Display',serif; font-size:15px; font-weight:500; letter-spacing:.02em; color:${t.text}; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .rl-card-date { font-size:12px; color:${t.textSec}; margin:0; font-family:'Inter',sans-serif; }
-      .rl-card-lider { font-size:11.5px; color:${AURA.gold}; margin:0; font-family:'Inter',sans-serif; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .rl-card-lider { font-size:11.5px; color:${t.gold}; margin:0; font-family:'Inter',sans-serif; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .rl-card-tag { display:flex; align-items:center; gap:7px; padding:8px 11px; border-radius:10px; font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; }
       .rl-card-stats { display:grid; grid-template-columns:1fr 1fr 1fr; border-top:1px solid ${t.border}; }
       .rl-card-stat { padding:12px 8px; text-align:center; }
@@ -271,7 +270,7 @@ function GlobalStylesRel({ t, isDark }) {
 
       .rl-modal-overlay {
         position: fixed; inset: 0; z-index: 0;
-        background: rgba(10,10,15,.88);
+        background: ${isDark ? "rgba(10,10,15,.88)" : "rgba(245,240,232,.88)"};
         backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
         animation: rl-fadein .22s ease;
       }
@@ -281,7 +280,7 @@ function GlobalStylesRel({ t, isDark }) {
         width: 100%;
         max-height: 92vh; max-height: 92dvh;
         display: flex; flex-direction: column;
-        background: ${t.bgEl}; border: 1px solid ${t.border};
+        background: ${t.bg}; border: 1px solid ${t.border};
         border-radius: 24px 24px 0 0; overflow: hidden;
         animation: rl-sheet .28s cubic-bezier(.32,1,.6,1);
         overscroll-behavior: contain;
@@ -329,7 +328,7 @@ function GlobalStylesRel({ t, isDark }) {
         -webkit-user-select: none; user-select: none;
         scroll-snap-align: start;
       }
-      .rl-tab.active { color: ${AURA.gold}; border-bottom-color: ${AURA.gold}; }
+      .rl-tab.active { color: ${t.gold}; border-bottom-color: ${t.gold}; }
       .rl-tab-badge { padding:2px 7px; border-radius:99px; font-size:9px; font-weight:700; }
 
       /* ── Stats bar ── */
@@ -413,7 +412,7 @@ function GlobalStylesRel({ t, isDark }) {
         .rl-notif-overlay {
           display: block;
           position: fixed; inset: 0; z-index: 1099;
-          background: rgba(10,10,15,.7);
+          background: ${isDark ? "rgba(10,10,15,.7)" : "rgba(245,240,232,.7)"};
           animation: rl-fadein .2s ease;
           backdrop-filter: blur(4px);
         }
@@ -561,7 +560,7 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes, semRelatori
                         >
                             <div className="rl-sheet-handle" />
 
-                            <div style={{ padding:"14px 18px 12px", background:`linear-gradient(135deg,${AURA.yellow},#c8a010)`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
+                            <div style={{ padding:"14px 18px 12px", background:`linear-gradient(135deg,${AURA.yellow},${t.yellow})`, display:"flex", alignItems:"center", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
                                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                                     <BellRing size={16} style={{ color:"#1A1008" }} />
                                     <span style={{ fontFamily:"'Inter',sans-serif", fontSize:10, letterSpacing:".15em", fontWeight:700, color:"#1A1008", textTransform:"uppercase" }}>{semRelatorios ? "Sem células" : "Células não realizadas"}</span>
@@ -586,8 +585,8 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes, semRelatori
                                     <div style={{ padding:"32px 20px", textAlign:"center" }}>
                                         {semRelatorios ? (
                                             <>
-                                                <AlertTriangle size={28} style={{ color:"#c8a010", margin:"0 auto 10px" }} />
-                                                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:"#c8a010", margin:"0 0 6px", textTransform:"uppercase", letterSpacing:".12em", fontWeight:600 }}>Nenhuma célula cadastrada</p>
+                                                <AlertTriangle size={28} style={{ color: t.yellow, margin:"0 auto 10px" }} />
+                                                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color: t.yellow, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:".12em", fontWeight:600 }}>Nenhuma célula cadastrada</p>
                                                 <p style={{ fontFamily:"'Inter',sans-serif", fontSize:10, color:t.textSec, margin:0 }}>Não há células no período selecionado</p>
                                             </>
                                         ) : (
@@ -605,11 +604,11 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes, semRelatori
                                              onClick={() => { onVerDetalhes(rel); setAberto(false); }}
                                              style={{ padding:"14px 18px", borderBottom:`1px solid ${t.border}`, cursor:"pointer", display:"flex", alignItems:"center", gap:12, background: isLida ? "transparent" : (isDark?"rgba(253,184,19,.05)":"rgba(253,184,19,.07)"), position:"relative", minHeight:72 }}
                                         >
-                                            {!isLida && <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:`linear-gradient(180deg,${AURA.yellow},#c8a010)`, borderRadius:"0 2px 2px 0" }} />}
+                                            {!isLida && <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:`linear-gradient(180deg,${AURA.yellow},${t.yellow})`, borderRadius:"0 2px 2px 0" }} />}
                                             <div style={{ width:44, height:44, borderRadius:12, flexShrink:0, background: isLida?(isDark?"rgba(255,255,255,.04)":"rgba(0,0,0,.04)"):"rgba(253,184,19,.14)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>{mot.icone}</div>
                                             <div style={{ flex:1, minWidth:0 }}>
                                                 <p style={{ fontFamily:"'Playfair Display',serif", fontSize:14, fontWeight:500, color:t.text, margin:"0 0 3px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{rel.nomeCelula}</p>
-                                                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:9, letterSpacing:".08em", color:"#c8a010", margin:"0 0 4px", textTransform:"uppercase" }}>{mot.label}</p>
+                                                <p style={{ fontFamily:"'Inter',sans-serif", fontSize:9, letterSpacing:".08em", color: t.yellow, margin:"0 0 4px", textTransform:"uppercase" }}>{mot.label}</p>
                                                 <div style={{ display:"flex", alignItems:"center", gap:5 }}>
                                                     <Clock size={10} style={{ color:t.textMuted }} />
                                                     <span style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:t.textMuted }}>{fmt(rel.dataReuniao)}</span>
@@ -617,7 +616,7 @@ function NotificacaoPanel({ naoRealizadas, isDark, t, onVerDetalhes, semRelatori
                                             </div>
                                             {!isLida && (
                                                 <button onClick={(e)=>handleMarcarLida(rel.id,e)} style={{ background:"rgba(253,184,19,.15)", border:"1px solid rgba(253,184,19,.3)", borderRadius:8, padding:"8px 10px", cursor:"pointer", flexShrink:0, minHeight:40, minWidth:40, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                                                    <CheckCheck size={14} style={{ color:"#c8a010" }} />
+                                                    <CheckCheck size={14} style={{ color: t.yellow }} />
                                                 </button>
                                             )}
                                         </div>
@@ -662,7 +661,7 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
         if (d==="ACEITOU_JESUS") return {background:"rgba(22,163,74,.12)",  color:"#16a34a", borderColor:"rgba(22,163,74,.3)"};
         if (d==="RECONCILIOU")   return {background:"rgba(14,165,233,.12)", color:"#0ea5e9", borderColor:"rgba(14,165,233,.3)"};
         if (d==="BATISMO_AGUAS") return {background:"rgba(139,92,246,.12)", color:"#8b5cf6", borderColor:"rgba(139,92,246,.3)"};
-        return {background:"rgba(201,169,110,.1)", color:AURA.gold, borderColor:"rgba(201,169,110,.3)"};
+        return {background:"rgba(201,169,110,.1)", color:t.gold, borderColor:"rgba(201,169,110,.3)"};
     };
 
     const naoRealizada        = rel.realizada === false;
@@ -683,8 +682,8 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
         ...(comDecisao.length>0?[{id:"decisoes",label:"Decisões",count:comDecisao.length}]:[]),
     ];
 
-    const TAB_COLORS = { info:AURA.gold, membros:"#16a34a", visitantes:"#0ea5e9", ausentes:"#6366F1", decisoes:"#c8a010" };
-    const hGrad  = naoRealizada ? `linear-gradient(135deg,${AURA.yellow},#c8a010)` : `linear-gradient(135deg,${AURA.blue},${AURA.blueDark})`;
+    const TAB_COLORS = { info:t.gold, membros:"#16a34a", visitantes:"#0ea5e9", ausentes:"#6366F1", decisoes:t.yellow };
+    const hGrad  = naoRealizada ? `linear-gradient(135deg,${AURA.yellow},${t.yellow})` : `linear-gradient(135deg,${AURA.blue},${AURA.blueDark})`;
     const hText  = naoRealizada ? "#1A1008" : "#fff";
     const hSub   = naoRealizada ? "rgba(26,16,8,.7)" : "rgba(255,255,255,.7)";
 
@@ -734,7 +733,7 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                     <div className="rl-stats-bar">
                         {[
                             {num:membrosPresentes.length,                                             lbl:"Membros",    cor:t.text},
-                            {num:visitantesPresentes.length+(rel.quantidadeVisitantes||0),            lbl:"Visitantes", cor:AURA.gold},
+                            {num:visitantesPresentes.length+(rel.quantidadeVisitantes||0),            lbl:"Visitantes", cor:t.gold},
                             {num:totalGeral,                                                          lbl:"Total",      cor:AURA.blue},
                         ].map((s,i) => (
                             <div key={i} className="rl-stat-cell">
@@ -779,17 +778,17 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                                 <div className="rl-tab-panel">
                                     <div style={{ padding:24, background:isDark?"rgba(253,184,19,.06)":"rgba(253,184,19,.08)", border:"1px solid rgba(253,184,19,.25)", borderRadius:18, textAlign:"center" }}>
                                         <div style={{fontSize:54,marginBottom:14}}>{motivo.icone}</div>
-                                        <p style={{fontFamily:"'Inter',sans-serif",fontSize:10,letterSpacing:".2em",color:"#c8a010",fontWeight:700,margin:"0 0 6px",textTransform:"uppercase"}}>Motivo da Não Realização</p>
+                                        <p style={{fontFamily:"'Inter',sans-serif",fontSize:10,letterSpacing:".2em",color: t.yellow,fontWeight:700,margin:"0 0 6px",textTransform:"uppercase"}}>Motivo da Não Realização</p>
                                         <p style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:t.text,margin:"0 0 18px",fontWeight:500}}>{motivo.label}</p>
-                                        <div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 18px",background:"rgba(253,184,19,.12)",border:"1px solid rgba(253,184,19,.3)",borderRadius:99,fontFamily:"'Inter',sans-serif",fontSize:9,letterSpacing:".14em",color:"#c8a010",textTransform:"uppercase",fontWeight:600}}>
+                                        <div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 18px",background:"rgba(253,184,19,.12)",border:"1px solid rgba(253,184,19,.3)",borderRadius:99,fontFamily:"'Inter',sans-serif",fontSize:9,letterSpacing:".14em",color: t.yellow,textTransform:"uppercase",fontWeight:600}}>
                                             <Ban size={12} /> Célula não realizada
                                         </div>
                                     </div>
                                     {rel.observacoes && (
                                         <div style={{padding:"16px 18px",background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.05)",border:`1px solid ${t.border}`,borderRadius:14}}>
                                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                                                <MessageSquare size={14} style={{color:AURA.gold}} />
-                                                <span style={{fontFamily:"'Inter',sans-serif",fontSize:9,letterSpacing:".14em",color:AURA.gold,textTransform:"uppercase",fontWeight:600}}>Observações</span>
+                                                <MessageSquare size={14} style={{color:t.gold}} />
+                                                <span style={{fontFamily:"'Inter',sans-serif",fontSize:9,letterSpacing:".14em",color:t.gold,textTransform:"uppercase",fontWeight:600}}>Observações</span>
                                             </div>
                                             <p style={{fontFamily:"'Inter',sans-serif",fontSize:14,fontStyle:"italic",fontWeight:300,color:t.textSec,margin:0}}>"{rel.observacoes}"</p>
                                         </div>
@@ -817,17 +816,17 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                                     {rel.observacoes && (
                                         <div style={{padding:"16px 18px",background:isDark?"rgba(255,255,255,.03)":"rgba(201,169,110,.05)",border:`1px solid ${t.border}`,borderRadius:14}}>
                                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                                                <MessageSquare size={14} style={{color:AURA.gold}} />
-                                                <span style={{fontFamily:"'Inter',sans-serif",fontSize:9,letterSpacing:".14em",color:AURA.gold,textTransform:"uppercase",fontWeight:600}}>Observações do Líder</span>
+                                                <MessageSquare size={14} style={{color:t.gold}} />
+                                                <span style={{fontFamily:"'Inter',sans-serif",fontSize:9,letterSpacing:".14em",color:t.gold,textTransform:"uppercase",fontWeight:600}}>Observações do Líder</span>
                                             </div>
                                             <p style={{fontFamily:"'Inter',sans-serif",fontSize:14,fontStyle:"italic",fontWeight:300,color:t.textSec,margin:0}}>"{rel.observacoes}"</p>
                                         </div>
                                     )}
                                     {comDecisao.length > 0 && (
                                         <div style={{padding:"14px 16px",background:isDark?"rgba(253,184,19,.06)":"rgba(253,184,19,.08)",border:"1px solid rgba(253,184,19,.25)",borderRadius:14,display:"flex",alignItems:"center",gap:10}}>
-                                            <Sparkles size={16} style={{color:"#c8a010",flexShrink:0}} />
+                                            <Sparkles size={16} style={{color: t.yellow,flexShrink:0}} />
                                             <p style={{fontFamily:"'Inter',sans-serif",fontSize:12,color:t.textSec,margin:0}}>
-                                                <strong style={{color:"#c8a010"}}>{comDecisao.length} decisão{comDecisao.length>1?"ões":""} espiritual{comDecisao.length>1?"is":""}</strong> — veja a aba <strong style={{color:"#c8a010"}}>Decisões</strong>
+                                                <strong style={{color: t.yellow}}>{comDecisao.length} decisão{comDecisao.length>1?"ões":""} espiritual{comDecisao.length>1?"is":""}</strong> — veja a aba <strong style={{color: t.yellow}}>Decisões</strong>
                                             </p>
                                         </div>
                                     )}
@@ -1065,7 +1064,6 @@ export default function RelatorioCelula({ isDark = false }) {
     if (loading) return (
         <div className="rl-root">
             <GlobalStylesRel t={t} isDark={isDark} />
-            <div className="rl-glow" />
             <TelaCarregando isDark={isDark} texto="Sincronizando…" minHeight="60vh" background="transparent" />
         </div>
     );
@@ -1073,7 +1071,6 @@ export default function RelatorioCelula({ isDark = false }) {
     return (
         <div className="rl-root">
             <GlobalStylesRel t={t} isDark={isDark} />
-            <div className="rl-glow" />
 
             <div className="rl-content">
                 {/* Header */}
@@ -1125,7 +1122,7 @@ export default function RelatorioCelula({ isDark = false }) {
                         <div><p className="rl-kpi-label">Membros</p><p className="rl-kpi-value">{totais.membros}</p></div>
                     </div>
                     <div className="rl-kpi-card">
-                        <div className="rl-kpi-icon" style={{background:"rgba(201,169,110,.12)"}}><UserPlus size={18} style={{color:AURA.gold}} /></div>
+                        <div className="rl-kpi-icon" style={{background:"rgba(201,169,110,.12)"}}><UserPlus size={18} style={{color:t.gold}} /></div>
                         <div><p className="rl-kpi-label">Visitantes</p><p className="rl-kpi-value">{totais.visitantes}</p></div>
                     </div>
                     <div className="rl-kpi-card hero">
@@ -1137,7 +1134,7 @@ export default function RelatorioCelula({ isDark = false }) {
                         <div><p className="rl-kpi-label">Faltas Just.</p><p className="rl-kpi-value">{totais.justificadas}</p></div>
                     </div>
                     <div className={`rl-kpi-card ${naoRealizadas.length>0?"alert":""}`}>
-                        <div className="rl-kpi-icon" style={{background:naoRealizadas.length>0?"rgba(26,16,8,.12)":"rgba(201,169,110,.12)"}}><Ban size={18} style={{color:naoRealizadas.length>0?"#1A1008":AURA.gold}} /></div>
+                        <div className="rl-kpi-icon" style={{background:naoRealizadas.length>0?"rgba(26,16,8,.12)":"rgba(201,169,110,.12)"}}><Ban size={18} style={{color:naoRealizadas.length>0?"#1A1008":t.gold}} /></div>
                         <div><p className="rl-kpi-label">Não Real.</p><p className="rl-kpi-value">{naoRealizadas.length}</p></div>
                     </div>
                 </div>
@@ -1146,7 +1143,7 @@ export default function RelatorioCelula({ isDark = false }) {
                 {naoRealizadas.length > 0 && (
                     <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}}>
                         <div className="rl-section-hd">
-                            <span className="rl-section-badge" style={{background:"rgba(253,184,19,.12)",border:"1px solid rgba(253,184,19,.3)",color:"#c8a010"}}>
+                            <span className="rl-section-badge" style={{background:"rgba(253,184,19,.12)",border:"1px solid rgba(253,184,19,.3)",color: t.yellow}}>
                                 <AlertTriangle size={12} /> Não Realizadas — {naoRealizadas.length}
                             </span>
                             <div className="rl-section-line" style={{background:"linear-gradient(90deg,rgba(253,184,19,.3),transparent)"}} />
@@ -1157,7 +1154,7 @@ export default function RelatorioCelula({ isDark = false }) {
                                 const nomeLiderCurto = rel.nomeLider && rel.nomeLider !== "Sem líder" ? primeiroEUltimoNome(rel.nomeLider) : null;
                                 return (
                                     <motion.div key={rel.id} initial={{opacity:0,y:14}} animate={{opacity:1,y:0}} transition={{delay:i*.04}} className="rl-card" onClick={() => handleVerDetalhes(rel)}>
-                                        <div className="rl-card-strip" style={{background:`linear-gradient(90deg,#c8a010,${AURA.yellow})`}} />
+                                        <div className="rl-card-strip" style={{background:`linear-gradient(90deg,${t.yellow},${AURA.yellow})`}} />
                                         <div className="rl-card-body">
                                             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12,gap:8}}>
                                                 <div className="rl-card-icon" style={{background:"rgba(253,184,19,.14)",fontSize:18}}>{mot.icone}</div>
@@ -1168,11 +1165,11 @@ export default function RelatorioCelula({ isDark = false }) {
                                             </div>
                                             <h3 className="rl-card-title" style={{marginBottom:2}}>{rel.nomeCelula}</h3>
                                             {nomeLiderCurto && <p className="rl-card-lider" style={{marginBottom:10}}>{nomeLiderCurto}</p>}
-                                            <div className="rl-card-tag" style={{background:"rgba(253,184,19,.1)",border:"1px solid rgba(253,184,19,.25)",color:"#c8a010"}}>
+                                            <div className="rl-card-tag" style={{background:"rgba(253,184,19,.1)",border:"1px solid rgba(253,184,19,.25)",color: t.yellow}}>
                                                 <Ban size={11} /> {mot.label}
                                             </div>
                                         </div>
-                                        <div className="rl-card-footer" style={{color:"#c8a010"}}>
+                                        <div className="rl-card-footer" style={{color: t.yellow}}>
                                             <span>Ver Detalhes</span><ChevronRight size={13} />
                                         </div>
                                     </motion.div>
@@ -1186,7 +1183,7 @@ export default function RelatorioCelula({ isDark = false }) {
                 {realizadas.length > 0 && (
                     <>
                         <div className="rl-section-hd">
-                            <span className="rl-section-badge" style={{background:"rgba(201,169,110,.1)",border:"1px solid rgba(201,169,110,.25)",color:AURA.gold}}>
+                            <span className="rl-section-badge" style={{background:"rgba(201,169,110,.1)",border:"1px solid rgba(201,169,110,.25)",color:t.gold}}>
                                 <Calendar size={12} /> Realizadas — {realizadas.length}
                             </span>
                             <div className="rl-section-line" style={{background:"linear-gradient(90deg,rgba(201,169,110,.25),transparent)"}} />
@@ -1202,7 +1199,7 @@ export default function RelatorioCelula({ isDark = false }) {
                                     <motion.div key={rel.id} initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{delay:i*.03}} className="rl-card" onClick={() => handleVerDetalhes(rel)}>
                                         <div className="rl-card-body" style={{paddingBottom:14}}>
                                             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12,gap:8}}>
-                                                <div className="rl-card-icon" style={{background:"rgba(201,169,110,.12)"}}><Calendar size={17} style={{color:AURA.gold}} /></div>
+                                                <div className="rl-card-icon" style={{background:"rgba(201,169,110,.12)"}}><Calendar size={17} style={{color:t.gold}} /></div>
                                                 <div style={{textAlign:"right"}}>
                                                     <p style={{fontSize:8,letterSpacing:".1em",color:t.textMuted,margin:"0 0 2px",textTransform:"uppercase",fontWeight:600}}>Data</p>
                                                     <p className="rl-card-date">{fmtShort(rel.dataReuniao)}</p>
@@ -1214,18 +1211,18 @@ export default function RelatorioCelula({ isDark = false }) {
                                                 <BookOpen size={11} style={{flexShrink:0}} />
                                                 <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{rel.estudo||"Sem estudo informado"}</span>
                                             </div>
-                                            {decisoes.length>0&&<div className="rl-card-tag" style={{background:"rgba(253,184,19,.08)",border:"1px solid rgba(253,184,19,.2)",color:"#c8a010",marginBottom:ausentesJ.length>0?8:0}}><Sparkles size={11} style={{flexShrink:0}} />{decisoes.length} decisão{decisoes.length>1?"ões":""}</div>}
+                                            {decisoes.length>0&&<div className="rl-card-tag" style={{background:"rgba(253,184,19,.08)",border:"1px solid rgba(253,184,19,.2)",color: t.yellow,marginBottom:ausentesJ.length>0?8:0}}><Sparkles size={11} style={{flexShrink:0}} />{decisoes.length} decisão{decisoes.length>1?"ões":""}</div>}
                                             {ausentesJ.length>0&&<div className="rl-card-tag" style={{background:"rgba(99,102,241,.08)",border:"1px solid rgba(99,102,241,.2)",color:"#6366F1"}}><UserX size={11} style={{flexShrink:0}} />{ausentesJ.length} falta{ausentesJ.length>1?"s":""} justificada{ausentesJ.length>1?"s":""}</div>}
                                         </div>
                                         <div className="rl-card-stats">
-                                            {[{label:"Membros",value:m,color:t.text},{label:"Visitas",value:v,color:AURA.gold},{label:"Total",value:m+v,color:AURA.blue}].map((k,ki)=>(
+                                            {[{label:"Membros",value:m,color:t.text},{label:"Visitas",value:v,color:t.gold},{label:"Total",value:m+v,color:AURA.blue}].map((k,ki)=>(
                                                 <div key={ki} className="rl-card-stat">
                                                     <p className="rl-card-stat-value" style={{color:k.color}}>{k.value}</p>
                                                     <p className="rl-card-stat-label">{k.label}</p>
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="rl-card-footer" style={{color:AURA.gold}}>
+                                        <div className="rl-card-footer" style={{color:t.gold}}>
                                             <span>Ver Detalhes</span><ChevronRight size={13} />
                                         </div>
                                     </motion.div>
@@ -1239,7 +1236,7 @@ export default function RelatorioCelula({ isDark = false }) {
                     <motion.div initial={{opacity:0,scale:.96}} animate={{opacity:1,scale:1}} transition={{duration:.3}}>
                         <div className="rl-empty-alert">
                             <div className="rl-empty-icon">
-                                <AlertTriangle size={28} style={{color:"#c8a010"}} />
+                                <AlertTriangle size={28} style={{color: t.yellow}} />
                             </div>
                             <h3>Nenhuma célula encontrada</h3>
                             <p>Não há relatórios de células no período selecionado.<br />Verifique se há células cadastradas ou ajuste o filtro de datas.</p>

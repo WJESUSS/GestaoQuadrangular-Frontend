@@ -28,13 +28,17 @@ const AURA = {
 function theme(isDark) {
     return {
         bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
+        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "#D8D4CC",
         bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
         border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
         borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
         text:        isDark ? "#F5F0E8"                : "#1A1008",
         textSec:     isDark ? "#9A9588"                : "#6B5E4A",
         textMuted:   isDark ? "#6B6658"                : "#9A9080",
+        gold:        isDark ? "#C9A96E"                : "#3D3218",
+        goldLight:   isDark ? "#E8D5A3"                : "#A68B4B",
+        goldSoft:    isDark ? "rgba(201,169,110,.06)"  : "rgba(122,101,48,.08)",
+        goldHover:   isDark ? "rgba(201,169,110,.12)"  : "rgba(122,101,48,.14)",
         optionBg:    isDark ? "#12121A"                : "#F5F0E8",
     };
 }
@@ -138,7 +142,7 @@ function GlobalStyles({ t, isDark }) {
       .rdc-btn-primary{ background:linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color:#fff; }
       .rdc-btn-primary:hover{ transform:translateY(-1px); }
       .rdc-btn-ghost{ background:${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}; border:1px solid ${t.border}; color:${t.textSec}; }
-      .rdc-btn-ghost:hover{ border-color:${AURA.gold}; color:${AURA.gold}; }
+      .rdc-btn-ghost:hover{ border-color:${t.gold}; color:${t.gold}; }
       .rdc-btn-danger{ background:rgba(200,16,46,.12); border:1px solid rgba(200,16,46,.35); color:#E88; }
       .rdc-btn-sm{ padding:7px 12px; font-size:11px; }
 
@@ -158,7 +162,7 @@ function GlobalStyles({ t, isDark }) {
         .rdc-hist-cell-title{ display:block; }
       }
 
-      .rdc-link{ color:${AURA.gold}; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+      .rdc-link{ color:${t.gold}; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
 
       .rdc-badge{ display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:100px; font-size:10.5px; font-weight:700; }
       .rdc-badge-ok{ background:rgba(30,122,76,.15); color:${AURA.green}; }
@@ -169,10 +173,10 @@ function GlobalStyles({ t, isDark }) {
       .rdc-empty{ text-align:center; padding:36px 16px; color:${t.textMuted}; font-size:13px; display:flex; flex-direction:column; align-items:center; gap:10px; }
       .rdc-loading{ display:flex; align-items:center; justify-content:center; padding:60px 0; color:${t.textMuted}; }
 
-      .rdc-overlay{ position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; backdrop-filter:blur(3px); }
+      .rdc-overlay{ position:fixed; inset:0; z-index:200; background:${isDark ? "rgba(10,10,15,.55)" : "rgba(245,240,232,.55)"}; display:flex; align-items:flex-end; justify-content:center; backdrop-filter:blur(3px); }
       @media(min-width:640px){ .rdc-overlay{ align-items:center; padding:20px; } }
       .rdc-modal{
-        background:${isDark ? "#12121A" : "#FBFAF6"}; width:100%; max-width:600px; max-height:92vh; overflow-y:auto;
+        background:${t.bg}; width:100%; max-width:600px; max-height:92vh; overflow-y:auto;
         border-radius:22px 22px 0 0; border:1px solid ${t.border};
       }
       @media(min-width:640px){ .rdc-modal{ border-radius:22px; } }
@@ -306,7 +310,7 @@ export default function RelatoriosDiscipuladoCelulas({ isDark = true }) {
             <GlobalStyles t={t} isDark={isDark} />
 
             <div style={{ marginBottom: 16 }}>
-                <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase", color: AURA.gold, opacity: .8, margin: "0 0 4px" }}>
+                <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase", color: t.gold, opacity: .8, margin: "0 0 4px" }}>
                     Acompanhamento Pastoral
                 </p>
                 <h2 style={{ fontSize: "clamp(18px,4vw,23px)", fontWeight: 700, margin: 0, color: t.text }}>

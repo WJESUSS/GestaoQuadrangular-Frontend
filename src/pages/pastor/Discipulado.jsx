@@ -27,7 +27,7 @@ const AURA = {
 function theme(isDark) {
   return {
     bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.97)"    : "rgba(255,255,255,.97)",
+    bgEl:        isDark ? "rgba(18,18,26,.97)"    : "#D8D4CC",
     bgInput:     isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)",
     border:      isDark ? "rgba(201,169,110,.1)"  : "rgba(201,169,110,.2)",
     borderInput: isDark ? "rgba(201,169,110,.18)" : "rgba(201,169,110,.3)",
@@ -39,6 +39,9 @@ function theme(isDark) {
     placeholder: isDark ? "rgba(154,149,136,.35)" : "rgba(107,94,74,.35)",
     rowHov:      isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.05)",
     warnBg:      isDark ? "rgba(253,184,19,.07)"  : "rgba(253,184,19,.06)",
+    gold:        isDark ? "#C9A96E" : "#3D3218",
+    goldSoft:    isDark ? "rgba(201,169,110,.06)" : "rgba(61,50,24,.08)",
+    goldHover:   isDark ? "rgba(201,169,110,.12)" : "rgba(61,50,24,.14)",
   };
 }
 
@@ -98,8 +101,8 @@ function CelulaPresenca({ membro, coluna, isDark, t }) {
   const marcado = membro[coluna.campo];
   const justval = membro[coluna.justField];
   const cfg     = JUST_CONFIG[justval] || {
-    emoji: "📝", color: AURA.gold,
-    bg:    `${AURA.gold}15`, border: `${AURA.gold}30`,
+    emoji: "📝", color: t.gold,
+    bg:    `${t.gold}15`, border: `${t.gold}30`,
   };
 
   return (
@@ -125,7 +128,7 @@ function CelulaPresenca({ membro, coluna, isDark, t }) {
 
 /* barra de frequência inline */
 function FreqBar({ pct }) {
-  const color = pct === 100 ? AURA.green : pct >= 60 ? AURA.gold : AURA.red;
+  const color = pct === 100 ? AURA.green : pct >= 60 ? t.gold : AURA.red;
   return (
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{
@@ -241,7 +244,7 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
   if (!rel) return null;
   const presencas = rel.presencas || [];
   const pct       = frequencia(presencas);
-  const freqColor = pct >= 70 ? AURA.green : pct >= 50 ? AURA.gold : AURA.red;
+  const freqColor = pct >= 70 ? AURA.green : pct >= 50 ? t.gold : AURA.red;
 
   return (
       <motion.div
@@ -264,7 +267,7 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
             }}
         >
           {/* fio dourado no topo, como nos cards */}
-          <div style={{ height: 3, background: `linear-gradient(90deg, ${AURA.blue}, ${AURA.gold})`, flexShrink: 0 }} />
+          <div style={{ height: 3, background: `linear-gradient(90deg, ${AURA.blue}, ${t.gold})`, flexShrink: 0 }} />
 
           {/* Header */}
           <div className="disc-modal-header">
@@ -280,7 +283,7 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
               <div style={{ minWidth: 0 }}>
                 <p style={{
                   fontSize: 9, letterSpacing: ".16em", fontWeight: 700,
-                  color: `${AURA.gold}99`, margin: "0 0 4px", textTransform: "uppercase",
+                  color: `${t.gold}99`, margin: "0 0 4px", textTransform: "uppercase",
                 }}>
                   {rel.nomeCelula}
                 </p>
@@ -370,10 +373,10 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <div style={{
                             width: 30, height: 30, borderRadius: 9, flexShrink: 0,
-                            background: `linear-gradient(135deg,${AURA.blue}22,${AURA.gold}16)`,
-                            border: `1px solid ${AURA.gold}22`,
+                            background: `linear-gradient(135deg,${AURA.blue}22,${t.gold}16)`,
+                            border: `1px solid ${t.gold}22`,
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 12, fontWeight: 700, color: AURA.gold,
+                            fontSize: 12, fontWeight: 700, color: t.gold,
                           }}>
                             {p.nomeMembro?.charAt(0) || "?"}
                           </div>
@@ -427,10 +430,10 @@ function ModalRelatorio({ rel, isDark, t, onClose, onPDF }) {
                 style={{
                   flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                   padding: "12px", borderRadius: 100, border: "none", cursor: "pointer",
-                  background: `linear-gradient(135deg, ${AURA.yellowDark}, ${AURA.gold})`,
+                  background: `linear-gradient(135deg, ${AURA.yellowDark}, ${t.gold})`,
                   color: "#241A00", fontSize: 11, fontWeight: 700, letterSpacing: ".12em",
                   textTransform: "uppercase", transition: "opacity .2s, transform .2s",
-                  boxShadow: `0 8px 22px ${AURA.gold}35`,
+                  boxShadow: `0 8px 22px ${t.gold}35`,
                 }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
@@ -470,19 +473,14 @@ export default function Discipulado({ isDark = false }) {
     @keyframes blink      { 0%,100%{opacity:1}  50%{opacity:.3}  }
     *, *::before, *::after { box-sizing: border-box; }
 
+    /* ── Root: SEM fundo/gradiente/min-height/isolation próprios.
+       Este componente é renderizado DENTRO do PastorPage (.pp-root),
+       que já fornece o fundo (t.bg) e o brilho (.pp-glow) da página. ── */
     .disc-root {
-      min-height: 100vh;
-      background: ${t.bg};
       color: ${t.text};
       font-family: 'Inter', sans-serif;
       padding-bottom: max(48px, env(safe-area-inset-bottom, 48px));
       -webkit-overflow-scrolling: touch;
-    }
-    .disc-glow {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background:
-        radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
     }
     .disc-wrap {
       position: relative; z-index: 1;
@@ -501,7 +499,7 @@ export default function Discipulado({ isDark = false }) {
       transition: border-color .25s;
       -webkit-appearance: none;
     }
-    .disc-input:focus { border-color: ${AURA.gold}80; }
+    .disc-input:focus { border-color: ${t.gold}80; }
     .disc-input::placeholder { color: ${t.placeholder}; }
 
     .disc-date {
@@ -512,7 +510,7 @@ export default function Discipulado({ isDark = false }) {
       font-family: 'Inter', sans-serif; font-size: 13px;
       transition: border-color .25s; -webkit-appearance: none;
     }
-    .disc-date:focus { border-color: ${AURA.gold}80; }
+    .disc-date:focus { border-color: ${t.gold}80; }
 
     /* grid de cards */
     .disc-grid {
@@ -532,7 +530,7 @@ export default function Discipulado({ isDark = false }) {
     }
     .disc-card:hover {
       transform: translateY(-4px);
-      border-color: ${AURA.gold}55;
+      border-color: ${t.gold}55;
       box-shadow: 0 12px 32px rgba(0,0,0,${isDark ? .35 : .1});
     }
     .disc-card:active { transform: scale(.98); }
@@ -547,7 +545,7 @@ export default function Discipulado({ isDark = false }) {
       font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
       transition: border-color .2s, color .2s; white-space: nowrap;
     }
-    .disc-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+    .disc-btn-ghost:hover { border-color: ${t.gold}; color: ${t.gold}; }
 
     .disc-btn-blue {
       display: inline-flex; align-items: center; gap: 6px;
@@ -573,7 +571,7 @@ export default function Discipulado({ isDark = false }) {
     /* divider */
     .disc-div {
       height: 1px;
-      background: linear-gradient(90deg, transparent, ${AURA.gold}50, transparent);
+      background: linear-gradient(90deg, transparent, ${t.gold}50, transparent);
       margin: 18px 0;
     }
 
@@ -584,7 +582,7 @@ export default function Discipulado({ isDark = false }) {
        rola a página toda até o fim, incluindo os botões do rodapé.  */
     .disc-modal-overlay {
       position: fixed; inset: 0; z-index: 9999;
-      background: rgba(8,8,12,.72);
+      background: ${isDark ? "rgba(10,10,15,.72)" : "rgba(245,240,232,.72)"};
       backdrop-filter: blur(20px) saturate(140%);
       -webkit-backdrop-filter: blur(20px) saturate(140%);
       display: flex; align-items: flex-start; justify-content: center;
@@ -594,7 +592,7 @@ export default function Discipulado({ isDark = false }) {
     }
     .disc-modal {
       width: 100%; max-width: 820px; margin: 0 auto;
-      background: ${t.bgEl}; border: 1px solid ${t.border};
+      background: ${t.bg}; border: 1px solid ${t.border};
       overflow: hidden; display: flex; flex-direction: column;
       min-height: 100%;
     }
@@ -776,7 +774,6 @@ export default function Discipulado({ isDark = false }) {
   return (
       <div className="disc-root">
         <style>{css}</style>
-        <div className="disc-glow" />
 
         <div className="disc-wrap">
 
@@ -800,7 +797,7 @@ export default function Discipulado({ isDark = false }) {
               <div>
                 <p style={{
                   fontSize: 9, letterSpacing: ".2em", fontWeight: 600,
-                  color: `${AURA.gold}88`, margin: "0 0 3px", textTransform: "uppercase",
+                  color: `${t.gold}88`, margin: "0 0 3px", textTransform: "uppercase",
                 }}>
                   Controle & Auditoria
                 </p>
@@ -864,7 +861,7 @@ export default function Discipulado({ isDark = false }) {
                     <div style={{ position: "relative" }}>
                       <Search size={14} style={{
                         position: "absolute", left: 13, top: "50%",
-                        transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none",
+                        transform: "translateY(-50%)", color: t.gold, opacity: .5, pointerEvents: "none",
                       }} />
                       <input
                           className="disc-input"
@@ -956,7 +953,7 @@ export default function Discipulado({ isDark = false }) {
             <AnimatePresence mode="popLayout">
               {paginaAtual.map((rel, i) => {
                 const pct = frequencia(rel.presencas);
-                const freqColor = pct >= 70 ? AURA.green : pct >= 50 ? AURA.gold : AURA.red;
+                const freqColor = pct >= 70 ? AURA.green : pct >= 50 ? t.gold : AURA.red;
 
                 return (
                     <motion.div
@@ -973,7 +970,7 @@ export default function Discipulado({ isDark = false }) {
                         aria-label={`Ver detalhes de ${rel.nomeCelula}`}
                     >
                       {/* faixa topo */}
-                      <div style={{ height: 3, background: `linear-gradient(90deg, ${AURA.blue}, ${AURA.gold})` }} />
+                      <div style={{ height: 3, background: `linear-gradient(90deg, ${AURA.blue}, ${t.gold})` }} />
 
                       <div style={{ padding: "16px 16px 0" }}>
                         {/* badge célula + seta */}
@@ -1000,7 +997,7 @@ export default function Discipulado({ isDark = false }) {
 
                         {/* semana */}
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
-                          <Calendar size={11} style={{ color: AURA.gold, flexShrink: 0 }} />
+                          <Calendar size={11} style={{ color: t.gold, flexShrink: 0 }} />
                           <span style={{ fontSize: 12, fontWeight: 300, color: t.textSec }}>
                         {formatarSemana(rel.dataInicio, rel.dataFim)}
                       </span>
@@ -1035,7 +1032,7 @@ export default function Discipulado({ isDark = false }) {
                 background: t.bgEl, borderRadius: 20,
                 border: `2px dashed ${t.border}`, marginTop: 12,
               }}>
-                <AlertCircle size={34} style={{ color: `${AURA.gold}40`, margin: "0 auto 12px" }} />
+                <AlertCircle size={34} style={{ color: `${t.gold}40`, margin: "0 auto 12px" }} />
                 <p style={{ fontSize: 13, fontWeight: 300, color: t.textMuted, margin: 0 }}>
                   Nenhum relatório encontrado.
                 </p>

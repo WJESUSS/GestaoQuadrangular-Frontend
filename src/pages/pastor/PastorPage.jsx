@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Routes, Route, NavLink, useLocation } from "react-router-dom";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import api from "../../services/api.js";
 import { getFotoUrl } from "../../utils/foto.js";
@@ -18,8 +17,9 @@ import RelatoriosDiscipuladoCelulas from "./RelatoriosDiscipuladoCelulas.jsx";
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, LogOut, Sun, Moon,
-  ClipboardList, Flame,
+  ClipboardList, Flame, Activity,
   Cake, Bell, Send, Check, X, ChevronRight, UserCheck,
+  ArrowLeft,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 
@@ -39,45 +39,50 @@ const AURA = {
 
 function theme(isDark) {
   return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.98)"     : "rgba(255,255,255,.98)",
+    bg:          isDark ? "#07070C"               : "#FAF8F4",
+    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "#FFFFFF",
     bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
+    border:      isDark ? "rgba(201,169,110,.10)"  : "rgba(201,169,110,.35)",
     borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
     text:        isDark ? "#F5F0E8"                : "#1A1008",
     textSec:     isDark ? "#9A9588"                : "#6B5E4A",
     textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(245,240,232,.97)",
-    cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
+    gold:        isDark ? "#C9A96E"                : "#3D3218",
+    goldSoft:    isDark ? "rgba(201,169,110,.06)"  : "rgba(122,101,48,.08)",
+    goldHover:   isDark ? "rgba(201,169,110,.12)"  : "rgba(122,101,48,.14)",
+    glow1:       isDark ? "rgba(201,169,110,.07)"  : "rgba(201,169,110,.10)",
+    glow2:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
+    glow3:       isDark ? "rgba(155,11,30,.03)"    : "rgba(0,61,165,.04)",
+    headerBg:    isDark ? "rgba(7,7,12,.92)"       : "rgba(247,243,238,.92)",
+    cardHover:   isDark ? "rgba(201,169,110,.20)"  : "rgba(122,101,48,.20)",
     placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
   };
 }
 
-/* ─── Nav items ──────────────────────────────────────────────────── */
-const NAV_ITEMS = [
-  { to: "/pastor",                   icon: LayoutDashboard, label: "Dashboard",    color: AURA.blue,   end: true  },
-  { to: "/pastor/relatorio-celulas", icon: FileText,        label: "Relatórios",   color: AURA.red                },
-  { to: "/pastor/discipulado",       icon: Users,           label: "Secretaria",   color: "#8B5CF6"               },
-  { to: "/pastor/acompanhamento-discipulado", icon: UserCheck, label: "Discipulado", color: AURA.blue             },
-  { to: "/pastor/multiplicacoes",    icon: Share2,          label: "Mult.",        color: "#059669"               },
-  { to: "/pastor/ranking-celulas",   icon: Trophy,          label: "Ranking",      color: AURA.yellow             },
-  { to: "/pastor/missao70",          icon: Flame,           label: "Missão 70",    color: AURA.yellow             },
-  { to: "/pastor/pendencias",        icon: ClipboardList,   label: "Pendências",   color: "#F97316"               },
-  { to: "/pastor/alertas",           icon: AlertTriangle,   label: "Alertas",      color: AURA.red, alert: true   },
+/* ─── Menu items ─────────────────────────────────────────────────── */
+const MENU_ITEMS = [
+  { icon: LayoutDashboard,           name: "Dashboard",     desc: "Visão Geral",    aba: "dashboard",              color: AURA.blue },
+  { icon: FileText,                  name: "Relatórios",    desc: "Células",         aba: "relatorio-celulas",      color: AURA.red },
+  { icon: Users,                     name: "Secretaria",    desc: "Discipulado",     aba: "discipulado",            color: "#8B5CF6" },
+  { icon: UserCheck,                 name: "Discipulado",   desc: "Relatórios Cel.",  aba: "acompanhamento-discipulado", color: AURA.blue },
+  { icon: Share2,                    name: "Multiplicação", desc: "Novas Células",   aba: "multiplicacoes",         color: "#059669" },
+  { icon: Trophy,                    name: "Ranking",       desc: "Desempenho",      aba: "ranking-celulas",        color: AURA.yellow },
+  { icon: Flame,                     name: "Missão 70",     desc: "Evangelismo",     aba: "missao70",               color: AURA.gold },
+  { icon: ClipboardList,             name: "Pendências",    desc: "Itens Abertos",   aba: "pendencias",             color: "#F97316" },
+  { icon: AlertTriangle,             name: "Alertas",       desc: "Notificações",    aba: "alertas",                color: AURA.red },
+  { icon: Activity,                  name: "Painel",        desc: "Pastoral",        aba: "painel-pastoral",        color: AURA.gold, modal: true },
 ];
 
 const PAGE_TITLES = {
-  "pastor":            "Dashboard Geral",
+  "dashboard":       "Dashboard Geral",
   "relatorio-celulas": "Relatórios de Células",
-  "discipulado":       "Secretaria",
+  "discipulado":     "Secretaria",
   "acompanhamento-discipulado": "Relatórios de Discipulado das Células",
-  "multiplicacoes":    "Multiplicações",
-  "ranking-celulas":   "Ranking",
-  "alertas":           "Alertas",
-  "pendencias":        "Pendências",
-  "missao70":          "Missão 70",
+  "multiplicacoes":  "Multiplicações",
+  "ranking-celulas": "Ranking",
+  "alertas":         "Alertas",
+  "pendencias":      "Pendências",
+  "missao70":        "Missão 70",
 };
 
 /* ─── Logo ──────────────────────────────────────────────────────── */
@@ -124,28 +129,38 @@ function GlobalStyles({ t, isDark }) {
         flex-direction: column;
         position: relative;
         overflow-x: hidden;
-        transition: background .3s, color .3s;
+        transition: background .4s, color .3s;
         isolation: isolate;
+      }
+
+      /* ── Vignette: sutil escurecimento nas bordas para profundidade ── */
+      .pp-root::before {
+        content: "";
+        position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        background: radial-gradient(ellipse at center, transparent 40%, ${isDark ? "rgba(0,0,0,.35)" : "rgba(0,0,0,.06)"} 100%);
+        transition: background .4s;
       }
 
       .pp-glow {
         position: fixed; inset: 0; pointer-events: none; z-index: 0;
         background:
-          radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
-          radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
-        transition: background .3s;
+          radial-gradient(ellipse at 10% -5%, ${t.glow1} 0%, transparent 45%),
+          radial-gradient(ellipse at 90% 105%, ${t.glow2} 0%, transparent 45%),
+          radial-gradient(ellipse at 50% 50%, ${t.glow3} 0%, transparent 60%);
+        transition: background .4s;
       }
 
       /* ── HEADER ── */
       .pp-header {
         position: sticky; top: 0; z-index: 50;
         background: ${t.headerBg};
-        border-bottom: 1px solid ${t.border};
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
+        border-bottom: 1px solid ${isDark ? "rgba(201,169,110,.12)" : "rgba(201,169,110,.18)"};
+        backdrop-filter: blur(32px) saturate(1.4);
+        -webkit-backdrop-filter: blur(32px) saturate(1.4);
         display: flex; align-items: center; justify-content: space-between;
         padding: 0 16px; height: 60px; gap: 10px;
-        transition: background .3s, border-color .3s;
+        transition: background .4s, border-color .3s;
+        box-shadow: 0 1px 0 ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.08)"};
       }
       @media(min-width:480px) { .pp-header { padding: 0 20px; height: 64px; } }
 
@@ -153,6 +168,7 @@ function GlobalStyles({ t, isDark }) {
         height: 2px; position: sticky; top: 60px; z-index: 49;
         background: linear-gradient(90deg, ${AURA.redDark}, ${AURA.red}, ${AURA.yellow}, ${AURA.blue}, transparent);
         flex-shrink: 0;
+        opacity: .85;
       }
       @media(min-width:480px) { .pp-header-line { top: 64px; } }
 
@@ -163,17 +179,18 @@ function GlobalStyles({ t, isDark }) {
       .pp-avatar-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
       .pp-ring {
         position: absolute; border-radius: 50%;
-        border: 1px solid rgba(201,169,110,.22);
+        border: 1px solid rgba(201,169,110,.18);
         top: 50%; left: 50%; transform: translate(-50%,-50%);
       }
       .pp-avatar {
         width: 38px; height: 38px; border-radius: 50%;
-        border: 1.5px solid rgba(201,169,110,.28);
-        background: ${isDark ? "rgba(18,18,26,.99)" : "#fff"};
+        border: 1.5px solid rgba(201,169,110,.30);
+        background: ${isDark ? "rgba(14,14,22,.98)" : "#fff"};
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
-        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 15px; color: ${AURA.gold};
+        font-family: 'Playfair Display', serif; font-weight: 600; font-size: 15px; color: ${t.gold};
         flex-shrink: 0;
+        box-shadow: 0 2px 10px ${isDark ? "rgba(201,169,110,.12)" : "rgba(201,169,110,.15)"};
       }
       .pp-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
       @media(min-width:480px) { .pp-avatar { width: 44px; height: 44px; font-size: 16px; } }
@@ -181,7 +198,7 @@ function GlobalStyles({ t, isDark }) {
       .pp-title-block { min-width: 0; overflow: hidden; }
       .pp-eyebrow {
         font-size: 8px; font-weight: 500; letter-spacing: .2em;
-        text-transform: uppercase; color: rgba(201,169,110,.55); margin: 0 0 1px;
+        text-transform: uppercase; color: ${isDark ? "rgba(201,169,110,.55)" : "#8B7A50"}; margin: 0 0 1px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       @media(min-width:480px) { .pp-eyebrow { font-size: 9px; margin-bottom: 2px; } }
@@ -191,7 +208,7 @@ function GlobalStyles({ t, isDark }) {
         font-weight: 500; color: ${t.text}; margin: 0; line-height: 1.2;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
-      .pp-title span { color: ${AURA.gold}; }
+      .pp-title span { color: ${t.gold}; }
       .pp-breadcrumb {
         display: flex; align-items: center; gap: 3px; margin-top: 2px;
         overflow: hidden;
@@ -208,11 +225,13 @@ function GlobalStyles({ t, isDark }) {
       .pp-stat-chip {
         padding: 5px 10px; border-radius: 10px;
         background: ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.08)"};
-        border: 1px solid ${t.border}; text-align: center; min-width: 48px;
+        border: 1px solid ${isDark ? "rgba(201,169,110,.10)" : "rgba(201,169,110,.15)"};
+        text-align: center; min-width: 48px;
+        backdrop-filter: blur(8px);
       }
       .pp-stat-chip-label {
         font-size: 8px; font-weight: 500; letter-spacing: .15em;
-        text-transform: uppercase; color: rgba(201,169,110,.6); line-height: 1;
+        text-transform: uppercase; color: ${isDark ? "rgba(201,169,110,.6)" : "#8B7A50"}; line-height: 1;
       }
       .pp-stat-chip-val {
         font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600;
@@ -220,14 +239,26 @@ function GlobalStyles({ t, isDark }) {
       }
 
       .pp-btn-ico {
-        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(201,169,110,.06)"};
-        border: 1px solid ${t.border};
+        background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(201,169,110,.05)"};
+        border: 1px solid ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.14)"};
         border-radius: 10px; width: 34px; height: 34px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
         color: ${t.textMuted}; transition: all .25s; flex-shrink: 0; position: relative;
+        backdrop-filter: blur(8px);
       }
-      .pp-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .pp-btn-ico:hover { border-color: ${t.gold}; color: ${t.gold}; background: ${t.goldHover}; }
       @media(min-width:480px) { .pp-btn-ico { width: 38px; height: 38px; border-radius: 12px; } }
+
+      .pp-btn-back {
+        background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(30,63,102,.05)"};
+        border: 1px solid ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.14)"};
+        border-radius: 10px; width: 34px; height: 34px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        color: ${t.textMuted}; transition: all .25s; flex-shrink: 0;
+        backdrop-filter: blur(8px);
+      }
+      .pp-btn-back:hover { border-color: ${t.gold}; color: ${t.gold}; background: ${t.goldHover}; }
+      @media(min-width:480px) { .pp-btn-back { width: 38px; height: 38px; border-radius: 12px; } }
 
       .pp-btn-exit {
         display: flex; align-items: center; gap: 6px;
@@ -235,105 +266,85 @@ function GlobalStyles({ t, isDark }) {
         background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
         color: #fff; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
-        transition: all .3s; box-shadow: 0 4px 16px rgba(200,16,46,.22);
+        transition: all .3s cubic-bezier(.4,0,.2,1);
+        box-shadow: 0 4px 16px rgba(200,16,46,.22), 0 1px 3px rgba(200,16,46,.15);
         white-space: nowrap; flex-shrink: 0;
       }
-      .pp-btn-exit:hover { opacity: .88; transform: translateY(-1px); }
+      .pp-btn-exit:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,16,46,.30), 0 2px 4px rgba(200,16,46,.18); }
       @media(min-width:480px) { .pp-btn-exit { padding: 0 14px; height: 38px; } }
       .pp-btn-exit-label { display: none; }
       @media(min-width:400px) { .pp-btn-exit-label { display: inline; } }
 
-      /* ── NAV ── */
-      .pp-nav {
-        position: sticky; top: 62px; z-index: 40;
-        background: ${t.headerBg};
-        border-bottom: 1px solid ${t.border};
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        padding: 8px 10px 10px;
-        overflow-x: auto;
-        overflow-y: visible;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-        transition: background .3s, border-color .3s;
+      /* ── MENU GRID ── */
+      .pp-menu-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 22px;
       }
-      @media(min-width:480px) { .pp-nav { top: 66px; padding: 10px 14px 12px; } }
-      .pp-nav::-webkit-scrollbar { display: none; }
+      @media(min-width:480px) { .pp-menu-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
+      @media(min-width:768px) { .pp-menu-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; } }
 
-      .pp-nav-inner {
-        display: flex;
-        gap: 3px;
-        width: max-content;
-        min-width: 100%;
-      }
-      @media(min-width:720px) {
-        .pp-nav-inner {
-          width: 100%;
-          min-width: 0;
-          flex-wrap: nowrap;
-          justify-content: center;
-        }
-      }
-
-      .pp-nav-tile {
+      .pp-menu-card {
+        position: relative;
+        background: ${t.bgEl};
+        border: 1px solid ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.14)"};
+        border-radius: 18px;
+        padding: 16px 12px;
+        cursor: pointer;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        min-width: 72px;
-        width: 72px;
-        min-height: 64px;
-        border-radius: 14px;
-        gap: 5px;
-        flex-shrink: 0;
-        text-decoration: none;
         text-align: center;
-        border: 1px solid transparent;
-        background: transparent;
-        cursor: pointer;
-        transition: background .25s, border-color .25s, box-shadow .25s;
-        padding: 8px 4px 7px;
+        gap: 10px;
+        overflow: hidden;
+        transition: all .3s cubic-bezier(.4,0,.2,1);
         -webkit-tap-highlight-color: transparent;
-        position: relative;
-        overflow: visible;
+        box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.06)"}, 0 4px 12px ${isDark ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.04)"};
       }
-      @media(min-width:480px) {
-        .pp-nav-tile { min-width: 80px; width: 80px; min-height: 68px; gap: 6px; }
+      .pp-menu-card::before {
+        content: "";
+        position: absolute; inset: 0;
+        opacity: 0;
+        transition: opacity .35s;
+        border-radius: inherit;
       }
-      @media(min-width:720px) {
-        .pp-nav-tile { flex: 1; min-width: 0; width: auto; max-width: 100px; }
+      .pp-menu-card::after {
+        content: "";
+        position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, ${isDark ? "rgba(201,169,110,.12)" : "rgba(201,169,110,.18)"}, transparent);
+        opacity: 0; transition: opacity .35s;
       }
-      .pp-nav-tile:hover {
-        background: ${isDark ? "rgba(201,169,110,.05)" : "rgba(201,169,110,.07)"};
-        border-color: ${t.border};
-        transform: translateY(-1px);
-      }
-      .pp-nav-tile.pp-active {
-        background: ${isDark ? "rgba(201,169,110,.09)" : "rgba(255,255,255,.9)"};
+      .pp-menu-card:hover {
+        transform: translateY(-4px);
         border-color: rgba(201,169,110,.28);
-        box-shadow: 0 4px 18px rgba(201,169,110,.1);
-        transform: translateY(-2px);
+        box-shadow:
+          0 8px 32px ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.12)"},
+          0 2px 8px ${isDark ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.08)"};
+      }
+      .pp-menu-card:hover::before { opacity: .07; }
+      .pp-menu-card:hover::after  { opacity: 1; }
+      @media(min-width:480px) {
+        .pp-menu-card { padding: 20px 14px; border-radius: 20px; }
       }
 
-      .pp-tile-icon {
-        width: 30px; height: 30px; border-radius: 8px;
+      .pp-menu-icon {
+        width: 44px; height: 44px; border-radius: 14px;
         display: flex; align-items: center; justify-content: center;
-        background: rgba(201,169,110,.07); transition: all .25s; flex-shrink: 0;
+        flex-shrink: 0;
+        transition: transform .3s cubic-bezier(.4,0,.2,1);
       }
-      @media(min-width:480px) { .pp-tile-icon { width: 32px; height: 32px; border-radius: 9px; } }
+      .pp-menu-card:hover .pp-menu-icon { transform: scale(1.08); }
 
-      .pp-tile-label {
-        font-size: 8.5px; font-weight: 600; letter-spacing: .06em;
-        text-transform: uppercase; color: ${t.textMuted}; line-height: 1.25;
-        white-space: normal; word-break: break-word; overflow: visible;
-        width: 100%; text-align: center; transition: color .25s; padding: 0 2px;
+      .pp-menu-name {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px; font-weight: 600; color: ${t.text}; margin: 0;
+        line-height: 1.3;
       }
-      @media(min-width:480px) { .pp-tile-label { font-size: 9px; letter-spacing: .08em; } }
-
-      .pp-active-dot {
-        position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
-        width: 4px; height: 4px; border-radius: 50%; background: ${AURA.gold};
-        box-shadow: 0 0 6px ${AURA.gold};
+      .pp-menu-desc {
+        font-family: 'Inter', sans-serif;
+        font-size: 10px; color: ${t.textMuted}; margin: 0;
+        line-height: 1.2;
       }
 
       /* ── MAIN ── */
@@ -354,9 +365,9 @@ function GlobalStyles({ t, isDark }) {
       .pp-footer {
         text-align: center; font-size: 9px; font-weight: 500; letter-spacing: .18em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(26,16,8,.15)"};
+        color: ${isDark ? "rgba(245,240,232,.10)" : "rgba(26,16,8,.12)"};
         padding: 16px 0 8px;
-        border-top: 1px solid ${t.border};
+        border-top: 1px solid ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.10)"};
       }
       .pp-loading {
         min-height: 100dvh; display: flex; align-items: center; justify-content: center;
@@ -417,7 +428,6 @@ function SinoPastor({ isDark, t }) {
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  // Fecha ao clicar fora (desktop)
   useEffect(() => {
     if (!open || isMobile) return;
     const fn = (e) => {
@@ -429,7 +439,6 @@ function SinoPastor({ isDark, t }) {
     return () => document.removeEventListener("mousedown", fn);
   }, [open, isMobile]);
 
-  // Trava scroll do body no mobile
   useEffect(() => {
     document.body.style.overflow = (isMobile && open) ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -456,10 +465,8 @@ function SinoPastor({ isDark, t }) {
     } catch { alert("Erro ao abrir WhatsApp"); }
   };
 
-  // Conteúdo interno compartilhado
   const conteudoInterno = (
       <>
-        {/* Cabeçalho */}
         <div style={{
           padding: "14px 16px 10px",
           borderBottom: `1px solid ${t.border}`,
@@ -473,12 +480,12 @@ function SinoPastor({ isDark, t }) {
               background: "rgba(201,169,110,.1)", border: `1px solid ${t.border}`,
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
-              <Cake size={16} color={AURA.gold} />
+              <Cake size={16} color={t.gold} />
             </div>
             <div>
               <p style={{
                 fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
-                letterSpacing: ".18em", textTransform: "uppercase", color: AURA.gold, margin: 0,
+                letterSpacing: ".18em", textTransform: "uppercase", color: t.gold, margin: 0,
               }}>
                 ANIVERSARIANTES
               </p>
@@ -494,7 +501,7 @@ function SinoPastor({ isDark, t }) {
                   fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600,
                   border: `1px solid ${tab === tb ? "rgba(201,169,110,.4)" : "transparent"}`,
                   background: tab === tb ? "rgba(201,169,110,.1)" : "transparent",
-                  color: tab === tb ? AURA.gold : t.textMuted, transition: "all .18s",
+                  color: tab === tb ? t.gold : t.textMuted, transition: "all .18s",
                 }}>
                   {tb === "hoje" ? "Hoje" : "Semana"}
                 </button>
@@ -510,18 +517,13 @@ function SinoPastor({ isDark, t }) {
           </div>
         </div>
 
-        {/* Lista — única área com scroll */}
         <div
             className="pp-sino-scroll"
             style={{
-              flex: 1,
-              minHeight: 0,        /* ← essencial para o scroll funcionar no flex */
-              overflowY: "auto",
-              overflowX: "hidden",
+              flex: 1, minHeight: 0,
+              overflowY: "auto", overflowX: "hidden",
               padding: "10px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 6,
+              display: "flex", flexDirection: "column", gap: 6,
               WebkitOverflowScrolling: "touch",
             }}
         >
@@ -545,7 +547,7 @@ function SinoPastor({ isDark, t }) {
                   background: isToday
                       ? "rgba(201,169,110,.05)"
                       : isDark ? "rgba(255,255,255,.02)" : "rgba(201,169,110,.02)",
-                  borderLeft: isToday ? `3px solid ${AURA.gold}` : undefined,
+                  borderLeft: isToday ? `3px solid ${t.gold}` : undefined,
                   flexShrink: 0,
                 }}>
                   <div style={{
@@ -572,7 +574,7 @@ function SinoPastor({ isDark, t }) {
                         <span style={{
                           fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 700,
                           letterSpacing: ".1em", padding: "2px 7px", borderRadius: 5,
-                          background: "rgba(201,169,110,.1)", color: AURA.gold,
+                          background: t.goldSoft, color: t.gold,
                           border: "1px solid rgba(201,169,110,.22)",
                           marginTop: 4, display: "inline-block",
                         }}>
@@ -594,7 +596,6 @@ function SinoPastor({ isDark, t }) {
           })}
         </div>
 
-        {/* Rodapé */}
         <div style={{
           padding: "8px 16px", flexShrink: 0,
           borderTop: `1px solid ${t.border}`,
@@ -608,9 +609,8 @@ function SinoPastor({ isDark, t }) {
       </>
   );
 
-  // Estilos base do painel
   const estiloBase = {
-    background: t.bgEl,
+    background: t.bg,
     border: `1px solid ${t.border}`,
     overflow: "hidden",
     display: "flex",
@@ -619,16 +619,15 @@ function SinoPastor({ isDark, t }) {
 
   return (
       <>
-        {/* Botão sino */}
         <div ref={btnRef} style={{ display: "inline-flex" }}>
           <button
               className="pp-btn-ico"
               onClick={() => setOpen(o => !o)}
               aria-label="Aniversariantes"
-              style={temHoje ? { borderColor: "rgba(201,169,110,.4)", color: AURA.gold } : {}}
+              style={temHoje ? { borderColor: t.goldHover, color: t.gold } : {}}
           >
           <span className={temHoje && !open ? "pp-bell" : ""} style={{ display: "inline-flex" }}>
-            <Bell size={15} style={{ color: temHoje ? AURA.gold : undefined }} />
+            <Bell size={15} style={{ color: temHoje ? t.gold : undefined }} />
           </span>
             {temHoje && (
                 <span className="pp-badge" style={{
@@ -646,20 +645,17 @@ function SinoPastor({ isDark, t }) {
           </button>
         </div>
 
-        {/* Portal — renderiza direto no body, fora do header */}
         {open && createPortal(
             <>
-              {/* Overlay */}
               <div
                   onMouseDown={() => setOpen(false)}
                   style={{
                     position: "fixed", inset: 0,
-                    background: isMobile ? "rgba(0,0,0,.5)" : "transparent",
+                    background: isDark ? "rgba(10,10,15,.5)" : "rgba(245,240,232,.5)",
                     zIndex: 9998,
                   }}
               />
 
-              {/* Painel */}
               <div
                   ref={panelRef}
                   onMouseDown={(e) => e.stopPropagation()}
@@ -671,26 +667,23 @@ function SinoPastor({ isDark, t }) {
                     boxShadow: isDark
                         ? "0 16px 48px rgba(0,0,0,.7)"
                         : "0 8px 32px rgba(201,169,110,.22)",
-                    // Mobile: bottom sheet
                     ...(isMobile ? {
                       bottom: 0, left: 0, right: 0,
                       width: "100%",
-                      height: "90dvh",           /* ← height explícito: flex filho sabe até onde crescer */
+                      height: "90dvh",
                       borderRadius: "20px 20px 0 0",
                       borderBottom: "none",
                       boxShadow: "0 -8px 48px rgba(0,0,0,.4)",
                     } : {
-                      // Desktop: centralizado horizontalmente, abaixo do header
                       top: 72,
                       left: "50%",
                       transform: "translateX(-50%)",
                       width: "min(360px, calc(100vw - 20px))",
-                      height: "min(460px, calc(100dvh - 100px))", /* ← height explícito */
+                      height: "min(460px, calc(100dvh - 100px))",
                       borderRadius: 18,
                     }),
                   }}
               >
-                {/* Handle de arraste (mobile) */}
                 {isMobile && (
                     <div style={{
                       width: 36, height: 4, borderRadius: 2,
@@ -709,24 +702,25 @@ function SinoPastor({ isDark, t }) {
   );
 }
 
-/* ─── Variantes de animação ───────────────────────────────────────── */
-const PAGE_VARIANTS = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.18, ease: "easeOut" } },
-  exit:    { opacity: 0, transition: { duration: 0.12, ease: "easeIn"  } },
-};
-
 /* ─── COMPONENTE PRINCIPAL ───────────────────────────────────────── */
 export default function PastorPage() {
+  const [abaAtiva,     setAbaAtiva]     = useState("dashboard");
+  const [showPainel,    setShowPainel]    = useState(false);
   const [celulas,       setCelulas]       = useState([]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [isDark,        setIsDark]        = useState(() => localStorage.getItem("theme") === "dark");
-  const location = useLocation();
 
   const t = theme(isDark);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
+
+  useEffect(() => {
+    if (abaAtiva !== "dashboard") window.history.pushState({ aba: abaAtiva }, "");
+    const handlePopState = () => setAbaAtiva("dashboard");
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [abaAtiva]);
 
   useEffect(() => {
     (async () => {
@@ -749,9 +743,6 @@ export default function PastorPage() {
     totalAtivas: celulas.filter(c => c.ativa === true).length,
   }), [celulas]);
 
-  const getPageSegment = () => location.pathname.split("/").pop();
-  const getPageTitle   = () => PAGE_TITLES[getPageSegment()] || PAGE_TITLES["pastor"];
-
   if (loading) {
     return (
         <div className="pp-loading" style={{ background: t.bg }}>
@@ -762,7 +753,7 @@ export default function PastorPage() {
     );
   }
 
-  const pageTitle = getPageTitle();
+  const pageTitle = PAGE_TITLES[abaAtiva] || PAGE_TITLES["dashboard"];
 
   return (
       <div className="pp-root">
@@ -772,6 +763,11 @@ export default function PastorPage() {
         {/* ════ HEADER ════ */}
         <header className="pp-header">
           <div className="pp-hdr-left">
+            {abaAtiva !== "dashboard" && (
+                <button className="pp-btn-back" onClick={() => setAbaAtiva("dashboard")} title="Voltar">
+                  <ArrowLeft size={16} />
+                </button>
+            )}
             <div className="pp-avatar-wrap">
               <div className="pp-ring pp-pulse" style={{ width: 52, height: 52 }} />
               <div className="pp-ring pp-pulse" style={{ width: 40, height: 40, animationDelay: ".9s" }} />
@@ -787,7 +783,7 @@ export default function PastorPage() {
               <h1 className="pp-title">IEQ <span>Pituaçu</span></h1>
               <div className="pp-breadcrumb">
                 <span className="pp-breadcrumb-seg">Pastoral</span>
-                <ChevronRight size={9} style={{ color: "rgba(201,169,110,.4)", flexShrink: 0 }} />
+                <ChevronRight size={9} style={{ color: t.textMuted, flexShrink: 0 }} />
                 <span className="pp-breadcrumb-seg active">{pageTitle}</span>
               </div>
             </div>
@@ -835,67 +831,149 @@ export default function PastorPage() {
         {/* Linha gradiente decorativa */}
         <div className="pp-header-line" />
 
-        {/* ════ NAV ════ */}
-        <nav className="pp-nav" aria-label="Navegação pastoral">
-          <div className="pp-nav-inner">
-            {NAV_ITEMS.map(({ to, icon: Icon, label, color, end }) => (
-                <NavLink
-                    key={to}
-                    to={to}
-                    end={end}
-                    className={({ isActive }) => `pp-nav-tile${isActive ? " pp-active" : ""}`}
-                    aria-label={label}
-                >
-                  {({ isActive }) => (
-                      <>
-                        <div
-                            className="pp-tile-icon"
-                            style={{ background: isActive ? `color-mix(in srgb, ${color} 18%, transparent)` : undefined }}
-                        >
-                          <Icon size={15} style={{ color: isActive ? color : undefined, transition: "color .25s" }} />
-                        </div>
-                        <span className="pp-tile-label" style={{ color: isActive ? color : undefined }}>
-                    {label}
-                  </span>
-                        {isActive && <div className="pp-active-dot" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />}
-                      </>
-                  )}
-                </NavLink>
-            ))}
-          </div>
-        </nav>
-
         {/* ════ CONTEÚDO ════ */}
         <main className="pp-main">
           <div className="pp-content">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                  key={location.pathname}
-                  className="pp-page-anim"
-                  variants={PAGE_VARIANTS}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-              >
-                <Routes location={location}>
-                  <Route index                    element={<PainelPastor              isDark={isDark} />} />
-                  <Route path="relatorio-celulas" element={<RelatorioCelula           isDark={isDark} />} />
-                  <Route path="discipulado"       element={<Discipulado               isDark={isDark} />} />
-                  <Route path="acompanhamento-discipulado" element={<RelatoriosDiscipuladoCelulas isDark={isDark} />} />
-                  <Route path="multiplicacoes"    element={<SolicitacoesMultiplicacao isDark={isDark} />} />
-                  <Route path="ranking-celulas"   element={<RankingCelulas            isDark={isDark} />} />
-                  <Route path="alertas"           element={<PainelAlertas             isDark={isDark} />} />
-                  <Route path="pendencias"        element={<TelaPendencias            isDark={isDark} />} />
-                  <Route path="missao70"          element={<RelatorioMissao70Pastor   isDark={isDark} />} />
-                </Routes>
+            <AnimatePresence mode="sync">
+              {abaAtiva === "dashboard" ? (
 
-                <p className="pp-footer">
-                  © {new Date().getFullYear()} IEQ Pituaçu — Sistema Eclesiástico
-                </p>
-              </motion.div>
+                  <motion.div
+                      key="dashboard"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1, transition: { duration: .3 } }}
+                      exit={{ opacity: 0, transition: { duration: .2 } }}
+                      style={{ display: "flex", flexDirection: "column" }}
+                  >
+                    {/* ════ MENU GRID ════ */}
+                    <div className="pp-menu-grid">
+                      {MENU_ITEMS.map(({ icon: Icon, name, desc, aba, color, modal }) => (
+                          <motion.div
+                              key={aba}
+                              className="pp-menu-card"
+                              whileHover={{ y: -5 }}
+                              whileTap={{ scale: .96 }}
+                              onClick={() => modal ? setShowPainel(true) : setAbaAtiva(aba)}
+                          >
+                            <style>{`.pp-menu-card:hover::before{ background: linear-gradient(135deg,${color}66,${color}); }`}</style>
+                            <div className="pp-menu-icon" style={{ background: `${color}18`, color }}>
+                              <Icon size={20} />
+                            </div>
+                            <div>
+                              <p className="pp-menu-name">{name}</p>
+                              <p className="pp-menu-desc">{desc}</p>
+                            </div>
+                          </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+
+              ) : (
+
+                  <motion.div
+                      key={abaAtiva}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1, transition: { duration: .3 } }}
+                      exit={{ opacity: 0, transition: { duration: .2 } }}
+                  >
+                    {abaAtiva === "relatorio-celulas"       && <RelatorioCelula           isDark={isDark} />}
+                    {abaAtiva === "discipulado"             && <Discipulado               isDark={isDark} />}
+                    {abaAtiva === "acompanhamento-discipulado" && <RelatoriosDiscipuladoCelulas isDark={isDark} />}
+                    {abaAtiva === "multiplicacoes"          && <SolicitacoesMultiplicacao isDark={isDark} />}
+                    {abaAtiva === "ranking-celulas"         && <RankingCelulas            isDark={isDark} />}
+                    {abaAtiva === "alertas"                 && <PainelAlertas             isDark={isDark} />}
+                    {abaAtiva === "pendencias"              && <TelaPendencias            isDark={isDark} />}
+                    {abaAtiva === "missao70"                && <RelatorioMissao70Pastor   isDark={isDark} />}
+                  </motion.div>
+
+              )}
             </AnimatePresence>
+
+            <p className="pp-footer">
+              © {new Date().getFullYear()} IEQ Pituaçu — Sistema Eclesiástico
+            </p>
           </div>
         </main>
+
+        {/* ════ MODAL PASTOR ════ */}
+        {showPainel && createPortal(
+            <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+              <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  style={{ position: "fixed", inset: 0, background: isDark ? "rgba(10,10,15,.88)" : "rgba(245,240,232,.88)", backdropFilter: "blur(4px)" }}
+                  onClick={() => setShowPainel(false)}
+              />
+              <motion.div
+                  initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                  transition={{ type: "tween", duration: .28 }}
+                  style={{
+                    position: "relative", zIndex: 10,
+                    width: "100%", maxWidth: 800, maxHeight: "88vh",
+                    display: "flex", flexDirection: "column",
+                    background: t.bg, border: `1px solid ${t.border}`,
+                    borderRadius: "22px 22px 0 0", overflow: "hidden",
+                  }}
+              >
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "16px 20px", borderBottom: `1px solid ${t.border}`,
+                  background: isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)",
+                  flexShrink: 0,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{
+                      width: 34, height: 34, borderRadius: 10,
+                      background: "rgba(201,169,110,.1)", border: `1px solid ${t.border}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <Activity size={16} color={t.gold} />
+                    </div>
+                    <div>
+                      <p style={{
+                        fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
+                        letterSpacing: ".18em", textTransform: "uppercase", color: t.gold, margin: 0,
+                      }}>
+                        PAINEL PASTORAL
+                      </p>
+                      <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textSec, marginTop: 2 }}>
+                        Métricas e alertas do mês
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                    <button onClick={() => setShowPainel(false)} style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "6px 12px", borderRadius: 8, border: "none", cursor: "pointer",
+                      background: t.goldSoft,
+                      color: t.gold,
+                      fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500,
+                      transition: "all .25s",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = t.goldHover; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = t.goldSoft; }}
+                    >
+                      <ArrowLeft size={14} />
+                      Voltar
+                    </button>
+                    <button onClick={() => setShowPainel(false)} style={{
+                      width: 30, height: 30, borderRadius: 8, border: "none",
+                      background: "transparent", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: t.textMuted, transition: "all .2s",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = t.gold; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = t.textMuted; }}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
+                <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "20px 16px" }}>
+                  <PainelPastor isDark={isDark} />
+                </div>
+              </motion.div>
+            </div>,
+            document.body
+        )}
       </div>
   );
 }

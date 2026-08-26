@@ -49,6 +49,7 @@ function theme(isDark) {
         progressTrack: isDark ? "rgba(255,255,255,.08)": "rgba(0,0,0,.06)",
         tagBg:       isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.035)",
         hoverBg:     isDark ? "rgba(201,169,110,.06)"  : "rgba(201,169,110,.07)",
+        gold:        isDark ? "#C9A96E"                : "#3D3218",
     };
 }
 
@@ -128,7 +129,7 @@ function Avatar({ name, blue = false }) {
             border: `1px solid ${blue ? "rgba(0,61,165,.25)" : "rgba(201,169,110,.28)"}`,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: "'Playfair Display',serif", fontSize: 12, fontWeight: 700,
-            color: blue ? AURA.blueFade : AURA.gold,
+            color: blue ? AURA.blueFade : t.gold,
         }}>
             {initials(name)}
         </div>
@@ -557,7 +558,7 @@ function CelulaSection({ grupo, t, isDark }) {
                         width: 38, height: 38, borderRadius: 10, flexShrink: 0,
                         background: "rgba(201,169,110,.1)", border: "1px solid rgba(201,169,110,.25)",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 700, color: AURA.gold,
+                        fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 700, color: t.gold,
                     }}>
                         {initials(grupo.celulaName)}
                     </div>
@@ -828,7 +829,7 @@ export default function RelatorioCasasDePaz({ isDark = true }) {
             text-transform: uppercase; cursor: pointer; transition: all .3s;
             padding: 12px 18px; white-space: nowrap;
         }
-        .rdcp-btn-clear:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+        .rdcp-btn-clear:hover { border-color: ${t.gold}; color: ${t.gold}; }
 
         /* ── Cards / Células ── */
         .rdcp-card {
@@ -934,7 +935,7 @@ export default function RelatorioCasasDePaz({ isDark = true }) {
             <div style={{ marginBottom: 22 }}>
                 <p className="rdcp-title-eyebrow">IEQ PITUAÇU · PAINEL PASTORAL</p>
                 <h2 className="rdcp-title">
-                    Relatórios <span style={{ color: AURA.gold }}>· Casas de Paz</span>
+                    Relatórios <span style={{ color: t.gold }}>· Casas de Paz</span>
                 </h2>
             </div>
 

@@ -6,7 +6,7 @@ import {
     Users, UserCheck, CheckCircle2, XCircle,
     Plus, X, ChevronRight, ChevronLeft, Search, AlertCircle,
     Loader2, History, Filter, RotateCcw, Check,
-    ClipboardList,
+    ClipboardList, BookOpen, MapPin, Clock, Users as UsersIcon, Calendar,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
 
@@ -252,6 +252,268 @@ function GlobalStyles({ t, isDark }) {
       .ad-timeline-item { padding:13px 0; border-bottom:1px solid ${t.border}; }
       .ad-timeline-item:last-child{ border-bottom:none; }
 
+      /* Detalhe Coletivo — layout elegante */
+      .ad-detail-hero {
+        position:relative; overflow:hidden; border-radius:16px; padding:22px 20px;
+        background:linear-gradient(135deg, ${AURA.roxoDeep} 0%, ${AURA.mossDeep} 60%, ${AURA.moss} 100%);
+        margin-bottom:18px;
+      }
+      .ad-detail-hero::before {
+        content:''; position:absolute; top:-40px; right:-40px; width:140px; height:140px;
+        border-radius:50%; background:rgba(255,255,255,.06); pointer-events:none;
+      }
+      .ad-detail-hero::after {
+        content:''; position:absolute; bottom:-30px; left:30%; width:100px; height:100px;
+        border-radius:50%; background:rgba(184,137,46,.08); pointer-events:none;
+      }
+      .ad-detail-hero-top { display:flex; align-items:center; gap:10px; margin-bottom:14px; position:relative; z-index:1; }
+      .ad-detail-hero-icon {
+        width:44px; height:44px; border-radius:14px; background:rgba(255,255,255,.12);
+        display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15);
+      }
+      .ad-detail-hero-label {
+        font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+        color:rgba(255,255,255,.55); margin:0 0 3px;
+      }
+      .ad-detail-hero-tema {
+        font-family:'Fraunces',serif; font-size:17px; font-weight:600; color:#fff;
+        margin:0; line-height:1.3; position:relative; z-index:1;
+      }
+      .ad-detail-hero-meta {
+        display:flex; flex-wrap:wrap; gap:12px; margin-top:14px; position:relative; z-index:1;
+      }
+      .ad-detail-hero-chip {
+        display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:100px;
+        background:rgba(255,255,255,.1); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,.12);
+        font-size:11px; color:rgba(255,255,255,.85); font-weight:500;
+      }
+
+      .ad-detail-section { margin-bottom:18px; }
+      .ad-detail-section-label {
+        font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+        color:${t.textMuted}; margin:0 0 10px; display:flex; align-items:center; gap:6px;
+      }
+      .ad-detail-section-label::after {
+        content:''; flex:1; height:1px; background:${t.border};
+      }
+
+      .ad-detail-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .ad-detail-info-card {
+        padding:14px; border-radius:14px; background:${t.bgEl}; border:1px solid ${t.border};
+      }
+      .ad-detail-info-label {
+        font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+        color:${t.textMuted}; margin:0 0 5px; display:flex; align-items:center; gap:5px;
+      }
+      .ad-detail-info-value { font-size:13.5px; font-weight:600; color:${t.text}; margin:0; }
+
+      .ad-detail-note {
+        padding:14px; border-radius:14px; background:${t.bgEl}; border:1px solid ${t.border};
+        font-size:12.5px; color:${t.textSec}; line-height:1.55; margin:0;
+      }
+
+      .ad-detail-participant {
+        display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px;
+        background:${t.bgEl}; border:1px solid ${t.border}; transition:all .2s;
+      }
+      .ad-detail-participant:hover { border-color:${AURA.gold}; }
+      .ad-detail-participant + .ad-detail-participant { margin-top:8px; }
+      .ad-detail-participant-avatar {
+        width:34px; height:34px; border-radius:50%; flex-shrink:0;
+        background:linear-gradient(135deg, ${AURA.roxo}, ${AURA.moss}); color:#fff;
+        display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;
+        font-family:'Fraunces',serif; border:2px solid rgba(255,255,255,.15);
+      }
+      .ad-detail-participant-name { font-size:13px; font-weight:600; color:${t.text}; margin:0; }
+      .ad-detail-participant-num { font-size:10px; color:${t.textMuted}; margin:0; }
+      .ad-detail-participant-badge {
+        margin-left:auto; padding:3px 8px; border-radius:100px;
+        background:rgba(74,124,92,.12); color:${AURA.green}; font-size:10px; font-weight:700;
+      }
+
+      /* Formulário coletivo — layout elegante */
+      .ad-form-hero {
+        position:relative; overflow:hidden; border-radius:16px; padding:20px;
+        background:linear-gradient(135deg, ${AURA.mossDeep} 0%, ${AURA.roxoDeep} 100%);
+        margin-bottom:20px; text-align:center;
+      }
+      .ad-form-hero::before {
+        content:''; position:absolute; top:-30px; left:-30px; width:100px; height:100px;
+        border-radius:50%; background:rgba(255,255,255,.05); pointer-events:none;
+      }
+      .ad-form-hero::after {
+        content:''; position:absolute; bottom:-20px; right:15%; width:80px; height:80px;
+        border-radius:50%; background:rgba(184,137,46,.07); pointer-events:none;
+      }
+      .ad-form-hero-icon {
+        width:48px; height:48px; border-radius:15px; background:rgba(255,255,255,.12);
+        display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;
+        backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15); position:relative; z-index:1;
+      }
+      .ad-form-hero-title {
+        font-family:'Fraunces',serif; font-size:17px; font-weight:600; color:#fff;
+        margin:0 0 4px; position:relative; z-index:1;
+      }
+      .ad-form-hero-sub { font-size:12px; color:rgba(255,255,255,.55); margin:0; position:relative; z-index:1; }
+
+      .ad-form-section { margin-bottom:20px; }
+      .ad-form-section-label {
+        font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+        color:${t.textMuted}; margin:0 0 10px; display:flex; align-items:center; gap:6px;
+      }
+      .ad-form-section-label::after { content:''; flex:1; height:1px; background:${t.border}; }
+
+      .ad-form-card {
+        padding:16px; border-radius:16px; background:${t.bgEl}; border:1px solid ${t.border};
+      }
+
+      .ad-form-field-elegant { margin-bottom:14px; }
+      .ad-form-field-elegant:last-child { margin-bottom:0; }
+      .ad-form-field-elegant label {
+        display:flex; align-items:center; gap:5px; font-size:10.5px; font-weight:600;
+        letter-spacing:.04em; text-transform:uppercase; color:${t.textMuted}; margin-bottom:7px;
+      }
+      .ad-form-field-elegant input, .ad-form-field-elegant select, .ad-form-field-elegant textarea {
+        width:100%; padding:11px 14px; border-radius:12px; background:${t.bgInput};
+        border:1px solid ${t.borderInput}; color:${t.text}; font-size:13px;
+        font-family:'Inter',sans-serif; outline:none; transition:border-color .2s;
+      }
+      .ad-form-field-elegant select option { background:${t.optionBg}; color:${t.text}; }
+      .ad-form-field-elegant input:focus, .ad-form-field-elegant select:focus, .ad-form-field-elegant textarea:focus { border-color:${AURA.gold}; }
+      .ad-form-field-elegant textarea { resize:vertical; min-height:60px; }
+
+      .ad-form-pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .ad-form-pick-card {
+        padding:12px; border-radius:12px; background:${t.bgEl}; border:1px solid ${t.border};
+        cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:10px;
+      }
+      .ad-form-pick-card:hover { border-color:${AURA.gold}; transform:translateY(-1px); }
+      .ad-form-pick-card.selected { border-color:${AURA.moss}; background:rgba(30,63,102,.06); }
+      .ad-form-pick-icon {
+        width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+        background:rgba(184,137,46,.08); flex-shrink:0;
+      }
+      .ad-form-pick-label { font-size:12.5px; font-weight:600; color:${t.text}; margin:0; }
+      .ad-form-pick-sub { font-size:10px; color:${t.textMuted}; margin:0; }
+
+      .ad-form-participants-header {
+        display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+      }
+      .ad-form-participants-title { font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:${t.textMuted}; }
+      .ad-form-select-all {
+        display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px;
+        background:rgba(184,137,46,.08); border:1px solid rgba(184,137,46,.2); color:${AURA.gold};
+        font-size:11px; font-weight:600; cursor:pointer; transition:all .2s;
+      }
+      .ad-form-select-all:hover { background:rgba(184,137,46,.15); }
+
+      .ad-form-member {
+        display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px;
+        border:1px solid ${t.border}; cursor:pointer; transition:all .2s;
+      }
+      .ad-form-member + .ad-form-member { margin-top:8px; }
+      .ad-form-member:hover { border-color:${AURA.gold}; }
+      .ad-form-member.checked { border-color:${AURA.moss}; background:rgba(30,63,102,.05); }
+      .ad-form-member-avatar {
+        width:34px; height:34px; border-radius:50%; flex-shrink:0;
+        background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color:#fff;
+        display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;
+        font-family:'Fraunces',serif; transition:all .2s;
+      }
+      .ad-form-member.checked .ad-form-member-avatar { background:linear-gradient(135deg, ${AURA.moss}, ${AURA.mossLight}); }
+      .ad-form-member-name { font-size:13px; font-weight:600; color:${t.text}; flex:1; margin:0; }
+      .ad-form-member-check {
+        width:22px; height:22px; border-radius:7px; border:2px solid ${t.borderInput};
+        display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0;
+      }
+      .ad-form-member.checked .ad-form-member-check { background:${AURA.moss}; border-color:${AURA.moss}; }
+
+      .ad-form-footer {
+        display:flex; align-items:center; gap:12px; margin-top:20px;
+      }
+      .ad-form-counter {
+        flex:1; text-align:center; padding:12px 15px; border-radius:14px;
+        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(30,63,102,.05)"}; border:1px solid ${t.border};
+        font-size:12.5px; color:${t.textSec}; font-weight:600;
+      }
+      .ad-form-counter strong { color:${AURA.gold}; }
+
+      /* Lista coletivo — layout elegante */
+      .ad-list-hero {
+        position:relative; overflow:hidden; border-radius:16px; padding:20px;
+        background:linear-gradient(135deg, ${AURA.roxoDeep} 0%, ${AURA.mossDeep} 60%, ${AURA.moss} 100%);
+        margin-bottom:18px; text-align:center;
+      }
+      .ad-list-hero::before {
+        content:''; position:absolute; top:-25px; right:-25px; width:90px; height:90px;
+        border-radius:50%; background:rgba(255,255,255,.05); pointer-events:none;
+      }
+      .ad-list-hero-icon {
+        width:48px; height:48px; border-radius:15px; background:rgba(255,255,255,.12);
+        display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;
+        backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15); position:relative; z-index:1;
+      }
+      .ad-list-hero-title {
+        font-family:'Fraunces',serif; font-size:17px; font-weight:600; color:#fff;
+        margin:0 0 4px; position:relative; z-index:1;
+      }
+      .ad-list-hero-sub { font-size:12px; color:rgba(255,255,255,.55); margin:0; position:relative; z-index:1; }
+
+      .ad-list-section-label {
+        font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+        color:${t.textMuted}; margin:0 0 10px; display:flex; align-items:center; gap:6px;
+      }
+      .ad-list-section-label::after { content:''; flex:1; height:1px; background:${t.border}; }
+
+      .ad-list-card {
+        border-radius:16px; background:${t.bgEl}; border:1px solid ${t.border};
+        overflow:hidden; backdrop-filter:blur(10px);
+      }
+
+      .ad-list-item {
+        display:flex; align-items:center; gap:12px; padding:14px 16px;
+        border-bottom:1px solid ${t.border}; cursor:pointer; transition:all .2s;
+      }
+      .ad-list-item:last-child { border-bottom:none; }
+      .ad-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(30,63,102,.03)"}; }
+
+      .ad-list-item-avatar {
+        width:42px; height:42px; border-radius:13px; flex-shrink:0;
+        background:linear-gradient(135deg, ${AURA.roxoDeep}, ${AURA.roxo});
+        display:flex; align-items:center; justify-content:center; color:#fff;
+      }
+
+      .ad-list-item-body { flex:1; min-width:0; }
+      .ad-list-item-title {
+        font-family:'Fraunces',serif; font-size:14px; font-weight:600; color:${t.text};
+        margin:0 0 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      }
+      .ad-list-item-meta {
+        display:flex; flex-wrap:wrap; gap:8px; font-size:11px; color:${t.textMuted}; margin:0;
+      }
+      .ad-list-item-meta span { display:inline-flex; align-items:center; gap:3px; }
+
+      .ad-list-item-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+      .ad-list-item-arrow {
+        width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(30,63,102,.05)"}; transition:all .2s;
+      }
+      .ad-list-item:hover .ad-list-item-arrow { background:rgba(184,137,46,.12); color:${AURA.gold}; }
+
+      .ad-list-summary {
+        display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:18px;
+      }
+      .ad-list-summary-card {
+        padding:14px 10px; border-radius:14px; background:${t.bgEl}; border:1px solid ${t.border};
+        text-align:center;
+      }
+      .ad-list-summary-value {
+        font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:${AURA.gold};
+        margin:0 0 2px;
+      }
+      .ad-list-summary-label { font-size:10px; color:${t.textMuted}; margin:0; text-transform:uppercase; letter-spacing:.05em; }
+
       .ad-toast-wrap { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:400; width:calc(100% - 32px); max-width:420px; }
       .ad-toast {
         display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:14px;
@@ -398,6 +660,7 @@ export default function AcompanhamentoDiscipulado({ isDark = true, open, onClose
                                         t={t} membros={membros} loading={loadingMembros}
                                         onRegistrar={(m) => push("individual-form", { membroPre: m })}
                                         onVerHistorico={(m) => push("individual-historico", { membroId: m.membroId, membroNome: m.membroNome })}
+                                        onMembroJaDiscipulado={() => notify("Membro já foi discipulado", "info")}
                                     />
                                 )}
 
@@ -509,7 +772,7 @@ function TelaEscolha({ t, pendentesSemana, onEscolher }) {
 /* ════════════════════════════════════════════════════════════════════
    DISCIPULADO INDIVIDUAL — lista
    ════════════════════════════════════════════════════════════════════ */
-function TelaIndividualLista({ t, membros, loading, onRegistrar, onVerHistorico }) {
+function TelaIndividualLista({ t, membros, loading, onRegistrar, onVerHistorico, onMembroJaDiscipulado }) {
     const [busca, setBusca] = useState("");
     const filtrados = useMemo(() => {
         const q = busca.trim().toLowerCase();
@@ -533,7 +796,7 @@ function TelaIndividualLista({ t, membros, loading, onRegistrar, onVerHistorico 
                     filtrados.map((m) => {
                         const realizado = m.statusSemanal === "REALIZADO" || m.discipuladoEstaSemana === true;
                         return (
-                            <div key={m.membroId} className="ad-row" onClick={() => (realizado ? onVerHistorico(m) : onRegistrar(m))}>
+                            <div key={m.membroId} className="ad-row" onClick={() => (realizado ? onMembroJaDiscipulado(m) : onRegistrar(m))}>
                                 <div className="ad-row-left">
                                     <div className="ad-avatar">{m.membroNome?.charAt(0).toUpperCase()}</div>
                                     <div style={{ minWidth: 0 }}>
@@ -748,36 +1011,73 @@ function TelaColetivoLista({ t, notify, onRegistrar, onAbrirDetalhe }) {
 
     useEffect(() => { carregar(); }, [carregar]);
 
+    const totalParticipantes = lista.reduce((acc, e) => acc + (e.quantidadeParticipantes ?? e.participantes ?? 0), 0);
+
     return (
         <div>
+            {/* Hero */}
+            <div className="ad-list-hero">
+                <div className="ad-list-hero-icon">
+                    <Users size={22} color="#fff" />
+                </div>
+                <p className="ad-list-hero-title">Encontros Coletivos</p>
+                <p className="ad-list-hero-sub">Visualize e registre encontros da célula</p>
+            </div>
+
+            {/* Botão registrar */}
             <div className="ad-cta-row">
                 <button className="ad-btn ad-btn-primary ad-btn-block" onClick={onRegistrar}>
-                    <Plus size={14} /> Registrar Discipulado Coletivo
+                    <Plus size={14} /> Registrar Encontro
                 </button>
             </div>
 
-            <p className="ad-section-title" style={{ fontSize: 13 }}>Encontros registrados</p>
-            <div className="ad-card">
+            {/* Resumo */}
+            {!loading && lista.length > 0 && (
+                <div className="ad-list-summary">
+                    <div className="ad-list-summary-card">
+                        <p className="ad-list-summary-value">{lista.length}</p>
+                        <p className="ad-list-summary-label">Encontros</p>
+                    </div>
+                    <div className="ad-list-summary-card">
+                        <p className="ad-list-summary-value">{totalParticipantes}</p>
+                        <p className="ad-list-summary-label">Participações</p>
+                    </div>
+                    <div className="ad-list-summary-card">
+                        <p className="ad-list-summary-value">{lista.length > 0 ? Math.round(totalParticipantes / lista.length) : 0}</p>
+                        <p className="ad-list-summary-label">Média</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Lista */}
+            <div className="ad-list-section-label">Encontros registrados</div>
+            <div className="ad-list-card">
                 {loading ? (
                     <div className="ad-loading-wrap"><Loader2 size={20} className="ad-spin" /></div>
                 ) : lista.length === 0 ? (
                     <div className="ad-empty"><Users size={22} /> Nenhum encontro coletivo registrado ainda.</div>
                 ) : (
                     lista.map((e) => (
-                        <div key={e.id} className="ad-row" onClick={() => onAbrirDetalhe(e.id)}>
-                            <div className="ad-row-left">
-                                <div className="ad-avatar" style={{ background: `linear-gradient(135deg, ${AURA.roxoDeep}, ${AURA.roxo})` }}>
-                                    <Users size={15} />
-                                </div>
-                                <div style={{ minWidth: 0 }}>
-                                    <p className="ad-row-name">{e.tema || labelTipoEstudo(e.tipoEstudo)}</p>
-                                    <p className="ad-row-meta">
-                                        <span>{formatarDataBR(e.data)}</span>
-                                        <span>· {e.quantidadeParticipantes ?? e.participantes ?? "—"} participantes</span>
-                                    </p>
+                        <div key={e.id} className="ad-list-item" onClick={() => onAbrirDetalhe(e.id)}>
+                            <div className="ad-list-item-avatar">
+                                <BookOpen size={18} />
+                            </div>
+                            <div className="ad-list-item-body">
+                                <p className="ad-list-item-title">{e.tema || labelTipoEstudo(e.tipoEstudo)}</p>
+                                <div className="ad-list-item-meta">
+                                    <span><Calendar size={10} /> {formatarDataBR(e.data)}</span>
+                                    <span><UsersIcon size={10} /> {e.quantidadeParticipantes ?? e.participantes ?? "—"} participantes</span>
+                                    {e.horario && <span><Clock size={10} /> {e.horario}</span>}
                                 </div>
                             </div>
-                            <ChevronRight size={15} color={t.textMuted} />
+                            <div className="ad-list-item-right">
+                                <span className={`ad-badge ${e.status === "CANCELADO" ? "ad-badge-off" : "ad-badge-ok"}`}>
+                                    {e.status === "CANCELADO" ? "Cancelado" : "Concluído"}
+                                </span>
+                                <div className="ad-list-item-arrow">
+                                    <ChevronRight size={14} color={t.textMuted} />
+                                </div>
+                            </div>
                         </div>
                     ))
                 )}
@@ -840,82 +1140,106 @@ function FormColetivo({ t, membros, onSalvo, onErro }) {
 
     return (
         <div>
+            {/* Hero */}
+            <div className="ad-form-hero">
+                <div className="ad-form-hero-icon">
+                    <ClipboardList size={22} color="#fff" />
+                </div>
+                <p className="ad-form-hero-title">Registrar Encontro Coletivo</p>
+                <p className="ad-form-hero-sub">Preencha os dados do encontro e marque os presentes</p>
+            </div>
+
             {erro && <div className="ad-alert ad-alert-error"><AlertCircle size={16} style={{ flexShrink: 0 }} /> <span>{erro}</span></div>}
 
-            <div className="ad-form-row">
-                <div className="ad-form-group">
-                    <label>Data</label>
-                    <input type="date" className="ad-input" max={hoje()} value={form.data} onChange={set("data")} />
-                </div>
-                <div className="ad-form-group">
-                    <label>Horário</label>
-                    <input type="time" className="ad-input" value={form.horario} onChange={set("horario")} />
-                </div>
-            </div>
+            {/* Dados do encontro */}
+            <div className="ad-form-section">
+                <p className="ad-form-section-label">Dados do Encontro</p>
+                <div className="ad-form-card">
+                    <div className="ad-form-pick-grid" style={{ marginBottom: 14 }}>
+                        <div className="ad-form-field-elegant">
+                            <label><Calendar size={11} /> Data</label>
+                            <input type="date" max={hoje()} value={form.data} onChange={set("data")} />
+                        </div>
+                        <div className="ad-form-field-elegant">
+                            <label><Clock size={11} /> Horário</label>
+                            <input type="time" value={form.horario} onChange={set("horario")} />
+                        </div>
+                    </div>
 
-            <div className="ad-form-group">
-                <label>Tipo de estudo</label>
-                <select className="ad-select" value={form.tipoEstudo} onChange={set("tipoEstudo")}>
-                    {TIPOS_ESTUDO.map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
-                </select>
-            </div>
+                    <div className="ad-form-field-elegant">
+                        <label><BookOpen size={11} /> Tipo de Estudo</label>
+                        <select value={form.tipoEstudo} onChange={set("tipoEstudo")}>
+                            {TIPOS_ESTUDO.map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
+                        </select>
+                    </div>
 
-            {form.tipoEstudo === "OUTRO" && (
-                <div className="ad-form-group">
-                    <label>Descreva o tipo de estudo</label>
-                    <input className="ad-input" value={form.tipoEstudoOutro} onChange={set("tipoEstudoOutro")} />
-                </div>
-            )}
+                    {form.tipoEstudo === "OUTRO" && (
+                        <div className="ad-form-field-elegant">
+                            <label>Descreva o tipo de estudo</label>
+                            <input value={form.tipoEstudoOutro} onChange={set("tipoEstudoOutro")} placeholder="Ex.: Estudo sobre..." />
+                        </div>
+                    )}
 
-            <div className="ad-form-group">
-                <label>Tema</label>
-                <input className="ad-input" value={form.tema} onChange={set("tema")} placeholder="Ex.: Fé" />
-            </div>
+                    <div className="ad-form-field-elegant">
+                        <label><BookOpen size={11} /> Tema</label>
+                        <input value={form.tema} onChange={set("tema")} placeholder="Ex.: Fé, Oração, Amor..." />
+                    </div>
 
-            <div className="ad-form-group">
-                <label>Local</label>
-                <input className="ad-input" value={form.local} onChange={set("local")} placeholder="Ex.: Igreja" />
-            </div>
+                    <div className="ad-form-field-elegant">
+                        <label><MapPin size={11} /> Local</label>
+                        <input value={form.local} onChange={set("local")} placeholder="Ex.: Igreja, Residência..." />
+                    </div>
 
-            <div className="ad-form-group">
-                <label>Observações</label>
-                <textarea className="ad-textarea" value={form.observacoes} onChange={set("observacoes")} />
-            </div>
-
-            <div className="ad-form-group">
-                <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span>Participantes</span>
-                    <span
-                        style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", textTransform: "none", color: AURA.gold, fontWeight: 600 }}
-                        onClick={toggleTodos}
-                    >
-              <span className={`ad-checkbox ${todosMarcados ? "checked" : ""}`} style={{ width: 16, height: 16 }}>
-                {todosMarcados && <Check size={11} color="#fff" />}
-              </span>
-              Selecionar todos
-            </span>
-                </label>
-                <div className="ad-checklist">
-                    {membros.length === 0 && <p style={{ padding: 10, fontSize: 12, color: t.textMuted }}>Nenhum membro na célula.</p>}
-                    {membros.map((m) => {
-                        const checked = participantes.has(m.membroId);
-                        return (
-                            <div key={m.membroId} className="ad-check-row" onClick={() => toggleMembro(m.membroId)}>
-                                <span className={`ad-checkbox ${checked ? "checked" : ""}`}>{checked && <Check size={12} color="#fff" />}</span>
-                                <span className="ad-check-name">{m.membroNome}</span>
-                            </div>
-                        );
-                    })}
+                    <div className="ad-form-field-elegant">
+                        <label>Observações</label>
+                        <textarea value={form.observacoes} onChange={set("observacoes")} placeholder="Anotações adicionais..." />
+                    </div>
                 </div>
             </div>
 
-            <div className="ad-count-pill">
-                {participantes.size} participante{participantes.size === 1 ? "" : "s"} selecionado{participantes.size === 1 ? "" : "s"}
+            {/* Participantes */}
+            <div className="ad-form-section">
+                <div className="ad-form-participants-header">
+                    <span className="ad-form-participants-title">Participantes ({participantes.size}/{membros.length})</span>
+                    <span className="ad-form-select-all" onClick={toggleTodos}>
+                        <span className={`ad-checkbox ${todosMarcados ? "checked" : ""}`} style={{ width: 15, height: 15 }}>
+                            {todosMarcados && <Check size={10} color="#fff" />}
+                        </span>
+                        {todosMarcados ? "Desmarcar todos" : "Selecionar todos"}
+                    </span>
+                </div>
+
+                {membros.length === 0 ? (
+                    <div className="ad-empty"><Users size={22} /> Nenhum membro na célula.</div>
+                ) : (
+                    <div>
+                        {membros.map((m) => {
+                            const checked = participantes.has(m.membroId);
+                            return (
+                                <div key={m.membroId} className={`ad-form-member ${checked ? "checked" : ""}`} onClick={() => toggleMembro(m.membroId)}>
+                                    <div className="ad-form-member-avatar">
+                                        {checked ? <Check size={14} color="#fff" /> : m.membroNome?.charAt(0)?.toUpperCase()}
+                                    </div>
+                                    <p className="ad-form-member-name">{m.membroNome}</p>
+                                    <div className={`ad-form-member-check ${checked ? "checked" : ""}`}>
+                                        {checked && <Check size={12} color="#fff" />}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
-            <button className="ad-btn ad-btn-primary ad-btn-block" disabled={salvando} onClick={salvar}>
-                {salvando ? <Loader2 size={15} className="ad-spin" /> : <Check size={15} />} Salvar Encontro
-            </button>
+            {/* Footer */}
+            <div className="ad-form-footer">
+                <div className="ad-form-counter">
+                    <strong>{participantes.size}</strong> participante{participantes.size === 1 ? "" : "s"} selecionado{participantes.size === 1 ? "" : "s"}
+                </div>
+                <button className="ad-btn ad-btn-primary" disabled={salvando} onClick={salvar} style={{ minWidth: 140 }}>
+                    {salvando ? <Loader2 size={15} className="ad-spin" /> : <Check size={15} />} Salvar
+                </button>
+            </div>
         </div>
     );
 }
@@ -943,58 +1267,87 @@ function DetalheColetivo({ t, id, notify }) {
 
     if (loading) return <div className="ad-loading-wrap"><Loader2 size={20} className="ad-spin" /></div>;
     const presentes = dados?.presentes || [];
+    const totalPresentes = dados?.quantidadePresentes ?? presentes.length;
 
     return (
         <div>
-            <div className="ad-form-row" style={{ marginBottom: 4 }}>
-                <div>
-                    <p style={{ fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 3px" }}>Data / Horário</p>
-                    <p style={{ margin: 0, fontWeight: 600, color: t.text, fontSize: 13 }}>{formatarDataBR(dados?.data)} {dados?.horario ? `· ${dados.horario}` : ""}</p>
-                </div>
-                <div>
-                    <p style={{ fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 3px" }}>Tipo de estudo</p>
-                    <p style={{ margin: 0, fontWeight: 600, color: t.text, fontSize: 13 }}>{dados?.tipoEstudoDescricao || labelTipoEstudo(dados?.tipoEstudo)}</p>
-                </div>
-            </div>
-
-            <p style={{ fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase", color: t.textMuted, margin: "13px 0 3px" }}>Tema</p>
-            <p style={{ margin: "0 0 10px", fontWeight: 600, fontSize: 14, color: t.text }}>{dados?.tema}</p>
-
-            {dados?.local && (
-                <>
-                    <p style={{ fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 3px" }}>Local</p>
-                    <p style={{ margin: "0 0 10px", color: t.textSec, fontSize: 12.5 }}>{dados.local}</p>
-                </>
-            )}
-
-            {dados?.observacoes && (
-                <>
-                    <p style={{ fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 3px" }}>Observações</p>
-                    <p style={{ margin: "0 0 12px", color: t.textSec, fontSize: 12.5 }}>{dados.observacoes}</p>
-                </>
-            )}
-
-            <div className="ad-count-pill">
-                {dados?.quantidadePresentes ?? presentes.length} presente{(dados?.quantidadePresentes ?? presentes.length) === 1 ? "" : "s"}
-            </div>
-
-            <p style={{ fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase", color: t.textMuted, margin: "14px 0 8px" }}>
-                Presentes ({presentes.length})
-            </p>
-            <div className="ad-checklist" style={{ marginBottom: 14 }}>
-                {presentes.map((p, idx) => (
-                    <div key={p.membroId ?? idx} className="ad-check-row" style={{ cursor: "default" }}>
-                        <span style={{ width: 20, textAlign: "center", fontSize: 10.5, color: t.textMuted, fontWeight: 700 }}>{idx + 1}.</span>
-                        <span className="ad-check-name">{p.membroNome}</span>
+            {/* Hero card */}
+            <div className="ad-detail-hero">
+                <div className="ad-detail-hero-top">
+                    <div className="ad-detail-hero-icon">
+                        <BookOpen size={20} color="#fff" />
                     </div>
-                ))}
-                {presentes.length === 0 && <p style={{ padding: 10, fontSize: 12, color: t.textMuted }}>Nenhum presente listado.</p>}
+                    <div>
+                        <p className="ad-detail-hero-label">Encontro Coletivo</p>
+                    </div>
+                </div>
+                <p className="ad-detail-hero-tema">{dados?.tema || labelTipoEstudo(dados?.tipoEstudo)}</p>
+                <div className="ad-detail-hero-meta">
+                    <span className="ad-detail-hero-chip">
+                        <Clock size={11} /> {formatarDataBR(dados?.data)} {dados?.horario ? `· ${dados.horario}` : ""}
+                    </span>
+                    <span className="ad-detail-hero-chip">
+                        <UsersIcon size={11} /> {totalPresentes} presente{totalPresentes === 1 ? "" : "s"}
+                    </span>
+                    <span className={dados?.status === "CANCELADO" ? "ad-badge ad-badge-off" : "ad-detail-hero-chip"}>
+                        {dados?.status === "CANCELADO" ? "Cancelado" : "Concluído"}
+                    </span>
+                </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span className={`ad-badge ${dados?.status === "CANCELADO" ? "ad-badge-off" : "ad-badge-ok"}`}>
-            {dados?.status === "CANCELADO" ? "Cancelado" : "Concluído"}
-          </span>
+            {/* Informações */}
+            <div className="ad-detail-section">
+                <p className="ad-detail-section-label">Informações</p>
+                <div className="ad-detail-info-grid">
+                    <div className="ad-detail-info-card">
+                        <p className="ad-detail-info-label"><Clock size={10} /> Data / Horário</p>
+                        <p className="ad-detail-info-value">{formatarDataBR(dados?.data)} {dados?.horario ? `· ${dados.horario}` : ""}</p>
+                    </div>
+                    <div className="ad-detail-info-card">
+                        <p className="ad-detail-info-label"><BookOpen size={10} /> Tipo de Estudo</p>
+                        <p className="ad-detail-info-value">{dados?.tipoEstudoDescricao || labelTipoEstudo(dados?.tipoEstudo)}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Local */}
+            {dados?.local && (
+                <div className="ad-detail-section">
+                    <p className="ad-detail-section-label">Local</p>
+                    <div className="ad-detail-info-card" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <MapPin size={14} color={AURA.gold} style={{ flexShrink: 0 }} />
+                        <p className="ad-detail-info-value" style={{ margin: 0, fontSize: 13 }}>{dados.local}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Observações */}
+            {dados?.observacoes && (
+                <div className="ad-detail-section">
+                    <p className="ad-detail-section-label">Observações</p>
+                    <p className="ad-detail-note">{dados.observacoes}</p>
+                </div>
+            )}
+
+            {/* Participantes */}
+            <div className="ad-detail-section">
+                <p className="ad-detail-section-label">Participantes ({presentes.length})</p>
+                {presentes.length === 0 ? (
+                    <div className="ad-empty"><Users size={22} /> Nenhum presente listado.</div>
+                ) : (
+                    presentes.map((p, idx) => (
+                        <div key={p.membroId ?? idx} className="ad-detail-participant">
+                            <div className="ad-detail-participant-avatar">
+                                {p.membroNome?.charAt(0)?.toUpperCase()}
+                            </div>
+                            <div>
+                                <p className="ad-detail-participant-name">{p.membroNome}</p>
+                                <p className="ad-detail-participant-num">#{idx + 1}</p>
+                            </div>
+                            <span className="ad-detail-participant-badge">Presente</span>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

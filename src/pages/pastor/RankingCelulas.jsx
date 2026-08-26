@@ -41,6 +41,10 @@ function theme(isDark) {
     glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
     cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
     placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
+    gold:      isDark ? "#C9A96E"               : "#3D3218",
+    goldSoft:  isDark ? "rgba(201,169,110,.06)" : "rgba(61,50,24,.08)",
+    goldHover: isDark ? "rgba(201,169,110,.12)" : "rgba(61,50,24,.14)",
+    yellow:    isDark ? "#FDB813"               : "#9A7A0E",
   };
 }
 
@@ -54,7 +58,7 @@ const RANK_STYLE = {
 /* Critérios que compõem a pontuação mensal */
 const CRITERIOS = [
   { key: "presencaMedia",     label: "Presença Média",   Icon: Users,         color: AURA.blue },
-  { key: "visitantes",        label: "Visitantes",        Icon: UserPlus,      color: "#c8a010" },
+  { key: "visitantes",        label: "Visitantes",        Icon: UserPlus,      color: AURA.yellow },
   { key: "consolidados",      label: "Consolidados",      Icon: HeartHandshake,color: AURA.red },
   { key: "aceitouJesus",      label: "Aceitaram Jesus",    Icon: Sparkles,      color: AURA.gold },
   { key: "desejaBatismo",     label: "Desejam Batismo",    Icon: Droplet,       color: AURA.blue },
@@ -148,21 +152,21 @@ function GlobalStyles({ t, isDark }) {
       .rk-btn-export {
         width: auto; padding: 0 14px; gap: 7px;
         font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600;
-        color: ${AURA.gold}; border-color: rgba(201,169,110,.3);
+        color: ${t.gold}; border-color: rgba(201,169,110,.3);
         background: rgba(201,169,110,.08);
       }
-      .rk-btn-refresh:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .rk-btn-refresh:hover { border-color: ${t.gold}; color: ${t.gold}; }
       .rk-btn-export:hover { background: rgba(201,169,110,.16); }
       .rk-btn-refresh:disabled, .rk-btn-export:disabled { opacity: .5; cursor: default; }
 
       /* ── Modal de exportação ── */
       .rk-export-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,.6);
+        position: fixed; inset: 0; background: ${isDark ? "rgba(10,10,15,.6)" : "rgba(245,240,232,.6)"};
         backdrop-filter: blur(4px); z-index: 1000;
         display: flex; align-items: center; justify-content: center; padding: 20px;
       }
       .rk-export-modal {
-        width: 100%; max-width: 380px; background: ${isDark ? "#12121A" : "#fff"};
+        width: 100%; max-width: 380px; background: ${t.bg};
         border: 1px solid ${t.border}; border-radius: 20px; padding: 20px;
       }
       .rk-export-modal-head {
@@ -185,12 +189,12 @@ function GlobalStyles({ t, isDark }) {
         border: 1px solid ${t.border}; cursor: pointer; transition: all .2s;
         font-family: 'Inter', sans-serif; text-align: left;
       }
-      .rk-export-option:hover:not(:disabled) { border-color: ${AURA.gold}; background: rgba(201,169,110,.1); }
+      .rk-export-option:hover:not(:disabled) { border-color: ${t.gold}; background: rgba(201,169,110,.1); }
       .rk-export-option:disabled { opacity: .5; cursor: default; }
       .rk-export-option-icon {
         width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
-        background: rgba(201,169,110,.12); color: ${AURA.gold};
+        background: rgba(201,169,110,.12); color: ${t.gold};
       }
       .rk-export-option-label { font-size: 13px; font-weight: 500; color: ${t.text}; margin: 0; }
       .rk-export-option-sub { font-size: 10.5px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; }
@@ -209,7 +213,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; justify-content: center;
         transition: all .2s; flex-shrink: 0;
       }
-      .rk-month-btn:hover:not(:disabled) { background: rgba(201,169,110,.12); color: ${AURA.gold}; }
+      .rk-month-btn:hover:not(:disabled) { background: rgba(201,169,110,.12); color: ${t.gold}; }
       .rk-month-btn:disabled { opacity: .3; cursor: default; }
       .rk-month-label {
         flex: 1; text-align: center; min-width: 0;
@@ -219,7 +223,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .rk-month-now {
         font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-        color: ${AURA.gold}; background: rgba(201,169,110,.1);
+        color: ${t.gold}; background: rgba(201,169,110,.1);
         border: 1px solid rgba(201,169,110,.25); border-radius: 100px;
         padding: 5px 10px; cursor: pointer; flex-shrink: 0; transition: all .2s;
       }
@@ -229,7 +233,7 @@ function GlobalStyles({ t, isDark }) {
       .rk-search-wrap { position: relative; margin-bottom: 20px; }
       .rk-search-icon {
         position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-        color: ${AURA.gold}; opacity: .5; pointer-events: none;
+        color: ${t.gold}; opacity: .5; pointer-events: none;
       }
       .rk-input {
         width: 100%; box-sizing: border-box;
@@ -288,7 +292,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; justify-content: center;
         font-family: 'Playfair Display', serif; font-weight: 600; font-size: 18px;
         background: linear-gradient(135deg, rgba(201,169,110,.2), rgba(201,169,110,.06));
-        border: 1px solid rgba(201,169,110,.22); color: ${AURA.gold};
+        border: 1px solid rgba(201,169,110,.22); color: ${t.gold};
         position: relative; z-index: 1;
       }
       .rk-podium-1 .rk-podium-avatar { width: 56px; height: 56px; font-size: 22px; }
@@ -376,7 +380,7 @@ function GlobalStyles({ t, isDark }) {
         border: 1px solid rgba(201,169,110,.22);
         display: flex; align-items: center; justify-content: center;
         font-family: 'Playfair Display', serif; font-weight: 600;
-        font-size: 15px; color: ${AURA.gold};
+        font-size: 15px; color: ${t.gold};
       }
 
       .rk-row-info { flex: 1; min-width: 0; }
@@ -394,14 +398,14 @@ function GlobalStyles({ t, isDark }) {
 
       .rk-self-tag {
         font-size: 7.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-        color: ${AURA.gold}; background: rgba(201,169,110,.12);
+        color: ${t.gold}; background: rgba(201,169,110,.12);
         border: 1px solid rgba(201,169,110,.3); border-radius: 100px;
         padding: 2px 7px; flex-shrink: 0; line-height: 1.5;
       }
       .rk-multi-tag {
         display: inline-flex; align-items: center; gap: 3px;
         font-size: 7.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-        color: #c8a010; background: rgba(253,184,19,.12);
+        color: t.yellow; background: rgba(253,184,19,.12);
         border: 1px solid rgba(253,184,19,.3); border-radius: 100px;
         padding: 2px 7px; flex-shrink: 0; line-height: 1.5;
       }
@@ -449,7 +453,7 @@ function GlobalStyles({ t, isDark }) {
         grid-column: 1 / -1; display: flex; align-items: center; gap: 8px;
         padding: 9px 12px; border-radius: 10px;
         background: rgba(253,184,19,.08); border: 1px solid rgba(253,184,19,.25);
-        color: #c8a010; font-size: 11px; font-weight: 500;
+        color: t.yellow; font-size: 11px; font-weight: 500;
       }
 
       .rk-empty {
@@ -469,7 +473,7 @@ function GlobalStyles({ t, isDark }) {
         width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
         background: rgba(201,169,110,.08); border: 1px solid rgba(201,169,110,.2);
-        color: ${AURA.gold};
+        color: ${t.gold};
       }
       .rk-info-title { font-size: 12px; font-weight: 600; color: ${t.text}; margin: 0; letter-spacing: .02em; }
       .rk-info-sub { font-size: 10.5px; font-weight: 300; color: ${t.textMuted}; margin: 1px 0 0; }
@@ -539,7 +543,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; justify-content: center;
         font-family: 'Playfair Display', serif; font-weight: 600; font-size: 40px;
         background: linear-gradient(135deg, rgba(201,169,110,.22), rgba(201,169,110,.06));
-        border: 1px solid rgba(201,169,110,.3); color: #C9A96E;
+        border: 1px solid rgba(201,169,110,.3); color: ${t.gold};
       }
       .pxp-card-1 .pxp-avatar { width: 118px; height: 118px; font-size: 48px; }
       .pxp-name {
@@ -850,7 +854,7 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
                 {filtrado.length} célula{filtrado.length === 1 ? "" : "s"}{buscaLower ? " encontrada(s)" : " no mês"}
               </p>
             </div>
-            <Sparkles size={16} style={{ color: AURA.gold, opacity: .6, flexShrink: 0 }} />
+            <Sparkles size={16} style={{ color: t.gold, opacity: .6, flexShrink: 0 }} />
           </div>
 
           <div className="rk-list">
@@ -965,7 +969,7 @@ export default function RankingCelulas({ isDark = false, celulaId = null }) {
                         </div>
                     ))}
                     <div className="rk-info-row">
-                      <div className="rk-info-row-icon" style={{ background: "rgba(253,184,19,.12)", color: "#c8a010" }}>
+                      <div className="rk-info-row-icon" style={{ background: "rgba(253,184,19,.12)", color: t.yellow }}>
                         <GitBranch size={13} />
                       </div>
                       <span>Multiplicação da célula no mês</span>

@@ -50,7 +50,6 @@ export default function PainelAlertas({ isDark = false }) {
   const [loading,   setLoading]   = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
-  const bg            = isDark ? IEQ.dark     : "#F0EAE8";
   const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
   const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
@@ -63,17 +62,7 @@ export default function PainelAlertas({ isDark = false }) {
     }
     @keyframes pulse { 0%,100% { transform:scale(1); opacity:.45; } 50% { transform:scale(1.12); opacity:.12; } }
     @keyframes spin  { to { transform: rotate(360deg); } }
-    .ieq-bg-alerts {
-      position:fixed; inset:0; pointer-events:none; z-index:0;
-      background: repeating-linear-gradient(
-        -55deg,
-        ${isDark ? "rgba(200,16,46,.04)" : "rgba(200,16,46,.06)"} 0 10px,
-        transparent 10px 20px,
-        ${isDark ? "rgba(253,184,19,.03)" : "rgba(253,184,19,.05)"} 20px 30px,
-        transparent 30px 40px
-      );
-      background-size:60px 60px;
-    }
+    /* ── SEM fundo/min-height próprios: renderizado DENTRO de PastorPage (.pp-root) ── */
     .ieq-card-alerts {
       background: ${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
       border: 1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
@@ -141,9 +130,8 @@ export default function PainelAlertas({ isDark = false }) {
   );
 
   return (
-      <div style={{ minHeight:"100vh", background:bg, color:textPrimary, fontFamily:"'EB Garamond',serif", position:"relative", paddingBottom:60 }}>
+      <div style={{ color:textPrimary, fontFamily:"'EB Garamond',serif", position:"relative", paddingBottom:60 }}>
         <style>{globalStyles}</style>
-        <div className="ieq-bg-alerts" />
 
         <div style={{ position:"relative", zIndex:10, maxWidth:1200, margin:"0 auto", padding:"32px 16px 0" }}>
 
