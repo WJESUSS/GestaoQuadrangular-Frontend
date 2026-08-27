@@ -144,7 +144,7 @@ export default function Login() {
             const d = jwtDecode(token);
             localStorage.setItem("user", JSON.stringify({ id:d.id, username:d.sub, perfil:d.perfil }));
             const p = d.perfil?.replace("ROLE_","").toUpperCase();
-            const map = { ADMIN:"/admin", PASTOR:"/pastor", LIDER_CELULA:"/lider", TESOUREIRO:"/tesouraria", SECRETARIO:"/secretaria" };
+            const map = { ADMIN:"/admin", PASTOR:"/pastor", LIDER_CELULA:"/lider", TESOUREIRO:"/tesouraria", SECRETARIO:"/secretaria", DIACONO:"/diacono" };
             if (map[p]) {
                 sessionStorage.setItem("boas_vindas_pendente", "1");
                 navigate(map[p]);

@@ -13,13 +13,14 @@ import Discipulado                from "./Discipulado.jsx";
 import TelaPendencias             from "./TelaPendencias.jsx";
 import RelatorioMissao70Pastor    from "./RelatorioMissao70Pastor.jsx";
 import RelatoriosDiscipuladoCelulas from "./RelatoriosDiscipuladoCelulas.jsx";
+import RelatorioCultos              from "./RelatorioCultos.jsx";
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, LogOut, Sun, Moon,
   ClipboardList, Flame, Activity,
   Cake, Bell, Send, Check, X, ChevronRight, UserCheck,
-  ArrowLeft,
+  ArrowLeft, Church,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 
@@ -70,6 +71,7 @@ const MENU_ITEMS = [
   { icon: Flame,                     name: "Missão 70",     desc: "Evangelismo",     aba: "missao70",               color: AURA.gold },
   { icon: ClipboardList,             name: "Pendências",    desc: "Itens Abertos",   aba: "pendencias",             color: "#F97316" },
   { icon: AlertTriangle,             name: "Alertas",       desc: "Notificações",    aba: "alertas",                color: AURA.red },
+  { icon: Church,                    name: "Cultos",        desc: "Relatórios",      aba: "cultos",                 color: AURA.gold },
   { icon: Activity,                  name: "Painel",        desc: "Pastoral",        aba: "painel-pastoral",        color: AURA.gold, modal: true },
 ];
 
@@ -81,6 +83,7 @@ const PAGE_TITLES = {
   "multiplicacoes":  "Multiplicações",
   "ranking-celulas": "Ranking",
   "alertas":         "Alertas",
+  "cultos":          "Relatório de Cultos",
   "pendencias":      "Pendências",
   "missao70":        "Missão 70",
 };
@@ -881,6 +884,7 @@ export default function PastorPage() {
                     {abaAtiva === "multiplicacoes"          && <SolicitacoesMultiplicacao isDark={isDark} />}
                     {abaAtiva === "ranking-celulas"         && <RankingCelulas            isDark={isDark} />}
                     {abaAtiva === "alertas"                 && <PainelAlertas             isDark={isDark} />}
+                    {abaAtiva === "cultos"                  && <RelatorioCultos           isDark={isDark} />}
                     {abaAtiva === "pendencias"              && <TelaPendencias            isDark={isDark} />}
                     {abaAtiva === "missao70"                && <RelatorioMissao70Pastor   isDark={isDark} />}
                   </motion.div>

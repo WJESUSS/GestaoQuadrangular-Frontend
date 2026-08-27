@@ -71,6 +71,7 @@ export default function UserForm({ fetchUsuarios, editingUser, setEditingUser })
         <option value="LIDER_CELULA">LIDER_CELULA</option>
         <option value="SECRETARIO">SECRETARIO</option>
         <option value="TESOUREIRO">TESOUREIRO</option>
+        <option value="DIACONO">DIACONO</option>
       </select>
       <button type="submit">{editingUser ? "Atualizar" : "Cadastrar"}</button>
       {editingUser && <button onClick={() => setEditingUser(null)}>Cancelar</button>}

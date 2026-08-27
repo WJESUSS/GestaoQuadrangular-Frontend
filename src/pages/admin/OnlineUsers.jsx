@@ -38,6 +38,7 @@ function perfilLabel(perfil) {
     SECRETARIO: "Secretário",
     LIDER_CELULA: "Líder de Célula",
     TESOUREIRO: "Tesoureiro",
+    DIACONO: "Diácono",
   };
   return map[perfil] || perfil || "—";
 }
@@ -49,6 +50,7 @@ function perfilCor(perfil) {
     SECRETARIO: "#7C3AED",
     LIDER_CELULA: AURA.green,
     TESOUREIRO: AURA.gold,
+    DIACONO: "#0EA5E9",
   };
   return map[perfil] || AURA.gold;
 }

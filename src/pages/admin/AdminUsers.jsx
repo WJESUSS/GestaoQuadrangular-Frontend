@@ -86,7 +86,7 @@ function theme(isDark) {
   };
 }
 
-const perfis = ["ADMIN","PASTOR","LIDER_CELULA","SECRETARIO","TESOUREIRO"];
+const perfis = ["ADMIN","PASTOR","LIDER_CELULA","SECRETARIO","TESOUREIRO","DIACONO"];
 
 const SECOES = [
   {

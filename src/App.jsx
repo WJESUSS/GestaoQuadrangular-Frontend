@@ -13,6 +13,7 @@ const PastorPage     = lazy(() => import("./pages/pastor/PastorPage"));
 const SecretariaPage = lazy(() => import("./pages/secretaria/SecretariaPage"));
 const DashboardLider = lazy(() => import("./pages/lider/DashboardLider"));
 const TesourariaPage = lazy(() => import("./pages/tesouraria/TesourariaPage"));
+const DiaconoPage    = lazy(() => import("./pages/diacono/DiaconoPage"));
 const OnlineUsers    = lazy(() => import("./pages/admin/OnlineUsers"));
 
 const PrivateRoute = ({ children, allowedRoles }) => {
@@ -92,6 +93,16 @@ export default function App() {
                         element={
                             <PrivateRoute allowedRoles={["SECRETARIO", "PASTOR", "ADMIN"]}>
                                 <SecretariaPage />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    {/* DIACONO */}
+                    <Route
+                        path="/diacono"
+                        element={
+                            <PrivateRoute allowedRoles="DIACONO">
+                                <DiaconoPage />
                             </PrivateRoute>
                         }
                     />
