@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import {
   BarChart2, DollarSign, FileText, Users,
   TrendingUp, ArrowLeft, LogOut, Sun, Moon,
+  Church,
 } from "lucide-react";
 
 import TesourariaDashboard   from "./TesourariaDashboard.jsx";
@@ -10,6 +11,7 @@ import TesourariaLancamento  from "./TesourariaLancamento.jsx";
 import TesourariaRelatorio   from "./TesourariaRelatorio.jsx";
 import TesourariaDizimistas  from "./TesourariaDizimistas.jsx";
 import TesourariaComparativo from "./TesourariaComparativo.jsx";
+import RelatorioCultos       from "../pastor/RelatorioCultos.jsx";
 
 /* ─── Tokens AURA ─────────────────────────────────────────────────── */
 const AURA = {
@@ -348,6 +350,7 @@ export default function TesourariaPage() {
     { nome: "Relatório",   desc: "Exportar e docs",  icon: <FileText   size={20} />, cor: AURA.gold,    rota: "relatorio",   gradient: `rgba(201,169,110,.8),${AURA.gold}` },
     { nome: "Dizimistas",  desc: "Base de dados",    icon: <Users      size={20} />, cor: AURA.red,     rota: "dizimistas",  gradient: `${AURA.redDark},${AURA.red}`   },
     { nome: "Comparativo", desc: "Evolução anual",   icon: <TrendingUp size={20} />, cor: AURA.blue,    rota: "comparativo", gradient: `${AURA.blueDark},${AURA.blue}` },
+    { nome: "Rel. Cultos", desc: "Presença e relatório", icon: <Church    size={20} />, cor: AURA.gold,    rota: "cultos",      gradient: `rgba(201,169,110,.8),${AURA.gold}` },
   ];
 
   return (
@@ -475,6 +478,7 @@ export default function TesourariaPage() {
                     <Route path="relatorio"   element={<TesourariaRelatorio  isDark={isDark} />} />
                     <Route path="dizimistas"  element={<TesourariaDizimistas isDark={isDark} />} />
                     <Route path="comparativo" element={<TesourariaComparativo isDark={isDark} />} />
+                    <Route path="cultos"      element={<RelatorioCultos isDark={isDark} />} />
                   </Routes>
                 </div>
               </div>
