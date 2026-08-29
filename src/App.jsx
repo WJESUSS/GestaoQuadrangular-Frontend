@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import usePresence from "./hooks/usePresence";
+import InstallPWABanner from "./components/InstallPWABanner.jsx";
 
 // Carrega imediatamente — são as telas de entrada
 import Home  from "./pages/Home";
@@ -70,6 +71,7 @@ export default function App() {
 
     return (
         <BrowserRouter>
+            <InstallPWABanner />
             <Suspense fallback={<CarregandoTela />}>
                 <Routes>
 

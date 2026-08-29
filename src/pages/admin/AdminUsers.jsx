@@ -14,7 +14,7 @@ import {
   MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
   ChevronLeft, Inbox,
   ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info, UserCheck,
-  Droplets, Wifi,
+  Droplets, Wifi, Church,
 } from "lucide-react";
 
 import Membros                   from "../secretaria/Membros";
@@ -24,6 +24,7 @@ import FichasEncontro            from "../secretaria/FichasEncontro";
 import SecretariaCelulas         from "../secretaria/SecretariaCelulas";
 import PainelPastor              from "../pastor/PainelPastor";
 import RelatorioCelula           from "../pastor/RelatorioCelula";
+import RelatorioCultos           from "../pastor/RelatorioCultos";
 import SolicitacoesMultiplicacao from "../pastor/SolicitacoesMultiplicacao";
 import RankingCelulas            from "../pastor/RankingCelulas";
 import PainelAlertas             from "../pastor/PainelAlertas";
@@ -115,6 +116,7 @@ const SECOES = [
     itens:[
       { key:"painel-pastor",  label:"Dashboard",    sub:"Visão geral",     icon:LayoutDashboard },
       { key:"relatorios",     label:"Relatórios",   sub:"Células",         icon:FileText        },
+      { key:"cultos",         label:"Rel. Cultos",  sub:"Presença",        icon:Church          },
       { key:"discipulado",    label:"Discipulado",  sub:"Secretaria",      icon:Users           },
       { key:"acompanhamento", label:"Acompanhamento", sub:"Discipulado",   icon:UserCheck       },
       { key:"multiplicacoes", label:"Multiplicação",sub:"Solicitações",    icon:Share2          },
@@ -643,6 +645,7 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
     case "fichas-convertido": return <FichasConvertido {...p}/>;
     case "painel-pastor":     return <PainelPastor {...p}/>;
     case "relatorios":        return <RelatorioCelula {...p}/>;
+    case "cultos":            return <RelatorioCultos {...p}/>;
     case "discipulado":       return <Discipulado {...p}/>;
     case "acompanhamento":    return <RelatoriosDiscipuladoCelulas {...p}/>;
     case "multiplicacoes":    return <SolicitacoesMultiplicacao {...p}/>;
