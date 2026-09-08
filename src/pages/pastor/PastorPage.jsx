@@ -14,13 +14,14 @@ import TelaPendencias             from "./TelaPendencias.jsx";
 import RelatorioMissao70Pastor    from "./RelatorioMissao70Pastor.jsx";
 import RelatoriosDiscipuladoCelulas from "./RelatoriosDiscipuladoCelulas.jsx";
 import RelatorioCultos              from "./RelatorioCultos.jsx";
+import CelulasPastor                from "./CelulasPastor.jsx";
 
 import {
   LayoutDashboard, FileText, Users, Share2, Trophy,
   AlertTriangle, LogOut, Sun, Moon,
   ClipboardList, Flame, Activity,
   Cake, Bell, Send, Check, X, ChevronRight, UserCheck,
-  ArrowLeft, Church,
+  ArrowLeft, Church, Contact,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 
@@ -63,6 +64,7 @@ function theme(isDark) {
 /* ─── Menu items ─────────────────────────────────────────────────── */
 const MENU_ITEMS = [
   { icon: LayoutDashboard,           name: "Dashboard",     desc: "Visão Geral",    aba: "dashboard",              color: AURA.blue },
+  { icon: Contact,                   name: "Células",       desc: "Visita Pastoral", aba: "celulas",                color: "#A855F7" },
   { icon: FileText,                  name: "Relatórios",    desc: "Células",         aba: "relatorio-celulas",      color: AURA.red },
   { icon: Users,                     name: "Secretaria",    desc: "Discipulado",     aba: "discipulado",            color: "#8B5CF6" },
   { icon: UserCheck,                 name: "Discipulado",   desc: "Relatórios Cel.",  aba: "acompanhamento-discipulado", color: AURA.blue },
@@ -77,6 +79,7 @@ const MENU_ITEMS = [
 
 const PAGE_TITLES = {
   "dashboard":       "Dashboard Geral",
+  "celulas":         "Células",
   "relatorio-celulas": "Relatórios de Células",
   "discipulado":     "Secretaria",
   "acompanhamento-discipulado": "Relatórios de Discipulado das Células",
@@ -879,6 +882,7 @@ export default function PastorPage() {
                       exit={{ opacity: 0, transition: { duration: .2 } }}
                   >
                     {abaAtiva === "relatorio-celulas"       && <RelatorioCelula           isDark={isDark} />}
+                    {abaAtiva === "celulas"                  && <CelulasPastor            isDark={isDark} />}
                     {abaAtiva === "discipulado"             && <Discipulado               isDark={isDark} />}
                     {abaAtiva === "acompanhamento-discipulado" && <RelatoriosDiscipuladoCelulas isDark={isDark} />}
                     {abaAtiva === "multiplicacoes"          && <SolicitacoesMultiplicacao isDark={isDark} />}

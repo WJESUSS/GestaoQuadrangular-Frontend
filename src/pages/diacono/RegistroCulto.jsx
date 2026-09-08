@@ -390,6 +390,14 @@ export default function RegistroCulto({ isDark = false }) {
       return;
     }
 
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const dataCulto = new Date(y, m - 1, d);
+    if (dataCulto > hoje) {
+      setErro({ msg: "Data do culto não pode ser futura." });
+      return;
+    }
+
     const payload = {
       data:                       form.data,
       horario:                    form.horario || null,
