@@ -14,7 +14,7 @@ import {
   MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
   ChevronLeft, Inbox,
   ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info, UserCheck,
-  Droplets, Wifi, Church,
+  Droplets, Wifi, Church, Contact,
 } from "lucide-react";
 
 import Membros                   from "../secretaria/Membros";
@@ -32,6 +32,7 @@ import Discipulado               from "../pastor/Discipulado";
 import TelaPendencias            from "../pastor/TelaPendencias";
 import RelatorioMissao70Pastor   from "../pastor/RelatorioMissao70Pastor";
 import RelatoriosDiscipuladoCelulas from "../pastor/RelatoriosDiscipuladoCelulas";
+import CelulasPastor                from "../pastor/CelulasPastor";
 import TelaRelatorio             from "../lider/TelaRelatorio";
 import RelatorioDiscipulado      from "../lider/RelatorioDiscipulado";
 import TelaVisitantes            from "../lider/TelaVisitantes";
@@ -115,6 +116,7 @@ const SECOES = [
     id:"pastor", label:"Pastoral", icon:LayoutDashboard, color:"#e05050",
     itens:[
       { key:"painel-pastor",  label:"Dashboard",    sub:"Visão geral",     icon:LayoutDashboard },
+      { key:"celulas-pastor", label:"Células",      sub:"Visita Pastoral", icon:Contact },
       { key:"relatorios",     label:"Relatórios",   sub:"Células",         icon:FileText        },
       { key:"cultos",         label:"Rel. Cultos",  sub:"Presença",        icon:Church          },
       { key:"discipulado",    label:"Discipulado",  sub:"Secretaria",      icon:Users           },
@@ -644,6 +646,7 @@ function ModuloRenderer({ moduloKey, isDark, celulaAdmin }) {
     case "secretariacelulas": return <SecretariaCelulas {...p}/>;
     case "fichas-convertido": return <FichasConvertido {...p}/>;
     case "painel-pastor":     return <PainelPastor {...p}/>;
+    case "celulas-pastor":    return <CelulasPastor {...p}/>;
     case "relatorios":        return <RelatorioCelula {...p}/>;
     case "cultos":            return <RelatorioCultos {...p}/>;
     case "discipulado":       return <Discipulado {...p}/>;

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
   Plus, X, Building2, Clock, Search, Users, MapPin, Calendar,
-  Home, User, Loader2, ChevronRight,
+  Home, User, Loader2, ChevronRight, CalendarCheck, CheckCircle2,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 
@@ -59,6 +59,28 @@ const DIAS_CURTO = {
   SATURDAY:  "Sáb",
   SUNDAY:    "Dom",
 };
+
+/* ─── Controle de visitas pastorais (persistência local) ─────────── */
+const VISITAS_KEY = "ieq_pastor_visitas_celulas";
+
+function carregarVisitas() {
+  try { return JSON.parse(localStorage.getItem(VISITAS_KEY) || "{}"); } catch { return {}; }
+}
+
+function salvarVisitas(map) {
+  localStorage.setItem(VISITAS_KEY, JSON.stringify(map));
+}
+
+function fmtVisita(iso) {
+  if (!iso) return null;
+  try {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    const dia = dt.toLocaleDateString("pt-BR", { weekday: "long" });
+    const data = dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return { dia: dia.charAt(0).toUpperCase() + dia.slice(1), data };
+  } catch { return null; }
+}
 
 /* ─── GlobalStyles ────────────────────────────────────────────────── */
 function GlobalStylesCelulas({ t, isDark }) {
@@ -161,6 +183,14 @@ function GlobalStylesCelulas({ t, isDark }) {
       }
       .cp-card:hover { transform: translateY(-3px); border-color: ${t.cardHover}; }
       .cp-card:active { transform: scale(.98); }
+
+      .cp-card.visitada {
+        border-color: rgba(5,150,105,.42);
+        background: ${isDark ? "rgba(5,150,105,.07)" : "rgba(5,150,105,.05)"};
+      }
+      .cp-card.visitada::before {
+        background: linear-gradient(90deg, transparent, rgba(5,150,105,.4), transparent);
+      }
 
       .cp-card-strip { height: 4px; flex-shrink: 0; }
 
@@ -354,14 +384,72 @@ function GlobalStylesCelulas({ t, isDark }) {
         color: ${AURA.red};
         border: 1px solid rgba(200,16,46,.3);
       }
+
+      .cp-badge-visita {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 10px; border-radius: 9px;
+        font-size: 10px; font-weight: 600;
+        background: rgba(5,150,105,.12);
+        color: ${AURA.green};
+        border: 1px solid rgba(5,150,105,.3);
+      }
+
+      /* ── Seção visita no modal ── */
+      .cp-visita-status {
+        padding: 16px; border-radius: 14px; text-align: center;
+        display: flex; flex-direction: column; gap: 10px;
+        background: rgba(5,150,105,.08);
+        border: 1px solid rgba(5,150,105,.3);
+      }
+      .cp-visita-status.pendente {
+        background: ${isDark ? "rgba(255,255,255,.02)" : "rgba(0,0,0,.02)"};
+        border: 1px solid ${t.border};
+      }
+      .cp-visita-ok {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 8px 14px; border-radius: 99px;
+        background: rgba(5,150,105,.12);
+        border: 1px solid rgba(5,150,105,.3);
+        color: ${AURA.green}; font-family: 'Inter', sans-serif;
+      }
+      .cp-visita-ok strong { font-size: 13px; font-weight: 600; }
+      .cp-visita-ok span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; }
+      .cp-visita-txt {
+        font-size: 12px; font-weight: 400; color: ${t.textMuted};
+        margin: 0; line-height: 1.4;
+      }
+
+      .cp-btn-visita {
+        width: 100%; padding: 13px; border-radius: 12px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, ${AURA.green}, ${AURA.greenDark});
+        color: #fff; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; transition: all .3s;
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+      }
+      .cp-btn-visita:hover { opacity: .9; transform: translateY(-1px); }
+      .cp-btn-visita:active { transform: scale(.97); }
+
+      .cp-btn-visita-desfazer {
+        width: 100%; padding: 11px; border-radius: 12px; cursor: pointer;
+        background: transparent; border: 1px solid rgba(200,16,46,.3);
+        color: ${AURA.red}; font-family: 'Inter', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; transition: all .3s;
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+      }
+      .cp-btn-visita-desfazer:hover { background: rgba(200,16,46,.08); }
     `}</style>
   );
 }
 
 /* ─── Modal de Detalhes da Célula (foco: visita pastoral) ─────────── */
-function ModalCelulaDetalhe({ celula, isDark, onClose }) {
+function ModalCelulaDetalhe({ celula, isDark, onClose, visita, onMarcarVisita, onDesmarcarVisita }) {
   const t = themeCelulas(isDark);
   const [membrosContagem, setMembrosContagem] = useState(null);
+
+  const infoVisita = fmtVisita(visita);
+  const temVisita  = Boolean(infoVisita);
 
   useEffect(() => {
     let ativo = true;
@@ -416,6 +504,32 @@ function ModalCelulaDetalhe({ celula, isDark, onClose }) {
           </div>
 
           <div className="cp-modal-body">
+            {/* Visita pastoral */}
+            <div className={`cp-visita-status${temVisita ? "" : " pendente"}`}>
+              <div className="cp-visita-ok">
+                <CalendarCheck size={15} style={{ color: temVisita ? AURA.green : t.textMuted }} />
+                {temVisita ? (
+                    <><strong>{infoVisita.data}</strong><span>{infoVisita.dia}</span></>
+                ) : (
+                    <span style={{ color: t.textMuted }}>Sem visita registrada</span>
+                )}
+              </div>
+              <p className="cp-visita-txt">
+                {temVisita
+                    ? "Visita pastoral registrada nesta data. A célula está destacada na lista."
+                    : "Marque quando a célula for visitada. Ela mudará de cor e mostrará a data da visita."}
+              </p>
+              {temVisita ? (
+                  <button className="cp-btn-visita-desfazer" onClick={onDesmarcarVisita}>
+                    <X size={13} /> Desmarcar visita
+                  </button>
+              ) : (
+                  <button className="cp-btn-visita" onClick={onMarcarVisita}>
+                    <CheckCircle2 size={15} /> Marcar visita
+                  </button>
+              )}
+            </div>
+
             {/* Dia e Horário — prioridade para a visita pastoral */}
             <div className="cp-visita-box">
               <div className="cp-visita-cell dia">
@@ -506,8 +620,27 @@ export default function CelulasPastor({ isDark = false }) {
   const [erro,    setErro]    = useState("");
   const [filtro,  setFiltro]  = useState("");
   const [selecionada, setSelecionada] = useState(null);
+  const [visitas, setVisitas] = useState(carregarVisitas);
 
   const t = themeCelulas(isDark);
+
+  const marcarVisita = (id) => {
+    const hoje = new Date().toLocaleDateString("en-CA");
+    setVisitas(prev => {
+      const next = { ...prev, [id]: hoje };
+      salvarVisitas(next);
+      return next;
+    });
+  };
+
+  const desmarcarVisita = (id) => {
+    setVisitas(prev => {
+      const next = { ...prev };
+      delete next[id];
+      salvarVisitas(next);
+      return next;
+    });
+  };
 
   const carregarDados = useCallback(async () => {
     try {
@@ -525,11 +658,13 @@ export default function CelulasPastor({ isDark = false }) {
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
 
-  const celulasFiltradas = celulas.filter(c =>
-      c.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
-      c.nomeLider?.toLowerCase().includes(filtro.toLowerCase()) ||
-      c.bairro?.toLowerCase().includes(filtro.toLowerCase())
-  );
+  const celulasFiltradas = celulas
+      .filter(c =>
+          c.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
+          c.nomeLider?.toLowerCase().includes(filtro.toLowerCase()) ||
+          c.bairro?.toLowerCase().includes(filtro.toLowerCase())
+      )
+      .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "pt-BR", { sensitivity: "base" }));
 
   return (
       <div className="cp-root">
@@ -591,27 +726,44 @@ export default function CelulasPastor({ isDark = false }) {
                   initial="hidden" animate="visible"
                   variants={{ hidden: {}, visible: { transition: { staggerChildren: .04 } } }}
               >
-                {celulasFiltradas.map((c) => (
-                    <motion.div
-                        key={c.id}
-                        className="cp-card"
-                        variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
-                        onClick={() => setSelecionada(c)}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: .98 }}
-                    >
-                      <div className="cp-card-strip" style={{ background: `linear-gradient(90deg, ${AURA.blue}, ${AURA.gold})` }} />
-                      <div className="cp-card-body">
-                        <div className="cp-card-title-row">
-                          <h3 className="cp-card-title">{c.nome?.toUpperCase()}</h3>
-                          {c.ativa === false && <span className="cp-badge-inativa">Inativa</span>}
-                        </div>
-                        {c.nomeLider && (
-                            <p className="cp-card-lider">
-                              <Users size={13} style={{ color: AURA.green }} />
-                              {c.nomeLider}
-                            </p>
-                        )}
+                {celulasFiltradas.map((c) => {
+                  const infoV = fmtVisita(visitas[c.id]);
+                  return (
+                      <motion.div
+                          key={c.id}
+                          className={`cp-card${infoV ? " visitada" : ""}`}
+                          variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                          onClick={() => setSelecionada(c)}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: .98 }}
+                      >
+                        <div className="cp-card-strip" style={{ background: infoV
+                            ? `linear-gradient(90deg, ${AURA.greenDark}, ${AURA.green})`
+                            : `linear-gradient(90deg, ${AURA.blue}, ${AURA.gold})` }} />
+                        <div className="cp-card-body">
+                          <div className="cp-card-title-row">
+                            <h3 className="cp-card-title">{c.nome?.toUpperCase()}</h3>
+                            <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                              {infoV && (
+                                  <span className="cp-badge-visita">
+                                    <CalendarCheck size={11} /> {infoV.data}
+                                  </span>
+                              )}
+                              {c.ativa === false && <span className="cp-badge-inativa">Inativa</span>}
+                            </div>
+                          </div>
+                          {infoV && (
+                              <p className="cp-card-lider" style={{ color: AURA.green, fontWeight: 600 }}>
+                                <CalendarCheck size={13} style={{ color: AURA.green }} />
+                                {infoV.dia}
+                              </p>
+                          )}
+                          {c.nomeLider && (
+                              <p className="cp-card-lider">
+                                <Users size={13} style={{ color: AURA.green }} />
+                                {c.nomeLider}
+                              </p>
+                          )}
                         <div className="cp-card-dia-hora">
                           <span className="cp-chip">
                             <Calendar size={12} />
@@ -642,7 +794,8 @@ export default function CelulasPastor({ isDark = false }) {
                         <ChevronRight size={13} />
                       </div>
                     </motion.div>
-                ))}
+                  );
+                })}
               </motion.div>
           ) : (
               <motion.div
@@ -666,6 +819,9 @@ export default function CelulasPastor({ isDark = false }) {
               <ModalCelulaDetalhe
                   celula={selecionada}
                   isDark={isDark}
+                  visita={visitas[selecionada.id] || null}
+                  onMarcarVisita={() => marcarVisita(selecionada.id)}
+                  onDesmarcarVisita={() => desmarcarVisita(selecionada.id)}
                   onClose={() => setSelecionada(null)}
               />
           )}
