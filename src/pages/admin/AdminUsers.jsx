@@ -7,12 +7,12 @@ import {
   UserPlus, Users, Power, Trash2, LogOut,
   Mail, Key, User, Shield, Loader2, RefreshCcw, Pencil, X,
   Sun, Moon, Eye, EyeOff, CheckCircle, XCircle, Clock, Camera,
-  History, Search, Phone, ChevronDown, Menu, FileText,
+  History, Search, Phone, ChevronDown, FileText,
   Building2, DollarSign, Home, Flame,
   LayoutDashboard, Share2, Trophy, ClipboardList,
   BarChart2, TrendingUp, Target, ChevronRight,
   MessageCircle, Filter, AlertCircle, WifiOff, RefreshCw,
-  ChevronLeft, Inbox,
+  ChevronLeft, ArrowLeft, Inbox,
   ShieldOff, Ban, Unlock, ShieldCheck, AlertTriangle, Info, UserCheck,
   Droplets, Wifi, Church, Contact,
 } from "lucide-react";
@@ -290,6 +290,14 @@ function GlobalStyles({ t, isDark }) {
       transition: all .22s; flex-shrink: 0;
     }
     .adm-ico-btn:hover { border-color: ${AURA.gold}44; color: ${AURA.gold}; background: ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.07)"}; }
+    .adm-btn-back {
+      width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      background: ${isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.04)"};
+      border: 1px solid ${t.border}; color: ${t.textMuted};
+      transition: all .22s; flex-shrink: 0;
+    }
+    .adm-btn-back:hover { border-color: ${AURA.gold}44; color: ${AURA.gold}; background: ${isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.07)"}; }
     .adm-live-pill {
       display: flex; align-items: center; gap: 5px;
       padding: 5px 12px; border-radius: 100px;
@@ -374,31 +382,6 @@ function GlobalStyles({ t, isDark }) {
     .adm-mega-sub  { font-size: 9.5px; color: ${t.textMuted}; letter-spacing: .03em; display: block; margin-top: 1px; }
     .adm-mega-rel  { position: relative; flex: 1; min-width: 0; }
     .adm-mega-badge { position: absolute; right: 0; top: -2px; background: ${AURA.yellow}; color: #080810; font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
-
-    .adm-mobile-overlay { position: fixed; inset: 0; z-index: 250; background: ${t.overlayBg}; display: flex; flex-direction: column; }
-    .adm-mobile-overlay-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; flex-shrink: 0; border-bottom: 1px solid rgba(201,169,110,.08); }
-    .adm-mobile-overlay-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 0 24px; }
-    .adm-mobile-sec-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; user-select: none; min-height: 48px; }
-    .adm-mobile-sec-left { display: flex; align-items: center; gap: 9px; }
-    .adm-mobile-sec-label { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; color: rgba(245,240,232,.85); }
-    .adm-mobile-nav-item {
-      width: 100%; display: flex; align-items: center; gap: 12px;
-      padding: 12px 20px 12px 32px; min-height: 48px;
-      border: none; cursor: pointer; background: transparent; text-align: left; position: relative;
-    }
-    .adm-mobile-nav-item.act { background: rgba(255,255,255,.045); }
-    .adm-mobile-nav-item::before {
-      content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-      width: 2px; height: 0; border-radius: 0 2px 2px 0;
-      background: var(--nc, ${AURA.gold}); transition: height .15s;
-    }
-    .adm-mobile-nav-item.act::before { height: 24px; }
-    .adm-mobile-nav-ico { width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.04); }
-    .adm-mobile-nav-main { font-size: 12.5px; font-weight: 500; color: rgba(245,240,232,.55); display: block; line-height: 1.2; }
-    .adm-mobile-nav-item.act .adm-mobile-nav-main { color: rgba(245,240,232,.95); font-weight: 600; }
-    .adm-mobile-nav-sub { font-size: 9px; color: rgba(245,240,232,.2); margin-top: 2px; display: block; text-transform: uppercase; letter-spacing: .06em; }
-    .adm-mobile-nav-badge { margin-left: auto; background: ${AURA.yellow}; color: #080810; font-size: 8.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
-    .adm-mobile-overlay-foot { padding: 14px 18px 22px; flex-shrink: 0; border-top: 1px solid rgba(201,169,110,.08); }
 
     .adm-main { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; z-index: 1; min-width: 0; }
     .adm-page-eyebrow { font-size: 7.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 2px; }
@@ -566,6 +549,92 @@ function GlobalStyles({ t, isDark }) {
     @media (max-width: 420px) { .wa-drawer { width: 100vw; right: -100vw; } .wa-drawer.open { right: 0; } }
     @media (max-width: 639px) { .adm-input, .adm-select { font-size: 16px !important; } }
     .adm-footer-txt { text-align: center; font-size: 7.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; padding: 16px 0 0; color: ${isDark ? "rgba(245,240,232,.07)" : "rgba(26,16,8,.1)"}; }
+
+    /* ── Dashboard Grid (estilo Painel do Pastor) ── */
+    .adm-menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    @media(min-width:480px) { .adm-menu-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
+    @media(min-width:768px) { .adm-menu-grid { grid-template-columns: repeat(5, 1fr); gap: 14px; } }
+
+    .adm-menu-card {
+      position: relative;
+      background: ${t.bgEl};
+      border: 1px solid ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.14)"};
+      border-radius: 18px;
+      padding: 16px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      overflow: hidden;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.06)"}, 0 4px 12px ${isDark ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.04)"};
+    }
+    .adm-menu-card::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--menu-a, transparent), var(--menu-b, transparent));
+      opacity: 0;
+      transition: opacity .35s;
+      border-radius: inherit;
+    }
+    .adm-menu-card::after {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, ${isDark ? "rgba(201,169,110,.12)" : "rgba(201,169,110,.18)"}, transparent);
+      opacity: 0; transition: opacity .35s;
+    }
+    .adm-menu-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(201,169,110,.28);
+      box-shadow: 0 8px 32px ${isDark ? "rgba(201,169,110,.08)" : "rgba(201,169,110,.12)"}, 0 2px 8px ${isDark ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.08)"};
+    }
+    .adm-menu-card:hover::before { opacity: .07; }
+    .adm-menu-card:hover::after  { opacity: 1; }
+    @media(min-width:480px) {
+      .adm-menu-card { padding: 20px 14px; border-radius: 20px; }
+    }
+
+    .adm-menu-icon {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .adm-menu-card:hover .adm-menu-icon { transform: scale(1.08); }
+
+    .adm-menu-name {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 600; color: ${t.text}; margin: 0;
+      line-height: 1.3;
+    }
+    .adm-menu-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px; color: ${t.textMuted}; margin: 0;
+      line-height: 1.2;
+    }
+
+    .adm-section-label {
+      display: flex; align-items: center; gap: 8px;
+      margin: 16px 0 10px;
+    }
+    .adm-section-label:first-child { margin-top: 0; }
+    .adm-section-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .adm-section-text {
+      font-size: 10px; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase;
+    }
     `}</style>
   );
 }
@@ -1393,12 +1462,14 @@ export default function AdminUsers() {
   const [buscaUsu,       setBuscaUsu]       = useState("");
   const [filtroStatusUsu,setFiltroStatusUsu]= useState(""); // "", "ativo", "suspenso"
   const [isDark,         setIsDark]         = useState(() => localStorage.getItem("theme") === "dark");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [megaOpenId,     setMegaOpenId]     = useState(null);
   const [moduloAtivo,    setModuloAtivo]    = useState("usuarios");
-  const [secaoExpMobile, setSecaoExpMobile] = useState("admin");
   const [celulas,        setCelulas]        = useState([]);
   const [celulaAdmin,    setCelulaAdmin]    = useState(null);
+
+  const [dashboard,      setDashboard]      = useState(true);
+  const [modalKey,       setModalKey]       = useState(null);
+  const ITENS_INLINE = ["usuarios", "historico", "wa-registros", "bloqueios"];
 
   const [bloqueados,      setBloqueados]      = useState([]);
   const [carregandoBloq,  setCarregandoBloq]  = useState(false);
@@ -1418,12 +1489,13 @@ export default function AdminUsers() {
     window.history.pushState({ admPanel: true }, "");
 
     const handlePopState = () => {
-      if (exitConfirm)     { setExitConfirm(false);   window.history.pushState({ admPanel: true }, ""); return; }
-      if (itemDesbloquear) { setItemDesbloquear(null); window.history.pushState({ admPanel: true }, ""); return; }
-      if (modalBloquear)   { setModalBloquear(false);  window.history.pushState({ admPanel: true }, ""); return; }
-      if (drawerOpen)      { setDrawerOpen(false);     window.history.pushState({ admPanel: true }, ""); return; }
-      if (mobileMenuOpen)  { setMobileMenuOpen(false); window.history.pushState({ admPanel: true }, ""); return; }
-      if (megaOpenId)      { setMegaOpenId(null);      window.history.pushState({ admPanel: true }, ""); return; }
+      if (modalKey)          { setModalKey(null);          window.history.pushState({ admPanel: true }, ""); return; }
+      if (exitConfirm)       { setExitConfirm(false);      window.history.pushState({ admPanel: true }, ""); return; }
+      if (itemDesbloquear)   { setItemDesbloquear(null);   window.history.pushState({ admPanel: true }, ""); return; }
+      if (modalBloquear)     { setModalBloquear(false);     window.history.pushState({ admPanel: true }, ""); return; }
+      if (drawerOpen)        { setDrawerOpen(false);        window.history.pushState({ admPanel: true }, ""); return; }
+      if (megaOpenId)        { setMegaOpenId(null);         window.history.pushState({ admPanel: true }, ""); return; }
+      if (!dashboard)        { setDashboard(true);          window.history.pushState({ admPanel: true }, ""); return; }
       if (moduloAtivo !== "usuarios") {
         setModuloAtivo("usuarios");
         window.history.pushState({ admPanel: true }, "");
@@ -1434,7 +1506,7 @@ export default function AdminUsers() {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [exitConfirm, itemDesbloquear, modalBloquear, drawerOpen, mobileMenuOpen, megaOpenId, moduloAtivo]);
+  }, [exitConfirm, itemDesbloquear, modalBloquear, drawerOpen, megaOpenId, moduloAtivo, dashboard, modalKey]);
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
   // Segurança: garante que a rolagem nunca fique travada ao entrar/sair da página
@@ -1448,12 +1520,6 @@ export default function AdminUsers() {
       document.documentElement.style.overflow = "";
     };
   }, []);
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = ""; };
-    }
-  }, [mobileMenuOpen]);
   useEffect(() => {
     if (!megaOpenId) return;
     const onKey = e => { if (e.key === "Escape") setMegaOpenId(null); };
@@ -1621,8 +1687,9 @@ export default function AdminUsers() {
       return;
     }
     setModuloAtivo(key);
+    setDashboard(false);
     setMegaOpenId(null);
-    setMobileMenuOpen(false);
+    window.history.pushState({ admPanel: true }, "");
   };
 
   const qtdPend    = pendentes.size;
@@ -1696,8 +1763,11 @@ export default function AdminUsers() {
           <div className="adm-header-top-line" />
           <div className="adm-topbar">
             <div className="adm-topbar-l">
-              <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu"><Menu size={18}/></button>
-              <div className="adm-topbar-sep"/>
+              {!dashboard && (
+                  <button className="adm-btn-back" onClick={() => setDashboard(true)} title="Voltar ao painel">
+                    <ArrowLeft size={16} />
+                  </button>
+              )}
               <div className="adm-brand">
                 <div className="adm-brand-logo">
                   <img src="/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }}/>
@@ -1745,6 +1815,8 @@ export default function AdminUsers() {
             </div>
           </div>
 
+          {!dashboard && (
+          <>
           <nav className="adm-nav-row" ref={navRowRef}>
             {SECOES.map(sec => {
               const SIcon = sec.icon;
@@ -1794,91 +1866,21 @@ export default function AdminUsers() {
                 </>
             )}
           </AnimatePresence>
-        </div>
-
-        <AnimatePresence>
-          {mobileMenuOpen && (
-              <motion.div className="adm-mobile-overlay"
-                          initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                          transition={{ duration:.2 }}>
-                <div className="adm-mobile-overlay-head">
-                  <div className="adm-brand">
-                    <div className="adm-brand-logo">
-                      <img src="/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }}/>
-                    </div>
-                    <div>
-                      <p className="adm-brand-name">IEQ Pituaçu</p>
-                      <span className="adm-brand-sub">Painel Administrativo</span>
-                    </div>
-                  </div>
-                  <button className="adm-ico-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Fechar menu"><X size={18}/></button>
-                </div>
-                <div className="adm-mobile-overlay-body">
-                  {SECOES.map(sec => {
-                    const SIcon = sec.icon;
-                    const exp = secaoExpMobile === sec.id;
-                    return (
-                        <div key={sec.id}>
-                          <div className="adm-mobile-sec-toggle" onClick={() => setSecaoExpMobile(exp ? null : sec.id)}>
-                            <div className="adm-mobile-sec-left">
-                              <SIcon size={14} style={{ color: sec.color }}/>
-                              <span className="adm-mobile-sec-label">{sec.label}</span>
-                              {sec.id === "admin" && qtdPend > 0 && <span className="adm-mobile-nav-badge" style={{ marginLeft:4 }}>{qtdPend}</span>}
-                            </div>
-                            <ChevronDown size={14} style={{ color:"rgba(245,240,232,.3)", transform: exp?"rotate(180deg)":"none", transition:"transform .2s" }}/>
-                          </div>
-                          <AnimatePresence>
-                            {exp && (
-                                <motion.div initial={{ height:0,opacity:0 }} animate={{ height:"auto",opacity:1 }} exit={{ height:0,opacity:0 }} transition={{ duration:.16 }} style={{ overflow:"hidden" }}>
-                                  {sec.itens.map(item => {
-                                    const IIcon = item.icon;
-                                    const ativo = moduloAtivo === item.key;
-                                    return (
-                                        <button key={item.key}
-                                                className={`adm-mobile-nav-item${ativo?" act":""}`}
-                                                style={{ "--nc": sec.color }}
-                                                onClick={() => selecionarModulo(item.key)}>
-                                          <div className="adm-mobile-nav-ico">
-                                            <IIcon size={14} style={{ color: ativo?"#fff":sec.color, opacity: ativo?1:.65 }}/>
-                                          </div>
-                                          <div style={{ flex:1, minWidth:0 }}>
-                                            <span className="adm-mobile-nav-main">{item.label}</span>
-                                            <span className="adm-mobile-nav-sub">{item.sub}</span>
-                                          </div>
-                                          {item.key === "usuarios" && qtdPend > 0 && <span className="adm-mobile-nav-badge">{qtdPend}</span>}
-                                        </button>
-                                    );
-                                  })}
-                                </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                    );
-                  })}
-                </div>
-                <div className="adm-mobile-overlay-foot">
-                  <button className="adm-btn-primary red" style={{ width:"100%" }} onClick={() => { setMobileMenuOpen(false); setExitConfirm(true); }}>
-                    <LogOut size={14}/> Sair do sistema
-                  </button>
-                  <p style={{ textAlign:"center", fontSize:7.5, letterSpacing:".16em", color:"rgba(245,240,232,.12)", marginTop:14, textTransform:"uppercase", fontFamily:"'Inter',sans-serif" }}>
-                    © IEQ Pituaçu · {new Date().getFullYear()}
-                  </p>
-                </div>
-              </motion.div>
+          </>
           )}
-        </AnimatePresence>
+        </div>
 
         <main className="adm-main">
           <div className="adm-page-head">
-            <p className="adm-page-eyebrow">{secaoAtiva?.label || "Admin"}</p>
-            <motion.h2 className="adm-page-title" key={moduloAtivo}
+            <p className="adm-page-eyebrow">{dashboard ? "Admin" : (secaoAtiva?.label || "Admin")}</p>
+            <motion.h2 className="adm-page-title" key={dashboard ? "dashboard" : moduloAtivo}
                        initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} transition={{ duration:.2 }}>
-              {itemAtivo?.label || "Painel"}
+              {dashboard ? "Painel Administrativo" : (itemAtivo?.label || "Painel")}
             </motion.h2>
           </div>
 
           <div className="adm-content">
-            {isLider && celulas.length > 0 && (
+            {!dashboard && isLider && celulas.length > 0 && (
                 <div className="adm-celula-bar" style={{ marginTop:14 }}>
                   <Building2 size={15} style={{ color:AURA.blue, flexShrink:0 }}/>
                   <span style={{ fontSize:9, fontWeight:600, letterSpacing:".14em", textTransform:"uppercase", color:t.textMuted, flexShrink:0 }}>Célula:</span>
@@ -1892,6 +1894,53 @@ export default function AdminUsers() {
                 </div>
             )}
 
+            {dashboard ? (
+              <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ marginTop:14 }}>
+                {SECOES.map(sec => (
+                    <div key={sec.id}>
+                      <div className="adm-section-label">
+                        <div className="adm-section-icon" style={{ background: `${sec.color}18` }}>
+                          <sec.icon size={14} style={{ color: sec.color }} />
+                        </div>
+                        <span className="adm-section-text" style={{ color: sec.color }}>{sec.label}</span>
+                      </div>
+                      <div className="adm-menu-grid">
+                        {sec.itens.map(item => (
+                            <motion.div
+                                key={item.key}
+                                className="adm-menu-card"
+                                whileHover={{ y: -5 }}
+                                whileTap={{ scale: .96 }}
+                                style={{ "--menu-a": `${sec.color}66`, "--menu-b": sec.color }}
+                                onClick={() => {
+                                  if (item.href) {
+                                    window.location.href = item.href;
+                                    return;
+                                  }
+                                  if (ITENS_INLINE.includes(item.key)) {
+                                    setDashboard(false);
+                                    setModuloAtivo(item.key);
+                                    window.history.pushState({ admPanel: true }, "");
+                                  } else {
+                                    setModalKey(item.key);
+                                    window.history.pushState({ admPanel: true }, "");
+                                  }
+                                }}
+                            >
+                              <div className="adm-menu-icon" style={{ background: `${sec.color}18`, color: sec.color }}>
+                                <item.icon size={20} />
+                              </div>
+                              <div>
+                                <p className="adm-menu-name">{item.label}</p>
+                                <p className="adm-menu-desc">{item.sub}</p>
+                              </div>
+                            </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                ))}
+              </motion.div>
+            ) : (
             <AnimatePresence mode="wait">
               <motion.div key={moduloAtivo}
                           initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-6 }}
@@ -2096,10 +2145,89 @@ export default function AdminUsers() {
                 )}
               </motion.div>
             </AnimatePresence>
+            )}
 
             <p className="adm-footer-txt">© {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico · Admin Total</p>
           </div>
         </main>
+
+        {modalKey && createPortal(
+            <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+              <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  style={{ position: "fixed", inset: 0, background: isDark ? "rgba(10,10,15,.88)" : "rgba(245,240,232,.88)", backdropFilter: "blur(4px)" }}
+                  onClick={() => { setModalKey(null); window.history.pushState({ admPanel: true }, ""); }}
+              />
+              <motion.div
+                  initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                  transition={{ type: "tween", duration: .28 }}
+                  style={{
+                    position: "relative", zIndex: 10,
+                    width: "100%", maxWidth: 900, maxHeight: "88vh",
+                    display: "flex", flexDirection: "column",
+                    background: t.bg, border: `1px solid ${t.border}`,
+                    borderRadius: "22px 22px 0 0", overflow: "hidden",
+                  }}
+              >
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "16px 20px", borderBottom: `1px solid ${t.border}`,
+                  background: isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)",
+                  flexShrink: 0,
+                }}>
+                  {(() => {
+                    const sec = SECOES.find(s => s.itens.some(i => i.key === modalKey));
+                    const item = SECOES.flatMap(s => s.itens).find(i => i.key === modalKey);
+                    const Icon = item?.icon || Shield;
+                    const color = sec?.color || AURA.gold;
+                    return (
+                        <>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{
+                              width: 34, height: 34, borderRadius: 10,
+                              background: `${color}18`,
+                              border: `1px solid ${t.border}`,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                            }}>
+                              <Icon size={16} style={{ color }} />
+                            </div>
+                            <div>
+                              <p style={{
+                                fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
+                                letterSpacing: ".18em", textTransform: "uppercase",
+                                color, margin: 0,
+                              }}>
+                                {sec?.label || "Admin"}
+                              </p>
+                              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textSec, marginTop: 2 }}>
+                                {item?.label || ""}
+                              </p>
+                            </div>
+                          </div>
+                          <button onClick={() => { setModalKey(null); window.history.pushState({ admPanel: true }, ""); }} style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            padding: "6px 12px", borderRadius: 8, border: "none", cursor: "pointer",
+                            background: isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.07)",
+                            color: AURA.gold, fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500,
+                            transition: "all .25s",
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(201,169,110,.14)" : "rgba(201,169,110,.14)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = isDark ? "rgba(201,169,110,.06)" : "rgba(201,169,110,.07)"; }}
+                          >
+                            <ArrowLeft size={14} />
+                            Voltar
+                          </button>
+                        </>
+                    );
+                  })()}
+                </div>
+                <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "20px 16px" }}>
+                  <ModuloRenderer moduloKey={modalKey} isDark={isDark} celulaAdmin={celulaAdmin} />
+                </div>
+              </motion.div>
+            </div>,
+            document.body
+        )}
 
         <input ref={fotoRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFoto}/>
 
