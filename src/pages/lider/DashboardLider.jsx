@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import FundoGlass from "../../components/FundoGlass.jsx";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
@@ -43,7 +44,7 @@ function IEQCross({ size = 36 }) {
 function GlobalStyles({ t, isDark }) {
   return (
       <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
 
       @keyframes dl-spin   { to { transform: rotate(360deg); } }
       @keyframes dl-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
@@ -54,8 +55,10 @@ function GlobalStyles({ t, isDark }) {
       .dl-blink  { animation: dl-blink 2s ease-in-out infinite; }
 
       .dl-root {
-        font-family: 'Inter', sans-serif;
-        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #ECECEF 0%, #E0E0E5 55%, #D2D2D8 100%)"};
+        font-family: 'Roboto', sans-serif;
+        background: ${isDark
+        ? "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.66) 45%, rgba(0,0,0,.78) 100%)"
+        : "linear-gradient(180deg, rgba(241,241,243,.72) 0%, rgba(241,241,243,.86) 50%, rgba(241,241,243,.94) 100%)"};
         color: ${t.text};
         min-height: 100vh;
         position: relative;
@@ -65,359 +68,383 @@ function GlobalStyles({ t, isDark }) {
         isolation: isolate;
       }
       .dl-glow {
-        position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        position: fixed; inset: 0; pointer-events: none; z-index: 1;
         background:
           radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
           radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
         transition: background .3s;
       }
       .dl-content {
-        position: relative; z-index: 1;
-        max-width: 960px; margin: 0 auto;
-        padding: 28px 18px 0;
+        position: relative; z-index: 3;
+        max-width: 1000px; margin: 0 auto;
+        padding: 34px 20px 0;
       }
-      @media(max-width: 420px) { .dl-content { padding: 18px 14px 0; } }
+      @media(max-width: 420px) { .dl-content { padding: 22px 14px 0; } }
 
       .dl-header {
         display: flex; align-items: center; justify-content: space-between;
-        gap: 12px; margin-bottom: 26px; flex-wrap: wrap;
+        gap: 12px; margin-bottom: 30px; flex-wrap: wrap;
       }
       .dl-header-left {
-        display: flex; align-items: center; gap: 14px;
+        display: flex; align-items: center; gap: 16px;
         flex: 1; min-width: 0;
       }
       .dl-avatar-wrap { position: relative; flex-shrink: 0; }
       .dl-ring {
         position: absolute; border-radius: 50%;
-        border: 1px solid rgba(184,137,46,.24);
+        border: 1px solid rgba(185,140,255,.22);
         top: 50%; left: 50%; transform: translate(-50%,-50%);
       }
       .dl-avatar {
-        width: 52px; height: 52px; border-radius: 50%;
-        border: 1.5px solid rgba(184,137,46,.3);
-        background: ${isDark ? "rgba(26,34,54,.99)" : "#fff"};
+        width: 54px; height: 54px; border-radius: 50%;
+        border: 1.5px solid rgba(185,140,255,.32);
+        background: ${isDark ? "rgba(40,40,44,.99)" : "#fff"};
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
+        box-shadow: 0 0 0 6px ${isDark ? "rgba(185,140,255,.06)" : "rgba(155,92,255,.06)"};
       }
       .dl-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
       .dl-title-block { flex: 1; min-width: 0; }
       .dl-eyebrow {
-        font-size: 9px; font-weight: 500; letter-spacing: .2em;
-        text-transform: uppercase; color: rgba(184,137,46,.65);
-        margin: 0 0 3px;
+        font-size: 9.5px; font-weight: 500; letter-spacing: .24em;
+        text-transform: uppercase; color: rgba(185,140,255,.72);
+        margin: 0 0 5px;
       }
       .dl-title {
-        font-family: 'Fraunces', serif;
-        font-size: clamp(17px, 4vw, 22px);
-        font-weight: 500; color: ${t.text};
-        margin: 0; line-height: 1.2; letter-spacing: .02em;
+        font-family: 'Roboto', sans-serif;
+        font-size: clamp(18px, 4vw, 23px);
+        font-weight: 700; color: ${t.text};
+        margin: 0; line-height: 1.2; letter-spacing: -.02em;
       }
       .dl-title span { color: ${AURA.gold}; }
       .dl-subtitle {
-        font-size: 11px; font-weight: 300; color: ${t.textSec};
-        margin: 3px 0 0; overflow: hidden;
+        font-size: 12px; font-weight: 400; color: ${t.textSec};
+        margin: 4px 0 0; overflow: hidden;
         text-overflow: ellipsis; white-space: nowrap;
       }
       .dl-header-actions {
         display: flex; align-items: center; gap: 8px; flex-shrink: 0;
       }
       .dl-btn-ico {
-        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(30,63,102,.06)"};
+        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(155,92,255,.08)"};
         border: 1px solid ${t.border};
         border-radius: 12px; width: 38px; height: 38px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
-        color: ${t.textMuted}; transition: all .25s; flex-shrink: 0;
+        color: ${t.textMuted};
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        transition: all .25s; flex-shrink: 0;
       }
-      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(185,140,255,.09)" : "rgba(155,92,255,.12)"}; }
       .dl-btn-exit {
         display: flex; align-items: center; gap: 7px;
-        padding: 0 16px; height: 38px; border-radius: 100px; border: none;
+        padding: 0 16px; height: 38px; border-radius: 100px;
         cursor: pointer;
-        background: linear-gradient(135deg, ${AURA.clayDeep}, ${AURA.clay});
-        color: #fff; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        background: transparent; color: ${AURA.red};
+        border: 1px solid rgba(255,154,165,.28);
+        font-family: 'Roboto', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .12em;
         text-transform: uppercase; transition: all .3s; flex-shrink: 0;
-        box-shadow: 0 6px 20px rgba(158,42,43,.25);
       }
-      .dl-btn-exit:hover { opacity: .88; transform: translateY(-1px); }
+      .dl-btn-exit:hover { background: rgba(255,154,165,.1); border-color: ${AURA.red}; }
 
       /* Botão voltar pequeno */
       .dl-btn-back {
         display: flex; align-items: center; justify-content: center;
         width: 32px; height: 32px; border-radius: 10px;
         border: 1px solid ${t.border}; cursor: pointer;
-        background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(30,63,102,.06)"};
+        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(155,92,255,.08)"};
         color: ${t.textMuted}; font-size: 14px;
         transition: all .25s; flex-shrink: 0;
       }
       .dl-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
 
       .dl-divider {
-        display: flex; align-items: center; gap: 10px; margin: 0 0 22px;
+        display: flex; align-items: center; gap: 10px; margin: 0 auto 26px; max-width: 420px;
       }
       .dl-divider::before {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to right, transparent, ${AURA.gold});
+        background: linear-gradient(to right, transparent, rgba(185,140,255,.3));
       }
       .dl-divider::after {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to left, transparent, ${AURA.gold});
+        background: linear-gradient(to left, transparent, rgba(185,140,255,.3));
       }
-      .dl-divider-dot { width: 5px; height: 5px; border-radius: 50%; background: ${AURA.gold}; }
+      .dl-divider-dot { width: 4px; height: 4px; border-radius: 50%; background: ${AURA.gold}; box-shadow: 0 0 10px ${AURA.gold}; }
 
       .dl-badge {
-        display: inline-flex; align-items: center; gap: 7px;
-        background: rgba(184,137,46,.08);
-        border: 1px solid rgba(184,137,46,.22);
-        border-radius: 100px; padding: 8px 18px;
-        font-size: 10px; font-weight: 500; letter-spacing: .1em;
+        display: inline-flex; align-items: center; gap: 8px;
+        background: ${isDark ? "rgba(185,140,255,.07)" : "rgba(155,92,255,.08)"};
+        border: 1px solid ${isDark ? "rgba(185,140,255,.16)" : "rgba(155,92,255,.2)"};
+        border-radius: 100px; padding: 9px 20px;
+        font-size: 10px; font-weight: 500; letter-spacing: .12em;
         text-transform: uppercase; color: ${AURA.gold};
         white-space: nowrap;
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        box-shadow: ${isDark ? "inset 0 1px 0 rgba(255,255,255,.05)" : "none"};
       }
       .dl-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: ${AURA.gold}; }
-      .dl-badge-center { display: flex; justify-content: center; margin-bottom: 24px; }
+      .dl-badge-center { display: flex; justify-content: center; margin-bottom: 26px; }
 
       .dl-alert-aprovado {
         margin-bottom: 24px; padding: 16px 22px; border-radius: 16px;
-        background: linear-gradient(135deg, ${AURA.roxo}, ${AURA.roxoDeep});
+        background: ${isDark ? "rgba(122,61,224,.18)" : "rgba(122,61,224,.1)"};
         color: #fff; display: flex; align-items: center; gap: 12px;
-        font-family: 'Inter', sans-serif; font-size: 11px;
+        font-family: 'Roboto', sans-serif; font-size: 11px;
         font-weight: 500; letter-spacing: .1em;
-        border: 1px solid rgba(139,90,158,.25);
+        border: 1px solid rgba(155,92,255,.28);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       }
 
       .dl-kpi-grid {
         display: grid; grid-template-columns: 1.6fr 1fr;
-        gap: 14px; margin-bottom: 22px;
+        gap: 16px; margin-bottom: 30px;
       }
       @media(max-width: 480px) { .dl-kpi-grid { grid-template-columns: 1fr; } }
 
       .dl-kpi-hero {
-        background: linear-gradient(135deg, ${AURA.moss}, ${AURA.mossDeep});
-        border: 1px solid rgba(184,137,46,.16);
-        border-radius: 20px; padding: 26px 22px; position: relative; overflow: hidden;
+        background: ${isDark
+        ? "linear-gradient(150deg, rgba(155,92,255,.5), rgba(64,72,255,.32) 55%, rgba(40,40,44,.2))"
+        : "linear-gradient(150deg, rgba(155,92,255,.28), rgba(64,72,255,.18) 55%, rgba(155,92,255,.06))"};
+        border: 1px solid ${isDark ? "rgba(185,140,255,.28)" : "rgba(155,92,255,.25)"};
+        border-radius: 24px; padding: 30px 28px; position: relative; overflow: hidden;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       }
       .dl-kpi-stripes {
         position: absolute; inset: 0; pointer-events: none;
         background-image: repeating-linear-gradient(
-          -55deg, rgba(255,255,255,.025) 0 8px, transparent 8px 16px
+          -55deg, rgba(255,255,255,.02) 0 9px, transparent 9px 18px
         );
       }
       .dl-kpi-inner { position: relative; z-index: 1; }
       .dl-big-num {
-        font-family: 'Fraunces', serif;
-        font-size: clamp(44px, 10vw, 58px);
-        font-weight: 600; color: #fff; line-height: 1; margin: 10px 0 6px;
+        font-family: 'Roboto', sans-serif;
+        font-size: clamp(48px, 10vw, 62px);
+        font-weight: 800; line-height: 1; margin: 12px 0 4px;
+        background: linear-gradient(180deg, #fff, rgba(255,255,255,.72));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        letter-spacing: -.04em;
       }
       .dl-kpi-label {
-        font-size: 9px; font-weight: 600; letter-spacing: .2em;
-        text-transform: uppercase; color: rgba(255,255,255,.55);
+        font-size: 10px; font-weight: 600; letter-spacing: .22em;
+        text-transform: uppercase; color: rgba(255,255,255,.6);
       }
       .dl-kpi-desc {
-        font-size: 11px; font-weight: 300; color: rgba(255,255,255,.5);
-        margin-top: 8px; line-height: 1.55; max-width: 240px;
+        font-size: 11.5px; font-weight: 300; color: rgba(255,255,255,.62);
+        margin-top: 10px; line-height: 1.6; max-width: 260px;
       }
-      .dl-progress-wrap { margin-top: 16px; }
+      .dl-progress-wrap { margin-top: 18px; }
       .dl-progress-top {
         display: flex; justify-content: space-between;
-        font-size: 9px; font-weight: 600; letter-spacing: .14em;
-        text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 7px;
+        font-size: 9px; font-weight: 600; letter-spacing: .16em;
+        text-transform: uppercase; color: rgba(255,255,255,.52); margin-bottom: 8px;
       }
       .dl-progress-track {
         height: 5px; border-radius: 99px;
-        background: rgba(255,255,255,.12); overflow: hidden;
+        background: rgba(255,255,255,.14); overflow: hidden;
       }
       .dl-progress-fill {
         height: 100%; border-radius: 99px;
-        background: linear-gradient(90deg, ${AURA.gold}, ${AURA.goldLight});
+        background: linear-gradient(90deg, ${AURA.gold}, #FF2CB0);
         transition: width 1.2s cubic-bezier(.4,0,.2,1);
       }
-      .dl-progress-fill.done { background: ${AURA.goldLight}; }
+      .dl-progress-fill.done { background: linear-gradient(90deg, ${AURA.goldLight}, ${AURA.gold}); }
 
       .dl-kpi-action {
         background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
-        border-radius: 20px; padding: 22px 18px;
+        border-radius: 24px; padding: 24px 20px;
         display: flex; flex-direction: column; justify-content: space-between;
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        box-shadow: ${isDark ? "0 20px 50px rgba(0,0,0,.35)" : "0 12px 30px rgba(20,20,22,.05)"};
       }
       .dl-kpi-action-icon {
-        width: 44px; height: 44px; border-radius: 13px; margin-bottom: 14px;
+        width: 46px; height: 46px; border-radius: 50%; margin-bottom: 16px;
         display: flex; align-items: center; justify-content: center;
       }
       .dl-kpi-action-title {
-        font-size: 11px; font-weight: 600; letter-spacing: .14em;
-        text-transform: uppercase; color: ${t.text}; margin: 0 0 4px;
+        font-size: 10px; font-weight: 600; letter-spacing: .16em;
+        text-transform: uppercase; color: ${t.text}; margin: 0 0 5px;
       }
       .dl-kpi-action-sub {
-        font-size: 12px; font-weight: 300; color: ${t.textSec}; margin: 0;
+        font-size: 13px; font-weight: 300; color: ${t.textSec}; margin: 0;
       }
       .dl-kpi-action-btn {
-        margin-top: 18px; width: 100%; padding: 12px; border-radius: 100px;
+        margin-top: 20px; width: 100%; padding: 13px; border-radius: 100px;
         border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.moss}, ${AURA.mossDeep});
-        color: #fff; font-family: 'Inter', sans-serif;
-        font-size: 10px; font-weight: 600; letter-spacing: .14em;
+        color: #fff; font-family: 'Roboto', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: .16em;
         text-transform: uppercase; transition: all .3s;
-        box-shadow: 0 6px 20px rgba(30,63,102,.28);
+        box-shadow: 0 8px 24px rgba(155,92,255,.35);
       }
-      .dl-kpi-action-btn:hover { opacity: .88; transform: translateY(-1px); }
+      .dl-kpi-action-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
       .dl-kpi-action-btn-ghost {
-        margin-top: 18px; width: 100%; padding: 12px; border-radius: 100px;
+        margin-top: 20px; width: 100%; padding: 13px; border-radius: 100px;
         border: 1px solid ${t.border}; cursor: pointer;
         background: transparent; color: ${t.textSec};
-        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
-        letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
+        font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600;
+        letter-spacing: .16em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(185,140,255,.07)" : "rgba(155,92,255,.07)"}; }
 
       .dl-section-hd {
-        display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+        display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
       }
       .dl-section-title {
-        font-family: 'Fraunces', serif;
-        font-size: 15px; font-weight: 500; color: ${t.text};
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px; font-weight: 700; color: ${t.text}; letter-spacing: -.01em;
+      }
+      .dl-section-title::before {
+        content: ''; width: 3px; height: 15px; border-radius: 99px;
+        background: linear-gradient(180deg, ${AURA.gold}, #FF2CB0);
+        display: inline-block; margin-right: 10px; vertical-align: -2px;
       }
 
       .dl-menu-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 10px; margin-bottom: 22px;
+        gap: 14px; margin-bottom: 30px;
       }
-      @media(max-width: 480px) { .dl-menu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+      @media(max-width: 480px) { .dl-menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
       .dl-menu-card {
         background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
-        border-radius: 16px; padding: 16px 8px;
+        border-radius: 20px; padding: 20px 10px 16px;
         cursor: pointer; display: flex; flex-direction: column;
-        align-items: center; gap: 9px;
+        align-items: center; justify-content: center; gap: 10px;
         transition: all .35s cubic-bezier(.4,0,.2,1);
         text-align: center; position: relative;
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        box-shadow: ${isDark ? "0 12px 30px rgba(0,0,0,.22)" : "0 8px 22px rgba(20,20,22,.04)"};
       }
       .dl-menu-card::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-        border-radius: 16px 16px 0 0; opacity: 0; transition: opacity .35s;
+        content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 2px;
+        border-radius: 0 0 99px 99px; opacity: 0; transition: all .35s;
       }
       .dl-menu-card:hover {
         transform: translateY(-5px);
         border-color: ${t.cardHover};
-        box-shadow: 0 14px 36px rgba(0,0,0,${isDark ? ".45" : ".08"});
+        box-shadow: 0 18px 44px rgba(0,0,0,${isDark ? ".45" : ".1"});
       }
-      .dl-menu-card:hover::before { opacity: 1; }
+      .dl-menu-card:hover::before { opacity: 1; left: 12%; right: 12%; }
       .dl-menu-icon {
-        width: 40px; height: 40px; border-radius: 11px;
+        width: 46px; height: 46px; border-radius: 15px;
         display: flex; align-items: center; justify-content: center; margin: 0 auto;
+        transition: transform .35s;
       }
+      .dl-menu-card:hover .dl-menu-icon { transform: scale(1.06); }
       .dl-menu-name {
-        font-size: 9px; font-weight: 600; letter-spacing: .06em;
-        text-transform: uppercase; color: ${t.text}; margin: 0;
+        font-size: 11px; font-weight: 600; letter-spacing: .04em;
+        color: ${t.text}; margin: 0;
         word-break: break-word;
       }
       .dl-menu-desc {
-        font-size: 8px; letter-spacing: .1em;
-        text-transform: uppercase; color: ${t.textMuted}; margin: 2px 0 0;
+        font-size: 8.5px; letter-spacing: .1em;
+        text-transform: uppercase; color: ${t.textMuted}; margin: 3px 0 0;
       }
 
       .dl-card {
         background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
-        border-radius: 20px; overflow: hidden; margin-bottom: 20px;
-        backdrop-filter: blur(24px); position: relative;
+        border-radius: 24px; overflow: hidden; margin-bottom: 24px;
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative;
+        box-shadow: ${isDark ? "0 20px 50px rgba(0,0,0,.28)" : "0 12px 30px rgba(20,20,22,.05)"};
       }
       .dl-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(184,137,46,.22), transparent);
+        background: linear-gradient(90deg, transparent, rgba(185,140,255,.28), transparent);
       }
       .dl-card-head {
-        padding: 20px 22px;
+        padding: 22px 24px;
         border-bottom: 1px solid ${t.cardBorder};
         display: flex; align-items: center; justify-content: space-between;
         flex-wrap: wrap; gap: 12px;
       }
       .dl-card-head-title {
-        font-family: 'Fraunces', serif;
-        font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0;
+        font-family: 'Roboto', sans-serif;
+        font-size: 18px; font-weight: 700; color: ${t.text}; margin: 0; letter-spacing: -.01em;
       }
       .dl-card-head-sub {
-        font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0;
+        font-size: 11.5px; font-weight: 400; color: ${t.textMuted}; margin: 3px 0 0; letter-spacing: .04em;
       }
 
       .dl-btn-gold {
-        display: flex; align-items: center; gap: 7px;
-        padding: 11px 20px; border-radius: 100px; border: none; cursor: pointer;
+        display: flex; align-items: center; gap: 8px;
+        padding: 11px 22px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-        color: #12131C; font-family: 'Inter', sans-serif;
+        color: #12131C; font-family: 'Roboto', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .35s;
-        box-shadow: 0 6px 22px rgba(184,137,46,.24); flex-shrink: 0;
+        box-shadow: 0 8px 24px rgba(185,140,255,.3); flex-shrink: 0;
       }
-      .dl-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(184,137,46,.34); }
+      .dl-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(185,140,255,.4); }
       .dl-btn-ghost {
         display: flex; align-items: center; gap: 7px;
         padding: 11px 18px; border-radius: 100px;
         border: 1px solid ${t.border}; cursor: pointer;
         background: transparent; color: ${t.textSec};
-        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+        font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(185,140,255,.07)" : "rgba(155,92,255,.07)"}; }
 
       .dl-members-list {
-        padding: 16px 20px;
-        display: flex; flex-direction: column; gap: 9px;
+        padding: 16px 24px 22px;
+        display: flex; flex-direction: column; gap: 8px;
       }
       .dl-member-row {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 12px 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(30,63,102,.045)"};
-        border: 1px solid ${isDark ? "rgba(184,137,46,.09)" : "rgba(30,63,102,.12)"};
-        border-radius: 13px; transition: border-color .2s; gap: 10px;
+        padding: 11px 14px;
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(155,92,255,.05)"};
+        border: 1px solid ${isDark ? "rgba(185,140,255,.1)" : "rgba(155,92,255,.12)"};
+        border-radius: 14px; transition: all .2s; gap: 10px;
         min-width: 0; width: 100%;
       }
-      .dl-member-row:hover { border-color: rgba(184,137,46,.35); }
+      .dl-member-row:hover { border-color: rgba(185,140,255,.4); background: ${isDark ? "rgba(185,140,255,.06)" : "rgba(155,92,255,.08)"}; }
       .dl-member-avatar {
-        width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(184,137,46,.22), rgba(184,137,46,.07));
-        border: 1px solid rgba(184,137,46,.24);
+        width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+        background: linear-gradient(135deg, rgba(185,140,255,.35), rgba(155,92,255,.12));
+        border: 1px solid rgba(155,92,255,.28);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Fraunces', serif; font-weight: 600;
-        font-size: 15px; color: ${AURA.gold};
+        font-family: 'Roboto', sans-serif; font-weight: 700;
+        font-size: 15px; color: ${AURA.moss};
       }
       .dl-member-name {
-        font-size: 13px; font-weight: 300; color: ${t.text};
+        font-size: 13.5px; font-weight: 400; color: ${t.text};
         flex: 1; min-width: 0; overflow: hidden;
         text-overflow: ellipsis; white-space: nowrap;
       }
       .dl-btn-del {
         background: none; border: none; cursor: pointer;
-        color: ${t.textMuted}; padding: 5px; border-radius: 8px;
-        display: flex; align-items: center; flex-shrink: 0; transition: color .2s;
+        color: ${t.textMuted}; padding: 6px; border-radius: 9px;
+        display: flex; align-items: center; flex-shrink: 0; transition: all .2s;
       }
-      .dl-btn-del:hover { color: ${AURA.clay}; }
+      .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(255,154,165,.1); }
       .dl-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(184,137,46,.16), transparent);
+        background: linear-gradient(90deg, transparent, rgba(185,140,255,.16), transparent);
         margin: 2px 0;
       }
 
       .dl-search-wrap { position: relative; margin-bottom: 14px; }
       .dl-search-icon {
         position: absolute; left: 14px; top: 50%;
-        transform: translateY(-50%); color: ${AURA.gold}; opacity: .5;
+        transform: translateY(-50%); color: ${isDark ? "rgba(185,140,255,.65)" : "rgba(155,92,255,.6)"};
+        opacity: .9;
         pointer-events: none;
       }
       .dl-input {
         width: 100%; box-sizing: border-box;
         background: ${t.bgInput}; border: 1px solid ${t.borderInput};
         color: ${t.text}; padding: 13px 16px 13px 44px;
-        border-radius: 13px; outline: none;
-        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
+        border-radius: 14px; outline: none;
+        font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 400;
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .dl-input:focus {
-        border-color: rgba(184,137,46,.5);
-        background: rgba(184,137,46,.05);
-        box-shadow: 0 0 0 3px rgba(184,137,46,.09);
+        border-color: rgba(155,92,255,.55);
+        background: ${isDark ? "rgba(185,140,255,.08)" : "rgba(155,92,255,.08)"};
+        box-shadow: 0 0 0 4px rgba(155,92,255,.14);
       }
+      .dl-input { font-family: 'Roboto', sans-serif; }
       .dl-input::placeholder { color: ${t.placeholder}; }
 
       .dl-modal-backdrop {
@@ -429,19 +456,20 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-modal-overlay {
         position: fixed; inset: 0;
-        background: rgba(18,19,28,.88); z-index: 0;
-        backdrop-filter: blur(4px);
+        background: rgba(0,0,0,.72); z-index: 0;
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
       }
       .dl-modal-box {
         position: relative; z-index: 10;
         width: 100%; max-height: 88vh;
         display: flex; flex-direction: column;
         background: ${t.bgEl}; border: 1px solid ${t.border};
-        border-radius: 22px 22px 0 0; overflow: hidden;
+        border-radius: 24px 24px 0 0; overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0,0,0,.4);
       }
       @media(min-width: 520px) {
         .dl-modal-box {
-          border-radius: 22px; max-width: 480px;
+          border-radius: 24px; max-width: 480px;
           max-height: calc(100vh - 32px);
         }
       }
@@ -450,12 +478,12 @@ function GlobalStyles({ t, isDark }) {
         width: 100%; max-height: 88vh;
         display: flex; flex-direction: column;
         background: ${t.bgEl}; border: 1px solid ${t.border};
-        border-radius: 22px 22px 0 0;
+        border-radius: 24px 24px 0 0;
         padding: 32px 26px; overflow-y: auto;
       }
       @media(min-width: 520px) {
         .dl-modal-multi-box {
-          border-radius: 22px; max-width: 440px;
+          border-radius: 24px; max-width: 440px;
           max-height: calc(100vh - 32px);
         }
       }
@@ -464,28 +492,30 @@ function GlobalStyles({ t, isDark }) {
         width: 100%; box-sizing: border-box; resize: vertical;
         background: ${t.bgInput}; border: 1px solid ${t.borderInput};
         color: ${t.text}; padding: 14px 16px;
-        border-radius: 13px; outline: none; min-height: 110px;
-        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
+        border-radius: 14px; outline: none; min-height: 110px;
+        font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 400;
         transition: all .25s;
       }
       .dl-textarea:focus {
-        border-color: rgba(184,137,46,.5);
-        box-shadow: 0 0 0 3px rgba(184,137,46,.09);
+        border-color: rgba(155,92,255,.55);
+        box-shadow: 0 0 0 4px rgba(155,92,255,.14);
       }
       .dl-textarea::placeholder { color: ${t.placeholder}; }
 
       .dl-footer {
         text-align: center;
-        font-size: 9px; font-weight: 500; letter-spacing: .18em;
+        font-size: 9px; font-weight: 500; letter-spacing: .22em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(243,241,234,.14)" : "rgba(27,35,51,.3)"};
-        padding: 16px 0 0;
+        color: ${isDark ? "rgba(255,255,255,.18)" : "rgba(20,20,22,.32)"};
+        padding: 18px 0 0;
       }
 
       .dl-loading {
         min-height: 100vh; display: flex;
         align-items: center; justify-content: center;
-        background: ${isDark ? "radial-gradient(ellipse at 20% 0%, #1A2236 0%, #12131C 55%, #0D0F18 100%)" : "radial-gradient(ellipse at 20% 0%, #ECECEF 0%, #E0E0E5 55%, #D2D2D8 100%)"};
+        background: ${isDark
+        ? "linear-gradient(180deg, rgba(0,0,0,.66) 0%, rgba(0,0,0,.82) 45%, rgba(0,0,0,.9) 100%)"
+        : "linear-gradient(180deg, rgba(241,241,243,.72) 0%, rgba(241,241,243,.86) 50%, rgba(241,241,243,.94) 100%)"};
         position: relative;
       }
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }
@@ -606,6 +636,7 @@ export default function DashboardLider() {
     return (
         <div className="dl-loading">
           <GlobalStyles t={t} isDark={isDark} />
+          <FundoGlass />
           <div className="dl-glow" />
           <TelaCarregando isDark={isDark} minHeight="100vh" background="transparent" />
         </div>
@@ -614,19 +645,20 @@ export default function DashboardLider() {
 
   /* ── 7 módulos (Histórico removido) ── */
   const menuItems = [
-    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: AURA.clay,      gradient: `${AURA.clayDeep},${AURA.clay}` },
-    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
-    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.clay,      gradient: `${AURA.clayDeep},${AURA.clay}` },
-    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold,      gradient: `rgba(184,137,46,.8),${AURA.gold}` },
+    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: AURA.moss, gradient: `${AURA.mossDeep},${AURA.moss}` },
+    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: AURA.pink, gradient: `rgba(185,140,255,.8),${AURA.pink}` },
+    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.moss, gradient: `${AURA.mossDeep},${AURA.moss}` },
+    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold, gradient: `rgba(185,140,255,.8),${AURA.gold}` },
     { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
     { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
-    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
-    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: AURA.mossLight, gradient: `${AURA.mossDeep},${AURA.moss}` },
+    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: AURA.pink, gradient: `rgba(185,140,255,.8),${AURA.pink}` },
+    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: AURA.moss, gradient: `${AURA.mossDeep},${AURA.moss}` },
   ];
 
   return (
       <div className="dl-root">
         <GlobalStyles t={t} isDark={isDark} />
+        <FundoGlass />
         <div className="dl-glow" />
 
         <AnimatePresence>
@@ -662,6 +694,8 @@ export default function DashboardLider() {
               </div>
               <div className="dl-title-block">
                 <p className="dl-eyebrow">Painel do Líder</p>
+                <p className="dl-title">{usuarioLogado?.nome || "Líder"}</p>
+                <p className="dl-subtitle">{celula?.nome || "Célula"} · Acompanhamento semanal</p>
               </div>
             </div>
 
@@ -682,18 +716,7 @@ export default function DashboardLider() {
             </div>
           </motion.header>
 
-          {/* ── Divider + Nome do Líder em destaque + Badge da Célula ── */}
-          <div className="dl-divider"><div className="dl-divider-dot" /></div>
-
-          <div style={{ textAlign: "center", marginBottom: 14, padding: "0 12px" }}>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: AURA.gold, opacity: .75, margin: "0 0 5px" }}>
-              Líder Responsável
-            </p>
-            <p style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(18px, 4.5vw, 23px)", fontWeight: 600, color: t.text, margin: 0, lineHeight: 1.25, wordBreak: "break-word" }}>
-              {usuarioLogado?.nome || "Líder"}
-            </p>
-          </div>
-
+          {/* ── Badge da Célula ── */}
           <div className="dl-badge-center">
             <span className="dl-badge">
               <span className="dl-badge-dot dl-blink" />
@@ -733,7 +756,7 @@ export default function DashboardLider() {
                     <div className="dl-kpi-hero">
                       <div className="dl-kpi-stripes" />
                       <div className="dl-kpi-inner">
-                        <span className="dl-badge" style={{ fontSize: 9, padding: "4px 11px" }}>
+                        <span className="dl-badge" style={{ fontSize: 9, padding: "4px 12px" }}>
                           <TrendingUp size={10} /> Crescimento
                         </span>
                         <p className="dl-big-num">{qtdMembros}</p>
@@ -768,9 +791,9 @@ export default function DashboardLider() {
                         <div
                             className="dl-kpi-action-icon"
                             style={{
-                              background: isAprovado ? "rgba(91,42,110,.14)" : isAnalise ? "rgba(217,174,94,.12)" : "rgba(184,137,46,.09)",
+                              background: isAprovado ? "rgba(122,61,224,.14)" : isAnalise ? "rgba(227,207,255,.12)" : "rgba(185,140,255,.09)",
                               color: isAprovado ? AURA.roxoLight : isAnalise ? AURA.goldLight : AURA.gold,
-                              border: `1px solid ${isAprovado ? "rgba(91,42,110,.3)" : isAnalise ? "rgba(217,174,94,.28)" : "rgba(184,137,46,.22)"}`,
+                              border: `1px solid ${isAprovado ? "rgba(122,61,224,.3)" : isAnalise ? "rgba(227,207,255,.28)" : "rgba(185,140,255,.22)"}`,
                             }}
                         >
                           {isAprovado
@@ -786,13 +809,13 @@ export default function DashboardLider() {
                       </div>
                       <div>
                         {isAnalise ? (
-                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(217,174,94,.09)", border: "1px solid rgba(217,174,94,.28)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
+                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(227,207,255,.09)", border: "1px solid rgba(227,207,255,.28)", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
                               Consultando Pastor…
                             </div>
                         ) : podeSolicitar ? (
                             <button
                                 className="dl-kpi-action-btn"
-                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.roxo}, ${AURA.roxoDeep})`, boxShadow: "0 6px 20px rgba(91,42,110,.28)" } : undefined}
+                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.roxo}, ${AURA.roxoDeep})`, boxShadow: "0 6px 20px rgba(122,61,224,.28)" } : undefined}
                                 onClick={() => setShowModalMultiplicacao(true)}
                             >
                               {isAprovado ? "Nova Solicitação" : "Solicitar Mult."}
@@ -858,15 +881,15 @@ export default function DashboardLider() {
                           </React.Fragment>
                       ))}
                       {membros.length === 0 && (
-                          <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+                          <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
                             Nenhum membro vinculado.
                           </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="dl-divider-line" style={{ margin: "8px 0 16px" }} />
-                  <p className="dl-footer">© {new Date().getFullYear()} IEQ Pituaçu — Sistema Eclesiástico</p>
+                  <div className="dl-divider" style={{ margin: "6px auto 18px" }}><div className="dl-divider-dot" /></div>
+                  <p className="dl-footer">© {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico</p>
                 </motion.div>
 
             ) : (
@@ -909,16 +932,16 @@ export default function DashboardLider() {
                 <motion.div className="dl-modal-multi-box" initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: "tween", duration: .28 }}>
                   <div style={{ textAlign: "center", marginBottom: 26 }}>
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(184,137,46,.26)", borderRadius: "50%" }} />
-                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(184,137,46,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
-                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(26,34,54,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(185,140,255,.26)", borderRadius: "50%" }} />
+                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(185,140,255,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
+                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(40,40,44,.99)" : "#fff", border: "1.5px solid rgba(185,140,255,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
                         <IEQCross size={32} />
                       </div>
                     </div>
-                    <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
+                    <h2 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
                       Plano de Multiplicação
                     </h2>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.textSec }}>
+                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: t.textSec }}>
                       Informe o novo líder e o local da nova célula.
                     </p>
                   </div>
@@ -927,7 +950,7 @@ export default function DashboardLider() {
                   <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
                     <button className="dl-btn-ghost" style={{ flex: 1 }} onClick={() => setShowModalMultiplicacao(false)}>Cancelar</button>
                     <button
-                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", border: "none", borderRadius: "100px", cursor: "pointer", background: `linear-gradient(135deg,${AURA.mossDeep},${AURA.moss})`, color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .3s", opacity: solicitandoMulti ? .6 : 1 }}
+                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", border: "none", borderRadius: "100px", cursor: "pointer", background: `linear-gradient(135deg,${AURA.mossDeep},${AURA.moss})`, color: "#fff", fontFamily: "'Roboto',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .3s", opacity: solicitandoMulti ? .6 : 1 }}
                         onClick={solicitarMultiplicacao}
                         disabled={solicitandoMulti}
                     >
@@ -986,8 +1009,8 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
       <div style={{ padding: "22px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexShrink: 0 }}>
           <div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(184,137,46,.65)", margin: "0 0 4px" }}>Vincular</p>
-            <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
+            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(185,140,255,.65)", margin: "0 0 4px" }}>Vincular</p>
+            <h2 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex" }}>
             <X size={20} />
@@ -995,9 +1018,9 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
         </div>
 
         <div style={{ position: "relative", marginBottom: 14, flexShrink: 0 }}>
-          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
+          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? "rgba(185,140,255,.65)" : "rgba(155,92,255,.6)", opacity: .9, pointerEvents: "none" }} />
           <input
-              style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "13px 16px 13px 44px", borderRadius: 13, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, transition: "all .25s" }}
+              style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "13px 16px 13px 44px", borderRadius: 13, outline: "none", fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, transition: "all .25s" }}
               placeholder="Buscar por nome…"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
@@ -1013,28 +1036,28 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
               filtrados.map((m) => (
                   <div
                       key={m.id}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(30,63,102,.045)", border: `1px solid ${isDark ? "rgba(184,137,46,.09)" : "rgba(30,63,102,.13)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(184,137,46,.4)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(184,137,46,.09)" : "rgba(30,63,102,.13)"; }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(155,92,255,.06)", border: `1px solid ${isDark ? "rgba(185,140,255,.11)" : "rgba(155,92,255,.14)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(185,140,255,.45)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(185,140,255,.11)" : "rgba(155,92,255,.14)"; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(184,137,46,.22),rgba(184,137,46,.07))", border: "1px solid rgba(184,137,46,.24)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fraunces',serif", fontWeight: 600, fontSize: 14, color: AURA.gold }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(185,140,255,.4),rgba(155,92,255,.14))", border: "1px solid rgba(155,92,255,.32)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontWeight: 700, fontSize: 14, color: AURA.moss }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
-                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {m.nome}
                       </span>
                     </div>
                     <button
                         onClick={() => vincular(m.id)}
-                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})`, color: "#12131C", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
+                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})`, color: "#12131C", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
                     >
                       <Plus size={11} /> Vincular
                     </button>
                   </div>
               ))
           ) : (
-              <p style={{ textAlign: "center", paddingTop: 28, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+              <p style={{ textAlign: "center", paddingTop: 28, fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
                 Nenhum membro encontrado.
               </p>
           )}

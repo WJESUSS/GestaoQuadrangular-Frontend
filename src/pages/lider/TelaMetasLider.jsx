@@ -65,7 +65,7 @@ const statusMeta = (meta) => {
 
 const CSS = `
   .metas-wrap * { box-sizing: border-box; }
-  .metas-wrap { font-family: 'Fraunces', serif; }
+  .metas-wrap { font-family: 'Roboto', sans-serif; }
   @keyframes metas-fadeup { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
   @keyframes metas-spin   { to { transform:rotate(360deg); } }
   @keyframes metas-pulse  { 0%,100%{opacity:1} 50%{opacity:.6} }
@@ -75,68 +75,68 @@ const CSS = `
   .metas-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:20px; }
   @media (max-width:600px) { .metas-grid { grid-template-columns:1fr; } }
 
-  .metas-card { border-radius:14px; overflow:hidden; transition:box-shadow .3s, transform .25s; position:relative; }
+  .metas-card { border-radius:20px; overflow:hidden; box-shadow:0 12px 34px rgba(0,0,0,.25); transition:box-shadow .3s, transform .25s; position:relative; }
   .metas-card:hover { transform:translateY(-3px); }
-  .metas-card.dark  { background:#1A2236; border:1px solid rgba(158,42,43,.15); box-shadow:0 4px 24px rgba(0,0,0,.35); }
-  .metas-card.light { background:#fff;    border:1px solid rgba(158,42,43,.12); box-shadow:0 4px 24px rgba(158,42,43,.07); }
-  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(158,42,43,.18); border-color:rgba(158,42,43,.3); }
-  .metas-card:hover.light { box-shadow:0 12px 40px rgba(158,42,43,.14); border-color:rgba(158,42,43,.28); }
+  .metas-card.dark  { background:rgba(40,40,44,.96); border:1px solid rgba(155,92,255,.15); box-shadow:0 4px 24px rgba(0,0,0,.35); }
+  .metas-card.light { background:#fff;    border:1px solid rgba(155,92,255,.12); box-shadow:0 4px 24px rgba(155,92,255,.07); }
+  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(155,92,255,.18); border-color:rgba(155,92,255,.3); }
+  .metas-card:hover.light { box-shadow:0 12px 40px rgba(155,92,255,.14); border-color:rgba(155,92,255,.28); }
 
-  .metas-btn { display:inline-flex; align-items:center; gap:7px; border:none; border-radius:8px; cursor:pointer; transition:all .22s; font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.14em; }
+  .metas-btn { display:inline-flex; align-items:center; gap:7px; border:none; border-radius:100px; cursor:pointer; transition:all .22s; font-family:'Roboto',sans-serif; font-weight:700; letter-spacing:.14em; }
   .metas-btn:hover:not(:disabled) { filter:brightness(1.12); transform:translateY(-1px); }
   .metas-btn:disabled { opacity:.55; cursor:not-allowed; }
-  .metas-btn-red    { background:linear-gradient(135deg,#6E1D1E,#9E2A2B); color:#fff; font-size:10px; padding:11px 18px; }
-  .metas-btn-blue   { background:linear-gradient(135deg,#12283F,#1E3F66); color:#fff; font-size:10px; padding:11px 18px; }
+  .metas-btn-red    { background:linear-gradient(135deg,#7A3DE0,#9B5CFF); color:#fff; font-size:10px; padding:11px 18px; }
+  .metas-btn-blue   { background:linear-gradient(135deg,#7A3DE0,#9B5CFF); color:#fff; font-size:10px; padding:11px 18px; }
   .metas-btn-ghost  { font-size:9.5px; padding:10px 16px; }
-  .metas-btn-ghost.dark  { background:rgba(255,255,255,.05); color:#F3F1EA; border:1px solid rgba(158,42,43,.2); }
-  .metas-btn-ghost.light { background:rgba(158,42,43,.06); color:#6E1D1E;  border:1px solid rgba(158,42,43,.18); }
-  .metas-btn-ghost:hover { border-color:#9E2A2B !important; background:rgba(158,42,43,.1) !important; }
+  .metas-btn-ghost.dark  { background:rgba(255,255,255,.05); color:#FFFFFF; border:1px solid rgba(155,92,255,.2); }
+  .metas-btn-ghost.light { background:rgba(155,92,255,.06); color:#7A3DE0;  border:1px solid rgba(155,92,255,.18); }
+  .metas-btn-ghost:hover { border-color:#9B5CFF !important; background:rgba(155,92,255,.1) !important; }
 
   .metas-icon-btn { background:none; border:none; cursor:pointer; padding:6px; border-radius:6px; display:flex; align-items:center; justify-content:center; transition:all .2s; }
-  .metas-icon-btn:hover { background:rgba(158,42,43,.12); }
+  .metas-icon-btn:hover { background:rgba(155,92,255,.12); }
 
-  .metas-input { width:100%; padding:11px 14px; border-radius:8px; outline:none; font-family:'Inter',sans-serif; font-size:14px; transition:border-color .2s, box-shadow .2s; }
-  .metas-input.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(158,42,43,.2); color:#F3F1EA; }
-  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(158,42,43,.18); color:#1A0A0D; }
-  .metas-input:focus { border-color:#9E2A2B !important; box-shadow:0 0 0 3px rgba(158,42,43,.12); }
+  .metas-input { width:100%; padding:12px 16px; border-radius:14px; outline:none; font-family:'Roboto',sans-serif; font-size:14px; transition:border-color .2s, box-shadow .2s; }
+  .metas-input.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(155,92,255,.2); color:#FFFFFF; }
+  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(155,92,255,.18); color:#1A0A0D; }
+  .metas-input:focus { border-color:#9B5CFF !important; box-shadow:0 0 0 4px rgba(155,92,255,.16); }
   .metas-input.dark::placeholder  { color:rgba(245,240,232,.25); }
   .metas-input.light::placeholder { color:rgba(26,10,13,.3); }
 
-  .metas-label { font-family:'Inter',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.14em; display:block; margin-bottom:7px; }
-  .metas-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-family:'Inter',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.14em; border:1px solid; }
+  .metas-label { font-family:'Roboto',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.14em; display:block; margin-bottom:7px; }
+  .metas-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-family:'Roboto',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.14em; border:1px solid; }
   .metas-progress-track { height:7px; border-radius:99px; overflow:hidden; }
   .metas-progress-track.dark  { background:rgba(255,255,255,.08); }
-  .metas-progress-track.light { background:rgba(158,42,43,.1); }
-  .metas-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(158,42,43,.2),transparent); }
+  .metas-progress-track.light { background:rgba(155,92,255,.1); }
+  .metas-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(155,92,255,.25),transparent); }
 
-  .metas-empty { border-radius:14px; padding:48px 24px; text-align:center; }
-  .metas-empty.dark  { border:1.5px dashed rgba(158,42,43,.2);  background:rgba(255,255,255,.015); }
-  .metas-empty.light { border:1.5px dashed rgba(158,42,43,.18); background:rgba(158,42,43,.03); }
+  .metas-empty { border-radius:20px; padding:48px 24px; text-align:center; }
+  .metas-empty.dark  { border:1.5px dashed rgba(155,92,255,.2);  background:rgba(255,255,255,.015); }
+  .metas-empty.light { border:1.5px dashed rgba(155,92,255,.18); background:rgba(155,92,255,.03); }
 
   .metas-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
   @media(max-width:480px) { .metas-summary-grid { grid-template-columns:1fr 1fr; } }
 
-  .metas-summary-card { border-radius:12px; padding:16px; text-align:center; }
-  .metas-summary-card.dark  { background:rgba(255,255,255,.03); border:1px solid rgba(158,42,43,.12); }
-  .metas-summary-card.light { background:rgba(158,42,43,.04);   border:1px solid rgba(158,42,43,.1); }
+  .metas-summary-card { border-radius:16px; padding:18px 14px; text-align:center; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+  .metas-summary-card.dark  { background:rgba(255,255,255,.03); border:1px solid rgba(155,92,255,.12); }
+  .metas-summary-card.light { background:rgba(155,92,255,.04);   border:1px solid rgba(155,92,255,.1); }
 
-  .metas-hist-item { border-radius:10px; padding:14px 16px; }
-  .metas-hist-item.dark  { background:rgba(34,197,94,.05); border:1px solid rgba(34,197,94,.2); }
-  .metas-hist-item.light { background:rgba(34,197,94,.06); border:1px solid rgba(34,197,94,.22); }
+  .metas-hist-item { border-radius:14px; padding:16px; }
+  .metas-hist-item.dark  { background:rgba(91,214,140,.05); border:1px solid rgba(91,214,140,.2); }
+  .metas-hist-item.light { background:rgba(91,214,140,.06); border:1px solid rgba(91,214,140,.22); }
 
-  .metas-banner { border-radius:12px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:flex-start; gap:12px; }
-  .metas-banner.dark  { background:rgba(217,174,94,.07); border:1px solid rgba(217,174,94,.22); }
-  .metas-banner.light { background:rgba(217,174,94,.1);  border:1px solid rgba(217,174,94,.28); }
+  .metas-banner { border-radius:16px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:flex-start; gap:12px; }
+  .metas-banner.dark  { background:rgba(227,207,255,.07); border:1px solid rgba(227,207,255,.22); }
+  .metas-banner.light { background:rgba(227,207,255,.1);  border:1px solid rgba(227,207,255,.28); }
 
   .metas-backdrop { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:16px; }
-  .metas-modal { border-radius:16px; padding:32px 28px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; position:relative; z-index:1; }
-  .metas-modal.dark  { background:linear-gradient(135deg,#1A2236,#12131C); border:1px solid rgba(158,42,43,.2); box-shadow:0 30px 60px rgba(158,42,43,.15); }
-  .metas-modal.light { background:linear-gradient(135deg,#fff,#F3F1EA);    border:1px solid rgba(158,42,43,.15); box-shadow:0 30px 60px rgba(158,42,43,.12); }
+  .metas-modal { border-radius:24px; padding:32px 28px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; position:relative; z-index:1; }
+  .metas-modal.dark  { background:linear-gradient(135deg,rgba(40,40,44,.96),#101014); border:1px solid rgba(155,92,255,.2); box-shadow:0 30px 60px rgba(155,92,255,.15); }
+  .metas-modal.light { background:linear-gradient(135deg,#fff,#FFFFFF);    border:1px solid rgba(155,92,255,.15); box-shadow:0 30px 60px rgba(155,92,255,.12); }
 
   .tipo-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .tipo-opt { border-radius:8px; padding:10px 8px; text-align:center; cursor:pointer; transition:all .2s; border:2px solid transparent; }
   .tipo-opt.dark  { background:rgba(255,255,255,.03); }
-  .tipo-opt.light { background:rgba(158,42,43,.04); }
+  .tipo-opt.light { background:rgba(155,92,255,.04); }
   .tipo-opt.selected { border-color:var(--tc); background:color-mix(in srgb, var(--tc) 12%, transparent); }
   .tipo-opt:hover { border-color:var(--tc); }
 `;
@@ -288,10 +288,10 @@ export default function TelaMetasLider({ celula, isDark }) {
                         <Target size={22} style={{ color:AURA.red }} />
                     </div>
                     <div>
-                        <h2 style={{ fontFamily:"'Fraunces',serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>
+                        <h2 style={{ fontFamily:"'Roboto',sans-serif", fontSize:16, fontWeight:700, letterSpacing:".16em", color:textPrimary, margin:0 }}>
                             METAS DA CÉLULA
                         </h2>
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:textSecondary, margin:0 }}>
+                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:13, color:textSecondary, margin:0 }}>
                             {celula?.nome || "---"} — Gerencie seus objetivos
                         </p>
                     </div>
@@ -310,10 +310,10 @@ export default function TelaMetasLider({ celula, isDark }) {
                 >
                     <div style={{ fontSize:22, lineHeight:1, flexShrink:0 }}>🎯</div>
                     <div>
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:9, letterSpacing:".16em", color:AURA.yellowDark, margin:"0 0 4px" }}>
+                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:9, letterSpacing:".16em", color:AURA.yellowDark, margin:"0 0 4px" }}>
                             FOCO DA CÉLULA — {TIPO_CONFIG[metaMaisUrgente.tipoMeta]?.label?.toUpperCase()}
                         </p>
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:15, color:mensagemBanner.cor, fontWeight:600, margin:0 }}>
+                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:15, color:mensagemBanner.cor, fontWeight:600, margin:0 }}>
                             {mensagemBanner.texto}
                         </p>
                     </div>
@@ -329,8 +329,8 @@ export default function TelaMetasLider({ celula, isDark }) {
                 ].map(({ label, value, color, icon }) => (
                     <div key={label} className={`metas-summary-card ${t}`}>
                         <div style={{ color, marginBottom:8 }}>{icon}</div>
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:22, fontWeight:700, color, margin:0, lineHeight:1 }}>{value}</p>
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"6px 0 0" }}>{label}</p>
+                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:22, fontWeight:700, color, margin:0, lineHeight:1 }}>{value}</p>
+                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:8, letterSpacing:".14em", color:textSecondary, margin:"6px 0 0" }}>{label}</p>
                     </div>
                 ))}
             </motion.div>
@@ -357,8 +357,8 @@ export default function TelaMetasLider({ celula, isDark }) {
                         {metas.length === 0 ? (
                             <div className={`metas-empty ${t}`}>
                                 <Target size={36} style={{ color:textSecondary, opacity:.4, marginBottom:12 }} />
-                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>NENHUMA META ATIVA</p>
-                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:14, color:textSecondary, margin:"8px 0 20px", fontStyle:"italic" }}>Comece definindo o primeiro objetivo da sua célula.</p>
+                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>NENHUMA META ATIVA</p>
+                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:14, color:textSecondary, margin:"8px 0 20px", fontStyle:"italic" }}>Comece definindo o primeiro objetivo da sua célula.</p>
                                 <button className="metas-btn metas-btn-red" onClick={abrirNova}><Plus size={13} /> CRIAR PRIMEIRA META</button>
                             </div>
                         ) : (
@@ -384,8 +384,8 @@ export default function TelaMetasLider({ celula, isDark }) {
                         {historico.length === 0 ? (
                             <div className={`metas-empty ${t}`}>
                                 <Trophy size={36} style={{ color:textSecondary, opacity:.4, marginBottom:12 }} />
-                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>SEM HISTÓRICO AINDA</p>
-                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:14, color:textSecondary, margin:"8px 0 0", fontStyle:"italic" }}>Metas concluídas aparecerão aqui.</p>
+                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>SEM HISTÓRICO AINDA</p>
+                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:14, color:textSecondary, margin:"8px 0 0", fontStyle:"italic" }}>Metas concluídas aparecerão aqui.</p>
                             </div>
                         ) : (
                             <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
@@ -397,21 +397,21 @@ export default function TelaMetasLider({ celula, isDark }) {
                                         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                                             <span style={{ fontSize:22 }}>{TIPO_CONFIG[meta.tipoMeta]?.emoji}</span>
                                             <div>
-                                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:11, fontWeight:700, letterSpacing:".12em", color:TIPO_CONFIG[meta.tipoMeta]?.color, margin:0 }}>
+                                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".12em", color:TIPO_CONFIG[meta.tipoMeta]?.color, margin:0 }}>
                                                     {TIPO_CONFIG[meta.tipoMeta]?.label?.toUpperCase()}
                                                 </p>
-                                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:textSecondary, margin:"2px 0 0" }}>
+                                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:13, color:textSecondary, margin:"2px 0 0" }}>
                                                     Limite: {fmtData(meta.mesAno)} — {meta.metaAlcancada}/{meta.metaTotal} pessoas
                                                 </p>
                                                 {meta.dataCriacao && (
-                                                    <p style={{ fontFamily:"'Fraunces',serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"2px 0 0", opacity:.7 }}>
+                                                    <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"2px 0 0", opacity:.7 }}>
                                                         Criada em: {fmtDataCurta(meta.dataCriacao)}
                                                     </p>
                                                 )}
                                             </div>
                                         </div>
                                         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                                            <span style={{ fontFamily:"'Fraunces',serif", fontSize:10, color:"#22c55e", letterSpacing:".1em" }}>✓ CONCLUÍDA</span>
+                                            <span style={{ fontFamily:"'Roboto',sans-serif", fontSize:10, color:"#22c55e", letterSpacing:".1em" }}>✓ CONCLUÍDA</span>
                                             <button className="metas-icon-btn" onClick={() => deletar(meta.id)} style={{ color:textSecondary }}>
                                                 <Trash2 size={14} />
                                             </button>
@@ -430,7 +430,7 @@ export default function TelaMetasLider({ celula, isDark }) {
                     <div className="metas-backdrop">
                         <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
                                     onClick={() => setModalAberto(null)}
-                                    style={{ position:"fixed", inset:0, background: isDark ? "rgba(18,19,28,.9)" : "rgba(0,0,0,.7)", backdropFilter:"blur(20px)", zIndex:0 }} />
+                                    style={{ position:"fixed", inset:0, background: isDark ? "rgba(0,0,0,.9)" : "rgba(0,0,0,.7)", backdropFilter:"blur(20px)", zIndex:0 }} />
                         <motion.div className={`metas-modal ${t}`}
                                     initial={{ opacity:0, scale:.88, y:32 }} animate={{ opacity:1, scale:1, y:0 }}
                                     exit={{ opacity:0, scale:.88, y:32 }}
@@ -440,10 +440,10 @@ export default function TelaMetasLider({ celula, isDark }) {
                                 <X size={18} />
                             </button>
 
-                            <h3 style={{ fontFamily:"'Fraunces',serif", fontSize:14, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"0 0 4px" }}>
+                            <h3 style={{ fontFamily:"'Roboto',sans-serif", fontSize:14, fontWeight:700, letterSpacing:".15em", color:textPrimary, margin:"0 0 4px" }}>
                                 {modalAberto === "nova" ? "NOVA META" : "EDITAR META"}
                             </h3>
-                            <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:textSecondary, margin:"0 0 22px" }}>
+                            <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:13, color:textSecondary, margin:"0 0 22px" }}>
                                 {modalAberto === "nova" ? "Defina o tipo e a quantidade de pessoas" : "Altere as informações da meta"}
                             </p>
                             <div className="metas-divider" style={{ marginBottom:20 }} />
@@ -454,7 +454,7 @@ export default function TelaMetasLider({ celula, isDark }) {
                                     <div key={key} className={`tipo-opt ${t} ${form.tipoMeta === key ? "selected" : ""}`}
                                          style={{ "--tc": cfg.color }} onClick={() => setForm(f => ({ ...f, tipoMeta: key }))}>
                                         <span style={{ fontSize:20, display:"block", marginBottom:4 }}>{cfg.emoji}</span>
-                                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:9, fontWeight:700, letterSpacing:".12em", color: form.tipoMeta === key ? cfg.color : textSecondary, margin:0 }}>
+                                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:9, fontWeight:700, letterSpacing:".12em", color: form.tipoMeta === key ? cfg.color : textSecondary, margin:0 }}>
                                             {cfg.label.toUpperCase()}
                                         </p>
                                     </div>
@@ -486,10 +486,10 @@ export default function TelaMetasLider({ celula, isDark }) {
                                         : `✓ ${dias} dia${dias > 1 ? "s" : ""} restante${dias > 1 ? "s" : ""} a partir de hoje`;
                                 return (
                                     <div style={{ marginBottom:18, padding:"8px 12px", borderRadius:8, background:`${cor}10`, border:`1px solid ${cor}30` }}>
-                                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:9, letterSpacing:".12em", color:cor, margin:"0 0 3px" }}>
+                                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:9, letterSpacing:".12em", color:cor, margin:"0 0 3px" }}>
                                             {txt}
                                         </p>
-                                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, color:cor, margin:0, opacity:.85 }}>
+                                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:12, color:cor, margin:0, opacity:.85 }}>
                                             Limite: {fmtData(form.mesAno)}
                                         </p>
                                     </div>
@@ -540,18 +540,18 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                         <span style={{ fontSize:26 }}>{cfg.emoji}</span>
                         <div>
-                            <p style={{ fontFamily:"'Fraunces',serif", fontSize:11, fontWeight:700, letterSpacing:".13em", color:cfg.color, margin:0 }}>
+                            <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".13em", color:cfg.color, margin:0 }}>
                                 {cfg.label.toUpperCase()}
                             </p>
                             {/* Data limite + dias restantes */}
                             <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:3, flexWrap:"wrap" }}>
                                 <Calendar size={10} style={{ color:corDias }} />
-                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:12, color:textSecondary, margin:0 }}>
+                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:12, color:textSecondary, margin:0 }}>
                                     {fmtData(meta.mesAno)}
                                 </p>
                                 {diasRestantes !== null && !meta.metaConcluida && (
                                     <span style={{
-                                        fontFamily:"'Fraunces',serif", fontSize:8, fontWeight:700,
+                                        fontFamily:"'Roboto',sans-serif", fontSize:8, fontWeight:700,
                                         letterSpacing:".1em", color:corDias,
                                         background:`${corDias}18`, border:`1px solid ${corDias}44`,
                                         padding:"1px 7px", borderRadius:99,
@@ -564,7 +564,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                             </div>
                             {/* Data de criação */}
                             {meta.dataCriacao && (
-                                <p style={{ fontFamily:"'Fraunces',serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"3px 0 0", opacity:.65 }}>
+                                <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:8, letterSpacing:".09em", color:textSecondary, margin:"3px 0 0", opacity:.65 }}>
                                     Criada em: {fmtDataCurta(meta.dataCriacao)}
                                 </p>
                             )}
@@ -584,11 +584,11 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                 {/* Número + controles */}
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
                     <div>
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:10, letterSpacing:".1em", color:textSecondary, margin:0 }}>FALTAM</p>
+                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:10, letterSpacing:".1em", color:textSecondary, margin:0 }}>FALTAM</p>
                         <motion.p key={meta.faltam} initial={{ scale:.7, opacity:0 }} animate={{ scale:1, opacity:1 }}
-                                  style={{ fontFamily:"'Fraunces',serif", fontSize:38, fontWeight:700, margin:"2px 0 0", lineHeight:1,
+                                  style={{ fontFamily:"'Roboto',sans-serif", fontSize:38, fontWeight:700, margin:"2px 0 0", lineHeight:1,
                                       color: meta.metaConcluida ? "#22c55e" : cfg.color,
-                                      textShadow: meta.metaConcluida ? "0 0 16px rgba(34,197,94,.3)" : undefined }}>
+                                      textShadow: meta.metaConcluida ? "0 0 16px rgba(91,214,140,.3)" : undefined }}>
                             {meta.metaConcluida ? "✓" : meta.faltam}
                         </motion.p>
                     </div>
@@ -603,17 +603,17 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                                 onMouseLeave={e => { e.currentTarget.style.background = `${cfg.color}18`; }}>
                             {ajustando ? <Loader2 size={14} className="metas-spin" /> : <ChevronUp size={18} />}
                         </button>
-                        <span style={{ fontFamily:"'Fraunces',serif", fontSize:10, color:textSecondary, letterSpacing:".08em" }}>
+                        <span style={{ fontFamily:"'Roboto',sans-serif", fontSize:10, color:textSecondary, letterSpacing:".08em" }}>
                             {meta.metaAlcancada}/{meta.metaTotal}
                         </span>
                         <button onClick={onDecrementar} disabled={ajustando || meta.metaAlcancada <= 0}
-                                style={{ width:36, height:36, borderRadius:8, border:"2px solid rgba(158,42,43,.3)",
-                                    background:"rgba(158,42,43,.08)", color:AURA.red,
+                                style={{ width:36, height:36, borderRadius:8, border:"2px solid rgba(155,92,255,.3)",
+                                    background:"rgba(155,92,255,.08)", color:AURA.red,
                                     cursor: meta.metaAlcancada <= 0 ? "default" : "pointer",
                                     display:"flex", alignItems:"center", justifyContent:"center",
                                     transition:"all .18s", opacity: meta.metaAlcancada <= 0 ? .3 : 1 }}
-                                onMouseEnter={e => { if (meta.metaAlcancada > 0) e.currentTarget.style.background = "rgba(158,42,43,.16)"; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(158,42,43,.08)"; }}>
+                                onMouseEnter={e => { if (meta.metaAlcancada > 0) e.currentTarget.style.background = "rgba(155,92,255,.16)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(155,92,255,.08)"; }}>
                             <ChevronDown size={18} />
                         </button>
                     </div>
@@ -624,7 +624,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                     <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
                                 style={{ padding:"8px 12px", borderRadius:8, marginBottom:12,
                                     background:`${mensagem.cor}10`, border:`1px solid ${mensagem.cor}30` }}>
-                        <p style={{ fontFamily:"'Fraunces',serif", fontSize:13, color:mensagem.cor, margin:0, fontStyle:"italic" }}>
+                        <p style={{ fontFamily:"'Roboto',sans-serif", fontSize:13, color:mensagem.cor, margin:0, fontStyle:"italic" }}>
                             {mensagem.texto}
                         </p>
                     </motion.div>
@@ -639,7 +639,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
 
                 {/* Barra de progresso */}
                 <div>
-                    <div style={{ display:"flex", justifyContent:"space-between", fontFamily:"'Fraunces',serif", fontSize:8.5, letterSpacing:".12em", color:textSecondary, marginBottom:6 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", fontFamily:"'Roboto',sans-serif", fontSize:8.5, letterSpacing:".12em", color:textSecondary, marginBottom:6 }}>
                         <span>PROGRESSO</span><span>{pct}%</span>
                     </div>
                     <div className={`metas-progress-track ${t}`}>
@@ -653,7 +653,7 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                 <AnimatePresence>
                     {meta.metaConcluida && (
                         <motion.p initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-                                  style={{ fontFamily:"'Fraunces',serif", fontSize:9.5, letterSpacing:".14em", color:"#22c55e", textAlign:"center", marginTop:10, marginBottom:0 }}>
+                                  style={{ fontFamily:"'Roboto',sans-serif", fontSize:9.5, letterSpacing:".14em", color:"#22c55e", textAlign:"center", marginTop:10, marginBottom:0 }}>
                             ✦ META CONCLUÍDA COM SUCESSO!
                         </motion.p>
                     )}

@@ -32,10 +32,10 @@ const Input = ({ label, icon, name, value, onChange, t, ...rest }) => (
             style={{
               width: "100%", background: t.bgInput, border: `1px solid ${t.borderInput}`,
               color: t.text, padding: `11px 14px 11px ${icon ? 38 : 14}px`,
-              borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 14,
+              borderRadius: 14, outline: "none", fontFamily: "inherit", fontSize: 14,
               transition: "all .2s", boxSizing: "border-box",
             }}
-            onFocus={e => { e.currentTarget.style.borderColor = AURA.gold; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(201,169,110,.12)`; }}
+            onFocus={e => { e.currentTarget.style.borderColor = AURA.gold; e.currentTarget.style.boxShadow = `0 0 0 4px rgba(185,140,255,.14)`; }}
             onBlur={e => { e.currentTarget.style.borderColor = t.borderInput; e.currentTarget.style.boxShadow = "none"; }}
         />
       </div>
@@ -53,10 +53,10 @@ const Select = ({ label, icon, value, onChange, t, children }) => (
             style={{
               width: "100%", background: t.bgInput, border: `1px solid ${t.borderInput}`,
               color: t.text, padding: `11px 14px 11px ${icon ? 38 : 14}px`,
-              borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 13, fontWeight: 600,
+              borderRadius: 14, outline: "none", fontFamily: "inherit", fontSize: 13, fontWeight: 600,
               appearance: "none", cursor: "pointer", transition: "all .2s", boxSizing: "border-box",
             }}
-            onFocus={e => { e.currentTarget.style.borderColor = AURA.gold; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(201,169,110,.12)`; }}
+            onFocus={e => { e.currentTarget.style.borderColor = AURA.gold; e.currentTarget.style.boxShadow = `0 0 0 4px rgba(185,140,255,.14)`; }}
             onBlur={e => { e.currentTarget.style.borderColor = t.borderInput; e.currentTarget.style.boxShadow = "none"; }}
         >
           <option value="" style={{ background: t.optionBg }}>Selecione...</option>
@@ -74,9 +74,9 @@ const Checkbox = ({ label, checked, onChange, t }) => (
 );
 
 const Section = ({ title, icon, children, t }) => (
-    <div style={{ background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 16, marginBottom: 16, overflow: "hidden" }}>
+    <div style={{ background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 20, marginBottom: 16, overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: `1px solid ${t.border}` }}>
-        <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(201,169,110,.1)", color: AURA.gold, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(185,140,255,.1)", color: AURA.gold, display: "flex", alignItems: "center", justifyContent: "center" }}>
           {icon}
         </div>
         <span style={{ fontSize: 14, fontWeight: 700, color: t.text }}>{title}</span>
@@ -182,12 +182,12 @@ export default function SolicitarFichaMembro({ isDark }) {
   };
 
   return (
-      <div style={{ fontFamily: "'Inter',sans-serif", color: t.text, maxWidth: 800, margin: "0 auto", padding: "0 0 40px" }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&display=swap'); @keyframes dl-spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ fontFamily: "'Roboto',sans-serif", color: t.text, maxWidth: 800, margin: "0 auto", padding: "0 0 40px" }}>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap'); @keyframes dl-spin { to { transform: rotate(360deg); } }`}</style>
 
         <div style={{ textAlign: "center", padding: "8px 0 22px" }}>
-          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: "rgba(201,169,110,.6)", marginBottom: 6 }}>Líder</div>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(20px,5vw,26px)", fontWeight: 500, color: t.text, margin: 0 }}>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".25em", textTransform: "uppercase", color: "rgba(185,140,255,.6)", marginBottom: 6 }}>Líder</div>
+          <h2 style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(20px,5vw,26px)", fontWeight: 500, color: t.text, margin: 0 }}>
             Solicitar Ficha de Membro
           </h2>
           <p style={{ fontSize: 11, fontWeight: 400, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.gold, marginTop: 6 }}>
@@ -290,7 +290,7 @@ export default function SolicitarFichaMembro({ isDark }) {
               value={form.observacoes}
               onChange={e => set("observacoes", e.target.value)}
               rows={3}
-              style={{ width: "100%", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: 12, borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
+              style={{ width: "100%", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: 12, borderRadius: 14, outline: "none", fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
               onFocus={e => { e.currentTarget.style.borderColor = AURA.gold; }}
               onBlur={e => { e.currentTarget.style.borderColor = t.borderInput; }}
           />
@@ -335,7 +335,7 @@ export default function SolicitarFichaMembro({ isDark }) {
                 {minhas.map(s => (
                     <div key={s.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", padding: "12px 16px", background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 12 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(201,169,110,.1)", color: AURA.gold, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(185,140,255,.1)", color: AURA.gold, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           <User size={14} />
                         </div>
                         <div style={{ minWidth: 0 }}>

@@ -98,7 +98,7 @@ function dispararAtualizacaoMetas(celulaId) {
 function AuraStyles({ t, isDark }) {
   return (
       <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
 
       @keyframes aura-spin      { to { transform: rotate(360deg); } }
       @keyframes aura-pulse     { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
@@ -120,7 +120,7 @@ function AuraStyles({ t, isDark }) {
       .aura-blink { animation: aura-blink 2s ease-in-out infinite; }
       .aura-float { animation: aura-float 3s ease-in-out infinite; }
 
-      .aura-root { font-family: 'Inter', sans-serif; color: ${t.text}; min-height: 100vh; position: relative; padding-bottom: 120px; }
+      .aura-root { font-family: 'Roboto', sans-serif; color: ${t.text}; min-height: 100vh; position: relative; padding-bottom: 120px; }
       .aura-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0;
         background: radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
                     radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
@@ -133,19 +133,19 @@ function AuraStyles({ t, isDark }) {
       .aura-divider::after  { content:''; flex:1; height:1px; background: linear-gradient(to left, transparent, ${AURA.gold}); }
       .aura-divider-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
-      .aura-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(201,169,110,.07); border: 1px solid rgba(201,169,110,.2); border-radius: 100px; padding: 5px 14px; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: ${AURA.gold}; }
+      .aura-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(185,140,255,.07); border: 1px solid rgba(185,140,255,.2); border-radius: 100px; padding: 5px 14px; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: ${AURA.gold}; }
       .aura-badge-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
       .aura-tabs { display: flex; border-radius: 16px; overflow: hidden; border: 1px solid ${t.border}; margin: 16px 0 24px; backdrop-filter: blur(20px); }
-      .aura-tab { flex: 1; padding: 13px 16px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .25s; }
+      .aura-tab { flex: 1; padding: 13px 16px; border: none; cursor: pointer; font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .25s; }
       .aura-tab.active   { background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff; }
       .aura-tab.inactive { background: ${t.bgEl}; color: ${t.textMuted}; }
       .aura-tab.inactive:hover { color: ${AURA.gold}; }
 
       .aura-card { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 20px; overflow: hidden; backdrop-filter: blur(24px); position: relative; margin-bottom: 16px; }
-      .aura-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent); }
+      .aura-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, rgba(185,140,255,.2), transparent); }
       .aura-card-head { padding: 20px 24px; border-bottom: 1px solid ${t.border}; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-      .aura-card-head-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; }
+      .aura-card-head-title { font-family: 'Roboto', sans-serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; }
       .aura-card-head-sub   { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0; }
 
       .aura-hero { border-radius: 20px; padding: 32px 32px 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
@@ -154,13 +154,13 @@ function AuraStyles({ t, isDark }) {
 
       .aura-kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
       @media(max-width:480px) { .aura-kpi-grid { grid-template-columns: 1fr; } }
-      .aura-kpi { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 16px; padding: 20px 16px; text-align: center; backdrop-filter: blur(20px); }
+      .aura-kpi { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 18px; padding: 22px 16px; text-align: center; backdrop-filter: blur(20px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
       .aura-kpi-label { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 8px; }
-      .aura-kpi-num   { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; line-height: 1; margin: 0; }
+      .aura-kpi-num   { font-family: 'Roboto', sans-serif; font-size: 42px; font-weight: 700; line-height: 1; margin: 0; }
 
       .aura-label { display: block; margin-bottom: 7px; font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${AURA.gold}; }
-      .aura-input { width: 100%; box-sizing: border-box; background: ${t.bgInput}; border: 1px solid ${t.borderInput}; color: ${t.text}; padding: 13px 16px; border-radius: 13px; outline: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300; transition: all .25s; -webkit-appearance: none; appearance: none; }
-      .aura-input:focus { border-color: rgba(201,169,110,.5); background: rgba(201,169,110,.04); box-shadow: 0 0 0 3px rgba(201,169,110,.08); }
+      .aura-input { width: 100%; box-sizing: border-box; background: ${t.bgInput}; border: 1px solid ${t.borderInput}; color: ${t.text}; padding: 13px 16px; border-radius: 13px; outline: none; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 300; transition: all .25s; -webkit-appearance: none; appearance: none; }
+      .aura-input:focus { border-color: rgba(185,140,255,.5); background: rgba(185,140,255,.04); box-shadow: 0 0 0 3px rgba(185,140,255,.08); }
       .aura-input::placeholder { color: ${t.placeholder}; }
 
       .aura-person-row { border-bottom: 1px solid ${t.border}; transition: background .2s; }
@@ -169,7 +169,7 @@ function AuraStyles({ t, isDark }) {
       .aura-just-panel { animation: aura-just-in .25s ease forwards; padding: 14px 22px 18px 22px; border-top: 1px solid ${t.border}; }
       .aura-just-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${t.textMuted}; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
       .aura-just-options { display: flex; flex-wrap: wrap; gap: 8px; }
-      .aura-just-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 100px; border: 1px solid; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; transition: all .2s; background: transparent; }
+      .aura-just-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 100px; border: 1px solid; cursor: pointer; font-family: 'Roboto', sans-serif; font-size: 11px; font-weight: 500; transition: all .2s; background: transparent; }
 
       .aura-alert-warn    { display: flex; align-items: center; gap: 12px; background: rgba(253,184,19,.06); border: 1px solid rgba(253,184,19,.22); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #c8a010; }
       .aura-alert-success { display: flex; align-items: center; gap: 12px; background: rgba(13,110,58,.08); border: 1px solid rgba(13,110,58,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #0d6e3a; animation: aura-fadein .4s ease; }
@@ -228,13 +228,13 @@ function AuraStyles({ t, isDark }) {
         font-size: clamp(28px, 7vw, 40px); line-height: 1;
       }
       .aura-modal-title-v2 {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Roboto', sans-serif;
         font-size: clamp(21px, 5.5vw, 26px);
         font-weight: 600; color: #fff; text-align: center;
         margin: 0 0 6px; letter-spacing: .01em; line-height: 1.25;
       }
       .aura-modal-num-v2 {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Roboto', sans-serif;
         font-size: clamp(40px, 13vw, 54px);
         font-weight: 600; color: #fff; margin: 0; line-height: 1;
       }
@@ -263,7 +263,7 @@ function AuraStyles({ t, isDark }) {
       .aura-modal-chip {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 6px 14px; border-radius: 100px;
-        font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+        font-family: 'Roboto', sans-serif; font-size: 11px; font-weight: 600;
         letter-spacing: .06em; text-transform: uppercase;
       }
 
@@ -292,26 +292,26 @@ function AuraStyles({ t, isDark }) {
       .aura-modal-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(10,10,15,.82); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 0 20px; }
       .aura-modal-box { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 22px; padding: 32px 28px 26px; max-width: 420px; width: 100%; animation: aura-fadein .3s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 24px 80px rgba(0,0,0,.5); }
 
-      .aura-btn-primary { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; transition: all .3s; box-shadow: 0 8px 28px rgba(0,61,165,.28); }
+      .aura-btn-primary { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color: #fff; font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; transition: all .3s; box-shadow: 0 8px 28px rgba(155,92,255,.32); }
       .aura-btn-primary:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
       .aura-btn-primary:disabled { opacity: .4; cursor: not-allowed; }
 
-      .aura-btn-red { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red}); color: #fff; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; transition: all .3s; box-shadow: 0 8px 28px rgba(200,16,46,.28); }
+      .aura-btn-red { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red}); color: #fff; font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; transition: all .3s; box-shadow: 0 8px 28px rgba(200,16,46,.28); }
       .aura-btn-red:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
       .aura-btn-red:disabled { opacity: .4; cursor: not-allowed; }
 
-      .aura-btn-ghost { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: 100px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .3s; }
+      .aura-btn-ghost { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: 100px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .3s; }
       .aura-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
 
-      .aura-btn-back { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 100px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .3s; margin-bottom: 20px; }
+      .aura-btn-back { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 100px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .3s; margin-bottom: 20px; }
       .aura-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
 
-      .aura-btn-edit { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #0A0A0F; font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .25s; box-shadow: 0 4px 14px rgba(201,169,110,.2); flex-shrink: 0; }
-      .aura-btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,169,110,.3); }
+      .aura-btn-edit { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #0A0A0F; font-family: 'Roboto', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .25s; box-shadow: 0 4px 14px rgba(185,140,255,.2); flex-shrink: 0; }
+      .aura-btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(185,140,255,.3); }
 
       .aura-hist-row { padding: 18px 22px; border-bottom: 1px solid ${t.border}; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: background .2s; }
       .aura-hist-row:last-child { border-bottom: none; }
-      .aura-hist-row:hover { background: rgba(201,169,110,.03); }
+      .aura-hist-row:hover { background: rgba(185,140,255,.03); }
 
       .aura-decisao-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 100px; font-size: 10px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
       .aura-loading { min-height: 60vh; display: flex; align-items: center; justify-content: center; }
@@ -361,7 +361,7 @@ function BadgeNaoRealizada({ motivo }) {
       <span style={{
         display: "inline-flex", alignItems: "center", gap: 5,
         padding: "3px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600,
-        fontFamily: "'Inter',sans-serif", letterSpacing: ".06em",
+        fontFamily: "'Roboto',sans-serif", letterSpacing: ".06em",
         background: "rgba(253,184,19,.15)", color: "#C48C00",
         border: "1px solid rgba(253,184,19,.4)", whiteSpace: "nowrap",
       }}>
@@ -376,8 +376,8 @@ function DecisaoReadOnly({ decisao, t }) {
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 15px", borderRadius: 13, background: t.bgInput, border: `1px solid ${t.borderInput}` }}>
         <Lock size={13} style={{ color: t.textMuted, flexShrink: 0 }} />
         {cfg
-            ? <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: cfg.cor }}>{cfg.icone} {cfg.label}</span>
-            : <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Sem decisão registrada</span>
+            ? <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 500, color: cfg.cor }}>{cfg.icone} {cfg.label}</span>
+            : <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Sem decisão registrada</span>
         }
         <span style={{ marginLeft: "auto", fontSize: 8, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>Somente leitura</span>
       </div>
@@ -419,7 +419,7 @@ function ModalRealizadaSucesso({
                   width: i % 2 === 0 ? 130 : 85,
                   height: i % 2 === 0 ? 130 : 85,
                   borderRadius: "50%",
-                  background: "rgba(201,169,110,.10)",
+                  background: "rgba(185,140,255,.10)",
                   top: `${[10,60,30,80,20,70][i]}%`,
                   left: `${[10,70,85,20,55,40][i]}%`,
                   transform: "translate(-50%,-50%)",
@@ -431,9 +431,9 @@ function ModalRealizadaSucesso({
           <div className="aura-modal-body-v2">
             {/* Ícone com anel pulsante e checkmark animado */}
             <div className="aura-modal-icon-wrap-v2">
-              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(201,169,110,.3)" }} />
-              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(201,169,110,.15)" }} />
-              <div className="aura-modal-icon-circle-v2" style={{ background: "linear-gradient(135deg, rgba(201,169,110,.85), rgba(13,110,58,.45))", border: "1.5px solid rgba(232,213,163,.45)" }}>
+              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(185,140,255,.3)" }} />
+              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(185,140,255,.15)" }} />
+              <div className="aura-modal-icon-circle-v2" style={{ background: "linear-gradient(135deg, rgba(185,140,255,.85), rgba(13,110,58,.45))", border: "1.5px solid rgba(232,213,163,.45)" }}>
                 <svg className="aura-check-svg" width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ width: "55%", height: "55%" }}>
                   <path
                       className="aura-check-path"
@@ -448,31 +448,31 @@ function ModalRealizadaSucesso({
             </div>
 
             {/* Título */}
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(232,213,163,.75)", textAlign: "center", margin: "0 0 8px" }}>
+            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(232,213,163,.75)", textAlign: "center", margin: "0 0 8px" }}>
               {tituloTopo}
             </p>
             <h2 className="aura-modal-title-v2">{titulo}</h2>
-            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.5)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5, wordBreak: "break-word" }}>
+            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.5)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5, wordBreak: "break-word" }}>
               {subtitulo || nomeCelula || "O Senhor viu cada presença."}
             </p>
 
-            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(201,169,110,.25), transparent)" }} />
+            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(185,140,255,.25), transparent)" }} />
 
             {/* Stats */}
             <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: "clamp(22px,5vw,28px)", marginTop: 18 }}>
               {/* Total presentes — destaque */}
               <div style={{ textAlign: "center" }}>
                 <p className="aura-modal-num-v2 aura-shimmer-text">{total}</p>
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(232,213,163,.55)", margin: "4px 0 0" }}>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(232,213,163,.55)", margin: "4px 0 0" }}>
                   presentes
                 </p>
               </div>
 
               {/* Estudo */}
               {estudo && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(201,169,110,.08)", border: "1px solid rgba(201,169,110,.18)", minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(185,140,255,.08)", border: "1px solid rgba(185,140,255,.18)", minWidth: 0 }}>
                     <BookOpen size={14} style={{ color: "rgba(232,213,163,.8)", flexShrink: 0 }} />
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.8)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.8)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
                       {estudo}
                     </p>
                   </div>
@@ -485,9 +485,9 @@ function ModalRealizadaSucesso({
                 style={{
                   width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
                   background: "linear-gradient(135deg, #9B7E3F, #C9A96E)",
-                  color: "#1A1404", fontFamily: "'Inter',sans-serif", fontSize: 10,
+                  color: "#1A1404", fontFamily: "'Roboto',sans-serif", fontSize: 10,
                   fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
-                  boxShadow: "0 8px 28px rgba(201,169,110,.35)", transition: "all .25s",
+                  boxShadow: "0 8px 28px rgba(185,140,255,.35)", transition: "all .25s",
                 }}
                 onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -562,11 +562,11 @@ function ModalNaoRealizadaSucesso({
             </div>
 
             {/* Título */}
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(216,140,90,.75)", textAlign: "center", margin: "0 0 8px" }}>
+            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(216,140,90,.75)", textAlign: "center", margin: "0 0 8px" }}>
               {tituloTopo}
             </p>
             <h2 className="aura-modal-title-v2">{titulo}</h2>
-            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.45)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5 }}>
+            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(12.5px,3.2vw,14px)", fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,.45)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.5 }}>
               {subtitulo}
             </p>
 
@@ -581,10 +581,10 @@ function ModalNaoRealizadaSucesso({
                 border: "1px solid rgba(196,108,58,.2)",
                 textAlign: "center",
               }}>
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(216,140,90,.65)", margin: "0 0 10px" }}>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(216,140,90,.65)", margin: "0 0 10px" }}>
                   Motivo
                 </p>
-                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(16px,4vw,18px)", fontWeight: 500, color: "rgba(255,255,255,.9)", margin: 0, wordBreak: "break-word" }}>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(16px,4vw,18px)", fontWeight: 500, color: "rgba(255,255,255,.9)", margin: 0, wordBreak: "break-word" }}>
                   {cfg.label}
                 </p>
               </div>
@@ -593,7 +593,7 @@ function ModalNaoRealizadaSucesso({
               {nomeCelula && (
                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.07)", minWidth: 0 }}>
                     <Church size={14} style={{ color: "rgba(216,140,90,.7)", flexShrink: 0 }} />
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.65)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.65)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
                       {nomeCelula}
                     </p>
                   </div>
@@ -606,7 +606,7 @@ function ModalNaoRealizadaSucesso({
                 style={{
                   width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
                   background: "linear-gradient(135deg, #8A4A24, #C46C3A)",
-                  color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10,
+                  color: "#fff", fontFamily: "'Roboto',sans-serif", fontSize: 10,
                   fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
                   boxShadow: "0 8px 28px rgba(196,108,58,.35)", transition: "all .25s",
                 }}
@@ -686,8 +686,8 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
             <div style={{ position: "absolute", top: position.top, left: position.left, width: position.width, zIndex: 99999, background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 14, maxHeight: 300, overflowY: "auto", boxShadow: `0 25px 70px rgba(0,0,0,${isDark ? "0.75" : "0.3"})`, backdropFilter: "blur(24px)" }}>
               {sugestoes.map((s, i) => (
                   <button key={i} onMouseDown={() => selecionarSugestao(s)}
-                          style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "13px 16px", textAlign: "left", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, borderBottom: i < sugestoes.length - 1 ? `1px solid ${t.border}` : "none" }}
-                          onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(201,169,110,.10)" : "rgba(201,169,110,.15)"}
+                          style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "13px 16px", textAlign: "left", fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, borderBottom: i < sugestoes.length - 1 ? `1px solid ${t.border}` : "none" }}
+                          onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(185,140,255,.10)" : "rgba(185,140,255,.15)"}
                           onMouseLeave={e => e.currentTarget.style.background = "none"}
                   >{s}</button>
               ))}
@@ -733,7 +733,7 @@ function SeletorStatusCelula({ realizada, onChange, t }) {
                     textAlign: "left", cursor: "pointer",
                     padding: "16px 16px",
                     borderRadius: 16,
-                    fontFamily: "'Inter',sans-serif",
+                    fontFamily: "'Roboto',sans-serif",
                     transition: "all .25s",
                     border: ativo ? `2px solid ${AURA.gold}` : `1px solid ${t.borderInput}`,
                     background: ativo ? `linear-gradient(135deg, ${op.corOnDark}, ${op.corOn})` : t.bgInput,
@@ -781,7 +781,7 @@ function SeletorMotivo({ value, onChange, t }) {
                       display: "flex", alignItems: "center", gap: 10,
                       padding: "13px 14px", borderRadius: 12, cursor: "pointer",
                       textAlign: "left", transition: "all .2s",
-                      fontFamily: "'Inter',sans-serif",
+                      fontFamily: "'Roboto',sans-serif",
                       border: selecionado ? "none" : `1px solid ${t.borderInput}`,
                       background: selecionado
                           ? `linear-gradient(135deg, #c8a010, ${AURA.yellow})`
@@ -818,8 +818,8 @@ function AlertaErro({ erro, onFechar, t }) {
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14, background: cfg.bg, border: `1px solid ${cfg.borda}`, borderRadius: 14, padding: "14px 18px", marginBottom: 16, animation: "aura-fadein .3s ease forwards" }}>
         <AlertTriangle size={18} style={{ color: cfg.cor, flexShrink: 0, marginTop: 2 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: cfg.cor, margin: "0 0 6px", letterSpacing: ".05em" }}>{erro.titulo}</p>
-          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, lineHeight: 1.5, margin: 0 }}>{erro.mensagem}</p>
+          <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 600, color: cfg.cor, margin: "0 0 6px", letterSpacing: ".05em" }}>{erro.titulo}</p>
+          <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, lineHeight: 1.5, margin: 0 }}>{erro.mensagem}</p>
         </div>
         <button onClick={onFechar} style={{ background: "none", border: "none", cursor: "pointer", color: cfg.cor, padding: 0, flexShrink: 0, fontSize: 18, transition: "opacity .2s" }}
                 onMouseEnter={e => e.target.style.opacity = ".6"}
@@ -879,7 +879,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
 
             return (
                 <div key={pessoa.uKey} className="aura-person-row"
-                     style={{ background: marcado ? (isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)") : "transparent" }}>
+                     style={{ background: marcado ? (isDark ? "rgba(185,140,255,.04)" : "rgba(185,140,255,.06)") : "transparent" }}>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <div
                         role="button" tabIndex={0}
@@ -891,18 +891,18 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                       <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
                         <div style={{
                           width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-                          background: marcado ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` : isDark ? "rgba(255,255,255,.05)" : "rgba(201,169,110,.08)",
+                          background: marcado ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` : isDark ? "rgba(255,255,255,.05)" : "rgba(185,140,255,.08)",
                           border: marcado ? "none" : `1px solid ${t.border}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           color: marcado ? "#fff" : AURA.gold,
-                          fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 16,
+                          fontFamily: "'Roboto',sans-serif", fontWeight: 600, fontSize: 16,
                           transition: "all .3s",
                         }}>
                           {processing ? <Loader2 size={17} className="aura-spin" /> : pessoa.nome.charAt(0)}
                         </div>
                         <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
-                            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: marcado ? 500 : 300, color: marcado ? t.text : t.textSec, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: marcado ? 500 : 300, color: marcado ? t.text : t.textSec, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {pessoa.nome}
                             </p>
                             {isMembro && ausente && (
@@ -945,7 +945,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                           </label>
                           <DecisaoReadOnly decisao={decisao} t={t} />
                           {temDecisao && (
-                              <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "8px 0 0" }}>
+                              <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "8px 0 0" }}>
                                 Para alterar, acesse o cadastro do visitante.
                               </p>
                           )}
@@ -1516,14 +1516,14 @@ export default function TelaRelatorio({ isDark = false }) {
                     <AlertTriangle size={22} style={{ color: AURA.yellow }} />
                   </div>
                   <div>
-                    <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontWeight: 500, color: t.text, margin: "0 0 3px" }}>Relatório já enviado</p>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>
+                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 17, fontWeight: 500, color: t.text, margin: "0 0 3px" }}>Relatório já enviado</p>
+                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>
                       {new Date(normalizarData(modalDuplicado.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                     </p>
                   </div>
                 </div>
                 <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${AURA.gold}, transparent)`, margin: "0 0 18px" }} />
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.textSec, lineHeight: 1.65, margin: "0 0 20px" }}>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, color: t.textSec, lineHeight: 1.65, margin: "0 0 20px" }}>
                   Já existe um relatório para <strong style={{ color: t.text, fontWeight: 500 }}>
                   {new Date(normalizarData(modalDuplicado.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}
                 </strong> com <strong style={{ color: t.text, fontWeight: 500 }}>{modalDuplicado.totalPresentes} presentes</strong>. Deseja <strong style={{ color: t.text, fontWeight: 500 }}>editar</strong>?
@@ -1561,18 +1561,18 @@ export default function TelaRelatorio({ isDark = false }) {
                     <div style={{ padding: 48, textAlign: "center" }}><Loader2 size={28} className="aura-spin" style={{ color: AURA.gold, display: "inline-block" }} /></div>
                 ) : historico.length === 0 ? (
                     <div style={{ padding: 48, textAlign: "center" }}>
-                      <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Nenhum relatório encontrado.</p>
+                      <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Nenhum relatório encontrado.</p>
                     </div>
                 ) : historico.map(rel => (
                     <div key={rel.id} className="aura-hist-row">
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                           <div style={{ width: 7, height: 7, borderRadius: "50%", background: AURA.gold, flexShrink: 0 }} />
-                          <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 500, color: t.text, margin: 0 }}>
+                          <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 500, color: t.text, margin: 0 }}>
                             {rel.dataReuniao ? new Date(normalizarData(rel.dataReuniao) + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "—"}
                           </p>
                         </div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "0 0 5px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "0 0 5px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {rel.estudo || "Sem referência"}
                         </p>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>

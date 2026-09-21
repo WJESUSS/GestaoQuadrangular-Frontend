@@ -48,7 +48,7 @@ function BadgeDecisao({ decisao }) {
         <span style={{
             display: "inline-flex", alignItems: "center", gap: 4,
             padding: "2px 9px", borderRadius: 99,
-            fontSize: 11, fontWeight: 600, fontFamily: "'Inter',sans-serif",
+            fontSize: 11, fontWeight: 600, fontFamily: "'Roboto',sans-serif",
             background: cfg.bg, color: cfg.cor, border: `1px solid ${cfg.borda}`,
             whiteSpace: "nowrap", flexShrink: 0,
         }}>
@@ -63,7 +63,7 @@ function BadgeStatus({ status }) {
         <span style={{
             display: "inline-flex", alignItems: "center", gap: 5,
             padding: "4px 12px", borderRadius: 99,
-            fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600,
+            fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600,
             letterSpacing: ".12em", textTransform: "uppercase",
             color, border: `1px solid ${color}55`, background: `${color}18`,
         }}>{label}</span>
@@ -96,8 +96,8 @@ function AuraSquareModal({ open, onClose, title, subtitle, children, footer, t, 
                 {accentColor && <div style={{ height: 5, flexShrink: 0, background: `linear-gradient(90deg, ${accentColor}, ${accentColor}99)` }} />}
                 <div style={{ padding: "16px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, gap: 10 }}>
                     <div style={{ minWidth: 0 }}>
-                        <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 500, color: t.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</h3>
-                        {subtitle && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</p>}
+                        <h3 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 16, fontWeight: 500, color: t.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</h3>
+                        {subtitle && <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</p>}
                     </div>
                     <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex", flexShrink: 0 }}><X size={18} /></button>
                 </div>
@@ -191,11 +191,11 @@ function VisitanteMultiSelector({ items, loading, erro, selectedIds, onToggle, o
     const todosFiltradosSelecionados = filtrados.length > 0 && filtrados.every(p => selectedIds.has(p.id));
 
     if (loading) return (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300 }}>
             <Loader2 size={16} className="m70-spin" style={{ color: accentColor }} /> Carregando...
         </div>
     );
-    if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
+    if (erro) return <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -220,13 +220,13 @@ function VisitanteMultiSelector({ items, loading, erro, selectedIds, onToggle, o
                         onChange={() => todosFiltradosSelecionados ? onClearAll(filtrados.map(p => p.id)) : onSelectAll(filtrados.map(p => p.id))}
                         style={{ width: 15, height: 15, accentColor, cursor: "pointer", flexShrink: 0 }}
                     />
-                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec }}>
+                    <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec }}>
                         {todosFiltradosSelecionados ? "Desmarcar todos" : "Selecionar todos"}
                         {busca ? " (filtrados)" : ""}
                     </span>
                 </div>
                 {totalSelecionados > 0 && (
-                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: ".05em" }}>
+                    <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: ".05em" }}>
                         {totalSelecionados} selecionado{totalSelecionados !== 1 ? "s" : ""}
                     </span>
                 )}
@@ -235,7 +235,7 @@ function VisitanteMultiSelector({ items, loading, erro, selectedIds, onToggle, o
             {/* Lista de visitantes */}
             <div style={{ maxHeight: 240, overflowY: "auto", border: `1px solid ${t.border}`, borderRadius: 12 }}>
                 {filtrados.length === 0
-                    ? <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textMuted, padding: "14px 16px", margin: 0 }}>
+                    ? <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textMuted, padding: "14px 16px", margin: 0 }}>
                         {busca ? `Nenhum resultado para "${busca}".` : "Nenhum visitante encontrado nesta célula."}
                     </p>
                     : filtrados.map((p, i) => {
@@ -260,12 +260,12 @@ function VisitanteMultiSelector({ items, loading, erro, selectedIds, onToggle, o
                                     onClick={e => e.stopPropagation()}
                                     style={{ width: 15, height: 15, accentColor, cursor: "pointer", flexShrink: 0 }}
                                 />
-                                <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? `${accentColor}20` : `linear-gradient(135deg,${accentColor}18,${accentColor}06)`, border: `1px solid ${sel ? accentColor + "50" : accentColor + "22"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 13, color: accentColor, transition: "all .15s" }}>
+                                <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? `${accentColor}20` : `linear-gradient(135deg,${accentColor}18,${accentColor}06)`, border: `1px solid ${sel ? accentColor + "50" : accentColor + "22"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontWeight: 600, fontSize: 13, color: accentColor, transition: "all .15s" }}>
                                     {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: sel ? 500 : 300, color: t.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nome}</p>
-                                    {p.telefone && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "1px 0 0" }}>{p.telefone}</p>}
+                                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: sel ? 500 : 300, color: t.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nome}</p>
+                                    {p.telefone && <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "1px 0 0" }}>{p.telefone}</p>}
                                 </div>
                                 {sel && <CheckCircle2 size={16} color={accentColor} style={{ flexShrink: 0 }} />}
                             </div>
@@ -276,7 +276,7 @@ function VisitanteMultiSelector({ items, loading, erro, selectedIds, onToggle, o
             {/* Chips dos selecionados */}
             {totalSelecionados > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: accentColor, margin: 0 }}>
+                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: accentColor, margin: 0 }}>
                         Serão adicionados ({totalSelecionados})
                     </p>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -285,7 +285,7 @@ function VisitanteMultiSelector({ items, loading, erro, selectedIds, onToggle, o
                             if (!p) return null;
                             const nome = p.nome ?? p.nomeCompleto ?? `#${p.id}`;
                             return (
-                                <div key={id} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px 4px 8px", borderRadius: 99, background: `${accentColor}14`, border: `1px solid ${accentColor}35`, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 400, color: t.text }}>
+                                <div key={id} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px 4px 8px", borderRadius: 99, background: `${accentColor}14`, border: `1px solid ${accentColor}35`, fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 400, color: t.text }}>
                                     <span style={{ color: accentColor, fontSize: 10 }}>✦</span>
                                     {nome}
                                     <button
@@ -310,22 +310,22 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
     const filtrados = items.filter(p => (p[labelKey] ?? p.nomeCompleto ?? "").toLowerCase().includes(busca.toLowerCase()));
 
     if (loading) return (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300 }}>
             <Loader2 size={16} className="m70-spin" style={{ color: AURA.gold }} /> Carregando...
         </div>
     );
-    if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
+    if (erro) return <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
 
     return (
         <div>
             <div style={{ position: "relative", marginBottom: 10 }}>
                 <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
                 <input className="m70-input" placeholder={placeholder} value={busca} onChange={e => setBusca(e.target.value)}
-                       style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "11px 14px 11px 38px", borderRadius: 12, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300 }} />
+                       style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "11px 14px 11px 38px", borderRadius: 12, outline: "none", fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300 }} />
             </div>
             <div style={{ maxHeight: 200, overflowY: "auto", border: `1px solid ${t.border}`, borderRadius: 12 }}>
                 {filtrados.length === 0
-                    ? <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textMuted, padding: "14px 16px", margin: 0 }}>
+                    ? <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textMuted, padding: "14px 16px", margin: 0 }}>
                         {busca ? `Nenhum resultado para "${busca}".` : "Nenhum membro disponível."}
                     </p>
                     : filtrados.map((p, i) => {
@@ -333,14 +333,14 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
                         const sel  = selectedId === p.id;
                         return (
                             <div key={p.id} onClick={() => onSelect(p)}
-                                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", cursor: "pointer", background: sel ? "rgba(201,169,110,.1)" : "transparent", borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none", transition: "background .15s" }}>
+                                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", cursor: "pointer", background: sel ? "rgba(185,140,255,.1)" : "transparent", borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none", transition: "background .15s" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(201,169,110,.2),rgba(201,169,110,.06))", border: "1px solid rgba(201,169,110,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(185,140,255,.2),rgba(185,140,255,.06))", border: "1px solid rgba(185,140,255,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div>
-                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: sel ? 500 : 300, color: t.text, margin: 0 }}>{nome}</p>
-                                        {p.telefone && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "1px 0 0" }}>{p.telefone}</p>}
+                                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: sel ? 500 : 300, color: t.text, margin: 0 }}>{nome}</p>
+                                        {p.telefone && <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "1px 0 0" }}>{p.telefone}</p>}
                                     </div>
                                 </div>
                                 {sel && <CheckCircle2 size={16} color={AURA.gold} />}
@@ -351,7 +351,7 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
             {selectedId && (() => {
                 const p    = items.find(x => x.id === selectedId);
                 const nome = p ? (p[labelKey] ?? p.nomeCompleto ?? `#${p.id}`) : "";
-                return <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.sage, margin: "8px 0 0" }}>✓ Selecionado: <strong>{nome}</strong></p>;
+                return <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.sage, margin: "8px 0 0" }}>✓ Selecionado: <strong>{nome}</strong></p>;
             })()}
         </div>
     );
@@ -361,12 +361,12 @@ function PessoaBloco({ label, nome, cor, t }) {
     if (!nome) return null;
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: `${cor}18`, border: `1px solid ${cor}30`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 14, color: cor }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: `${cor}18`, border: `1px solid ${cor}30`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontWeight: 600, fontSize: 14, color: cor }}>
                 {nome.charAt(0).toUpperCase()}
             </div>
             <div>
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: 0 }}>{label}</p>
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, margin: 0 }}>{nome}</p>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: 0 }}>{label}</p>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, margin: 0 }}>{nome}</p>
             </div>
         </div>
     );
@@ -375,14 +375,14 @@ function PessoaBloco({ label, nome, cor, t }) {
 function GlobalStyles({ t, isDark }) {
     return (
         <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
 
         @keyframes m70-spin  { to { transform: rotate(360deg); } }
         @keyframes m70-fade  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @keyframes m70-toast { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
         .m70-spin { animation: m70-spin 1s linear infinite; }
         .m70-card-anim { animation: m70-fade .45s ease both; }
-        .m70-root { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; gap: 22px; box-sizing: border-box; max-width: 100%; }
+        .m70-root { font-family: 'Roboto', sans-serif; display: flex; flex-direction: column; gap: 22px; box-sizing: border-box; max-width: 100%; }
         .m70-root * { box-sizing: border-box; }
 
         .m70-card {
@@ -392,20 +392,20 @@ function GlobalStyles({ t, isDark }) {
         }
         .m70-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(185,140,255,.2), transparent);
         }
-        .m70-card:hover { border-color: rgba(201,169,110,.35); box-shadow: 0 8px 28px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
+        .m70-card:hover { border-color: rgba(185,140,255,.35); box-shadow: 0 8px 28px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
 
         .m70-stat { padding: 18px 20px; }
         .m70-stat-label { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: ${t.textMuted}; margin: 0; }
-        .m70-stat-value { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 600; margin: 6px 0 2px; }
+        .m70-stat-value { font-family: 'Roboto', sans-serif; font-size: 30px; font-weight: 600; margin: 6px 0 2px; }
         .m70-stat-sub { font-size: 12px; font-weight: 300; color: ${t.textSec}; margin: 0; }
 
         .m70-btn-primary {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             padding: 11px 22px; border-radius: 100px; border: none; cursor: pointer;
             background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red}); color: #fff;
-            font-family: 'Inter',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em;
+            font-family: 'Roboto',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em;
             text-transform: uppercase; transition: transform .2s, opacity .2s; box-shadow: 0 6px 20px rgba(200,16,46,.25);
             white-space: nowrap;
         }
@@ -417,7 +417,7 @@ function GlobalStyles({ t, isDark }) {
             position: relative; min-width: 0; width: 100%;
             padding: 11px 16px; border-radius: 100px; border: none; cursor: pointer;
             background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff;
-            font-family: 'Inter',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .1em;
+            font-family: 'Roboto',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .1em;
             text-transform: uppercase; transition: transform .2s, opacity .2s; box-shadow: 0 6px 20px rgba(0,61,165,.25);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
@@ -428,8 +428,8 @@ function GlobalStyles({ t, isDark }) {
             display: inline-flex; align-items: center; gap: 7px;
             padding: 9px 18px; border-radius: 100px; border: none; cursor: pointer;
             background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #0A0A0F;
-            font-family: 'Inter',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
-            text-transform: uppercase; transition: all .35s; box-shadow: 0 6px 18px rgba(201,169,110,.2);
+            font-family: 'Roboto',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
+            text-transform: uppercase; transition: all .35s; box-shadow: 0 6px 18px rgba(185,140,255,.2);
         }
         .m70-btn-gold:hover:not(:disabled) { transform: translateY(-2px); }
 
@@ -437,7 +437,7 @@ function GlobalStyles({ t, isDark }) {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
             padding: 9px 16px; border-radius: 100px; cursor: pointer;
             border: 1px solid ${t.border}; background: transparent; color: ${t.textSec};
-            font-family: 'Inter',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
+            font-family: 'Roboto',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
             text-transform: uppercase; transition: border-color .2s, color .2s;
             white-space: nowrap; min-width: 0;
         }
@@ -447,7 +447,7 @@ function GlobalStyles({ t, isDark }) {
             display: inline-flex; align-items: center; gap: 7px;
             padding: 9px 16px; border-radius: 100px; cursor: pointer; border: none;
             background: rgba(122,158,126,.12); color: ${AURA.sage}; border: 1px solid rgba(122,158,126,.3);
-            font-family: 'Inter',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
+            font-family: 'Roboto',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
             text-transform: uppercase; transition: all .2s;
         }
         .m70-btn-sage:hover { background: rgba(122,158,126,.2); }
@@ -456,7 +456,7 @@ function GlobalStyles({ t, isDark }) {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
             padding: 9px 16px; border-radius: 100px; cursor: pointer; border: none;
             background: rgba(200,16,46,.1); color: #e8556d; border: 1px solid rgba(200,16,46,.3);
-            font-family: 'Inter',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
+            font-family: 'Roboto',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
             text-transform: uppercase; transition: background .2s; white-space: nowrap;
         }
         .m70-btn-danger:hover { background: rgba(200,16,46,.2); }
@@ -465,7 +465,7 @@ function GlobalStyles({ t, isDark }) {
         .m70-btn-clear {
             background: transparent; color: ${t.textMuted};
             border: 1px solid ${t.border}; border-radius: 100px;
-            font-family: 'Inter',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .1em;
+            font-family: 'Roboto',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .1em;
             text-transform: uppercase; cursor: pointer; padding: 8px 14px;
             transition: border-color .2s, color .2s; white-space: nowrap;
         }
@@ -474,11 +474,11 @@ function GlobalStyles({ t, isDark }) {
         .m70-input {
             width: 100%; box-sizing: border-box;
             background: ${t.bgInput}; border: 1px solid ${t.borderInput};
-            color: ${t.text}; padding: 12px 16px; border-radius: 12px; outline: none;
-            font-family: 'Inter',sans-serif; font-size: 14px; font-weight: 300; transition: border-color .25s, background .25s, box-shadow .25s;
+            color: ${t.text}; padding: 12px 16px; border-radius: 14px; outline: none;
+            font-family: 'Roboto',sans-serif; font-size: 14px; font-weight: 300; transition: border-color .25s, background .25s, box-shadow .25s;
             -webkit-appearance: none; appearance: none;
         }
-        .m70-input:focus { border-color: rgba(201,169,110,.5); background: rgba(201,169,110,.04); box-shadow: 0 0 0 3px rgba(201,169,110,.08); }
+        .m70-input:focus { border-color: rgba(185,140,255,.5); background: rgba(185,140,255,.04); box-shadow: 0 0 0 4px rgba(185,140,255,.12); }
         .m70-input::placeholder { color: ${t.placeholder}; }
         .m70-input option { background: ${t.optionBg}; color: ${t.text}; }
         .m70-input:disabled { opacity: .45; cursor: not-allowed; }
@@ -496,7 +496,7 @@ function GlobalStyles({ t, isDark }) {
         .m70-toast {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 9999;
             padding: 12px 22px; border-radius: 100px; max-width: calc(100vw - 32px);
-            font-family: 'Inter',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .12em;
+            font-family: 'Roboto',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .12em;
             text-transform: uppercase;
             display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             animation: m70-toast .3s ease forwards; box-shadow: 0 8px 32px rgba(0,0,0,.3);
@@ -506,11 +506,11 @@ function GlobalStyles({ t, isDark }) {
 
         .m70-tab {
             flex: 1; padding: 9px 0; border-radius: 10px; border: 1px solid transparent; cursor: pointer;
-            background: transparent; font-family: 'Inter',sans-serif; font-size: 10px; font-weight: 600;
+            background: transparent; font-family: 'Roboto',sans-serif; font-size: 10px; font-weight: 600;
             letter-spacing: .1em; text-transform: uppercase; color: ${t.textMuted};
             display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .2s;
         }
-        .m70-tab.active { background: rgba(201,169,110,.12); border-color: rgba(201,169,110,.35); color: ${AURA.gold}; }
+        .m70-tab.active { background: rgba(185,140,255,.12); border-color: rgba(185,140,255,.35); color: ${AURA.gold}; }
 
         /* ── Select de decisão espiritual ──
            OBS: não usar a propriedade shorthand "background" aqui nem inline.
@@ -519,7 +519,7 @@ function GlobalStyles({ t, isDark }) {
            visualmente. Sempre usar as longhand props isoladas. */
         .m70-decisao-select {
             appearance: none; -webkit-appearance: none; cursor: pointer;
-            font-family: 'Inter',sans-serif; font-size: 11px; font-weight: 600;
+            font-family: 'Roboto',sans-serif; font-size: 11px; font-weight: 600;
             padding: 6px 26px 6px 10px; border-radius: 99px; outline: none;
             transition: background-color .18s, border-color .18s, color .18s; flex-shrink: 0; min-width: 128px;
             max-width: 100%;
@@ -536,7 +536,7 @@ function GlobalStyles({ t, isDark }) {
             display: flex; flex-direction: column; gap: 10px; min-height: 188px;
             transition: border-color .2s, box-shadow .2s, transform .2s;
         }
-        .m70-mission-card:hover { border-color: rgba(201,169,110,.4); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
+        .m70-mission-card:hover { border-color: rgba(185,140,255,.4); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
         .m70-mission-card.cancelada { cursor: default; opacity: .68; }
         .m70-mission-card.concluida:hover { border-color: rgba(122,158,126,.5); }
 
@@ -555,11 +555,11 @@ function GlobalStyles({ t, isDark }) {
         .m70-mission-icon-btn.danger:hover { border-color: ${AURA.red}; color: #e8556d; }
 
         .m70-mission-name {
-            font-family: 'Playfair Display', serif; font-size: 13.5px; font-weight: 500; color: ${t.text};
+            font-family: 'Roboto', sans-serif; font-size: 13.5px; font-weight: 500; color: ${t.text};
             margin: 0; line-height: 1.28; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
         .m70-mission-addr {
-            font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 300; color: ${t.textSec};
+            font-family: 'Roboto', sans-serif; font-size: 10.5px; font-weight: 300; color: ${t.textSec};
             margin: 3px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
 
@@ -1212,8 +1212,8 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         <Flame size={20} color={AURA.yellow} />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 19, fontWeight: 500, color: t.text, margin: 0 }}>Missão 70</h2>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "3px 0 0" }}>Gerencie missões de evangelismo de 4 semanas</p>
+                        <h2 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 19, fontWeight: 500, color: t.text, margin: 0 }}>Missão 70</h2>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "3px 0 0" }}>Gerencie missões de evangelismo de 4 semanas</p>
                     </div>
                 </div>
                 <button className="m70-btn-primary" onClick={abrirModalCriar}><Plus size={14} /> Nova Missão</button>
@@ -1238,13 +1238,13 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
             {/* ── Lista ── */}
             <div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
-                    <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0 }}>Lista de Missões</p>
+                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0 }}>Lista de Missões</p>
                     <button className="m70-btn-ghost" onClick={carregar}>↺ Atualizar</button>
                 </div>
 
                 <div className="m70-card" style={{ padding: "16px 18px", marginBottom: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
                             <Search size={11} /> Filtros de busca
                         </p>
                         {temFiltro && <button className="m70-btn-clear" onClick={limpar}>✕ Limpar filtros</button>}
@@ -1264,7 +1264,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         </div>
                     </div>
                     {temFiltro && (
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>
                             {missoesFiltradas.length === 0 ? "Nenhuma missão encontrada com os filtros aplicados." : `${missoesFiltradas.length} missão(ões) encontrada(s).`}
                         </p>
                     )}
@@ -1273,14 +1273,14 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                 {missoes.length === 0 ? (
                     <div className="m70-card" style={{ textAlign: "center", padding: "56px 24px" }}>
                         <Flame size={36} style={{ color: t.textMuted, marginBottom: 14 }} />
-                        <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhuma missão cadastrada</p>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textSec }}>Clique em "Nova Missão" para começar.</p>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 15, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhuma missão cadastrada</p>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textSec }}>Clique em "Nova Missão" para começar.</p>
                     </div>
                 ) : missoesFiltradas.length === 0 ? (
                     <div className="m70-card" style={{ textAlign: "center", padding: "40px 24px" }}>
                         <Search size={28} style={{ color: t.textMuted, marginBottom: 12 }} />
-                        <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhum resultado</p>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec }}>Ajuste os filtros para encontrar uma missão.</p>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhum resultado</p>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec }}>Ajuste os filtros para encontrar uma missão.</p>
                     </div>
                 ) : (
                     <div className="m70-missoes-grid">
@@ -1325,7 +1325,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                                         <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, border: `2px solid ${cancelada ? "rgba(200,16,46,.5)" : corAtual}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                            <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 600, color: cancelada ? AURA.red : corAtual, lineHeight: 1 }}>{restantes}</span>
+                                            <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 600, color: cancelada ? AURA.red : corAtual, lineHeight: 1 }}>{restantes}</span>
                                         </div>
                                         <BadgeStatus status={concluida ? "concluida" : m.status} />
                                     </div>
@@ -1338,7 +1338,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                 </div>
                                             ))}
                                         </div>
-                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9.5, fontWeight: 300, color: t.textMuted, margin: "5px 0 0" }}>Semana {realizados} de {TOTAL_SEMANAS}</p>
+                                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9.5, fontWeight: 300, color: t.textMuted, margin: "5px 0 0" }}>Semana {realizados} de {TOTAL_SEMANAS}</p>
                                     </div>
                                 </motion.div>
                             );
@@ -1395,7 +1395,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                         <div style={{ background: "rgba(112,144,232,.06)", border: "1px solid rgba(112,144,232,.2)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
                             <span style={{ fontSize: 13 }}>ℹ️</span>
-                            <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.4 }}>Cada membro só pode ocupar uma função — Líder, Auxiliar ou Membro adicional.</p>
+                            <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.4 }}>Cada membro só pode ocupar uma função — Líder, Auxiliar ou Membro adicional.</p>
                         </div>
 
                         <div>
@@ -1430,8 +1430,8 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         <div style={{ background: "rgba(253,184,19,.08)", border: "1px solid rgba(253,184,19,.25)", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
                             <span style={{ fontSize: 16, flexShrink: 0 }}>✦</span>
                             <div>
-                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.yellow, margin: "0 0 4px" }}>O que é a Missão 70?</p>
-                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.5 }}>
+                                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.yellow, margin: "0 0 4px" }}>O que é a Missão 70?</p>
+                                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.5 }}>
                                     São <strong style={{ color: t.text, fontWeight: 500 }}>4 encontros semanais</strong> de evangelismo na casa do anfitrião, para alcançar visitantes e registrar decisões de fé.
                                 </p>
                             </div>
@@ -1465,12 +1465,12 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                 {/* Header */}
                                 <div style={{ padding: "16px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, gap: 10 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                                        <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: `${corModal}30`, border: `1.5px solid ${corModal}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 14, color: corModal }}>
+                                        <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: `${corModal}30`, border: `1.5px solid ${corModal}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontWeight: 700, fontSize: 14, color: corModal }}>
                                             {realizadosModal}
                                         </div>
                                         <div style={{ minWidth: 0 }}>
-                                            <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 500, color: t.text, margin: 0 }}>Semanas da Missão</h3>
-                                            {targetNome && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{targetNome}</p>}
+                                            <h3 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 16, fontWeight: 500, color: t.text, margin: 0 }}>Semanas da Missão</h3>
+                                            {targetNome && <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{targetNome}</p>}
                                         </div>
                                     </div>
                                     <button onClick={() => setModalEncontro(false)} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex", flexShrink: 0 }}><X size={18} /></button>
@@ -1500,7 +1500,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             </div>
                                         </div>
                                         {dataAtualJaRegistrada && (
-                                            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500, color: "#e8556d", margin: "-4px 0 0", display: "flex", alignItems: "center", gap: 6 }}>
+                                            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 500, color: "#e8556d", margin: "-4px 0 0", display: "flex", alignItems: "center", gap: 6 }}>
                                                 <Ban size={12} /> Já existe uma semana registrada nesta data. Escolha outra data ou edite o registro existente no Histórico.
                                             </p>
                                         )}
@@ -1513,7 +1513,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                     width: "100%", padding: "10px 14px", borderRadius: 10, cursor: "pointer",
                                                     border: `1px dashed ${t.borderInput}`, background: t.bgInput,
                                                     display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                                                    fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500,
+                                                    fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 500,
                                                     color: AURA.gold,
                                                 }}>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1528,7 +1528,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             const idsAtuais = new Set((missaoAtual?.visitantes || []).map(v => v.id));
                                             return (
                                                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: "2px 0 0" }}>Presentes &amp; decisões de fé</p>
+                                                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: "2px 0 0" }}>Presentes &amp; decisões de fé</p>
                                                     {[...fEnc.visitantesPresentesIds].map(vid => {
                                                         const v = buscarVisitantePorId(vid);
                                                         if (!v) return null;
@@ -1544,9 +1544,9 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                             ? historicoDecisoes[vid]
                                                             : (v.decisaoEspiritual ?? null);
                                                         return (
-                                                            <div key={vid} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 10px", borderRadius: 10, background: isDark ? "rgba(201,169,110,.03)" : "rgba(201,169,110,.03)", border: `1px solid ${t.border}` }}>
+                                                            <div key={vid} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 10px", borderRadius: 10, background: isDark ? "rgba(185,140,255,.03)" : "rgba(185,140,255,.03)", border: `1px solid ${t.border}` }}>
                                                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                                                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 400, color: t.text, flex: 1, minWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
+                                                                    <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 400, color: t.text, flex: 1, minWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
                                                                         {nome}
                                                                         {ehNovo && <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".06em", color: AURA.sage, border: `1px solid ${AURA.sage}55`, background: `${AURA.sage}14`, borderRadius: 99, padding: "1px 6px", flexShrink: 0 }}>NOVO</span>}
                                                                     </span>
@@ -1558,14 +1558,14 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                 </div>
                                                                 {decisaoJaExistente && decisaoJaExistente !== "NENHUMA" && (
                                                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                                        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Já decidiu antes:</span>
+                                                                        <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 10, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Já decidiu antes:</span>
                                                                         <BadgeDecisao decisao={decisaoJaExistente} />
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         );
                                                     })}
-                                                    <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "2px 0 0" }}>Visitantes marcados como <strong style={{ color: AURA.sage, fontWeight: 600 }}>NOVO</strong> serão adicionados à missão automaticamente ao registrar.</p>
+                                                    <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "2px 0 0" }}>Visitantes marcados como <strong style={{ color: AURA.sage, fontWeight: 600 }}>NOVO</strong> serão adicionados à missão automaticamente ao registrar.</p>
                                                 </div>
                                             );
                                         })() : (
@@ -1588,7 +1588,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                 />
                                                 <label
                                                     htmlFor="m70-confirma-sem-visitantes"
-                                                    style={{ fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 400, color: t.text, cursor: "pointer", lineHeight: 1.4 }}
+                                                    style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11.5, fontWeight: 400, color: t.text, cursor: "pointer", lineHeight: 1.4 }}
                                                 >
                                                     Nenhum visitante selecionado. Confirmo registrar mesmo assim.
                                                 </label>
@@ -1598,15 +1598,15 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                 ) : (
                                     <div style={{ padding: "14px 20px", display: "flex", flexDirection: "column", gap: 10, overflowY: "auto", flex: 1, WebkitOverflowScrolling: "touch" }}>
                                         {historicoLoading && (
-                                            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300 }}>
                                                 <Loader2 size={16} className="m70-spin" style={{ color: AURA.gold }} /> Carregando histórico...
                                             </div>
                                         )}
                                         {!historicoLoading && historicoErro && (
-                                            <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red }}>{historicoErro}</p>
+                                            <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red }}>{historicoErro}</p>
                                         )}
                                         {!historicoLoading && !historicoErro && historicoEncontros.length === 0 && (
-                                            <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textSec, textAlign: "center", padding: "20px 0" }}>Nenhuma semana registrada ainda.</p>
+                                            <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textSec, textAlign: "center", padding: "20px 0" }}>Nenhuma semana registrada ainda.</p>
                                         )}
                                         {!historicoLoading && historicoEncontros.map((enc, idx) => {
                                             const editando = editandoEncontroId === enc.id;
@@ -1619,15 +1619,15 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             const listaDecisoesEnc = enc.decisoes ?? [];
 
                                             return (
-                                                <div key={enc.id ?? idx} style={{ border: `1px solid ${editando ? "rgba(201,169,110,.4)" : t.border}`, borderRadius: 12, padding: "12px 14px", background: editando ? "rgba(201,169,110,.05)" : "transparent" }}>
+                                                <div key={enc.id ?? idx} style={{ border: `1px solid ${editando ? "rgba(185,140,255,.4)" : t.border}`, borderRadius: 12, padding: "12px 14px", background: editando ? "rgba(185,140,255,.05)" : "transparent" }}>
                                                     {!editando ? (
                                                         <>
                                                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                                                                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                                                                    <div style={{ width: 26, height: 26, borderRadius: 8, flexShrink: 0, background: "rgba(201,169,110,.14)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontSize: 12, fontWeight: 600, color: AURA.gold }}>{idx + 1}</div>
+                                                                    <div style={{ width: 26, height: 26, borderRadius: 8, flexShrink: 0, background: "rgba(185,140,255,.14)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 600, color: AURA.gold }}>{idx + 1}</div>
                                                                     <div style={{ minWidth: 0 }}>
-                                                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: t.text, margin: 0 }}>{dataFmt ? new Date(dataFmt + "T00:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p>
-                                                                        {enc.horaEncontro && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0 }}>{enc.horaEncontro}</p>}
+                                                                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 500, color: t.text, margin: 0 }}>{dataFmt ? new Date(dataFmt + "T00:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p>
+                                                                        {enc.horaEncontro && <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0 }}>{enc.horaEncontro}</p>}
                                                                     </div>
                                                                 </div>
                                                                 <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
@@ -1635,11 +1635,11 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                     <button onClick={() => excluirEncontro(enc.id)} title="Excluir" style={{ background: "rgba(200,16,46,.1)", border: "1px solid rgba(200,16,46,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#e8556d" }}><Trash2 size={13} /></button>
                                                                 </div>
                                                             </div>
-                                                            {enc.observacoes && <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "8px 0 0" }}>{enc.observacoes}</p>}
+                                                            {enc.observacoes && <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "8px 0 0" }}>{enc.observacoes}</p>}
 
                                                             {listaVisitantesEnc.length > 0 && (
                                                                 <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${t.border}` }}>
-                                                                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 8px" }}>
+                                                                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 8px" }}>
                                                                         Presentes ({listaVisitantesEnc.length})
                                                                     </p>
                                                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -1651,7 +1651,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                             const decisao = decisaoObj?.tipoDecisao ?? decisaoObj?.decisaoEspiritual ?? objeto?.decisaoEspiritual ?? null;
                                                                             return (
                                                                                 <div key={vid ?? vidx} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                                                                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(201,169,110,.08)", border: "1px solid rgba(201,169,110,.22)", borderRadius: 99, padding: "4px 10px", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 400, color: t.text }}>
+                                                                                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(185,140,255,.08)", border: "1px solid rgba(185,140,255,.22)", borderRadius: 99, padding: "4px 10px", fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 400, color: t.text }}>
                                                                                     <span style={{ color: AURA.gold }}>✦</span>{nome}
                                                                                 </span>
                                                                                     {decisao && decisao !== "NENHUMA" && (
@@ -1676,7 +1676,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                                                             {/* Presença editável: mostra TODOS os visitantes da célula, marcados ou não */}
                                                             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: 0 }}>
+                                                                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: 0 }}>
                                                                     Presença ({fEditEnc.visitantesPresentesIds.size} de {visitantesHook.visitantes.length})
                                                                 </p>
                                                                 <div style={{ position: "relative" }}>
@@ -1685,7 +1685,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                 </div>
 
                                                                 {visitantesHook.loading && (
-                                                                    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300 }}>
+                                                                    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", color: t.textSec, fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300 }}>
                                                                         <Loader2 size={14} className="m70-spin" style={{ color: AURA.gold }} /> Carregando visitantes...
                                                                     </div>
                                                                 )}
@@ -1707,7 +1707,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                                          }}>
                                                                                         <div onClick={() => toggleEditPresente(v.id)} style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0, cursor: "pointer" }}>
                                                                                             <input type="checkbox" checked={sel} onChange={() => toggleEditPresente(v.id)} onClick={e => e.stopPropagation()} style={{ width: 14, height: 14, cursor: "pointer", flexShrink: 0 }} />
-                                                                                            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: sel ? 500 : 300, color: t.text, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nome}</span>
+                                                                                            <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: sel ? 500 : 300, color: t.text, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nome}</span>
                                                                                         </div>
                                                                                         {sel && (
                                                                                             <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
@@ -1722,7 +1722,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                                 );
                                                                             })}
                                                                         {visitantesHook.visitantes.filter(v => (v.nome ?? v.nomeCompleto ?? "").toLowerCase().includes(editBuscaVisitante.toLowerCase())).length === 0 && (
-                                                                            <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textMuted, padding: "12px 10px", margin: 0 }}>
+                                                                            <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textMuted, padding: "12px 10px", margin: 0 }}>
                                                                                 {editBuscaVisitante ? `Nenhum resultado para "${editBuscaVisitante}".` : "Nenhum visitante cadastrado nesta célula."}
                                                                             </p>
                                                                         )}
@@ -1731,11 +1731,11 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                             </div>
 
                                                             <div style={{ display: "flex", gap: 8 }}>
-                                                                <button onClick={() => setEditandoEncontroId(null)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: `1px solid ${t.border}`, background: "transparent", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
+                                                                <button onClick={() => setEditandoEncontroId(null)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: `1px solid ${t.border}`, background: "transparent", color: t.textSec, fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
                                                                 <BotaoCarregavel
                                                                     loading={submitting}
                                                                     onClick={salvarEdicaoEncontro}
-                                                                    style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", background: "#7090e8", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                                                                    style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", background: "#7090e8", color: "#fff", fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
                                                                 >
                                                                     Salvar
                                                                 </BotaoCarregavel>
@@ -1772,7 +1772,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             width: "100%", padding: "8px 0", borderRadius: 10, cursor: "pointer",
                                             border: "1px solid rgba(200,16,46,.3)", background: "rgba(200,16,46,.06)",
                                             display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                                            fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".1em",
+                                            fontFamily: "'Roboto',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".1em",
                                             textTransform: "uppercase", color: "#e8556d",
                                         }}>
                                         <Ban size={12} /> Cancelar Missão
@@ -1800,7 +1800,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             </div>
                         }
                     >
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.text, lineHeight: 1.6, margin: 0 }}>
+                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: t.text, lineHeight: 1.6, margin: 0 }}>
                             Tem certeza que deseja cancelar <strong style={{ fontWeight: 500 }}>"{targetNome}"</strong>?
                         </p>
                         <div>
@@ -1851,7 +1851,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         >
                             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                                 <BadgeStatus status={concluida ? "concluida" : m.status} />
-                                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec }}>Semana {realizados} de {TOTAL_SEMANAS} · {visitantes.length} visitante{visitantes.length !== 1 ? "s" : ""}</span>
+                                <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec }}>Semana {realizados} de {TOTAL_SEMANAS} · {visitantes.length} visitante{visitantes.length !== 1 ? "s" : ""}</span>
                             </div>
 
                             <div style={{ display: "flex", gap: 5 }}>
@@ -1865,19 +1865,19 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             {concluida && (
                                 <div style={{ padding: "12px 14px", borderRadius: 12, background: isDark ? "rgba(122,158,126,.1)" : "rgba(122,158,126,.07)", border: "1px solid rgba(122,158,126,.35)", display: "flex", alignItems: "center", gap: 10 }}>
                                     <div style={{ fontSize: 22, flexShrink: 0 }}>🎉</div>
-                                    <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>Todas as {TOTAL_SEMANAS} semanas foram realizadas com sucesso.</p>
+                                    <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>Todas as {TOTAL_SEMANAS} semanas foram realizadas com sucesso.</p>
                                 </div>
                             )}
 
                             {m.nomeAnfitriao && (
                                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                    <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: "rgba(253,184,19,.12)", border: "1px solid rgba(253,184,19,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 12, color: AURA.yellow }}>
+                                    <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: "rgba(253,184,19,.12)", border: "1px solid rgba(253,184,19,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontWeight: 600, fontSize: 12, color: AURA.yellow }}>
                                         {m.nomeAnfitriao.charAt(0).toUpperCase()}
                                     </div>
                                     <div style={{ minWidth: 0 }}>
-                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: 0 }}>Anfitrião</p>
-                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.text, margin: 0 }}>{m.nomeAnfitriao}</p>
-                                        {m.telefoneContato && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0 }}>{m.telefoneContato}</p>}
+                                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, margin: 0 }}>Anfitrião</p>
+                                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: t.text, margin: 0 }}>{m.nomeAnfitriao}</p>
+                                        {m.telefoneContato && <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0 }}>{m.telefoneContato}</p>}
                                     </div>
                                 </div>
                             )}
@@ -1885,7 +1885,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             <PessoaBloco label="Auxiliar" nome={m.auxiliarNome} cor={AURA.sage} t={t} />
 
                             <div>
-                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 8px" }}>Visitantes ({visitantes.length})</p>
+                                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted, margin: "0 0 8px" }}>Visitantes ({visitantes.length})</p>
                                 {visitantes.length ? (
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                                         {visitantes.map((v) => {
@@ -1895,7 +1895,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             const salvando = decisaoSalvandoId === v.id;
                                             return (
                                                 <div key={v.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                                    <div style={{ background: "rgba(201,169,110,.08)", border: "1px solid rgba(201,169,110,.22)", borderRadius: 99, padding: "5px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.text, display: "flex", alignItems: "center", gap: 6 }}>
+                                                    <div style={{ background: "rgba(185,140,255,.08)", border: "1px solid rgba(185,140,255,.22)", borderRadius: 99, padding: "5px 12px", fontFamily: "'Roboto',sans-serif", fontSize: 12, fontWeight: 300, color: t.text, display: "flex", alignItems: "center", gap: 6 }}>
                                                         <span style={{ color: AURA.gold }}>✦</span><span>{v.nome ?? `#${v.id}`}</span>
                                                     </div>
                                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1911,7 +1911,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             );
                                         })}
                                     </div>
-                                ) : <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>Nenhum visitante cadastrado ainda.</p>}
+                                ) : <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0 }}>Nenhum visitante cadastrado ainda.</p>}
                             </div>
                         </AuraSquareModal>
                     );
@@ -1942,7 +1942,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                         }}>
                                 {/* Header */}
                                 <div style={{ padding: "16px 18px 0", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, gap: 10 }}>
-                                    <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0 }}>
+                                    <h3 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0 }}>
                                         Visitantes da célula
                                     </h3>
                                     <button onClick={() => setModalPickVisitantes(false)} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex", flexShrink: 0 }}>
@@ -1961,10 +1961,10 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                                 {/* Quick actions */}
                                 <div style={{ padding: "10px 18px", display: "flex", gap: 8, flexShrink: 0 }}>
-                                    <button onClick={() => pickSelectAll(idsFiltrados)} style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: `1px solid ${t.border}`, background: todosSelecionados ? `${AURA.teal}18` : "transparent", color: AURA.teal, fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer", transition: "background .15s" }}>
+                                    <button onClick={() => pickSelectAll(idsFiltrados)} style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: `1px solid ${t.border}`, background: todosSelecionados ? `${AURA.teal}18` : "transparent", color: AURA.teal, fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer", transition: "background .15s" }}>
                                         Todos{pickBusca ? " (filtrados)" : ""}
                                     </button>
-                                    <button onClick={() => pickClearAll(idsFiltrados)} style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: `1px solid ${t.border}`, background: "transparent", color: AURA.red, fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer", transition: "background .15s" }}>
+                                    <button onClick={() => pickClearAll(idsFiltrados)} style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: `1px solid ${t.border}`, background: "transparent", color: AURA.red, fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer", transition: "background .15s" }}>
                                         Nenhum
                                     </button>
                                 </div>
@@ -1972,15 +1972,15 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                 {/* Lista */}
                                 <div style={{ flex: 1, overflowY: "auto", padding: "0 18px 14px", WebkitOverflowScrolling: "touch" }}>
                                     {visitantesHook.loading && (
-                                        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300 }}>
                                             <Loader2 size={16} className="m70-spin" style={{ color: AURA.teal }} /> Carregando...
                                         </div>
                                     )}
                                     {!visitantesHook.loading && visitantesHook.erro && (
-                                        <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, color: AURA.red, textAlign: "center", padding: "24px 0" }}>{visitantesHook.erro}</p>
+                                        <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, color: AURA.red, textAlign: "center", padding: "24px 0" }}>{visitantesHook.erro}</p>
                                     )}
                                     {!visitantesHook.loading && !visitantesHook.erro && filtrados.length === 0 && (
-                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: t.textMuted, textAlign: "center", padding: "24px 0", margin: 0 }}>
+                                        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, color: t.textMuted, textAlign: "center", padding: "24px 0", margin: 0 }}>
                                             {pickBusca ? `Nenhum resultado para "${pickBusca}".` : "Nenhum visitante cadastrado nesta célula."}
                                         </p>
                                     )}
@@ -2017,12 +2017,12 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                     width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
                                                     background: sel ? `${AURA.teal}18` : isDark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.04)",
                                                     display: "flex", alignItems: "center", justifyContent: "center",
-                                                    fontFamily: "'Playfair Display',serif", fontSize: 10, fontWeight: 600,
+                                                    fontFamily: "'Roboto',sans-serif", fontSize: 10, fontWeight: 600,
                                                     color: sel ? AURA.teal : t.textMuted,
                                                 }}>
                                                     {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                                 </div>
-                                                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: sel ? 500 : 300, color: t.text, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: sel ? 500 : 300, color: t.text, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                                     {nome}
                                                 </span>
                                                 {!jaNaMissao && (
@@ -2036,11 +2036,11 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                 {/* Footer */}
                                 <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, display: "flex", gap: 10, flexShrink: 0 }}>
                                     <button onClick={() => setModalPickVisitantes(false)}
-                                            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1px solid ${t.border}`, background: "transparent", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: t.textSec, cursor: "pointer" }}>
+                                            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1px solid ${t.border}`, background: "transparent", fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 500, color: t.textSec, cursor: "pointer" }}>
                                         Cancelar
                                     </button>
                                     <button onClick={confirmarPickVisitantes}
-                                            style={{ flex: 2, padding: "10px 0", borderRadius: 10, border: "none", background: `linear-gradient(135deg,${AURA.teal},${AURA.blue})`, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>
+                                            style={{ flex: 2, padding: "10px 0", borderRadius: 10, border: "none", background: `linear-gradient(135deg,${AURA.teal},${AURA.blue})`, fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>
                                         Confirmar ({pickIds.size})
                                     </button>
                                 </div>
