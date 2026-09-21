@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { getFotoUrl } from "../utils/foto.js";
+import VersiculoAleatorio from "./VersiculoAleatorio.jsx";
 
 /* ─── Tokens AURA (espelhados das páginas Pastor/Secretaria) ─────────── */
 const AURA = {
@@ -48,14 +49,12 @@ export default function BoasVindas({ usuarioLogado, cargo = "", isDark, onClose 
             padding: "40px 20px",
           }}
       >
-        {/* ── imagem de fundo decorativa ── */}
+        {/* ── fundo decorativo ── */}
         <div style={{
           position: "fixed", inset: 0, zIndex: -1,
-          backgroundImage: "url(/40dias-milagres.png)",
+          background: `linear-gradient(165deg, ${isDark ? "#131322" : "#B9D0EE"}, ${isDark ? "#1E1630" : "#9B0B1E"})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          filter: "blur(30px) brightness(.5) saturate(1.1)",
-          transform: "scale(1.15)",
           pointerEvents: "none",
         }} />
 
@@ -140,18 +139,10 @@ export default function BoasVindas({ usuarioLogado, cargo = "", isDark, onClose 
 
           <div style={{ height: 1, background: `linear-gradient(90deg,transparent,${t.border},transparent)`, margin: "26px 0" }} />
 
-          {/* ── Imagem pequena de destaque ── */}
+          {/* ── Texto bíblico ── */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .3 }}
                       style={{ display: "flex", justifyContent: "center" }}>
-            <img
-                src="/40dias-milagres.png"
-                alt="40 Dias de Milagres — Avante e Sem Parar"
-                style={{
-                  width: 400, height: "auto", borderRadius: 14,
-                  border: `1px solid ${t.border}`,
-                  boxShadow: `0 8px 24px rgba(0,0,0,${isDark ? ".35" : ".15"})`,
-                }}
-            />
+            <VersiculoAleatorio isDark={isDark} accent={AURA.gold} />
           </motion.div>
 
           {/* CTA */}

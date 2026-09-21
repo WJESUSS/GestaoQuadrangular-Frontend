@@ -2,6 +2,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
+import VersiculoAleatorio from "../../components/VersiculoAleatorio.jsx";
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
 export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose }) {
@@ -78,18 +79,10 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                         {/* ── Mensagem ── */}
 
 
-                        {/* ── Imagem pequena de destaque ── */}
+                        {/* ── Texto bíblico ── */}
                         <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:.3 }}
                                     style={{ display:"flex", justifyContent:"center", marginTop:20 }}>
-                            <img
-                                src="/40dias-milagres.png"
-                                alt="40 Dias de Milagres — Avante e Sem Parar"
-                                style={{
-                                    width:400, height:"auto", borderRadius:14,
-                                    border:`1px solid ${t.border}`,
-                                    boxShadow:`0 8px 24px rgba(0,0,0,${isDark?.35:.15})`,
-                                }}
-                            />
+                            <VersiculoAleatorio isDark={isDark} accent={AURA.yellow} />
                         </motion.div>
 
                         {/* ── Botão fechar (rodapé) ── */}

@@ -24,6 +24,7 @@ import {
   ArrowLeft, Church, Contact,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import BoasVindas     from "../../components/BoasVindas.jsx";
 
 /* ─── Tokens AURA ────────────────────────────────────────────────── */
 const AURA = {
@@ -712,6 +713,7 @@ function SinoPastor({ isDark, t }) {
 export default function PastorPage() {
   const [abaAtiva,     setAbaAtiva]     = useState("dashboard");
   const [showPainel,    setShowPainel]    = useState(false);
+  const [showBoasVindas, setShowBoasVindas] = useState(false);
   const [celulas,       setCelulas]       = useState([]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [loading,       setLoading]       = useState(true);
@@ -743,6 +745,15 @@ export default function PastorPage() {
         setLoading(false);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("boas_vindas_pendente") !== "1") return;
+    const id = setTimeout(() => {
+      sessionStorage.removeItem("boas_vindas_pendente");
+      setShowBoasVindas(true);
+    }, 600);
+    return () => clearTimeout(id);
   }, []);
 
   const { totalAtivas } = useMemo(() => ({
@@ -901,6 +912,18 @@ export default function PastorPage() {
             </p>
           </div>
         </main>
+
+        {/* ════ BOAS-VINDAS ════ */}
+        <AnimatePresence>
+          {showBoasVindas && (
+              <BoasVindas
+                  usuarioLogado={usuarioLogado}
+                  cargo={usuarioLogado?.cargo || "Pastor"}
+                  isDark={isDark}
+                  onClose={() => setShowBoasVindas(false)}
+              />
+          )}
+        </AnimatePresence>
 
         {/* ════ MODAL PASTOR ════ */}
         {showPainel && createPortal(

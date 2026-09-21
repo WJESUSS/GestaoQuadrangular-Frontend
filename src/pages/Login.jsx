@@ -2,21 +2,19 @@ import { Helmet }        from "react-helmet-async";
 import { useNavigate }   from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { jwtDecode }     from "jwt-decode";
-import { Loader2, Lock, Mail, Sun, Moon, User, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Loader2, Lock, Mail, Sun, Moon, User, ShieldCheck, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useAuth }       from "../auth/AuthContext";
 import { useTheme }      from "../context/ThemeContext";
 import api               from "../services/api.js";
 
-/* ─── Paleta AURA (DashboardLider) ─── */
-const BRAND = {
-    moss:"#1E3F66", mossDeep:"#12283F", mossLight:"#4C7EB0",
-    dark:"#12131C", stone:"#1A2236",
-    light:"#F3F1EA", muted:"#8B93A0",
-    gold:"#B8892E", goldLight:"#D9AE5E",
-    red:"#9E2A2B", redDark:"#6E1D1E",
+/* ─── Paleta "Dunas" (template space-login) ─── */
+const P = {
+    plum:"#834D87", plumDark:"#6B3A70", plumDeep:"#583575",
+    pink:"#F598AD", ink:"#200A3F",
+    red:"#9E2A2B", gold:"#B8892E",
 };
 
-/* ─── Mini-hook fade-in (igual ao da Home) ─── */
+/* ─── Fade-in do cartão ─── */
 function useFadeIn(threshold = 0.15) {
     const ref = useRef(null);
     useEffect(() => {
@@ -31,21 +29,16 @@ function useFadeIn(threshold = 0.15) {
     return ref;
 }
 
-/* ─── Cruz quadrangular (mesmo SVG da Home) ─── */
-/* ??? Cruz quadrangular ??? */
-function IEQCross({ size = 300, src = "/quadrangular.png" }) {
+/* ─── Logo IEQ ─── */
+function IEQCross({ size = 40, src = "/quadrangular.png" }) {
     return (
         <img
             src={src}
             alt="Logo IEQ"
             style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                minWidth: `${size}px`,
-                minHeight: `${size}px`,
-                borderRadius: "50%",
-                objectFit: "cover",
-                display: "block",
+                width: `${size}px`, height: `${size}px`,
+                minWidth: `${size}px`, minHeight: `${size}px`,
+                borderRadius: "50%", objectFit: "cover", display: "block",
             }}
         />
     );
@@ -68,10 +61,235 @@ function ErrIcon({ t }) {
     return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
 }
 
-/* ─── Cálculo de força de senha ─── */
-const calcForca   = s => s.length < 6 ? 1 : s.length < 8 ? 2 : /[A-Z]/.test(s) && /[0-9]/.test(s) ? 4 : 3;
-const forcaLabel  = ["","Muito curta","Fraca","Média","Forte"];
-const forcaColor  = ["",BRAND.red,BRAND.gold,"#22c55e",BRAND.moss];
+/* ─── Força de senha ─── */
+const calcForca  = s => s.length < 6 ? 1 : s.length < 8 ? 2 : /[A-Z]/.test(s) && /[0-9]/.test(s) ? 4 : 3;
+const forcaLabel = ["","Muito curta","Fraca","Média","Forte"];
+const forcaColor = ["",P.red,P.gold,"#3E9B5F",P.plum];
+
+function Forca({ senha }) {
+    if (!senha) return null;
+    const f = calcForca(senha);
+    return (
+        <div style={{ marginTop:8 }}>
+            <div style={{ display:"flex", gap:4, marginBottom:5 }}>
+                {[1,2,3,4].map(i => (
+                    <div key={i} className="forca-bar" style={{ background: i<=f ? forcaColor[f] : "var(--track)" }}/>
+                ))}
+            </div>
+            <p style={{ fontSize:11, fontWeight:700, color:forcaColor[f] }}>{forcaLabel[f]}</p>
+        </div>
+    );
+}
+
+function Confere({ a, b }) {
+    if (!b) return null;
+    const ok = a === b;
+    return (
+        <p style={{ fontSize:11.5, marginTop:6, fontWeight:700, color: ok ? "#3E9B5F" : "var(--err)" }}>
+            {ok ? "✓ Senhas conferem" : "✗ Senhas não conferem"}
+        </p>
+    );
+}
+
+/* ─── Campo com ícone (definido fora para não perder o foco a cada render) ─── */
+function Field({ id, label, icon:Icon, required, children }) {
+    return (
+        <div>
+            <label className="fld-label" htmlFor={id}>
+                {label}{required && <span style={{ color:"var(--err)" }}> *</span>}
+            </label>
+            <div className="fld-wrap">
+                <Icon size={16} className="fld-icon" aria-hidden="true"/>
+                {children}
+            </div>
+        </div>
+    );
+}
+
+function EyeBtn({ show, onClick }) {
+    return (
+        <button type="button" className="eye" onClick={onClick}
+                aria-label={show ? "Ocultar senha" : "Mostrar senha"}>
+            <EyeIcon open={show}/>
+        </button>
+    );
+}
+
+function ErrBox({ e }) {
+    if (!e) return null;
+    return (
+        <div className={`err-box ${e.tipo==="limite" ? "err-warn" : "err-bad"}`} role="alert">
+            <span className="err-ico"><ErrIcon t={e.tipo}/></span>
+            <div>
+                <p className="err-title">{e.titulo}</p>
+                <p className="err-msg">{e.msg}</p>
+            </div>
+        </div>
+    );
+}
+
+/* ══════════ ARTE: fundo em tela cheia (céu + dunas) ══════════ */
+const BG_STARS = [
+    [96,95,1.5],[126,204,1.8],[306,204,1.5],[365,84,1.3],[196,293,1.5],[378,277,1.3],[58,358,2.4],[94,388,1.2],
+    [119,463,1.5],[315,483,2.8],[620,90,3],[809,50,1.6],[943,131,1.6],[963,270,1.7],[1079,199,2.6],[1191,86,1.8],
+    [1258,185,1.6],[1253,328,2.4],[1180,388,2.4],[1262,448,1.4],[1187,561,2.8],[996,466,1.3],[450,150,1.2],[700,40,1.2],
+    [540,340,1.2],[880,330,1.3],[230,120,1.1],[1120,120,1.2],
+];
+const BG_STREAKS = [
+    [1012,361,1110,262,2.4],[195,458,282,373,2.2],[1043,554,1094,501,1.8],
+    [630,212,662,185,1.4],[830,270,862,244,1.4],[515,266,541,246,1.2],
+];
+
+function SceneBackground({ dark }) {
+    return (
+        <svg className="scene" viewBox="0 0 1344 896" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <defs>
+                <linearGradient id="bg-sky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0"   stopColor="#442B6C"/>
+                    <stop offset=".30" stopColor="#6D3F77"/>
+                    <stop offset=".50" stopColor="#9A5385"/>
+                    <stop offset=".68" stopColor="#C56B93"/>
+                    <stop offset=".85" stopColor="#E08AA1"/>
+                    <stop offset="1"   stopColor="#EA94A5"/>
+                </linearGradient>
+                <linearGradient id="bg-dark" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#6A4381"/>
+                    <stop offset="1" stopColor="#4B2A68"/>
+                </linearGradient>
+                <linearGradient id="bg-darkR" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#4F2D6B"/>
+                    <stop offset="1" stopColor="#5E3877"/>
+                </linearGradient>
+                <linearGradient id="bg-lit" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="#F7A5A6"/>
+                    <stop offset=".55" stopColor="#DD87A2"/>
+                    <stop offset="1" stopColor="#A96C95"/>
+                </linearGradient>
+                <linearGradient id="bg-litBottom" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#B9709A"/>
+                    <stop offset=".5" stopColor="#E88EA5"/>
+                    <stop offset="1" stopColor="#BD7396"/>
+                </linearGradient>
+                <linearGradient id="bg-streak" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0" stopColor="#FFFFFF" stopOpacity=".95"/>
+                    <stop offset="1" stopColor="#FFFFFF" stopOpacity="0"/>
+                </linearGradient>
+                <radialGradient id="bg-glow">
+                    <stop offset="0" stopColor="#FFFFFF" stopOpacity=".95"/>
+                    <stop offset=".35" stopColor="#E9B6FF" stopOpacity=".55"/>
+                    <stop offset="1" stopColor="#C68BFF" stopOpacity="0"/>
+                </radialGradient>
+            </defs>
+
+            <rect width="1344" height="896" fill="url(#bg-sky)"/>
+
+            {/* estrelas */}
+            <g className="twinkle">
+                {BG_STARS.map(([x,y,r],i) => (
+                    <g key={i}>
+                        {r >= 2.4 && <circle cx={x} cy={y} r={r*3.2} fill="url(#bg-glow)"/>}
+                        <circle cx={x} cy={y} r={r} fill="#fff" opacity={r>=2.4?1:.8}/>
+                    </g>
+                ))}
+            </g>
+            {BG_STREAKS.map(([x1,y1,x2,y2,w],i) => (
+                <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#bg-streak)" strokeWidth={w} strokeLinecap="round"/>
+            ))}
+
+            {/* massa base entre as dunas */}
+            <path d="M0,640 C300,650 600,690 900,640 C1100,600 1250,650 1344,640 L1344,896 L0,896 Z" fill="#6A4381"/>
+
+            {/* duna esquerda */}
+            <path d="M0,610 C50,608 110,618 152,626 C205,590 245,562 262,563 C276,572 274,610 266,650 C258,700 205,745 232,800 C245,830 270,860 300,896 L0,896 Z" fill="url(#bg-dark)"/>
+            <path d="M264,566 C300,600 360,655 405,702 C350,740 280,790 240,822 C215,780 235,730 262,690 C275,640 274,600 264,566 Z" fill="url(#bg-lit)"/>
+            <path d="M0,896 L0,800 C60,780 130,770 165,780 C178,830 172,870 160,896 Z" fill="#4B2A68"/>
+            <path d="M165,782 C200,820 250,860 282,896 L160,896 C172,860 178,820 165,782 Z" fill="url(#bg-lit)"/>
+
+            {/* base central rosada (aparece abaixo do cartão) */}
+            <path d="M500,896 C560,810 690,770 800,780 C910,790 990,835 1030,896 Z" fill="url(#bg-litBottom)"/>
+
+            {/* duna direita */}
+            <path d="M900,620 C940,590 975,558 992,556 C1020,562 1035,590 1010,612 C985,628 960,640 968,655 C1000,690 1055,705 1058,745 C1058,790 1075,815 1150,840 L1344,880 L1344,896 L800,896 Z" fill="url(#bg-darkR)"/>
+            <path d="M1005,563 C1100,640 1230,720 1298,762 C1250,810 1200,840 1165,850 C1100,830 1060,800 1058,745 C1055,705 1000,690 968,655 C960,640 985,628 1010,612 C1035,590 1025,565 1005,563 Z" fill="url(#bg-lit)"/>
+            <path d="M1180,676 C1250,660 1310,650 1344,640 L1344,770 L1298,762 Z" fill="#5B3673"/>
+            <path d="M1085,896 C1180,860 1290,800 1344,730 L1344,896 Z" fill="#5B3673"/>
+
+            {dark && <rect width="1344" height="896" fill="#0E0620" opacity=".45"/>}
+        </svg>
+    );
+}
+
+/* ══════════ ARTE: ilustração do topo do cartão ══════════ */
+const HD_STARS = [[60,40,1.2],[130,25,1],[200,60,1.3],[300,30,1],[455,110,1.2],[35,120,1],[250,18,1.1],[350,85,1],[170,95,1.4],[430,160,1]];
+
+function CardArt() {
+    return (
+        <svg viewBox="0 0 495 341" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <defs>
+                <linearGradient id="hd-sky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0"   stopColor="#42296B"/>
+                    <stop offset=".45" stopColor="#6F4179"/>
+                    <stop offset=".75" stopColor="#A85B88"/>
+                    <stop offset="1"   stopColor="#CF7599"/>
+                </linearGradient>
+                <linearGradient id="hd-moon" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#F7AAA6"/>
+                    <stop offset="1" stopColor="#B06F95" stopOpacity=".65"/>
+                </linearGradient>
+                <linearGradient id="hd-dark" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#5C3775"/>
+                    <stop offset="1" stopColor="#6F4784"/>
+                </linearGradient>
+                <linearGradient id="hd-darkR" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#5A3674"/>
+                    <stop offset="1" stopColor="#7A4E89"/>
+                </linearGradient>
+                <linearGradient id="hd-lit" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="#F7A5A6"/>
+                    <stop offset=".5" stopColor="#DE88A2"/>
+                    <stop offset="1" stopColor="#B0709A"/>
+                </linearGradient>
+                <linearGradient id="hd-streak" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0" stopColor="#fff" stopOpacity=".9"/>
+                    <stop offset="1" stopColor="#fff" stopOpacity="0"/>
+                </linearGradient>
+                <radialGradient id="hd-glow">
+                    <stop offset="0" stopColor="#fff" stopOpacity=".9"/>
+                    <stop offset="1" stopColor="#D9A3FF" stopOpacity="0"/>
+                </radialGradient>
+            </defs>
+
+            <rect width="495" height="341" fill="url(#hd-sky)"/>
+
+            <circle cx="405" cy="58" r="22" fill="url(#hd-moon)"/>
+
+            <g className="twinkle">
+                {HD_STARS.map(([x,y,r],i) => <circle key={i} cx={x} cy={y} r={r} fill="#fff" opacity=".85"/>)}
+                <circle cx="42" cy="92" r="9" fill="url(#hd-glow)"/>
+                <circle cx="42" cy="92" r="1.8" fill="#fff"/>
+            </g>
+            <line x1="418" y1="152" x2="452" y2="124" stroke="url(#hd-streak)" strokeWidth="1.6" strokeLinecap="round"/>
+            <line x1="70" y1="160" x2="98" y2="136" stroke="url(#hd-streak)" strokeWidth="1.4" strokeLinecap="round"/>
+
+            {/* massa de fundo */}
+            <path d="M0,255 C120,245 260,262 495,240 L495,341 L0,341 Z" fill="#6A4381"/>
+
+            {/* dunas pequenas à esquerda */}
+            <path d="M0,246 C27,223 67,198 89,196 C95,213 89,233 75,253 C69,273 57,298 55,341 L0,341 Z" fill="url(#hd-dark)"/>
+            <path d="M89,196 C110,215 135,236 150,250 C130,270 100,300 90,341 L55,341 C57,298 69,273 75,253 C89,233 95,213 89,196 Z" fill="url(#hd-lit)"/>
+
+            {/* duna principal */}
+            <path d="M39,341 C47,323 72,298 117,253 C167,213 207,181 225,179 C242,185 249,203 237,223 C217,238 195,248 197,268 C207,293 247,323 292,341 Z" fill="url(#hd-dark)"/>
+            <path d="M237,186 C297,233 377,288 422,313 C407,328 392,335 372,341 L292,341 C247,323 207,293 197,268 C195,248 217,238 237,223 C249,203 242,186 237,186 Z" fill="url(#hd-lit)"/>
+
+            {/* duna à direita */}
+            <path d="M300,341 C312,290 345,225 372,193 C390,194 391,214 372,224 C358,236 378,250 388,262 C395,290 420,320 495,341 Z" fill="url(#hd-darkR)"/>
+            <path d="M374,197 C420,220 470,255 495,270 L495,341 C450,325 405,300 390,268 C380,248 360,235 372,224 C391,214 392,197 374,197 Z" fill="url(#hd-lit)"/>
+
+            <path d="M0,326 C150,336 350,336 495,320 L495,341 L0,341 Z" fill="#5B3673" opacity=".85"/>
+        </svg>
+    );
+}
 
 /* ══════════════════════════════════════════════════════════════ */
 export default function Login() {
@@ -117,22 +335,8 @@ export default function Login() {
 
     const cardRef = useFadeIn();
 
-    /* Adia as camadas pesadas (blur/drop-shadow) para depois do 1º paint — evita travar a navegação */
-    const [bgReady, setBgReady] = useState(false);
-    useEffect(() => {
-        let raf2;
-        const raf1 = requestAnimationFrame(() => {
-            raf2 = requestAnimationFrame(() => setBgReady(true));
-        });
-        return () => { cancelAnimationFrame(raf1); if (raf2) cancelAnimationFrame(raf2); };
-    }, []);
-
     /* helpers */
     const trocarAba = a => { setAba(a); setErrLogin(null); setErrCad(null); setErrAlt(null); setOkCad(false); setOkAlt(false); };
-
-    const errBg     = e => e?.tipo==="limite" ? "rgba(184,137,46,.12)" : "rgba(158,42,43,.12)";
-    const errBorder = e => e?.tipo==="limite" ? "rgba(184,137,46,.4)" : "rgba(158,42,43,.4)";
-    const errColor  = e => e?.tipo==="limite" ? BRAND.gold : BRAND.red;
 
     /* ── handlers ── */
     const handleLogin = async e => {
@@ -220,17 +424,21 @@ export default function Login() {
         } finally { setLoadAlt(false); }
     };
 
-    /* ── Cores base (mesmas da Home) ── */
-    const bg    = dark ? BRAND.dark  : BRAND.light;
-    /* ── card mais transparente ── */
-    const cardBg= dark ? "rgba(26,34,54,.07)" : "rgba(255,255,255,.05)";
-    const txt   = dark ? BRAND.light : BRAND.dark;
-    const sub   = dark ? "rgba(243,241,234,.5)" : "rgba(27,35,51,.45)";
-    const border= dark ? "rgba(30,63,102,.12)" : "rgba(30,63,102,.10)";
+    /* ── tokens de tema (claro = template original; escuro = painel roxo-noite) ── */
+    const vars = dark ? {
+        "--panel":"#1F1435", "--title":"#FFFFFF", "--text":"rgba(255,255,255,.80)", "--sub":"rgba(255,255,255,.62)",
+        "--link":P.pink, "--notice":"rgba(255,255,255,.07)", "--notice-b":"rgba(255,255,255,.16)",
+        "--track":"rgba(255,255,255,.16)", "--switch-off":"rgba(255,255,255,.28)", "--switch-on":P.plum,
+        "--err":"#FF8F90", "--warn":"#E3B865", "--chip":"rgba(245,152,173,.16)", "--chip-b":"rgba(245,152,173,.45)",
+    } : {
+        "--panel":"#F1F1F3", "--title":P.ink, "--text":"#4A3568", "--sub":"rgba(32,10,63,.62)",
+        "--link":P.plum, "--notice":"rgba(131,77,135,.08)", "--notice-b":"rgba(131,77,135,.24)",
+        "--track":"rgba(32,10,63,.12)", "--switch-off":"rgba(88,53,117,.30)", "--switch-on":P.plumDeep,
+        "--err":P.red, "--warn":"#8A6516", "--chip":"rgba(245,152,173,.22)", "--chip-b":"rgba(131,77,135,.4)",
+    };
 
-    /* ── Força senha ── */
-    const fc = calcForca(cSenha);
-    const fa = calcForca(aNova);
+    const titulos = { login:"Entrar", cadastro:"Solicitar acesso", alterar:"Alterar dados" };
+    const temErro = errLogin || errCad || errAlt;
 
     return (
         <>
@@ -240,774 +448,457 @@ export default function Login() {
             </Helmet>
 
             <style>{`
-        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
-        /* ── font base ── */
+        .ieq-login-root, .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { box-sizing:border-box; }
+        :where(.ieq-login-root, .ieq-login-root *) { margin:0; padding:0; }
         .ieq-login-root {
-          font-family:'Inter',sans-serif;
-          min-height:100vh;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          overflow:hidden;
-          position:relative;
-          transition:background .4s;
+          font-family:'Montserrat',system-ui,sans-serif;
+          min-height:100vh; position:relative; overflow-x:hidden;
+          color:var(--text); background:#442B6C;
+        }
+        .ieq-login-root button, .ieq-login-root input { font-family:inherit; }
+
+        /* ── cenário de fundo ── */
+        .scene { position:fixed; inset:0; width:100%; height:100%; z-index:0; display:block; }
+        .twinkle { animation:twinkle 5s ease-in-out infinite alternate; }
+        @keyframes twinkle { from{opacity:.65} to{opacity:1} }
+
+        .login-stage {
+          position:relative; z-index:2; min-height:100vh;
+          display:flex; flex-direction:column; align-items:center; justify-content:center;
+          gap:18px; padding:32px 16px 24px;
         }
 
-        /* ── glow azul central ── */
-        /* ── noise grain ── */
-        .noise-overlay {
-          position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.035;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-          background-repeat:repeat; background-size:256px 256px;
+        /* ── botão de tema ── */
+        .theme-btn {
+          position:fixed; top:18px; right:18px; z-index:50;
+          width:42px; height:42px; border-radius:50%; cursor:pointer;
+          display:grid; place-items:center; color:#fff;
+          background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.35);
+          backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+          transition:background .2s;
         }
+        .theme-btn:hover { background:rgba(255,255,255,.28); }
+        .theme-btn:focus-visible { outline:2px solid #fff; outline-offset:2px; }
 
-        /* ── glows ── */
-        .glow-primary {
-          position:fixed; top:50%; left:50%;
-          transform:translate(-50%,-50%);
-          width:800px; height:800px; border-radius:50%;
-          background:radial-gradient(circle,rgba(30,63,102,.15) 0%,rgba(76,126,176,.08) 40%,transparent 70%);
-          pointer-events:none; z-index:0;
-          animation:glowPulse 6s ease-in-out infinite;
-        }
-        .glow-secondary {
-          position:fixed; top:20%; right:5%;
-          width:500px; height:500px; border-radius:50%;
-          background:radial-gradient(circle,rgba(184,137,46,.1) 0%,rgba(184,137,46,.05) 30%,transparent 65%);
-          pointer-events:none; z-index:0;
-          animation:glowPulse 8s ease-in-out infinite reverse;
-        }
-        .glow-tertiary {
-          position:fixed; bottom:-10%; left:-5%;
-          width:600px; height:600px; border-radius:50%;
-          background:radial-gradient(circle,rgba(76,126,176,.08) 0%,transparent 60%);
-          pointer-events:none; z-index:0;
-          animation:glowPulse 10s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-          0%,100%{ opacity:.6; transform:translate(-50%,-50%) scale(1); }
-          50%{ opacity:1; transform:translate(-50%,-50%) scale(1.08); }
-        }
-        .glow-secondary { animation-name:glowPulseAlt; }
-        @keyframes glowPulseAlt {
-          0%,100%{ opacity:.4; transform:scale(1); }
-          50%{ opacity:.8; transform:scale(1.12); }
-        }
-        .glow-tertiary { animation-name:glowPulseT; }
-        @keyframes glowPulseT {
-          0%,100%{ opacity:.3; transform:scale(1); }
-          50%{ opacity:.6; transform:scale(1.15); }
-        }
-
-        /* ── card principal ── */
+        /* ── cartão vertical ── */
         .login-card {
-          position:relative; z-index:10;
-          width:100%; max-width:480px;
-          margin:24px;
-          background:${cardBg};
-          backdrop-filter:blur(20px) saturate(1.2);
-          -webkit-backdrop-filter:blur(20px) saturate(1.2);
-          border:1px solid rgba(255,255,255,.10);
-          border-radius:16px;
-          padding:44px 44px 36px;
-          opacity:0; transform:translateY(28px);
-          transition:opacity .7s ease, transform .7s ease,
-                      background .4s, border-color .4s, box-shadow .4s;
-          box-shadow:
-            0 1px 2px rgba(0,0,0,.04),
-            0 4px 8px rgba(0,0,0,.05),
-            0 16px 32px rgba(0,0,0,.06),
-            0 32px 64px rgba(0,0,0,.08),
-            inset 0 1px 0 rgba(255,255,255,.08);
+          width:100%; max-width:420px; overflow:hidden;
+          background:var(--panel); border-radius:4px;
+          box-shadow:0 34px 80px rgba(22,8,48,.55), 0 10px 26px rgba(22,8,48,.30);
+          opacity:0; transform:translateY(24px);
+          transition:opacity .7s ease, transform .7s ease, background .3s;
         }
-        .login-card::before {
-          content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
-          background:linear-gradient(135deg, rgba(255,255,255,.09) 0%, transparent 50%, rgba(30,63,102,.05) 100%);
-          pointer-events:none;
+        .card-hero { position:relative; height:300px; }
+        .card-hero > svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
+        .hero-content {
+          position:absolute; top:0; left:0; right:0; padding:18px 20px 0;
+          display:flex; flex-direction:column; align-items:center; text-align:center; color:#fff;
         }
-        .login-card::after {
-          content:""; position:absolute; inset:0; border-radius:16px; z-index:-1;
-          padding:1px;
-          background:linear-gradient(135deg, rgba(255,255,255,.20) 0%, transparent 40%, rgba(30,63,102,.08) 100%);
-          -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite:xor;
-          mask-composite:exclude;
-          pointer-events:none;
+        .logo-ring {
+          width:56px; height:56px; border-radius:50%; display:grid; place-items:center;
+          background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.45);
+          backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+        }
+        .hero-content h1 {
+          margin-top:12px; font-size:21px; font-weight:700; line-height:1.18; letter-spacing:-.01em;
+          text-shadow:0 2px 14px rgba(20,8,45,.55);
+        }
+        .hero-content p {
+          margin-top:8px; font-size:11.5px; font-weight:500; letter-spacing:.04em; opacity:.88;
+          text-shadow:0 1px 8px rgba(20,8,45,.5);
         }
 
-        /* ── tabs ── */
-        .tabs-row {
-          display:flex;
-          background:rgba(255,255,255,.08);
-          border-radius:8px;
-          padding:3px;
-          gap:3px;
-          margin-bottom:28px;
-        }
-        .tab-btn {
-          flex:1; padding:10px 6px; border:none; cursor:pointer;
-          border-radius:6px;
-          font-family:'Inter',sans-serif; font-size:9.5px;
-          font-weight:700; letter-spacing:.13em; text-transform:uppercase;
-          transition:all .25s;
-        }
-        .tab-btn.active {
-          background:linear-gradient(135deg, ${BRAND.moss}, ${BRAND.mossDeep});
-          color:#fff;
-          box-shadow:0 3px 12px rgba(30,63,102,.35);
-        }
-        .tab-btn.inactive {
-          background:transparent;
-          color:rgba(255,255,255,.55);
-        }
-        .tab-btn.inactive:hover {
-          background:${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)"};
-          color:${BRAND.moss};
-        }
+        .card-body { padding:26px 34px 22px; }
+        .card-title { font-size:27px; font-weight:800; letter-spacing:-.015em; color:var(--title); margin-bottom:18px; }
+        .form-col { display:flex; flex-direction:column; gap:15px; }
 
-        /* ── label ── */
-        .fld-label {
-          display:block; margin-bottom:6px;
-          font-size:10px; font-weight:700;
-          letter-spacing:.12em; text-transform:uppercase;
-          color:rgba(255,255,255,.7); font-family:'Inter',sans-serif;
-        }
-        .fld-label.blue { color: rgba(255,255,255,.8); }
-
-        /* ── inputs (e-mail e senha mais transparentes, efeito vidro) ── */
+        /* ── campos em pílula rosa ── */
+        .fld-label { display:block; margin-bottom:6px; padding-left:4px; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--text); }
+        .fld-wrap { position:relative; }
+        .fld-icon { position:absolute; left:17px; top:50%; transform:translateY(-50%); color:#fff; pointer-events:none; }
         .ieq-input {
-          width:100%;
-          background:rgba(255,255,255,.08);
-          backdrop-filter:blur(8px);
-          -webkit-backdrop-filter:blur(8px);
-          border:1px solid rgba(255,255,255,.2);
-          color:#fff;
-          padding:13px 13px 13px 43px;
-          border-radius:6px; outline:none;
-          font-size:14px; font-family:'Inter',sans-serif;
-          transition:border-color .2s, box-shadow .2s, background .2s;
+          width:100%; height:46px; padding:0 48px 0 46px;
+          background:${P.pink}; color:#3A1160;
+          border:2px solid transparent; border-radius:999px; outline:none;
+          font-size:13.5px; font-weight:600; letter-spacing:.02em;
+          transition:box-shadow .2s, background .2s, border-color .2s;
         }
-        .ieq-input:focus {
-          border-color:${BRAND.goldLight};
-          box-shadow:0 0 0 3px rgba(201,169,110,.15);
-          background:rgba(255,255,255,.12);
+        .ieq-input::placeholder { color:rgba(255,255,255,.96); font-weight:500; letter-spacing:.04em; }
+        .ieq-input:focus { background:#F7A3B6; box-shadow:0 0 0 3px rgba(131,77,135,.42); }
+        .ieq-input.error { border-color:${P.red}; }
+        .ieq-input:-webkit-autofill,
+        .ieq-input:-webkit-autofill:focus {
+          -webkit-box-shadow:0 0 0 100px ${P.pink} inset; -webkit-text-fill-color:#3A1160;
         }
-        .ieq-input.blue:focus {
-          border-color:${BRAND.goldLight};
-          box-shadow:0 0 0 3px rgba(201,169,110,.15);
+        .eye {
+          position:absolute; right:8px; top:50%; transform:translateY(-50%);
+          width:34px; height:34px; border-radius:50%; border:none; background:transparent;
+          color:${P.plumDark}; cursor:pointer; display:grid; place-items:center; transition:background .2s;
         }
-        .ieq-input.error { border-color:${BRAND.red}; }
-        .ieq-input::placeholder { color:rgba(255,255,255,.4); }
+        .eye:hover { background:rgba(255,255,255,.38); }
+        .eye:focus-visible { outline:2px solid ${P.plum}; }
 
-        /* ── botão principal ── */
+        /* ── botão principal (roxo, reto como no template) ── */
         .btn-primary {
-          width:100%; padding:14px; border:none; border-radius:6px;
-          font-family:'Inter',sans-serif; font-size:11px; font-weight:700;
-          letter-spacing:.2em; text-transform:uppercase; cursor:pointer; color:#fff;
+          width:100%; height:46px; border:none; border-radius:6px;
+          background:${P.plum}; color:#fff; cursor:pointer;
           display:flex; align-items:center; justify-content:center; gap:8px;
-          transition:opacity .2s, transform .2s, box-shadow .2s;
+          font-size:13px; font-weight:700; letter-spacing:.08em;
+          transition:background .2s, transform .2s, box-shadow .2s;
         }
-        .btn-primary:hover:not(:disabled) {
-          opacity:.88; transform:translateY(-2px);
-          box-shadow:0 8px 28px rgba(30,63,102,.35);
-        }
-        .btn-primary:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
-        .btn-primary.blue:hover:not(:disabled) { box-shadow:0 8px 28px rgba(18,40,63,.35); }
+        .btn-primary:hover:not(:disabled) { background:${P.plumDark}; transform:translateY(-1px); box-shadow:0 8px 20px rgba(131,77,135,.42); }
+        .btn-primary:focus-visible { outline:3px solid ${P.pink}; outline-offset:2px; }
+        .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
 
-        /* ── caixa de erro ── */
-        .err-box {
-          display:flex; gap:10px; align-items:flex-start;
-          padding:12px 14px; border-radius:7px;
-          animation:slideDown .28s ease both;
+        .btn-ghost {
+          background:none; border:1.5px solid ${P.plum}; color:var(--link); border-radius:6px;
+          padding:10px 24px; cursor:pointer; font-size:12.5px; font-weight:700; letter-spacing:.05em;
+          transition:background .2s;
         }
+        .btn-ghost:hover { background:var(--chip); }
+        .btn-ghost:focus-visible { outline:2px solid ${P.plum}; outline-offset:2px; }
+
+        /* ── links e interruptor ── */
+        .row-between { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:2px; }
+        .link {
+          background:none; border:none; cursor:pointer; padding:4px 2px;
+          font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--link);
+          display:inline-flex; align-items:center; gap:6px;
+        }
+        .link:hover { text-decoration:underline; }
+        .link:focus-visible { outline:2px solid ${P.plum}; outline-offset:2px; border-radius:3px; }
+        .link-strong { font-size:13.5px; font-weight:800; color:var(--title); }
+        .card-links { margin-top:14px; display:flex; justify-content:center; }
+
+        .switch {
+          display:inline-flex; align-items:center; gap:9px; background:none; border:none; cursor:pointer;
+          padding:4px 0; font-size:12px; font-weight:600; color:var(--text);
+        }
+        .switch-track { width:36px; height:20px; border-radius:999px; background:var(--switch-off); position:relative; transition:background .2s; }
+        .switch-thumb { position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s; }
+        .switch[aria-checked="true"] .switch-track { background:var(--switch-on); }
+        .switch[aria-checked="true"] .switch-thumb { transform:translateX(16px); }
+        .switch:focus-visible { outline:2px solid ${P.plum}; outline-offset:2px; border-radius:6px; }
+
+        /* ── avisos, erros e sucesso ── */
+        .notice {
+          display:flex; gap:9px; align-items:flex-start; margin-bottom:18px; padding:11px 13px; border-radius:8px;
+          background:var(--notice); border:1px solid var(--notice-b);
+          font-size:12.5px; line-height:1.55; color:var(--text);
+        }
+        .notice svg { flex-shrink:0; margin-top:2px; color:var(--link); }
+        .notice strong { color:var(--title); }
+
+        .err-box { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:8px; animation:slideDown .28s ease both; }
+        .err-bad  { background:rgba(158,42,43,.09);  border:1px solid rgba(158,42,43,.38); --tone:var(--err); }
+        .err-warn { background:rgba(184,137,46,.14); border:1px solid rgba(184,137,46,.45); --tone:var(--warn); }
+        .err-ico { color:var(--tone); flex-shrink:0; margin-top:1px; }
+        .err-title { font-size:12px; font-weight:700; color:var(--tone); letter-spacing:.02em; margin-bottom:3px; }
+        .err-msg { font-size:12.5px; line-height:1.55; color:var(--text); }
         @keyframes slideDown { from{opacity:0;transform:translateY(-7px)} to{opacity:1;transform:translateY(0)} }
 
-        /* ── toggle checkbox visual ── */
+        .success {
+          text-align:center; padding:26px 20px; border-radius:10px;
+          background:var(--chip); border:1px solid var(--chip-b);
+        }
+        .success h3 { font-size:18px; font-weight:800; color:var(--title); margin:12px 0 8px; }
+        .success p  { font-size:13px; line-height:1.6; color:var(--text); margin-bottom:18px; }
+
+        /* ── escolha do que alterar ── */
         .check-row {
-          display:flex; align-items:center; gap:10px;
-          padding:11px 13px; border-radius:6px; cursor:pointer;
-          transition:background .2s, border-color .2s;
-          user-select:none;
+          display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+          padding:11px 14px; border-radius:999px; cursor:pointer;
+          background:transparent; border:1.5px solid var(--chip-b); color:var(--text);
+          font-size:12.5px; font-weight:600; transition:background .2s, border-color .2s;
         }
+        .check-row[aria-checked="true"] { background:var(--chip); border-color:${P.plum}; color:var(--title); }
+        .check-row:focus-visible { outline:2px solid ${P.plum}; outline-offset:2px; }
         .check-box {
-          width:18px; height:18px; border-radius:4px; flex-shrink:0;
-          display:flex; align-items:center; justify-content:center;
-          transition:all .2s;
+          width:18px; height:18px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
+          border:2px solid var(--chip-b); transition:all .2s;
         }
+        .check-row[aria-checked="true"] .check-box { background:${P.plum}; border-color:${P.plum}; }
+        .divider { display:flex; align-items:center; gap:12px; margin:4px 0 14px; font-size:11.5px; font-weight:700; color:var(--sub); white-space:nowrap; }
+        .divider::before, .divider::after { content:""; flex:1; height:1px; background:var(--track); }
 
-        /* ── divisor ── */
-        .divider {
-          display:flex; align-items:center; gap:12px;
-          margin:6px 0;
-        }
-        .divider::before,.divider::after {
-          content:""; flex:1; height:1px;
-          background:${dark?"rgba(30,63,102,.12)":"rgba(27,35,51,.09)"};
-        }
-
-        /* ── força senha ── */
-        .forca-bar {
-          flex:1; height:3px; border-radius:2px;
-          transition:background .25s;
-        }
-
-        /* ── animações ── */
-        @keyframes fadeUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes ieqFadeIn { to { opacity:1; } }
-        @keyframes popIn   { from{opacity:0;transform:scale(.9)} to{opacity:1;transform:scale(1)} }
-        @keyframes shakeX  { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-        @keyframes tabIn   { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
-        @keyframes pulse   { 0%,100%{opacity:.18} 50%{opacity:.06} }
-        @keyframes spin    { to{transform:rotate(360deg)} }
+        .forca-bar { flex:1; height:4px; border-radius:2px; transition:background .25s; }
 
         .tab-content { animation:tabIn .28s ease both; }
-        .pop-in      { animation:popIn .42s cubic-bezier(.16,1,.3,1) both; }
-        .shake       { animation:shakeX .4s ease both; }
-        .spin        { animation:spin 1s linear infinite; }
+        .pop-in { animation:popIn .42s cubic-bezier(.16,1,.3,1) both; }
+        .shake  { animation:shakeX .4s ease both; }
+        .spin   { animation:spin 1s linear infinite; }
+        @keyframes tabIn  { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes popIn  { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+        @keyframes shakeX { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+        @keyframes spin   { to{transform:rotate(360deg)} }
 
-        /* ── pulse ring da cruz ── */
-        .pulse-ring {
-          position:absolute; border-radius:50%;
-          border:1px solid rgba(255,255,255,.25);
-          animation:pulse 3s ease-in-out infinite;
+        /* ── rodapé (inclui o crédito exigido pela licença gratuita do template) ── */
+        .login-foot {
+          text-align:center; font-size:11px; line-height:1.7; color:rgba(255,255,255,.92);
+          padding:7px 18px; border-radius:16px;
+          background:rgba(32,10,63,.5); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
         }
+        .login-foot a { color:#fff; font-weight:600; text-decoration:underline; text-underline-offset:2px; }
 
-        /* ── tag badge ── */
-        .badge {
-          display:inline-flex; align-items:center; gap:7px;
-          background:rgba(255,255,255,.12);
-          border:1px solid rgba(255,255,255,.25);
-          border-radius:100px; padding:5px 14px;
-          font-size:11px; font-weight:700;
-          letter-spacing:.1em; text-transform:uppercase;
-          color:${BRAND.goldLight};
-          backdrop-filter:blur(8px);
+        @media (max-width:520px) {
+          .login-stage { padding-top:70px; }
+          .card-body { padding:24px 22px 20px; }
+          .card-hero { height:280px; }
         }
-        .badge-dot {
-          width:6px; height:6px; border-radius:50%;
-          background:${BRAND.goldLight};
-          animation:pulse 2s ease-in-out infinite;
-        }
-
-        /* ── responsive ── */
-        @media(max-width:520px){
-          .login-card{ padding:32px 22px 28px; }
-          .tab-btn   { font-size:8.5px; letter-spacing:.07em; }
+        @media (prefers-reduced-motion: reduce) {
+          .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { animation:none !important; transition:none !important; }
         }
       `}</style>
-            <div className="ieq-login-root">
-                {/* ── base gradiente instantânea (pinta no 1º frame, custo zero) ── */}
-                <div style={{
-                    position:"fixed", inset:0, zIndex:0,
-                    background: dark
-                        ? "linear-gradient(160deg,#1E3F66 0%,#12283F 45%,#12131C 100%)"
-                        : "linear-gradient(160deg,#4C7EB0 0%,#1E3F66 55%,#12283F 100%)",
-                }} />
 
-                {/* ── fundo desfocado + imagem nítida (entram depois, com fade) ── */}
-                {bgReady && (
-                    <>
-                        <div style={{
-                            position:"fixed", inset:0, zIndex:0,
-                            backgroundImage:"url(/40dias-milagres.png)",
-                            backgroundSize:"cover",
-                            backgroundPosition:"center",
-                            filter:"blur(38px) brightness(.7) saturate(1.1)",
-                            transform:"scale(1.15)",
-                            opacity:0,
-                            animation:"ieqFadeIn .5s ease forwards",
-                        }} />
+            <div className="ieq-login-root" style={vars}>
+                <SceneBackground dark={dark}/>
 
-                        <img
-                            src="/40dias-milagres.png"
-                            alt="40 Dias de Milagres — Avante e Sem Parar"
-                            decoding="async"
-                            style={{
-                                position:"fixed", inset:0, margin:"auto",
-                                width:"100%", height:"100%",
-                                objectFit:"contain",
-                                zIndex:0,
-                                filter:"drop-shadow(0 20px 60px rgba(0,0,0,.5))",
-                                opacity:0,
-                                animation:"ieqFadeIn .5s ease .08s forwards",
-                            }}
-                        />
-                    </>
-                )}
-
-                <div style={{
-                    position:"fixed", inset:0, zIndex:0,
-                    background: dark
-                        ? "linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.15) 50%, rgba(0,0,0,.30) 100%)"
-                        : "linear-gradient(180deg, rgba(0,0,0,.20) 0%, rgba(0,0,0,.10) 50%, rgba(0,0,0,.25) 100%)",
-                }} />
-                {/* ── grade + glows (sem a cena de igreja/nuvens) ── */}
-                <div className="noise-overlay"/>
-                <div className="glow-primary"/>
-                <div className="glow-secondary"/>
-                <div className="glow-tertiary"/>
-
-                {/* ── botão tema ── */}
-                <button
-                    onClick={toggleTheme}
-                    aria-label="Alternar tema"
-                    style={{
-                        position:"fixed", top:22, right:22, zIndex:50,
-                        background:"none", border:"none", cursor:"pointer",
-                        color:dark?BRAND.moss:BRAND.gold, transition:"color .3s",
-                    }}
-                >
-                    {dark ? <Sun size={22}/> : <Moon size={22}/>}
+                <button className="theme-btn" onClick={toggleTheme} aria-label="Alternar tema">
+                    {dark ? <Sun size={19}/> : <Moon size={19}/>}
                 </button>
 
-                {/* ════════ CARD ════════ */}
-                <div
-                    className="login-card"
-                    ref={cardRef}
-                    style={{ ...(errLogin||errCad||errAlt?{ animation:"shakeX .4s ease" }:{}) }}
-                >
-                    {/* ── topo: cruz + título ── */}
-                    <div style={{ textAlign:"center", marginBottom:28 }}>
-                        {/* cruz com anel pulsante */}
-                        <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center", marginBottom:16 }}>
-                            <div className="pulse-ring" style={{ width:88, height:88 }}/>
-                            <div className="pulse-ring" style={{ width:72, height:72, animationDelay:"1s" }}/>
-                            <div style={{
-                                width:62, height:62, borderRadius:"50%",
-                                background:"rgba(255,255,255,.15)",
-                                border:`1px solid rgba(255,255,255,.3)`,
-                                backdropFilter:"blur(8px)",
-                                display:"flex", alignItems:"center", justifyContent:"center",
-                            }}>
-                                <IEQCross size={44}/>
+                <main className="login-stage">
+                    {/* ════════ CARTÃO ════════ */}
+                    <div className={`login-card${temErro ? " shake" : ""}`} ref={cardRef}>
+
+                        {/* ── topo ilustrado ── */}
+                        <header className="card-hero">
+                            <CardArt/>
+                            <div className="hero-content">
+                                <div className="logo-ring"><IEQCross size={40}/></div>
+                                <h1>Sua Igreja,<br/>Bem Administrada.</h1>
+                                <p>Portal Administrativo · IEQ Pituaçu</p>
                             </div>
-                        </div>
+                        </header>
 
-                        {/* badge "sistema exclusivo" */}
-                        <div style={{ marginBottom:14 }}>
-              <span className="badge">
-                <span className="badge-dot"/>
-                Sistema Exclusivo IEQ
-              </span>
-                        </div>
+                        <section className="card-body">
+                            <h2 className="card-title">{titulos[aba]}</h2>
 
-                        {/* título igual à Home */}
-                        <h1 style={{
-                            fontFamily:"'Fraunces',serif",
-                            fontSize:"clamp(26px,5vw,32px)",
-                            fontWeight:700, lineHeight:1.1,
-                            letterSpacing:"-.02em",
-                            color:"#fff", margin:0,
-                            textShadow:"0 2px 16px rgba(0,0,0,.6)",
-                        }}>
-                            Sua Igreja,{" "}
-                            <span style={{ color:BRAND.goldLight, fontStyle:"italic" }}>Bem Administrada.</span>
-                        </h1>
-                        <p style={{
-                            marginTop:8, fontSize:12,
-                            color:"rgba(255,255,255,.7)", letterSpacing:".06em",
-                            fontFamily:"'Inter',sans-serif",
-                            textShadow:"0 1px 8px rgba(0,0,0,.4)",
-                        }}>
-                            Portal Administrativo · IEQ Pituaçu
-                        </p>
-                    </div>
+                            {/* ════ LOGIN ════ */}
+                            {aba === "login" && (
+                                <div className="tab-content">
+                                    <form onSubmit={handleLogin} className="form-col">
+                                        <Field id="l-email" label="E-mail" icon={Mail}>
+                                            <input id="l-email" className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
+                                                   type="email" placeholder="usuario@ieq.com"
+                                                   value={email} onChange={e=>{setEmail(e.target.value);if(errLogin)setErrLogin(null);}}
+                                                   required autoComplete="email"/>
+                                        </Field>
 
-                    {/* ── separador decorativo ── */}
-                    <div style={{
-                        display:"flex", alignItems:"center", gap:12, marginBottom:24,
-                    }}>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to right,transparent,rgba(217,174,94,.5))` }}/>
-                        <div style={{ width:6, height:6, borderRadius:"50%", background:BRAND.goldLight }}/>
-                        <div style={{ flex:1, height:1, background:`linear-gradient(to left,transparent,rgba(217,174,94,.5))` }}/>
-                    </div>
+                                        <Field id="l-senha" label="Senha" icon={Lock}>
+                                            <input id="l-senha" className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
+                                                   type={showPass?"text":"password"} placeholder="••••••••"
+                                                   value={pass} onChange={e=>{setPass(e.target.value);if(errLogin)setErrLogin(null);}}
+                                                   required autoComplete="current-password"/>
+                                        </Field>
 
-                    {/* ── tabs ── */}
-                    <div className="tabs-row">
-                        {[
-                            { key:"login",    label:"Entrar" },
-                            { key:"cadastro", label:"Solicitar Acesso" },
-                            { key:"alterar",  label:"Alterar Dados" },
-                        ].map(t => (
-                            <button
-                                key={t.key}
-                                className={`tab-btn ${aba===t.key?"active":"inactive"}`}
-                                onClick={() => trocarAba(t.key)}
-                            >{t.label}</button>
-                        ))}
-                    </div>
+                                        <div className="row-between">
+                                            <button type="button" className="switch" role="switch"
+                                                    aria-checked={showPass} onClick={()=>setShowPass(!showPass)}>
+                                                <span className="switch-track"><span className="switch-thumb"/></span>
+                                                Mostrar senha
+                                            </button>
+                                            <button type="button" className="link" onClick={()=>trocarAba("alterar")}>
+                                                Alterar e-mail ou senha
+                                            </button>
+                                        </div>
 
-                    {/* ════ ABA: LOGIN ════ */}
-                    {aba === "login" && (
-                        <div className="tab-content">
-                            <form onSubmit={handleLogin} style={{ display:"flex", flexDirection:"column", gap:16 }}>
-                                {/* campo e-mail */}
-                                <div>
-                                    <label className="fld-label">E-mail</label>
-                                    <div style={{ position:"relative" }}>
-                                        <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                        <input
-                                            className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
-                                            type="email" placeholder="usuario@ieq.com"
-                                            value={email} onChange={e=>{setEmail(e.target.value);if(errLogin)setErrLogin(null);}}
-                                            required autoComplete="email"
-                                        />
-                                    </div>
-                                </div>
+                                        <ErrBox e={errLogin}/>
 
-                                {/* campo senha */}
-                                <div>
-                                    <label className="fld-label">Senha</label>
-                                    <div style={{ position:"relative" }}>
-                                        <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                        <input
-                                            className={`ieq-input${errLogin?.tipo==="senha"?" error":""}`}
-                                            type={showPass?"text":"password"} placeholder="••••••••"
-                                            value={pass} onChange={e=>{setPass(e.target.value);if(errLogin)setErrLogin(null);}}
-                                            required autoComplete="current-password"
-                                        />
-                                        <button type="button" onClick={()=>setShowPass(!showPass)}
-                                                style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
-                                            <EyeIcon open={showPass}/>
+                                        <button type="submit" className="btn-primary" disabled={loadLogin}>
+                                            {loadLogin ? <><Loader2 size={16} className="spin"/> Verificando...</> : "Acessar sistema"}
+                                        </button>
+                                    </form>
+
+                                    <div className="card-links">
+                                        <button type="button" className="link link-strong" onClick={()=>trocarAba("cadastro")}>
+                                            Solicitar acesso
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* caixa de erro login */}
-                                {errLogin && (
-                                    <div className="err-box" role="alert"
-                                         style={{ background:errBg(errLogin), border:`1px solid ${errBorder(errLogin)}` }}>
-                                        <span style={{ color:errColor(errLogin), flexShrink:0, marginTop:1 }}><ErrIcon t={errLogin.tipo}/></span>
-                                        <div>
-                                            <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errLogin), letterSpacing:".05em", fontFamily:"'Inter',sans-serif", marginBottom:3 }}>{errLogin.titulo}</p>
-                                            <p style={{ fontSize:12.5, color:"rgba(255,255,255,.65)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>{errLogin.msg}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* botão */}
-                                <button type="submit" className="btn-primary" disabled={loadLogin}
-                                        style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.mossDeep},${BRAND.moss})` }}>
-                                    {loadLogin
-                                        ? <><Loader2 size={16} className="spin"/> Verificando...</>
-                                        : "Acessar Sistema"}
-                                </button>
-                            </form>
-                        </div>
-                    )}
-
-                    {/* ════ ABA: CADASTRO ════ */}
-                    {aba === "cadastro" && (
-                        <div className="tab-content">
-                            {/* aviso roxo */}
-                            <div style={{
-                                marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:"rgba(255,255,255,.08)",
-                                border:"1px solid rgba(255,255,255,.15)",
-                                backdropFilter:"blur(6px)",
-                                display:"flex", gap:9, alignItems:"flex-start",
-                            }}>
-                <span style={{ color:BRAND.goldLight, flexShrink:0, marginTop:2 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                </span>
-                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>
-                                    Exclusivo para <strong style={{ color:"#fff" }}>líderes de célula</strong>. Após o envio, aguarde a aprovação do administrador para acessar o sistema.
-                                </p>
-                            </div>
-
-                            {/* sucesso cadastro */}
-                            {okCad ? (
-                                <div className="pop-in" style={{
-                                    textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:"rgba(255,255,255,.08)",
-                                    border:"1px solid rgba(255,255,255,.15)",
-                                    backdropFilter:"blur(6px)",
-                                }}>
-                                    <CheckCircle2 size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
-                                    <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:700, color:BRAND.goldLight, marginBottom:8 }}>Solicitação Enviada!</p>
-                                    <p style={{ fontSize:13, color:"rgba(255,255,255,.6)", lineHeight:1.6, fontFamily:"'Inter',sans-serif", marginBottom:18 }}>
-                                        Sua solicitação foi recebida. O administrador irá analisar e liberar seu acesso em breve.
-                                    </p>
-                                    <button onClick={()=>trocarAba("login")} style={{
-                                        background:"none", border:`1px solid rgba(255,255,255,.3)`, color:"#fff",
-                                        borderRadius:6, padding:"9px 22px", cursor:"pointer",
-                                        fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".12em",
-                                    }}>IR PARA LOGIN</button>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleCad} style={{ display:"flex", flexDirection:"column", gap:13 }}>
-                                    {/* nome */}
-                                    <div>
-                                        <label className="fld-label">Nome Completo</label>
-                                        <div style={{ position:"relative" }}>
-                                            <User size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                            <input className="ieq-input" type="text" placeholder="Seu nome completo"
-                                                   value={cNome} onChange={e=>{setCNome(e.target.value);if(errCad)setErrCad(null);}} required autoComplete="name"/>
-                                        </div>
-                                    </div>
-                                    {/* email */}
-                                    <div>
-                                        <label className="fld-label">E-mail</label>
-                                        <div style={{ position:"relative" }}>
-                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                            <input className="ieq-input" type="email" placeholder="seu@email.com"
-                                                   value={cEmail} onChange={e=>{setCEmail(e.target.value);if(errCad)setErrCad(null);}} required autoComplete="email"/>
-                                        </div>
-                                    </div>
-                                    {/* senha */}
-                                    <div>
-                                        <label className="fld-label">Senha</label>
-                                        <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                            <input className={`ieq-input${errCad?.tipo==="senha"?" error":""}`}
-                                                   type={showCP?"text":"password"} placeholder="Mínimo 6 caracteres"
-                                                   value={cSenha} onChange={e=>{setCSenha(e.target.value);if(errCad)setErrCad(null);}} required/>
-                                            <button type="button" onClick={()=>setShowCP(!showCP)}
-                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
-                                                <EyeIcon open={showCP}/>
-                                            </button>
-                                        </div>
-                                        {cSenha.length > 0 && (
-                                            <div style={{ marginTop:7 }}>
-                                                <div style={{ display:"flex", gap:4, marginBottom:4 }}>
-                                                    {[1,2,3,4].map(i => (
-                                                        <div key={i} className="forca-bar"
-                                                             style={{ background:i<=fc?forcaColor[fc]:(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.07)") }}/>
-                                                    ))}
-                                                </div>
-                                                <p style={{ fontSize:10, color:forcaColor[fc], fontFamily:"'Inter',sans-serif", fontWeight:700, letterSpacing:".07em" }}>{forcaLabel[fc]}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    {/* confirmar */}
-                                    <div>
-                                        <label className="fld-label">Confirmar Senha</label>
-                                        <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                            <input className={`ieq-input${cConf.length>0&&cSenha!==cConf?" error":""}`}
-                                                   type={showCP?"text":"password"} placeholder="Repita a senha"
-                                                   value={cConf} onChange={e=>{setCConf(e.target.value);if(errCad)setErrCad(null);}} required/>
-                                        </div>
-                                        {cConf.length > 0 && (
-                                            <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Inter',sans-serif", color:cSenha===cConf?"#22c55e":BRAND.red }}>
-                                                {cSenha===cConf?"✓ Senhas conferem":"✗ Senhas não conferem"}
-                                            </p>
-                                        )}
-                                    </div>
-                                    {/* erro */}
-                                    {errCad && (
-                                        <div className="err-box" role="alert"
-                                             style={{ background:errBg(errCad), border:`1px solid ${errBorder(errCad)}` }}>
-                                            <span style={{ color:errColor(errCad), flexShrink:0, marginTop:1 }}><ErrIcon t={errCad.tipo}/></span>
-                                            <div>
-                                                <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errCad), letterSpacing:".05em", fontFamily:"'Inter',sans-serif", marginBottom:3 }}>{errCad.titulo}</p>
-                                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>{errCad.msg}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {/* botão */}
-                                    <button type="submit" className="btn-primary blue" disabled={loadCad}
-                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.mossDeep},${BRAND.moss})` }}>
-                                        {loadCad ? <><Loader2 size={16} className="spin"/> Enviando...</> : "Solicitar Acesso"}
-                                    </button>
-                                </form>
                             )}
-                        </div>
-                    )}
 
-                    {/* ════ ABA: ALTERAR DADOS ════ */}
-                    {aba === "alterar" && (
-                        <div className="tab-content">
-                            {/* aviso */}
-                            <div style={{
-                                marginBottom:18, padding:"11px 13px", borderRadius:7,
-                                background:dark?"rgba(30,63,102,.08)":"rgba(30,63,102,.09)",
-                                border:`1px solid ${dark?"rgba(30,63,102,.25)":"rgba(30,63,102,.28)"}`,
-                                display:"flex", gap:9, alignItems:"flex-start",
-                            }}>
-                <span style={{ color:BRAND.moss, flexShrink:0, marginTop:2 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                </span>
-                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>
-                                    As alterações ficam <strong style={{ color:txt }}>pendentes de aprovação</strong> do administrador antes de serem aplicadas.
-                                </p>
-                            </div>
-
-                            {/* sucesso alterar */}
-                            {okAlt ? (
-                                <div className="pop-in" style={{
-                                    textAlign:"center", padding:"28px 20px", borderRadius:8,
-                                    background:dark?"rgba(30,63,102,.1)":"rgba(30,63,102,.06)",
-                                    border:`1px solid ${dark?"rgba(30,63,102,.32)":"rgba(30,63,102,.18)"}`,
-                                }}>
-                                    <ShieldCheck size={42} color="#22c55e" strokeWidth={1.5} style={{ marginBottom:12 }}/>
-                                    <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:700, color:BRAND.moss, marginBottom:8 }}>Solicitação Enviada!</p>
-                                    <p style={{ fontSize:13, color:sub, lineHeight:1.6, fontFamily:"'Inter',sans-serif", marginBottom:18 }}>
-                                        O administrador irá analisar e aplicar as mudanças em breve.
-                                    </p>
-                                    <button onClick={()=>trocarAba("login")} style={{
-                                        background:"none", border:`1px solid ${BRAND.moss}`, color:BRAND.moss,
-                                        borderRadius:6, padding:"9px 22px", cursor:"pointer",
-                                        fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:".12em",
-                                    }}>IR PARA LOGIN</button>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleAlt} style={{ display:"flex", flexDirection:"column", gap:0 }}>
-                                    {/* e-mail atual */}
-                                    <div style={{ marginBottom:14 }}>
-                                        <label className="fld-label">Seu E-mail <span style={{ color:BRAND.red }}>*</span></label>
-                                        <div style={{ position:"relative" }}>
-                                            <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                            <input className={`ieq-input${errAlt&&(errAlt.titulo==="E-mail obrigatório"||errAlt.titulo==="E-mail não encontrado")?" error":""}`}
-                                                   type="email" placeholder="seu@email.com"
-                                                   value={aEmail} onChange={e=>{setAEmail(e.target.value);if(errAlt)setErrAlt(null);}} required autoComplete="email"/>
-                                        </div>
+                            {/* ════ SOLICITAR ACESSO ════ */}
+                            {aba === "cadastro" && (
+                                <div className="tab-content">
+                                    <div className="notice">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        <p>Exclusivo para <strong>líderes de célula</strong>. Após o envio, aguarde a aprovação do administrador para acessar o sistema.</p>
                                     </div>
-                                    {/* senha atual */}
-                                    <div style={{ marginBottom:18 }}>
-                                        <label className="fld-label">Senha Atual <span style={{ color:BRAND.red }}>*</span></label>
-                                        <div style={{ position:"relative" }}>
-                                            <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                            <input className={`ieq-input${errAlt?.tipo==="senha"?" error":""}`}
-                                                   type={showAA?"text":"password"} placeholder="Confirme sua identidade"
-                                                   value={aAtual} onChange={e=>{setAAtual(e.target.value);if(errAlt)setErrAlt(null);}} required autoComplete="current-password"/>
-                                            <button type="button" onClick={()=>setShowAA(!showAA)}
-                                                    style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
-                                                <EyeIcon open={showAA}/>
+
+                                    {okCad ? (
+                                        <div className="pop-in success">
+                                            <CheckCircle2 size={42} color="#3E9B5F" strokeWidth={1.6}/>
+                                            <h3>Solicitação enviada!</h3>
+                                            <p>Sua solicitação foi recebida. O administrador irá analisar e liberar seu acesso em breve.</p>
+                                            <button type="button" className="btn-ghost" onClick={()=>trocarAba("login")}>Ir para o login</button>
+                                        </div>
+                                    ) : (
+                                        <form onSubmit={handleCad} className="form-col">
+                                            <Field id="c-nome" label="Nome completo" icon={User}>
+                                                <input id="c-nome" className="ieq-input" type="text" placeholder="Seu nome completo"
+                                                       value={cNome} onChange={e=>{setCNome(e.target.value);if(errCad)setErrCad(null);}}
+                                                       required autoComplete="name"/>
+                                            </Field>
+
+                                            <Field id="c-email" label="E-mail" icon={Mail}>
+                                                <input id="c-email" className="ieq-input" type="email" placeholder="seu@email.com"
+                                                       value={cEmail} onChange={e=>{setCEmail(e.target.value);if(errCad)setErrCad(null);}}
+                                                       required autoComplete="email"/>
+                                            </Field>
+
+                                            <div>
+                                                <Field id="c-senha" label="Senha" icon={Lock}>
+                                                    <input id="c-senha" className={`ieq-input${errCad?.tipo==="senha"?" error":""}`}
+                                                           type={showCP?"text":"password"} placeholder="Mínimo 6 caracteres"
+                                                           value={cSenha} onChange={e=>{setCSenha(e.target.value);if(errCad)setErrCad(null);}}
+                                                           required autoComplete="new-password"/>
+                                                    <EyeBtn show={showCP} onClick={()=>setShowCP(!showCP)}/>
+                                                </Field>
+                                                <Forca senha={cSenha}/>
+                                            </div>
+
+                                            <div>
+                                                <Field id="c-conf" label="Confirmar senha" icon={Lock}>
+                                                    <input id="c-conf" className={`ieq-input${cConf.length>0&&cSenha!==cConf?" error":""}`}
+                                                           type={showCP?"text":"password"} placeholder="Repita a senha"
+                                                           value={cConf} onChange={e=>{setCConf(e.target.value);if(errCad)setErrCad(null);}}
+                                                           required autoComplete="new-password"/>
+                                                </Field>
+                                                <Confere a={cSenha} b={cConf}/>
+                                            </div>
+
+                                            <ErrBox e={errCad}/>
+
+                                            <button type="submit" className="btn-primary" disabled={loadCad}>
+                                                {loadCad ? <><Loader2 size={16} className="spin"/> Enviando...</> : "Enviar solicitação"}
                                             </button>
-                                        </div>
-                                    </div>
-
-                                    {/* divisor */}
-                                    <div className="divider" style={{ marginBottom:14 }}>
-                    <span style={{ fontSize:9.5, fontWeight:700, letterSpacing:".13em", color:sub, whiteSpace:"nowrap", fontFamily:"'Inter',sans-serif" }}>
-                      O QUE DESEJA ALTERAR?
-                    </span>
-                                    </div>
-
-                                    {/* toggles */}
-                                    <div style={{ display:"flex", flexDirection:"column", gap:7, marginBottom:18 }}>
-                                        {[
-                                            { key:"email", label:"Alterar E-mail", state:altEmail, set:setAltEmail },
-                                            { key:"senha", label:"Alterar Senha",  state:altSenha, set:setAltSenha },
-                                        ].map(({ key, label, state, set }) => (
-                                            <div key={key} className="check-row"
-                                                 onClick={()=>{set(!state);setErrAlt(null);}}
-                                                 style={{
-                                                     background: state
-                                                         ? "rgba(255,255,255,.1)"
-                                                         : "rgba(255,255,255,.04)",
-                                                     border:`1px solid ${state?"rgba(255,255,255,.3)":"rgba(255,255,255,.1)"}`,
-                                                 }}
-                                            >
-                                                <div className="check-box"
-                                                     style={{
-                                                         background:state?BRAND.moss:"transparent",
-                                                         border:`2px solid ${state?BRAND.moss:"rgba(255,255,255,.25)"}`,
-                                                     }}>
-                                                    {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
-                                                </div>
-                                                {key==="email"
-                                                    ? <Mail size={14} color={state?"#fff":"rgba(255,255,255,.4)"} style={{ flexShrink:0 }}/>
-                                                    : <Lock size={14} color={state?"#fff":"rgba(255,255,255,.4)"} style={{ flexShrink:0 }}/>}
-                                                <span style={{ fontSize:11, fontWeight:700, letterSpacing:".1em", fontFamily:"'Inter',sans-serif", color:state?"#fff":"rgba(255,255,255,.5)" }}>{label}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* novo e-mail */}
-                                    {altEmail && (
-                                        <div style={{ marginBottom:14, animation:"slideDown .25s ease both" }}>
-                                            <label className="fld-label blue">Novo E-mail</label>
-                                            <div style={{ position:"relative" }}>
-                                                <Mail size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                                <input className="ieq-input blue" type="email" placeholder="novo@email.com"
-                                                       value={aEmailN} onChange={e=>{setAEmailN(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="email"/>
-                                            </div>
-                                        </div>
+                                        </form>
                                     )}
 
-                                    {/* nova senha */}
-                                    {altSenha && (
-                                        <div style={{ display:"flex", flexDirection:"column", gap:13, marginBottom:14, animation:"slideDown .25s ease both" }}>
-                                            <div>
-                                                <label className="fld-label blue">Nova Senha</label>
-                                                <div style={{ position:"relative" }}>
-                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                                    <input className="ieq-input blue" type={showAN?"text":"password"} placeholder="Mínimo 6 caracteres"
-                                                           value={aNova} onChange={e=>{setANova(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="new-password"/>
-                                                    <button type="button" onClick={()=>setShowAN(!showAN)}
-                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
-                                                        <EyeIcon open={showAN}/>
+                                    <div className="card-links">
+                                        <button type="button" className="link" onClick={()=>trocarAba("login")}>
+                                            <ArrowLeft size={14}/> Voltar ao login
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ════ ALTERAR DADOS ════ */}
+                            {aba === "alterar" && (
+                                <div className="tab-content">
+                                    <div className="notice">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        <p>As alterações ficam <strong>pendentes de aprovação</strong> do administrador antes de serem aplicadas.</p>
+                                    </div>
+
+                                    {okAlt ? (
+                                        <div className="pop-in success">
+                                            <ShieldCheck size={42} color="#3E9B5F" strokeWidth={1.6}/>
+                                            <h3>Solicitação enviada!</h3>
+                                            <p>O administrador irá analisar e aplicar as mudanças em breve.</p>
+                                            <button type="button" className="btn-ghost" onClick={()=>trocarAba("login")}>Ir para o login</button>
+                                        </div>
+                                    ) : (
+                                        <form onSubmit={handleAlt} className="form-col">
+                                            <Field id="a-email" label="Seu e-mail" icon={Mail} required>
+                                                <input id="a-email"
+                                                       className={`ieq-input${errAlt&&(errAlt.titulo==="E-mail obrigatório"||errAlt.titulo==="E-mail não encontrado")?" error":""}`}
+                                                       type="email" placeholder="seu@email.com"
+                                                       value={aEmail} onChange={e=>{setAEmail(e.target.value);if(errAlt)setErrAlt(null);}}
+                                                       required autoComplete="email"/>
+                                            </Field>
+
+                                            <Field id="a-atual" label="Senha atual" icon={Lock} required>
+                                                <input id="a-atual" className={`ieq-input${errAlt?.tipo==="senha"?" error":""}`}
+                                                       type={showAA?"text":"password"} placeholder="Confirme sua identidade"
+                                                       value={aAtual} onChange={e=>{setAAtual(e.target.value);if(errAlt)setErrAlt(null);}}
+                                                       required autoComplete="current-password"/>
+                                                <EyeBtn show={showAA} onClick={()=>setShowAA(!showAA)}/>
+                                            </Field>
+
+                                            <div className="divider">O que deseja alterar?</div>
+
+                                            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                                                {[
+                                                    { key:"email", label:"Alterar e-mail", state:altEmail, set:setAltEmail, Icon:Mail },
+                                                    { key:"senha", label:"Alterar senha",  state:altSenha, set:setAltSenha, Icon:Lock },
+                                                ].map(({ key, label, state, set, Icon }) => (
+                                                    <button key={key} type="button" role="checkbox" aria-checked={state}
+                                                            className="check-row"
+                                                            onClick={()=>{set(!state);setErrAlt(null);}}>
+                                                        <span className="check-box">
+                                                            {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                        </span>
+                                                        <Icon size={14} style={{ flexShrink:0 }}/>
+                                                        {label}
                                                     </button>
+                                                ))}
+                                            </div>
+
+                                            {altEmail && (
+                                                <div style={{ animation:"slideDown .25s ease both" }}>
+                                                    <Field id="a-novo-email" label="Novo e-mail" icon={Mail}>
+                                                        <input id="a-novo-email" className="ieq-input" type="email" placeholder="novo@email.com"
+                                                               value={aEmailN} onChange={e=>{setAEmailN(e.target.value);if(errAlt)setErrAlt(null);}}
+                                                               autoComplete="email"/>
+                                                    </Field>
                                                 </div>
-                                                {aNova.length > 0 && (
-                                                    <div style={{ marginTop:7 }}>
-                                                        <div style={{ display:"flex", gap:4, marginBottom:4 }}>
-                                                            {[1,2,3,4].map(i => (
-                                                                <div key={i} className="forca-bar"
-                                                                     style={{ background:i<=fa?forcaColor[fa]:(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.07)") }}/>
-                                                            ))}
-                                                        </div>
-                                                        <p style={{ fontSize:10, color:forcaColor[fa], fontFamily:"'Inter',sans-serif", fontWeight:700, letterSpacing:".07em" }}>{forcaLabel[fa]}</p>
+                                            )}
+
+                                            {altSenha && (
+                                                <div style={{ display:"flex", flexDirection:"column", gap:15, animation:"slideDown .25s ease both" }}>
+                                                    <div>
+                                                        <Field id="a-nova" label="Nova senha" icon={Lock}>
+                                                            <input id="a-nova" className="ieq-input" type={showAN?"text":"password"} placeholder="Mínimo 6 caracteres"
+                                                                   value={aNova} onChange={e=>{setANova(e.target.value);if(errAlt)setErrAlt(null);}}
+                                                                   autoComplete="new-password"/>
+                                                            <EyeBtn show={showAN} onClick={()=>setShowAN(!showAN)}/>
+                                                        </Field>
+                                                        <Forca senha={aNova}/>
                                                     </div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <label className="fld-label blue">Confirmar Nova Senha</label>
-                                                <div style={{ position:"relative" }}>
-                                                    <Lock size={15} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"rgba(255,255,255,.5)", opacity:.7 }}/>
-                                                    <input className={`ieq-input blue${aConf.length>0&&aNova!==aConf?" error":""}`}
-                                                           type={showAC?"text":"password"} placeholder="Repita a nova senha"
-                                                           value={aConf} onChange={e=>{setAConf(e.target.value);if(errAlt)setErrAlt(null);}} autoComplete="new-password"/>
-                                                    <button type="button" onClick={()=>setShowAC(!showAC)}
-                                                            style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:BRAND.moss }}>
-                                                        <EyeIcon open={showAC}/>
-                                                    </button>
+                                                    <div>
+                                                        <Field id="a-conf" label="Confirmar nova senha" icon={Lock}>
+                                                            <input id="a-conf" className={`ieq-input${aConf.length>0&&aNova!==aConf?" error":""}`}
+                                                                   type={showAC?"text":"password"} placeholder="Repita a nova senha"
+                                                                   value={aConf} onChange={e=>{setAConf(e.target.value);if(errAlt)setErrAlt(null);}}
+                                                                   autoComplete="new-password"/>
+                                                            <EyeBtn show={showAC} onClick={()=>setShowAC(!showAC)}/>
+                                                        </Field>
+                                                        <Confere a={aNova} b={aConf}/>
+                                                    </div>
                                                 </div>
-                                                {aConf.length > 0 && (
-                                                    <p style={{ fontSize:10.5, marginTop:4, fontWeight:700, fontFamily:"'Inter',sans-serif", color:aNova===aConf?"#22c55e":BRAND.red }}>
-                                                        {aNova===aConf?"✓ Senhas conferem":"✗ Senhas não conferem"}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
+                                            )}
+
+                                            <ErrBox e={errAlt}/>
+
+                                            <button type="submit" className="btn-primary" disabled={loadAlt||(!altEmail&&!altSenha)}>
+                                                {loadAlt
+                                                    ? <><Loader2 size={16} className="spin"/> Enviando...</>
+                                                    : <><CheckCircle2 size={15}/> Enviar solicitação</>}
+                                            </button>
+                                        </form>
                                     )}
 
-                                    {/* erro alterar */}
-                                    {errAlt && (
-                                        <div className="err-box" role="alert" style={{ background:errBg(errAlt), border:`1px solid ${errBorder(errAlt)}`, marginBottom:12 }}>
-                                            <span style={{ color:errColor(errAlt), flexShrink:0, marginTop:1 }}><ErrIcon t={errAlt.tipo}/></span>
-                                            <div>
-                                                <p style={{ fontSize:11.5, fontWeight:700, color:errColor(errAlt), letterSpacing:".05em", fontFamily:"'Inter',sans-serif", marginBottom:3 }}>{errAlt.titulo}</p>
-                                                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.6)", lineHeight:1.55, fontFamily:"'Inter',sans-serif" }}>{errAlt.msg}</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* botão */}
-                                    <button type="submit" className="btn-primary" disabled={loadAlt||(!altEmail&&!altSenha)}
-                                            style={{ marginTop:4, background:`linear-gradient(135deg,${BRAND.mossDeep},${BRAND.moss})` }}>
-                                        {loadAlt
-                                            ? <><Loader2 size={16} className="spin"/> Enviando...</>
-                                            : <><CheckCircle2 size={15}/> Enviar Solicitação</>}
-                                    </button>
-                                </form>
+                                    <div className="card-links">
+                                        <button type="button" className="link" onClick={()=>trocarAba("login")}>
+                                            <ArrowLeft size={14}/> Voltar ao login
+                                        </button>
+                                    </div>
+                                </div>
                             )}
-                        </div>
-                    )}
+                        </section>
+                    </div>
 
                     {/* ── rodapé ── */}
-                    <p style={{
-                        marginTop:28, textAlign:"center",
-                        fontSize:10, letterSpacing:".15em", fontFamily:"'Inter',sans-serif",
-                        color:dark?"rgba(243,241,234,.15)":"rgba(27,35,51,.18)",
-                        textTransform:"uppercase",
-                    }}>
+                    <p className="login-foot">
                         © {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico
+                        {" · "}
+                        <a href="http://www.freepik.com" target="_blank" rel="noopener noreferrer">Designed by Freepik</a>
                     </p>
-                </div>
+                </main>
             </div>
         </>
     );
