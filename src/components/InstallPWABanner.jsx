@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Download, Share, X, PlusSquare } from "lucide-react";
+import { AURA, theme } from "../pages/heroTheme";
 
 const DISMISS_KEY = "pwa-install-banner-dismissed-at";
 const DISMISS_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  dark:      "#12121A",
-};
 
 function isIOS() {
   return /iPhone|iPad|iPod/i.test(navigator.userAgent);

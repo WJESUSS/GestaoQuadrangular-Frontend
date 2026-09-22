@@ -26,7 +26,7 @@ const textoDecisao = {
 
 function makeStyles(t, isDark) {
   return `
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
     * { box-sizing: border-box; }
 
     @keyframes tv-spin   { to { transform: rotate(360deg); } }
@@ -39,7 +39,7 @@ function makeStyles(t, isDark) {
        que já fornece o fundo em gradiente e o brilho (.dl-glow) da página.
        Duplicar isso aqui criava o efeito de "tela dentro de tela". ── */
     .tv-root {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       color: ${t.text};
       position: relative;
       overflow-x: hidden;
@@ -64,15 +64,15 @@ function makeStyles(t, isDark) {
     }
     .tv-hero::after {
       content:''; position:absolute; bottom:-20px; left:20%; width:80px; height:80px;
-      border-radius:50%; background:rgba(185,140,255,.06); pointer-events:none;
+      border-radius:50%; background:rgba(184,137,46,.06); pointer-events:none;
     }
     .tv-hero-icon {
-      width:52px; height:52px; border-radius:16px; background:rgba(255,255,255,.12);
+      width:52px; height:52px; border-radius:16px; background:rgba(217,174,94,.16);
       display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;
-      backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15); position:relative; z-index:1;
+      backdrop-filter:blur(6px); border:1px solid rgba(217,174,94,.4); position:relative; z-index:1;
     }
     .tv-hero-title {
-      font-family:'Roboto',sans-serif; font-size:22px; font-weight:600; color:#fff;
+      font-family:'Inter',sans-serif; font-size:22px; font-weight:600; color:#fff;
       margin:0 0 4px; position:relative; z-index:1;
     }
     .tv-hero-sub { font-size:12px; color:rgba(255,255,255,.55); margin:0; position:relative; z-index:1; }
@@ -86,7 +86,7 @@ function makeStyles(t, isDark) {
     .tv-summary-icon {
       width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
     }
-    .tv-summary-value { font-family:'Roboto',sans-serif; font-size:24px; font-weight:700; color:${AURA.gold}; margin:0 0 2px; }
+    .tv-summary-value { font-family:'Inter',sans-serif; font-size:24px; font-weight:700; color:${AURA.gold}; margin:0 0 2px; }
     .tv-summary-label { font-size:10px; color:${t.textMuted}; margin:0; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
 
     /* ── Search ── */
@@ -100,7 +100,7 @@ function makeStyles(t, isDark) {
     .tv-search-input {
       width:100%; padding:13px 16px 13px 48px; border-radius:14px;
       background:${t.bgEl}; border:1px solid ${t.border};
-      color:${t.text}; font-family:'Roboto',sans-serif; font-size:13px;
+      color:${t.text}; font-family:'Inter',sans-serif; font-size:13px;
       outline:none; transition:border-color .2s;
     }
     .tv-search-input:focus { border-color:${AURA.gold}; }
@@ -119,10 +119,10 @@ function makeStyles(t, isDark) {
       border-radius:16px; border:none; cursor:pointer;
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       margin-bottom:20px; transition:all .3s cubic-bezier(.4,0,.2,1);
-      box-shadow:0 8px 24px rgba(155,92,255,.22);
+      box-shadow:0 8px 24px rgba(15,42,74,.22);
     }
     .tv-btn-novo:hover {
-      transform:translateY(-2px); box-shadow:0 12px 32px rgba(155,92,255,.32);
+      transform:translateY(-2px); box-shadow:0 12px 32px rgba(15,42,74,.32);
       filter:brightness(1.1);
     }
     .tv-btn-novo:active { transform:translateY(0); }
@@ -130,10 +130,10 @@ function makeStyles(t, isDark) {
       width:48px; height:48px; border-radius:14px; flex-shrink:0;
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       display:flex; align-items:center; justify-content:center; color:#fff;
-      box-shadow:0 4px 14px rgba(155,92,255,.28);
+      box-shadow:0 4px 14px rgba(15,42,74,.28);
     }
     .tv-btn-novo-title {
-      display:block; font-family:'Roboto',sans-serif; font-size:15px; font-weight:600;
+      display:block; font-family:'Inter',sans-serif; font-size:15px; font-weight:600;
       color:#fff; margin:0 0 2px;
     }
     .tv-btn-novo-sub {
@@ -159,7 +159,7 @@ function makeStyles(t, isDark) {
       position:relative;
     }
     .tv-list-item:last-child { border-bottom:none; }
-    .tv-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(155,92,255,.05)"}; }
+    .tv-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(15,42,74,.05)"}; }
     .tv-list-item.has-decision::before {
       content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0;
       background:linear-gradient(180deg, ${AURA.green}, ${AURA.moss});
@@ -169,7 +169,7 @@ function makeStyles(t, isDark) {
       width:40px; height:40px; border-radius:12px; flex-shrink:0;
       background:linear-gradient(135deg, ${AURA.redDark}, ${AURA.blueDark});
       display:flex; align-items:center; justify-content:center; color:#fff;
-      font-family:'Roboto',sans-serif; font-weight:600; font-size:16px;
+      font-family:'Inter',sans-serif; font-weight:600; font-size:16px;
     }
     .tv-list-avatar.decided {
       background:linear-gradient(135deg, ${AURA.greenDark}, ${AURA.green});
@@ -177,7 +177,7 @@ function makeStyles(t, isDark) {
 
     .tv-list-body { flex:1; min-width:0; }
     .tv-list-name {
-      font-family:'Roboto',sans-serif; font-size:14px; font-weight:600; color:${t.text};
+      font-family:'Inter',sans-serif; font-size:14px; font-weight:600; color:${t.text};
       margin:0 0 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .tv-list-meta {
@@ -189,18 +189,18 @@ function makeStyles(t, isDark) {
     .tv-list-origin {
       font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
       padding:3px 8px; border-radius:100px;
-      background:rgba(185,140,255,.08); color:${AURA.gold}; border:1px solid rgba(185,140,255,.15);
+      background:rgba(184,137,46,.08); color:${AURA.gold}; border:1px solid rgba(184,137,46,.15);
     }
     .tv-list-decision {
       font-size:10px; font-weight:600; padding:3px 8px; border-radius:100px;
     }
     .tv-list-decision.aceitou { background:rgba(74,124,92,.12); color:${AURA.green}; }
     .tv-list-decision.reconciliou { background:rgba(76,126,176,.12); color:${AURA.mossLight}; }
-    .tv-list-decision.batismo { background:rgba(185,140,255,.12); color:${AURA.goldLight}; }
+    .tv-list-decision.batismo { background:rgba(184,137,46,.12); color:${AURA.goldLight}; }
 
     .tv-list-edit {
       width:32px; height:32px; border-radius:9px; flex-shrink:0;
-      background:rgba(185,140,255,.08); border:1px solid rgba(185,140,255,.2);
+      background:rgba(184,137,46,.08); border:1px solid rgba(184,137,46,.2);
       color:${AURA.gold}; cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:all .2s;
     }
@@ -232,12 +232,12 @@ function makeStyles(t, isDark) {
     .tv-modal-hero-top { display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
     .tv-modal-hero-left { display:flex; align-items:center; gap:12px; }
     .tv-modal-hero-icon {
-      width:42px; height:42px; border-radius:13px; background:rgba(255,255,255,.12);
+      width:42px; height:42px; border-radius:13px; background:rgba(217,174,94,.16);
       display:flex; align-items:center; justify-content:center;
-      backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15);
+      backdrop-filter:blur(6px); border:1px solid rgba(217,174,94,.4);
     }
     .tv-modal-hero-title {
-      font-family:'Roboto',sans-serif; font-size:18px; font-weight:600; color:#fff; margin:0;
+      font-family:'Inter',sans-serif; font-size:18px; font-weight:600; color:#fff; margin:0;
     }
     .tv-modal-hero-sub { font-size:11px; color:rgba(255,255,255,.5); margin:2px 0 0; }
     .tv-modal-close {
@@ -257,7 +257,7 @@ function makeStyles(t, isDark) {
     .tv-modal-section-label::after { content:''; flex:1; height:1px; background:${t.border}; }
 
     .tv-modal-card {
-      padding:16px; border-radius:14px; background:${isDark?"rgba(255,255,255,.02)":"rgba(155,92,255,.04)"};
+      padding:16px; border-radius:14px; background:${isDark?"rgba(255,255,255,.02)":"rgba(15,42,74,.04)"};
       border:1px solid ${t.border};
     }
 
@@ -270,7 +270,7 @@ function makeStyles(t, isDark) {
     .tv-field input, .tv-field select {
       width:100%; padding:11px 14px; border-radius:12px; background:${t.bgInput};
       border:1px solid ${t.borderInput}; color:${t.text}; font-size:13px;
-      font-family:'Roboto',sans-serif; outline:none; transition:border-color .2s;
+      font-family:'Inter',sans-serif; outline:none; transition:border-color .2s;
     }
     .tv-field select option { background:${isDark?"#0A0A0F":"#fff"}; color:${t.text}; }
     .tv-field input:focus, .tv-field select:focus { border-color:${AURA.gold}; }
@@ -279,7 +279,7 @@ function makeStyles(t, isDark) {
     .tv-origin-grid { display:flex; flex-wrap:wrap; gap:8px; }
     .tv-origin-pill {
       padding:8px 14px; border-radius:100px; cursor:pointer;
-      font-family:'Roboto',sans-serif; font-size:11px; font-weight:600; letter-spacing:.04em;
+      font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:.04em;
       border:1px solid ${t.border}; background:transparent; color:${t.textSec};
       transition:all .2s; display:inline-flex; align-items:center; gap:5px;
     }
@@ -298,9 +298,9 @@ function makeStyles(t, isDark) {
       width:100%; display:flex; align-items:center; justify-content:center; gap:7px;
       padding:14px; border-radius:100px; border:none; cursor:pointer;
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
-      color:#fff; font-family:'Roboto',sans-serif;
+      color:#fff; font-family:'Inter',sans-serif;
       font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-      transition:all .3s; box-shadow:0 6px 22px rgba(155,92,255,.28);
+      transition:all .3s; box-shadow:0 6px 22px rgba(15,42,74,.28);
     }
     .tv-btn-save:hover:not(:disabled) { transform:translateY(-2px); opacity:.9; }
     .tv-btn-save:disabled { opacity:.5; cursor:not-allowed; }
@@ -309,7 +309,7 @@ function makeStyles(t, isDark) {
       display:flex; align-items:center; justify-content:center; gap:7px;
       width:100%; padding:13px; border-radius:100px; cursor:pointer;
       background:transparent; border:1px solid rgba(200,16,46,.3);
-      color:${AURA.red}; font-family:'Roboto',sans-serif;
+      color:${AURA.red}; font-family:'Inter',sans-serif;
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
     }
@@ -319,7 +319,7 @@ function makeStyles(t, isDark) {
       flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
       padding:13px; border-radius:100px; border:none; cursor:pointer;
       background:linear-gradient(135deg, #7A0B1A, ${AURA.redDark});
-      color:#fff; font-family:'Roboto',sans-serif;
+      color:#fff; font-family:'Inter',sans-serif;
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
     }
@@ -331,7 +331,7 @@ function makeStyles(t, isDark) {
       padding:13px; border-radius:100px; cursor:pointer;
       background:${isDark?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)"};
       border:1px solid ${t.border};
-      color:${t.textSec}; font-family:'Roboto',sans-serif;
+      color:${t.textSec}; font-family:'Inter',sans-serif;
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
     }
@@ -449,7 +449,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
           {/* ── Hero ── */}
           <div className="tv-hero">
             <div className="tv-hero-icon">
-              <Users size={24} color="#fff" />
+              <Users size={24} color="#F0DFB8" />
             </div>
             <p className="tv-hero-title">Visitantes</p>
             <p className="tv-hero-sub">Gestão e acompanhamento de novos visitantes</p>
@@ -459,7 +459,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
           {!loading && visitantes.length > 0 && (
               <div className="tv-summary">
                 <div className="tv-summary-card">
-                  <div className="tv-summary-icon" style={{ background:"rgba(185,140,255,.1)" }}><Users size={16} color={AURA.gold} /></div>
+                  <div className="tv-summary-icon" style={{ background:"rgba(184,137,46,.1)" }}><Users size={16} color={AURA.gold} /></div>
                   <p className="tv-summary-value">{visitantes.length}</p>
                   <p className="tv-summary-label">Visitantes</p>
                 </div>
@@ -503,7 +503,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
               <TelaCarregando isDark={isDark} texto="Carregando visitantes..." minHeight="40vh" background="transparent" />
           ) : filtrados.length === 0 ? (
               <div className="tv-empty">
-                <div style={{ width:64, height:64, borderRadius:20, background:"rgba(185,140,255,.08)", border:"1px solid rgba(185,140,255,.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ width:64, height:64, borderRadius:20, background:"rgba(184,137,46,.08)", border:"1px solid rgba(184,137,46,.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                   <Users size={28} color={AURA.gold} />
                 </div>
                 <p style={{ fontSize:14, fontWeight:500, color:t.text, margin:"8px 0 2px" }}>Nenhum visitante encontrado</p>
@@ -564,7 +564,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                   <div className="tv-modal-hero-top">
                     <div className="tv-modal-hero-left">
                       <div className="tv-modal-hero-icon">
-                        <UserCheck size={20} color="#fff" />
+                        <UserCheck size={20} color="#F0DFB8" />
                       </div>
                       <div>
                         <p className="tv-modal-hero-title">{editando ? "Editar Visitante" : "Novo Visitante"}</p>

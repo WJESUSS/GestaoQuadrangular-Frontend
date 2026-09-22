@@ -25,56 +25,21 @@ import {
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 import BoasVindas     from "../../components/BoasVindas.jsx";
-
-/* ─── Tokens AURA ────────────────────────────────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-};
-
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#07070C"               : "#FAF8F4",
-    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "#FFFFFF",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.10)"  : "rgba(201,169,110,.35)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    gold:        isDark ? "#C9A96E"                : "#3D3218",
-    goldSoft:    isDark ? "rgba(201,169,110,.06)"  : "rgba(122,101,48,.08)",
-    goldHover:   isDark ? "rgba(201,169,110,.12)"  : "rgba(122,101,48,.14)",
-    glow1:       isDark ? "rgba(201,169,110,.07)"  : "rgba(201,169,110,.10)",
-    glow2:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-    glow3:       isDark ? "rgba(155,11,30,.03)"    : "rgba(0,61,165,.04)",
-    headerBg:    isDark ? "rgba(7,7,12,.92)"       : "rgba(247,243,238,.92)",
-    cardHover:   isDark ? "rgba(201,169,110,.20)"  : "rgba(122,101,48,.20)",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-  };
-}
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Menu items ─────────────────────────────────────────────────── */
 const MENU_ITEMS = [
   { icon: LayoutDashboard,           name: "Dashboard",     desc: "Visão Geral",    aba: "dashboard",              color: AURA.blue },
-  { icon: Contact,                   name: "Células",       desc: "Visita Pastoral", aba: "celulas",                color: "#A855F7" },
-  { icon: FileText,                  name: "Relatórios",    desc: "Células",         aba: "relatorio-celulas",      color: AURA.red },
-  { icon: Users,                     name: "Secretaria",    desc: "Discipulado",     aba: "discipulado",            color: "#8B5CF6" },
+  { icon: Contact,                   name: "Células",       desc: "Visita Pastoral", aba: "celulas",                color: AURA.gold },
+  { icon: FileText,                  name: "Relatórios",    desc: "Células",         aba: "relatorio-celulas",      color: AURA.goldLight },
+  { icon: Users,                     name: "Secretaria",    desc: "Discipulado",     aba: "discipulado",            color: AURA.blueLight },
   { icon: UserCheck,                 name: "Discipulado",   desc: "Relatórios Cel.",  aba: "acompanhamento-discipulado", color: AURA.blue },
-  { icon: Share2,                    name: "Multiplicação", desc: "Novas Células",   aba: "multiplicacoes",         color: "#059669" },
+  { icon: Share2,                    name: "Multiplicação", desc: "Novas Células",   aba: "multiplicacoes",         color: AURA.gold },
   { icon: Trophy,                    name: "Ranking",       desc: "Desempenho",      aba: "ranking-celulas",        color: AURA.yellow },
-  { icon: Flame,                     name: "Missão 70",     desc: "Evangelismo",     aba: "missao70",               color: AURA.gold },
-  { icon: ClipboardList,             name: "Pendências",    desc: "Itens Abertos",   aba: "pendencias",             color: "#F97316" },
-  { icon: AlertTriangle,             name: "Alertas",       desc: "Notificações",    aba: "alertas",                color: AURA.red },
-  { icon: Church,                    name: "Cultos",        desc: "Relatórios",      aba: "cultos",                 color: AURA.gold },
+  { icon: Flame,                     name: "Missão 70",     desc: "Evangelismo",     aba: "missao70",               color: AURA.goldLight },
+  { icon: ClipboardList,             name: "Pendências",    desc: "Itens Abertos",   aba: "pendencias",             color: AURA.blueDark },
+  { icon: AlertTriangle,             name: "Alertas",       desc: "Notificações",    aba: "alertas",                color: AURA.gold },
+  { icon: Church,                    name: "Cultos",        desc: "Relatórios",      aba: "cultos",                 color: AURA.goldLight },
   { icon: Activity,                  name: "Painel",        desc: "Pastoral",        aba: "painel-pastoral",        color: AURA.gold, modal: true },
 ];
 

@@ -1,10 +1,7 @@
 import React from "react";
 import { Shield } from "lucide-react";
+import { AURA, theme } from "../pages/heroTheme";
 
-const AURA = {
-  gold: "#C9A96E",
-  redDark: "#9B0B1E",
-};
 
 /* Mesmo loader da tela AdminUsers: anel cônico giratório + núcleo pulsante com ícone */
 export default function TelaCarregando({

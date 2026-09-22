@@ -7,28 +7,9 @@ import {
   Search, Droplets, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
-const AURA = {
-  gold:      "#C9A96E",
-  dark:      "#0A0A0F",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  green:     "#059669",
-};
 
-function theme(isDark) {
-  return {
-    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    optionBg:    isDark ? "#12121A"                : "#F0EAE0",
-  };
-}
 
 const ESTADOS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
 const ESTADO_CIVIL = ["SOLTEIRO","CASADO","DIVORCIADO","VIUVO","SEPARADO","UNIAO_ESTAVEL"];
@@ -209,7 +190,7 @@ export default function FichasConvertido({ isDark }) {
 
   const statusBadge = s => {
     const map = {
-      AGUARDANDO_BATISMO: { color: "#D97706", bg: "rgba(217,119,6,.1)", label: "Aguardando Batismo" },
+      AGUARDANDO_BATISMO: { color: "#B8892E", bg: "rgba(184,137,46,.1)", label: "Aguardando Batismo" },
       MEMBRO:             { color: "#059669", bg: "rgba(5,150,105,.1)", label: "Membro" },
     };
     const c = map[s] || map.AGUARDANDO_BATISMO;
@@ -436,9 +417,9 @@ export default function FichasConvertido({ isDark }) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * .03 }}
                             style={{
-                              background: t.bgEl, border: `1px solid ${isPendente ? "rgba(217,119,6,.25)" : t.border}`,
+                              background: t.bgEl, border: `1px solid ${isPendente ? "rgba(184,137,46,.25)" : t.border}`,
                               borderRadius: 14, padding: "12px 16px",
-                              borderLeft: isPendente ? "3px solid #D97706" : "3px solid #059669",
+                              borderLeft: isPendente ? "3px solid #B8892E" : "3px solid #059669",
                               display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap",
                             }}
                         >
@@ -446,8 +427,8 @@ export default function FichasConvertido({ isDark }) {
                             <div style={{
                               width: 34, height: 34, borderRadius: 9, flexShrink: 0,
                               display: "flex", alignItems: "center", justifyContent: "center",
-                              background: isPendente ? "rgba(217,119,6,.12)" : "rgba(201,169,110,.1)",
-                              color: isPendente ? "#D97706" : AURA.gold,
+                              background: isPendente ? "rgba(184,137,46,.12)" : "rgba(201,169,110,.1)",
+                              color: isPendente ? "#B8892E" : AURA.gold,
                               fontSize: 14, fontWeight: 700,
                             }}>
                               {isPendente ? numeroPendente : <User size={15} />}

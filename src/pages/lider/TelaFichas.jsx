@@ -20,7 +20,7 @@ function IEQCross({ size = 36 }) {
 function GlobalStyles({ t, isDark }) {
   return (
       <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
 
       @keyframes dl-spin  { to { transform: rotate(360deg); } }
       @keyframes dl-pulse { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
@@ -28,7 +28,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-pulse { animation: dl-pulse 3s ease-in-out infinite; }
 
       .ff-root {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
         position: relative; z-index: 1;
         max-width: 800px; margin: 0 auto;
         padding: 0 0 40px;
@@ -37,11 +37,11 @@ function GlobalStyles({ t, isDark }) {
       .ff-header { text-align: center; padding: 8px 0 28px; }
       .ff-eyebrow {
         font-size: 9px; font-weight: 600; letter-spacing: .25em;
-        text-transform: uppercase; color: rgba(185,140,255,.6);
+        text-transform: uppercase; color: rgba(184,137,46,.6);
         margin: 14px 0 6px;
       }
       .ff-title {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: clamp(20px, 5vw, 26px);
         font-weight: 500; color: ${t.text};
         margin: 0; letter-spacing: .02em;
@@ -69,7 +69,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .ff-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(185,140,255,.2), transparent);
+        background: linear-gradient(90deg, transparent, rgba(184,137,46,.2), transparent);
       }
       .ff-card-pad { padding: 22px 22px 26px; }
       @media(max-width: 480px) { .ff-card-pad { padding: 18px 16px 22px; } }
@@ -81,7 +81,7 @@ function GlobalStyles({ t, isDark }) {
         flex-wrap: wrap; gap: 12px;
       }
       .ff-card-head-title {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0;
       }
       .ff-card-head-sub {
@@ -95,7 +95,7 @@ function GlobalStyles({ t, isDark }) {
         width: 30px; height: 30px; min-width: 30px; border-radius: 10px;
         background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.blue});
         display: flex; align-items: center; justify-content: center;
-        color: #fff; font-family: 'Roboto', sans-serif; font-weight: 600; font-size: 13px;
+        color: #fff; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px;
       }
       .ff-section-title {
         font-size: 11px; font-weight: 600; letter-spacing: .18em;
@@ -123,13 +123,13 @@ function GlobalStyles({ t, isDark }) {
         background: ${t.bgInput}; border: 1px solid ${t.borderInput};
         color: ${t.text}; padding: 13px 16px;
         border-radius: 14px; outline: none;
-        font-family: 'Roboto', sans-serif; font-size: 16px; font-weight: 300;
+        font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 300;
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .ff-input:focus, .ff-select:focus {
-        border-color: rgba(185,140,255,.5);
-        background: rgba(185,140,255,.04);
-        box-shadow: 0 0 0 4px rgba(185,140,255,.12);
+        border-color: rgba(184,137,46,.5);
+        background: rgba(184,137,46,.04);
+        box-shadow: 0 0 0 4px rgba(184,137,46,.12);
       }
       .ff-input::placeholder { color: ${t.placeholder}; }
       .ff-select {
@@ -141,11 +141,11 @@ function GlobalStyles({ t, isDark }) {
 
       .ff-checkbox-card {
         padding: 16px 18px; border-radius: 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(185,140,255,.04)"};
-        border: 1px solid ${isDark ? "rgba(185,140,255,.1)" : "rgba(185,140,255,.16)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(184,137,46,.04)"};
+        border: 1px solid ${isDark ? "rgba(184,137,46,.1)" : "rgba(184,137,46,.16)"};
         transition: border-color .2s;
       }
-      .ff-checkbox-card:hover { border-color: rgba(185,140,255,.3); }
+      .ff-checkbox-card:hover { border-color: rgba(184,137,46,.3); }
       .ff-checkbox-row {
         display: flex; align-items: center; gap: 12px; cursor: pointer;
         font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
@@ -157,14 +157,14 @@ function GlobalStyles({ t, isDark }) {
 
       .ff-bio-input {
         text-align: center; font-weight: 600; font-size: 20px;
-        font-family: 'Roboto', sans-serif; color: ${AURA.gold};
+        font-family: 'Inter', sans-serif; color: ${AURA.gold};
       }
 
       .ff-btn-primary {
         width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
         padding: 16px; border: none; border-radius: 100px; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red});
-        color: #fff; font-family: 'Roboto', sans-serif;
+        color: #fff; font-family: 'Inter', sans-serif;
         font-size: 11px; font-weight: 600; letter-spacing: .2em;
         text-transform: uppercase; transition: all .3s;
         box-shadow: 0 6px 20px rgba(200,16,46,.25);
@@ -176,17 +176,17 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 7px;
         padding: 11px 20px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-        color: #0A0A0F; font-family: 'Roboto', sans-serif;
+        color: #0A0A0F; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .35s;
-        box-shadow: 0 6px 22px rgba(185,140,255,.22); flex-shrink: 0;
+        box-shadow: 0 6px 22px rgba(184,137,46,.22); flex-shrink: 0;
       }
-      .ff-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(185,140,255,.32); }
+      .ff-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(184,137,46,.32); }
       .ff-btn-gold:disabled { opacity: .5; cursor: not-allowed; }
 
       .ff-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(185,140,255,.15), transparent);
+        background: linear-gradient(90deg, transparent, rgba(184,137,46,.15), transparent);
         margin: 2px 0;
       }
 
@@ -196,17 +196,17 @@ function GlobalStyles({ t, isDark }) {
       .ff-ficha-row {
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
         padding: 13px 16px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(185,140,255,.04)"};
-        border: 1px solid ${isDark ? "rgba(185,140,255,.07)" : "rgba(185,140,255,.12)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(184,137,46,.04)"};
+        border: 1px solid ${isDark ? "rgba(184,137,46,.07)" : "rgba(184,137,46,.12)"};
         border-radius: 14px; transition: border-color .2s;
       }
-      .ff-ficha-row:hover { border-color: rgba(185,140,255,.3); }
+      .ff-ficha-row:hover { border-color: rgba(184,137,46,.3); }
       .ff-ficha-avatar {
         width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(185,140,255,.2), rgba(185,140,255,.06));
-        border: 1px solid rgba(185,140,255,.22);
+        background: linear-gradient(135deg, rgba(184,137,46,.2), rgba(184,137,46,.06));
+        border: 1px solid rgba(184,137,46,.22);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Roboto', sans-serif; font-weight: 600; font-size: 15px; color: ${AURA.gold};
+        font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: ${AURA.gold};
       }
       .ff-ficha-name {
         font-size: 13px; font-weight: 400; color: ${t.text};
@@ -219,7 +219,7 @@ function GlobalStyles({ t, isDark }) {
       .ff-status-pill {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 5px 13px; border-radius: 100px; flex-shrink: 0;
-        background: rgba(185,140,255,.1); border: 1px solid rgba(185,140,255,.28);
+        background: rgba(184,137,46,.1); border: 1px solid rgba(184,137,46,.28);
         font-size: 9px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; color: ${AURA.gold};
       }
@@ -320,9 +320,9 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
         {/* ── Cabeçalho ── */}
         <div className="ff-header">
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-            <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(185,140,255,.22)", borderRadius: "50%" }} />
-            <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(185,140,255,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(185,140,255,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+            <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(184,137,46,.22)", borderRadius: "50%" }} />
+            <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(184,137,46,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
               <IEQCross size={32} />
             </div>
           </div>
@@ -375,7 +375,7 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
                     </React.Fragment>
                 ))
             ) : (
-                <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+                <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
                   Nenhuma inscrição enviada ainda.
                 </p>
             )}
@@ -520,11 +520,11 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
                   { name: "jaEraCristao", label: "Já era cristão?" },
                 ].map(({ name, label }) => (
                     <div key={name} className="ff-checkbox-card" style={{
-                      background: isDark ? "rgba(0,61,165,.08)" : "rgba(0,61,165,.05)",
-                      borderColor: isDark ? "rgba(0,61,165,.2)" : "rgba(0,61,165,.15)",
+                      background: isDark ? "rgba(15,42,74,.3)" : "rgba(184,137,46,.05)",
+                      borderColor: isDark ? "rgba(15,42,74,.45)" : "rgba(184,137,46,.2)",
                     }}>
-                      <label className="ff-checkbox-row" style={{ color: isDark ? "#7090e8" : AURA.blue }}>
-                        <input type="checkbox" name={name} checked={form[name]} onChange={handleChange} style={{ accentColor: AURA.blue }} />
+                      <label className="ff-checkbox-row" style={{ color: isDark ? "#D9AE5E" : AURA.gold }}>
+                        <input type="checkbox" name={name} checked={form[name]} onChange={handleChange} style={{ accentColor: AURA.gold }} />
                         {label}
                       </label>
                     </div>

@@ -11,33 +11,9 @@ import { createPortal } from "react-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
-const AURA = {
-    gold: "#C9A96E", goldLight: "#E8D5A3", dark: "#0A0A0F", darkEl: "#12121A",
-    light: "#F5F0E8", red: "#C8102E", redDark: "#9B0B1E", blue: "#003DA5",
-    blueDark: "#002470", yellow: "#FDB813",
-};
 
-function theme(isDark) {
-    return {
-        bg:          isDark ? "#0A0A0F"              : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.97)"   : "#D8D4CC",
-        bgInput:     isDark ? "rgba(255,255,255,.05)": "rgba(0,0,0,.04)",
-        border:      isDark ? "rgba(201,169,110,.1)" : "rgba(201,169,110,.2)",
-        borderInput: isDark ? "rgba(201,169,110,.18)": "rgba(201,169,110,.28)",
-        text:        isDark ? "#F5F0E8"              : "#1A1008",
-        textSec:     isDark ? "#9A9588"              : "#6B5E4A",
-        textMuted:   isDark ? "#6B6658"              : "#9A9080",
-        gold:        isDark ? "#C9A96E"              : "#3D3218",
-        goldLight:   isDark ? "#E8D5A3"              : "#A68B4B",
-        goldSoft:    isDark ? "rgba(201,169,110,.06)": "rgba(122,101,48,.08)",
-        goldHover:   isDark ? "rgba(201,169,110,.12)": "rgba(122,101,48,.14)",
-        yellow:      isDark ? "#FDB813"              : "#9A7A0E",
-        glow1:       isDark ? "rgba(201,169,110,.05)": "rgba(201,169,110,.08)",
-        glow2:       isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
-        cardHover:   isDark ? "rgba(201,169,110,.2)" : "rgba(201,169,110,.35)",
-    };
-}
 
 const MOTIVO_LABELS = {
     AUSENCIA_LIDER:     { label: "Ausência do líder",     icone: "👤" },
@@ -51,10 +27,10 @@ const MOTIVO_LABELS = {
 };
 
 const JUSTIFICATIVAS = {
-    TRABALHO: { label: "Trabalho",  icon: <Briefcase  size={11} />, cor: "#6366F1", bg: "rgba(99,102,241,.1)",  borda: "rgba(99,102,241,.28)" },
-    VIAGEM:   { label: "Viagem",    icon: <Plane      size={11} />, cor: "#0891B2", bg: "rgba(8,145,178,.1)",   borda: "rgba(8,145,178,.28)" },
-    DOENCA:   { label: "Doença",    icon: <HeartPulse size={11} />, cor: "#DC2626", bg: "rgba(220,38,38,.1)",   borda: "rgba(220,38,38,.28)" },
-    OUTROS:   { label: "Outros",    icon: <HelpCircle size={11} />, cor: "#D97706", bg: "rgba(217,119,6,.1)",   borda: "rgba(217,119,6,.28)" },
+    TRABALHO: { label: "Trabalho",  icon: <Briefcase  size={11} />, cor: "#1E4571", bg: "rgba(30,69,113,.10)", borda: "rgba(30,69,113,.28)" },
+    VIAGEM:   { label: "Viagem",    icon: <Plane      size={11} />, cor: "#0F2A4A", bg: "rgba(15,42,74,.10)",  borda: "rgba(15,42,74,.28)" },
+    DOENCA:   { label: "Doença",    icon: <HeartPulse size={11} />, cor: "#B8892E", bg: "rgba(184,137,46,.12)", borda: "rgba(184,137,46,.30)" },
+    OUTROS:   { label: "Outros",    icon: <HelpCircle size={11} />, cor: "#D9AE5E", bg: "rgba(217,174,94,.14)", borda: "rgba(217,174,94,.32)" },
 };
 
 function getMotivoLabel(m) { return MOTIVO_LABELS[m] || { label: m || "Não informado", icone: "📋" }; }
@@ -659,7 +635,7 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
 
     const getDecisaoCor = (d) => {
         if (d==="ACEITOU_JESUS") return {background:"rgba(22,163,74,.12)",  color:"#16a34a", borderColor:"rgba(22,163,74,.3)"};
-        if (d==="RECONCILIOU")   return {background:"rgba(14,165,233,.12)", color:"#0ea5e9", borderColor:"rgba(14,165,233,.3)"};
+        if (d==="RECONCILIOU")   return {background:"rgba(14,165,233,.12)", color:"#D9AE5E", borderColor:"rgba(14,165,233,.3)"};
         if (d==="BATISMO_AGUAS") return {background:"rgba(139,92,246,.12)", color:"#8b5cf6", borderColor:"rgba(139,92,246,.3)"};
         return {background:"rgba(201,169,110,.1)", color:t.gold, borderColor:"rgba(201,169,110,.3)"};
     };
@@ -682,7 +658,7 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
         ...(comDecisao.length>0?[{id:"decisoes",label:"Decisões",count:comDecisao.length}]:[]),
     ];
 
-    const TAB_COLORS = { info:t.gold, membros:"#16a34a", visitantes:"#0ea5e9", ausentes:"#6366F1", decisoes:t.yellow };
+    const TAB_COLORS = { info:t.gold, membros:"#1E7A46", visitantes:"#D9AE5E", ausentes:"#1E4571", decisoes:t.yellow };
     const hGrad  = naoRealizada ? `linear-gradient(135deg,${AURA.yellow},${t.yellow})` : `linear-gradient(135deg,${AURA.blue},${AURA.blueDark})`;
     const hText  = naoRealizada ? "#1A1008" : "#fff";
     const hSub   = naoRealizada ? "rgba(26,16,8,.7)" : "rgba(255,255,255,.7)";
@@ -863,9 +839,9 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                                         <>
                                             {rel.quantidadeVisitantes>0 && visitantesPresentes.length===0 && (
                                                 <div style={{padding:"14px 16px",background:isDark?"rgba(255,255,255,.03)":"rgba(14,165,233,.05)",border:"1px solid rgba(14,165,233,.2)",borderRadius:14,display:"flex",alignItems:"center",gap:10}}>
-                                                    <Users size={16} style={{color:"#0ea5e9",flexShrink:0}} />
+                                                    <Users size={16} style={{color:"#D9AE5E",flexShrink:0}} />
                                                     <span style={{fontFamily:"'Inter',sans-serif",fontSize:13,color:t.textSec}}>
-                                                        <strong style={{color:"#0ea5e9"}}>{rel.quantidadeVisitantes}</strong> visitante{rel.quantidadeVisitantes>1?"s":""} sem cadastro individual
+                                                        <strong style={{color:"#D9AE5E"}}>{rel.quantidadeVisitantes}</strong> visitante{rel.quantidadeVisitantes>1?"s":""} sem cadastro individual
                                                     </span>
                                                 </div>
                                             )}
@@ -896,7 +872,7 @@ function ModalDetalhes({ rel, isDark, t, onClose }) {
                                         <>
                                             {ausentesJustif.length > 0 && (
                                                 <>
-                                                    <p style={{fontFamily:"'Inter',sans-serif",fontSize:9,fontWeight:600,letterSpacing:".15em",textTransform:"uppercase",color:"#6366F1",margin:"0 0 6px"}}>Justificados ({ausentesJustif.length})</p>
+                                                    <p style={{fontFamily:"'Inter',sans-serif",fontSize:9,fontWeight:600,letterSpacing:".15em",textTransform:"uppercase",color:"#1E4571",margin:"0 0 6px"}}>Justificados ({ausentesJustif.length})</p>
                                                     {ausentesJustif.map((a,i) => (
                                                         <div key={i} className="rl-person-row" style={{border:`1px solid ${getJustificativaInfo(a.justificativaFalta).borda}`}}>
                                                             <div className="rl-avatar" style={{background:`${getJustificativaInfo(a.justificativaFalta).cor}18`,color:getJustificativaInfo(a.justificativaFalta).cor}}>{(a.nome||a.membroNome||"?").charAt(0).toUpperCase()}</div>
@@ -1130,7 +1106,7 @@ export default function RelatorioCelula({ isDark = false }) {
                         <div><p className="rl-kpi-label">Total</p><p className="rl-kpi-value">{totais.geral}</p></div>
                     </div>
                     <div className="rl-kpi-card">
-                        <div className="rl-kpi-icon" style={{background:"rgba(99,102,241,.1)"}}><UserX size={18} style={{color:"#6366F1"}} /></div>
+                        <div className="rl-kpi-icon" style={{background:"rgba(99,102,241,.1)"}}><UserX size={18} style={{color:"#1E4571"}} /></div>
                         <div><p className="rl-kpi-label">Faltas Just.</p><p className="rl-kpi-value">{totais.justificadas}</p></div>
                     </div>
                     <div className={`rl-kpi-card ${naoRealizadas.length>0?"alert":""}`}>
@@ -1212,7 +1188,7 @@ export default function RelatorioCelula({ isDark = false }) {
                                                 <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{rel.estudo||"Sem estudo informado"}</span>
                                             </div>
                                             {decisoes.length>0&&<div className="rl-card-tag" style={{background:"rgba(253,184,19,.08)",border:"1px solid rgba(253,184,19,.2)",color: t.yellow,marginBottom:ausentesJ.length>0?8:0}}><Sparkles size={11} style={{flexShrink:0}} />{decisoes.length} decisão{decisoes.length>1?"ões":""}</div>}
-                                            {ausentesJ.length>0&&<div className="rl-card-tag" style={{background:"rgba(99,102,241,.08)",border:"1px solid rgba(99,102,241,.2)",color:"#6366F1"}}><UserX size={11} style={{flexShrink:0}} />{ausentesJ.length} falta{ausentesJ.length>1?"s":""} justificada{ausentesJ.length>1?"s":""}</div>}
+                                            {ausentesJ.length>0&&<div className="rl-card-tag" style={{background:"rgba(99,102,241,.08)",border:"1px solid rgba(99,102,241,.2)",color:"#1E4571"}}><UserX size={11} style={{flexShrink:0}} />{ausentesJ.length} falta{ausentesJ.length>1?"s":""} justificada{ausentesJ.length>1?"s":""}</div>}
                                         </div>
                                         <div className="rl-card-stats">
                                             {[{label:"Membros",value:m,color:t.text},{label:"Visitas",value:v,color:t.gold},{label:"Total",value:m+v,color:AURA.blue}].map((k,ki)=>(

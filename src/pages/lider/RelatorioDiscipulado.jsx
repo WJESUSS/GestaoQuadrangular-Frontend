@@ -84,7 +84,7 @@ function IEQCross({ size = 28 }) {
 function RDStyles({ t, isDark }) {
   return (
       <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
 
     @keyframes rd-spin    { to { transform: rotate(360deg); } }
     @keyframes rd-pulse   { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
@@ -104,7 +104,7 @@ function RDStyles({ t, isDark }) {
     * { box-sizing: border-box; }
 
     .rd-root {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       position: relative;
       padding-bottom: 56px;
       color: ${t.text};
@@ -137,7 +137,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(185,140,255,.2), transparent);
+      background: linear-gradient(90deg, transparent, rgba(184,137,46,.2), transparent);
     }
 
     /* ── Header ── */
@@ -154,10 +154,10 @@ function RDStyles({ t, isDark }) {
     }
     .rd-eyebrow {
       font-size: 9px; font-weight: 500; letter-spacing: .2em;
-      text-transform: uppercase; color: rgba(185,140,255,.55); margin: 0 0 3px;
+      text-transform: uppercase; color: rgba(184,137,46,.55); margin: 0 0 3px;
     }
     .rd-title {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 18px; font-weight: 500; color: ${t.text};
       margin: 0; letter-spacing: .02em; line-height: 1.2;
     }
@@ -168,16 +168,16 @@ function RDStyles({ t, isDark }) {
     .rd-tab {
       display: flex; align-items: center; gap: 7px;
       padding: 10px 18px; border-radius: 100px; border: none; cursor: pointer;
-      font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600;
+      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
       letter-spacing: .14em; text-transform: uppercase; transition: all .25s;
       white-space: nowrap;
     }
     .rd-tab-active {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-      color: #0A0A0F; box-shadow: 0 6px 20px rgba(185,140,255,.25);
+      color: #0A0A0F; box-shadow: 0 6px 20px rgba(184,137,46,.25);
     }
     .rd-tab-inactive {
-      background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(185,140,255,.06)"};
+      background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(184,137,46,.06)"};
       border: 1px solid ${t.border}; color: ${t.textMuted};
     }
     .rd-tab-inactive:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
@@ -190,7 +190,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-date-input {
       background: transparent; border: none; outline: none;
-      font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: 600;
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
       letter-spacing: .08em; color: ${t.text}; cursor: pointer;
       color-scheme: ${isDark ? "dark" : "light"};
       max-width: 140px;
@@ -202,7 +202,7 @@ function RDStyles({ t, isDark }) {
       flex: 1; justify-content: center; min-width: 0;
     }
     .rd-week-label {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 12px; font-weight: 600; letter-spacing: .06em;
       color: ${t.text}; white-space: nowrap;
       overflow: hidden; text-overflow: ellipsis;
@@ -230,7 +230,7 @@ function RDStyles({ t, isDark }) {
       text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 8px;
     }
     .rd-kpi-val {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 40px; font-weight: 600; line-height: 1; margin: 0;
     }
 
@@ -241,12 +241,12 @@ function RDStyles({ t, isDark }) {
       animation: rd-slideD .3s ease;
     }
     .rd-banner-warn {
-      background: ${isDark ? "rgba(253,184,19,.08)" : "rgba(253,184,19,.1)"};
-      border: 1px solid rgba(253,184,19,.35);
+      background: ${isDark ? "rgba(184,137,46,.1)" : "rgba(184,137,46,.07)"};
+      border: 1px solid rgba(184,137,46,.3);
     }
     .rd-banner-edit {
-      background: ${isDark ? "rgba(0,61,165,.1)" : "rgba(0,61,165,.07)"};
-      border: 1px solid rgba(0,61,165,.28);
+      background: ${isDark ? "rgba(15,42,74,.25)" : "rgba(15,42,74,.07)"};
+      border: 1px solid rgba(15,42,74,.3);
     }
     .rd-banner-title {
       font-size: 10px; font-weight: 600; letter-spacing: .16em;
@@ -260,7 +260,7 @@ function RDStyles({ t, isDark }) {
       display: grid; grid-template-columns: 1fr repeat(5, 1fr); gap: 8px;
       align-items: center;
       border-bottom: 1px solid ${t.border};
-      background: ${isDark ? "rgba(185,140,255,.04)" : "rgba(185,140,255,.05)"};
+      background: ${isDark ? "rgba(184,137,46,.04)" : "rgba(184,137,46,.05)"};
     }
     .rd-table-col-label {
       text-align: center;
@@ -283,14 +283,14 @@ function RDStyles({ t, isDark }) {
     .rd-member-row:last-child { border-bottom: none; }
     .rd-member-avatar {
       width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
-      background: linear-gradient(135deg, rgba(185,140,255,.2), rgba(185,140,255,.06));
-      border: 1px solid rgba(185,140,255,.22);
+      background: linear-gradient(135deg, rgba(184,137,46,.2), rgba(184,137,46,.06));
+      border: 1px solid rgba(184,137,46,.22);
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Roboto', sans-serif; font-weight: 600;
+      font-family: 'Inter', sans-serif; font-weight: 600;
       font-size: 17px; color: ${AURA.gold};
     }
     .rd-member-name {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px; font-weight: 500; color: ${t.text}; margin: 0;
       transition: color .3s ease, font-weight .3s ease;
     }
@@ -300,7 +300,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-progress-track {
       height: 4px; border-radius: 99px; overflow: hidden;
-      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(185,140,255,.1)"};
+      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(184,137,46,.1)"};
       margin: 12px 0 14px;
     }
     .rd-progress-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
@@ -325,7 +325,7 @@ function RDStyles({ t, isDark }) {
     .rd-pb-label {
       display: flex; flex-direction: column; align-items: center;
       gap: 0;
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       text-transform: uppercase;
       text-align: center;
       line-height: 1.3;
@@ -348,23 +348,23 @@ function RDStyles({ t, isDark }) {
 
     .rd-just-btn {
       margin-top: 5px; padding: 4px 8px; border-radius: 99px;
-      border: 1px solid rgba(185,140,255,.25); background: transparent; cursor: pointer;
-      font-family: 'Roboto', sans-serif; font-size: 9.5px; font-weight: 600;
+      border: 1px solid rgba(184,137,46,.25); background: transparent; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 600;
       letter-spacing: .05em; display: flex; align-items: center; gap: 4px;
       transition: all .15s; white-space: nowrap; color: ${t.textMuted};
       max-width: 100%; overflow: hidden; text-overflow: ellipsis;
     }
-    .rd-just-btn:hover { border-color: rgba(185,140,255,.5); color: ${AURA.gold}; }
+    .rd-just-btn:hover { border-color: rgba(184,137,46,.5); color: ${AURA.gold}; }
     .rd-just-btn-filled {
-      border-color: rgba(185,140,255,.6) !important;
-      background: ${isDark ? "rgba(185,140,255,.12)" : "rgba(185,140,255,.1)"} !important;
+      border-color: rgba(184,137,46,.6) !important;
+      background: ${isDark ? "rgba(184,137,46,.12)" : "rgba(184,137,46,.1)"} !important;
       color: ${AURA.gold} !important;
     }
 
     /* ── Botão submit ── */
     .rd-btn-submit {
       width: 100%; padding: 16px 0; border: none; border-radius: 100px;
-      cursor: pointer; font-family: 'Roboto', sans-serif; font-size: 11px;
+      cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px;
       font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
       display: flex; align-items: center; justify-content: center; gap: 10px;
       transition: all .3s;
@@ -373,11 +373,11 @@ function RDStyles({ t, isDark }) {
     .rd-btn-submit:disabled { opacity: .4; cursor: not-allowed; }
     .rd-btn-gold {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-      color: #0A0A0F; box-shadow: 0 8px 28px rgba(185,140,255,.25);
+      color: #0A0A0F; box-shadow: 0 8px 28px rgba(184,137,46,.25);
     }
     .rd-btn-blue {
       background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
-      color: #fff; box-shadow: 0 8px 28px rgba(0,61,165,.22);
+      color: #fff; box-shadow: 0 8px 28px rgba(15,42,74,.4);
     }
 
     /* ── Erro ── */
@@ -392,10 +392,10 @@ function RDStyles({ t, isDark }) {
     /* ── Toast rascunho ── */
     .rd-toast-draft {
       padding: 12px 18px; border-radius: 14px;
-      background: ${isDark ? "rgba(0,61,165,.15)" : "rgba(0,61,165,.08)"};
-      border: 1px solid rgba(0,61,165,.25);
+      background: ${isDark ? "rgba(15,42,74,.3)" : "rgba(15,42,74,.06)"};
+      border: 1px solid rgba(15,42,74,.28);
       display: flex; align-items: center; gap: 10px;
-      font-family: 'Roboto', sans-serif; font-size: 9.5px; font-weight: 500;
+      font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 500;
       letter-spacing: .12em; text-transform: uppercase; color: ${AURA.blueLight};
       animation: rd-slideD .35s ease;
     }
@@ -426,7 +426,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-hist-bar {
       height: 3px; border-radius: 99px; margin-top: 10px;
-      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(185,140,255,.1)"};
+      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(184,137,46,.1)"};
       overflow: hidden;
     }
     .rd-hist-head {
@@ -441,7 +441,7 @@ function RDStyles({ t, isDark }) {
       flex-wrap: wrap; gap: 8px;
     }
     .rd-pag-info {
-      font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 500;
+      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500;
       letter-spacing: .1em; color: ${t.textMuted};
       white-space: nowrap;
     }
@@ -451,7 +451,7 @@ function RDStyles({ t, isDark }) {
       border: 1px solid ${t.border}; background: transparent;
       color: ${t.textMuted}; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Roboto', sans-serif; font-size: 11px; font-weight: 600;
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
       transition: all .2s; flex-shrink: 0;
     }
     .rd-pag-btn:hover:not(:disabled) { border-color: ${AURA.gold}; color: ${AURA.gold}; }
@@ -466,7 +466,7 @@ function RDStyles({ t, isDark }) {
       display: flex; align-items: center; gap: 6px;
       padding: 9px 16px; border-radius: 100px; border: 1px solid ${t.border};
       cursor: pointer; background: transparent; color: ${t.textMuted};
-      font-family: 'Roboto', sans-serif; font-size: 9px; font-weight: 600;
+      font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
       letter-spacing: .14em; text-transform: uppercase; transition: all .25s;
       flex-shrink: 0; white-space: nowrap;
     }
@@ -475,12 +475,12 @@ function RDStyles({ t, isDark }) {
       display: flex; align-items: center; gap: 7px;
       padding: 10px 18px; border-radius: 100px; border: none; cursor: pointer;
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-      color: #0A0A0F; font-family: 'Roboto', sans-serif;
+      color: #0A0A0F; font-family: 'Inter', sans-serif;
       font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
       transition: all .25s; flex-shrink: 0; white-space: nowrap;
-      box-shadow: 0 4px 14px rgba(185,140,255,.2);
+      box-shadow: 0 4px 14px rgba(184,137,46,.2);
     }
-    .rd-btn-edit-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(185,140,255,.3); }
+    .rd-btn-edit-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(184,137,46,.3); }
 
     /* ── Detalhe histórico ── */
     .rd-detail-grid {
@@ -496,7 +496,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-table-scroll::-webkit-scrollbar { height: 4px; }
     .rd-table-scroll::-webkit-scrollbar-thumb {
-      background: rgba(185,140,255,.35);
+      background: rgba(184,137,46,.35);
       border-radius: 99px;
     }
     .rd-table-inner {
@@ -662,7 +662,7 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
               margin: "0 auto 14px", fontSize: 22,
             }}>📋</div>
             <p className="rd-eyebrow" style={{ marginBottom: 6 }}>Justificativa de Falta</p>
-            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 17, fontWeight: 600, color: selecionado ? CORES_JUST[selecionado] : AURA.goldLight, textShadow: selecionado ? `0 0 16px ${CORES_JUST[selecionado]}66` : "0 0 16px rgba(185,140,255,.5)", margin: "0 0 3px", transition: "color .25s, text-shadow .25s" }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 17, fontWeight: 600, color: selecionado ? CORES_JUST[selecionado] : AURA.goldLight, textShadow: selecionado ? `0 0 16px ${CORES_JUST[selecionado]}66` : "0 0 16px rgba(184,137,46,.5)", margin: "0 0 3px", transition: "color .25s, text-shadow .25s" }}>
               {nomeMembro}
             </p>
             <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "#D97757", textShadow: "0 0 10px rgba(217,119,87,.4)", margin: 0 }}>
@@ -682,13 +682,13 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
                             className="rd-just-chip"
                             style={{
                               borderColor: sel ? AURA.gold : t.border,
-                              background: sel ? (isDark ? "rgba(185,140,255,.15)" : "rgba(185,140,255,.1)") : "transparent",
+                              background: sel ? (isDark ? "rgba(184,137,46,.15)" : "rgba(184,137,46,.1)") : "transparent",
                               transform: sel ? "scale(1.04)" : "scale(1)",
-                              boxShadow: sel ? "0 4px 16px rgba(185,140,255,.2)" : "none",
+                              boxShadow: sel ? "0 4px 16px rgba(184,137,46,.2)" : "none",
                             }}
                     >
                       <span style={{ fontSize: 22 }}>{EMOJIS_JUST[opcao]}</span>
-                      <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, letterSpacing: ".12em", fontWeight: sel ? 600 : 400, color: sel ? AURA.gold : t.textSec }}>
+                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, letterSpacing: ".12em", fontWeight: sel ? 600 : 400, color: sel ? AURA.gold : t.textSec }}>
                     {opcao.toUpperCase()}
                   </span>
                     </button>
@@ -697,10 +697,10 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={onFechar} style={{ flex: 1, padding: "12px 0", borderRadius: 100, border: `1px solid ${t.border}`, background: "transparent", cursor: "pointer", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
+            <button onClick={onFechar} style={{ flex: 1, padding: "12px 0", borderRadius: 100, border: `1px solid ${t.border}`, background: "transparent", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
               Cancelar
             </button>
-            <button onClick={() => { onSalvar(selecionado); onFechar(); }} style={{ flex: 2, padding: "12px 0", borderRadius: 100, background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, border: "none", cursor: "pointer", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "#0A0A0F", boxShadow: "0 4px 14px rgba(185,140,255,.25)" }}>
+            <button onClick={() => { onSalvar(selecionado); onFechar(); }} style={{ flex: 2, padding: "12px 0", borderRadius: 100, background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, border: "none", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "#0A0A0F", boxShadow: "0 4px 14px rgba(184,137,46,.25)" }}>
               Confirmar
             </button>
           </div>
@@ -733,7 +733,7 @@ function ToastSucessoDiscipulado({ totalPresencas, totalPontos, porcentagem, nom
                 <div key={i} style={{ width: i % 3 === 0 ? 11 : 7, height: i % 3 === 0 ? 11 : 7, borderRadius: i % 2 === 0 ? "50%" : 2, background: cor, opacity: 0, animation: `rd-confetti 1.4s ease ${0.04 + i * 0.06}s forwards` }} />
             ))}
           </div>
-          <div className="rd-toast-box" style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 60%, ${c3} 100%)`, boxShadow: modoEdicao ? "0 16px 60px rgba(0,61,165,.5)" : "0 16px 60px rgba(13,110,58,.5)" }}>
+          <div className="rd-toast-box" style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 60%, ${c3} 100%)`, boxShadow: modoEdicao ? "0 16px 60px rgba(15,42,74,.5)" : "0 16px 60px rgba(13,110,58,.5)" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,.04)", pointerEvents: "none" }} />
             <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <div className="rd-toast-ring" />
@@ -744,29 +744,29 @@ function ToastSucessoDiscipulado({ totalPresencas, totalPontos, porcentagem, nom
             </div>
             <div style={{ margin: "-4px 0 -4px" }}><IEQCross size={20} /></div>
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 18, fontWeight: 600, color: "#fff", margin: "0 0 8px", letterSpacing: ".04em" }}>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 600, color: "#fff", margin: "0 0 8px", letterSpacing: ".04em" }}>
                 {modoEdicao ? "Atualizado!" : "Glória a Deus!"}
               </p>
-              <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, color: "rgba(255,255,255,.75)", lineHeight: 1.55, margin: 0 }}>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: "rgba(255,255,255,.75)", lineHeight: 1.55, margin: 0 }}>
                 {modoEdicao ? <>Relatório de discipulado<br /><em>atualizado com sucesso!</em></> : <>Relatório de discipulado enviado.<br /><em>O Senhor viu cada presença!</em></>}
               </p>
             </div>
             <div style={{ width: "100%", height: 1, background: "linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent)" }} />
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-              <div style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.9)", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.9)", display: "flex", alignItems: "center", gap: 6 }}>
                 <Users2 size={11} /> {totalPresencas} Presenças
               </div>
-              <div style={{ background: "rgba(185,140,255,.25)", border: "1px solid rgba(185,140,255,.4)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight, display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ background: "rgba(184,137,46,.25)", border: "1px solid rgba(184,137,46,.4)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight, display: "flex", alignItems: "center", gap: 6 }}>
                 ⭐ {totalPontos} Pontos
               </div>
-              <div style={{ background: porcentagem >= 60 ? "rgba(185,140,255,.2)" : "rgba(200,16,46,.15)", border: `1px solid ${porcentagem >= 60 ? "rgba(185,140,255,.35)" : "rgba(200,16,46,.3)"}`, borderRadius: 100, padding: "5px 14px", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: porcentagem >= 60 ? AURA.gold : "rgba(255,255,255,.85)", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ background: porcentagem >= 60 ? "rgba(184,137,46,.2)" : "rgba(200,16,46,.15)", border: `1px solid ${porcentagem >= 60 ? "rgba(184,137,46,.35)" : "rgba(200,16,46,.3)"}`, borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: porcentagem >= 60 ? AURA.gold : "rgba(255,255,255,.85)", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={11} /> {porcentagem}% Freq.
               </div>
             </div>
-            <p style={{ fontFamily: "'Roboto',sans-serif", fontStyle: "italic", fontSize: 13, color: "rgba(255,255,255,.45)", textAlign: "center", margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, color: "rgba(255,255,255,.45)", textAlign: "center", margin: 0, lineHeight: 1.5 }}>
               "Ide, portanto, e fazei discípulos de todas as nações."
             </p>
-            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 8.5, fontWeight: 500, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.25)", margin: "-10px 0 0" }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 500, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.25)", margin: "-10px 0 0" }}>
               Mateus 28:19
             </p>
           </div>
@@ -819,7 +819,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
 
   /* ── erro ── */
   if (erro) return (
-      <div style={{ padding: "20px", textAlign: "center", color: AURA.red, fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase" }}>
+      <div style={{ padding: "20px", textAlign: "center", color: AURA.red, fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase" }}>
         {erro}
         <button className="rd-btn-icon" style={{ margin: "12px auto 0" }} onClick={() => buscarPagina(0)}>
           Tentar novamente
@@ -830,8 +830,8 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
   /* ── vazio ── */
   if (historico.length === 0 && totalElements === 0) return (
       <div style={{ padding: "48px 0", textAlign: "center" }}>
-        <History size={36} style={{ color: t.textMuted, marginBottom: 12 }} />
-        <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted }}>
+        <History size={36} style={{ color: AURA.gold, marginBottom: 12 }} />
+        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted }}>
           Nenhum relatório enviado ainda
         </p>
       </div>
@@ -854,13 +854,13 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
       <div className="rd-card" style={{ overflow: "hidden" }}>
         {/* Cabeçalho do card */}
         <div className="rd-hist-head">
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(185,140,255,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: AURA.gold, flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(184,137,46,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: AURA.gold, flexShrink: 0 }}>
             <History size={14} />
           </div>
-          <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 15, fontWeight: 500, color: t.text }}>
+          <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 500, color: t.text }}>
           Histórico de Discipulado
         </span>
-          <span style={{ marginLeft: "auto", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, whiteSpace: "nowrap" }}>
+          <span style={{ marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted, whiteSpace: "nowrap" }}>
           {totalElements} semana{totalElements !== 1 ? "s" : ""} registrada{totalElements !== 1 ? "s" : ""}
         </span>
         </div>
@@ -895,7 +895,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                         <span className="rd-hist-stat">{item.totalPresencas ?? 0} presenças</span>
                         <span className="rd-hist-stat" style={{ color: AURA.gold, fontWeight: 700 }}>{item.totalPontos ?? 0} pts</span>
                         <span style={{
-                          fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 700,
+                          fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
                           letterSpacing: ".12em", textTransform: "uppercase",
                           color: pct > 60 ? AURA.gold : AURA.red,
                           whiteSpace: "nowrap",
@@ -998,7 +998,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
             </button>
             <div style={{ minWidth: 0 }}>
               <p className="rd-eyebrow">Relatório</p>
-              <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0, wordBreak: "break-word" }}>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 500, color: t.text, margin: 0, wordBreak: "break-word" }}>
                     {formatarDataBR(item.inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(item.fim)}
               </p>
             </div>
@@ -1009,7 +1009,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
         </div>
 
         {presencas.length === 0 ? (
-            <p style={{ textAlign: "center", fontFamily: "'Roboto',sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
+            <p style={{ textAlign: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
               Sem dados de presenças
             </p>
         ) : (
@@ -1017,7 +1017,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
               <div className="rd-table-scroll">
                 <div className="rd-table-inner-sm">
                   <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 54px)" }}>
-                    <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
+                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
                     {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo, offset }) => (
                         <div key={campo} className="rd-table-col-label">
                           <span className="rd-table-col-data">{dataCulto(item.inicio, offset)}</span>
@@ -1047,7 +1047,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                             {p[campo] ? "✅" : emoji}
                           </span>
                                   {!p[campo] && p[justField] && (
-                                      <div style={{ fontSize: 8, color: AURA.gold, fontFamily: "'Roboto',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(185,140,255,.1)", borderRadius: 99, border: "1px solid rgba(185,140,255,.25)" }}>
+                                      <div style={{ fontSize: 8, color: AURA.gold, fontFamily: "'Inter',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(184,137,46,.1)", borderRadius: 99, border: "1px solid rgba(184,137,46,.25)" }}>
                                         {p[justField]}
                                       </div>
                                   )}
@@ -1460,7 +1460,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                   <div className="rd-table-scroll">
                     <div className="rd-table-inner">
                       <div className="rd-table-head" style={{ gridTemplateColumns: "1fr repeat(5, 1fr)" }}>
-                        <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
+                        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: t.textMuted }}>Membro</span>
                         {COLUNAS.map(({ tipoLabel, diaLabel, emoji, campo, offset }) => (
                             <div key={campo} className="rd-table-col-label">
                               <span className="rd-table-col-data">{dataCulto(inicio, offset)}</span>
@@ -1485,12 +1485,12 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                             ? "linear-gradient(135deg, rgba(46,213,115,.28), rgba(46,213,115,.08))"
                             : total > 0
                                 ? "linear-gradient(135deg, rgba(217,119,87,.28), rgba(217,119,87,.08))"
-                                : "linear-gradient(135deg, rgba(185,140,255,.2), rgba(185,140,255,.06))";
+                                : "linear-gradient(135deg, rgba(184,137,46,.2), rgba(184,137,46,.06))";
                         const avatarBorder = total === COLUNAS.length
                             ? "rgba(46,213,115,.45)"
                             : total > 0
                                 ? "rgba(217,119,87,.45)"
-                                : "rgba(185,140,255,.22)";
+                                : "rgba(184,137,46,.22)";
                         const nomeGlow = total === COLUNAS.length
                             ? "0 0 14px rgba(46,213,115,.45)"
                             : total > 0
@@ -1506,8 +1506,8 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                                     <p className="rd-member-id">ID #{m.id}</p>
                                   </div>
                                 </div>
-                                <div style={{ padding: "4px 14px", borderRadius: 100, background: total === COLUNAS.length ? `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})` : (isDark ? "rgba(185,140,255,.06)" : "rgba(185,140,255,.08)"), border: `1px solid ${total === COLUNAS.length ? "transparent" : t.border}` }}>
-                            <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: total === COLUNAS.length ? "#0A0A0F" : t.textMuted }}>
+                                <div style={{ padding: "4px 14px", borderRadius: 100, background: total === COLUNAS.length ? `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})` : (isDark ? "rgba(184,137,46,.06)" : "rgba(184,137,46,.08)"), border: `1px solid ${total === COLUNAS.length ? "transparent" : t.border}` }}>
+                            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: total === COLUNAS.length ? "#0A0A0F" : t.textMuted }}>
                               {total}/{COLUNAS.length}
                             </span>
                                 </div>
@@ -1529,12 +1529,12 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                                             title={temJust ? `${label} — ${justVal}` : label}
                                             style={{
                                               borderColor: marcado
-                                                  ? "rgba(185,140,255,.5)"
+                                                  ? "rgba(184,137,46,.5)"
                                                   : temJust
                                                       ? `${CORES_JUST[justVal]}66`
                                                       : t.border,
                                               background: marcado
-                                                  ? (isDark ? "rgba(185,140,255,.1)" : "rgba(185,140,255,.07)")
+                                                  ? (isDark ? "rgba(184,137,46,.1)" : "rgba(184,137,46,.07)")
                                                   : temJust
                                                       ? `${CORES_JUST[justVal]}14`
                                                       : "transparent",

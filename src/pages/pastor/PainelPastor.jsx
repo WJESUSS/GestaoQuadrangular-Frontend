@@ -5,28 +5,9 @@ import {
   MessageCircle, CheckCircle, Activity, TrendingUp, Loader2,
 } from "lucide-react";
 import api from "../../services/api.js";
+import { AURA, theme } from "../heroTheme";
 
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  yellow:    "#FDB813",
-};
 
-function theme(isDark) {
-  return {
-    bgEl:    isDark ? "rgba(18,18,26,.95)"   : "rgba(255,255,255,.95)",
-    border:  isDark ? "rgba(201,169,110,.1)"  : "rgba(201,169,110,.2)",
-    text:    isDark ? "#F5F0E8"               : "#1A1008",
-    textSec: isDark ? "#9A9588"               : "#6B5E4A",
-    textMuted: isDark ? "#6B6658"             : "#9A9080",
-    gold:      isDark ? "#C9A96E"            : "#3D3218",
-  };
-}
 
 function ScopedStyles({ t, isDark }) {
   return (
@@ -113,7 +94,7 @@ function ScopedStyles({ t, isDark }) {
       .pnp-btn-emerald {
         flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
         padding: 10px 16px; border-radius: 100px; border: none; cursor: pointer;
-        background: linear-gradient(135deg, #065f46, #059669);
+        background: linear-gradient(135deg, #B8892E, #D9AE5E);
         color: #fff; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .12em;
         text-transform: uppercase; transition: all .3s;

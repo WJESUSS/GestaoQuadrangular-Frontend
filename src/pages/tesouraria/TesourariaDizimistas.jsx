@@ -4,35 +4,10 @@ import {
     UserCheck, UserX, Search, ChevronLeft, ChevronRight,
     CheckCircle2, AlertCircle, Fingerprint, Users
 } from "lucide-react";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Tokens AURA (espelhados do DashboardLider) ───────────────────── */
-const AURA = {
-    gold:      "#C9A96E",
-    goldLight: "#E8D5A3",
-    dark:      "#0A0A0F",
-    darkEl:    "#12121A",
-    light:     "#F5F0E8",
-    red:       "#C8102E",
-    redDark:   "#9B0B1E",
-    blue:      "#003DA5",
-    blueDark:  "#002470",
-};
 
-function theme(isDark) {
-    return {
-        bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-        bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-        border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-        borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-        text:        isDark ? "#F5F0E8"                : "#1A1008",
-        textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-        textMuted:   isDark ? "#6B6658"                : "#9A9080",
-        placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-        rowBg:       isDark ? "rgba(255,255,255,.025)" : "rgba(201,169,110,.04)",
-        rowBorder:   isDark ? "rgba(201,169,110,.07)"  : "rgba(201,169,110,.12)",
-    };
-}
 
 const PAGE_SIZE = 8;
 

@@ -10,40 +10,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Paleta ───────────────────────────────────────────────────────────── */
-const AURA = {
-  gold:       "#C9A96E",
-  goldLight:  "#E8D5A3",
-  red:        "#C8102E",
-  redDark:    "#9B0B1E",
-  blue:       "#003DA5",
-  blueDark:   "#002470",
-  yellow:     "#FDB813",
-  yellowDark: "#C48C00",
-  green:      "#16a34a",
-};
 
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.97)"    : "#D8D4CC",
-    bgInput:     isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"  : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.18)" : "rgba(201,169,110,.3)",
-    text:        isDark ? "#F5F0E8"               : "#1A1008",
-    textSec:     isDark ? "#9A9588"               : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"               : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)" : "rgba(201,169,110,.08)",
-    glow2:       isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.06)",
-    placeholder: isDark ? "rgba(154,149,136,.35)" : "rgba(107,94,74,.35)",
-    rowHov:      isDark ? "rgba(201,169,110,.04)" : "rgba(201,169,110,.05)",
-    warnBg:      isDark ? "rgba(253,184,19,.07)"  : "rgba(253,184,19,.06)",
-    gold:        isDark ? "#C9A96E" : "#3D3218",
-    goldSoft:    isDark ? "rgba(201,169,110,.06)" : "rgba(61,50,24,.08)",
-    goldHover:   isDark ? "rgba(201,169,110,.12)" : "rgba(61,50,24,.14)",
-  };
-}
 
 /* ─── Config ───────────────────────────────────────────────────────────── */
 const COLUNAS = [
@@ -55,10 +25,10 @@ const COLUNAS = [
 ];
 
 const JUST_CONFIG = {
-  Trabalho: { emoji: "💼", color: "#6366F1", bg: "rgba(99,102,241,.1)",  border: "rgba(99,102,241,.28)" },
-  Doença:   { emoji: "🤒", color: "#DC2626", bg: "rgba(220,38,38,.1)",   border: "rgba(220,38,38,.28)"  },
-  Viagem:   { emoji: "✈️", color: "#0891B2", bg: "rgba(8,145,178,.1)",   border: "rgba(8,145,178,.28)"  },
-  Outro:    { emoji: "📝", color: AURA.yellowDark, bg: "rgba(217,119,6,.1)", border: "rgba(217,119,6,.28)" },
+  Trabalho: { emoji: "💼", color: "#1E4571", bg: "rgba(30,69,113,.10)",  border: "rgba(30,69,113,.28)" },
+  Doença:   { emoji: "🤒", color: "#B8892E", bg: "rgba(184,137,46,.12)", border: "rgba(184,137,46,.30)" },
+  Viagem:   { emoji: "✈️", color: "#0F2A4A", bg: "rgba(15,42,74,.10)",   border: "rgba(15,42,74,.28)" },
+  Outro:    { emoji: "📝", color: "#D9AE5E", bg: "rgba(217,174,94,.14)", border: "rgba(217,174,94,.32)" },
 };
 
 const PAGE_SIZES = [6, 12, 24];

@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
-import FundoGlass from "../../components/FundoGlass.jsx";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
@@ -44,7 +43,7 @@ function IEQCross({ size = 36 }) {
 function GlobalStyles({ t, isDark }) {
   return (
       <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
 
       @keyframes dl-spin   { to { transform: rotate(360deg); } }
       @keyframes dl-pulse  { 0%,100%{opacity:.2;} 50%{opacity:.05;} }
@@ -55,10 +54,8 @@ function GlobalStyles({ t, isDark }) {
       .dl-blink  { animation: dl-blink 2s ease-in-out infinite; }
 
       .dl-root {
-        font-family: 'Roboto', sans-serif;
-        background: ${isDark
-        ? "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.66) 45%, rgba(0,0,0,.78) 100%)"
-        : "linear-gradient(180deg, rgba(241,241,243,.72) 0%, rgba(241,241,243,.86) 50%, rgba(241,241,243,.94) 100%)"};
+        font-family: 'Inter', sans-serif;
+        background: ${t.bg};
         color: ${t.text};
         min-height: 100vh;
         position: relative;
@@ -66,13 +63,6 @@ function GlobalStyles({ t, isDark }) {
         padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
         transition: background .3s, color .3s;
         isolation: isolate;
-      }
-      .dl-glow {
-        position: fixed; inset: 0; pointer-events: none; z-index: 1;
-        background:
-          radial-gradient(ellipse at 15% 0%, ${t.glow1} 0%, transparent 50%),
-          radial-gradient(ellipse at 85% 100%, ${t.glow2} 0%, transparent 50%);
-        transition: background .3s;
       }
       .dl-content {
         position: relative; z-index: 3;
@@ -92,26 +82,26 @@ function GlobalStyles({ t, isDark }) {
       .dl-avatar-wrap { position: relative; flex-shrink: 0; }
       .dl-ring {
         position: absolute; border-radius: 50%;
-        border: 1px solid rgba(185,140,255,.22);
+        border: 1px solid rgba(184,137,46,.22);
         top: 50%; left: 50%; transform: translate(-50%,-50%);
       }
       .dl-avatar {
         width: 54px; height: 54px; border-radius: 50%;
-        border: 1.5px solid rgba(185,140,255,.32);
+        border: 1.5px solid rgba(184,137,46,.32);
         background: ${isDark ? "rgba(40,40,44,.99)" : "#fff"};
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
-        box-shadow: 0 0 0 6px ${isDark ? "rgba(185,140,255,.06)" : "rgba(155,92,255,.06)"};
+        box-shadow: 0 0 0 6px ${isDark ? "rgba(184,137,46,.06)" : "rgba(15,42,74,.06)"};
       }
       .dl-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
       .dl-title-block { flex: 1; min-width: 0; }
       .dl-eyebrow {
         font-size: 9.5px; font-weight: 500; letter-spacing: .24em;
-        text-transform: uppercase; color: rgba(185,140,255,.72);
+        text-transform: uppercase; color: rgba(184,137,46,.72);
         margin: 0 0 5px;
       }
       .dl-title {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: clamp(18px, 4vw, 23px);
         font-weight: 700; color: ${t.text};
         margin: 0; line-height: 1.2; letter-spacing: -.02em;
@@ -126,7 +116,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 8px; flex-shrink: 0;
       }
       .dl-btn-ico {
-        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(155,92,255,.08)"};
+        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(15,42,74,.08)"};
         border: 1px solid ${t.border};
         border-radius: 12px; width: 38px; height: 38px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -134,25 +124,25 @@ function GlobalStyles({ t, isDark }) {
         backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
         transition: all .25s; flex-shrink: 0;
       }
-      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(185,140,255,.09)" : "rgba(155,92,255,.12)"}; }
+      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(184,137,46,.09)" : "rgba(15,42,74,.12)"}; }
       .dl-btn-exit {
         display: flex; align-items: center; gap: 7px;
         padding: 0 16px; height: 38px; border-radius: 100px;
         cursor: pointer;
         background: transparent; color: ${AURA.red};
-        border: 1px solid rgba(255,154,165,.28);
-        font-family: 'Roboto', sans-serif;
+        border: 1px solid rgba(217,174,94,.28);
+        font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .12em;
         text-transform: uppercase; transition: all .3s; flex-shrink: 0;
       }
-      .dl-btn-exit:hover { background: rgba(255,154,165,.1); border-color: ${AURA.red}; }
+      .dl-btn-exit:hover { background: rgba(217,174,94,.1); border-color: ${AURA.red}; }
 
       /* Botão voltar pequeno */
       .dl-btn-back {
         display: flex; align-items: center; justify-content: center;
         width: 32px; height: 32px; border-radius: 10px;
         border: 1px solid ${t.border}; cursor: pointer;
-        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(155,92,255,.08)"};
+        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(15,42,74,.08)"};
         color: ${t.textMuted}; font-size: 14px;
         transition: all .25s; flex-shrink: 0;
       }
@@ -163,18 +153,18 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-divider::before {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to right, transparent, rgba(185,140,255,.3));
+        background: linear-gradient(to right, transparent, rgba(184,137,46,.3));
       }
       .dl-divider::after {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to left, transparent, rgba(185,140,255,.3));
+        background: linear-gradient(to left, transparent, rgba(184,137,46,.3));
       }
       .dl-divider-dot { width: 4px; height: 4px; border-radius: 50%; background: ${AURA.gold}; box-shadow: 0 0 10px ${AURA.gold}; }
 
       .dl-badge {
         display: inline-flex; align-items: center; gap: 8px;
-        background: ${isDark ? "rgba(185,140,255,.07)" : "rgba(155,92,255,.08)"};
-        border: 1px solid ${isDark ? "rgba(185,140,255,.16)" : "rgba(155,92,255,.2)"};
+        background: ${isDark ? "rgba(184,137,46,.07)" : "rgba(15,42,74,.08)"};
+        border: 1px solid ${isDark ? "rgba(184,137,46,.16)" : "rgba(15,42,74,.2)"};
         border-radius: 100px; padding: 9px 20px;
         font-size: 10px; font-weight: 500; letter-spacing: .12em;
         text-transform: uppercase; color: ${AURA.gold};
@@ -187,11 +177,11 @@ function GlobalStyles({ t, isDark }) {
 
       .dl-alert-aprovado {
         margin-bottom: 24px; padding: 16px 22px; border-radius: 16px;
-        background: ${isDark ? "rgba(122,61,224,.18)" : "rgba(122,61,224,.1)"};
-        color: #fff; display: flex; align-items: center; gap: 12px;
-        font-family: 'Roboto', sans-serif; font-size: 11px;
-        font-weight: 500; letter-spacing: .1em;
-        border: 1px solid rgba(155,92,255,.28);
+        background: ${isDark ? "rgba(30,122,70,.18)" : "rgba(30,122,70,.10)"};
+        color: ${isDark ? "#fff" : "#12233B"}; display: flex; align-items: center; gap: 12px;
+        font-family: 'Inter', sans-serif; font-size: 11px;
+        font-weight: 500; letter-spacing: .05em;
+        border: 1px solid ${isDark ? "rgba(30,122,70,.4)" : "rgba(30,122,70,.35)"};
         backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       }
 
@@ -202,27 +192,33 @@ function GlobalStyles({ t, isDark }) {
       @media(max-width: 480px) { .dl-kpi-grid { grid-template-columns: 1fr; } }
 
       .dl-kpi-hero {
-        background: ${isDark
-        ? "linear-gradient(150deg, rgba(155,92,255,.5), rgba(64,72,255,.32) 55%, rgba(40,40,44,.2))"
-        : "linear-gradient(150deg, rgba(155,92,255,.28), rgba(64,72,255,.18) 55%, rgba(155,92,255,.06))"};
-        border: 1px solid ${isDark ? "rgba(185,140,255,.28)" : "rgba(155,92,255,.25)"};
+        background: linear-gradient(160deg, #1E4571 0%, #0F2A4A 55%, #0A1D33 100%);
+        border: 1px solid rgba(217,174,94,.3);
         border-radius: 24px; padding: 30px 28px; position: relative; overflow: hidden;
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        box-shadow: none;
       }
       .dl-kpi-stripes {
         position: absolute; inset: 0; pointer-events: none;
         background-image: repeating-linear-gradient(
-          -55deg, rgba(255,255,255,.02) 0 9px, transparent 9px 18px
+          -55deg, rgba(255,255,255,.03) 0 9px, transparent 9px 18px
         );
       }
       .dl-kpi-inner { position: relative; z-index: 1; }
+      .dl-kpi-hero .dl-badge {
+        background: rgba(217,174,94,.14);
+        border: 1px solid rgba(217,174,94,.35);
+        color: #F0DFB8;
+      }
+      .dl-kpi-hero .dl-progress-track {
+        background: rgba(255,255,255,.16);
+      }
       .dl-big-num {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Fraunces', serif;
         font-size: clamp(48px, 10vw, 62px);
-        font-weight: 800; line-height: 1; margin: 12px 0 4px;
+        font-weight: 600; line-height: 1; margin: 12px 0 4px;
         background: linear-gradient(180deg, #fff, rgba(255,255,255,.72));
         -webkit-background-clip: text; background-clip: text; color: transparent;
-        letter-spacing: -.04em;
+        letter-spacing: -.02em;
       }
       .dl-kpi-label {
         font-size: 10px; font-weight: 600; letter-spacing: .22em;
@@ -244,7 +240,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-progress-fill {
         height: 100%; border-radius: 99px;
-        background: linear-gradient(90deg, ${AURA.gold}, #FF2CB0);
+        background: linear-gradient(90deg, ${AURA.gold}, ${AURA.goldLight});
         transition: width 1.2s cubic-bezier(.4,0,.2,1);
       }
       .dl-progress-fill.done { background: linear-gradient(90deg, ${AURA.goldLight}, ${AURA.gold}); }
@@ -271,31 +267,30 @@ function GlobalStyles({ t, isDark }) {
         margin-top: 20px; width: 100%; padding: 13px; border-radius: 100px;
         border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.moss}, ${AURA.mossDeep});
-        color: #fff; font-family: 'Roboto', sans-serif;
+        color: #fff; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .16em;
         text-transform: uppercase; transition: all .3s;
-        box-shadow: 0 8px 24px rgba(155,92,255,.35);
       }
       .dl-kpi-action-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
       .dl-kpi-action-btn-ghost {
         margin-top: 20px; width: 100%; padding: 13px; border-radius: 100px;
         border: 1px solid ${t.border}; cursor: pointer;
         background: transparent; color: ${t.textSec};
-        font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600;
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .16em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(185,140,255,.07)" : "rgba(155,92,255,.07)"}; }
+      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(184,137,46,.07)" : "rgba(15,42,74,.07)"}; }
 
       .dl-section-hd {
         display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
       }
       .dl-section-title {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 16px; font-weight: 700; color: ${t.text}; letter-spacing: -.01em;
       }
       .dl-section-title::before {
         content: ''; width: 3px; height: 15px; border-radius: 99px;
-        background: linear-gradient(180deg, ${AURA.gold}, #FF2CB0);
+        background: linear-gradient(180deg, ${AURA.gold}, ${AURA.goldLight});
         display: inline-block; margin-right: 10px; vertical-align: -2px;
       }
 
@@ -318,7 +313,9 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-menu-card::before {
         content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 2px;
-        border-radius: 0 0 99px 99px; opacity: 0; transition: all .35s;
+        border-radius: 0 0 99px 99px;
+        background: linear-gradient(90deg, transparent, rgba(184,137,46,.4), transparent);
+        opacity: 0; transition: all .35s;
       }
       .dl-menu-card:hover {
         transform: translateY(-5px);
@@ -350,7 +347,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(185,140,255,.28), transparent);
+        background: linear-gradient(90deg, transparent, rgba(184,137,46,.28), transparent);
       }
       .dl-card-head {
         padding: 22px 24px;
@@ -359,7 +356,7 @@ function GlobalStyles({ t, isDark }) {
         flex-wrap: wrap; gap: 12px;
       }
       .dl-card-head-title {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 18px; font-weight: 700; color: ${t.text}; margin: 0; letter-spacing: -.01em;
       }
       .dl-card-head-sub {
@@ -370,21 +367,21 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 8px;
         padding: 11px 22px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-        color: #12131C; font-family: 'Roboto', sans-serif;
+        color: #12131C; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .35s;
-        box-shadow: 0 8px 24px rgba(185,140,255,.3); flex-shrink: 0;
+        box-shadow: none; flex-shrink: 0;
       }
-      .dl-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(185,140,255,.4); }
+      .dl-btn-gold:hover { transform: translateY(-2px); filter: brightness(1.05); }
       .dl-btn-ghost {
         display: flex; align-items: center; gap: 7px;
         padding: 11px 18px; border-radius: 100px;
         border: 1px solid ${t.border}; cursor: pointer;
         background: transparent; color: ${t.textSec};
-        font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 600;
+        font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(185,140,255,.07)" : "rgba(155,92,255,.07)"}; }
+      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(184,137,46,.07)" : "rgba(15,42,74,.07)"}; }
 
       .dl-members-list {
         padding: 16px 24px 22px;
@@ -393,18 +390,18 @@ function GlobalStyles({ t, isDark }) {
       .dl-member-row {
         display: flex; align-items: center; justify-content: space-between;
         padding: 11px 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(155,92,255,.05)"};
-        border: 1px solid ${isDark ? "rgba(185,140,255,.1)" : "rgba(155,92,255,.12)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(15,42,74,.05)"};
+        border: 1px solid ${isDark ? "rgba(184,137,46,.1)" : "rgba(15,42,74,.12)"};
         border-radius: 14px; transition: all .2s; gap: 10px;
         min-width: 0; width: 100%;
       }
-      .dl-member-row:hover { border-color: rgba(185,140,255,.4); background: ${isDark ? "rgba(185,140,255,.06)" : "rgba(155,92,255,.08)"}; }
+      .dl-member-row:hover { border-color: rgba(184,137,46,.4); background: ${isDark ? "rgba(184,137,46,.06)" : "rgba(15,42,74,.08)"}; }
       .dl-member-avatar {
         width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(185,140,255,.35), rgba(155,92,255,.12));
-        border: 1px solid rgba(155,92,255,.28);
+        background: linear-gradient(135deg, rgba(184,137,46,.35), rgba(15,42,74,.12));
+        border: 1px solid rgba(15,42,74,.28);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Roboto', sans-serif; font-weight: 700;
+        font-family: 'Inter', sans-serif; font-weight: 700;
         font-size: 15px; color: ${AURA.moss};
       }
       .dl-member-name {
@@ -417,17 +414,17 @@ function GlobalStyles({ t, isDark }) {
         color: ${t.textMuted}; padding: 6px; border-radius: 9px;
         display: flex; align-items: center; flex-shrink: 0; transition: all .2s;
       }
-      .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(255,154,165,.1); }
+      .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(217,174,94,.1); }
       .dl-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(185,140,255,.16), transparent);
+        background: linear-gradient(90deg, transparent, rgba(184,137,46,.16), transparent);
         margin: 2px 0;
       }
 
       .dl-search-wrap { position: relative; margin-bottom: 14px; }
       .dl-search-icon {
         position: absolute; left: 14px; top: 50%;
-        transform: translateY(-50%); color: ${isDark ? "rgba(185,140,255,.65)" : "rgba(155,92,255,.6)"};
+        transform: translateY(-50%); color: ${isDark ? "rgba(184,137,46,.65)" : "rgba(15,42,74,.6)"};
         opacity: .9;
         pointer-events: none;
       }
@@ -436,15 +433,15 @@ function GlobalStyles({ t, isDark }) {
         background: ${t.bgInput}; border: 1px solid ${t.borderInput};
         color: ${t.text}; padding: 13px 16px 13px 44px;
         border-radius: 14px; outline: none;
-        font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 400;
+        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400;
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .dl-input:focus {
-        border-color: rgba(155,92,255,.55);
-        background: ${isDark ? "rgba(185,140,255,.08)" : "rgba(155,92,255,.08)"};
-        box-shadow: 0 0 0 4px rgba(155,92,255,.14);
+        border-color: rgba(15,42,74,.55);
+        background: ${isDark ? "rgba(184,137,46,.08)" : "rgba(15,42,74,.08)"};
+        box-shadow: 0 0 0 4px rgba(15,42,74,.14);
       }
-      .dl-input { font-family: 'Roboto', sans-serif; }
+      .dl-input { font-family: 'Inter', sans-serif; }
       .dl-input::placeholder { color: ${t.placeholder}; }
 
       .dl-modal-backdrop {
@@ -493,12 +490,12 @@ function GlobalStyles({ t, isDark }) {
         background: ${t.bgInput}; border: 1px solid ${t.borderInput};
         color: ${t.text}; padding: 14px 16px;
         border-radius: 14px; outline: none; min-height: 110px;
-        font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 400;
+        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400;
         transition: all .25s;
       }
       .dl-textarea:focus {
-        border-color: rgba(155,92,255,.55);
-        box-shadow: 0 0 0 4px rgba(155,92,255,.14);
+        border-color: rgba(15,42,74,.55);
+        box-shadow: 0 0 0 4px rgba(15,42,74,.14);
       }
       .dl-textarea::placeholder { color: ${t.placeholder}; }
 
@@ -513,9 +510,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-loading {
         min-height: 100vh; display: flex;
         align-items: center; justify-content: center;
-        background: ${isDark
-        ? "linear-gradient(180deg, rgba(0,0,0,.66) 0%, rgba(0,0,0,.82) 45%, rgba(0,0,0,.9) 100%)"
-        : "linear-gradient(180deg, rgba(241,241,243,.72) 0%, rgba(241,241,243,.86) 50%, rgba(241,241,243,.94) 100%)"};
+        background: ${t.bg};
         position: relative;
       }
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }
@@ -636,8 +631,6 @@ export default function DashboardLider() {
     return (
         <div className="dl-loading">
           <GlobalStyles t={t} isDark={isDark} />
-          <FundoGlass />
-          <div className="dl-glow" />
           <TelaCarregando isDark={isDark} minHeight="100vh" background="transparent" />
         </div>
     );
@@ -645,21 +638,19 @@ export default function DashboardLider() {
 
   /* ── 7 módulos (Histórico removido) ── */
   const menuItems = [
-    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: AURA.moss, gradient: `${AURA.mossDeep},${AURA.moss}` },
-    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: AURA.pink, gradient: `rgba(185,140,255,.8),${AURA.pink}` },
-    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.moss, gradient: `${AURA.mossDeep},${AURA.moss}` },
-    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold, gradient: `rgba(185,140,255,.8),${AURA.gold}` },
-    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
-    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: AURA.goldLight, gradient: `${AURA.gold},${AURA.goldLight}` },
-    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: AURA.pink, gradient: `rgba(185,140,255,.8),${AURA.pink}` },
-    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: AURA.moss, gradient: `${AURA.mossDeep},${AURA.moss}` },
+    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: AURA.moss },
+    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: AURA.pink },
+    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.moss },
+    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold },
+    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: AURA.goldLight },
+    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: AURA.goldLight },
+    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: AURA.pink },
+    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: AURA.moss },
   ];
 
   return (
-      <div className="dl-root">
+      <div className={`dl-root ieq-app${isDark ? " ieq-dark" : ""}`}>
         <GlobalStyles t={t} isDark={isDark} />
-        <FundoGlass />
-        <div className="dl-glow" />
 
         <AnimatePresence>
           {showBoasVindas && !loading && (
@@ -791,9 +782,9 @@ export default function DashboardLider() {
                         <div
                             className="dl-kpi-action-icon"
                             style={{
-                              background: isAprovado ? "rgba(122,61,224,.14)" : isAnalise ? "rgba(227,207,255,.12)" : "rgba(185,140,255,.09)",
-                              color: isAprovado ? AURA.roxoLight : isAnalise ? AURA.goldLight : AURA.gold,
-                              border: `1px solid ${isAprovado ? "rgba(122,61,224,.3)" : isAnalise ? "rgba(227,207,255,.28)" : "rgba(185,140,255,.22)"}`,
+                              background: isAprovado ? "rgba(30,122,70,.14)" : isAnalise ? "rgba(217,174,94,.12)" : "rgba(184,137,46,.08)",
+                              color: isAprovado ? "#1E7A46" : isAnalise ? AURA.goldLight : AURA.gold,
+                              border: `1px solid ${isAprovado ? "rgba(30,122,70,.35)" : isAnalise ? "rgba(217,174,94,.3)" : "rgba(184,137,46,.22)"}`,
                             }}
                         >
                           {isAprovado
@@ -809,13 +800,13 @@ export default function DashboardLider() {
                       </div>
                       <div>
                         {isAnalise ? (
-                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(227,207,255,.09)", border: "1px solid rgba(227,207,255,.28)", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
+                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(217,174,94,.10)", border: "1px solid rgba(217,174,94,.3)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
                               Consultando Pastor…
                             </div>
                         ) : podeSolicitar ? (
                             <button
                                 className="dl-kpi-action-btn"
-                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.roxo}, ${AURA.roxoDeep})`, boxShadow: "0 6px 20px rgba(122,61,224,.28)" } : undefined}
+                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, color: "#12131C", boxShadow: "0 6px 20px rgba(184,137,46,.30)" } : undefined}
                                 onClick={() => setShowModalMultiplicacao(true)}
                             >
                               {isAprovado ? "Nova Solicitação" : "Solicitar Mult."}
@@ -834,7 +825,7 @@ export default function DashboardLider() {
                     <span className="dl-section-title">Módulos</span>
                   </div>
                   <div className="dl-menu-grid">
-                    {menuItems.map(({ icon, name, desc, aba, color, gradient }) => (
+                    {menuItems.map(({ icon, name, desc, aba, color }) => (
                         <motion.div
                             key={aba}
                             className="dl-menu-card"
@@ -842,7 +833,6 @@ export default function DashboardLider() {
                             whileTap={{ scale: .96 }}
                             onClick={() => (aba === "acompanhamento-modal" ? setShowAcompanhamento(true) : setAbaAtiva(aba))}
                         >
-                          <style>{`.dl-menu-card:hover::before{ background: linear-gradient(135deg,${gradient}); }`}</style>
                           <div className="dl-menu-icon" style={{ background: `${color}18`, color }}>
                             {icon}
                           </div>
@@ -881,7 +871,7 @@ export default function DashboardLider() {
                           </React.Fragment>
                       ))}
                       {membros.length === 0 && (
-                          <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+                          <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
                             Nenhum membro vinculado.
                           </p>
                       )}
@@ -932,16 +922,16 @@ export default function DashboardLider() {
                 <motion.div className="dl-modal-multi-box" initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: "tween", duration: .28 }}>
                   <div style={{ textAlign: "center", marginBottom: 26 }}>
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(185,140,255,.26)", borderRadius: "50%" }} />
-                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(185,140,255,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
-                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(40,40,44,.99)" : "#fff", border: "1.5px solid rgba(185,140,255,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(184,137,46,.26)", borderRadius: "50%" }} />
+                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(184,137,46,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
+                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(40,40,44,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
                         <IEQCross size={32} />
                       </div>
                     </div>
-                    <h2 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
+                    <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
                       Plano de Multiplicação
                     </h2>
-                    <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: t.textSec }}>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.textSec }}>
                       Informe o novo líder e o local da nova célula.
                     </p>
                   </div>
@@ -950,7 +940,7 @@ export default function DashboardLider() {
                   <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
                     <button className="dl-btn-ghost" style={{ flex: 1 }} onClick={() => setShowModalMultiplicacao(false)}>Cancelar</button>
                     <button
-                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", border: "none", borderRadius: "100px", cursor: "pointer", background: `linear-gradient(135deg,${AURA.mossDeep},${AURA.moss})`, color: "#fff", fontFamily: "'Roboto',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .3s", opacity: solicitandoMulti ? .6 : 1 }}
+                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", border: "none", borderRadius: "100px", cursor: "pointer", background: `linear-gradient(135deg,${AURA.mossDeep},${AURA.moss})`, color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .3s", opacity: solicitandoMulti ? .6 : 1 }}
                         onClick={solicitarMultiplicacao}
                         disabled={solicitandoMulti}
                     >
@@ -1009,8 +999,8 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
       <div style={{ padding: "22px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexShrink: 0 }}>
           <div>
-            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(185,140,255,.65)", margin: "0 0 4px" }}>Vincular</p>
-            <h2 style={{ fontFamily: "'Roboto',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(184,137,46,.65)", margin: "0 0 4px" }}>Vincular</p>
+            <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex" }}>
             <X size={20} />
@@ -1018,9 +1008,9 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
         </div>
 
         <div style={{ position: "relative", marginBottom: 14, flexShrink: 0 }}>
-          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? "rgba(185,140,255,.65)" : "rgba(155,92,255,.6)", opacity: .9, pointerEvents: "none" }} />
+          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? "rgba(184,137,46,.65)" : "rgba(15,42,74,.6)", opacity: .9, pointerEvents: "none" }} />
           <input
-              style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "13px 16px 13px 44px", borderRadius: 13, outline: "none", fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, transition: "all .25s" }}
+              style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "13px 16px 13px 44px", borderRadius: 13, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, transition: "all .25s" }}
               placeholder="Buscar por nome…"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
@@ -1036,28 +1026,28 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
               filtrados.map((m) => (
                   <div
                       key={m.id}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(155,92,255,.06)", border: `1px solid ${isDark ? "rgba(185,140,255,.11)" : "rgba(155,92,255,.14)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(185,140,255,.45)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(185,140,255,.11)" : "rgba(155,92,255,.14)"; }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(15,42,74,.06)", border: `1px solid ${isDark ? "rgba(184,137,46,.11)" : "rgba(15,42,74,.14)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(184,137,46,.45)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(184,137,46,.11)" : "rgba(15,42,74,.14)"; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(185,140,255,.4),rgba(155,92,255,.14))", border: "1px solid rgba(155,92,255,.32)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Roboto',sans-serif", fontWeight: 700, fontSize: 14, color: AURA.moss }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(184,137,46,.4),rgba(15,42,74,.14))", border: "1px solid rgba(15,42,74,.32)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 14, color: AURA.moss }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
-                      <span style={{ fontFamily: "'Roboto',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {m.nome}
                       </span>
                     </div>
                     <button
                         onClick={() => vincular(m.id)}
-                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})`, color: "#12131C", fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
+                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})`, color: "#12131C", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
                     >
                       <Plus size={11} /> Vincular
                     </button>
                   </div>
               ))
           ) : (
-              <p style={{ textAlign: "center", paddingTop: 28, fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+              <p style={{ textAlign: "center", paddingTop: 28, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
                 Nenhum membro encontrado.
               </p>
           )}

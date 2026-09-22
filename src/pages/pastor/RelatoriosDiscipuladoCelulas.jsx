@@ -7,41 +7,10 @@ import {
     Loader2, History, Star, AlertCircle, X, Building2, TrendingUp, Award,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Tokens AURA (mesmo padrão do PastorPage / PainelPastor) ─────────── */
-const AURA = {
-    gold:      "#C9A96E",
-    goldLight: "#E8D5A3",
-    dark:      "#0A0A0F",
-    darkEl:    "#12121A",
-    light:     "#F5F0E8",
-    red:       "#C8102E",
-    redDark:   "#9B0B1E",
-    blue:      "#003DA5",
-    blueDark:  "#002470",
-    yellow:    "#FDB813",
-    green:     "#1E7A4C",
-    greenDark: "#125C39",
-    purple:    "#5B2A6E",
-};
 
-function theme(isDark) {
-    return {
-        bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "#D8D4CC",
-        bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-        border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-        borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-        text:        isDark ? "#F5F0E8"                : "#1A1008",
-        textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-        textMuted:   isDark ? "#6B6658"                : "#9A9080",
-        gold:        isDark ? "#C9A96E"                : "#3D3218",
-        goldLight:   isDark ? "#E8D5A3"                : "#A68B4B",
-        goldSoft:    isDark ? "rgba(201,169,110,.06)"  : "rgba(122,101,48,.08)",
-        goldHover:   isDark ? "rgba(201,169,110,.12)"  : "rgba(122,101,48,.14)",
-        optionBg:    isDark ? "#12121A"                : "#F5F0E8",
-    };
-}
 
 const BASE = "/api/acompanhamento/discipulado";
 

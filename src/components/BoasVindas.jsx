@@ -3,27 +3,10 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { getFotoUrl } from "../utils/foto.js";
 import VersiculoAleatorio from "./VersiculoAleatorio.jsx";
+import { AURA, theme } from "../pages/heroTheme";
 
 /* ─── Tokens AURA (espelhados das páginas Pastor/Secretaria) ─────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-};
 
-function theme(isDark) {
-  return {
-    bgEl:      isDark ? "rgba(18,18,26,.97)"    : "rgba(232,241,251,.97)",
-    border:    isDark ? "rgba(201,169,110,.14)" : "rgba(0,61,165,.16)",
-    text:      isDark ? "#FFFFFF"               : "#0A1628",
-    textSec:   isDark ? "#9A9588"               : "#1E3A5F",
-    textMuted: isDark ? "#6B6658"               : "#4A6585",
-  };
-}
 
 /* ─── Detecta gênero pelo cargo (ex: "Pastora", "Secretária") ─── */
 function isFeminino(cargo) {

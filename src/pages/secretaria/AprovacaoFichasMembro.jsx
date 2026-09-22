@@ -6,33 +6,9 @@ import {
   User, Clock, Search, FileText, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  green:     "#059669",
-  yellow:    "#FDB813",
-};
 
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-    optionBg:    isDark ? "#12121A"                : "#F0EAE0",
-  };
-}
 
 export default function AprovacaoFichasMembro({ isDark }) {
   const t = theme(isDark);
@@ -90,7 +66,7 @@ export default function AprovacaoFichasMembro({ isDark }) {
 
   const statusBadge = (s) => {
     const map = {
-      PENDENTE: { color: "#D97706", bg: "rgba(217,119,6,.1)", label: "Pendente" },
+      PENDENTE: { color: "#B8892E", bg: "rgba(184,137,46,.1)", label: "Pendente" },
       APROVADO: { color: "#059669", bg: "rgba(5,150,105,.1)", label: "Aprovado" },
       REJEITADO: { color: "#DC2626", bg: "rgba(220,38,38,.1)", label: "Rejeitado" },
     };
@@ -255,9 +231,9 @@ export default function AprovacaoFichasMembro({ isDark }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * .03 }}
               style={{
-                background: t.bgEl, border: `1px solid ${f.status === "PENDENTE" ? "rgba(217,119,6,.25)" : t.border}`,
+                background: t.bgEl, border: `1px solid ${f.status === "PENDENTE" ? "rgba(184,137,46,.25)" : t.border}`,
                 borderRadius: 14, overflow: "hidden",
-                borderLeft: f.status === "PENDENTE" ? `3px solid #D97706` : `3px solid transparent`,
+                borderLeft: f.status === "PENDENTE" ? `3px solid #B8892E` : `3px solid transparent`,
               }}
             >
               <div style={{ padding: "14px 16px", cursor: "pointer" }} onClick={() => verDetalhe(f.id)}>

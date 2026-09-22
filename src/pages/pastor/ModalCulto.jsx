@@ -6,18 +6,9 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Paleta (mesma dos outros módulos) ─────────────────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-  green:     "#16a34a",
-};
 
 const TIPO_CORES = {
   "Vitória":    { color: "#16a34a", bg: "rgba(22,163,74,.12)",  border: "rgba(22,163,74,.30)" },
@@ -196,7 +187,7 @@ export default function ModalCulto({ culto, isDark, t, onClose }) {
             {[
               { label: "Membros",     value: culto.quantidadeMembros || 0,         color: t.text,    icon: Users      },
               { label: "Visitantes",  value: culto.visitantesSimpatizantes || 0,   color: AURA.gold, icon: Users      },
-              { label: "Crianças",    value: culto.totalCriancas || 0,             color: "#8B5CF6", icon: Baby       },
+              { label: "Crianças",    value: culto.totalCriancas || 0,             color: "#B8892E", icon: Baby       },
               { label: "Diáconos",    value: culto.quantidadeDiaconos || 0,        color: AURA.green, icon: UserCheck },
               { label: "Total Geral", value: tot,                                  color: AURA.blue, icon: null       },
             ].map((k, i) => (

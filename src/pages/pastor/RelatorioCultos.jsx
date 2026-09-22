@@ -20,39 +20,10 @@ import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 import ModalCulto from "./ModalCulto.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Paleta ───────────────────────────────────────────────────────────── */
-const AURA = {
-  gold:       "#C9A96E",
-  goldLight:  "#E8D5A3",
-  red:        "#C8102E",
-  redDark:    "#9B0B1E",
-  blue:       "#003DA5",
-  blueDark:   "#002470",
-  yellow:     "#FDB813",
-  yellowDark: "#C48C00",
-  green:      "#16a34a",
-  greenDark:  "#15803d",
-  purple:     "#8B5CF6",
-  orange:     "#F97316",
-};
 
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.97)"    : "#FFFFFF",
-    bgInput:     isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"  : "rgba(201,169,110,.2)",
-    borderInput: isDark ? "rgba(201,169,110,.18)" : "rgba(201,169,110,.3)",
-    text:        isDark ? "#F5F0E8"               : "#1A1008",
-    textSec:     isDark ? "#9A9588"               : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"               : "#9A9080",
-    placeholder: isDark ? "rgba(154,149,136,.35)" : "rgba(107,94,74,.35)",
-    gold:        isDark ? "#C9A96E" : "#3D3218",
-    goldSoft:    isDark ? "rgba(201,169,110,.06)" : "rgba(61,50,24,.08)",
-    goldHover:   isDark ? "rgba(201,169,110,.12)" : "rgba(61,50,24,.14)",
-  };
-}
 
 /* ─── Config ───────────────────────────────────────────────────────────── */
 const TIPOS_CULTO = ["Todos", "Vitória", "Santa Ceia", "Celebração", "Missões", "Outro"];

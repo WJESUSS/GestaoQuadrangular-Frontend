@@ -4,13 +4,9 @@ import {
   Loader2, Save, User, Calendar, Wallet,
   Trophy, AlertCircle, CheckCircle2,
 } from "lucide-react";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Tokens AURA ─────────────────────────────────────────────────── */
-const AURA = {
-  gold: "#C9A96E", goldLight: "#E8D5A3",
-  red: "#C8102E",  redDark: "#9B0B1E",
-  blue: "#003DA5", blueDark: "#002470",
-};
 
 function tk(isDark) {
   return {

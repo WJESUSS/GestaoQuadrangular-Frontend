@@ -8,38 +8,10 @@ import {
 } from "lucide-react";
 import api from "../../services/api.js";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Tokens AURA ─────────────────────────────────────────────────────── */
-const AURA = {
-    gold:      "#C9A96E",
-    goldLight: "#E8D5A3",
-    dark:      "#0A0A0F",
-    darkEl:    "#12121A",
-    light:     "#F5F0E8",
-    red:       "#C8102E",
-    redDark:   "#9B0B1E",
-    blue:      "#003DA5",
-    blueDark:  "#002470",
-    yellow:    "#FDB813",
-};
 
-function theme(isDark) {
-    return {
-        bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-        bgInput:     isDark ? "#1C1C26"                : "#F0EBE0",
-        border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-        borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-        text:        isDark ? "#F5F0E8"                : "#1A1008",
-        textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-        textMuted:   isDark ? "#6B6658"                : "#9A9080",
-        glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-        glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-        cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
-        placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-        optionBg:    isDark ? "#1C1C26"                : "#FFFFFF",
-    };
-}
 
 function GlobalStyles({ t, isDark }) {
     return (
@@ -332,12 +304,12 @@ function GlobalStyles({ t, isDark }) {
 
 /* ─── Metadados de Ações ─────────────────────────────────────────────────── */
 const ACOES = {
-    CREATE:  { label: "Criação",   icon: PlusCircle,  color: "#059669", bg: "rgba(5,150,105,.12)",  border: "rgba(5,150,105,.25)"  },
-    UPDATE:  { label: "Edição",    icon: Edit3,       color: "#F59E0B", bg: "rgba(245,158,11,.12)", border: "rgba(245,158,11,.25)" },
-    DELETE:  { label: "Exclusão",  icon: Trash2,      color: "#EF4444", bg: "rgba(239,68,68,.12)",  border: "rgba(239,68,68,.25)"  },
-    APPROVE: { label: "Aprovação", icon: CheckCircle, color: "#10B981", bg: "rgba(16,185,129,.12)", border: "rgba(16,185,129,.25)" },
-    REJECT:  { label: "Rejeição",  icon: XCircle,     color: "#F97316", bg: "rgba(249,115,22,.12)", border: "rgba(249,115,22,.25)" },
-    VIEW:    { label: "Consulta",  icon: Eye,         color: "#6366F1", bg: "rgba(99,102,241,.12)", border: "rgba(99,102,241,.25)" },
+    CREATE:  { label: "Criação",   icon: PlusCircle,  color: "#1E7A46", bg: "rgba(30,122,70,.12)",  border: "rgba(30,122,70,.25)"  },
+    UPDATE:  { label: "Edição",    icon: Edit3,       color: "#B8892E", bg: "rgba(184,137,46,.12)", border: "rgba(184,137,46,.25)" },
+    DELETE:  { label: "Exclusão",  icon: Trash2,      color: "#B3261E", bg: "rgba(179,38,30,.12)",  border: "rgba(179,38,30,.25)"  },
+    APPROVE: { label: "Aprovação", icon: CheckCircle, color: "#1E7A46", bg: "rgba(30,122,70,.12)", border: "rgba(30,122,70,.25)" },
+    REJECT:  { label: "Rejeição",  icon: XCircle,     color: "#B3261E", bg: "rgba(179,38,30,.12)", border: "rgba(179,38,30,.25)" },
+    VIEW:    { label: "Consulta",  icon: Eye,         color: "#1E4571", bg: "rgba(30,69,113,.12)", border: "rgba(30,69,113,.25)" },
 };
 
 const ENTIDADES = ["MEMBRO", "VISITANTE", "CELULA", "FICHA", "USUARIO", "SECRETARIA"];
@@ -379,12 +351,12 @@ function AcaoBadge({ acao }) {
 
 function EntidadeTag({ entidade }) {
     const colors = {
-        MEMBRO:     { c: AURA.blue,   b: "rgba(0,61,165,.12)"   },
-        VISITANTE:  { c: AURA.red,    b: "rgba(200,16,46,.12)"  },
-        CELULA:     { c: "#059669",   b: "rgba(5,150,105,.12)"  },
-        FICHA:      { c: AURA.yellow, b: "rgba(253,184,19,.12)" },
-        USUARIO:    { c: "#8B5CF6",   b: "rgba(139,92,246,.12)" },
-        SECRETARIA: { c: "#003DA5",   b: "rgba(0,61,165,.12)"   },
+        MEMBRO:     { c: AURA.blue,   b: "rgba(15,42,74,.12)"   },
+        VISITANTE:  { c: AURA.gold,   b: "rgba(184,137,46,.12)" },
+        CELULA:     { c: "#1E7A46",   b: "rgba(30,122,70,.12)"  },
+        FICHA:      { c: AURA.goldLight, b: "rgba(217,174,94,.12)" },
+        USUARIO:    { c: AURA.blueDark, b: "rgba(10,29,51,.12)" },
+        SECRETARIA: { c: AURA.yellow, b: "rgba(184,137,46,.12)" },
     };
     const s = colors[entidade] || { c: "#888", b: "rgba(128,128,128,.1)" };
     return (

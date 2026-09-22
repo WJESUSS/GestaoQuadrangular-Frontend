@@ -10,48 +10,10 @@ import {
     Star, Droplets, Heart, FileDown, Loader2,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Tokens AURA (mesma paleta do Dashboard) ─────────────────────────── */
-const AURA = {
-    gold:      "#C9A96E",
-    goldLight: "#E8D5A3",
-    dark:      "#0A0A0F",
-    darkEl:    "#12121A",
-    light:     "#F5F0E8",
-    red:       "#C8102E",
-    redDark:   "#9B0B1E",
-    redLight:  "#E8294A",
-    blue:      "#003DA5",
-    blueDark:  "#002470",
-    blueFade:  "#7AABF4",
-    yellow:    "#FDB813",
-    teal:      "#5DCAA5",
-    gray:      "#B4B2A9",
-};
 
-function theme(isDark) {
-    return {
-        bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-        bgEl:        isDark ? "rgba(18,18,26,.95)"     : "rgba(255,255,255,.95)",
-        bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-        border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-        borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-        text:        isDark ? "#F5F0E8"                : "#1A1008",
-        textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-        textMuted:   isDark ? "#6B6658"                : "#9A9080",
-        glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-        glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-        cardHover:   isDark ? "rgba(201,169,110,.2)"   : "rgba(201,169,110,.35)",
-        placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-        optionBg:    isDark ? "#12121A"                : "#F0EAE0",
-        innerCardBg: isDark ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.02)",
-        miniStatBg:  isDark ? "rgba(0,0,0,.18)"        : "rgba(0,0,0,.03)",
-        progressTrack: isDark ? "rgba(255,255,255,.08)": "rgba(0,0,0,.06)",
-        tagBg:       isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.035)",
-        hoverBg:     isDark ? "rgba(201,169,110,.06)"  : "rgba(201,169,110,.07)",
-        gold:        isDark ? "#C9A96E"                : "#3D3218",
-    };
-}
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function initials(name) {

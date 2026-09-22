@@ -5,39 +5,9 @@ import api from "../../services/api.js";
 import { getFotoUrl } from "../../utils/foto.js";
 import RegistroCulto from "./RegistroCulto.jsx";
 import BoasVindas from "../../components/BoasVindas.jsx";
+import { AURA, theme } from "../heroTheme";
 
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  yellow:    "#FDB813",
-};
 
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#07070C"               : "#FAF8F4",
-    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "#D8D4CC",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.10)"  : "rgba(201,169,110,.35)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    gold:        isDark ? "#C9A96E"                : "#3D3218",
-    goldSoft:    isDark ? "rgba(201,169,110,.06)"  : "rgba(61,50,24,.08)",
-    goldHover:   isDark ? "rgba(201,169,110,.12)"  : "rgba(61,50,24,.14)",
-    glow1:       isDark ? "rgba(201,169,110,.07)"  : "rgba(201,169,110,.10)",
-    glow2:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-    glow3:       isDark ? "rgba(155,11,30,.03)"    : "rgba(0,61,165,.04)",
-    headerBg:    isDark ? "rgba(7,7,12,.92)"       : "rgba(247,243,238,.92)",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-  };
-}
 
 function GlobalStyles({ t, isDark }) {
   return (

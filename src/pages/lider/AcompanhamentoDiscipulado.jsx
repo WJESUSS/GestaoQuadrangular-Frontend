@@ -73,18 +73,18 @@ const TITULOS = {
 function GlobalStyles({ t, isDark }) {
     return (
         <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
 
       @keyframes ad-spin { to { transform: rotate(360deg); } }
       .ad-spin { animation: ad-spin 1s linear infinite; }
 
-      .ad-root { font-family:'Roboto',sans-serif; color:${t.text}; }
+      .ad-root { font-family:'Inter',sans-serif; color:${t.text}; }
 
       .ad-card {
         background:${t.bgEl}; border:1px solid ${t.border}; border-radius:18px;
         padding:16px; backdrop-filter:blur(10px);
       }
-      .ad-section-title { font-family:'Roboto',sans-serif; font-size:15px; font-weight:600; margin:0 0 4px; color:${t.text}; }
+      .ad-section-title { font-family:'Inter',sans-serif; font-size:15px; font-weight:600; margin:0 0 4px; color:${t.text}; }
       .ad-section-sub { font-size:12px; color:${t.textMuted}; margin:0 0 14px; }
 
       /* Tela de escolha */
@@ -100,7 +100,7 @@ function GlobalStyles({ t, isDark }) {
         width:42px; height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center;
         flex-shrink:0;
       }
-      .ad-choice-name { font-family:'Roboto',sans-serif; font-size:14.5px; font-weight:600; color:${t.text}; margin:0 0 2px; }
+      .ad-choice-name { font-family:'Inter',sans-serif; font-size:14.5px; font-weight:600; color:${t.text}; margin:0 0 2px; }
       .ad-choice-desc { font-size:11px; color:${t.textMuted}; margin:0; }
 
       .ad-cta-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; }
@@ -111,19 +111,19 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-btn-primary {
         background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color:#fff;
-        box-shadow:0 8px 22px rgba(155,92,255,.3);
+        box-shadow:0 8px 22px rgba(15,42,74,.3);
       }
       .ad-btn-primary:hover{ transform:translateY(-1px); }
       .ad-btn-primary:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
       .ad-btn-ghost {
-        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(155,92,255,.06)"};
+        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(15,42,74,.06)"};
         border:1px solid ${t.border}; color:${t.textSec};
       }
       .ad-btn-ghost:hover{ border-color:${AURA.gold}; color:${AURA.gold}; }
       .ad-btn-danger {
-        background:rgba(255,154,165,.12); border:1px solid rgba(255,154,165,.35); color:${AURA.redLight};
+        background:rgba(217,174,94,.12); border:1px solid rgba(217,174,94,.35); color:${AURA.redLight};
       }
-      .ad-btn-danger:hover{ background:rgba(255,154,165,.2); }
+      .ad-btn-danger:hover{ background:rgba(217,174,94,.2); }
       .ad-btn-sm { padding:7px 13px; font-size:11.5px; }
       .ad-btn-block { width:100%; }
 
@@ -132,7 +132,7 @@ function GlobalStyles({ t, isDark }) {
         background:${t.bgInput}; border:1px solid ${t.borderInput}; margin-bottom:14px;
       }
       .ad-search input {
-        flex:1; background:transparent; border:none; outline:none; color:${t.text}; font-size:13px; font-family:'Roboto',sans-serif;
+        flex:1; background:transparent; border:none; outline:none; color:${t.text}; font-size:13px; font-family:'Inter',sans-serif;
       }
       .ad-search input::placeholder{ color:${t.placeholder}; }
 
@@ -141,13 +141,13 @@ function GlobalStyles({ t, isDark }) {
         padding:12px 6px; border-bottom:1px solid ${t.border}; cursor:pointer; transition:background .2s;
       }
       .ad-row:last-child{ border-bottom:none; }
-      .ad-row:hover{ background:${isDark ? "rgba(255,255,255,.025)" : "rgba(155,92,255,.03)"}; border-radius:12px; }
+      .ad-row:hover{ background:${isDark ? "rgba(255,255,255,.025)" : "rgba(15,42,74,.03)"}; border-radius:12px; }
       .ad-row-left{ display:flex; align-items:center; gap:11px; min-width:0; flex:1; }
       .ad-avatar {
         width:36px; height:36px; border-radius:50%; flex-shrink:0;
         background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color:#fff;
         display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;
-        font-family:'Roboto',sans-serif;
+        font-family:'Inter',sans-serif;
       }
       .ad-row-name { font-size:13px; font-weight:600; color:${t.text}; margin:0 0 2px; }
       .ad-row-meta { font-size:10.5px; color:${t.textMuted}; margin:0; display:flex; gap:7px; flex-wrap:wrap; }
@@ -158,7 +158,7 @@ function GlobalStyles({ t, isDark }) {
         font-size:10.5px; font-weight:700; letter-spacing:.03em; white-space:nowrap;
       }
       .ad-badge-ok  { background:rgba(74,124,92,.15); color:${AURA.green}; }
-      .ad-badge-off { background:rgba(255,154,165,.13); color:${AURA.clay}; }
+      .ad-badge-off { background:rgba(217,174,94,.13); color:${AURA.clay}; }
 
       .ad-empty {
         text-align:center; padding:30px 16px; color:${t.textMuted}; font-size:13px;
@@ -172,14 +172,14 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-field input, .ad-field select {
         width:100%; padding:9px 12px; border-radius:10px; background:${t.bgInput};
-        border:1px solid ${t.borderInput}; color:${t.text}; font-size:12px; font-family:'Roboto',sans-serif; outline:none;
+        border:1px solid ${t.borderInput}; color:${t.text}; font-size:12px; font-family:'Inter',sans-serif; outline:none;
       }
       .ad-field select option { background:${t.optionBg}; color:${t.text}; }
       .ad-field input:focus, .ad-field select:focus{ border-color:${AURA.gold}; }
 
       .ad-hist-row {
         padding:12px; border-radius:12px; margin-bottom:8px;
-        background:${isDark ? "rgba(255,255,255,.02)" : "rgba(155,92,255,.025)"};
+        background:${isDark ? "rgba(255,255,255,.02)" : "rgba(15,42,74,.025)"};
         font-size:12px;
       }
 
@@ -202,7 +202,7 @@ function GlobalStyles({ t, isDark }) {
         display:flex; align-items:center; gap:10px; padding:18px 18px 14px;
         border-bottom:1px solid ${t.border}; position:sticky; top:0; background:${isDark ? "#161B29" : "#FBFAF6"}; z-index:1;
       }
-      .ad-modal-title { font-family:'Roboto',sans-serif; font-size:16px; font-weight:600; margin:0; color:${t.text}; flex:1; min-width:0; word-break:break-word; }
+      .ad-modal-title { font-family:'Inter',sans-serif; font-size:16px; font-weight:600; margin:0; color:${t.text}; flex:1; min-width:0; word-break:break-word; }
       .ad-modal-body { padding:16px 18px 22px; }
       .ad-icon-btn {
         width:32px; height:32px; border-radius:50%; border:1px solid ${t.border}; background:transparent;
@@ -219,23 +219,23 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-input, .ad-select, .ad-textarea {
         width:100%; padding:10px 13px; border-radius:12px; background:${t.bgInput};
-        border:1px solid ${t.borderInput}; color:${t.text}; font-size:13px; font-family:'Roboto',sans-serif; outline:none;
+        border:1px solid ${t.borderInput}; color:${t.text}; font-size:13px; font-family:'Inter',sans-serif; outline:none;
         transition:border-color .2s;
       }
       .ad-select option{ background:${t.optionBg}; color:${t.text}; }
       .ad-input:focus, .ad-select:focus, .ad-textarea:focus{ border-color:${AURA.gold}; }
-      .ad-textarea{ resize:vertical; min-height:64px; font-family:'Roboto',sans-serif; }
+      .ad-textarea{ resize:vertical; min-height:64px; font-family:'Inter',sans-serif; }
 
       .ad-alert {
         display:flex; gap:9px; padding:12px 14px; border-radius:14px; font-size:12.5px; line-height:1.5;
         margin-bottom:14px; align-items:flex-start;
       }
-      .ad-alert-error { background:rgba(255,154,165,.1); border:1px solid rgba(255,154,165,.3); color:${isDark ? "#E19A9B" : AURA.clayDeep}; }
+      .ad-alert-error { background:rgba(217,174,94,.1); border:1px solid rgba(217,174,94,.3); color:${isDark ? "#E19A9B" : AURA.clayDeep}; }
       .ad-alert-success{ background:rgba(74,124,92,.1); border:1px solid rgba(74,124,92,.3); color:${isDark ? "#8FCB9F" : AURA.greenDark}; }
 
       .ad-checklist { max-height:220px; overflow-y:auto; border:1px solid ${t.border}; border-radius:14px; padding:6px; }
       .ad-check-row { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; cursor:pointer; }
-      .ad-check-row:hover{ background:${isDark ? "rgba(255,255,255,.04)" : "rgba(155,92,255,.05)"}; }
+      .ad-check-row:hover{ background:${isDark ? "rgba(255,255,255,.04)" : "rgba(15,42,74,.05)"}; }
       .ad-checkbox {
         width:19px; height:19px; border-radius:6px; border:1.5px solid ${t.borderInput}; flex-shrink:0;
         display:flex; align-items:center; justify-content:center; transition:all .15s;
@@ -245,7 +245,7 @@ function GlobalStyles({ t, isDark }) {
 
       .ad-count-pill {
         display:flex; align-items:center; justify-content:center; padding:12px 15px; border-radius:14px;
-        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(155,92,255,.05)"}; border:1px solid ${t.border};
+        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(15,42,74,.05)"}; border:1px solid ${t.border};
         margin:13px 0; font-size:12.5px; color:${t.textSec}; font-weight:600;
       }
 
@@ -264,20 +264,20 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-detail-hero::after {
         content:''; position:absolute; bottom:-30px; left:30%; width:100px; height:100px;
-        border-radius:50%; background:rgba(185,140,255,.08); pointer-events:none;
+        border-radius:50%; background:rgba(184,137,46,.08); pointer-events:none;
       }
       .ad-detail-hero-top { display:flex; align-items:center; gap:10px; margin-bottom:14px; position:relative; z-index:1; }
       .ad-detail-hero-icon {
-        width:44px; height:44px; border-radius:14px; background:rgba(255,255,255,.12);
+        width:44px; height:44px; border-radius:14px; background:rgba(217,174,94,.16);
         display:flex; align-items:center; justify-content:center; flex-shrink:0;
-        backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15);
+        backdrop-filter:blur(6px); border:1px solid rgba(217,174,94,.4);
       }
       .ad-detail-hero-label {
         font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
         color:rgba(255,255,255,.55); margin:0 0 3px;
       }
       .ad-detail-hero-tema {
-        font-family:'Roboto',sans-serif; font-size:17px; font-weight:600; color:#fff;
+        font-family:'Inter',sans-serif; font-size:17px; font-weight:600; color:#fff;
         margin:0; line-height:1.3; position:relative; z-index:1;
       }
       .ad-detail-hero-meta {
@@ -323,7 +323,7 @@ function GlobalStyles({ t, isDark }) {
         width:34px; height:34px; border-radius:50%; flex-shrink:0;
         background:linear-gradient(135deg, ${AURA.roxo}, ${AURA.moss}); color:#fff;
         display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;
-        font-family:'Roboto',sans-serif; border:2px solid rgba(255,255,255,.15);
+        font-family:'Inter',sans-serif; border:2px solid rgba(255,255,255,.15);
       }
       .ad-detail-participant-name { font-size:13px; font-weight:600; color:${t.text}; margin:0; }
       .ad-detail-participant-num { font-size:10px; color:${t.textMuted}; margin:0; }
@@ -344,15 +344,15 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-form-hero::after {
         content:''; position:absolute; bottom:-20px; right:15%; width:80px; height:80px;
-        border-radius:50%; background:rgba(185,140,255,.07); pointer-events:none;
+        border-radius:50%; background:rgba(184,137,46,.07); pointer-events:none;
       }
       .ad-form-hero-icon {
-        width:48px; height:48px; border-radius:15px; background:rgba(255,255,255,.12);
+        width:48px; height:48px; border-radius:15px; background:rgba(217,174,94,.16);
         display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;
-        backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15); position:relative; z-index:1;
+        backdrop-filter:blur(6px); border:1px solid rgba(217,174,94,.4); position:relative; z-index:1;
       }
       .ad-form-hero-title {
-        font-family:'Roboto',sans-serif; font-size:17px; font-weight:600; color:#fff;
+        font-family:'Inter',sans-serif; font-size:17px; font-weight:600; color:#fff;
         margin:0 0 4px; position:relative; z-index:1;
       }
       .ad-form-hero-sub { font-size:12px; color:rgba(255,255,255,.55); margin:0; position:relative; z-index:1; }
@@ -377,7 +377,7 @@ function GlobalStyles({ t, isDark }) {
       .ad-form-field-elegant input, .ad-form-field-elegant select, .ad-form-field-elegant textarea {
         width:100%; padding:11px 14px; border-radius:12px; background:${t.bgInput};
         border:1px solid ${t.borderInput}; color:${t.text}; font-size:13px;
-        font-family:'Roboto',sans-serif; outline:none; transition:border-color .2s;
+        font-family:'Inter',sans-serif; outline:none; transition:border-color .2s;
       }
       .ad-form-field-elegant select option { background:${t.optionBg}; color:${t.text}; }
       .ad-form-field-elegant input:focus, .ad-form-field-elegant select:focus, .ad-form-field-elegant textarea:focus { border-color:${AURA.gold}; }
@@ -389,10 +389,10 @@ function GlobalStyles({ t, isDark }) {
         cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:10px;
       }
       .ad-form-pick-card:hover { border-color:${AURA.gold}; transform:translateY(-1px); }
-      .ad-form-pick-card.selected { border-color:${AURA.moss}; background:rgba(155,92,255,.06); }
+      .ad-form-pick-card.selected { border-color:${AURA.moss}; background:rgba(15,42,74,.06); }
       .ad-form-pick-icon {
         width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-        background:rgba(185,140,255,.08); flex-shrink:0;
+        background:rgba(184,137,46,.08); flex-shrink:0;
       }
       .ad-form-pick-label { font-size:12.5px; font-weight:600; color:${t.text}; margin:0; }
       .ad-form-pick-sub { font-size:10px; color:${t.textMuted}; margin:0; }
@@ -403,10 +403,10 @@ function GlobalStyles({ t, isDark }) {
       .ad-form-participants-title { font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:${t.textMuted}; }
       .ad-form-select-all {
         display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px;
-        background:rgba(185,140,255,.08); border:1px solid rgba(185,140,255,.2); color:${AURA.gold};
+        background:rgba(184,137,46,.08); border:1px solid rgba(184,137,46,.2); color:${AURA.gold};
         font-size:11px; font-weight:600; cursor:pointer; transition:all .2s;
       }
-      .ad-form-select-all:hover { background:rgba(185,140,255,.15); }
+      .ad-form-select-all:hover { background:rgba(184,137,46,.15); }
 
       .ad-form-member {
         display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px;
@@ -414,12 +414,12 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-form-member + .ad-form-member { margin-top:8px; }
       .ad-form-member:hover { border-color:${AURA.gold}; }
-      .ad-form-member.checked { border-color:${AURA.moss}; background:rgba(155,92,255,.05); }
+      .ad-form-member.checked { border-color:${AURA.moss}; background:rgba(15,42,74,.05); }
       .ad-form-member-avatar {
         width:34px; height:34px; border-radius:50%; flex-shrink:0;
         background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color:#fff;
         display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;
-        font-family:'Roboto',sans-serif; transition:all .2s;
+        font-family:'Inter',sans-serif; transition:all .2s;
       }
       .ad-form-member.checked .ad-form-member-avatar { background:linear-gradient(135deg, ${AURA.moss}, ${AURA.mossLight}); }
       .ad-form-member-name { font-size:13px; font-weight:600; color:${t.text}; flex:1; margin:0; }
@@ -434,7 +434,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-form-counter {
         flex:1; text-align:center; padding:12px 15px; border-radius:14px;
-        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(155,92,255,.05)"}; border:1px solid ${t.border};
+        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(15,42,74,.05)"}; border:1px solid ${t.border};
         font-size:12.5px; color:${t.textSec}; font-weight:600;
       }
       .ad-form-counter strong { color:${AURA.gold}; }
@@ -450,12 +450,12 @@ function GlobalStyles({ t, isDark }) {
         border-radius:50%; background:rgba(255,255,255,.05); pointer-events:none;
       }
       .ad-list-hero-icon {
-        width:48px; height:48px; border-radius:15px; background:rgba(255,255,255,.12);
+        width:48px; height:48px; border-radius:15px; background:rgba(217,174,94,.16);
         display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;
-        backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.15); position:relative; z-index:1;
+        backdrop-filter:blur(6px); border:1px solid rgba(217,174,94,.4); position:relative; z-index:1;
       }
       .ad-list-hero-title {
-        font-family:'Roboto',sans-serif; font-size:17px; font-weight:600; color:#fff;
+        font-family:'Inter',sans-serif; font-size:17px; font-weight:600; color:#fff;
         margin:0 0 4px; position:relative; z-index:1;
       }
       .ad-list-hero-sub { font-size:12px; color:rgba(255,255,255,.55); margin:0; position:relative; z-index:1; }
@@ -476,7 +476,7 @@ function GlobalStyles({ t, isDark }) {
         border-bottom:1px solid ${t.border}; cursor:pointer; transition:all .2s;
       }
       .ad-list-item:last-child { border-bottom:none; }
-      .ad-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(155,92,255,.03)"}; }
+      .ad-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(15,42,74,.03)"}; }
 
       .ad-list-item-avatar {
         width:42px; height:42px; border-radius:13px; flex-shrink:0;
@@ -486,7 +486,7 @@ function GlobalStyles({ t, isDark }) {
 
       .ad-list-item-body { flex:1; min-width:0; }
       .ad-list-item-title {
-        font-family:'Roboto',sans-serif; font-size:14px; font-weight:600; color:${t.text};
+        font-family:'Inter',sans-serif; font-size:14px; font-weight:600; color:${t.text};
         margin:0 0 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       }
       .ad-list-item-meta {
@@ -497,9 +497,9 @@ function GlobalStyles({ t, isDark }) {
       .ad-list-item-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
       .ad-list-item-arrow {
         width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(155,92,255,.05)"}; transition:all .2s;
+        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(15,42,74,.05)"}; transition:all .2s;
       }
-      .ad-list-item:hover .ad-list-item-arrow { background:rgba(185,140,255,.12); color:${AURA.gold}; }
+      .ad-list-item:hover .ad-list-item-arrow { background:rgba(184,137,46,.12); color:${AURA.gold}; }
 
       .ad-list-summary {
         display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:18px;
@@ -509,7 +509,7 @@ function GlobalStyles({ t, isDark }) {
         text-align:center;
       }
       .ad-list-summary-value {
-        font-family:'Roboto',sans-serif; font-size:22px; font-weight:700; color:${AURA.gold};
+        font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:${AURA.gold};
         margin:0 0 2px;
       }
       .ad-list-summary-label { font-size:10px; color:${t.textMuted}; margin:0; text-transform:uppercase; letter-spacing:.05em; }
@@ -727,7 +727,7 @@ function TelaEscolha({ t, pendentesSemana, onEscolher }) {
 
             <div className="ad-choice-link" onClick={() => onEscolher("individual-lista")}>
                 <div className="ad-choice-link-left">
-                    <div className="ad-choice-icon" style={{ background: `${AURA.mossLight}18`, color: AURA.mossLight }}>
+                    <div className="ad-choice-icon" style={{ background: "rgba(30,122,70,.14)", color: "#1E7A46" }}>
                         <UserCheck size={20} />
                     </div>
                     <div>
@@ -742,7 +742,7 @@ function TelaEscolha({ t, pendentesSemana, onEscolher }) {
 
             <div className="ad-choice-link" onClick={() => onEscolher("coletivo-lista")}>
                 <div className="ad-choice-link-left">
-                    <div className="ad-choice-icon" style={{ background: `${AURA.roxoLight}18`, color: AURA.roxoLight }}>
+                    <div className="ad-choice-icon" style={{ background: "rgba(184,137,46,.16)", color: "#B8892E" }}>
                         <Users size={20} />
                     </div>
                     <div>
@@ -755,7 +755,7 @@ function TelaEscolha({ t, pendentesSemana, onEscolher }) {
 
             <div className="ad-choice-link" onClick={() => onEscolher("historico-geral")}>
                 <div className="ad-choice-link-left">
-                    <div className="ad-choice-icon" style={{ background: `${AURA.gold}18`, color: AURA.gold }}>
+                    <div className="ad-choice-icon" style={{ background: "rgba(30,69,113,.14)", color: "#1E4571" }}>
                         <History size={20} />
                     </div>
                     <div>
@@ -957,7 +957,7 @@ function HistoricoIndividual({ t, membroId, membroNome, notify }) {
 
     return (
         <div>
-            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 15, fontWeight: 600, margin: "0 0 4px", color: t.text }}>{membroNome}</p>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 600, margin: "0 0 4px", color: t.text }}>{membroNome}</p>
             <p style={{ fontSize: 12, color: t.textMuted, margin: "0 0 16px" }}>
                 {dados?.totalDiscipulados ?? itens.length} discipulado(s) registrado(s)
             </p>
@@ -1018,7 +1018,7 @@ function TelaColetivoLista({ t, notify, onRegistrar, onAbrirDetalhe }) {
             {/* Hero */}
             <div className="ad-list-hero">
                 <div className="ad-list-hero-icon">
-                    <Users size={22} color="#fff" />
+                    <Users size={22} color="#F0DFB8" />
                 </div>
                 <p className="ad-list-hero-title">Encontros Coletivos</p>
                 <p className="ad-list-hero-sub">Visualize e registre encontros da célula</p>
@@ -1143,7 +1143,7 @@ function FormColetivo({ t, membros, onSalvo, onErro }) {
             {/* Hero */}
             <div className="ad-form-hero">
                 <div className="ad-form-hero-icon">
-                    <ClipboardList size={22} color="#fff" />
+                    <ClipboardList size={22} color="#F0DFB8" />
                 </div>
                 <p className="ad-form-hero-title">Registrar Encontro Coletivo</p>
                 <p className="ad-form-hero-sub">Preencha os dados do encontro e marque os presentes</p>
@@ -1275,7 +1275,7 @@ function DetalheColetivo({ t, id, notify }) {
             <div className="ad-detail-hero">
                 <div className="ad-detail-hero-top">
                     <div className="ad-detail-hero-icon">
-                        <BookOpen size={20} color="#fff" />
+                        <BookOpen size={20} color="#F0DFB8" />
                     </div>
                     <div>
                         <p className="ad-detail-hero-label">Encontro Coletivo</p>
@@ -1442,7 +1442,7 @@ function TelaHistoricoGeral({ t, notify, membros, onAbrirColetivo }) {
                     <div className="ad-hist-row" key={r.id ?? idx}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                             <strong style={{ color: t.text }}>{formatarDataBR(r.data)}</strong>
-                            <span className="ad-badge" style={{ background: r.tipo === "COLETIVO" ? "rgba(122,61,224,.14)" : "rgba(155,92,255,.12)", color: r.tipo === "COLETIVO" ? AURA.roxoLight : AURA.mossLight }}>
+                            <span className="ad-badge" style={{ background: r.tipo === "COLETIVO" ? "rgba(184,137,46,.14)" : "rgba(15,42,74,.12)", color: r.tipo === "COLETIVO" ? AURA.gold : AURA.mossLight }}>
                       {r.tipo === "COLETIVO" ? "Coletivo" : "Individual"}
                     </span>
                         </div>

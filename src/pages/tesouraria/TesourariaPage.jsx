@@ -12,20 +12,9 @@ import TesourariaRelatorio   from "./TesourariaRelatorio.jsx";
 import TesourariaDizimistas  from "./TesourariaDizimistas.jsx";
 import TesourariaComparativo from "./TesourariaComparativo.jsx";
 import RelatorioCultos       from "../pastor/RelatorioCultos.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Tokens AURA ─────────────────────────────────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-};
 
 function t(isDark) {
   return {

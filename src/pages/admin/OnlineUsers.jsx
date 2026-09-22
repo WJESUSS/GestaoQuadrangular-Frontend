@@ -7,29 +7,9 @@ import {
   Wifi, WifiOff, Sun, Moon, LogOut, ArrowLeft,
   Users, Loader2, RefreshCcw, Clock,
 } from "lucide-react";
+import { AURA, theme } from "../heroTheme";
 
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  red:       "#C8102E",
-  blue:      "#003DA5",
-  green:     "#059669",
-};
 
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#0A0A0F"               : "#F5F0E8",
-    bgEl:        isDark ? "rgba(18,18,26,.98)"     : "rgba(255,255,255,.98)",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.1)"   : "rgba(201,169,110,.2)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    glow1:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-    glow2:       isDark ? "rgba(201,169,110,.04)"  : "rgba(201,169,110,.06)",
-    headerBg:    isDark ? "rgba(10,10,15,.97)"     : "rgba(245,240,232,.97)",
-  };
-}
 
 function perfilLabel(perfil) {
   const map = {
@@ -47,10 +27,10 @@ function perfilCor(perfil) {
   const map = {
     ADMIN: AURA.red,
     PASTOR: AURA.blue,
-    SECRETARIO: "#7C3AED",
+    SECRETARIO: "#1E4571",
     LIDER_CELULA: AURA.green,
     TESOUREIRO: AURA.gold,
-    DIACONO: "#0EA5E9",
+    DIACONO: "#B8892E",
   };
   return map[perfil] || AURA.gold;
 }

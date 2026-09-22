@@ -46,47 +46,10 @@ import TesourariaDizimistas      from "../tesouraria/TesourariaDizimistas";
 import TesourariaComparativo     from "../tesouraria/TesourariaComparativo";
 import HistoricoAuditoria        from "./HistoricoAuditoria";
 import FichasConvertido          from "../secretaria/FichasConvertido";
+import { AURA, theme } from "../heroTheme";
 
 
-const AURA = {
-  gold:       "#C9A96E",
-  goldLight:  "#E8D5A3",
-  goldDim:    "#7A6240",
-  red:        "#C8102E",
-  redDark:    "#9B0B1E",
-  blue:       "#003DA5",
-  blueDark:   "#002470",
-  yellow:     "#FDB813",
-  yellowDark: "#C48C00",
-  green:      "#059669",
-  greenDark:  "#047857",
-  wa:         "#25D366",
-  waDark:     "#1a9e4a",
-};
 
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#080810"              : "#F2EDE4",
-    bgEl:        isDark ? "rgba(14,14,22,.98)"   : "rgba(255,255,255,.98)",
-    bgElHover:   isDark ? "rgba(20,20,32,.98)"   : "rgba(248,244,238,.98)",
-    bgInput:     isDark ? "rgba(255,255,255,.05)": "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.09)": "rgba(201,169,110,.18)",
-    borderIn:    isDark ? "rgba(201,169,110,.13)": "rgba(201,169,110,.25)",
-    borderHov:   isDark ? "rgba(201,169,110,.28)": "rgba(201,169,110,.45)",
-    text:        isDark ? "#EDE8DF"              : "#180E04",
-    textSec:     isDark ? "#8A8378"              : "#6B5E4A",
-    textMuted:   isDark ? "#585248"              : "#9A8E80",
-    glow1:       isDark ? "rgba(200,16,46,.06)"  : "rgba(200,16,46,.04)",
-    glow2:       isDark ? "rgba(0,61,165,.05)"   : "rgba(0,61,165,.035)",
-    glow3:       isDark ? "rgba(201,169,110,.04)": "rgba(201,169,110,.06)",
-    headerBg:    isDark ? "rgba(8,8,14,.97)"     : "rgba(242,237,228,.97)",
-    megaBg:      isDark ? "rgba(10,10,18,.99)"   : "rgba(252,249,244,.99)",
-    overlayBg:   isDark ? "rgba(5,5,10,.99)"     : "rgba(8,6,4,.985)",
-    placeholder: isDark ? "rgba(138,131,120,.3)" : "rgba(107,94,74,.3)",
-    shadow:      isDark ? "rgba(0,0,0,.7)"       : "rgba(0,0,0,.12)",
-    drawerBg:    isDark ? "rgba(10,10,18,.99)"   : "rgba(252,249,244,.99)",
-  };
-}
 
 const perfis = ["ADMIN","PASTOR","LIDER_CELULA","SECRETARIO","TESOUREIRO","DIACONO"];
 

@@ -171,14 +171,14 @@ export default function Home() {
             </Helmet>
 
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
 
         .ieq-home, .ieq-home *, .ieq-home *::before, .ieq-home *::after { box-sizing:border-box; }
         :where(.ieq-home, .ieq-home *) { margin:0; padding:0; }
         .ieq-home {
           position:relative; min-height:100vh; overflow-x:hidden;
-          font-family:'Roboto',system-ui,sans-serif; color:#fff;
-          background:#000;
+          font-family:'Inter',system-ui,sans-serif; color:#fff;
+          background:linear-gradient(180deg,#0A1D33 0%,#070D1C 45%,#0A1D33 100%);
         }
         .ieq-home button, .ieq-home a { font-family:inherit; }
         .ieq-home button { cursor:pointer; }
@@ -193,16 +193,16 @@ export default function Home() {
           -webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent);
           mask-image:linear-gradient(to bottom,#000 62%,transparent); }
         .glow-streak { position:absolute; left:-14%; right:-14%; top:36%; height:180px; transform:rotate(-9deg);
-          filter:blur(46px); background:linear-gradient(90deg,rgba(110,40,200,.60),rgba(196,38,170,.80),rgba(80,70,255,.65)); }
+          filter:blur(46px); background:linear-gradient(90deg,rgba(30,69,113,.75),rgba(15,42,74,.85),rgba(184,137,46,.55)); }
         .glow-blue { position:absolute; right:-3%; top:-10%; width:36%; height:62%;
-          background:radial-gradient(closest-side, rgba(70,60,255,.55), transparent); filter:blur(30px); }
+          background:radial-gradient(closest-side, rgba(15,42,74,.8), transparent); filter:blur(30px); }
 
         /* ── nav fixada ── */
         .home-nav {
           position:fixed; top:0; left:0; right:0; z-index:50;
           display:flex; align-items:center; justify-content:space-between;
           padding:0 clamp(20px, 5vw, 80px); height:64px;
-          background:rgba(10,10,14,.6);
+          background:rgba(7,13,28,.72);
           backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4);
           border-bottom:1px solid rgba(255,255,255,.10);
         }
@@ -226,7 +226,7 @@ export default function Home() {
         .glass-hero {
           width:100%; max-width:940px; padding:clamp(30px,5vw,58px);
           display:flex; gap:46px; align-items:stretch;
-          border-radius:44px; background:rgba(40,40,44,.56);
+          border-radius:44px; background:rgba(13,24,48,.72);
           border:1px solid rgba(255,255,255,.14);
           backdrop-filter:blur(30px) saturate(1.3); -webkit-backdrop-filter:blur(30px) saturate(1.3);
           box-shadow:0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10);
@@ -235,7 +235,7 @@ export default function Home() {
         .pane-right { flex:1; display:flex; flex-direction:column; justify-content:center; gap:18px; }
         .pane-divider { width:4px; border-radius:2px; background:#fff; opacity:.16; align-self:stretch; margin:0 6px; }
         .brand-name { display:flex; align-items:center; gap:14px; }
-        .brand-name .nm { font-size:44px; font-weight:900; line-height:1; color:#fff; }
+        .brand-name .nm { font-size:44px; font-weight:700; font-family:'Fraunces',serif; line-height:1; color:#fff; }
         .eyebrow-type { margin-top:18px; font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:rgba(255,255,255,.62); }
         .headline { margin-top:10px; font-size:clamp(28px,3.2vw,38px); line-height:1.22; letter-spacing:-.02em; color:#fff; }
         .headline .heavy { font-weight:900; }
@@ -262,30 +262,30 @@ export default function Home() {
         .stats { position:relative; z-index:1; max-width:940px; margin:0 auto; padding:0 clamp(20px,5vw,80px);
           display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; }
         .stat { padding:26px 16px; text-align:center; border-radius:28px;
-          background:rgba(40,40,44,.56); border:1px solid rgba(255,255,255,.14);
+          background:rgba(13,24,48,.72); border:1px solid rgba(255,255,255,.14);
           backdrop-filter:blur(24px) saturate(1.3); -webkit-backdrop-filter:blur(24px) saturate(1.3);
           box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
         .stat b { display:block; font-size:28px; font-weight:900; letter-spacing:-.01em;
-          background:linear-gradient(90deg,#9B5CFF,#FF2CB0); -webkit-background-clip:text; background-clip:text; color:transparent; }
+          background:linear-gradient(90deg,#D9AE5E,#B8892E); -webkit-background-clip:text; background-clip:text; color:transparent; }
         .stat span { display:block; margin-top:8px; font-size:11px; font-weight:400; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.6); }
 
         /* ── seções ── */
         .section { position:relative; z-index:1; padding:96px clamp(20px,5vw,80px); }
         .section-head { text-align:center; margin-bottom:56px; }
-        .kicker { font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:#B98CFF; margin-bottom:14px; }
+        .kicker { font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:#D9AE5E; margin-bottom:14px; }
         .section-head h2 { font-size:clamp(26px,3.6vw,40px); font-weight:900; letter-spacing:-.02em; color:#fff; margin:0; }
         .section-head p { margin:14px auto 0; max-width:560px; font-size:14.5px; line-height:1.75; color:rgba(255,255,255,.66); }
 
         /* ── grade de módulos ── */
         .feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; max-width:1120px; margin:0 auto; }
         .glass-card { padding:30px 26px; border-radius:28px;
-          background:rgba(40,40,44,.56); border:1px solid rgba(255,255,255,.14);
+          background:rgba(13,24,48,.72); border:1px solid rgba(255,255,255,.14);
           backdrop-filter:blur(24px) saturate(1.3); -webkit-backdrop-filter:blur(24px) saturate(1.3);
           box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
           transition:transform .25s, border-color .25s, box-shadow .25s; }
-        .glass-card:hover { transform:translateY(-4px); border-color:rgba(185,140,255,.45); box-shadow:0 20px 50px rgba(0,0,0,.5); }
+        .glass-card:hover { transform:translateY(-4px); border-color:rgba(217,174,94,.45); box-shadow:0 20px 50px rgba(0,0,0,.5); }
         .feat-ico { width:50px; height:50px; border-radius:50%; display:grid; place-items:center; margin-bottom:18px;
-          background:rgba(185,140,255,.16); border:1px solid rgba(185,140,255,.35); color:#E3CFFF; }
+          background:rgba(217,174,94,.16); border:1px solid rgba(217,174,94,.35); color:#F0DFB8; }
         .glass-card h3 { font-size:16px; font-weight:700; color:#fff; margin-bottom:8px; }
         .glass-card p { font-size:13px; line-height:1.7; color:rgba(255,255,255,.66); }
 
@@ -300,7 +300,7 @@ export default function Home() {
 
         /* ── cartão de citação (vidro) ── */
         .quote-card { position:relative; overflow:hidden; border-radius:44px; padding:44px 40px 40px;
-          background:linear-gradient(160deg, rgba(64,72,255,.28), rgba(255,44,176,.22)), rgba(40,40,44,.72);
+          background:linear-gradient(160deg, rgba(30,69,113,.35), rgba(184,137,46,.16)), rgba(13,24,48,.72);
           border:1px solid rgba(255,255,255,.16);
           backdrop-filter:blur(28px) saturate(1.3); -webkit-backdrop-filter:blur(28px) saturate(1.3);
           box-shadow:0 30px 70px rgba(0,0,0,.5); }
@@ -322,7 +322,7 @@ export default function Home() {
           border-top:1px solid rgba(255,255,255,.1); }
         .foot-brand { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; color:#fff; }
         .home-foot p { font-size:12px; color:rgba(255,255,255,.58); }
-        .home-foot a { color:#B98CFF; text-decoration:none; }
+        .home-foot a { color:#D9AE5E; text-decoration:none; }
         .home-foot a:hover { text-decoration:underline; }
 
         @media (max-width:860px) {

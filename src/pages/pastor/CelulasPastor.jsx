@@ -7,22 +7,9 @@ import {
   Home, User, Loader2, ChevronRight, CalendarCheck, CheckCircle2,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── AURA Design Tokens (igual ao Dashboard) ─────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-  green:     "#059669",
-  greenDark: "#047857",
-};
 
 function themeCelulas(isDark) {
   return {

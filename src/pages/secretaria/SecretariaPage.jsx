@@ -16,51 +16,20 @@ import SecretariaCelulas from "./SecretariaCelulas";
 import AprovacaoFichasMembro from "./AprovacaoFichasMembro";
 import FichasConvertido from "./FichasConvertido";
 import BoasVindas            from "../../components/BoasVindas.jsx";
+import { AURA, theme } from "../heroTheme";
 
 /* ─── Tokens ──────────────────────────────────────────────────────── */
-const AURA = {
-  gold:      "#C9A96E",
-  goldLight: "#E8D5A3",
-  dark:      "#0A0A0F",
-  darkEl:    "#12121A",
-  light:     "#F5F0E8",
-  red:       "#C8102E",
-  redDark:   "#9B0B1E",
-  blue:      "#003DA5",
-  blueDark:  "#002470",
-  yellow:    "#FDB813",
-};
 
-function theme(isDark) {
-  return {
-    bg:          isDark ? "#07070C"               : "#FAF8F4",
-    bgEl:        isDark ? "rgba(18,18,26,.97)"     : "#D8D4CC",
-    bgInput:     isDark ? "rgba(255,255,255,.04)"  : "rgba(0,0,0,.04)",
-    border:      isDark ? "rgba(201,169,110,.10)"  : "rgba(201,169,110,.35)",
-    borderInput: isDark ? "rgba(201,169,110,.15)"  : "rgba(201,169,110,.28)",
-    text:        isDark ? "#F5F0E8"                : "#1A1008",
-    textSec:     isDark ? "#9A9588"                : "#6B5E4A",
-    textMuted:   isDark ? "#6B6658"                : "#9A9080",
-    gold:        isDark ? "#C9A96E"                : "#3D3218",
-    goldSoft:    isDark ? "rgba(201,169,110,.06)"  : "rgba(61,50,24,.08)",
-    goldHover:   isDark ? "rgba(201,169,110,.12)"  : "rgba(61,50,24,.14)",
-    glow1:       isDark ? "rgba(201,169,110,.07)"  : "rgba(201,169,110,.10)",
-    glow2:       isDark ? "rgba(201,169,110,.05)"  : "rgba(201,169,110,.08)",
-    glow3:       isDark ? "rgba(155,11,30,.03)"    : "rgba(0,61,165,.04)",
-    headerBg:    isDark ? "rgba(7,7,12,.92)"       : "rgba(247,243,238,.92)",
-    placeholder: isDark ? "rgba(154,149,136,.35)"  : "rgba(107,94,74,.35)",
-  };
-}
 
 /* ─── Menu items ─────────────────────────────────────────────────── */
 const MENU_ITEMS = [
   { icon: Users,           name: "Membros",      desc: "Gestão",        aba: "MEMBROS",            color: AURA.blue },
-  { icon: UserPlus,        name: "Visitantes",   desc: "Novas Vidas",   aba: "VISITANTES",         color: AURA.red },
-  { icon: Home,            name: "Células",      desc: "Grupos",        aba: "CELULAS",            color: "#059669" },
+  { icon: UserPlus,        name: "Visitantes",   desc: "Novas Vidas",   aba: "VISITANTES",         color: AURA.gold },
+  { icon: Home,            name: "Células",      desc: "Grupos",        aba: "CELULAS",            color: AURA.goldLight },
   { icon: FileText,        name: "Fichas",       desc: "Encontro",      aba: "FICHAS",             color: AURA.yellow },
-  { icon: Building2,       name: "Secretaria",   desc: "Controle",      aba: "SECRETARIACELULAS",  color: "#7090e8" },
-  { icon: ClipboardList,   name: "Aprov. Fichas",desc: "Membros",       aba: "APROVACAO_FICHAS",   color: AURA.red, badgeKey: "APROVACAO_FICHAS" },
-  { icon: Droplets,        name: "Convertidos",  desc: "Novas Vidas",   aba: "FICHAS_CONVERTIDO",  color: "#059669", badgeKey: "FICHAS_CONVERTIDO" },
+  { icon: Building2,       name: "Secretaria",   desc: "Controle",      aba: "SECRETARIACELULAS",  color: AURA.blueDark },
+  { icon: ClipboardList,   name: "Aprov. Fichas",desc: "Membros",       aba: "APROVACAO_FICHAS",   color: AURA.gold, badgeKey: "APROVACAO_FICHAS" },
+  { icon: Droplets,        name: "Convertidos",  desc: "Novas Vidas",   aba: "FICHAS_CONVERTIDO",  color: AURA.goldLight, badgeKey: "FICHAS_CONVERTIDO" },
 ];
 
 const PAGE_TITLES = {
