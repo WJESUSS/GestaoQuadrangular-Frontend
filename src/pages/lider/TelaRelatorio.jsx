@@ -181,21 +181,21 @@ function AuraStyles({ t, isDark }) {
         display: flex; align-items: center; justify-content: center; padding: 20px;
         background: rgba(5,5,10,.88);
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        animation: aura-overlay-in .3s ease forwards;
+        animation: aura-overlay-in .18s ease forwards;
       }
-      .aura-modal-overlay-bg.saindo { animation: aura-overlay-in .3s ease reverse forwards; }
+      .aura-modal-overlay-bg.saindo { animation: aura-overlay-in .14s ease reverse forwards; }
 
       /* ── Cartão do modal (legado, mantido para compatibilidade) ── */
       .aura-modal-card {
         position: relative; width: 100%; max-width: 400px;
         border-radius: 28px; overflow: hidden;
         box-shadow: 0 40px 120px rgba(0,0,0,.7);
-        animation: aura-modal-in .45s cubic-bezier(.34,1.28,.64,1) forwards;
+        animation: aura-modal-in .3s cubic-bezier(.22,.82,.3,1) forwards;
       }
-      .aura-modal-card.saindo { animation: aura-modal-out .3s ease forwards; }
+      .aura-modal-card.saindo { animation: aura-modal-out .22s ease forwards; }
       .aura-modal-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 10;
-        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba(196,166,255,.5) 50%, transparent 100%);
       }
 
       /* ── Cartão do modal v2 (responsivo, usado pelos modais de resultado) ── */
@@ -203,14 +203,14 @@ function AuraStyles({ t, isDark }) {
         position: relative; width: 100%; max-width: 420px;
         border-radius: clamp(20px, 5vw, 28px); overflow: hidden;
         box-shadow: 0 40px 120px rgba(0,0,0,.7);
-        animation: aura-modal-in .45s cubic-bezier(.34,1.28,.64,1) forwards;
+        animation: aura-modal-in .3s cubic-bezier(.22,.82,.3,1) forwards;
         max-height: calc(100vh - 40px);
         display: flex; flex-direction: column;
       }
-      .aura-modal-card-v2.saindo { animation: aura-modal-out .3s ease forwards; }
+      .aura-modal-card-v2.saindo { animation: aura-modal-out .22s ease forwards; }
       .aura-modal-card-v2::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 10;
-        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba(196,166,255,.5) 50%, transparent 100%);
       }
       .aura-modal-body-v2 {
         position: relative; z-index: 1;
@@ -286,7 +286,7 @@ function AuraStyles({ t, isDark }) {
       .aura-check-svg { display: block; }
       .aura-check-path {
         stroke-dasharray: 60; stroke-dashoffset: 60;
-        animation: aura-check-draw .6s .3s cubic-bezier(.4,0,.2,1) forwards;
+        animation: aura-check-draw .4s .12s cubic-bezier(.4,0,.2,1) forwards;
       }
 
       .aura-modal-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(10,10,15,.82); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 0 20px; }
@@ -397,19 +397,18 @@ function ModalRealizadaSucesso({
   useEffect(() => {
     const t = setTimeout(() => {
       setSaindo(true);
-      setTimeout(() => onClose?.(), 380);
-    }, 5500);
+      setTimeout(() => onClose?.(), 220);
+    }, 4500);
     return () => clearTimeout(t);
   }, [onClose]);
 
-  const fechar = () => { setSaindo(true); setTimeout(() => onClose?.(), 380); };
+  const fechar = () => { setSaindo(true); setTimeout(() => onClose?.(), 220); };
 
   return (
       <div className={`aura-modal-overlay-bg${saindo ? " saindo" : ""}`} onClick={fechar}>
-        <div
-            className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
+        <div className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
             onClick={e => e.stopPropagation()}
-            style={{ background: "linear-gradient(165deg, #2C2308 0%, #1A1404 50%, #0D0A02 100%)" }}
+            style={{ background: "linear-gradient(165deg, #241845 0%, #171036 50%, #0B0820 100%)" }}
         >
           {/* Partículas decorativas de fundo */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
@@ -419,7 +418,7 @@ function ModalRealizadaSucesso({
                   width: i % 2 === 0 ? 130 : 85,
                   height: i % 2 === 0 ? 130 : 85,
                   borderRadius: "50%",
-                  background: "rgba(185,140,255,.10)",
+                  background: ["rgba(185,140,255,.14)", "rgba(255,44,176,.10)", "rgba(64,72,255,.12)"][i % 3],
                   top: `${[10,60,30,80,20,70][i]}%`,
                   left: `${[10,70,85,20,55,40][i]}%`,
                   transform: "translate(-50%,-50%)",
@@ -431,24 +430,33 @@ function ModalRealizadaSucesso({
           <div className="aura-modal-body-v2">
             {/* Ícone com anel pulsante e checkmark animado */}
             <div className="aura-modal-icon-wrap-v2">
-              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(185,140,255,.3)" }} />
-              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(185,140,255,.15)" }} />
-              <div className="aura-modal-icon-circle-v2" style={{ background: "linear-gradient(135deg, rgba(185,140,255,.85), rgba(13,110,58,.45))", border: "1.5px solid rgba(232,213,163,.45)" }}>
+              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(185,140,255,.4)" }} />
+              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(255,44,176,.35)" }} />
+              <div className="aura-modal-icon-circle-v2" style={{ background: "linear-gradient(135deg, rgba(185,140,255,.9), rgba(64,72,255,.6), rgba(255,44,176,.35))", border: "1.5px solid rgba(196,166,255,.5)" }}>
                 <svg className="aura-check-svg" width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ width: "55%", height: "55%" }}>
+                  <defs>
+                    <linearGradient id="aura-gCheck" x1="0" y1="1" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#9B5CFF" />
+                      <stop offset="60%" stopColor="#FF2CB0" />
+                      <stop offset="100%" stopColor="#FFE066" />
+                    </linearGradient>
+                    <filter id="aura-gCheckGlow"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
                   <path
                       className="aura-check-path"
                       d="M10 22 L18 31 L34 13"
-                      stroke="rgba(255,255,255,.95)"
-                      strokeWidth="3"
+                      stroke="url(#aura-gCheck)"
+                      strokeWidth="3.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      filter="url(#aura-gCheckGlow)"
                   />
                 </svg>
               </div>
             </div>
 
             {/* Título */}
-            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(232,213,163,.75)", textAlign: "center", margin: "0 0 8px" }}>
+            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(196,166,255,.8)", textAlign: "center", margin: "0 0 8px" }}>
               {tituloTopo}
             </p>
             <h2 className="aura-modal-title-v2">{titulo}</h2>
@@ -456,22 +464,22 @@ function ModalRealizadaSucesso({
               {subtitulo || nomeCelula || "O Senhor viu cada presença."}
             </p>
 
-            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(185,140,255,.25), transparent)" }} />
+            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(185,140,255,.3), transparent)" }} />
 
             {/* Stats */}
             <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: "clamp(22px,5vw,28px)", marginTop: 18 }}>
               {/* Total presentes — destaque */}
               <div style={{ textAlign: "center" }}>
                 <p className="aura-modal-num-v2 aura-shimmer-text">{total}</p>
-                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(232,213,163,.55)", margin: "4px 0 0" }}>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(196,166,255,.6)", margin: "4px 0 0" }}>
                   presentes
                 </p>
               </div>
 
               {/* Estudo */}
               {estudo && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(185,140,255,.08)", border: "1px solid rgba(185,140,255,.18)", minWidth: 0 }}>
-                    <BookOpen size={14} style={{ color: "rgba(232,213,163,.8)", flexShrink: 0 }} />
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(185,140,255,.1)", border: "1px solid rgba(185,140,255,.22)", minWidth: 0 }}>
+                    <BookOpen size={14} style={{ color: "rgba(196,166,255,.9)", flexShrink: 0 }} />
                     <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.8)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
                       {estudo}
                     </p>
@@ -484,10 +492,10 @@ function ModalRealizadaSucesso({
                 onClick={fechar}
                 style={{
                   width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
-                  background: "linear-gradient(135deg, #9B7E3F, #C9A96E)",
-                  color: "#1A1404", fontFamily: "'Roboto',sans-serif", fontSize: 10,
+                  background: "linear-gradient(135deg, #7A3DE0, #9B5CFF)",
+                  color: "#fff", fontFamily: "'Roboto',sans-serif", fontSize: 10,
                   fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
-                  boxShadow: "0 8px 28px rgba(185,140,255,.35)", transition: "all .25s",
+                  boxShadow: "0 8px 28px rgba(155,92,255,.4)", transition: "all .25s",
                 }}
                 onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -514,19 +522,19 @@ function ModalNaoRealizadaSucesso({
   useEffect(() => {
     const t = setTimeout(() => {
       setSaindo(true);
-      setTimeout(() => onClose?.(), 380);
-    }, 6000);
+      setTimeout(() => onClose?.(), 220);
+    }, 5000);
     return () => clearTimeout(t);
   }, [onClose]);
 
-  const fechar = () => { setSaindo(true); setTimeout(() => onClose?.(), 380); };
+  const fechar = () => { setSaindo(true); setTimeout(() => onClose?.(), 220); };
 
   return (
       <div className={`aura-modal-overlay-bg${saindo ? " saindo" : ""}`} onClick={fechar}>
         <div
             className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
             onClick={e => e.stopPropagation()}
-            style={{ background: "linear-gradient(165deg, #2A1810 0%, #1A0F0A 50%, #0D0805 100%)" }}
+            style={{ background: "linear-gradient(165deg, #241845 0%, #171036 50%, #0B0820 100%)" }}
         >
           {/* Partículas de fundo */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
@@ -536,7 +544,7 @@ function ModalNaoRealizadaSucesso({
                   width: i % 2 === 0 ? 140 : 90,
                   height: i % 2 === 0 ? 140 : 90,
                   borderRadius: "50%",
-                  background: "rgba(196,108,58,.10)",
+                  background: ["rgba(255,154,165,.12)", "rgba(255,44,176,.10)", "rgba(185,140,255,.12)"][i % 3],
                   top: `${[15,65,35,80,50][i]}%`,
                   left: `${[15,75,80,25,50][i]}%`,
                   transform: "translate(-50%,-50%)",
@@ -548,13 +556,13 @@ function ModalNaoRealizadaSucesso({
           <div className="aura-modal-body-v2">
             {/* Ícone flutuante com anel */}
             <div className="aura-modal-icon-wrap-v2">
-              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(196,108,58,.3)" }} />
-              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(196,108,58,.15)" }} />
+              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(255,154,165,.35)" }} />
+              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(255,44,176,.3)" }} />
               <div
                   className="aura-modal-icon-circle-v2 aura-float"
                   style={{
-                    background: "linear-gradient(135deg, rgba(120,60,20,.85), rgba(196,108,58,.4))",
-                    border: "1.5px solid rgba(216,140,90,.4)",
+                    background: "linear-gradient(135deg, rgba(200,60,120,.9), rgba(255,154,165,.55), rgba(185,140,255,.3))",
+                    border: "1.5px solid rgba(255,196,201,.5)",
                   }}
               >
                 {cfg.icone}
@@ -562,7 +570,7 @@ function ModalNaoRealizadaSucesso({
             </div>
 
             {/* Título */}
-            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(216,140,90,.75)", textAlign: "center", margin: "0 0 8px" }}>
+            <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(255,196,201,.8)", textAlign: "center", margin: "0 0 8px" }}>
               {tituloTopo}
             </p>
             <h2 className="aura-modal-title-v2">{titulo}</h2>
@@ -570,18 +578,18 @@ function ModalNaoRealizadaSucesso({
               {subtitulo}
             </p>
 
-            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(216,140,90,.25), transparent)" }} />
+            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(255,154,165,.3), transparent)" }} />
 
             {/* Motivo em destaque */}
             <div style={{ marginBottom: "clamp(22px,5vw,28px)", marginTop: 18, display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{
                 padding: "clamp(16px,4vw,20px)",
                 borderRadius: 18,
-                background: "rgba(196,108,58,.09)",
-                border: "1px solid rgba(196,108,58,.2)",
+                background: "rgba(255,154,165,.1)",
+                border: "1px solid rgba(255,154,165,.25)",
                 textAlign: "center",
               }}>
-                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(216,140,90,.65)", margin: "0 0 10px" }}>
+                <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,196,201,.7)", margin: "0 0 10px" }}>
                   Motivo
                 </p>
                 <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: "clamp(16px,4vw,18px)", fontWeight: 500, color: "rgba(255,255,255,.9)", margin: 0, wordBreak: "break-word" }}>
@@ -592,7 +600,7 @@ function ModalNaoRealizadaSucesso({
               {/* Célula */}
               {nomeCelula && (
                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.07)", minWidth: 0 }}>
-                    <Church size={14} style={{ color: "rgba(216,140,90,.7)", flexShrink: 0 }} />
+                    <Church size={14} style={{ color: "rgba(255,196,201,.8)", flexShrink: 0 }} />
                     <p style={{ fontFamily: "'Roboto',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.65)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
                       {nomeCelula}
                     </p>
@@ -605,7 +613,7 @@ function ModalNaoRealizadaSucesso({
                 onClick={fechar}
                 style={{
                   width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
-                  background: "linear-gradient(135deg, #8A4A24, #C46C3A)",
+                  background: "linear-gradient(135deg, #7A3DE0, #9B5CFF)",
                   color: "#fff", fontFamily: "'Roboto',sans-serif", fontSize: 10,
                   fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
                   boxShadow: "0 8px 28px rgba(196,108,58,.35)", transition: "all .25s",
