@@ -324,7 +324,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-menu-card:hover::before { opacity: 1; left: 12%; right: 12%; }
       .dl-menu-icon {
-        width: 46px; height: 46px; border-radius: 15px;
+        width: 52px; height: 52px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center; margin: 0 auto;
         transition: transform .35s;
       }
@@ -638,14 +638,14 @@ export default function DashboardLider() {
 
   /* ── 7 módulos (Histórico removido) ── */
   const menuItems = [
-    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: AURA.moss },
-    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: AURA.pink },
-    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: AURA.moss },
-    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: AURA.gold },
-    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: AURA.goldLight },
-    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: AURA.goldLight },
-    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: AURA.pink },
-    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: AURA.moss },
+    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: "#3D7BCC" },
+    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: "#2E9E6B" },
+    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: "#E0841F" },
+    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: "#E8B63A" },
+    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#9A6BDB" },
+    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#E45D5D" },
+    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#23A4C8" },
+    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: "#E2669F" },
   ];
 
   return (
@@ -833,7 +833,7 @@ export default function DashboardLider() {
                             whileTap={{ scale: .96 }}
                             onClick={() => (aba === "acompanhamento-modal" ? setShowAcompanhamento(true) : setAbaAtiva(aba))}
                         >
-                          <div className="dl-menu-icon" style={{ background: `${color}18`, color }}>
+                          <div className="dl-menu-icon" style={{ background: `radial-gradient(circle at 30% 25%, ${color}2e, ${color}12)`, color, border: `1px solid ${color}30`, boxShadow: `0 4px 12px ${color}22` }}>
                             {icon}
                           </div>
                           <div>
