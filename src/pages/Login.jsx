@@ -2,12 +2,11 @@ import { Helmet }        from "react-helmet-async";
 import { useNavigate }   from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { jwtDecode }     from "jwt-decode";
-import { Loader2, Lock, Mail, Sun, Moon, User, ShieldCheck, CheckCircle2, ArrowLeft, Users, Wallet, ClipboardList } from "lucide-react";
+import { Loader2, Lock, Mail, Sun, Moon, User, ShieldCheck, CheckCircle2, ArrowLeft, } from "lucide-react";
 import { useAuth }       from "../auth/AuthContext";
 import { useTheme }      from "../context/ThemeContext";
 import api               from "../services/api.js";
 import jesusImg          from "../assets/jesus.jpeg";
-import CrossMark         from "../components/CrossMark.jsx";
 
 /* ─── Paleta da Home: vinho + escarlate + dourado ─── */
 const P = {
@@ -28,7 +27,7 @@ function useFadeIn(threshold = 0.15) {
         }, { threshold });
         obs.observe(el);
         return () => obs.disconnect();
-    }, []);
+    }, [threshold]);
     return ref;
 }
 
@@ -305,7 +304,7 @@ export default function Login() {
 
         /* ── cartão dividido ── */
         .login-card {
-          position:relative; z-index:1; display:flex; width:100%; max-width:860px; overflow:hidden;
+          position:relative; z-index:1; display:flex; width:100%; max-width:940px; overflow:hidden;
           background:var(--panel); border-radius:16px; border:1px solid var(--input-b);
           box-shadow:0 1px 2px rgba(53,3,9,.05), 0 24px 48px -12px rgba(53,3,9,.28);
           opacity:0; transform:translateY(20px);
@@ -314,49 +313,40 @@ export default function Login() {
 
         /* lado da marca (vinho + imagem) */
         .brand-pane {
-          flex:1; min-width:280px; padding:40px 40px 34px;
+          flex:1.35 1 0; min-width:320px; padding:40px 40px 34px;
           background:linear-gradient(160deg, ${P.wineLight} 0%, ${P.wine} 55%, ${P.wineDeep} 100%);
-          background-size:cover; background-position:center 28%; background-repeat:no-repeat;
           color:#fff; display:flex; flex-direction:column; justify-content:space-between;
           position:relative; overflow:hidden; isolation:isolate;
         }
+        .brand-image {
+          position:absolute; inset:0; z-index:0;
+          background-size:contain; background-position:center center; background-repeat:no-repeat;
+          animation:brand-float 18s ease-in-out infinite alternate;
+          will-change:transform;
+        }
         .brand-pane::before {
-          content:""; position:absolute; inset:0; z-index:0;
+          content:""; position:absolute; inset:0; z-index:1;
           background-image:
             linear-gradient(180deg, rgba(23,3,7,.60) 0%, rgba(29,4,9,.26) 40%, rgba(23,3,7,.93) 100%),
             linear-gradient(155deg, rgba(200,16,46,.38) 0%, rgba(29,4,9,.08) 55%, rgba(23,3,7,.80) 100%),
             radial-gradient(closest-side, rgba(253,184,19,.14), transparent 72%);
           pointer-events:none;
         }
-        .brand-pane > * { position:relative; z-index:1; }
-        .brand-top { display:flex; align-items:center; gap:12px; }
-        .brand-top-rule { flex:1; height:1px; background:linear-gradient(90deg, rgba(253,184,19,.5), transparent); }
-        .brand-name { font-size:13px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:${P.goldLight}; }
-        .brand-mid { margin-top:26px; }
-
-        .brand-cross {
-          width:100px; height:auto; aspect-ratio:80 / 104; display:block; margin-bottom:18px;
-          overflow:visible; filter:drop-shadow(0 8px 22px rgba(253,184,19,.3));
+        .brand-pane::after {
+          content:""; position:absolute; inset:-30% -20%; z-index:2; pointer-events:none;
+          background:linear-gradient(115deg, transparent 42%, rgba(255,211,77,.12) 49%, rgba(255,255,255,.05) 51%, transparent 58%);
+          animation:brand-sheen 14s ease-in-out infinite;
         }
-        .brand-lede { margin-top:12px; font-size:13px; line-height:1.65; color:rgba(255,255,255,.74); max-width:280px; }
-        .brand-verse {
-          margin-top:18px; padding-left:14px; border-left:2px solid rgba(253,184,19,.55);
-          font-family:'Fraunces',serif; font-style:italic; font-size:12.5px; line-height:1.6;
-          color:rgba(255,255,255,.82); max-width:290px;
+        @keyframes brand-float {
+          from { transform:translateY(-1.6%); }
+          to   { transform:translateY(1.6%); }
         }
-        .brand-verse cite {
-          display:block; margin-top:7px; font-family:'Inter',sans-serif; font-style:normal;
-          font-size:8.5px; font-weight:700; letter-spacing:.24em; color:${P.goldLight};
+        @keyframes brand-sheen {
+          0%,100% { transform:translateX(-30%); }
+          50%     { transform:translateX(30%); }
         }
-        .brand-feats { margin-top:22px; display:flex; flex-direction:column; gap:10px; }
-        .brand-feat { display:flex; align-items:center; gap:10px; font-size:12px; color:rgba(255,255,255,.85); }
-        .brand-feat-ico {
-          width:26px; height:26px; border-radius:7px; flex-shrink:0;
-          background:rgba(253,184,19,.10); border:1px solid rgba(253,184,19,.28);
-          display:grid; place-items:center; color:${P.goldLight};
-        }
-        /* lado do formulário */
-        .form-pane { flex:1.05; min-width:300px; padding:44px 42px; display:flex; flex-direction:column; justify-content:center; }
+                /* lado do formulário */
+        .form-pane { flex:1 1 0; min-width:300px; padding:44px 42px; display:flex; flex-direction:column; justify-content:center; }
         .card-title { font-family:'Fraunces',serif; font-size:26px; font-weight:600; letter-spacing:-.01em; color:var(--title); margin-bottom:6px; }
         .card-subtitle { font-size:13px; color:var(--sub); margin-bottom:22px; }
         .form-col { display:flex; flex-direction:column; gap:15px; }
@@ -477,13 +467,15 @@ export default function Login() {
         @keyframes shakeX { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
         @keyframes spin   { to{transform:rotate(360deg)} }
 
+        /* ── mobile: imagem grande e bem enquadrada ── */
         @media (max-width:760px) {
           .login-card { flex-direction:column; max-width:440px; border-radius:14px; }
-          .brand-pane { padding:28px 28px 24px; background-position:center 22%; }
-          .brand-mid { margin-top:14px; }
-          .brand-cross { width:74px; margin-bottom:12px; }
-          .brand-lede, .brand-verse, .brand-feats { display:none; }
-          .form-pane { padding:32px 28px; }
+          .brand-pane {
+            flex:none; min-width:0; min-height:300px;      /* altura da imagem: ajuste aqui */
+            padding:24px 24px 20px;
+            justify-content:flex-end;
+          }
+          .form-pane { flex:none; min-width:0; padding:32px 28px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { animation:none !important; transition:none !important; }
@@ -500,38 +492,12 @@ export default function Login() {
                     <div className={`login-card${temErro ? " shake" : ""}`} ref={cardRef}>
 
                         {/* ── lado da marca ── */}
-                        <aside
-                            className="brand-pane"
-                            style={{ backgroundImage: `url(${jesusImg})` }}
-                        >
-                            <div className="brand-top">
-                                <span className="brand-name">IEQ Pituaçu</span>
-                                <span className="brand-top-rule" aria-hidden="true"/>
-                            </div>
-
-                            <div className="brand-mid">
-                                <CrossMark className="brand-cross"/>
-                                <p className="brand-lede">Entre para cuidar da igreja com a mesma excelência com que servimos ao Senhor.</p>
-                                <blockquote className="brand-verse">
-                                    “Porque o Filho do Homem veio buscar e salvar o que se havia perdido.”
-                                    <cite>Lucas 19:10</cite>
-                                </blockquote>
-
-                                <div className="brand-feats">
-                                    <div className="brand-feat">
-                                        <span className="brand-feat-ico"><Users size={13}/></span>
-                                        Gestão de células e membros
-                                    </div>
-                                    <div className="brand-feat">
-                                        <span className="brand-feat-ico"><Wallet size={13}/></span>
-                                        Tesouraria e prestação de contas
-                                    </div>
-                                    <div className="brand-feat">
-                                        <span className="brand-feat-ico"><ClipboardList size={13}/></span>
-                                        Relatórios e acompanhamento pastoral
-                                    </div>
-                                </div>
-                            </div>
+                        <aside className="brand-pane">
+                            <div
+                                className="brand-image"
+                                style={{ backgroundImage: `url(${jesusImg})` }}
+                                aria-hidden="true"
+                            />
                         </aside>
 
                         {/* ── lado do formulário ── */}
