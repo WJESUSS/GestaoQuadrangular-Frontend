@@ -12,15 +12,15 @@ import { AURA, theme } from "./liderTheme";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 
 const JUSTIFICATIVAS = [
-  { value: "TRABALHO", label: "Trabalho",  icon: <Briefcase  size={13} />, cor: "#1E4571", bg: "rgba(30,69,113,.10)",  borda: "rgba(30,69,113,.28)"  },
-  { value: "VIAGEM",   label: "Viagem",    icon: <Plane      size={13} />, cor: "#0F2A4A", bg: "rgba(15,42,74,.10)",   borda: "rgba(15,42,74,.28)"   },
-  { value: "DOENCA",   label: "Doença",    icon: <HeartPulse size={13} />, cor: "#B8892E", bg: "rgba(184,137,46,.12)", borda: "rgba(184,137,46,.30)" },
-  { value: "OUTROS",   label: "Outros",    icon: <HelpCircle size={13} />, cor: "#D9AE5E", bg: "rgba(217,174,94,.14)", borda: "rgba(217,174,94,.32)" },
+  { value: "TRABALHO", label: "Trabalho",  icon: <Briefcase  size={13} />, cor: "#5A0B16", bg: "rgba(90,11,22,.10)",  borda: "rgba(90,11,22,.28)"  },
+  { value: "VIAGEM",   label: "Viagem",    icon: <Plane      size={13} />, cor: "#350309", bg: "rgba(53,3,9,.10)",   borda: "rgba(53,3,9,.28)"   },
+  { value: "DOENCA",   label: "Doença",    icon: <HeartPulse size={13} />, cor: "#FDB813", bg: "rgba(253,184,19,.12)", borda: "rgba(253,184,19,.30)" },
+  { value: "OUTROS",   label: "Outros",    icon: <HelpCircle size={13} />, cor: "#FFD34D", bg: "rgba(255,211,77,.14)", borda: "rgba(255,211,77,.32)" },
 ];
 
 const DECISAO_CONFIG = {
-  ACEITOU_JESUS: { label: "Aceitou Jesus",  cor: AURA.blue,  bg: "rgba(15,42,74,.08)",   borda: "rgba(15,42,74,.25)",  icone: "✝️" },
-  RECONCILIOU:   { label: "Reconciliou",    cor: "#B8892E",  bg: "rgba(184,137,46,.1)",  borda: "rgba(184,137,46,.3)", icone: "🙏" },
+  ACEITOU_JESUS: { label: "Aceitou Jesus",  cor: AURA.blue,  bg: "rgba(53,3,9,.08)",   borda: "rgba(53,3,9,.25)",  icone: "✝️" },
+  RECONCILIOU:   { label: "Reconciliou",    cor: "#FDB813",  bg: "rgba(253,184,19,.1)",  borda: "rgba(253,184,19,.3)", icone: "🙏" },
   BATISMO_AGUAS: { label: "Deseja Batismo", cor: "#1E7A46",  bg: "rgba(30,122,70,.08)", borda: "rgba(30,122,70,.3)", icone: "💧" },
 };
 
@@ -129,7 +129,7 @@ function AuraStyles({ t, isDark }) {
       .aura-divider::after  { content:''; flex:1; height:1px; background: linear-gradient(to left, transparent, ${AURA.gold}); }
       .aura-divider-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
-      .aura-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(184,137,46,.07); border: 1px solid rgba(184,137,46,.2); border-radius: 100px; padding: 5px 14px; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: ${AURA.gold}; }
+      .aura-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(253,184,19,.07); border: 1px solid rgba(253,184,19,.2); border-radius: 100px; padding: 5px 14px; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: ${AURA.gold}; }
       .aura-badge-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
       .aura-tabs { display: flex; border-radius: 16px; overflow: hidden; border: 1px solid ${t.border}; margin: 16px 0 24px; backdrop-filter: blur(20px); }
@@ -139,7 +139,7 @@ function AuraStyles({ t, isDark }) {
       .aura-tab.inactive:hover { color: ${AURA.gold}; }
 
       .aura-card { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 20px; overflow: hidden; backdrop-filter: blur(24px); position: relative; margin-bottom: 16px; }
-      .aura-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, rgba(184,137,46,.2), transparent); }
+      .aura-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, rgba(253,184,19,.2), transparent); }
       .aura-card-head { padding: 20px 24px; border-bottom: 1px solid ${t.border}; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
       .aura-card-head-title { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500; color: ${t.text}; margin: 0; }
       .aura-card-head-sub   { font-size: 11px; font-weight: 300; color: ${t.textMuted}; margin: 3px 0 0; }
@@ -156,7 +156,7 @@ function AuraStyles({ t, isDark }) {
 
       .aura-label { display: block; margin-bottom: 7px; font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${AURA.gold}; }
       .aura-input { width: 100%; box-sizing: border-box; background: ${t.bgInput}; border: 1px solid ${t.borderInput}; color: ${t.text}; padding: 13px 16px; border-radius: 13px; outline: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300; transition: all .25s; -webkit-appearance: none; appearance: none; }
-      .aura-input:focus { border-color: rgba(184,137,46,.5); background: rgba(184,137,46,.04); box-shadow: 0 0 0 3px rgba(184,137,46,.08); }
+      .aura-input:focus { border-color: rgba(253,184,19,.5); background: rgba(253,184,19,.04); box-shadow: 0 0 0 3px rgba(253,184,19,.08); }
       .aura-input::placeholder { color: ${t.placeholder}; }
 
       .aura-person-row { border-bottom: 1px solid ${t.border}; transition: background .2s; }
@@ -167,9 +167,9 @@ function AuraStyles({ t, isDark }) {
       .aura-just-options { display: flex; flex-wrap: wrap; gap: 8px; }
       .aura-just-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 100px; border: 1px solid; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; transition: all .2s; background: transparent; }
 
-      .aura-alert-warn    { display: flex; align-items: center; gap: 12px; background: rgba(184,137,46,.07); border: 1px solid rgba(184,137,46,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #B8892E; }
+      .aura-alert-warn    { display: flex; align-items: center; gap: 12px; background: rgba(253,184,19,.07); border: 1px solid rgba(253,184,19,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #FDB813; }
       .aura-alert-success { display: flex; align-items: center; gap: 12px; background: rgba(13,110,58,.08); border: 1px solid rgba(13,110,58,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #0d6e3a; animation: aura-fadein .4s ease; }
-      .aura-alert-info    { display: flex; align-items: center; gap: 12px; background: rgba(15,42,74,.07); border: 1px solid rgba(15,42,74,.22); border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; }
+      .aura-alert-info    { display: flex; align-items: center; gap: 12px; background: rgba(53,3,9,.07); border: 1px solid rgba(53,3,9,.22); border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; }
 
       /* ── Modal overlay elegante ── */
       .aura-modal-overlay-bg {
@@ -191,7 +191,7 @@ function AuraStyles({ t, isDark }) {
       .aura-modal-card.saindo { animation: aura-modal-out .22s ease forwards; }
       .aura-modal-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 10;
-        background: linear-gradient(90deg, transparent 0%, rgba(217,174,94,.5) 50%, transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba(255,211,77,.5) 50%, transparent 100%);
       }
 
       /* ── Cartão do modal v2 (responsivo, usado pelos modais de resultado) ── */
@@ -206,7 +206,7 @@ function AuraStyles({ t, isDark }) {
       .aura-modal-card-v2.saindo { animation: aura-modal-out .22s ease forwards; }
       .aura-modal-card-v2::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 10;
-        background: linear-gradient(90deg, transparent 0%, rgba(217,174,94,.5) 50%, transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba(255,211,77,.5) 50%, transparent 100%);
       }
       .aura-modal-body-v2 {
         position: relative; z-index: 1;
@@ -288,7 +288,7 @@ function AuraStyles({ t, isDark }) {
       .aura-modal-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(10,10,15,.82); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 0 20px; }
       .aura-modal-box { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 22px; padding: 32px 28px 26px; max-width: 420px; width: 100%; animation: aura-fadein .3s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 24px 80px rgba(0,0,0,.5); }
 
-      .aura-btn-primary { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color: #fff; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; transition: all .3s; box-shadow: 0 8px 28px rgba(15,42,74,.32); }
+      .aura-btn-primary { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 17px 0; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color: #fff; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; transition: all .3s; box-shadow: 0 8px 28px rgba(53,3,9,.32); }
       .aura-btn-primary:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
       .aura-btn-primary:disabled { opacity: .4; cursor: not-allowed; }
 
@@ -302,16 +302,16 @@ function AuraStyles({ t, isDark }) {
       .aura-btn-back { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 100px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .3s; margin-bottom: 20px; }
       .aura-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
 
-      .aura-btn-edit { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #0A0A0F; font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .25s; box-shadow: 0 4px 14px rgba(184,137,46,.2); flex-shrink: 0; }
-      .aura-btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,137,46,.3); }
+      .aura-btn-edit { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #0A0A0F; font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .25s; box-shadow: 0 4px 14px rgba(253,184,19,.2); flex-shrink: 0; }
+      .aura-btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(253,184,19,.3); }
 
       .aura-hist-row { padding: 18px 22px; border-bottom: 1px solid ${t.border}; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: background .2s; }
       .aura-hist-row:last-child { border-bottom: none; }
-      .aura-hist-row:hover { background: rgba(184,137,46,.03); }
+      .aura-hist-row:hover { background: rgba(253,184,19,.03); }
 
       .aura-decisao-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 100px; font-size: 10px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
       .aura-loading { min-height: 60vh; display: flex; align-items: center; justify-content: center; }
-      .aura-draft-toast { display: flex; align-items: center; gap: 10px; background: rgba(15,42,74,.07); border: 1px solid rgba(15,42,74,.2); border-radius: 14px; padding: 12px 18px; margin-bottom: 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; animation: aura-fadein .4s ease; }
+      .aura-draft-toast { display: flex; align-items: center; gap: 10px; background: rgba(53,3,9,.07); border: 1px solid rgba(53,3,9,.2); border-radius: 14px; padding: 12px 18px; margin-bottom: 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; animation: aura-fadein .4s ease; }
 
       .aura-btn-justificar {
         width: 28px; height: 28px; border-radius: 8px; border: none;
@@ -321,13 +321,6 @@ function AuraStyles({ t, isDark }) {
       }
       .aura-btn-justificar:hover { background: rgba(220,38,38,.14) !important; color: #DC2626 !important; }
     `}</style>
-  );
-}
-
-function IEQCross({ size = 36 }) {
-  return (
-      <img src="/quadrangular.png" alt="Logo IEQ"
-           style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }} />
   );
 }
 
@@ -358,8 +351,8 @@ function BadgeNaoRealizada({ motivo }) {
         display: "inline-flex", alignItems: "center", gap: 5,
         padding: "3px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600,
         fontFamily: "'Inter',sans-serif", letterSpacing: ".06em",
-        background: "rgba(184,137,46,.15)", color: "#B8892E",
-        border: "1px solid rgba(184,137,46,.4)", whiteSpace: "nowrap",
+        background: "rgba(253,184,19,.15)", color: "#FDB813",
+        border: "1px solid rgba(253,184,19,.4)", whiteSpace: "nowrap",
       }}>
       <Ban size={10} /> NÃO REALIZADA · {cfg.icone} {cfg.label.toUpperCase()}
     </span>
@@ -404,7 +397,7 @@ function ModalRealizadaSucesso({
       <div className={`aura-modal-overlay-bg${saindo ? " saindo" : ""}`} onClick={fechar}>
         <div className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
             onClick={e => e.stopPropagation()}
-            style={{ background: "linear-gradient(165deg, #0F2A4A 0%, #0A1D33 50%, #070E1C 100%)" }}
+            style={{ background: "linear-gradient(165deg, #350309 0%, #1D0409 50%, #170307 100%)" }}
         >
           {/* Partículas decorativas de fundo */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
@@ -414,7 +407,7 @@ function ModalRealizadaSucesso({
                   width: i % 2 === 0 ? 130 : 85,
                   height: i % 2 === 0 ? 130 : 85,
                   borderRadius: "50%",
-                  background: ["rgba(217,174,94,.16)", "rgba(217,174,94,.10)", "rgba(30,69,113,.14)"][i % 3],
+                  background: ["rgba(255,211,77,.16)", "rgba(255,211,77,.10)", "rgba(90,11,22,.14)"][i % 3],
                   top: `${[10,60,30,80,20,70][i]}%`,
                   left: `${[10,70,85,20,55,40][i]}%`,
                   transform: "translate(-50%,-50%)",
@@ -426,14 +419,14 @@ function ModalRealizadaSucesso({
           <div className="aura-modal-body-v2">
             {/* Ícone com anel pulsante e checkmark animado */}
             <div className="aura-modal-icon-wrap-v2">
-              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(217,174,94,.45)" }} />
-              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(217,174,94,.3)" }} />
-              <div className="aura-modal-icon-circle-v2" style={{ background: "linear-gradient(135deg, rgba(217,174,94,.9), rgba(30,69,113,.7), rgba(184,137,46,.4))", border: "1.5px solid rgba(240,223,184,.6)" }}>
+              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(255,211,77,.45)" }} />
+              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(255,211,77,.3)" }} />
+              <div className="aura-modal-icon-circle-v2" style={{ background: "linear-gradient(135deg, rgba(255,211,77,.9), rgba(90,11,22,.7), rgba(253,184,19,.4))", border: "1.5px solid rgba(255,233,168,.6)" }}>
                 <svg className="aura-check-svg" width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ width: "55%", height: "55%" }}>
                   <defs>
                     <linearGradient id="aura-gCheck" x1="0" y1="1" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#D9AE5E" />
-                      <stop offset="60%" stopColor="#B8892E" />
+                      <stop offset="0%" stopColor="#FFD34D" />
+                      <stop offset="60%" stopColor="#FDB813" />
                       <stop offset="100%" stopColor="#E8C98A" />
                     </linearGradient>
                     <filter id="aura-gCheckGlow"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -452,7 +445,7 @@ function ModalRealizadaSucesso({
             </div>
 
             {/* Título */}
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(217,174,94,.85)", textAlign: "center", margin: "0 0 8px" }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(255,211,77,.85)", textAlign: "center", margin: "0 0 8px" }}>
               {tituloTopo}
             </p>
             <h2 className="aura-modal-title-v2">{titulo}</h2>
@@ -460,22 +453,22 @@ function ModalRealizadaSucesso({
               {subtitulo || nomeCelula || "O Senhor viu cada presença."}
             </p>
 
-            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(184,137,46,.3), transparent)" }} />
+            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(253,184,19,.3), transparent)" }} />
 
             {/* Stats */}
             <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: "clamp(22px,5vw,28px)", marginTop: 18 }}>
               {/* Total presentes — destaque */}
               <div style={{ textAlign: "center" }}>
                 <p className="aura-modal-num-v2 aura-shimmer-text">{total}</p>
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(217,174,94,.65)", margin: "4px 0 0" }}>
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,211,77,.65)", margin: "4px 0 0" }}>
                   presentes
                 </p>
               </div>
 
               {/* Estudo */}
               {estudo && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(184,137,46,.1)", border: "1px solid rgba(184,137,46,.22)", minWidth: 0 }}>
-                    <BookOpen size={14} style={{ color: "rgba(217,174,94,.9)", flexShrink: 0 }} />
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(253,184,19,.1)", border: "1px solid rgba(253,184,19,.22)", minWidth: 0 }}>
+                    <BookOpen size={14} style={{ color: "rgba(255,211,77,.9)", flexShrink: 0 }} />
                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.8)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
                       {estudo}
                     </p>
@@ -488,10 +481,10 @@ function ModalRealizadaSucesso({
                 onClick={fechar}
                 style={{
                   width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
-                  background: "linear-gradient(135deg, #0A1D33, #0F2A4A)",
+                  background: "linear-gradient(135deg, #1D0409, #350309)",
                   color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10,
                   fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
-                  boxShadow: "0 8px 28px rgba(15,42,74,.4)", transition: "all .25s",
+                  boxShadow: "0 8px 28px rgba(53,3,9,.4)", transition: "all .25s",
                 }}
                 onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -530,7 +523,7 @@ function ModalNaoRealizadaSucesso({
         <div
             className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
             onClick={e => e.stopPropagation()}
-            style={{ background: "linear-gradient(165deg, #0F2A4A 0%, #0A1D33 50%, #070E1C 100%)" }}
+            style={{ background: "linear-gradient(165deg, #350309 0%, #1D0409 50%, #170307 100%)" }}
         >
           {/* Partículas de fundo */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
@@ -540,7 +533,7 @@ function ModalNaoRealizadaSucesso({
                   width: i % 2 === 0 ? 140 : 90,
                   height: i % 2 === 0 ? 140 : 90,
                   borderRadius: "50%",
-                  background: ["rgba(217,174,94,.14)", "rgba(184,137,46,.1)", "rgba(30,69,113,.14)"][i % 3],
+                  background: ["rgba(255,211,77,.14)", "rgba(253,184,19,.1)", "rgba(90,11,22,.14)"][i % 3],
                   top: `${[15,65,35,80,50][i]}%`,
                   left: `${[15,75,80,25,50][i]}%`,
                   transform: "translate(-50%,-50%)",
@@ -552,13 +545,13 @@ function ModalNaoRealizadaSucesso({
           <div className="aura-modal-body-v2">
             {/* Ícone flutuante com anel */}
             <div className="aura-modal-icon-wrap-v2">
-              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(217,174,94,.4)" }} />
-              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(217,174,94,.28)" }} />
+              <div className="aura-modal-icon-ring" style={{ border: "1.5px solid rgba(255,211,77,.4)" }} />
+              <div className="aura-modal-icon-ring-2" style={{ border: "1px solid rgba(255,211,77,.28)" }} />
               <div
                   className="aura-modal-icon-circle-v2 aura-float"
                   style={{
-                    background: "linear-gradient(135deg, rgba(179,38,30,.85), rgba(217,174,94,.5), rgba(184,137,46,.3))",
-                    border: "1.5px solid rgba(240,223,184,.55)",
+                    background: "linear-gradient(135deg, rgba(179,38,30,.85), rgba(255,211,77,.5), rgba(253,184,19,.3))",
+                    border: "1.5px solid rgba(255,233,168,.55)",
                   }}
               >
                 {cfg.icone}
@@ -566,7 +559,7 @@ function ModalNaoRealizadaSucesso({
             </div>
 
             {/* Título */}
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(217,174,94,.85)", textAlign: "center", margin: "0 0 8px" }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(8px,2.4vw,9px)", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(255,211,77,.85)", textAlign: "center", margin: "0 0 8px" }}>
               {tituloTopo}
             </p>
             <h2 className="aura-modal-title-v2">{titulo}</h2>
@@ -574,18 +567,18 @@ function ModalNaoRealizadaSucesso({
               {subtitulo}
             </p>
 
-            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(217,174,94,.3), transparent)" }} />
+            <div className="aura-modal-sep" style={{ background: "linear-gradient(90deg, transparent, rgba(255,211,77,.3), transparent)" }} />
 
             {/* Motivo em destaque */}
             <div style={{ marginBottom: "clamp(22px,5vw,28px)", marginTop: 18, display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{
                 padding: "clamp(16px,4vw,20px)",
                 borderRadius: 18,
-                background: "rgba(217,174,94,.1)",
-                border: "1px solid rgba(217,174,94,.25)",
+                background: "rgba(255,211,77,.1)",
+                border: "1px solid rgba(255,211,77,.25)",
                 textAlign: "center",
               }}>
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(217,174,94,.75)", margin: "0 0 10px" }}>
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,211,77,.75)", margin: "0 0 10px" }}>
                   Motivo
                 </p>
                 <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(16px,4vw,18px)", fontWeight: 500, color: "rgba(255,255,255,.9)", margin: 0, wordBreak: "break-word" }}>
@@ -596,7 +589,7 @@ function ModalNaoRealizadaSucesso({
               {/* Célula */}
               {nomeCelula && (
                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.07)", minWidth: 0 }}>
-                    <Church size={14} style={{ color: "rgba(217,174,94,.85)", flexShrink: 0 }} />
+                    <Church size={14} style={{ color: "rgba(255,211,77,.85)", flexShrink: 0 }} />
                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,.65)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
                       {nomeCelula}
                     </p>
@@ -609,10 +602,10 @@ function ModalNaoRealizadaSucesso({
                 onClick={fechar}
                 style={{
                   width: "100%", padding: "15px 0", border: "none", borderRadius: 100, cursor: "pointer",
-                  background: "linear-gradient(135deg, #0A1D33, #0F2A4A)",
+                  background: "linear-gradient(135deg, #1D0409, #350309)",
                   color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10,
                   fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase",
-                  boxShadow: "0 8px 28px rgba(217,174,94,.4)", transition: "all .25s",
+                  boxShadow: "0 8px 28px rgba(255,211,77,.4)", transition: "all .25s",
                 }}
                 onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -691,7 +684,7 @@ function SeletorReferenciaBiblica({ value, onChange, t, isDark }) {
               {sugestoes.map((s, i) => (
                   <button key={i} onMouseDown={() => selecionarSugestao(s)}
                           style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "13px 16px", textAlign: "left", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, borderBottom: i < sugestoes.length - 1 ? `1px solid ${t.border}` : "none" }}
-                          onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(184,137,46,.10)" : "rgba(184,137,46,.15)"}
+                          onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(253,184,19,.10)" : "rgba(253,184,19,.15)"}
                           onMouseLeave={e => e.currentTarget.style.background = "none"}
                   >{s}</button>
               ))}
@@ -712,7 +705,7 @@ function SeletorStatusCelula({ realizada, onChange, t }) {
       icone: <CheckCircle2 size={18} />,
       corOn:  AURA.blue,
       corOnDark: AURA.blueDark,
-      iconBg: "rgba(15,42,74,.16)",
+      iconBg: "rgba(53,3,9,.16)",
     },
     {
       key: false,
@@ -790,7 +783,7 @@ function SeletorMotivo({ value, onChange, t }) {
                       background: selecionado
                           ? `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`
                           : t.bgInput,
-                      boxShadow: selecionado ? "0 4px 16px rgba(184,137,46,.35)" : "none",
+                      boxShadow: selecionado ? "0 4px 16px rgba(253,184,19,.35)" : "none",
                     }}
                 >
                   <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{icone}</span>
@@ -814,9 +807,9 @@ function AlertaErro({ erro, onFechar, t }) {
   const cfg = {
     conflito:  { cor: "#DC2626", bg: "rgba(220,38,38,.08)", borda: "rgba(220,38,38,.25)" },
     validacao: { cor: "#B3261E", bg: "rgba(179,38,30,.08)", borda: "rgba(179,38,30,.25)" },
-    servidor:  { cor: "#B8892E", bg: "rgba(184,137,46,.10)", borda: "rgba(184,137,46,.28)" },
-    generico:  { cor: "#1E4571", bg: "rgba(30,69,113,.10)", borda: "rgba(30,69,113,.28)" },
-  }[erro.tipo] || { cor: "#1E4571", bg: "rgba(30,69,113,.10)", borda: "rgba(30,69,113,.28)" };
+    servidor:  { cor: "#FDB813", bg: "rgba(253,184,19,.10)", borda: "rgba(253,184,19,.28)" },
+    generico:  { cor: "#5A0B16", bg: "rgba(90,11,22,.10)", borda: "rgba(90,11,22,.28)" },
+  }[erro.tipo] || { cor: "#5A0B16", bg: "rgba(90,11,22,.10)", borda: "rgba(90,11,22,.28)" };
 
   return (
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14, background: cfg.bg, border: `1px solid ${cfg.borda}`, borderRadius: 14, padding: "14px 18px", marginBottom: 16, animation: "aura-fadein .3s ease forwards" }}>
@@ -883,7 +876,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
 
             return (
                 <div key={pessoa.uKey} className="aura-person-row"
-                     style={{ background: marcado ? (isDark ? "rgba(184,137,46,.04)" : "rgba(184,137,46,.06)") : "transparent" }}>
+                     style={{ background: marcado ? (isDark ? "rgba(253,184,19,.04)" : "rgba(253,184,19,.06)") : "transparent" }}>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <div
                         role="button" tabIndex={0}
@@ -895,7 +888,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                       <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
                         <div style={{
                           width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-                          background: marcado ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` : isDark ? "rgba(255,255,255,.05)" : "rgba(184,137,46,.08)",
+                          background: marcado ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` : isDark ? "rgba(255,255,255,.05)" : "rgba(253,184,19,.08)",
                           border: marcado ? "none" : `1px solid ${t.border}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           color: marcado ? "#fff" : AURA.gold,
@@ -1180,7 +1173,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
           <div style={{ height: 100 }} />
         </div>
 
-        <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)" }}>
+        <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(251,244,239,1) 55%,transparent)" }}>
           <div style={{ maxWidth: 760, margin: "0 auto" }}>
             <button className="aura-btn-red" onClick={handleSalvar} disabled={salvando || (relatorioRealizada ? !form.estudo.trim() : !motivoNaoRealizacao)}>
               {salvando ? <><Loader2 size={16} className="aura-spin" /> Salvando…</> : <><ClipboardCheck size={16} /> {relatorioRealizada ? `Salvar Alterações (${total} presentes)` : "Salvar Alterações"}</>}
@@ -1513,8 +1506,8 @@ export default function TelaRelatorio({ isDark = false }) {
             <div className="aura-modal-overlay" onClick={() => setModalDuplicado(null)}>
               <div className="aura-modal-box" onClick={e => e.stopPropagation()}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-                  <div style={{ width: 50, height: 50, borderRadius: "50%", flexShrink: 0, background: "linear-gradient(135deg,#0F2A4A,#12233B)", border: "1px solid rgba(184,137,46,.3)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(15,42,74,.35)" }}>
-                    <AlertTriangle size={22} style={{ color: "#D9AE5E" }} />
+                  <div style={{ width: 50, height: 50, borderRadius: "50%", flexShrink: 0, background: "linear-gradient(135deg,#350309,#350309)", border: "1px solid rgba(253,184,19,.3)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(53,3,9,.35)" }}>
+                    <AlertTriangle size={22} style={{ color: "#FFD34D" }} />
                   </div>
                   <div>
                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 17, fontWeight: 500, color: t.text, margin: "0 0 3px" }}>Relatório já enviado</p>
@@ -1655,7 +1648,7 @@ export default function TelaRelatorio({ isDark = false }) {
         </div>
 
         {modo === "novo" && (
-            <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(245,240,232,1) 55%,transparent)" }}>
+            <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(251,244,239,1) 55%,transparent)" }}>
               <div style={{ maxWidth: 760, margin: "0 auto" }}>
                 <button className="aura-btn-primary" onClick={handleSubmit} disabled={enviando || (realizada ? !form.estudo.trim() : !motivoNaoRealizacao)}>
                   {enviando ? <><Loader2 size={16} className="aura-spin" /> Enviando…</> : <><ClipboardCheck size={16} /> {realizada ? `Finalizar Relatório (${total} presentes)` : "Registrar Ausência"}</>}

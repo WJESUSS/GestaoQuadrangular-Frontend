@@ -38,7 +38,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                     >
                         {/* Faixa topo */}
                         <div style={{ position:"absolute", top:0, left:0, right:0, height:3, borderRadius:"24px 24px 0 0",
-                            background:`linear-gradient(90deg,${AURA.mossDeep},${AURA.moss},${AURA.blue},rgba(217,174,94,1))` }} />
+                            background:`linear-gradient(90deg,${AURA.mossDeep},${AURA.moss},${AURA.blue},rgba(255,211,77,1))` }} />
 
                         {/* Botão fechar */}
                         <button onClick={onClose} style={{
@@ -47,7 +47,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                             color:t.textMuted, padding:8, borderRadius:8, display:"flex",
                             transition:"all .2s",
                         }}
-                                onMouseEnter={e => { e.currentTarget.style.background=isDark?"rgba(255,255,255,.08)":"rgba(217,174,94,.1)"; e.currentTarget.style.color=AURA.red; }}
+                                onMouseEnter={e => { e.currentTarget.style.background=isDark?"rgba(255,255,255,.08)":"rgba(255,211,77,.1)"; e.currentTarget.style.color=AURA.red; }}
                                 onMouseLeave={e => { e.currentTarget.style.background="none"; e.currentTarget.style.color=t.textMuted; }}>
                             <X size={20} />
                         </button>
@@ -57,7 +57,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                                     style={{ textAlign:"center", marginBottom:32 }}>
                             <motion.div animate={{ rotate:360 }} transition={{ duration:3, repeat:Infinity, ease:"linear" }}
                                         style={{ display:"inline-block", marginBottom:14 }}>
-                                <Sparkles size={36} style={{ color:AURA.goldLight, filter:"drop-shadow(0 0 10px rgba(217,174,94,.35))" }} />
+                                <Sparkles size={36} style={{ color:AURA.goldLight, filter:"drop-shadow(0 0 10px rgba(255,211,77,.35))" }} />
                             </motion.div>
                             <h1 style={{
                                 fontFamily:"'Inter',sans-serif", fontSize:"clamp(22px,5vw,28px)",
@@ -93,7 +93,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                             background:`linear-gradient(135deg,${AURA.mossDeep},${AURA.moss})`, color:"#fff",
                             border:"none", borderRadius:100, padding:"15px 20px",
                             cursor:"pointer", transition:"all .25s",
-                            boxShadow:"0 6px 24px rgba(15,42,74,.3)",
+                            boxShadow:"0 6px 24px rgba(53,3,9,.3)",
                         }}
                                 onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.filter="brightness(1.12)"; }}
                                 onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.filter="brightness(1)"; }}>

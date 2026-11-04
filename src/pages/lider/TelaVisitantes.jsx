@@ -64,12 +64,12 @@ function makeStyles(t, isDark) {
     }
     .tv-hero::after {
       content:''; position:absolute; bottom:-20px; left:20%; width:80px; height:80px;
-      border-radius:50%; background:rgba(184,137,46,.06); pointer-events:none;
+      border-radius:50%; background:rgba(253,184,19,.06); pointer-events:none;
     }
     .tv-hero-icon {
-      width:52px; height:52px; border-radius:16px; background:rgba(217,174,94,.16);
+      width:52px; height:52px; border-radius:16px; background:rgba(255,211,77,.16);
       display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;
-      backdrop-filter:blur(6px); border:1px solid rgba(217,174,94,.4); position:relative; z-index:1;
+      backdrop-filter:blur(6px); border:1px solid rgba(255,211,77,.4); position:relative; z-index:1;
     }
     .tv-hero-title {
       font-family:'Inter',sans-serif; font-size:22px; font-weight:600; color:#fff;
@@ -119,10 +119,10 @@ function makeStyles(t, isDark) {
       border-radius:16px; border:none; cursor:pointer;
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       margin-bottom:20px; transition:all .3s cubic-bezier(.4,0,.2,1);
-      box-shadow:0 8px 24px rgba(15,42,74,.22);
+      box-shadow:0 8px 24px rgba(53,3,9,.22);
     }
     .tv-btn-novo:hover {
-      transform:translateY(-2px); box-shadow:0 12px 32px rgba(15,42,74,.32);
+      transform:translateY(-2px); box-shadow:0 12px 32px rgba(53,3,9,.32);
       filter:brightness(1.1);
     }
     .tv-btn-novo:active { transform:translateY(0); }
@@ -130,7 +130,7 @@ function makeStyles(t, isDark) {
       width:48px; height:48px; border-radius:14px; flex-shrink:0;
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       display:flex; align-items:center; justify-content:center; color:#fff;
-      box-shadow:0 4px 14px rgba(15,42,74,.28);
+      box-shadow:0 4px 14px rgba(53,3,9,.28);
     }
     .tv-btn-novo-title {
       display:block; font-family:'Inter',sans-serif; font-size:15px; font-weight:600;
@@ -159,7 +159,7 @@ function makeStyles(t, isDark) {
       position:relative;
     }
     .tv-list-item:last-child { border-bottom:none; }
-    .tv-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(15,42,74,.05)"}; }
+    .tv-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(53,3,9,.05)"}; }
     .tv-list-item.has-decision::before {
       content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0;
       background:linear-gradient(180deg, ${AURA.green}, ${AURA.moss});
@@ -189,18 +189,18 @@ function makeStyles(t, isDark) {
     .tv-list-origin {
       font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
       padding:3px 8px; border-radius:100px;
-      background:rgba(184,137,46,.08); color:${AURA.gold}; border:1px solid rgba(184,137,46,.15);
+      background:rgba(253,184,19,.08); color:${AURA.gold}; border:1px solid rgba(253,184,19,.15);
     }
     .tv-list-decision {
       font-size:10px; font-weight:600; padding:3px 8px; border-radius:100px;
     }
     .tv-list-decision.aceitou { background:rgba(74,124,92,.12); color:${AURA.green}; }
     .tv-list-decision.reconciliou { background:rgba(76,126,176,.12); color:${AURA.mossLight}; }
-    .tv-list-decision.batismo { background:rgba(184,137,46,.12); color:${AURA.goldLight}; }
+    .tv-list-decision.batismo { background:rgba(253,184,19,.12); color:${AURA.goldLight}; }
 
     .tv-list-edit {
       width:32px; height:32px; border-radius:9px; flex-shrink:0;
-      background:rgba(184,137,46,.08); border:1px solid rgba(184,137,46,.2);
+      background:rgba(253,184,19,.08); border:1px solid rgba(253,184,19,.2);
       color:${AURA.gold}; cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:all .2s;
     }
@@ -232,9 +232,9 @@ function makeStyles(t, isDark) {
     .tv-modal-hero-top { display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
     .tv-modal-hero-left { display:flex; align-items:center; gap:12px; }
     .tv-modal-hero-icon {
-      width:42px; height:42px; border-radius:13px; background:rgba(217,174,94,.16);
+      width:42px; height:42px; border-radius:13px; background:rgba(255,211,77,.16);
       display:flex; align-items:center; justify-content:center;
-      backdrop-filter:blur(6px); border:1px solid rgba(217,174,94,.4);
+      backdrop-filter:blur(6px); border:1px solid rgba(255,211,77,.4);
     }
     .tv-modal-hero-title {
       font-family:'Inter',sans-serif; font-size:18px; font-weight:600; color:#fff; margin:0;
@@ -257,7 +257,7 @@ function makeStyles(t, isDark) {
     .tv-modal-section-label::after { content:''; flex:1; height:1px; background:${t.border}; }
 
     .tv-modal-card {
-      padding:16px; border-radius:14px; background:${isDark?"rgba(255,255,255,.02)":"rgba(15,42,74,.04)"};
+      padding:16px; border-radius:14px; background:${isDark?"rgba(255,255,255,.02)":"rgba(53,3,9,.04)"};
       border:1px solid ${t.border};
     }
 
@@ -300,7 +300,7 @@ function makeStyles(t, isDark) {
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       color:#fff; font-family:'Inter',sans-serif;
       font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-      transition:all .3s; box-shadow:0 6px 22px rgba(15,42,74,.28);
+      transition:all .3s; box-shadow:0 6px 22px rgba(53,3,9,.28);
     }
     .tv-btn-save:hover:not(:disabled) { transform:translateY(-2px); opacity:.9; }
     .tv-btn-save:disabled { opacity:.5; cursor:not-allowed; }
@@ -449,7 +449,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
           {/* ── Hero ── */}
           <div className="tv-hero">
             <div className="tv-hero-icon">
-              <Users size={24} color="#F0DFB8" />
+              <Users size={24} color="#FFE9A8" />
             </div>
             <p className="tv-hero-title">Visitantes</p>
             <p className="tv-hero-sub">Gestão e acompanhamento de novos visitantes</p>
@@ -459,7 +459,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
           {!loading && visitantes.length > 0 && (
               <div className="tv-summary">
                 <div className="tv-summary-card">
-                  <div className="tv-summary-icon" style={{ background:"rgba(184,137,46,.1)" }}><Users size={16} color={AURA.gold} /></div>
+                  <div className="tv-summary-icon" style={{ background:"rgba(253,184,19,.1)" }}><Users size={16} color={AURA.gold} /></div>
                   <p className="tv-summary-value">{visitantes.length}</p>
                   <p className="tv-summary-label">Visitantes</p>
                 </div>
@@ -503,7 +503,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
               <TelaCarregando isDark={isDark} texto="Carregando visitantes..." minHeight="40vh" background="transparent" />
           ) : filtrados.length === 0 ? (
               <div className="tv-empty">
-                <div style={{ width:64, height:64, borderRadius:20, background:"rgba(184,137,46,.08)", border:"1px solid rgba(184,137,46,.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ width:64, height:64, borderRadius:20, background:"rgba(253,184,19,.08)", border:"1px solid rgba(253,184,19,.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                   <Users size={28} color={AURA.gold} />
                 </div>
                 <p style={{ fontSize:14, fontWeight:500, color:t.text, margin:"8px 0 2px" }}>Nenhum visitante encontrado</p>
@@ -564,7 +564,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                   <div className="tv-modal-hero-top">
                     <div className="tv-modal-hero-left">
                       <div className="tv-modal-hero-icon">
-                        <UserCheck size={20} color="#F0DFB8" />
+                        <UserCheck size={20} color="#FFE9A8" />
                       </div>
                       <div>
                         <p className="tv-modal-hero-title">{editando ? "Editar Visitante" : "Novo Visitante"}</p>

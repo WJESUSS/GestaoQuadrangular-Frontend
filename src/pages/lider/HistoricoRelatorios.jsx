@@ -62,12 +62,12 @@ const HistoricoRelatorios = ({ isDark }) => {
                 padding: '20px 24px',
                 borderBottom: `1px solid ${t.border}`,
                 background: isDark
-                    ? 'linear-gradient(135deg, rgba(15,42,74,.18), rgba(30,69,113,.12))'
-                    : 'linear-gradient(135deg, rgba(184,137,46,.08), rgba(30,69,113,.05))',
+                    ? 'linear-gradient(135deg, rgba(53,3,9,.18), rgba(90,11,22,.12))'
+                    : 'linear-gradient(135deg, rgba(253,184,19,.08), rgba(90,11,22,.05))',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
             }}>
                 <div>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.22em', color: '#0F2A4A', textTransform: 'uppercase', margin: '0 0 4px' }}>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.22em', color: '#350309', textTransform: 'uppercase', margin: '0 0 4px' }}>
                         Último Relatório
                     </p>
                     <h3 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 700, color: t.text, margin: 0 }}>
@@ -80,11 +80,11 @@ const HistoricoRelatorios = ({ isDark }) => {
                     )}
                 </div>
                 <div style={{
-                    background: isDark ? 'rgba(184,137,46,.14)' : 'rgba(184,137,46,.09)',
-                    border: '1px solid rgba(184,137,46,.22)',
+                    background: isDark ? 'rgba(253,184,19,.14)' : 'rgba(253,184,19,.09)',
+                    border: '1px solid rgba(253,184,19,.22)',
                     borderRadius: 12, padding: '8px 14px', textAlign: 'center',
                 }}>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.16em', color: '#0F2A4A', textTransform: 'uppercase', margin: '0 0 2px' }}>Data</p>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.16em', color: '#350309', textTransform: 'uppercase', margin: '0 0 2px' }}>Data</p>
                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 700, color: t.text, margin: 0 }}>{fmtData(dataReuniao)}</p>
                 </div>
             </div>
@@ -92,9 +92,9 @@ const HistoricoRelatorios = ({ isDark }) => {
             {/* KPIs */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderBottom: `1px solid ${t.border}` }}>
                 {[
-                    { label: 'Membros',    value: totalMembros   ?? membrosPresentes.length,   color: '#1E4571' },
-                    { label: 'Visitantes', value: totalVisitantes ?? (visitantesPresentes.length + (quantidadeVisitantes || 0)), color: '#0F2A4A' },
-                    { label: 'Total',      value: totalPresentes  ?? todos.length,              color: '#B8892E' },
+                    { label: 'Membros',    value: totalMembros   ?? membrosPresentes.length,   color: '#5A0B16' },
+                    { label: 'Visitantes', value: totalVisitantes ?? (visitantesPresentes.length + (quantidadeVisitantes || 0)), color: '#350309' },
+                    { label: 'Total',      value: totalPresentes  ?? todos.length,              color: '#FDB813' },
                 ].map(({ label, value, color }) => (
                     <div key={label} style={{ padding: '16px 12px', textAlign: 'center', borderRight: `1px solid ${t.border}` }}>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 26, fontWeight: 700, color, margin: 0, lineHeight: 1 }}>{value ?? '—'}</p>
@@ -106,7 +106,7 @@ const HistoricoRelatorios = ({ isDark }) => {
             {/* Estudo */}
             {estudo && (
                 <div style={{ padding: '12px 24px', borderBottom: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 3, height: 32, borderRadius: 99, background: 'linear-gradient(180deg, #0F2A4A, #1E4571)', flexShrink: 0 }}/>
+                    <div style={{ width: 3, height: 32, borderRadius: 99, background: 'linear-gradient(180deg, #350309, #5A0B16)', flexShrink: 0 }}/>
                     <div>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 8.5, fontWeight: 800, letterSpacing: '.16em', textTransform: 'uppercase', color: t.textMuted, margin: '0 0 2px' }}>Estudo</p>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: t.text, margin: 0 }}>{estudo}</p>
@@ -129,8 +129,8 @@ const HistoricoRelatorios = ({ isDark }) => {
                                     <div style={{
                                         width: 30, height: 30, borderRadius: 6, flexShrink: 0,
                                         background: p.tipo === 'membro'
-                                            ? 'linear-gradient(135deg, #B3261E, #1E4571)'
-                                            : 'linear-gradient(135deg, #B8892E, #B3261E)',
+                                            ? 'linear-gradient(135deg, #B3261E, #5A0B16)'
+                                            : 'linear-gradient(135deg, #FDB813, #B3261E)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         color: '#fff', fontFamily: "'Inter',sans-serif", fontWeight: 800, fontSize: 12,
                                     }}>
@@ -144,9 +144,9 @@ const HistoricoRelatorios = ({ isDark }) => {
                                     fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 800,
                                     letterSpacing: '.12em', textTransform: 'uppercase',
                                     padding: '3px 8px', borderRadius: 99,
-                                    background: p.tipo === 'membro' ? 'rgba(30,69,113,.12)' : 'rgba(184,137,46,.12)',
-                                    color: p.tipo === 'membro' ? '#1E4571' : '#B8892E',
-                                    border: `1px solid ${p.tipo === 'membro' ? 'rgba(30,69,113,.25)' : 'rgba(184,137,46,.25)'}`,
+                                    background: p.tipo === 'membro' ? 'rgba(90,11,22,.12)' : 'rgba(253,184,19,.12)',
+                                    color: p.tipo === 'membro' ? '#5A0B16' : '#FDB813',
+                                    border: `1px solid ${p.tipo === 'membro' ? 'rgba(90,11,22,.25)' : 'rgba(253,184,19,.25)'}`,
                                     flexShrink: 0,
                                 }}>
                                     {p.tipo === 'membro' ? 'Membro' : 'Visitante'}

@@ -77,66 +77,66 @@ const CSS = `
 
   .metas-card { border-radius:20px; overflow:hidden; box-shadow:0 12px 34px rgba(0,0,0,.25); transition:box-shadow .3s, transform .25s; position:relative; }
   .metas-card:hover { transform:translateY(-3px); }
-  .metas-card.dark  { background:rgba(40,40,44,.96); border:1px solid rgba(15,42,74,.15); box-shadow:0 4px 24px rgba(0,0,0,.35); }
-  .metas-card.light { background:#fff;    border:1px solid rgba(15,42,74,.12); box-shadow:0 4px 24px rgba(15,42,74,.07); }
-  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(15,42,74,.18); border-color:rgba(15,42,74,.3); }
-  .metas-card:hover.light { box-shadow:0 12px 40px rgba(15,42,74,.14); border-color:rgba(15,42,74,.28); }
+  .metas-card.dark  { background:rgba(40,40,44,.96); border:1px solid rgba(53,3,9,.15); box-shadow:0 4px 24px rgba(0,0,0,.35); }
+  .metas-card.light { background:#fff;    border:1px solid rgba(53,3,9,.12); box-shadow:0 4px 24px rgba(53,3,9,.07); }
+  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(53,3,9,.18); border-color:rgba(53,3,9,.3); }
+  .metas-card:hover.light { box-shadow:0 12px 40px rgba(53,3,9,.14); border-color:rgba(53,3,9,.28); }
 
   .metas-btn { display:inline-flex; align-items:center; gap:7px; border:none; border-radius:100px; cursor:pointer; transition:all .22s; font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.14em; }
   .metas-btn:hover:not(:disabled) { filter:brightness(1.12); transform:translateY(-1px); }
   .metas-btn:disabled { opacity:.55; cursor:not-allowed; }
-  .metas-btn-red    { background:linear-gradient(135deg,#0A1D33,#0F2A4A); color:#fff; font-size:10px; padding:11px 18px; }
-  .metas-btn-blue   { background:linear-gradient(135deg,#0A1D33,#0F2A4A); color:#fff; font-size:10px; padding:11px 18px; }
+  .metas-btn-red    { background:linear-gradient(135deg,#1D0409,#350309); color:#fff; font-size:10px; padding:11px 18px; }
+  .metas-btn-blue   { background:linear-gradient(135deg,#1D0409,#350309); color:#fff; font-size:10px; padding:11px 18px; }
   .metas-btn-ghost  { font-size:9.5px; padding:10px 16px; }
-  .metas-btn-ghost.dark  { background:rgba(255,255,255,.05); color:#FFFFFF; border:1px solid rgba(15,42,74,.2); }
-  .metas-btn-ghost.light { background:rgba(15,42,74,.06); color:#0A1D33;  border:1px solid rgba(15,42,74,.18); }
-  .metas-btn-ghost:hover { border-color:#0F2A4A !important; background:rgba(15,42,74,.1) !important; }
+  .metas-btn-ghost.dark  { background:rgba(255,255,255,.05); color:#FFFFFF; border:1px solid rgba(53,3,9,.2); }
+  .metas-btn-ghost.light { background:rgba(53,3,9,.06); color:#1D0409;  border:1px solid rgba(53,3,9,.18); }
+  .metas-btn-ghost:hover { border-color:#350309 !important; background:rgba(53,3,9,.1) !important; }
 
   .metas-icon-btn { background:none; border:none; cursor:pointer; padding:6px; border-radius:6px; display:flex; align-items:center; justify-content:center; transition:all .2s; }
-  .metas-icon-btn:hover { background:rgba(15,42,74,.12); }
+  .metas-icon-btn:hover { background:rgba(53,3,9,.12); }
 
   .metas-input { width:100%; padding:12px 16px; border-radius:14px; outline:none; font-family:'Inter',sans-serif; font-size:14px; transition:border-color .2s, box-shadow .2s; }
-  .metas-input.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(15,42,74,.2); color:#FFFFFF; }
-  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(15,42,74,.18); color:#1A0A0D; }
-  .metas-input:focus { border-color:#0F2A4A !important; box-shadow:0 0 0 4px rgba(15,42,74,.16); }
-  .metas-input.dark::placeholder  { color:rgba(245,240,232,.25); }
+  .metas-input.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(53,3,9,.2); color:#FFFFFF; }
+  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(53,3,9,.18); color:#1A0A0D; }
+  .metas-input:focus { border-color:#350309 !important; box-shadow:0 0 0 4px rgba(53,3,9,.16); }
+  .metas-input.dark::placeholder  { color:rgba(251,244,239,.25); }
   .metas-input.light::placeholder { color:rgba(26,10,13,.3); }
 
   .metas-label { font-family:'Inter',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.14em; display:block; margin-bottom:7px; }
   .metas-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-family:'Inter',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.14em; border:1px solid; }
   .metas-progress-track { height:7px; border-radius:99px; overflow:hidden; }
   .metas-progress-track.dark  { background:rgba(255,255,255,.08); }
-  .metas-progress-track.light { background:rgba(15,42,74,.1); }
-  .metas-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(15,42,74,.25),transparent); }
+  .metas-progress-track.light { background:rgba(53,3,9,.1); }
+  .metas-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(53,3,9,.25),transparent); }
 
   .metas-empty { border-radius:20px; padding:48px 24px; text-align:center; }
-  .metas-empty.dark  { border:1.5px dashed rgba(15,42,74,.2);  background:rgba(255,255,255,.015); }
-  .metas-empty.light { border:1.5px dashed rgba(15,42,74,.18); background:rgba(15,42,74,.03); }
+  .metas-empty.dark  { border:1.5px dashed rgba(53,3,9,.2);  background:rgba(255,255,255,.015); }
+  .metas-empty.light { border:1.5px dashed rgba(53,3,9,.18); background:rgba(53,3,9,.03); }
 
   .metas-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
   @media(max-width:480px) { .metas-summary-grid { grid-template-columns:1fr 1fr; } }
 
   .metas-summary-card { border-radius:16px; padding:18px 14px; text-align:center; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
-  .metas-summary-card.dark  { background:rgba(255,255,255,.03); border:1px solid rgba(15,42,74,.12); }
-  .metas-summary-card.light { background:rgba(15,42,74,.04);   border:1px solid rgba(15,42,74,.1); }
+  .metas-summary-card.dark  { background:rgba(255,255,255,.03); border:1px solid rgba(53,3,9,.12); }
+  .metas-summary-card.light { background:rgba(53,3,9,.04);   border:1px solid rgba(53,3,9,.1); }
 
   .metas-hist-item { border-radius:14px; padding:16px; }
   .metas-hist-item.dark  { background:rgba(91,214,140,.05); border:1px solid rgba(91,214,140,.2); }
   .metas-hist-item.light { background:rgba(91,214,140,.06); border:1px solid rgba(91,214,140,.22); }
 
   .metas-banner { border-radius:16px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:flex-start; gap:12px; }
-  .metas-banner.dark  { background:rgba(217,174,94,.08); border:1px solid rgba(217,174,94,.24); }
-  .metas-banner.light { background:rgba(217,174,94,.10); border:1px solid rgba(217,174,94,.32); }
+  .metas-banner.dark  { background:rgba(255,211,77,.08); border:1px solid rgba(255,211,77,.24); }
+  .metas-banner.light { background:rgba(255,211,77,.10); border:1px solid rgba(255,211,77,.32); }
 
   .metas-backdrop { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:16px; }
   .metas-modal { border-radius:24px; padding:32px 28px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; position:relative; z-index:1; }
-  .metas-modal.dark  { background:linear-gradient(135deg,rgba(40,40,44,.96),#101014); border:1px solid rgba(15,42,74,.2); box-shadow:0 30px 60px rgba(15,42,74,.15); }
-  .metas-modal.light { background:linear-gradient(135deg,#fff,#FFFFFF);    border:1px solid rgba(15,42,74,.15); box-shadow:0 30px 60px rgba(15,42,74,.12); }
+  .metas-modal.dark  { background:linear-gradient(135deg,rgba(40,40,44,.96),#170307); border:1px solid rgba(53,3,9,.2); box-shadow:0 30px 60px rgba(53,3,9,.15); }
+  .metas-modal.light { background:linear-gradient(135deg,#fff,#FFFFFF);    border:1px solid rgba(53,3,9,.15); box-shadow:0 30px 60px rgba(53,3,9,.12); }
 
   .tipo-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .tipo-opt { border-radius:8px; padding:10px 8px; text-align:center; cursor:pointer; transition:all .2s; border:2px solid transparent; }
   .tipo-opt.dark  { background:rgba(255,255,255,.03); }
-  .tipo-opt.light { background:rgba(15,42,74,.04); }
+  .tipo-opt.light { background:rgba(53,3,9,.04); }
   .tipo-opt.selected { border-color:var(--tc); background:color-mix(in srgb, var(--tc) 12%, transparent); }
   .tipo-opt:hover { border-color:var(--tc); }
 `;
@@ -144,7 +144,7 @@ const CSS = `
 export default function TelaMetasLider({ celula, isDark }) {
     const t = isDark ? "dark" : "light";
     const textPrimary   = isDark ? AURA.offWhite : "#1A0A0D";
-    const textSecondary = isDark ? "rgba(245,240,232,.42)" : "rgba(26,10,13,.42)";
+    const textSecondary = isDark ? "rgba(251,244,239,.42)" : "rgba(26,10,13,.42)";
 
     const [metas,        setMetas]        = useState([]);
     const [historico,    setHistorico]    = useState([]);
@@ -607,13 +607,13 @@ function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando,
                             {meta.metaAlcancada}/{meta.metaTotal}
                         </span>
                         <button onClick={onDecrementar} disabled={ajustando || meta.metaAlcancada <= 0}
-                                style={{ width:36, height:36, borderRadius:8, border:"2px solid rgba(15,42,74,.3)",
-                                    background:"rgba(15,42,74,.08)", color:AURA.red,
+                                style={{ width:36, height:36, borderRadius:8, border:"2px solid rgba(53,3,9,.3)",
+                                    background:"rgba(53,3,9,.08)", color:AURA.red,
                                     cursor: meta.metaAlcancada <= 0 ? "default" : "pointer",
                                     display:"flex", alignItems:"center", justifyContent:"center",
                                     transition:"all .18s", opacity: meta.metaAlcancada <= 0 ? .3 : 1 }}
-                                onMouseEnter={e => { if (meta.metaAlcancada > 0) e.currentTarget.style.background = "rgba(15,42,74,.16)"; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(15,42,74,.08)"; }}>
+                                onMouseEnter={e => { if (meta.metaAlcancada > 0) e.currentTarget.style.background = "rgba(53,3,9,.16)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(53,3,9,.08)"; }}>
                             <ChevronDown size={18} />
                         </button>
                     </div>

@@ -5,9 +5,9 @@ import { Bell, Cake, CheckCircle2, X, Send } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
 
 const CORES = [
-    { bg: "rgba(217,174,94,.18)", text: "#B3261E" },
-    { bg: "rgba(30,69,113,.14)",  text: "#1E4571"  },
-    { bg: "rgba(184,137,46,.14)", text: "#B8892E"  },
+    { bg: "rgba(255,211,77,.18)", text: "#B3261E" },
+    { bg: "rgba(90,11,22,.14)",  text: "#5A0B16"  },
+    { bg: "rgba(253,184,19,.14)", text: "#FDB813"  },
 ];
 
 function initials(nome = "") {
@@ -131,8 +131,8 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                     onClick={handleOpen}
                     style={{
                         padding: "10px 14px",
-                        background: open || temHoje ? "rgba(184,137,46,.14)" : "transparent",
-                        border: `1px solid ${open || temHoje ? "rgba(184,137,46,.55)" : "rgba(184,137,46,.3)"}`,
+                        background: open || temHoje ? "rgba(253,184,19,.14)" : "transparent",
+                        border: `1px solid ${open || temHoje ? "rgba(253,184,19,.55)" : "rgba(253,184,19,.3)"}`,
                         borderRadius: 8,
                         cursor: "pointer",
                         display: "flex",
@@ -183,7 +183,7 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                             maxHeight: "85dvh",
                             borderRadius: "20px 20px 0 0",
                             background: isDark ? "rgba(0,0,0,.99)" : "#fff",
-                            border: "1px solid rgba(184,137,46,.35)",
+                            border: "1px solid rgba(253,184,19,.35)",
                             borderBottom: "none",
                             boxShadow: "0 -8px 40px rgba(0,0,0,.3)",
                             zIndex: 99999,
@@ -198,11 +198,11 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                             transform: "translateX(-50%)",
                             width: "min(380px, calc(100vw - 32px))",
                             background: isDark ? "rgba(0,0,0,.98)" : "#fff",
-                            border: "1px solid rgba(184,137,46,.35)",
+                            border: "1px solid rgba(253,184,19,.35)",
                             borderRadius: 16,
                             boxShadow: isDark
                                 ? "0 20px 50px rgba(0,0,0,.8)"
-                                : "0 15px 40px rgba(184,137,46,.2)",
+                                : "0 15px 40px rgba(253,184,19,.2)",
                             zIndex: 99999,
                             overflow: "hidden",
                             maxHeight: "calc(100vh - 90px)",
@@ -213,7 +213,7 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                         {isMobile && (
                             <div style={{
                                 width: 36, height: 4, borderRadius: 2,
-                                background: "rgba(184,137,46,.3)",
+                                background: "rgba(253,184,19,.3)",
                                 margin: "10px auto 0", flexShrink: 0,
                             }} />
                         )}
@@ -238,8 +238,8 @@ function PainelConteudo({
             {/* Cabeçalho */}
             <div style={{
                 padding: "14px 18px",
-                background: "rgba(184,137,46,.08)",
-                borderBottom: "1px solid rgba(184,137,46,.22)",
+                background: "rgba(253,184,19,.08)",
+                borderBottom: "1px solid rgba(253,184,19,.22)",
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 flexShrink: 0,
             }}>
@@ -319,11 +319,11 @@ function PainelConteudo({
                                 background: marcado
                                     ? (isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.03)")
                                     : (tab === "hoje"
-                                        ? "rgba(184,137,46,.07)"
+                                        ? "rgba(253,184,19,.07)"
                                         : (isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.02)")),
                                 opacity: marcado ? 0.6 : 1,
                                 border: tab === "hoje" && !marcado
-                                    ? "1px solid rgba(184,137,46,.32)"
+                                    ? "1px solid rgba(253,184,19,.32)"
                                     : "1px solid transparent",
                                 transition: "opacity .25s",
                             }}
@@ -385,7 +385,7 @@ function PainelConteudo({
             <div style={{
                 padding: "9px", textAlign: "center",
                 fontSize: 10, color: "#888",
-                borderTop: "1px solid rgba(184,137,46,.1)",
+                borderTop: "1px solid rgba(253,184,19,.1)",
                 flexShrink: 0,
             }}>
                 Lembrete de Aniversários – IEQ Pituaçu

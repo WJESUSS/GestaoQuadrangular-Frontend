@@ -22,22 +22,10 @@ import {
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import CrossMark from "../../components/CrossMark.jsx";
+import jesusImg from "../../assets/jesus.jpeg";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
-
-/* ─── Logo ─────────────────────────────────────────────────────────────── */
-function IEQCross({ size = 36 }) {
-  return (
-      <img
-          src="/quadrangular.png"
-          alt="Logo IEQ"
-          style={{
-            width: size, height: size,
-            borderRadius: "50%", objectFit: "cover", display: "block",
-          }}
-      />
-  );
-}
 
 /* ─── CSS Global ────────────────────────────────────────────────────────── */
 function GlobalStyles({ t, isDark }) {
@@ -64,6 +52,17 @@ function GlobalStyles({ t, isDark }) {
         transition: background .3s, color .3s;
         isolation: isolate;
       }
+      .dl-root::before {
+        content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image:
+          ${isDark
+            ? "linear-gradient(180deg, rgba(23,3,7,.78) 0%, rgba(23,3,7,.90) 60%, rgba(23,3,7,.96) 100%)"
+            : "linear-gradient(180deg, rgba(251,244,239,.86) 0%, rgba(251,244,239,.93) 60%, rgba(251,244,239,.97) 100%)"},
+          url(${jesusImg});
+        background-size: cover;
+        background-position: center top;
+        background-repeat: no-repeat;
+      }
       .dl-content {
         position: relative; z-index: 3;
         max-width: 1000px; margin: 0 auto;
@@ -82,22 +81,22 @@ function GlobalStyles({ t, isDark }) {
       .dl-avatar-wrap { position: relative; flex-shrink: 0; }
       .dl-ring {
         position: absolute; border-radius: 50%;
-        border: 1px solid rgba(184,137,46,.22);
+        border: 1px solid rgba(253,184,19,.22);
         top: 50%; left: 50%; transform: translate(-50%,-50%);
       }
       .dl-avatar {
         width: 54px; height: 54px; border-radius: 50%;
-        border: 1.5px solid rgba(184,137,46,.32);
+        border: 1.5px solid rgba(253,184,19,.32);
         background: ${isDark ? "rgba(40,40,44,.99)" : "#fff"};
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
-        box-shadow: 0 0 0 6px ${isDark ? "rgba(184,137,46,.06)" : "rgba(15,42,74,.06)"};
+        box-shadow: 0 0 0 6px ${isDark ? "rgba(253,184,19,.06)" : "rgba(53,3,9,.06)"};
       }
       .dl-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
       .dl-title-block { flex: 1; min-width: 0; }
       .dl-eyebrow {
         font-size: 9.5px; font-weight: 500; letter-spacing: .24em;
-        text-transform: uppercase; color: rgba(184,137,46,.72);
+        text-transform: uppercase; color: rgba(253,184,19,.72);
         margin: 0 0 5px;
       }
       .dl-title {
@@ -116,7 +115,7 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 8px; flex-shrink: 0;
       }
       .dl-btn-ico {
-        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(15,42,74,.08)"};
+        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.08)"};
         border: 1px solid ${t.border};
         border-radius: 12px; width: 38px; height: 38px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -124,25 +123,25 @@ function GlobalStyles({ t, isDark }) {
         backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
         transition: all .25s; flex-shrink: 0;
       }
-      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(184,137,46,.09)" : "rgba(15,42,74,.12)"}; }
+      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(253,184,19,.09)" : "rgba(53,3,9,.12)"}; }
       .dl-btn-exit {
         display: flex; align-items: center; gap: 7px;
         padding: 0 16px; height: 38px; border-radius: 100px;
         cursor: pointer;
         background: transparent; color: ${AURA.red};
-        border: 1px solid rgba(217,174,94,.28);
+        border: 1px solid rgba(255,211,77,.28);
         font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .12em;
         text-transform: uppercase; transition: all .3s; flex-shrink: 0;
       }
-      .dl-btn-exit:hover { background: rgba(217,174,94,.1); border-color: ${AURA.red}; }
+      .dl-btn-exit:hover { background: rgba(255,211,77,.1); border-color: ${AURA.red}; }
 
       /* Botão voltar pequeno */
       .dl-btn-back {
         display: flex; align-items: center; justify-content: center;
         width: 32px; height: 32px; border-radius: 10px;
         border: 1px solid ${t.border}; cursor: pointer;
-        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(15,42,74,.08)"};
+        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.08)"};
         color: ${t.textMuted}; font-size: 14px;
         transition: all .25s; flex-shrink: 0;
       }
@@ -153,18 +152,18 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-divider::before {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to right, transparent, rgba(184,137,46,.3));
+        background: linear-gradient(to right, transparent, rgba(253,184,19,.3));
       }
       .dl-divider::after {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to left, transparent, rgba(184,137,46,.3));
+        background: linear-gradient(to left, transparent, rgba(253,184,19,.3));
       }
       .dl-divider-dot { width: 4px; height: 4px; border-radius: 50%; background: ${AURA.gold}; box-shadow: 0 0 10px ${AURA.gold}; }
 
       .dl-badge {
         display: inline-flex; align-items: center; gap: 8px;
-        background: ${isDark ? "rgba(184,137,46,.07)" : "rgba(15,42,74,.08)"};
-        border: 1px solid ${isDark ? "rgba(184,137,46,.16)" : "rgba(15,42,74,.2)"};
+        background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.08)"};
+        border: 1px solid ${isDark ? "rgba(253,184,19,.16)" : "rgba(53,3,9,.2)"};
         border-radius: 100px; padding: 9px 20px;
         font-size: 10px; font-weight: 500; letter-spacing: .12em;
         text-transform: uppercase; color: ${AURA.gold};
@@ -178,7 +177,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-alert-aprovado {
         margin-bottom: 24px; padding: 16px 22px; border-radius: 16px;
         background: ${isDark ? "rgba(30,122,70,.18)" : "rgba(30,122,70,.10)"};
-        color: ${isDark ? "#fff" : "#12233B"}; display: flex; align-items: center; gap: 12px;
+        color: ${isDark ? "#fff" : "#350309"}; display: flex; align-items: center; gap: 12px;
         font-family: 'Inter', sans-serif; font-size: 11px;
         font-weight: 500; letter-spacing: .05em;
         border: 1px solid ${isDark ? "rgba(30,122,70,.4)" : "rgba(30,122,70,.35)"};
@@ -192,8 +191,8 @@ function GlobalStyles({ t, isDark }) {
       @media(max-width: 480px) { .dl-kpi-grid { grid-template-columns: 1fr; } }
 
       .dl-kpi-hero {
-        background: linear-gradient(160deg, #1E4571 0%, #0F2A4A 55%, #0A1D33 100%);
-        border: 1px solid rgba(217,174,94,.3);
+        background: linear-gradient(160deg, #5A0B16 0%, #350309 55%, #1D0409 100%);
+        border: 1px solid rgba(255,211,77,.3);
         border-radius: 24px; padding: 30px 28px; position: relative; overflow: hidden;
         box-shadow: none;
       }
@@ -205,9 +204,9 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-kpi-inner { position: relative; z-index: 1; }
       .dl-kpi-hero .dl-badge {
-        background: rgba(217,174,94,.14);
-        border: 1px solid rgba(217,174,94,.35);
-        color: #F0DFB8;
+        background: rgba(255,211,77,.14);
+        border: 1px solid rgba(255,211,77,.35);
+        color: #FFE9A8;
       }
       .dl-kpi-hero .dl-progress-track {
         background: rgba(255,255,255,.16);
@@ -279,7 +278,7 @@ function GlobalStyles({ t, isDark }) {
         font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .16em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(184,137,46,.07)" : "rgba(15,42,74,.07)"}; }
+      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.07)"}; }
 
       .dl-section-hd {
         display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
@@ -314,7 +313,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-menu-card::before {
         content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 2px;
         border-radius: 0 0 99px 99px;
-        background: linear-gradient(90deg, transparent, rgba(184,137,46,.4), transparent);
+        background: linear-gradient(90deg, transparent, rgba(253,184,19,.4), transparent);
         opacity: 0; transition: all .35s;
       }
       .dl-menu-card:hover {
@@ -347,7 +346,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .dl-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(184,137,46,.28), transparent);
+        background: linear-gradient(90deg, transparent, rgba(253,184,19,.28), transparent);
       }
       .dl-card-head {
         padding: 22px 24px;
@@ -381,7 +380,7 @@ function GlobalStyles({ t, isDark }) {
         font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(184,137,46,.07)" : "rgba(15,42,74,.07)"}; }
+      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.07)"}; }
 
       .dl-members-list {
         padding: 16px 24px 22px;
@@ -390,16 +389,16 @@ function GlobalStyles({ t, isDark }) {
       .dl-member-row {
         display: flex; align-items: center; justify-content: space-between;
         padding: 11px 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(15,42,74,.05)"};
-        border: 1px solid ${isDark ? "rgba(184,137,46,.1)" : "rgba(15,42,74,.12)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(53,3,9,.05)"};
+        border: 1px solid ${isDark ? "rgba(253,184,19,.1)" : "rgba(53,3,9,.12)"};
         border-radius: 14px; transition: all .2s; gap: 10px;
         min-width: 0; width: 100%;
       }
-      .dl-member-row:hover { border-color: rgba(184,137,46,.4); background: ${isDark ? "rgba(184,137,46,.06)" : "rgba(15,42,74,.08)"}; }
+      .dl-member-row:hover { border-color: rgba(253,184,19,.4); background: ${isDark ? "rgba(253,184,19,.06)" : "rgba(53,3,9,.08)"}; }
       .dl-member-avatar {
         width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(184,137,46,.35), rgba(15,42,74,.12));
-        border: 1px solid rgba(15,42,74,.28);
+        background: linear-gradient(135deg, rgba(253,184,19,.35), rgba(53,3,9,.12));
+        border: 1px solid rgba(53,3,9,.28);
         display: flex; align-items: center; justify-content: center;
         font-family: 'Inter', sans-serif; font-weight: 700;
         font-size: 15px; color: ${AURA.moss};
@@ -414,17 +413,17 @@ function GlobalStyles({ t, isDark }) {
         color: ${t.textMuted}; padding: 6px; border-radius: 9px;
         display: flex; align-items: center; flex-shrink: 0; transition: all .2s;
       }
-      .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(217,174,94,.1); }
+      .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(255,211,77,.1); }
       .dl-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(184,137,46,.16), transparent);
+        background: linear-gradient(90deg, transparent, rgba(253,184,19,.16), transparent);
         margin: 2px 0;
       }
 
       .dl-search-wrap { position: relative; margin-bottom: 14px; }
       .dl-search-icon {
         position: absolute; left: 14px; top: 50%;
-        transform: translateY(-50%); color: ${isDark ? "rgba(184,137,46,.65)" : "rgba(15,42,74,.6)"};
+        transform: translateY(-50%); color: ${isDark ? "rgba(253,184,19,.65)" : "rgba(53,3,9,.6)"};
         opacity: .9;
         pointer-events: none;
       }
@@ -437,9 +436,9 @@ function GlobalStyles({ t, isDark }) {
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .dl-input:focus {
-        border-color: rgba(15,42,74,.55);
-        background: ${isDark ? "rgba(184,137,46,.08)" : "rgba(15,42,74,.08)"};
-        box-shadow: 0 0 0 4px rgba(15,42,74,.14);
+        border-color: rgba(53,3,9,.55);
+        background: ${isDark ? "rgba(253,184,19,.08)" : "rgba(53,3,9,.08)"};
+        box-shadow: 0 0 0 4px rgba(53,3,9,.14);
       }
       .dl-input { font-family: 'Inter', sans-serif; }
       .dl-input::placeholder { color: ${t.placeholder}; }
@@ -494,8 +493,8 @@ function GlobalStyles({ t, isDark }) {
         transition: all .25s;
       }
       .dl-textarea:focus {
-        border-color: rgba(15,42,74,.55);
-        box-shadow: 0 0 0 4px rgba(15,42,74,.14);
+        border-color: rgba(53,3,9,.55);
+        box-shadow: 0 0 0 4px rgba(53,3,9,.14);
       }
       .dl-textarea::placeholder { color: ${t.placeholder}; }
 
@@ -638,14 +637,14 @@ export default function DashboardLider() {
 
   /* ── 7 módulos (Histórico removido) ── */
   const menuItems = [
-    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: "#3D7BCC" },
-    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: "#2E9E6B" },
-    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: "#E0841F" },
-    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: "#E8B63A" },
-    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#9A6BDB" },
-    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#E45D5D" },
-    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#23A4C8" },
-    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: "#E2669F" },
+    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: "#FDB813" },
+    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: "#C8102E" },
+    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: "#E09A0B" },
+    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: "#FFD34D" },
+    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#A50018" },
+    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#E0153B" },
+    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#8B0000" },
+    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: "#FFB84D" },
   ];
 
   return (
@@ -679,7 +678,7 @@ export default function DashboardLider() {
                 <div className="dl-avatar">
                   {usuarioLogado?.fotoPerfil
                       ? <img src={getFotoUrl(usuarioLogado.fotoPerfil)} alt={usuarioLogado.nome || "Líder"} />
-                      : <IEQCross size={34} />
+                      : <CrossMark size={30} />
                   }
                 </div>
               </div>
@@ -782,9 +781,9 @@ export default function DashboardLider() {
                         <div
                             className="dl-kpi-action-icon"
                             style={{
-                              background: isAprovado ? "rgba(30,122,70,.14)" : isAnalise ? "rgba(217,174,94,.12)" : "rgba(184,137,46,.08)",
+                              background: isAprovado ? "rgba(30,122,70,.14)" : isAnalise ? "rgba(255,211,77,.12)" : "rgba(253,184,19,.08)",
                               color: isAprovado ? "#1E7A46" : isAnalise ? AURA.goldLight : AURA.gold,
-                              border: `1px solid ${isAprovado ? "rgba(30,122,70,.35)" : isAnalise ? "rgba(217,174,94,.3)" : "rgba(184,137,46,.22)"}`,
+                              border: `1px solid ${isAprovado ? "rgba(30,122,70,.35)" : isAnalise ? "rgba(255,211,77,.3)" : "rgba(253,184,19,.22)"}`,
                             }}
                         >
                           {isAprovado
@@ -800,13 +799,13 @@ export default function DashboardLider() {
                       </div>
                       <div>
                         {isAnalise ? (
-                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(217,174,94,.10)", border: "1px solid rgba(217,174,94,.3)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
+                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(255,211,77,.10)", border: "1px solid rgba(255,211,77,.3)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
                               Consultando Pastor…
                             </div>
                         ) : podeSolicitar ? (
                             <button
                                 className="dl-kpi-action-btn"
-                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, color: "#12131C", boxShadow: "0 6px 20px rgba(184,137,46,.30)" } : undefined}
+                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, color: "#12131C", boxShadow: "0 6px 20px rgba(253,184,19,.30)" } : undefined}
                                 onClick={() => setShowModalMultiplicacao(true)}
                             >
                               {isAprovado ? "Nova Solicitação" : "Solicitar Mult."}
@@ -922,10 +921,10 @@ export default function DashboardLider() {
                 <motion.div className="dl-modal-multi-box" initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: "tween", duration: .28 }}>
                   <div style={{ textAlign: "center", marginBottom: 26 }}>
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(184,137,46,.26)", borderRadius: "50%" }} />
-                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(184,137,46,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
-                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(40,40,44,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-                        <IEQCross size={32} />
+                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(253,184,19,.26)", borderRadius: "50%" }} />
+                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(253,184,19,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
+                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(40,40,44,.99)" : "#fff", border: "1.5px solid rgba(253,184,19,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                        <CrossMark size={28} />
                       </div>
                     </div>
                     <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
@@ -999,7 +998,7 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
       <div style={{ padding: "22px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexShrink: 0 }}>
           <div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(184,137,46,.65)", margin: "0 0 4px" }}>Vincular</p>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(253,184,19,.65)", margin: "0 0 4px" }}>Vincular</p>
             <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex" }}>
@@ -1008,7 +1007,7 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
         </div>
 
         <div style={{ position: "relative", marginBottom: 14, flexShrink: 0 }}>
-          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? "rgba(184,137,46,.65)" : "rgba(15,42,74,.6)", opacity: .9, pointerEvents: "none" }} />
+          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? "rgba(253,184,19,.65)" : "rgba(53,3,9,.6)", opacity: .9, pointerEvents: "none" }} />
           <input
               style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "13px 16px 13px 44px", borderRadius: 13, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, transition: "all .25s" }}
               placeholder="Buscar por nome…"
@@ -1026,12 +1025,12 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
               filtrados.map((m) => (
                   <div
                       key={m.id}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(15,42,74,.06)", border: `1px solid ${isDark ? "rgba(184,137,46,.11)" : "rgba(15,42,74,.14)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(184,137,46,.45)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(184,137,46,.11)" : "rgba(15,42,74,.14)"; }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(53,3,9,.06)", border: `1px solid ${isDark ? "rgba(253,184,19,.11)" : "rgba(53,3,9,.14)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(253,184,19,.45)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(253,184,19,.11)" : "rgba(53,3,9,.14)"; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(184,137,46,.4),rgba(15,42,74,.14))", border: "1px solid rgba(15,42,74,.32)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 14, color: AURA.moss }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.4),rgba(53,3,9,.14))", border: "1px solid rgba(53,3,9,.32)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 14, color: AURA.moss }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
                       <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

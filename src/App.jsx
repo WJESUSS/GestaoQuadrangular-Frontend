@@ -7,6 +7,7 @@ import InstallPWABanner from "./components/InstallPWABanner.jsx";
 // Carrega imediatamente — são as telas de entrada
 import Home  from "./pages/Home";
 import Login from "./pages/Login";
+const EstudoPage = lazy(() => import("./pages/estudos/EstudoPage"));
 
 // Carrega só quando o usuário navegar até lá
 const AdminPage      = lazy(() => import("./pages/admin/AdminUsers"));
@@ -78,6 +79,7 @@ export default function App() {
                     {/* PÚBLICA */}
                     <Route path="/"      element={<Home />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/estudos/:estudoId" element={<EstudoPage />} />
 
                     {/* ADMIN */}
                     <Route

@@ -6,13 +6,15 @@ import { Loader2, Lock, Mail, Sun, Moon, User, ShieldCheck, CheckCircle2, ArrowL
 import { useAuth }       from "../auth/AuthContext";
 import { useTheme }      from "../context/ThemeContext";
 import api               from "../services/api.js";
+import jesusImg          from "../assets/jesus.jpeg";
+import CrossMark         from "../components/CrossMark.jsx";
 
-/* ─── Paleta profissional: azul-marinho + dourado ─── */
+/* ─── Paleta da Home: vinho + escarlate + dourado ─── */
 const P = {
-    navy:"#0F2A4A", navyDeep:"#0A1D33", navyLight:"#1E4571",
-    gold:"#B8892E", goldLight:"#D9AE5E",
-    red:"#B3261E", green:"#1E7A46", amber:"#8A5A00",
-    ink:"#12233B", paper:"#FFFFFF", canvas:"#F4F6F9",
+    wine:"#350309", wineDeep:"#1D0409", wineLight:"#5A0B16",
+    scarlet:"#C8102E", gold:"#FDB813", goldLight:"#FFD34D",
+    red:"#E0153B", green:"#1E7A46", amber:"#B97A08",
+    ink:"#350309", paper:"#FFFFFF", cream:"#FBF4EF",
 };
 
 /* ─── Fade-in do cartão ─── */
@@ -28,21 +30,6 @@ function useFadeIn(threshold = 0.15) {
         return () => obs.disconnect();
     }, []);
     return ref;
-}
-
-/* ─── Logo IEQ ─── */
-function IEQCross({ size = 44, src = "/quadrangular.png" }) {
-    return (
-        <img
-            src={src}
-            alt="Logo IEQ"
-            style={{
-                width: `${size}px`, height: `${size}px`,
-                minWidth: `${size}px`, minHeight: `${size}px`,
-                borderRadius: "50%", objectFit: "cover", display: "block",
-            }}
-        />
-    );
 }
 
 /* ─── Ícone olho ─── */
@@ -65,7 +52,7 @@ function ErrIcon({ t }) {
 /* ─── Força de senha ─── */
 const calcForca  = s => s.length < 6 ? 1 : s.length < 8 ? 2 : /[A-Z]/.test(s) && /[0-9]/.test(s) ? 4 : 3;
 const forcaLabel = ["","Muito curta","Fraca","Média","Forte"];
-const forcaColor = ["",P.red,P.amber,P.green,P.navy];
+const forcaColor = ["",P.red,P.amber,P.green,P.wine];
 
 function Forca({ senha }) {
     if (!senha) return null;
@@ -264,17 +251,17 @@ export default function Login() {
 
     /* ── tokens de tema ── */
     const vars = dark ? {
-        "--panel":"#0F1B2D", "--title":"#FFFFFF", "--text":"rgba(255,255,255,.78)", "--sub":"rgba(255,255,255,.55)",
-        "--link":P.goldLight, "--notice":"rgba(255,255,255,.05)", "--notice-b":"rgba(255,255,255,.14)",
+        "--panel":"#2A060D", "--title":"#FFFFFF", "--text":"rgba(255,255,255,.78)", "--sub":"rgba(255,255,255,.55)",
+        "--link":P.goldLight, "--notice":"rgba(253,184,19,.06)", "--notice-b":"rgba(253,184,19,.18)",
         "--track":"rgba(255,255,255,.14)", "--input-bg":"rgba(255,255,255,.06)", "--input-b":"rgba(255,255,255,.16)",
         "--switch-off":"rgba(255,255,255,.24)", "--switch-on":P.gold,
-        "--err":"#F2837C", "--warn":"#E3B865", "--chip":"rgba(184,137,46,.14)", "--chip-b":"rgba(184,137,46,.4)",
+        "--err":"#F2837C", "--warn":"#E3B865", "--chip":"rgba(253,184,19,.12)", "--chip-b":"rgba(253,184,19,.4)",
     } : {
-        "--panel":"#FFFFFF", "--title":P.ink, "--text":"#3C4A5E", "--sub":"rgba(18,35,59,.58)",
-        "--link":P.navy, "--notice":"rgba(15,42,74,.05)", "--notice-b":"rgba(15,42,74,.14)",
-        "--track":"rgba(15,42,74,.10)", "--input-bg":"#F4F6F9", "--input-b":"rgba(15,42,74,.14)",
-        "--switch-off":"rgba(15,42,74,.20)", "--switch-on":P.navy,
-        "--err":P.red, "--warn":P.amber, "--chip":"rgba(184,137,46,.10)", "--chip-b":"rgba(184,137,46,.35)",
+        "--panel":"#FFFFFF", "--title":P.ink, "--text":"#4B3532", "--sub":"rgba(53,3,9,.58)",
+        "--link":P.scarlet, "--notice":"rgba(200,16,46,.05)", "--notice-b":"rgba(200,16,46,.16)",
+        "--track":"rgba(53,3,9,.10)", "--input-bg":P.cream, "--input-b":"rgba(53,3,9,.16)",
+        "--switch-off":"rgba(53,3,9,.20)", "--switch-on":P.wine,
+        "--err":P.red, "--warn":P.amber, "--chip":"rgba(253,184,19,.12)", "--chip-b":"rgba(253,184,19,.42)",
     };
 
     const titulos = { login:"Entrar", cadastro:"Solicitar acesso", alterar:"Alterar dados" };
@@ -288,17 +275,15 @@ export default function Login() {
             </Helmet>
 
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap');
-
         .ieq-login-root, .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { box-sizing:border-box; }
         :where(.ieq-login-root, .ieq-login-root *) { margin:0; padding:0; }
         .ieq-login-root {
           font-family:'Inter',system-ui,sans-serif;
           min-height:100vh; position:relative;
-          color:var(--text); background:${P.canvas};
+          color:var(--text); background:${P.cream};
           transition:background .3s;
         }
-        .ieq-login-root.dark-bg { background:#080E18; }
+        .ieq-login-root.dark-bg { background:#170307; }
         .ieq-login-root button, .ieq-login-root input { font-family:inherit; }
 
         .login-stage {
@@ -312,56 +297,67 @@ export default function Login() {
           width:40px; height:40px; border-radius:10px; cursor:pointer;
           display:grid; place-items:center;
           background:var(--panel); border:1px solid var(--input-b); color:var(--link);
-          box-shadow:0 2px 8px rgba(15,42,74,.10);
+          box-shadow:0 2px 10px rgba(53,3,9,.16);
           transition:background .2s, transform .15s;
         }
         .theme-btn:hover { transform:translateY(-1px); }
-        .theme-btn:focus-visible { outline:2px solid ${P.navy}; outline-offset:2px; }
+        .theme-btn:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; }
 
         /* ── cartão dividido ── */
         .login-card {
           position:relative; z-index:1; display:flex; width:100%; max-width:860px; overflow:hidden;
           background:var(--panel); border-radius:16px; border:1px solid var(--input-b);
-          box-shadow:0 1px 2px rgba(15,23,42,.04), 0 24px 48px -12px rgba(15,23,42,.18);
+          box-shadow:0 1px 2px rgba(53,3,9,.05), 0 24px 48px -12px rgba(53,3,9,.28);
           opacity:0; transform:translateY(20px);
           transition:opacity .6s ease, transform .6s ease, background .3s;
         }
 
-        /* lado da marca (azul-marinho) */
+        /* lado da marca (vinho + imagem) */
         .brand-pane {
-          flex:1; min-width:280px; padding:44px 40px;
-          background:linear-gradient(160deg, ${P.navyLight} 0%, ${P.navy} 55%, ${P.navyDeep} 100%);
+          flex:1; min-width:280px; padding:40px 40px 34px;
+          background:linear-gradient(160deg, ${P.wineLight} 0%, ${P.wine} 55%, ${P.wineDeep} 100%);
+          background-size:cover; background-position:center 28%; background-repeat:no-repeat;
           color:#fff; display:flex; flex-direction:column; justify-content:space-between;
-          position:relative; overflow:hidden;
+          position:relative; overflow:hidden; isolation:isolate;
         }
         .brand-pane::before {
-          content:""; position:absolute; inset:0;
+          content:""; position:absolute; inset:0; z-index:0;
           background-image:
-            radial-gradient(560px 320px at 100% 0%, rgba(217,174,94,.16), transparent 60%),
-            radial-gradient(420px 300px at 0% 100%, rgba(255,255,255,.06), transparent 60%);
+            linear-gradient(180deg, rgba(23,3,7,.60) 0%, rgba(29,4,9,.26) 40%, rgba(23,3,7,.93) 100%),
+            linear-gradient(155deg, rgba(200,16,46,.38) 0%, rgba(29,4,9,.08) 55%, rgba(23,3,7,.80) 100%),
+            radial-gradient(closest-side, rgba(253,184,19,.14), transparent 72%);
           pointer-events:none;
         }
-        .brand-top { position:relative; display:flex; align-items:center; gap:12px; }
-        .brand-name { font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:${P.goldLight}; }
-        .brand-mid { position:relative; margin-top:30px; }
-        .brand-mid h1 {
-          font-family:'Fraunces',serif; font-weight:700; font-size:clamp(24px,2.6vw,30px);
-          line-height:1.18; letter-spacing:-.01em; color:#fff;
+        .brand-pane > * { position:relative; z-index:1; }
+        .brand-top { display:flex; align-items:center; gap:12px; }
+        .brand-top-rule { flex:1; height:1px; background:linear-gradient(90deg, rgba(253,184,19,.5), transparent); }
+        .brand-name { font-size:13px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:${P.goldLight}; }
+        .brand-mid { margin-top:26px; }
+
+        .brand-cross {
+          width:100px; height:auto; aspect-ratio:80 / 104; display:block; margin-bottom:18px;
+          overflow:visible; filter:drop-shadow(0 8px 22px rgba(253,184,19,.3));
         }
-        .brand-mid h1 em { font-style:italic; color:${P.goldLight}; }
-        .brand-mid p { margin-top:12px; font-size:13px; line-height:1.65; color:rgba(255,255,255,.72); max-width:280px; }
-        .brand-feats { position:relative; margin-top:26px; display:flex; flex-direction:column; gap:12px; }
-        .brand-feat { display:flex; align-items:center; gap:10px; font-size:12.5px; color:rgba(255,255,255,.85); }
+        .brand-lede { margin-top:12px; font-size:13px; line-height:1.65; color:rgba(255,255,255,.74); max-width:280px; }
+        .brand-verse {
+          margin-top:18px; padding-left:14px; border-left:2px solid rgba(253,184,19,.55);
+          font-family:'Fraunces',serif; font-style:italic; font-size:12.5px; line-height:1.6;
+          color:rgba(255,255,255,.82); max-width:290px;
+        }
+        .brand-verse cite {
+          display:block; margin-top:7px; font-family:'Inter',sans-serif; font-style:normal;
+          font-size:8.5px; font-weight:700; letter-spacing:.24em; color:${P.goldLight};
+        }
+        .brand-feats { margin-top:22px; display:flex; flex-direction:column; gap:10px; }
+        .brand-feat { display:flex; align-items:center; gap:10px; font-size:12px; color:rgba(255,255,255,.85); }
         .brand-feat-ico {
           width:26px; height:26px; border-radius:7px; flex-shrink:0;
-          background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16);
+          background:rgba(253,184,19,.10); border:1px solid rgba(253,184,19,.28);
           display:grid; place-items:center; color:${P.goldLight};
         }
-        .brand-foot { position:relative; font-size:11px; letter-spacing:.04em; color:rgba(255,255,255,.5); }
-
         /* lado do formulário */
         .form-pane { flex:1.05; min-width:300px; padding:44px 42px; display:flex; flex-direction:column; justify-content:center; }
-        .card-title { font-size:24px; font-weight:700; letter-spacing:-.01em; color:var(--title); margin-bottom:6px; }
+        .card-title { font-family:'Fraunces',serif; font-size:26px; font-weight:600; letter-spacing:-.01em; color:var(--title); margin-bottom:6px; }
         .card-subtitle { font-size:13px; color:var(--sub); margin-bottom:22px; }
         .form-col { display:flex; flex-direction:column; gap:15px; }
 
@@ -377,8 +373,8 @@ export default function Login() {
           transition:border-color .2s, box-shadow .2s, background .2s;
         }
         .ieq-input::placeholder { color:var(--sub); font-weight:400; }
-        .ieq-input:focus { border-color:${P.navy}; box-shadow:0 0 0 3px rgba(15,42,74,.12); background:var(--panel); }
-        .ieq-login-root.dark-bg .ieq-input:focus { border-color:${P.goldLight}; box-shadow:0 0 0 3px rgba(217,174,94,.16); }
+        .ieq-input:focus { border-color:${P.wine}; box-shadow:0 0 0 3px rgba(200,16,46,.14); background:var(--panel); }
+        .ieq-login-root.dark-bg .ieq-input:focus { border-color:${P.goldLight}; box-shadow:0 0 0 3px rgba(253,184,19,.16); }
         .ieq-input.error { border-color:var(--err); }
         .ieq-input:-webkit-autofill, .ieq-input:-webkit-autofill:focus {
           -webkit-text-fill-color:var(--title); transition:background-color 9999s ease-in-out 0s;
@@ -389,27 +385,29 @@ export default function Login() {
           color:var(--sub); cursor:pointer; display:grid; place-items:center; transition:background .2s, color .2s;
         }
         .eye:hover { background:var(--notice); color:var(--link); }
-        .eye:focus-visible { outline:2px solid ${P.navy}; }
+        .eye:focus-visible { outline:2px solid ${P.wine}; }
 
         /* ── botão principal ── */
         .btn-primary {
-          width:100%; height:44px; border:none; border-radius:8px;
-          background:${P.navy}; color:#fff; cursor:pointer;
+          width:100%; height:46px; border:none; border-radius:9px;
+          background:linear-gradient(158deg, #E0153B 0%, ${P.scarlet} 48%, #8B0000 100%);
+          color:#fff; cursor:pointer;
           display:flex; align-items:center; justify-content:center; gap:8px;
-          font-size:13.5px; font-weight:700; letter-spacing:.02em;
+          font-size:13.5px; font-weight:700; letter-spacing:.03em;
+          box-shadow:0 10px 26px rgba(200,16,46,.28);
           transition:background .2s, transform .15s, box-shadow .2s;
         }
-        .btn-primary:hover:not(:disabled) { background:${P.navyLight}; box-shadow:0 6px 16px rgba(15,42,74,.28); }
+        .btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 14px 34px rgba(200,16,46,.4); }
         .btn-primary:focus-visible { outline:2px solid ${P.gold}; outline-offset:2px; }
         .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
 
         .btn-ghost {
-          background:none; border:1.5px solid ${P.navy}; color:var(--link); border-radius:8px;
+          background:none; border:1.5px solid ${P.wine}; color:var(--link); border-radius:8px;
           padding:10px 22px; cursor:pointer; font-size:12.5px; font-weight:700;
           transition:background .2s;
         }
         .btn-ghost:hover { background:var(--notice); }
-        .btn-ghost:focus-visible { outline:2px solid ${P.navy}; outline-offset:2px; }
+        .btn-ghost:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; }
 
         /* ── links e interruptor ── */
         .row-between { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:-2px; }
@@ -419,7 +417,7 @@ export default function Login() {
           display:inline-flex; align-items:center; gap:6px;
         }
         .link:hover { text-decoration:underline; text-underline-offset:2px; }
-        .link:focus-visible { outline:2px solid ${P.navy}; outline-offset:2px; border-radius:3px; }
+        .link:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; border-radius:3px; }
         .card-links { margin-top:18px; display:flex; justify-content:center; border-top:1px solid var(--input-b); padding-top:16px; }
         .card-links .link { font-weight:700; }
 
@@ -431,7 +429,7 @@ export default function Login() {
         .switch-thumb { position:absolute; top:2.5px; left:2.5px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:transform .2s; }
         .switch[aria-checked="true"] .switch-track { background:var(--switch-on); }
         .switch[aria-checked="true"] .switch-thumb { transform:translateX(15px); }
-        .switch:focus-visible { outline:2px solid ${P.navy}; outline-offset:2px; border-radius:6px; }
+        .switch:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; border-radius:6px; }
 
         /* ── avisos, erros, sucesso ── */
         .notice {
@@ -443,8 +441,8 @@ export default function Login() {
         .notice strong { color:var(--title); }
 
         .err-box { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:8px; animation:slideDown .25s ease both; }
-        .err-bad  { background:rgba(179,38,30,.07);  border:1px solid rgba(179,38,30,.28); --tone:var(--err); }
-        .err-warn { background:rgba(184,137,46,.10); border:1px solid rgba(184,137,46,.35); --tone:var(--warn); }
+        .err-bad  { background:rgba(200,16,46,.07);  border:1px solid rgba(200,16,46,.30); --tone:var(--err); }
+        .err-warn { background:rgba(185,122,8,.10); border:1px solid rgba(185,122,8,.35); --tone:var(--warn); }
         .err-ico { color:var(--tone); flex-shrink:0; margin-top:1px; }
         .err-title { font-size:12px; font-weight:700; color:var(--tone); margin-bottom:3px; }
         .err-msg { font-size:12.5px; line-height:1.5; color:var(--text); }
@@ -461,10 +459,10 @@ export default function Login() {
           background:var(--input-bg); border:1.5px solid var(--input-b); font-size:12.5px; font-weight:600;
           transition:background .2s, border-color .2s;
         }
-        .check-row[aria-checked="true"] { background:var(--chip); border-color:${P.navy}; color:var(--title); }
-        .check-row:focus-visible { outline:2px solid ${P.navy}; outline-offset:2px; }
+        .check-row[aria-checked="true"] { background:var(--chip); border-color:${P.wine}; color:var(--title); }
+        .check-row:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; }
         .check-box { width:17px; height:17px; border-radius:4px; flex-shrink:0; display:grid; place-items:center; border:1.5px solid var(--sub); transition:all .2s; }
-        .check-row[aria-checked="true"] .check-box { background:${P.navy}; border-color:${P.navy}; }
+        .check-row[aria-checked="true"] .check-box { background:${P.wine}; border-color:${P.wine}; }
         .divider-t { display:flex; align-items:center; gap:12px; font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--sub); white-space:nowrap; }
         .divider-t::before, .divider-t::after { content:""; flex:1; height:1px; background:var(--input-b); }
 
@@ -481,8 +479,10 @@ export default function Login() {
 
         @media (max-width:760px) {
           .login-card { flex-direction:column; max-width:440px; border-radius:14px; }
-          .brand-pane { padding:32px 28px; }
-          .brand-mid p, .brand-feats { display:none; }
+          .brand-pane { padding:28px 28px 24px; background-position:center 22%; }
+          .brand-mid { margin-top:14px; }
+          .brand-cross { width:74px; margin-bottom:12px; }
+          .brand-lede, .brand-verse, .brand-feats { display:none; }
           .form-pane { padding:32px 28px; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -500,15 +500,22 @@ export default function Login() {
                     <div className={`login-card${temErro ? " shake" : ""}`} ref={cardRef}>
 
                         {/* ── lado da marca ── */}
-                        <aside className="brand-pane">
+                        <aside
+                            className="brand-pane"
+                            style={{ backgroundImage: `url(${jesusImg})` }}
+                        >
                             <div className="brand-top">
-                                <IEQCross size={40}/>
                                 <span className="brand-name">IEQ Pituaçu</span>
+                                <span className="brand-top-rule" aria-hidden="true"/>
                             </div>
 
                             <div className="brand-mid">
-                                <h1>Sua Igreja,<br/><em>Bem Administrada.</em></h1>
-                                <p>Portal administrativo para líderes, tesouraria e secretaria acompanharem células e membros com segurança.</p>
+                                <CrossMark className="brand-cross"/>
+                                <p className="brand-lede">Entre para cuidar da igreja com a mesma excelência com que servimos ao Senhor.</p>
+                                <blockquote className="brand-verse">
+                                    “Porque o Filho do Homem veio buscar e salvar o que se havia perdido.”
+                                    <cite>Lucas 19:10</cite>
+                                </blockquote>
 
                                 <div className="brand-feats">
                                     <div className="brand-feat">
@@ -525,8 +532,6 @@ export default function Login() {
                                     </div>
                                 </div>
                             </div>
-
-                            <p className="brand-foot">© {new Date().getFullYear()} IEQ Pituaçu · Sistema Eclesiástico</p>
                         </aside>
 
                         {/* ── lado do formulário ── */}

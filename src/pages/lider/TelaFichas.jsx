@@ -5,16 +5,7 @@ import {
   Sparkles, Heart, MapPin, User,
 } from "lucide-react";
 import { AURA, theme } from "./liderTheme";
-
-function IEQCross({ size = 36 }) {
-  return (
-      <img
-          src="/quadrangular.png"
-          alt="Logo IEQ"
-          style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
-      />
-  );
-}
+import CrossMark from "../../components/CrossMark.jsx";
 
 /* ─── CSS Global (segue padrão dl-*) ─── */
 function GlobalStyles({ t, isDark }) {
@@ -37,7 +28,7 @@ function GlobalStyles({ t, isDark }) {
       .ff-header { text-align: center; padding: 8px 0 28px; }
       .ff-eyebrow {
         font-size: 9px; font-weight: 600; letter-spacing: .25em;
-        text-transform: uppercase; color: rgba(184,137,46,.6);
+        text-transform: uppercase; color: rgba(253,184,19,.6);
         margin: 14px 0 6px;
       }
       .ff-title {
@@ -69,7 +60,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .ff-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(184,137,46,.2), transparent);
+        background: linear-gradient(90deg, transparent, rgba(253,184,19,.2), transparent);
       }
       .ff-card-pad { padding: 22px 22px 26px; }
       @media(max-width: 480px) { .ff-card-pad { padding: 18px 16px 22px; } }
@@ -127,9 +118,9 @@ function GlobalStyles({ t, isDark }) {
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .ff-input:focus, .ff-select:focus {
-        border-color: rgba(184,137,46,.5);
-        background: rgba(184,137,46,.04);
-        box-shadow: 0 0 0 4px rgba(184,137,46,.12);
+        border-color: rgba(253,184,19,.5);
+        background: rgba(253,184,19,.04);
+        box-shadow: 0 0 0 4px rgba(253,184,19,.12);
       }
       .ff-input::placeholder { color: ${t.placeholder}; }
       .ff-select {
@@ -141,11 +132,11 @@ function GlobalStyles({ t, isDark }) {
 
       .ff-checkbox-card {
         padding: 16px 18px; border-radius: 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(184,137,46,.04)"};
-        border: 1px solid ${isDark ? "rgba(184,137,46,.1)" : "rgba(184,137,46,.16)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(253,184,19,.04)"};
+        border: 1px solid ${isDark ? "rgba(253,184,19,.1)" : "rgba(253,184,19,.16)"};
         transition: border-color .2s;
       }
-      .ff-checkbox-card:hover { border-color: rgba(184,137,46,.3); }
+      .ff-checkbox-card:hover { border-color: rgba(253,184,19,.3); }
       .ff-checkbox-row {
         display: flex; align-items: center; gap: 12px; cursor: pointer;
         font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
@@ -179,14 +170,14 @@ function GlobalStyles({ t, isDark }) {
         color: #0A0A0F; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .35s;
-        box-shadow: 0 6px 22px rgba(184,137,46,.22); flex-shrink: 0;
+        box-shadow: 0 6px 22px rgba(253,184,19,.22); flex-shrink: 0;
       }
-      .ff-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(184,137,46,.32); }
+      .ff-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(253,184,19,.32); }
       .ff-btn-gold:disabled { opacity: .5; cursor: not-allowed; }
 
       .ff-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(184,137,46,.15), transparent);
+        background: linear-gradient(90deg, transparent, rgba(253,184,19,.15), transparent);
         margin: 2px 0;
       }
 
@@ -196,15 +187,15 @@ function GlobalStyles({ t, isDark }) {
       .ff-ficha-row {
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
         padding: 13px 16px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(184,137,46,.04)"};
-        border: 1px solid ${isDark ? "rgba(184,137,46,.07)" : "rgba(184,137,46,.12)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(253,184,19,.04)"};
+        border: 1px solid ${isDark ? "rgba(253,184,19,.07)" : "rgba(253,184,19,.12)"};
         border-radius: 14px; transition: border-color .2s;
       }
-      .ff-ficha-row:hover { border-color: rgba(184,137,46,.3); }
+      .ff-ficha-row:hover { border-color: rgba(253,184,19,.3); }
       .ff-ficha-avatar {
         width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(184,137,46,.2), rgba(184,137,46,.06));
-        border: 1px solid rgba(184,137,46,.22);
+        background: linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06));
+        border: 1px solid rgba(253,184,19,.22);
         display: flex; align-items: center; justify-content: center;
         font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: ${AURA.gold};
       }
@@ -219,7 +210,7 @@ function GlobalStyles({ t, isDark }) {
       .ff-status-pill {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 5px 13px; border-radius: 100px; flex-shrink: 0;
-        background: rgba(184,137,46,.1); border: 1px solid rgba(184,137,46,.28);
+        background: rgba(253,184,19,.1); border: 1px solid rgba(253,184,19,.28);
         font-size: 9px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; color: ${AURA.gold};
       }
@@ -228,7 +219,7 @@ function GlobalStyles({ t, isDark }) {
         text-align: center;
         font-size: 9px; font-weight: 500; letter-spacing: .18em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(245,240,232,.12)" : "rgba(26,16,8,.15)"};
+        color: ${isDark ? "rgba(251,244,239,.12)" : "rgba(26,16,8,.15)"};
         padding: 16px 0 0;
       }
     `}</style>
@@ -320,10 +311,10 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
         {/* ── Cabeçalho ── */}
         <div className="ff-header">
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-            <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(184,137,46,.22)", borderRadius: "50%" }} />
-            <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(184,137,46,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "rgba(18,18,26,.99)" : "#fff", border: "1.5px solid rgba(184,137,46,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-              <IEQCross size={32} />
+            <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(253,184,19,.22)", borderRadius: "50%" }} />
+            <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(253,184,19,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "rgba(42,6,13,.99)" : "#fff", border: "1.5px solid rgba(253,184,19,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+              <CrossMark size={30} />
             </div>
           </div>
           <p className="ff-eyebrow">Secretaria · Ficha de Inscrição</p>
@@ -520,10 +511,10 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
                   { name: "jaEraCristao", label: "Já era cristão?" },
                 ].map(({ name, label }) => (
                     <div key={name} className="ff-checkbox-card" style={{
-                      background: isDark ? "rgba(15,42,74,.3)" : "rgba(184,137,46,.05)",
-                      borderColor: isDark ? "rgba(15,42,74,.45)" : "rgba(184,137,46,.2)",
+                      background: isDark ? "rgba(53,3,9,.3)" : "rgba(253,184,19,.05)",
+                      borderColor: isDark ? "rgba(53,3,9,.45)" : "rgba(253,184,19,.2)",
                     }}>
-                      <label className="ff-checkbox-row" style={{ color: isDark ? "#D9AE5E" : AURA.gold }}>
+                      <label className="ff-checkbox-row" style={{ color: isDark ? "#FFD34D" : AURA.gold }}>
                         <input type="checkbox" name={name} checked={form[name]} onChange={handleChange} style={{ accentColor: AURA.gold }} />
                         {label}
                       </label>

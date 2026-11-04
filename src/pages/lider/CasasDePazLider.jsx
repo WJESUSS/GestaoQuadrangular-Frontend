@@ -13,11 +13,11 @@ const TOTAL_ENCONTROS = 7;
 const DECISAO_CONFIG = {
     ACEITOU_JESUS: {
         label: "Aceitou Jesus",
-        cor: "#1E4571", bg: "rgba(30,69,113,.08)", borda: "rgba(30,69,113,.3)", icone: "✝️",
+        cor: "#5A0B16", bg: "rgba(90,11,22,.08)", borda: "rgba(90,11,22,.3)", icone: "✝️",
     },
     RECONCILIOU: {
         label: "Reconciliou",
-        cor: "#B8892E", bg: "rgba(184,137,46,.1)", borda: "rgba(184,137,46,.35)", icone: "🤝",
+        cor: "#FDB813", bg: "rgba(253,184,19,.1)", borda: "rgba(253,184,19,.35)", icone: "🤝",
     },
     BATISMO_AGUAS: {
         label: "Deseja Batismo",
@@ -76,7 +76,7 @@ function BadgeStatus({ status }) {
         return <span style={{ ...base, color: "#E8294A", border: "1px solid rgba(200,16,46,.35)", background: "rgba(200,16,46,.1)" }}>● Cancelada</span>;
     if (s.includes("conclu"))
         return <span style={{ ...base, color: "#1E7A46", border: "1px solid rgba(30,122,70,.35)", background: "rgba(30,122,70,.1)" }}>★ Concluída</span>;
-    return <span style={{ ...base, color: AURA.gold, border: "1px solid rgba(184,137,46,.3)", background: "rgba(184,137,46,.08)" }}>○ Pendente</span>;
+    return <span style={{ ...base, color: AURA.gold, border: "1px solid rgba(253,184,19,.3)", background: "rgba(253,184,19,.08)" }}>○ Pendente</span>;
 }
 
 /* ─── Modal AURA ──────────────────────────────────────────────────────── */
@@ -102,7 +102,7 @@ function AuraModal({ open, onClose, title, children, t }) {
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${AURA.gold}, transparent)`, opacity: .3 }} />
                 <div style={{ padding: "22px 24px 0", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6, flexShrink: 0 }}>
                     <div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(184,137,46,.55)", margin: "0 0 3px" }}>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(253,184,19,.55)", margin: "0 0 3px" }}>
                             Casas de Paz
                         </p>
                         <h3 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>{title}</h3>
@@ -216,13 +216,13 @@ function MembroSelector({ items, loading, erro, onSelect, selectedId, placeholde
                                  style={{
                                      display: "flex", alignItems: "center", justifyContent: "space-between",
                                      padding: "11px 14px", cursor: "pointer",
-                                     background: sel ? (isDark ? "rgba(184,137,46,.12)" : "rgba(184,137,46,.08)") : "transparent",
+                                     background: sel ? (isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.08)") : "transparent",
                                      borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none",
                                      transition: "background .15s",
                                  }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(184,137,46,.2),rgba(184,137,46,.06))", border: "1px solid rgba(184,137,46,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div>
@@ -280,8 +280,8 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 style={{
                                     display: "inline-flex", alignItems: "center", gap: 6,
                                     padding: "4px 10px 4px 12px", borderRadius: 99, cursor: "pointer",
-                                    background: "linear-gradient(135deg,rgba(184,137,46,.18),rgba(184,137,46,.08))",
-                                    border: "1px solid rgba(184,137,46,.35)",
+                                    background: "linear-gradient(135deg,rgba(253,184,19,.18),rgba(253,184,19,.08))",
+                                    border: "1px solid rgba(253,184,19,.35)",
                                     fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: AURA.gold,
                                     transition: "all .15s",
                                 }}
@@ -314,7 +314,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 style={{
                                     display: "flex", alignItems: "center", gap: 12,
                                     padding: "11px 14px", cursor: "pointer",
-                                    background: sel ? (isDark ? "rgba(184,137,46,.1)" : "rgba(184,137,46,.07)") : "transparent",
+                                    background: sel ? (isDark ? "rgba(253,184,19,.1)" : "rgba(253,184,19,.07)") : "transparent",
                                     borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none",
                                     transition: "background .15s",
                                 }}
@@ -322,7 +322,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 {/* Checkbox visual */}
                                 <div style={{
                                     width: 18, height: 18, borderRadius: 5, flexShrink: 0,
-                                    border: `1.5px solid ${sel ? AURA.gold : (isDark ? "rgba(184,137,46,.3)" : "rgba(184,137,46,.4)")}`,
+                                    border: `1.5px solid ${sel ? AURA.gold : (isDark ? "rgba(253,184,19,.3)" : "rgba(253,184,19,.4)")}`,
                                     background: sel ? AURA.gold : "transparent",
                                     display: "flex", alignItems: "center", justifyContent: "center",
                                     transition: "all .15s",
@@ -331,7 +331,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 </div>
 
                                 <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? "linear-gradient(135deg,rgba(184,137,46,.3),rgba(184,137,46,.1))" : "linear-gradient(135deg,rgba(184,137,46,.15),rgba(184,137,46,.05))", border: `1px solid ${sel ? "rgba(184,137,46,.4)" : "rgba(184,137,46,.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? "linear-gradient(135deg,rgba(253,184,19,.3),rgba(253,184,19,.1))" : "linear-gradient(135deg,rgba(253,184,19,.15),rgba(253,184,19,.05))", border: `1px solid ${sel ? "rgba(253,184,19,.4)" : "rgba(253,184,19,.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div style={{ minWidth: 0 }}>
@@ -396,7 +396,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
     const labelStyle = {
         fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600,
         letterSpacing: ".18em", textTransform: "uppercase",
-        color: "rgba(184,137,46,.55)", margin: "0 0 6px", display: "block",
+        color: "rgba(253,184,19,.55)", margin: "0 0 6px", display: "block",
     };
 
     /* ── CSS global ────────────────────────────────────────────────────── */
@@ -409,7 +409,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
     @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
     .cp-fade-up { animation: fadeUp .4s ease both; }
     .cp-casa-card { transition: border-color .25s, box-shadow .25s; }
-    .cp-casa-card:hover { border-color: ${t.cardHover} !important; box-shadow: 0 8px 32px rgba(184,137,46,.08); }
+    .cp-casa-card:hover { border-color: ${t.cardHover} !important; box-shadow: 0 8px 32px rgba(253,184,19,.08); }
     .cp-btn-primary {
       background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
       color: #fff; border: none; border-radius: 100px;
@@ -417,7 +417,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
       letter-spacing: .14em; text-transform: uppercase; cursor: pointer;
       padding: 11px 22px; transition: all .3s;
       display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 6px 20px rgba(15,42,74,.3);
+      box-shadow: 0 6px 20px rgba(53,3,9,.3);
     }
     .cp-btn-primary:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
     .cp-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
@@ -437,9 +437,9 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
       letter-spacing: .14em; text-transform: uppercase; cursor: pointer;
       padding: 10px 18px; transition: all .3s;
       display: inline-flex; align-items: center; gap: 7px;
-      box-shadow: 0 6px 20px rgba(184,137,46,.2);
+      box-shadow: 0 6px 20px rgba(253,184,19,.2);
     }
-    .cp-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(184,137,46,.3); }
+    .cp-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(253,184,19,.3); }
     .cp-btn-gold:disabled { opacity: .5; cursor: not-allowed; }
     .cp-btn-sage {
       background: rgba(30,122,70,.1); color: #1E7A46;
@@ -459,7 +459,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
       display: inline-flex; align-items: center; gap: 6px;
     }
     .cp-btn-danger:hover { background: rgba(200,16,46,.16); }
-    .cp-input:focus { border-color: rgba(184,137,46,.5) !important; box-shadow: 0 0 0 4px rgba(184,137,46,.12) !important; }
+    .cp-input:focus { border-color: rgba(253,184,19,.5) !important; box-shadow: 0 0 0 4px rgba(253,184,19,.12) !important; }
     .cp-input::placeholder { color: ${t.placeholder}; }
     input[type="date"].cp-input::-webkit-calendar-picker-indicator { filter: ${isDark ? "invert(1) opacity(0.4)" : "opacity(0.5)"}; cursor: pointer; }
     .cp-toast {
@@ -687,11 +687,11 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
             {/* ── Header ─────────────────────────────────────────────────── */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#0F2A4A,#12233B)", border: "1px solid rgba(184,137,46,.35)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(15,42,74,.35)" }}>
-                        <Home size={20} color="#D9AE5E" />
+                    <div style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#350309,#350309)", border: "1px solid rgba(253,184,19,.35)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(53,3,9,.35)" }}>
+                        <Home size={20} color="#FFD34D" />
                     </div>
                     <div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(184,137,46,.55)", margin: "0 0 2px" }}>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(253,184,19,.55)", margin: "0 0 2px" }}>
                             Evangelismo
                         </p>
                         <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>
@@ -812,7 +812,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                         <motion.div key={c.id} className="cp-casa-card"
                                     style={{
                                         background: t.bgEl,
-                                        border: `1px solid ${concluida ? "rgba(30,122,70,.4)" : isOpen ? "rgba(184,137,46,.3)" : t.border}`,
+                                        border: `1px solid ${concluida ? "rgba(30,122,70,.4)" : isOpen ? "rgba(253,184,19,.3)" : t.border}`,
                                         borderRadius: 16, marginBottom: 10, overflow: "hidden",
                                         backdropFilter: "blur(24px)", position: "relative",
                                     }}
@@ -827,7 +827,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", cursor: "pointer", gap: 12, flexWrap: "wrap" }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                                    <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: concluida ? "rgba(30,122,70,.12)" : "linear-gradient(135deg,#0F2A4A,#12233B)", border: `1px solid ${concluida ? "rgba(30,122,70,.35)" : "rgba(184,137,46,.3)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+                                    <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: concluida ? "rgba(30,122,70,.12)" : "linear-gradient(135deg,#350309,#350309)", border: `1px solid ${concluida ? "rgba(30,122,70,.35)" : "rgba(253,184,19,.3)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
                                         {concluida ? "🏆" : "🏠"}
                                     </div>
                                     <div>
@@ -836,7 +836,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                     </div>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                                    <div style={{ textAlign: "center", width: 44, height: 44, borderRadius: "50%", border: `2px solid ${concluida ? "#1E7A46" : "rgba(184,137,46,.3)"}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                    <div style={{ textAlign: "center", width: 44, height: 44, borderRadius: "50%", border: `2px solid ${concluida ? "#1E7A46" : "rgba(253,184,19,.3)"}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                                         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 600, color: concluida ? "#1E7A46" : t.text, lineHeight: 1 }}>{restantes}</span>
                                         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, color: t.textMuted, lineHeight: 1, marginTop: 2, fontWeight: 500 }}>REST.</span>
                                     </div>
@@ -893,7 +893,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                                                     {[{ label: "Líder", nome: c.liderNome }, { label: "Auxiliar", nome: c.auxiliarNome }].map(({ label, nome }) => nome ? (
                                                         <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                                            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,rgba(184,137,46,.2),rgba(184,137,46,.06))", border: "1px solid rgba(184,137,46,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                                            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
                                                                 {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                                             </div>
                                                             <div>
@@ -919,7 +919,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                             const nome = v.nome ?? v.nomeCompleto ?? v.name ?? `#${v.id}`;
                                                             return (
                                                                 <div key={vi} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                                                    <div style={{ background: cfg ? `${cfg.cor}12` : (isDark ? "rgba(184,137,46,.06)" : "rgba(184,137,46,.08)"), border: `1px solid ${cfg ? cfg.cor + "35" : "rgba(184,137,46,.18)"}`, borderRadius: 99, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: cfg ? cfg.cor : t.text, display: "flex", alignItems: "center", gap: 6 }}>
+                                                                    <div style={{ background: cfg ? `${cfg.cor}12` : (isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.08)"), border: `1px solid ${cfg ? cfg.cor + "35" : "rgba(253,184,19,.18)"}`, borderRadius: 99, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: cfg ? cfg.cor : t.text, display: "flex", alignItems: "center", gap: 6 }}>
                                                                         <span>{cfg ? cfg.icone : "👤"}</span>
                                                                         <span style={{ fontWeight: cfg ? 500 : 300 }}>{nome}</span>
                                                                     </div>
@@ -949,14 +949,14 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                                 return (
                                                                     <div key={ei} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "10px 0", borderBottom: !isLast ? `1px solid ${t.border}` : "none" }}>
                                                                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, paddingTop: 4 }}>
-                                                                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: ei === 0 ? AURA.gold : (isDark ? "rgba(184,137,46,.3)" : "rgba(184,137,46,.4)"), border: `1.5px solid ${AURA.gold}` }} />
-                                                                            {!isLast && <div style={{ width: 1, minHeight: 24, background: isDark ? "rgba(184,137,46,.12)" : "rgba(184,137,46,.2)", marginTop: 4 }} />}
+                                                                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: ei === 0 ? AURA.gold : (isDark ? "rgba(253,184,19,.3)" : "rgba(253,184,19,.4)"), border: `1.5px solid ${AURA.gold}` }} />
+                                                                            {!isLast && <div style={{ width: 1, minHeight: 24, background: isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.2)", marginTop: 4 }} />}
                                                                         </div>
                                                                         <div style={{ flex: 1 }}>
                                                                             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                                                                                 <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: t.text, margin: 0 }}>Encontro {num}</p>
                                                                                 {ei === 0 && (
-                                                                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", background: "rgba(184,137,46,.12)", color: AURA.gold, border: "1px solid rgba(184,137,46,.25)", borderRadius: 99, padding: "2px 8px" }}>
+                                                                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", background: "rgba(253,184,19,.12)", color: AURA.gold, border: "1px solid rgba(253,184,19,.25)", borderRadius: 99, padding: "2px 8px" }}>
                                             Mais recente
                                           </span>
                                                                                 )}
@@ -980,7 +980,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                     </p>
                                                 )}
                                                 {restantes > 0 && !cancelada && (
-                                                    <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: isDark ? "rgba(184,137,46,.04)" : "rgba(184,137,46,.06)", border: "1px dashed rgba(184,137,46,.2)" }}>
+                                                    <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: isDark ? "rgba(253,184,19,.04)" : "rgba(253,184,19,.06)", border: "1px dashed rgba(253,184,19,.2)" }}>
                                                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
                                                             <Calendar size={12} />
                                                             {restantes === 1 ? "Falta 1 encontro para concluir esta casa." : `Faltam ${restantes} encontros para concluir esta casa.`}
@@ -1025,7 +1025,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                             </div>
 
                             {/* Aviso — decisões espirituais bloqueadas aqui */}
-                            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px", borderRadius: 12, background: isDark ? "rgba(184,137,46,.05)" : "rgba(184,137,46,.06)", border: "1px solid rgba(184,137,46,.2)" }}>
+                            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px", borderRadius: 12, background: isDark ? "rgba(253,184,19,.05)" : "rgba(253,184,19,.06)", border: "1px solid rgba(253,184,19,.2)" }}>
                                 <Lock size={16} style={{ color: AURA.gold, flexShrink: 0, marginTop: 1 }} />
                                 <div>
                                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: AURA.gold, margin: "0 0 3px", letterSpacing: ".05em" }}>
