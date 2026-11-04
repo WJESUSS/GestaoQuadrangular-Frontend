@@ -3,16 +3,18 @@ import api from "../../services/api.js";
 import { getFotoUrl } from "../../utils/foto.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import TelaRelatorio from "./TelaRelatorio";
-import TelaVisitantes from "./TelaVisitantes";
-import TelaFichas from "./TelaFichas";
-import RelatorioDiscipulado from "./RelatorioDiscipulado";
-import AcompanhamentoDiscipulado from "./AcompanhamentoDiscipulado";
-import Missao70Lider from "./Missao70Lider";
-import SolicitarFichaMembro from "./SolicitarFichaMembro";
 import SinoAniversariantes from "./SinoAniversariantes";
 import BoasVindasLider from "./BoasVindasLider";
-import TelaMetasLider from "./TelaMetasLider";
+
+/* Telas e modais pesados carregados sob demanda (code-splitting) */
+const TelaRelatorio          = React.lazy(() => import("./TelaRelatorio"));
+const TelaVisitantes         = React.lazy(() => import("./TelaVisitantes"));
+const TelaFichas             = React.lazy(() => import("./TelaFichas"));
+const RelatorioDiscipulado   = React.lazy(() => import("./RelatorioDiscipulado"));
+const AcompanhamentoDiscipulado = React.lazy(() => import("./AcompanhamentoDiscipulado"));
+const Missao70Lider          = React.lazy(() => import("./Missao70Lider"));
+const SolicitarFichaMembro   = React.lazy(() => import("./SolicitarFichaMembro"));
+const TelaMetasLider         = React.lazy(() => import("./TelaMetasLider"));
 import {
   Trash2, Loader2, Users, Plus, Search, X,
   TrendingUp, Target, Sparkles, LogOut,
@@ -28,7 +30,7 @@ import jesusImg from "../../assets/jesus.jpeg";
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
 /* ─── CSS Global ────────────────────────────────────────────────────────── */
-function GlobalStyles({ t, isDark }) {
+const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
   return (
       <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
@@ -120,7 +122,7 @@ function GlobalStyles({ t, isDark }) {
         border-radius: 12px; width: 38px; height: 38px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
         color: ${t.textMuted};
-        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
         transition: all .25s; flex-shrink: 0;
       }
       .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(253,184,19,.09)" : "rgba(53,3,9,.12)"}; }
@@ -168,7 +170,7 @@ function GlobalStyles({ t, isDark }) {
         font-size: 10px; font-weight: 500; letter-spacing: .12em;
         text-transform: uppercase; color: ${AURA.gold};
         white-space: nowrap;
-        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
         box-shadow: ${isDark ? "inset 0 1px 0 rgba(255,255,255,.05)" : "none"};
       }
       .dl-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: ${AURA.gold}; }
@@ -181,7 +183,7 @@ function GlobalStyles({ t, isDark }) {
         font-family: 'Inter', sans-serif; font-size: 11px;
         font-weight: 500; letter-spacing: .05em;
         border: 1px solid ${isDark ? "rgba(30,122,70,.4)" : "rgba(30,122,70,.35)"};
-        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       }
 
       .dl-kpi-grid {
@@ -248,7 +250,7 @@ function GlobalStyles({ t, isDark }) {
         background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
         border-radius: 24px; padding: 24px 20px;
         display: flex; flex-direction: column; justify-content: space-between;
-        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
         box-shadow: ${isDark ? "0 20px 50px rgba(0,0,0,.35)" : "0 12px 30px rgba(20,20,22,.05)"};
       }
       .dl-kpi-action-icon {
@@ -307,7 +309,7 @@ function GlobalStyles({ t, isDark }) {
         align-items: center; justify-content: center; gap: 10px;
         transition: all .35s cubic-bezier(.4,0,.2,1);
         text-align: center; position: relative;
-        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
         box-shadow: ${isDark ? "0 12px 30px rgba(0,0,0,.22)" : "0 8px 22px rgba(20,20,22,.04)"};
       }
       .dl-menu-card::before {
@@ -341,7 +343,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-card {
         background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
         border-radius: 24px; overflow: hidden; margin-bottom: 24px;
-        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative;
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); position: relative;
         box-shadow: ${isDark ? "0 20px 50px rgba(0,0,0,.28)" : "0 12px 30px rgba(20,20,22,.05)"};
       }
       .dl-card::before {
@@ -453,7 +455,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-modal-overlay {
         position: fixed; inset: 0;
         background: rgba(0,0,0,.72); z-index: 0;
-        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
       }
       .dl-modal-box {
         position: relative; z-index: 10;
@@ -515,7 +517,7 @@ function GlobalStyles({ t, isDark }) {
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }
     `}</style>
   );
-}
+});
 
 /* ─── Componente Principal ─────────────────────────────────────────────── */
 export default function DashboardLider() {
@@ -534,7 +536,21 @@ export default function DashboardLider() {
   );
   const [showBoasVindas,         setShowBoasVindas]          = useState(false);
 
-  const t = theme(isDark);
+  const t = useMemo(() => theme(isDark), [isDark]);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      import("./TelaMetasLider");
+      import("./TelaRelatorio");
+      import("./RelatorioDiscipulado");
+      import("./TelaVisitantes");
+      import("./TelaFichas");
+      import("./Missao70Lider");
+      import("./SolicitarFichaMembro");
+      import("./AcompanhamentoDiscipulado");
+    }, 1500);
+    return () => clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     if (abaAtiva !== "home") window.history.pushState({ aba: abaAtiva }, "");
@@ -889,13 +905,15 @@ export default function DashboardLider() {
                     animate={{ opacity: 1, transition: { duration: .3 } }}
                     exit={{ opacity: 0, transition: { duration: .2 } }}
                 >
-                  {abaAtiva === "metas"       && <TelaMetasLider      celula={celula}       isDark={isDark} />}
-                  {abaAtiva === "relatorio"   && <TelaRelatorio        isDark={isDark} />}
-                  {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}     isDark={isDark} />}
-                  {abaAtiva === "visitantes"  && <TelaVisitantes       celulaId={celula?.id} isDark={isDark} />}
-                  {abaAtiva === "fichas"      && <TelaFichas           celula={celula}       isDark={isDark} />}
-                  {abaAtiva === "missao70"    && <Missao70Lider        celulaId={celula?.id} isDark={isDark} />}
-                  {abaAtiva === "solicitar-ficha" && <SolicitarFichaMembro isDark={isDark} />}
+                  <React.Suspense fallback={<div style={{ display: "flex", justifyContent: "center", padding: "48px 0" }}><Loader2 size={22} className="dl-spin" style={{ color: t.textMuted }} /></div>}>
+                    {abaAtiva === "metas"       && <TelaMetasLider      celula={celula}       isDark={isDark} />}
+                    {abaAtiva === "relatorio"   && <TelaRelatorio        isDark={isDark} />}
+                    {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}     isDark={isDark} />}
+                    {abaAtiva === "visitantes"  && <TelaVisitantes       celulaId={celula?.id} isDark={isDark} />}
+                    {abaAtiva === "fichas"      && <TelaFichas           celula={celula}       isDark={isDark} />}
+                    {abaAtiva === "missao70"    && <Missao70Lider        celulaId={celula?.id} isDark={isDark} />}
+                    {abaAtiva === "solicitar-ficha" && <SolicitarFichaMembro isDark={isDark} />}
+                  </React.Suspense>
                 </motion.div>
 
             )}
@@ -953,11 +971,13 @@ export default function DashboardLider() {
         </AnimatePresence>
 
         {/* ── Modal único: Acompanhamento de Discipulado ── */}
-        <AcompanhamentoDiscipulado
-            isDark={isDark}
-            open={showAcompanhamento}
-            onClose={() => setShowAcompanhamento(false)}
-        />
+        <React.Suspense fallback={null}>
+          <AcompanhamentoDiscipulado
+              isDark={isDark}
+              open={showAcompanhamento}
+              onClose={() => setShowAcompanhamento(false)}
+          />
+        </React.Suspense>
       </div>
   );
 }
