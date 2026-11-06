@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import api from "../../services/api.js";
 import { getFotoUrl } from "../../utils/foto.js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,7 +30,7 @@ import jesusImg from "../../assets/jesus.jpeg";
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
 /* ─── CSS Global ────────────────────────────────────────────────────────── */
-const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
+const GlobalStyles = React.memo(function GlobalStyles() {
   return (
       <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:wght@600;700&display=swap');
@@ -45,8 +45,8 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
 
       .dl-root {
         font-family: 'Inter', sans-serif;
-        background: ${t.bg};
-        color: ${t.text};
+        background: var(--dl-bg);
+        color: var(--dl-text);
         min-height: 100vh;
         position: relative;
         overflow-x: hidden;
@@ -56,11 +56,7 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       }
       .dl-root::before {
         content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-        background-image:
-          ${isDark
-            ? "linear-gradient(180deg, rgba(23,3,7,.78) 0%, rgba(23,3,7,.90) 60%, rgba(23,3,7,.96) 100%)"
-            : "linear-gradient(180deg, rgba(251,244,239,.86) 0%, rgba(251,244,239,.93) 60%, rgba(251,244,239,.97) 100%)"},
-          url(${jesusImg});
+        background-image: var(--dl-bg-overlay), url(${jesusImg});
         background-size: cover;
         background-position: center top;
         background-repeat: no-repeat;
@@ -89,10 +85,10 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-avatar {
         width: 54px; height: 54px; border-radius: 50%;
         border: 1.5px solid rgba(253,184,19,.32);
-        background: ${isDark ? "rgba(40,40,44,.99)" : "#fff"};
+        background: var(--dl-avatar-bg);
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
-        box-shadow: 0 0 0 6px ${isDark ? "rgba(253,184,19,.06)" : "rgba(53,3,9,.06)"};
+        box-shadow: var(--dl-avatar-shadow);
       }
       .dl-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
       .dl-title-block { flex: 1; min-width: 0; }
@@ -104,12 +100,12 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-title {
         font-family: 'Inter', sans-serif;
         font-size: clamp(18px, 4vw, 23px);
-        font-weight: 700; color: ${t.text};
+        font-weight: 700; color: var(--dl-text);
         margin: 0; line-height: 1.2; letter-spacing: -.02em;
       }
       .dl-title span { color: ${AURA.gold}; }
       .dl-subtitle {
-        font-size: 12px; font-weight: 400; color: ${t.textSec};
+        font-size: 12px; font-weight: 400; color: var(--dl-text-sec);
         margin: 4px 0 0; overflow: hidden;
         text-overflow: ellipsis; white-space: nowrap;
       }
@@ -117,15 +113,15 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 8px; flex-shrink: 0;
       }
       .dl-btn-ico {
-        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.08)"};
-        border: 1px solid ${t.border};
+        background: var(--dl-surface-1);
+        border: 1px solid var(--dl-border);
         border-radius: 12px; width: 38px; height: 38px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
-        color: ${t.textMuted};
+        color: var(--dl-text-muted);
         backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
         transition: all .25s; flex-shrink: 0;
       }
-      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(253,184,19,.09)" : "rgba(53,3,9,.12)"}; }
+      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: var(--dl-hover-gold-bg); }
       .dl-btn-exit {
         display: flex; align-items: center; gap: 7px;
         padding: 0 16px; height: 38px; border-radius: 100px;
@@ -142,9 +138,9 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-btn-back {
         display: flex; align-items: center; justify-content: center;
         width: 32px; height: 32px; border-radius: 10px;
-        border: 1px solid ${t.border}; cursor: pointer;
-        background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.08)"};
-        color: ${t.textMuted}; font-size: 14px;
+        border: 1px solid var(--dl-border); cursor: pointer;
+        background: var(--dl-surface-1);
+        color: var(--dl-text-muted); font-size: 14px;
         transition: all .25s; flex-shrink: 0;
       }
       .dl-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
@@ -164,25 +160,25 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
 
       .dl-badge {
         display: inline-flex; align-items: center; gap: 8px;
-        background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.08)"};
-        border: 1px solid ${isDark ? "rgba(253,184,19,.16)" : "rgba(53,3,9,.2)"};
+        background: var(--dl-soft-gold-bg);
+        border: 1px solid var(--dl-soft-gold-border);
         border-radius: 100px; padding: 9px 20px;
         font-size: 10px; font-weight: 500; letter-spacing: .12em;
         text-transform: uppercase; color: ${AURA.gold};
         white-space: nowrap;
         backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-        box-shadow: ${isDark ? "inset 0 1px 0 rgba(255,255,255,.05)" : "none"};
+        box-shadow: var(--dl-inset-highlight);
       }
       .dl-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: ${AURA.gold}; }
       .dl-badge-center { display: flex; justify-content: center; margin-bottom: 26px; }
 
       .dl-alert-aprovado {
         margin-bottom: 24px; padding: 16px 22px; border-radius: 16px;
-        background: ${isDark ? "rgba(30,122,70,.18)" : "rgba(30,122,70,.10)"};
-        color: ${isDark ? "#fff" : "#350309"}; display: flex; align-items: center; gap: 12px;
+        background: var(--dl-alert-bg);
+        color: var(--dl-alert-color); display: flex; align-items: center; gap: 12px;
         font-family: 'Inter', sans-serif; font-size: 11px;
         font-weight: 500; letter-spacing: .05em;
-        border: 1px solid ${isDark ? "rgba(30,122,70,.4)" : "rgba(30,122,70,.35)"};
+        border: var(--dl-alert-border);
         backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       }
 
@@ -247,11 +243,11 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-progress-fill.done { background: linear-gradient(90deg, ${AURA.goldLight}, ${AURA.gold}); }
 
       .dl-kpi-action {
-        background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
+        background: var(--dl-card-bg); border: 1px solid var(--dl-card-border);
         border-radius: 24px; padding: 24px 20px;
         display: flex; flex-direction: column; justify-content: space-between;
         backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-        box-shadow: ${isDark ? "0 20px 50px rgba(0,0,0,.35)" : "0 12px 30px rgba(20,20,22,.05)"};
+        box-shadow: var(--dl-card-shadow);
       }
       .dl-kpi-action-icon {
         width: 46px; height: 46px; border-radius: 50%; margin-bottom: 16px;
@@ -259,10 +255,10 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       }
       .dl-kpi-action-title {
         font-size: 10px; font-weight: 600; letter-spacing: .16em;
-        text-transform: uppercase; color: ${t.text}; margin: 0 0 5px;
+        text-transform: uppercase; color: var(--dl-text); margin: 0 0 5px;
       }
       .dl-kpi-action-sub {
-        font-size: 13px; font-weight: 300; color: ${t.textSec}; margin: 0;
+        font-size: 13px; font-weight: 300; color: var(--dl-text-sec); margin: 0;
       }
       .dl-kpi-action-btn {
         margin-top: 20px; width: 100%; padding: 13px; border-radius: 100px;
@@ -275,19 +271,19 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-kpi-action-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
       .dl-kpi-action-btn-ghost {
         margin-top: 20px; width: 100%; padding: 13px; border-radius: 100px;
-        border: 1px solid ${t.border}; cursor: pointer;
-        background: transparent; color: ${t.textSec};
+        border: 1px solid var(--dl-border); cursor: pointer;
+        background: transparent; color: var(--dl-text-sec);
         font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .16em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.07)"}; }
+      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: var(--dl-ghost-hover-bg); }
 
       .dl-section-hd {
         display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
       }
       .dl-section-title {
         font-family: 'Inter', sans-serif;
-        font-size: 16px; font-weight: 700; color: ${t.text}; letter-spacing: -.01em;
+        font-size: 16px; font-weight: 700; color: var(--dl-text); letter-spacing: -.01em;
       }
       .dl-section-title::before {
         content: ''; width: 3px; height: 15px; border-radius: 99px;
@@ -303,14 +299,14 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       @media(max-width: 480px) { .dl-menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
       .dl-menu-card {
-        background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
+        background: var(--dl-card-bg); border: 1px solid var(--dl-card-border);
         border-radius: 20px; padding: 20px 10px 16px;
         cursor: pointer; display: flex; flex-direction: column;
         align-items: center; justify-content: center; gap: 10px;
         transition: all .35s cubic-bezier(.4,0,.2,1);
         text-align: center; position: relative;
         backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-        box-shadow: ${isDark ? "0 12px 30px rgba(0,0,0,.22)" : "0 8px 22px rgba(20,20,22,.04)"};
+        box-shadow: var(--dl-card-shadow-sm);
       }
       .dl-menu-card::before {
         content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 2px;
@@ -320,8 +316,8 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       }
       .dl-menu-card:hover {
         transform: translateY(-5px);
-        border-color: ${t.cardHover};
-        box-shadow: 0 18px 44px rgba(0,0,0,${isDark ? ".45" : ".1"});
+        border-color: var(--dl-card-hover);
+        box-shadow: var(--dl-modal-shadow);
       }
       .dl-menu-card:hover::before { opacity: 1; left: 12%; right: 12%; }
       .dl-menu-icon {
@@ -332,19 +328,19 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-menu-card:hover .dl-menu-icon { transform: scale(1.06); }
       .dl-menu-name {
         font-size: 11px; font-weight: 600; letter-spacing: .04em;
-        color: ${t.text}; margin: 0;
+        color: var(--dl-text); margin: 0;
         word-break: break-word;
       }
       .dl-menu-desc {
         font-size: 8.5px; letter-spacing: .1em;
-        text-transform: uppercase; color: ${t.textMuted}; margin: 3px 0 0;
+        text-transform: uppercase; color: var(--dl-text-muted); margin: 3px 0 0;
       }
 
       .dl-card {
-        background: ${t.cardBg}; border: 1px solid ${t.cardBorder};
+        background: var(--dl-card-bg); border: 1px solid var(--dl-card-border);
         border-radius: 24px; overflow: hidden; margin-bottom: 24px;
         backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); position: relative;
-        box-shadow: ${isDark ? "0 20px 50px rgba(0,0,0,.28)" : "0 12px 30px rgba(20,20,22,.05)"};
+        box-shadow: var(--dl-card-shadow-lg);
       }
       .dl-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -352,16 +348,16 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       }
       .dl-card-head {
         padding: 22px 24px;
-        border-bottom: 1px solid ${t.cardBorder};
+        border-bottom: 1px solid var(--dl-card-border);
         display: flex; align-items: center; justify-content: space-between;
         flex-wrap: wrap; gap: 12px;
       }
       .dl-card-head-title {
         font-family: 'Inter', sans-serif;
-        font-size: 18px; font-weight: 700; color: ${t.text}; margin: 0; letter-spacing: -.01em;
+        font-size: 18px; font-weight: 700; color: var(--dl-text); margin: 0; letter-spacing: -.01em;
       }
       .dl-card-head-sub {
-        font-size: 11.5px; font-weight: 400; color: ${t.textMuted}; margin: 3px 0 0; letter-spacing: .04em;
+        font-size: 11.5px; font-weight: 400; color: var(--dl-text-muted); margin: 3px 0 0; letter-spacing: .04em;
       }
 
       .dl-btn-gold {
@@ -377,12 +373,12 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-btn-ghost {
         display: flex; align-items: center; gap: 7px;
         padding: 11px 18px; border-radius: 100px;
-        border: 1px solid ${t.border}; cursor: pointer;
-        background: transparent; color: ${t.textSec};
+        border: 1px solid var(--dl-border); cursor: pointer;
+        background: transparent; color: var(--dl-text-sec);
         font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: ${isDark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.07)"}; }
+      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: var(--dl-ghost-hover-bg); }
 
       .dl-members-list {
         padding: 16px 24px 22px;
@@ -391,12 +387,12 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-member-row {
         display: flex; align-items: center; justify-content: space-between;
         padding: 11px 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(53,3,9,.05)"};
-        border: 1px solid ${isDark ? "rgba(253,184,19,.1)" : "rgba(53,3,9,.12)"};
+        background: var(--dl-surface-2);
+        border: 1px solid var(--dl-surface-2-border);
         border-radius: 14px; transition: all .2s; gap: 10px;
         min-width: 0; width: 100%;
       }
-      .dl-member-row:hover { border-color: rgba(253,184,19,.4); background: ${isDark ? "rgba(253,184,19,.06)" : "rgba(53,3,9,.08)"}; }
+      .dl-member-row:hover { border-color: rgba(253,184,19,.4); background: var(--dl-row-hover-bg); }
       .dl-member-avatar {
         width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
         background: linear-gradient(135deg, rgba(253,184,19,.35), rgba(53,3,9,.12));
@@ -406,13 +402,13 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
         font-size: 15px; color: ${AURA.moss};
       }
       .dl-member-name {
-        font-size: 13.5px; font-weight: 400; color: ${t.text};
+        font-size: 13.5px; font-weight: 400; color: var(--dl-text);
         flex: 1; min-width: 0; overflow: hidden;
         text-overflow: ellipsis; white-space: nowrap;
       }
       .dl-btn-del {
         background: none; border: none; cursor: pointer;
-        color: ${t.textMuted}; padding: 6px; border-radius: 9px;
+        color: var(--dl-text-muted); padding: 6px; border-radius: 9px;
         display: flex; align-items: center; flex-shrink: 0; transition: all .2s;
       }
       .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(255,211,77,.1); }
@@ -425,25 +421,25 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
       .dl-search-wrap { position: relative; margin-bottom: 14px; }
       .dl-search-icon {
         position: absolute; left: 14px; top: 50%;
-        transform: translateY(-50%); color: ${isDark ? "rgba(253,184,19,.65)" : "rgba(53,3,9,.6)"};
+        transform: translateY(-50%); color: var(--dl-input-icon);
         opacity: .9;
         pointer-events: none;
       }
       .dl-input {
         width: 100%; box-sizing: border-box;
-        background: ${t.bgInput}; border: 1px solid ${t.borderInput};
-        color: ${t.text}; padding: 13px 16px 13px 44px;
+        background: var(--dl-bg-input); border: 1px solid var(--dl-border-input);
+        color: var(--dl-text); padding: 13px 16px 13px 44px;
         border-radius: 14px; outline: none;
         font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400;
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .dl-input:focus {
         border-color: rgba(53,3,9,.55);
-        background: ${isDark ? "rgba(253,184,19,.08)" : "rgba(53,3,9,.08)"};
+        background: var(--dl-chip-bg);
         box-shadow: 0 0 0 4px rgba(53,3,9,.14);
       }
       .dl-input { font-family: 'Inter', sans-serif; }
-      .dl-input::placeholder { color: ${t.placeholder}; }
+      .dl-input::placeholder { color: var(--dl-placeholder); }
 
       .dl-modal-backdrop {
         position: fixed; inset: 0; z-index: 999;
@@ -461,7 +457,7 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
         position: relative; z-index: 10;
         width: 100%; max-height: 88vh;
         display: flex; flex-direction: column;
-        background: ${t.bgEl}; border: 1px solid ${t.border};
+        background: var(--dl-bg-el); border: 1px solid var(--dl-border);
         border-radius: 24px 24px 0 0; overflow: hidden;
         box-shadow: 0 30px 80px rgba(0,0,0,.4);
       }
@@ -475,7 +471,7 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
         position: relative; z-index: 10;
         width: 100%; max-height: 88vh;
         display: flex; flex-direction: column;
-        background: ${t.bgEl}; border: 1px solid ${t.border};
+        background: var(--dl-bg-el); border: 1px solid var(--dl-border);
         border-radius: 24px 24px 0 0;
         padding: 32px 26px; overflow-y: auto;
       }
@@ -488,8 +484,8 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
 
       .dl-textarea {
         width: 100%; box-sizing: border-box; resize: vertical;
-        background: ${t.bgInput}; border: 1px solid ${t.borderInput};
-        color: ${t.text}; padding: 14px 16px;
+        background: var(--dl-bg-input); border: 1px solid var(--dl-border-input);
+        color: var(--dl-text); padding: 14px 16px;
         border-radius: 14px; outline: none; min-height: 110px;
         font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400;
         transition: all .25s;
@@ -498,20 +494,20 @@ const GlobalStyles = React.memo(function GlobalStyles({ t, isDark }) {
         border-color: rgba(53,3,9,.55);
         box-shadow: 0 0 0 4px rgba(53,3,9,.14);
       }
-      .dl-textarea::placeholder { color: ${t.placeholder}; }
+      .dl-textarea::placeholder { color: var(--dl-placeholder); }
 
       .dl-footer {
         text-align: center;
         font-size: 9px; font-weight: 500; letter-spacing: .22em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(255,255,255,.18)" : "rgba(20,20,22,.32)"};
+        color: var(--dl-empty-color);
         padding: 18px 0 0;
       }
 
       .dl-loading {
         min-height: 100vh; display: flex;
         align-items: center; justify-content: center;
-        background: ${t.bg};
+        background: var(--dl-bg);
         position: relative;
       }
       .dl-loading-inner { text-align: center; position: relative; z-index: 10; }
@@ -537,6 +533,57 @@ export default function DashboardLider() {
   const [showBoasVindas,         setShowBoasVindas]          = useState(false);
 
   const t = useMemo(() => theme(isDark), [isDark]);
+
+  const themeVars = useMemo(() => {
+    const dark = isDark;
+    return {
+      "--dl-bg": t.bg,
+      "--dl-bg-el": t.bgEl,
+      "--dl-bg-input": t.bgInput,
+      "--dl-border": t.border,
+      "--dl-border-input": t.borderInput,
+      "--dl-text": t.text,
+      "--dl-text-sec": t.textSec,
+      "--dl-text-muted": t.textMuted,
+      "--dl-card-bg": t.cardBg,
+      "--dl-card-border": t.cardBorder,
+      "--dl-card-hover": t.cardHover,
+      "--dl-placeholder": t.placeholder,
+      "--dl-header-bg": t.headerBg,
+      "--dl-glow-1": t.glow1,
+      "--dl-glow-2": t.glow2,
+      "--dl-option-bg": t.optionBg,
+      "--dl-avatar-bg": dark ? "rgba(40,40,44,.99)" : "#fff",
+      "--dl-avatar-shadow": dark ? "0 0 0 6px rgba(253,184,19,.06)" : "0 0 0 6px rgba(53,3,9,.06)",
+      "--dl-surface-1": dark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.08)",
+      "--dl-hover-gold-bg": dark ? "rgba(253,184,19,.09)" : "rgba(53,3,9,.12)",
+      "--dl-soft-gold-bg": dark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.08)",
+      "--dl-soft-gold-border": dark ? "rgba(253,184,19,.16)" : "rgba(53,3,9,.2)",
+      "--dl-inset-highlight": dark ? "inset 0 1px 0 rgba(255,255,255,.05)" : "none",
+      "--dl-alert-bg": dark ? "rgba(30,122,70,.18)" : "rgba(30,122,70,.10)",
+      "--dl-alert-color": dark ? "#fff" : "#350309",
+      "--dl-alert-border": dark ? "1px solid rgba(30,122,70,.4)" : "1px solid rgba(30,122,70,.35)",
+      "--dl-card-shadow": dark ? "0 20px 50px rgba(0,0,0,.35)" : "0 12px 30px rgba(20,20,22,.05)",
+      "--dl-card-shadow-lg": dark ? "0 20px 50px rgba(0,0,0,.28)" : "0 12px 30px rgba(20,20,22,.05)",
+      "--dl-bg-overlay": dark
+        ? "linear-gradient(180deg, rgba(23,3,7,.78) 0%, rgba(23,3,7,.90) 60%, rgba(23,3,7,.96) 100%)"
+        : "linear-gradient(180deg, rgba(251,244,239,.86) 0%, rgba(251,244,239,.93) 60%, rgba(251,244,239,.97) 100%)",
+      "--dl-ghost-hover-bg": dark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.07)",
+      "--dl-card-shadow-sm": dark ? "0 12px 30px rgba(0,0,0,.22)" : "0 8px 22px rgba(20,20,22,.04)",
+      "--dl-modal-shadow": dark ? "0 18px 44px rgba(0,0,0,.45)" : "0 18px 44px rgba(0,0,0,.1)",
+      "--dl-surface-2": dark ? "rgba(255,255,255,.025)" : "rgba(53,3,9,.05)",
+      "--dl-surface-2-border": dark ? "rgba(253,184,19,.1)" : "rgba(53,3,9,.12)",
+      "--dl-row-hover-bg": dark ? "rgba(253,184,19,.06)" : "rgba(53,3,9,.08)",
+      "--dl-input-icon": dark ? "rgba(253,184,19,.65)" : "rgba(53,3,9,.6)",
+      "--dl-chip-bg": dark ? "rgba(253,184,19,.08)" : "rgba(53,3,9,.08)",
+      "--dl-empty-color": dark ? "rgba(255,255,255,.18)" : "rgba(20,20,22,.32)",
+    };
+  }, [isDark, t]);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    for (const [k, v] of Object.entries(themeVars)) root.style.setProperty(k, v);
+  }, [themeVars]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -645,7 +692,7 @@ export default function DashboardLider() {
   if (loading) {
     return (
         <div className="dl-loading">
-          <GlobalStyles t={t} isDark={isDark} />
+          <GlobalStyles />
           <TelaCarregando isDark={isDark} minHeight="100vh" background="transparent" />
         </div>
     );
@@ -665,7 +712,7 @@ export default function DashboardLider() {
 
   return (
       <div className={`dl-root ieq-app${isDark ? " ieq-dark" : ""}`}>
-        <GlobalStyles t={t} isDark={isDark} />
+        <GlobalStyles />
 
         <AnimatePresence>
           {showBoasVindas && !loading && (

@@ -7,13 +7,14 @@ import { useAuth }       from "../auth/AuthContext";
 import { useTheme }      from "../context/ThemeContext";
 import api               from "../services/api.js";
 import jesusImg          from "../assets/jesus.jpeg";
+import cartazImg         from "../assets/jesus_salva_cartaz.jpg";
 
-/* ─── Paleta da Home: vinho + escarlate + dourado ─── */
+/* ─── Paleta do cartaz: escarlate + blocos chapados ─── */
 const P = {
-    wine:"#350309", wineDeep:"#1D0409", wineLight:"#5A0B16",
-    scarlet:"#C8102E", gold:"#FDB813", goldLight:"#FFD34D",
-    red:"#E0153B", green:"#1E7A46", amber:"#B97A08",
-    ink:"#350309", paper:"#FFFFFF", cream:"#FBF4EF",
+    wine:"#4CFF9B", wineDeep:"#3D0004", wineLight:"#B5000F",
+    scarlet:"#E30613", gold:"#FFD400", goldLight:"#FFD400",
+    red:"#FF7A83", green:"#4CFF9B", amber:"#FFD400",
+    ink:"#2A0306", paper:"#8F0009", cream:"#E30613",
 };
 
 /* ─── Fade-in do cartão ─── */
@@ -79,7 +80,8 @@ function Confere({ a, b }) {
 }
 
 /* ─── Campo (definido fora para não perder o foco a cada render) ─── */
-function Field({ id, label, icon:Icon, required, children }) {
+function Field({ id, label, icon, required, children }) {
+    const Icon = icon;
     return (
         <div>
             <label className="fld-label" htmlFor={id}>
@@ -248,21 +250,6 @@ export default function Login() {
         } finally { setLoadAlt(false); }
     };
 
-    /* ── tokens de tema ── */
-    const vars = dark ? {
-        "--panel":"#2A060D", "--title":"#FFFFFF", "--text":"rgba(255,255,255,.78)", "--sub":"rgba(255,255,255,.55)",
-        "--link":P.goldLight, "--notice":"rgba(253,184,19,.06)", "--notice-b":"rgba(253,184,19,.18)",
-        "--track":"rgba(255,255,255,.14)", "--input-bg":"rgba(255,255,255,.06)", "--input-b":"rgba(255,255,255,.16)",
-        "--switch-off":"rgba(255,255,255,.24)", "--switch-on":P.gold,
-        "--err":"#F2837C", "--warn":"#E3B865", "--chip":"rgba(253,184,19,.12)", "--chip-b":"rgba(253,184,19,.4)",
-    } : {
-        "--panel":"#FFFFFF", "--title":P.ink, "--text":"#4B3532", "--sub":"rgba(53,3,9,.58)",
-        "--link":P.scarlet, "--notice":"rgba(200,16,46,.05)", "--notice-b":"rgba(200,16,46,.16)",
-        "--track":"rgba(53,3,9,.10)", "--input-bg":P.cream, "--input-b":"rgba(53,3,9,.16)",
-        "--switch-off":"rgba(53,3,9,.20)", "--switch-on":P.wine,
-        "--err":P.red, "--warn":P.amber, "--chip":"rgba(253,184,19,.12)", "--chip-b":"rgba(253,184,19,.42)",
-    };
-
     const titulos = { login:"Entrar", cadastro:"Solicitar acesso", alterar:"Alterar dados" };
     const temErro = errLogin || errCad || errAlt;
 
@@ -277,186 +264,195 @@ export default function Login() {
         .ieq-login-root, .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { box-sizing:border-box; }
         :where(.ieq-login-root, .ieq-login-root *) { margin:0; padding:0; }
         .ieq-login-root {
+          --red:#E30613; --red-mid:#B5000F; --red-dark:#8F0009; --red-deep:#3D0004;
+          --glow:#FF5A64; --orange:#FF7A00; --yellow:#FFD400; --blue:#1E4FD8; --magenta:#C2187A;
+          --white:#FFFFFF; --ink:#2A0306;
+          --white-78:rgba(255,255,255,.78); --white-60:rgba(255,255,255,.6); --white-35:rgba(255,255,255,.35);
+          --err:#FF7A83; --warn:#FFD400; --track:rgba(255,255,255,.18);
           font-family:'Inter',system-ui,sans-serif;
-          min-height:100vh; position:relative;
-          color:var(--text); background:${P.cream};
-          transition:background .3s;
+          min-height:100vh; position:relative; overflow-x:hidden;
+          color:#fff; background:var(--red);
         }
-        .ieq-login-root.dark-bg { background:#170307; }
+        .ieq-login-root.is-dark { background:var(--red-dark); }
         .ieq-login-root button, .ieq-login-root input { font-family:inherit; }
+        .ieq-login-root button { cursor:pointer; }
+        .ieq-login-root ::selection { background:var(--yellow); color:var(--ink); }
+        .ieq-login-root :is(a,button,input):focus-visible { outline:3px solid var(--yellow); outline-offset:3px; }
 
-        .login-stage {
-          position:relative; z-index:1; min-height:100vh;
-          display:flex; align-items:center; justify-content:center; padding:32px 20px;
+        .login-bg { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+        .login-bg-img {
+          position:absolute; inset:-4%;
+          background-size:cover; background-position:50% 28%; background-repeat:no-repeat;
+          filter:grayscale(1) contrast(1.15) brightness(.58) blur(3px);
         }
+        .login-bg::after { content:""; position:absolute; inset:0; background:var(--red); mix-blend-mode:multiply; }
+        .login-bg::before { content:""; position:absolute; inset:0;
+          background:
+            radial-gradient(closest-side at 50% 48%, rgba(255,90,100,.5), rgba(255,90,100,0) 60%),
+            linear-gradient(90deg, rgba(143,0,9,.9) 0%, rgba(227,6,19,.3) 50%, rgba(143,0,9,.9) 100%);
+          box-shadow:inset 0 0 220px 70px rgba(61,0,4,.7);
+        }
+        .login-cross { position:absolute; z-index:1; right:4%; top:50%; width:min(34vw,340px); height:min(50vh,460px);
+          transform:translateY(-50%); opacity:.1; pointer-events:none; }
+        .login-cross::before { content:""; position:absolute; left:50%; top:0; width:30%; height:100%; background:#fff; transform:translateX(-50%); }
+        .login-cross::after { content:""; position:absolute; top:50%; left:0; width:100%; height:30%; background:#fff; transform:translateY(-50%); }
+        .login-squares { position:absolute; z-index:2; left:clamp(18px,4vw,54px); bottom:clamp(18px,5vh,54px);
+          display:grid; grid-template-columns:repeat(2,20px); gap:6px; pointer-events:none; }
+        .login-squares span { display:block; width:20px; height:20px; }
+        .login-squares span:nth-child(1) { background:var(--orange); }
+        .login-squares span:nth-child(2) { background:var(--yellow); }
+        .login-squares span:nth-child(3) { background:var(--blue); }
+        .login-squares span:nth-child(4) { background:var(--magenta); }
 
-        /* ── botão de tema ── */
+        .login-stage { position:relative; z-index:3; min-height:100vh;
+          display:flex; align-items:center; justify-content:center; padding:34px 20px; }
+
         .theme-btn {
           position:fixed; top:18px; right:18px; z-index:50;
-          width:40px; height:40px; border-radius:10px; cursor:pointer;
+          width:44px; height:44px; border-radius:0; cursor:pointer;
           display:grid; place-items:center;
-          background:var(--panel); border:1px solid var(--input-b); color:var(--link);
-          box-shadow:0 2px 10px rgba(53,3,9,.16);
-          transition:background .2s, transform .15s;
+          background:var(--yellow); border:2px solid var(--yellow); color:var(--ink);
+          box-shadow:5px 5px 0 var(--red-dark);
+          transition:transform .2s, box-shadow .2s;
         }
-        .theme-btn:hover { transform:translateY(-1px); }
-        .theme-btn:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; }
+        .theme-btn:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--red-dark); }
 
-        /* ── cartão dividido ── */
         .login-card {
-          position:relative; z-index:1; display:flex; width:100%; max-width:940px; overflow:hidden;
-          background:var(--panel); border-radius:16px; border:1px solid var(--input-b);
-          box-shadow:0 1px 2px rgba(53,3,9,.05), 0 24px 48px -12px rgba(53,3,9,.28);
+          position:relative; z-index:1; display:grid; grid-template-columns:1.08fr .92fr;
+          width:100%; max-width:1060px; overflow:hidden;
+          background:var(--red-mid); border:3px solid #fff;
+          box-shadow:16px 16px 0 var(--red-dark);
           opacity:0; transform:translateY(20px);
-          transition:opacity .6s ease, transform .6s ease, background .3s;
+          transition:opacity .6s ease, transform .6s ease;
         }
 
-        /* lado da marca (vinho + imagem) */
+        /* ── lado da marca: cartaz "Jesus Salva" ── */
         .brand-pane {
-          flex:1.35 1 0; min-width:320px; padding:40px 40px 34px;
-          background:linear-gradient(160deg, ${P.wineLight} 0%, ${P.wine} 55%, ${P.wineDeep} 100%);
-          color:#fff; display:flex; flex-direction:column; justify-content:space-between;
           position:relative; overflow:hidden; isolation:isolate;
+          aspect-ratio:1215 / 1295;      /* mesma proporção do cartaz */
+          min-height:0; padding:0;
+          display:block;
+          background:#120304;            /* tom escuro das bordas do cartaz */
+          color:#fff;
         }
-        .brand-image {
+        .brand-media {
           position:absolute; inset:0; z-index:0;
-          background-size:contain; background-position:center center; background-repeat:no-repeat;
-          animation:brand-float 18s ease-in-out infinite alternate;
-          will-change:transform;
+          width:100%; height:100%;
+          object-fit:contain;            /* cartaz inteiro, sem cortes */
+          object-position:50% 50%;
+          display:block;
+          user-select:none; -webkit-user-drag:none;
         }
-        .brand-pane::before {
-          content:""; position:absolute; inset:0; z-index:1;
-          background-image:
-            linear-gradient(180deg, rgba(23,3,7,.60) 0%, rgba(29,4,9,.26) 40%, rgba(23,3,7,.93) 100%),
-            linear-gradient(155deg, rgba(200,16,46,.38) 0%, rgba(29,4,9,.08) 55%, rgba(23,3,7,.80) 100%),
-            radial-gradient(closest-side, rgba(253,184,19,.14), transparent 72%);
-          pointer-events:none;
-        }
-        .brand-pane::after {
-          content:""; position:absolute; inset:-30% -20%; z-index:2; pointer-events:none;
-          background:linear-gradient(115deg, transparent 42%, rgba(255,211,77,.12) 49%, rgba(255,255,255,.05) 51%, transparent 58%);
-          animation:brand-sheen 14s ease-in-out infinite;
-        }
-        @keyframes brand-float {
-          from { transform:translateY(-1.6%); }
-          to   { transform:translateY(1.6%); }
-        }
-        @keyframes brand-sheen {
-          0%,100% { transform:translateX(-30%); }
-          50%     { transform:translateX(30%); }
-        }
-                /* lado do formulário */
-        .form-pane { flex:1 1 0; min-width:300px; padding:44px 42px; display:flex; flex-direction:column; justify-content:center; }
-        .card-title { font-family:'Fraunces',serif; font-size:26px; font-weight:600; letter-spacing:-.01em; color:var(--title); margin-bottom:6px; }
-        .card-subtitle { font-size:13px; color:var(--sub); margin-bottom:22px; }
-        .form-col { display:flex; flex-direction:column; gap:15px; }
+        .brand-flag { position:absolute; top:0; left:0; right:0; z-index:3; display:flex; height:8px; }
+        .brand-flag i { flex:1; }
+        .brand-flag .c-orange { background:var(--orange); }
+        .brand-flag .c-yellow { background:var(--yellow); }
+        .brand-flag .c-blue { background:var(--blue); }
+        .brand-flag .c-magenta { background:var(--magenta); }
 
-        /* ── campos ── */
-        .fld-label { display:block; margin-bottom:6px; font-size:12.5px; font-weight:600; color:var(--text); }
+        .form-pane { min-width:300px; padding:46px 44px; display:flex; flex-direction:column; justify-content:center;
+          background:var(--red-dark); color:#fff; }
+        .card-title { font-family:'Anton','Inter',sans-serif; font-size:clamp(2rem,3vw,2.6rem); font-weight:400;
+          letter-spacing:.005em; text-transform:uppercase; color:#fff; margin-bottom:8px; line-height:1; }
+        .card-subtitle { font-size:13.5px; color:var(--white-78); margin-bottom:24px; line-height:1.55; }
+        .form-col { display:flex; flex-direction:column; gap:16px; }
+
+        .fld-label { display:block; margin-bottom:7px; font-size:12px; font-weight:800;
+          letter-spacing:.08em; text-transform:uppercase; color:#fff; }
         .fld-wrap { position:relative; }
-        .fld-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--sub); pointer-events:none; }
+        .fld-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--white-60); pointer-events:none; }
         .ieq-input {
-          width:100%; height:44px; padding:0 42px 0 40px;
-          background:var(--input-bg); color:var(--title);
-          border:1.5px solid var(--input-b); border-radius:8px; outline:none;
+          width:100%; height:48px; padding:0 44px 0 42px;
+          background:var(--red-mid); color:#fff;
+          border:2px solid rgba(255,255,255,.22); border-radius:0; outline:none;
           font-size:14px; font-weight:500;
           transition:border-color .2s, box-shadow .2s, background .2s;
         }
-        .ieq-input::placeholder { color:var(--sub); font-weight:400; }
-        .ieq-input:focus { border-color:${P.wine}; box-shadow:0 0 0 3px rgba(200,16,46,.14); background:var(--panel); }
-        .ieq-login-root.dark-bg .ieq-input:focus { border-color:${P.goldLight}; box-shadow:0 0 0 3px rgba(253,184,19,.16); }
+        .ieq-input::placeholder { color:var(--white-60); font-weight:400; }
+        .ieq-input:focus { border-color:var(--yellow); box-shadow:4px 4px 0 var(--red-deep); background:var(--red-mid); }
         .ieq-input.error { border-color:var(--err); }
         .ieq-input:-webkit-autofill, .ieq-input:-webkit-autofill:focus {
-          -webkit-text-fill-color:var(--title); transition:background-color 9999s ease-in-out 0s;
+          -webkit-text-fill-color:#fff; transition:background-color 9999s ease-in-out 0s;
         }
         .eye {
           position:absolute; right:6px; top:50%; transform:translateY(-50%);
-          width:32px; height:32px; border-radius:6px; border:none; background:transparent;
-          color:var(--sub); cursor:pointer; display:grid; place-items:center; transition:background .2s, color .2s;
+          width:34px; height:34px; border-radius:0; border:none; background:transparent;
+          color:var(--white-60); cursor:pointer; display:grid; place-items:center; transition:background .2s, color .2s;
         }
-        .eye:hover { background:var(--notice); color:var(--link); }
-        .eye:focus-visible { outline:2px solid ${P.wine}; }
+        .eye:hover { background:rgba(255,255,255,.12); color:var(--yellow); }
 
-        /* ── botão principal ── */
         .btn-primary {
-          width:100%; height:46px; border:none; border-radius:9px;
-          background:linear-gradient(158deg, #E0153B 0%, ${P.scarlet} 48%, #8B0000 100%);
-          color:#fff; cursor:pointer;
+          width:100%; height:52px; border:2px solid var(--yellow); border-radius:0;
+          background:var(--yellow); color:var(--ink); cursor:pointer;
           display:flex; align-items:center; justify-content:center; gap:8px;
-          font-size:13.5px; font-weight:700; letter-spacing:.03em;
-          box-shadow:0 10px 26px rgba(200,16,46,.28);
-          transition:background .2s, transform .15s, box-shadow .2s;
+          font-size:13px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+          box-shadow:7px 7px 0 var(--red-deep);
+          transition:transform .2s, box-shadow .2s;
         }
-        .btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 14px 34px rgba(200,16,46,.4); }
-        .btn-primary:focus-visible { outline:2px solid ${P.gold}; outline-offset:2px; }
+        .btn-primary:hover:not(:disabled) { transform:translate(-2px,-2px); box-shadow:10px 10px 0 var(--red-deep); }
         .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
 
         .btn-ghost {
-          background:none; border:1.5px solid ${P.wine}; color:var(--link); border-radius:8px;
-          padding:10px 22px; cursor:pointer; font-size:12.5px; font-weight:700;
-          transition:background .2s;
+          background:transparent; border:2px solid #fff; color:#fff; border-radius:0;
+          padding:11px 22px; cursor:pointer; font-size:12px; font-weight:800;
+          letter-spacing:.08em; text-transform:uppercase;
+          box-shadow:5px 5px 0 var(--red-deep); transition:transform .2s, box-shadow .2s, background .2s, color .2s;
         }
-        .btn-ghost:hover { background:var(--notice); }
-        .btn-ghost:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; }
+        .btn-ghost:hover { background:#fff; color:var(--red-dark); transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--red-deep); }
 
-        /* ── links e interruptor ── */
         .row-between { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:-2px; }
         .link {
           background:none; border:none; cursor:pointer; padding:4px 2px;
-          font-size:12.5px; font-weight:600; color:var(--link);
+          font-size:12.5px; font-weight:800; color:var(--yellow);
           display:inline-flex; align-items:center; gap:6px;
         }
-        .link:hover { text-decoration:underline; text-underline-offset:2px; }
-        .link:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; border-radius:3px; }
-        .card-links { margin-top:18px; display:flex; justify-content:center; border-top:1px solid var(--input-b); padding-top:16px; }
-        .card-links .link { font-weight:700; }
+        .link:hover { text-decoration:underline; text-underline-offset:3px; }
+        .card-links { margin-top:20px; display:flex; justify-content:center; border-top:2px solid rgba(255,255,255,.16); padding-top:18px; }
+        .card-links .link { font-weight:800; }
 
         .switch {
           display:inline-flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer;
-          padding:4px 0; font-size:12.5px; font-weight:500; color:var(--text);
+          padding:4px 0; font-size:12.5px; font-weight:600; color:var(--white-78);
         }
-        .switch-track { width:34px; height:19px; border-radius:999px; background:var(--switch-off); position:relative; transition:background .2s; }
-        .switch-thumb { position:absolute; top:2.5px; left:2.5px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:transform .2s; }
-        .switch[aria-checked="true"] .switch-track { background:var(--switch-on); }
-        .switch[aria-checked="true"] .switch-thumb { transform:translateX(15px); }
-        .switch:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; border-radius:6px; }
+        .switch-track { width:38px; height:21px; border-radius:0; background:rgba(255,255,255,.2); position:relative; transition:background .2s; }
+        .switch-thumb { position:absolute; top:3px; left:3px; width:15px; height:15px; border-radius:0; background:#fff; transition:transform .2s; }
+        .switch[aria-checked="true"] .switch-track { background:var(--yellow); }
+        .switch[aria-checked="true"] .switch-thumb { transform:translateX(17px); background:var(--ink); }
 
-        /* ── avisos, erros, sucesso ── */
         .notice {
-          display:flex; gap:9px; align-items:flex-start; margin-bottom:18px; padding:11px 13px; border-radius:8px;
-          background:var(--notice); border:1px solid var(--notice-b);
-          font-size:12.5px; line-height:1.55; color:var(--text);
+          display:flex; gap:10px; align-items:flex-start; margin-bottom:18px; padding:12px 14px;
+          background:var(--red-mid); border:2px solid rgba(255,255,255,.18); border-left:6px solid var(--yellow);
+          font-size:12.5px; line-height:1.55; color:var(--white-78);
         }
-        .notice svg { flex-shrink:0; margin-top:2px; color:var(--link); }
-        .notice strong { color:var(--title); }
+        .notice svg { flex-shrink:0; margin-top:2px; color:var(--yellow); }
+        .notice strong { color:#fff; }
 
-        .err-box { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:8px; animation:slideDown .25s ease both; }
-        .err-bad  { background:rgba(200,16,46,.07);  border:1px solid rgba(200,16,46,.30); --tone:var(--err); }
-        .err-warn { background:rgba(185,122,8,.10); border:1px solid rgba(185,122,8,.35); --tone:var(--warn); }
+        .err-box { display:flex; gap:10px; align-items:flex-start; padding:12px 14px;
+          background:var(--red-mid); border:2px solid rgba(255,255,255,.18); animation:slideDown .25s ease both; }
+        .err-bad  { border-left:6px solid var(--err); --tone:var(--err); }
+        .err-warn { border-left:6px solid var(--yellow); --tone:var(--yellow); }
         .err-ico { color:var(--tone); flex-shrink:0; margin-top:1px; }
-        .err-title { font-size:12px; font-weight:700; color:var(--tone); margin-bottom:3px; }
-        .err-msg { font-size:12.5px; line-height:1.5; color:var(--text); }
+        .err-title { font-size:12px; font-weight:800; color:var(--tone); margin-bottom:3px; text-transform:uppercase; letter-spacing:.04em; }
+        .err-msg { font-size:12.5px; line-height:1.5; color:var(--white-78); }
         @keyframes slideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
-        .success { text-align:center; padding:26px 18px; border-radius:10px; background:var(--chip); border:1px solid var(--chip-b); }
-        .success h3 { font-family:'Fraunces',serif; font-size:18px; font-weight:700; color:var(--title); margin:12px 0 8px; }
-        .success p  { font-size:13px; line-height:1.6; color:var(--text); margin-bottom:18px; }
+        .success { text-align:center; padding:28px 18px; background:var(--red-mid); border:2px solid var(--yellow); }
+        .success h3 { font-family:'Anton','Inter',sans-serif; font-size:1.4rem; font-weight:400; text-transform:uppercase; color:#fff; margin:12px 0 8px; }
+        .success p  { font-size:13px; line-height:1.6; color:var(--white-78); margin-bottom:18px; }
 
-        /* ── seleção do que alterar ── */
         .check-row {
           display:flex; align-items:center; gap:10px; width:100%; text-align:left;
-          padding:10px 13px; border-radius:8px; cursor:pointer; color:var(--text);
-          background:var(--input-bg); border:1.5px solid var(--input-b); font-size:12.5px; font-weight:600;
-          transition:background .2s, border-color .2s;
+          padding:11px 13px; border-radius:0; cursor:pointer; color:var(--white-78);
+          background:var(--red-mid); border:2px solid rgba(255,255,255,.18); font-size:12.5px; font-weight:700;
+          transition:background .2s, border-color .2s, color .2s;
         }
-        .check-row[aria-checked="true"] { background:var(--chip); border-color:${P.wine}; color:var(--title); }
-        .check-row:focus-visible { outline:2px solid ${P.wine}; outline-offset:2px; }
-        .check-box { width:17px; height:17px; border-radius:4px; flex-shrink:0; display:grid; place-items:center; border:1.5px solid var(--sub); transition:all .2s; }
-        .check-row[aria-checked="true"] .check-box { background:${P.wine}; border-color:${P.wine}; }
-        .divider-t { display:flex; align-items:center; gap:12px; font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--sub); white-space:nowrap; }
-        .divider-t::before, .divider-t::after { content:""; flex:1; height:1px; background:var(--input-b); }
+        .check-row[aria-checked="true"] { background:var(--red-mid); border-color:var(--yellow); color:#fff; }
+        .check-box { width:17px; height:17px; border-radius:0; flex-shrink:0; display:grid; place-items:center; border:2px solid var(--white-35); transition:all .2s; }
+        .check-row[aria-checked="true"] .check-box { background:var(--yellow); border-color:var(--yellow); }
+        .divider-t { display:flex; align-items:center; gap:12px; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--white-60); white-space:nowrap; }
+        .divider-t::before, .divider-t::after { content:""; flex:1; height:2px; background:rgba(255,255,255,.16); }
 
-        .forca-bar { flex:1; height:4px; border-radius:2px; transition:background .25s; }
+        .forca-bar { flex:1; height:5px; border-radius:0; transition:background .25s; }
 
         .tab-content { animation:tabIn .25s ease both; }
         .pop-in { animation:popIn .38s cubic-bezier(.16,1,.3,1) both; }
@@ -467,22 +463,31 @@ export default function Login() {
         @keyframes shakeX { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
         @keyframes spin   { to{transform:rotate(360deg)} }
 
-        /* ── mobile: imagem grande e bem enquadrada ── */
-        @media (max-width:760px) {
-          .login-card { flex-direction:column; max-width:440px; border-radius:14px; }
-          .brand-pane {
-            flex:none; min-width:0; min-height:300px;      /* altura da imagem: ajuste aqui */
-            padding:24px 24px 20px;
-            justify-content:flex-end;
-          }
-          .form-pane { flex:none; min-width:0; padding:32px 28px; }
+        @media (max-width:900px) {
+          .login-card { grid-template-columns:1fr; max-width:560px; }
+          .brand-pane { width:100%; }
+          .form-pane { padding:36px 30px 40px; }
+          .login-cross { width:60vw; right:-14%; opacity:.07; }
+        }
+        @media (max-width:600px) {
+          .login-stage { padding:20px 14px; }
+          .login-card { box-shadow:10px 10px 0 var(--red-dark); }
+          .form-pane { padding:30px 22px 34px; }
+          .login-squares { display:none; }
+          .theme-btn { top:auto; bottom:14px; right:14px; width:40px; height:40px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { animation:none !important; transition:none !important; }
         }
       `}</style>
 
-            <div className={`ieq-login-root${dark ? " dark-bg" : ""}`} style={vars}>
+            <div className={`ieq-login-root${dark ? " is-dark" : ""}`}>
+                <div className="login-bg" aria-hidden="true">
+                    <div className="login-bg-img" style={{ backgroundImage: `url(${jesusImg})` }} />
+                </div>
+                <div className="login-cross" aria-hidden="true" />
+                <div className="login-squares" aria-hidden="true"><span /><span /><span /><span /></div>
+
                 <button className="theme-btn" onClick={toggleTheme} aria-label="Alternar tema">
                     {dark ? <Sun size={17}/> : <Moon size={17}/>}
                 </button>
@@ -491,12 +496,18 @@ export default function Login() {
                     {/* ════════ CARTÃO ════════ */}
                     <div className={`login-card${temErro ? " shake" : ""}`} ref={cardRef}>
 
-                        {/* ── lado da marca ── */}
+                        {/* ── lado da marca (cartaz) ── */}
                         <aside className="brand-pane">
-                            <div
-                                className="brand-image"
-                                style={{ backgroundImage: `url(${jesusImg})` }}
-                                aria-hidden="true"
+                            <span className="brand-flag" aria-hidden="true">
+                                <i className="c-orange" /><i className="c-yellow" /><i className="c-blue" /><i className="c-magenta" />
+                            </span>
+                            <img
+                                className="brand-media"
+                                src={cartazImg}
+                                alt="Jesus Salva — 1ª Doutrina da IEQ. João 3:16"
+                                loading="eager"
+                                decoding="async"
+                                draggable={false}
                             />
                         </aside>
 
@@ -655,19 +666,22 @@ export default function Login() {
 
                                             <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                                                 {[
-                                                    { key:"email", label:"Alterar e-mail", state:altEmail, set:setAltEmail, Icon:Mail },
-                                                    { key:"senha", label:"Alterar senha",  state:altSenha, set:setAltSenha, Icon:Lock },
-                                                ].map(({ key, label, state, set, Icon }) => (
-                                                    <button key={key} type="button" role="checkbox" aria-checked={state}
-                                                            className="check-row"
-                                                            onClick={()=>{set(!state);setErrAlt(null);}}>
-                                                        <span className="check-box">
-                                                            {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
-                                                        </span>
-                                                        <Icon size={14} style={{ flexShrink:0 }}/>
-                                                        {label}
-                                                    </button>
-                                                ))}
+                                                    { key:"email", label:"Alterar e-mail", state:altEmail, set:setAltEmail, icon:Mail },
+                                                    { key:"senha", label:"Alterar senha",  state:altSenha, set:setAltSenha, icon:Lock },
+                                                ].map(({ key, label, state, set, icon }) => {
+                                                    const Icon = icon;
+                                                    return (
+                                                        <button key={key} type="button" role="checkbox" aria-checked={state}
+                                                                className="check-row"
+                                                                onClick={()=>{set(!state);setErrAlt(null);}}>
+                                                            <span className="check-box">
+                                                                {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2A0306" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                            </span>
+                                                            <Icon size={14} style={{ flexShrink:0 }}/>
+                                                            {label}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
 
                                             {altEmail && (
