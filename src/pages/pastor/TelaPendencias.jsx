@@ -1,38 +1,15 @@
-/* ============================================================
-   TelaPendencias.jsx  —  COM POLLING AUTOMÁTICO
-
-   MUDANÇAS vs versão original:
-   1. Polling a cada 60s — atualiza automaticamente
-   2. Indicador visual "AO VIVO" pulsando
-   3. Contador regressivo mostrando próxima atualização
-   4. Polling pausa quando a aba está oculta (Page Visibility API)
-   5. Polling reseta ao trocar de semana ou filtro
-   ============================================================ */
-
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../services/api.js";
 import {
-    AlertTriangle, CheckCircle2, RefreshCw, Loader2,
+    AlertTriangle, CheckCircle2, RefreshCw,
     FileText, BookOpen, MapPin, User, ClipboardList,
-    CalendarDays, ChevronLeft, ChevronRight, Radio,
+    CalendarDays, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
+import { AURA, theme } from "../heroTheme";
 
-const IEQ = {
-    red:        "#C8102E",
-    redDark:    "#8B0B1F",
-    redLight:   "#E8294A",
-    yellow:     "#FDB813",
-    yellowDark: "#C48C00",
-    blue:       "#003DA5",
-    blueDark:   "#002470",
-    blueLight:  "#1A56C4",
-    offWhite:   "#F5F0E8",
-    dark:       "#0A0608",
-};
-
-const POLLING_INTERVAL = 60; // segundos
+const POLLING_INTERVAL = 60;
 
 const inicioSemana = (date) => {
     const d = new Date(date);
@@ -58,6 +35,7 @@ const labelSemana = (inicioDate) => {
 export default function TelaPendencias({ isDark = false }) {
     const hoje        = new Date();
     const semanaAtual = inicioSemana(hoje);
+    const t           = theme(isDark);
 
     const [semanaRef,   setSemanaRef]   = useState(semanaAtual);
     const [celulas,     setCelulas]     = useState([]);
@@ -67,22 +45,17 @@ export default function TelaPendencias({ isDark = false }) {
     const [showPicker,  setShowPicker]  = useState(false);
     const [pickerPos,   setPickerPos]   = useState({ top: 0, left: 0 });
 
-    // ── POLLING ──────────────────────────────────────────────
     const [countdown,      setCountdown]      = useState(POLLING_INTERVAL);
-    const [ultimaAtt,      setUltimaAtt]      = useState(null);   // horário da última atualização
+    const [ultimaAtt,      setUltimaAtt]      = useState(null);
     const [pollingAtivo,   setPollingAtivo]   = useState(true);
     const pollingTimerRef  = useRef(null);
     const countdownRef     = useRef(null);
-    const semanaRefRef     = useRef(semanaRef); // ref para usar dentro do setInterval sem stale closure
+    const semanaRefRef     = useRef(semanaRef);
 
-    // mantém ref sincronizado com state
     useEffect(() => { semanaRefRef.current = semanaRef; }, [semanaRef]);
 
     const pickerRef = useRef(null);
     const labelRef  = useRef(null);
-
-    const textPrimary   = isDark ? IEQ.offWhite : "#1A0A0D";
-    const textSecondary = isDark ? "rgba(245,240,232,.45)" : "rgba(26,10,13,.45)";
 
     useEffect(() => {
         const handler = (e) => {
@@ -93,7 +66,6 @@ export default function TelaPendencias({ isDark = false }) {
         return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    // ── Função de carga (usada pelo polling e pelo manual) ──
     const carregar = useCallback(async (semana, silencioso = false) => {
         if (!silencioso) setLoading(true);
         setErro("");
@@ -111,28 +83,22 @@ export default function TelaPendencias({ isDark = false }) {
         }
     }, []);
 
-    // ── Carga inicial ao montar / trocar semana ──
     useEffect(() => {
         carregar(semanaRef);
-        // Reinicia o countdown ao trocar de semana
         setCountdown(POLLING_INTERVAL);
     }, [carregar, semanaRef]);
 
-    // ── POLLING: tick a cada segundo, dispara carga a cada 60s ──
     useEffect(() => {
-        // Para qualquer timer anterior
         clearInterval(pollingTimerRef.current);
         clearInterval(countdownRef.current);
 
         if (!pollingAtivo) return;
 
-        // Countdown visual (decrementa 1 por segundo)
         countdownRef.current = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
-                    // Dispara a atualização silenciosa (sem spinner de loading)
                     carregar(semanaRefRef.current, true);
-                    return POLLING_INTERVAL; // reinicia
+                    return POLLING_INTERVAL;
                 }
                 return prev - 1;
             });
@@ -144,13 +110,11 @@ export default function TelaPendencias({ isDark = false }) {
         };
     }, [pollingAtivo, carregar]);
 
-    // ── Pausa o polling quando a aba fica oculta ──
     useEffect(() => {
         const onVisibilityChange = () => {
             if (document.hidden) {
                 setPollingAtivo(false);
             } else {
-                // Volta para a aba: atualiza imediatamente e retoma polling
                 carregar(semanaRefRef.current, true);
                 setCountdown(POLLING_INTERVAL);
                 setPollingAtivo(true);
@@ -160,10 +124,9 @@ export default function TelaPendencias({ isDark = false }) {
         return () => document.removeEventListener("visibilitychange", onVisibilityChange);
     }, [carregar]);
 
-    // ── Atualização manual (botão ATUALIZAR) ──
     const handleAtualizar = () => {
         carregar(semanaRef);
-        setCountdown(POLLING_INTERVAL); // reinicia contador
+        setCountdown(POLLING_INTERVAL);
     };
 
     const navSemana = (delta) => {
@@ -191,7 +154,6 @@ export default function TelaPendencias({ isDark = false }) {
         setShowPicker(v => !v);
     };
 
-    // ── FILTROS ──
     const celulasFiltradas = celulas.filter((p) => {
         const temRelatorio   = p.relatorioPendente;
         const temDiscipulado = p.discipuladoPendente;
@@ -209,457 +171,481 @@ export default function TelaPendencias({ isDark = false }) {
     const totalRelatorio   = celulas.filter(p => p.relatorioPendente).length;
     const totalDiscipulado = celulas.filter(p => p.discipuladoPendente).length;
     const totalEmDia       = celulas.filter(p => !p.relatorioPendente && !p.discipuladoPendente).length;
+    const totalPendentes   = celulas.filter(p => p.relatorioPendente || p.discipuladoPendente).length;
     const semanaLabel      = labelSemana(semanaRef);
 
-    // Formata horário da última atualização
     const ultimaAttLabel = ultimaAtt
         ? ultimaAtt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
         : null;
 
-    const globalStyles = `
-    @keyframes spin        { to { transform:rotate(360deg); } }
-    @keyframes livePulse   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
-    @keyframes countRing   { from{stroke-dashoffset:0} to{stroke-dashoffset:100} }
-
-    .pend-card {
-      background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
-      border-radius:14px; backdrop-filter:blur(24px);
-    }
-    .pend-row {
-      display:flex; flex-wrap:wrap; align-items:center;
-      justify-content:space-between; gap:14px; padding:18px 22px;
-      border-bottom:1px solid ${isDark ? "rgba(200,16,46,.08)" : "rgba(200,16,46,.07)"};
-      transition:background .2s;
-    }
-    .pend-row:hover { background:${isDark ? "rgba(200,16,46,.05)" : "rgba(200,16,46,.04)"}; }
-    .pend-row:last-child { border-bottom:none; }
-
-    .pend-badge {
-      display:inline-flex; align-items:center; gap:5px;
-      padding:5px 13px; border-radius:99px;
-      font-family:'Cinzel',serif; font-size:8.5px; font-weight:700;
-      letter-spacing:.12em; border:1px solid; white-space:nowrap;
-    }
-    .pend-avatar {
-      width:42px; height:42px; border-radius:9px; flex-shrink:0;
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Cinzel',serif; font-weight:700; font-size:15px;
-    }
-    .pend-filtro-btn {
-      font-family:'Cinzel',serif; font-size:9px; font-weight:700;
-      letter-spacing:.16em; border-radius:8px; cursor:pointer;
-      padding:9px 16px; border:1px solid; transition:all .2s;
-    }
-    .pend-kpi {
-      background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.15)" : "rgba(200,16,46,.12)"};
-      border-radius:14px; backdrop-filter:blur(24px);
-      padding:18px 20px; display:flex; align-items:center; gap:14px;
-    }
-    .pend-status-group {
-      display:flex; flex-direction:column; gap:6px;
-      flex-shrink:0; align-items:flex-end;
-    }
-    .semana-nav {
-      display:flex; align-items:center; gap:4px;
-      background:${isDark ? "rgba(17,10,13,.97)" : "rgba(255,255,255,.92)"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.18)" : "rgba(200,16,46,.15)"};
-      border-radius:10px; padding:5px 8px; backdrop-filter:blur(24px);
-    }
-    .semana-nav-btn {
-      background:none; border:none; cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      width:28px; height:28px; border-radius:6px;
-      color:${textSecondary}; transition:all .2s;
-    }
-    .semana-nav-btn:hover {
-      background:${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.08)"};
-      color:${IEQ.red};
-    }
-    .semana-nav-btn:disabled { opacity:.3; cursor:default; }
-    .semana-nav-btn:disabled:hover { background:none; color:${textSecondary}; }
-    .semana-label-btn {
-      display:flex; align-items:center; gap:6px;
-      font-family:'Cinzel',serif; font-size:10px; font-weight:700;
-      letter-spacing:.13em; color:${textPrimary};
-      min-width:120px; justify-content:center;
-      cursor:pointer; padding:5px 10px; border-radius:6px;
-      background:none; border:none; transition:background .2s;
-    }
-    .semana-label-btn:hover {
-      background:${isDark ? "rgba(200,16,46,.1)" : "rgba(200,16,46,.07)"};
-    }
-    .semana-hoje-btn {
-      font-family:'Cinzel',serif; font-size:8px; font-weight:700;
-      letter-spacing:.14em; border-radius:6px; cursor:pointer;
-      padding:5px 11px; border:1px solid ${IEQ.red}40;
-      background:${IEQ.red}12; color:${IEQ.red}; transition:all .2s; white-space:nowrap;
-    }
-    .semana-hoje-btn:hover { background:${IEQ.red}22; }
-    .date-picker-popup {
-      position:fixed; z-index:9999;
-      background:${isDark ? "rgba(12,6,9,.99)" : "#fff"};
-      border:1px solid ${isDark ? "rgba(200,16,46,.22)" : "rgba(200,16,46,.18)"};
-      border-radius:12px; padding:16px 18px; min-width:240px;
-      box-shadow:0 14px 44px rgba(0,0,0,.28);
-    }
-    .date-picker-popup label {
-      display:block; font-family:'Cinzel',serif; font-size:8px;
-      font-weight:700; letter-spacing:.18em; color:${textSecondary}; margin-bottom:8px;
-    }
-    .date-picker-popup input[type=date] {
-      width:100%; font-family:'Cinzel',serif; font-size:12px;
-      border:1px solid ${isDark ? "rgba(200,16,46,.22)" : "rgba(200,16,46,.18)"};
-      border-radius:8px; padding:9px 12px; box-sizing:border-box;
-      background:${isDark ? "rgba(200,16,46,.06)" : "rgba(200,16,46,.04)"};
-      color:${textPrimary}; outline:none;
-    }
-    .date-picker-popup input[type=date]:focus { border-color:${IEQ.red}80; }
-    .date-picker-hint {
-      font-family:'EB Garamond',serif; font-size:12px;
-      color:${textSecondary}; margin-top:8px; text-align:center;
-    }
-
-    /* ── POLLING UI ── */
-    .live-dot {
-      width:7px; height:7px; border-radius:50%;
-      background:#12A060; animation:livePulse 1.6s ease-in-out infinite;
-      flex-shrink:0;
-    }
-    .polling-bar {
-      display:flex; align-items:center; gap:10px;
-      background:${isDark ? "rgba(18,160,96,.07)" : "rgba(18,160,96,.06)"};
-      border:1px solid rgba(18,160,96,.2);
-      border-radius:9px; padding:8px 14px;
-    }
-    .countdown-ring {
-      position:relative; width:22px; height:22px; flex-shrink:0;
-    }
-    .countdown-ring svg {
-      transform: rotate(-90deg);
-    }
-    .countdown-ring circle {
-      fill:none; stroke-width:2.5;
-    }
-    .countdown-ring .track { stroke:rgba(18,160,96,.15); }
-    .countdown-ring .fill  {
-      stroke:#12A060;
-      stroke-dasharray:57;
-      transition:stroke-dashoffset .9s linear;
-    }
-    .countdown-num {
-      position:absolute; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Cinzel',serif; font-size:7px; font-weight:700;
-      color:#12A060;
-    }
-  `;
-
-    // Calcula o dashoffset do anel SVG (0 = cheio, 57 = vazio)
     const ringOffset = ((POLLING_INTERVAL - countdown) / POLLING_INTERVAL) * 57;
 
+    const globalStyles = `
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+    @keyframes pend-spin { to { transform: rotate(360deg); } }
+    @keyframes pend-live { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.35;transform:scale(.7);} }
+
+    .pend-shell { display:flex; flex-direction:column; gap:16px; font-family:'Inter',sans-serif; color:${t.text}; }
+
+    .pend-eyebrow {
+      font-family:'Inter',sans-serif; font-size:9px; font-weight:600;
+      letter-spacing:.2em; text-transform:uppercase; color:${t.gold}; margin:0 0 5px;
+    }
+    .pend-title {
+      font-family:'Playfair Display',serif; font-size:clamp(19px,3vw,25px);
+      font-weight:500; color:${t.text}; margin:0; line-height:1.15; letter-spacing:.01em;
+    }
+    .pend-sub {
+      font-family:'Inter',sans-serif; font-size:12.5px; font-weight:300;
+      color:${t.textMuted}; margin:6px 0 0;
+    }
+
+    .pend-btn {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:9px 16px; border-radius:100px; cursor:pointer;
+      background:${t.bgEl}; border:1px solid ${t.border};
+      color:${t.textSec}; font-family:'Inter',sans-serif; font-size:10.5px;
+      font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+      transition:all .22s;
+    }
+    .pend-btn:hover { border-color:${t.borderHov}; color:${t.gold}; background:${t.hoverBg}; }
+    .pend-btn:focus-visible { outline:2px solid ${t.gold}; outline-offset:2px; }
+
+    .pend-card {
+      background:${t.bgEl}; border:1px solid ${t.border};
+      border-radius:20px; overflow:hidden; position:relative;
+    }
+    .pend-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, ${isDark ? "rgba(217,174,94,.28)" : "rgba(184,137,46,.28)"}, transparent);
+    }
+
+    .pend-kpi {
+      position:relative; overflow:hidden;
+      display:flex; align-items:center; gap:14px;
+      padding:17px 18px; border-radius:18px;
+      background:${t.bgEl}; border:1px solid ${t.border};
+      transition:transform .25s cubic-bezier(.4,0,.2,1), border-color .25s, box-shadow .25s;
+    }
+    .pend-kpi:hover { transform:translateY(-2px); border-color:${t.borderHov}; box-shadow:${t.shadow}; }
+    .pend-kpi::after {
+      content:''; position:absolute; inset:0 auto 0 0; width:3px;
+      background:var(--kpi-color, ${t.gold}); opacity:.75;
+    }
+    .pend-kpi-icon {
+      width:44px; height:44px; border-radius:13px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .pend-kpi-value {
+      font-family:'Playfair Display',serif; font-size:28px; font-weight:600;
+      color:${t.text}; line-height:1; margin:0;
+    }
+    .pend-kpi-label {
+      font-family:'Inter',sans-serif; font-size:8.5px; font-weight:600;
+      letter-spacing:.15em; text-transform:uppercase; color:${t.textMuted};
+      margin:6px 0 0;
+    }
+
+    .pend-week {
+      display:inline-flex; align-items:center; gap:2px;
+      background:${t.bgEl}; border:1px solid ${t.border};
+      border-radius:100px; padding:4px;
+    }
+    .pend-week-btn {
+      width:32px; height:32px; border-radius:50%; border:none;
+      background:transparent; color:${t.textMuted};
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all .2s;
+    }
+    .pend-week-btn:hover { background:${t.hoverBg}; color:${t.gold}; }
+    .pend-week-btn:disabled { opacity:.28; cursor:default; }
+    .pend-week-btn:disabled:hover { background:transparent; color:${t.textMuted}; }
+    .pend-week-label {
+      display:flex; align-items:center; gap:7px;
+      font-family:'Playfair Display',serif; font-size:12.5px; font-weight:500;
+      letter-spacing:.02em; color:${t.text}; background:none; border:none;
+      cursor:pointer; padding:6px 12px; border-radius:100px; transition:background .2s;
+      min-width:130px; justify-content:center;
+    }
+    .pend-week-label:hover { background:${t.hoverBg}; }
+    .pend-today-btn {
+      font-family:'Inter',sans-serif; font-size:9px; font-weight:600;
+      letter-spacing:.12em; text-transform:uppercase; border-radius:100px;
+      cursor:pointer; padding:8px 14px; color:${t.gold};
+      border:1px solid ${t.borderHov}; background:${t.hoverBg}; transition:all .2s;
+    }
+    .pend-today-btn:hover { background:${isDark ? "rgba(217,174,94,.22)" : "rgba(184,137,46,.2)"}; }
+
+    .pend-date-popup {
+      position:fixed; z-index:9999; min-width:250px;
+      background:${t.bgEl}; border:1px solid ${t.borderHov};
+      border-radius:16px; padding:16px 18px;
+      box-shadow:${t.shadow};
+    }
+    .pend-date-popup label {
+      display:block; font-family:'Inter',sans-serif; font-size:8.5px;
+      font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+      color:${t.textMuted}; margin-bottom:9px;
+    }
+    .pend-date-popup input[type=date] {
+      width:100%; box-sizing:border-box; padding:10px 12px;
+      font-family:'Inter',sans-serif; font-size:12.5px;
+      border:1px solid ${t.borderInput}; border-radius:10px;
+      background:${t.bgInput}; color:${t.text}; outline:none;
+    }
+    .pend-date-popup input[type=date]:focus { border-color:${t.gold}; }
+    .pend-date-hint { font-family:'Inter',sans-serif; font-size:11px; color:${t.textMuted}; margin:9px 0 0; text-align:center; }
+
+    .pend-filters { display:flex; flex-wrap:wrap; gap:8px; }
+    .pend-chip {
+      font-family:'Inter',sans-serif; font-size:9.5px; font-weight:600;
+      letter-spacing:.08em; text-transform:uppercase;
+      padding:9px 16px; border-radius:100px; cursor:pointer;
+      background:transparent; border:1px solid ${t.border}; color:${t.textMuted};
+      transition:all .22s; white-space:nowrap;
+    }
+    .pend-chip:hover { color:${t.text}; border-color:${t.borderHov}; background:${t.hoverBg}; }
+    .pend-chip:focus-visible { outline:2px solid ${t.gold}; outline-offset:2px; }
+    .pend-chip.active {
+      color:#fff; border-color:transparent;
+      background:linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
+      box-shadow:0 4px 14px rgba(15,42,74,.25);
+    }
+    .pend-chip.active.green {
+      background:linear-gradient(135deg, ${AURA.greenDark}, ${AURA.green});
+      box-shadow:0 4px 14px rgba(30,122,70,.25);
+    }
+
+    .pend-live {
+      display:flex; align-items:center; gap:10px;
+      background:${t.bgEl}; border:1px solid ${t.border};
+      border-radius:100px; padding:6px 8px 6px 15px;
+    }
+    .pend-live-dot {
+      width:7px; height:7px; border-radius:50%; flex-shrink:0;
+      background:${AURA.green}; animation:pend-live 1.8s ease-in-out infinite;
+    }
+    .pend-live-text {
+      font-family:'Inter',sans-serif; font-size:9px; font-weight:600;
+      letter-spacing:.12em; text-transform:uppercase; color:${t.textSec};
+      white-space:nowrap;
+    }
+    .pend-live-toggle {
+      border:none; cursor:pointer; border-radius:100px;
+      padding:6px 12px; font-family:'Inter',sans-serif; font-size:8.5px;
+      font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+      transition:all .2s; white-space:nowrap;
+    }
+
+    .pend-ring { position:relative; width:24px; height:24px; flex-shrink:0; }
+    .pend-ring svg { transform:rotate(-90deg); }
+    .pend-ring circle { fill:none; stroke-width:2.5; }
+    .pend-ring .track { stroke:${isDark ? "rgba(255,255,255,.12)" : "rgba(15,42,74,.1)"}; }
+    .pend-ring .fill  { stroke:${t.gold}; stroke-dasharray:57; transition:stroke-dashoffset .9s linear; }
+    .pend-ring-num {
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      font-family:'Inter',sans-serif; font-size:8px; font-weight:700; color:${t.gold};
+    }
+
+    .pend-list-head {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:12px; padding:18px 22px;
+      border-bottom:1px solid ${t.border};
+    }
+    .pend-list-title { font-family:'Playfair Display',serif; font-size:16px; font-weight:500; color:${t.text}; margin:0; }
+    .pend-list-sub { font-family:'Inter',sans-serif; font-size:11.5px; font-weight:300; color:${t.textMuted}; margin:3px 0 0; }
+
+    .pend-row {
+      display:grid; grid-template-columns:1fr auto; align-items:center;
+      gap:16px; padding:15px 22px; border-bottom:1px solid ${t.border};
+      transition:background .2s;
+    }
+    .pend-row:hover { background:${t.rowHov}; }
+    .pend-row:last-child { border-bottom:none; }
+
+    .pend-avatar {
+      width:44px; height:44px; border-radius:13px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-weight:600; font-size:16px; color:#fff;
+    }
+    .pend-name {
+      font-family:'Playfair Display',serif; font-size:14px; font-weight:500;
+      color:${t.text}; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .pend-meta {
+      display:flex; align-items:center; gap:13px; flex-wrap:wrap;
+      margin-top:4px; font-family:'Inter',sans-serif; font-size:11.5px;
+      font-weight:300; color:${t.textMuted};
+    }
+    .pend-meta span { display:flex; align-items:center; gap:5px; }
+
+    .pend-status { display:flex; flex-direction:column; gap:6px; align-items:flex-end; flex-shrink:0; }
+    .pend-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 11px; border-radius:100px; white-space:nowrap;
+      font-family:'Inter',sans-serif; font-size:8.5px; font-weight:600;
+      letter-spacing:.08em; text-transform:uppercase; border:1px solid;
+    }
+
+    .pend-empty { padding:56px 24px; text-align:center; }
+    .pend-empty-title {
+      font-family:'Playfair Display',serif; font-size:16px; font-weight:500;
+      color:${t.text}; margin:0 0 4px;
+    }
+    .pend-empty-sub { font-family:'Inter',sans-serif; font-size:12.5px; font-weight:300; color:${t.textMuted}; margin:0; }
+
+    @media (max-width:700px) {
+      .pend-row { grid-template-columns:1fr; align-items:flex-start; gap:12px; }
+      .pend-status { flex-direction:row; flex-wrap:wrap; align-items:flex-start; }
+    }
+    @media (max-width:520px) {
+      .pend-head-top { flex-direction:column; align-items:flex-start; }
+      .pend-kpi-value { font-size:24px; }
+    }
+    `;
+
+    const KPIS = [
+        { label: "Ambas pendentes", value: totalAmbas,       color: AURA.red,   icon: <AlertTriangle size={19} /> },
+        { label: "Sem relatório",   value: totalRelatorio,   color: AURA.gold,  icon: <FileText size={19} />      },
+        { label: "Sem discipulado", value: totalDiscipulado, color: AURA.blue,  icon: <BookOpen size={19} />      },
+        { label: "Em dia",          value: totalEmDia,       color: AURA.green, icon: <CheckCircle2 size={19} />  },
+    ];
+
+    const FILTROS = [
+        { key: "TODAS",       label: "Todas"          },
+        { key: "PENDENTES",   label: "Com pendência"  },
+        { key: "AMBAS",       label: "Ambas"          },
+        { key: "RELATORIO",   label: "Sem relatório"  },
+        { key: "DISCIPULADO", label: "Sem discipulado"},
+        { key: "EM_DIA",      label: "Em dia"         },
+    ];
+
     return (
-        <div style={{ color: textPrimary, fontFamily: "'EB Garamond',serif" }}>
+        <div className="pend-shell">
             <style>{globalStyles}</style>
 
-            {/* ── HEADER ── */}
-            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 14 }}>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                        className="pend-head-top"
+                        style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
                 <div>
-                    <h2 style={{
-                        fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 700, letterSpacing: ".18em", margin: 0,
-                        background: `linear-gradient(90deg,${IEQ.redDark},${IEQ.red},${IEQ.yellow},${IEQ.blue})`,
-                        WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-                    }}>
-                        PENDÊNCIAS DA SEMANA
-                    </h2>
-                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".2em", color: textSecondary, margin: "4px 0 0" }}>
-                        RELATÓRIOS E DISCIPULADO
+                    <p className="pend-eyebrow">Pendências da semana</p>
+                    <h2 className="pend-title">Relatórios &amp; Discipulado</h2>
+                    <p className="pend-sub">
+                        {loading ? "Carregando células…" : `${totalPendentes} de ${celulas.length} célula(s) com pendência · ${semanaLabel}`}
                     </p>
                 </div>
-                <button onClick={handleAtualizar} style={{
-                    background: "none", border: `1px solid ${isDark ? "rgba(200,16,46,.25)" : "rgba(200,16,46,.2)"}`,
-                    borderRadius: 8, padding: "9px 16px", cursor: "pointer", color: textSecondary,
-                    display: "flex", alignItems: "center", gap: 8, fontFamily: "'Cinzel',serif",
-                    fontSize: 9, letterSpacing: ".15em", transition: "all .2s",
-                }}>
-                    <RefreshCw size={13} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
-                    ATUALIZAR
-                </button>
-            </motion.div>
 
-            {/* ── BARRA DE POLLING AO VIVO ── */}
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .02 }}
-                        style={{ marginBottom: 16 }}>
-                <div className="polling-bar">
-                    {/* Ponto verde pulsando */}
-                    <div className="live-dot" />
-
-                    {/* Anel de countdown */}
-                    <div className="countdown-ring">
-                        <svg width="22" height="22" viewBox="0 0 22 22">
-                            <circle className="track" cx="11" cy="11" r="9" />
-                            <circle
-                                className="fill"
-                                cx="11" cy="11" r="9"
-                                strokeDashoffset={ringOffset}
-                            />
-                        </svg>
-                        <div className="countdown-num">{countdown}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <div className="pend-live">
+                        <div className="pend-live-dot" />
+                        <div className="pend-ring">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <circle className="track" cx="12" cy="12" r="9" />
+                                <circle className="fill" cx="12" cy="12" r="9" strokeDashoffset={ringOffset} />
+                            </svg>
+                            <div className="pend-ring-num">{countdown}</div>
+                        </div>
+                        <span className="pend-live-text">Ao vivo</span>
+                        <button
+                            className="pend-live-toggle"
+                            onClick={() => {
+                                setPollingAtivo(v => !v);
+                                if (!pollingAtivo) setCountdown(POLLING_INTERVAL);
+                            }}
+                            style={{
+                                background: pollingAtivo ? `${AURA.green}18` : `${AURA.red}14`,
+                                border: `1px solid ${pollingAtivo ? `${AURA.green}40` : `${AURA.red}40`}`,
+                                color: pollingAtivo ? AURA.green : AURA.red,
+                            }}
+                        >
+                            {pollingAtivo ? "Pausar" : "Retomar"}
+                        </button>
                     </div>
 
-                    {/* Texto */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, fontWeight: 700, letterSpacing: ".14em", color: "#12A060", margin: 0 }}>
-                            AO VIVO — ATUALIZAÇÃO AUTOMÁTICA
-                        </p>
-                        {ultimaAttLabel && (
-                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 12, color: textSecondary, margin: "2px 0 0" }}>
-                                Última atualização às {ultimaAttLabel} · próxima em {countdown}s
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Toggle pausar/retomar */}
-                    <button
-                        onClick={() => {
-                            setPollingAtivo(v => !v);
-                            if (!pollingAtivo) setCountdown(POLLING_INTERVAL);
-                        }}
-                        style={{
-                            background: pollingAtivo ? "rgba(18,160,96,.12)" : `${IEQ.red}12`,
-                            border: `1px solid ${pollingAtivo ? "rgba(18,160,96,.3)" : `${IEQ.red}30`}`,
-                            borderRadius: 6, padding: "5px 12px", cursor: "pointer",
-                            fontFamily: "'Cinzel',serif", fontSize: 8, fontWeight: 700,
-                            letterSpacing: ".14em", color: pollingAtivo ? "#12A060" : IEQ.red,
-                            transition: "all .2s", whiteSpace: "nowrap", flexShrink: 0,
-                        }}
-                    >
-                        {pollingAtivo ? "PAUSAR" : "RETOMAR"}
+                    <button className="pend-btn" onClick={handleAtualizar} aria-label="Atualizar agora">
+                        <RefreshCw size={13} style={{ animation: loading ? "pend-spin 1s linear infinite" : "none" }} />
+                        Atualizar
                     </button>
                 </div>
             </motion.div>
 
-            {/* ── NAVEGADOR DE SEMANA ── */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .04 }}
-                        style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, flexWrap: "wrap", position: "relative", zIndex: 10 }}>
-                <div className="semana-nav">
-                    <button className="semana-nav-btn" onClick={() => navSemana(-1)} title="Semana anterior">
-                        <ChevronLeft size={15} />
+            {ultimaAttLabel && !loading && (
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: "-8px 0 0" }}>
+                    Última atualização às {ultimaAttLabel}{pollingAtivo ? ` · próxima em ${countdown}s` : " · atualização automática pausada"}
+                </p>
+            )}
+
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .04 }}
+                        style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", position: "relative", zIndex: 10 }}>
+                <div className="pend-week">
+                    <button className="pend-week-btn" onClick={() => navSemana(-1)} title="Semana anterior">
+                        <ChevronLeft size={16} />
                     </button>
                     <div style={{ position: "relative" }} ref={pickerRef}>
-                        <button className="semana-label-btn" ref={labelRef} onClick={abrirPicker}>
-                            <CalendarDays size={12} style={{ color: IEQ.red, flexShrink: 0 }} />
+                        <button className="pend-week-label" ref={labelRef} onClick={abrirPicker}>
+                            <CalendarDays size={13} style={{ color: t.gold, flexShrink: 0 }} />
                             {semanaLabel}
                         </button>
                         <AnimatePresence>
                             {showPicker && (
-                                <motion.div className="date-picker-popup"
+                                <motion.div className="pend-date-popup"
                                             style={{ top: pickerPos.top, left: pickerPos.left, transform: "translateX(-50%)" }}
                                             initial={{ opacity: 0, y: -6, scale: .97 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: -6, scale: .97 }}
                                             transition={{ duration: .16 }}>
-                                    <label>ESCOLHA QUALQUER DIA DA SEMANA</label>
+                                    <label>Escolha qualquer dia da semana</label>
                                     <input type="date" max={toISO(hoje)} defaultValue={toISO(semanaRef)} onChange={onPickDate} />
-                                    <p className="date-picker-hint">A semana vai de domingo a sábado.</p>
+                                    <p className="pend-date-hint">A semana vai de domingo a sábado.</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
-                    <button className="semana-nav-btn" onClick={() => navSemana(1)} disabled={ehSemanaAtual} title="Próxima semana">
-                        <ChevronRight size={15} />
+                    <button className="pend-week-btn" onClick={() => navSemana(1)} disabled={ehSemanaAtual} title="Próxima semana">
+                        <ChevronRight size={16} />
                     </button>
                 </div>
+
                 <AnimatePresence>
                     {!ehSemanaAtual && (
-                        <motion.button className="semana-hoje-btn"
+                        <motion.button className="pend-today-btn"
                                        initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }}
                                        onClick={() => setSemanaRef(semanaAtual)}>
-                            SEMANA ATUAL
+                            Semana atual
                         </motion.button>
                     )}
                 </AnimatePresence>
                 {!ehSemanaAtual && (
                     <span style={{
-                        fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".14em",
-                        color: IEQ.yellowDark, background: `${IEQ.yellow}18`,
-                        border: `1px solid ${IEQ.yellow}40`, borderRadius: 6, padding: "4px 10px",
-                    }}>SEMANA ANTERIOR</span>
+                        fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600,
+                        letterSpacing: ".1em", textTransform: "uppercase",
+                        color: AURA.gold, background: t.hoverBg,
+                        border: `1px solid ${t.borderHov}`, borderRadius: 100, padding: "6px 12px",
+                    }}>Semana anterior</span>
                 )}
             </motion.div>
 
-            {/* ── KPIs ── */}
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }}
-                        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 14, marginBottom: 20 }}>
-                {[
-                    { label: "AMBAS PENDENTES", value: totalAmbas,       color: IEQ.red,        icon: <AlertTriangle size={18} /> },
-                    { label: "SEM RELATÓRIO",   value: totalRelatorio,   color: IEQ.yellowDark, icon: <FileText size={18} />      },
-                    { label: "SEM DISCIPULADO", value: totalDiscipulado, color: IEQ.blue,       icon: <BookOpen size={18} />      },
-                    { label: "EM DIA",          value: totalEmDia,       color: "#12A060",      icon: <CheckCircle2 size={18} />  },
-                ].map(({ label, value, color, icon }) => (
-                    <div key={label} className="pend-kpi">
-                        <div style={{
-                            width: 42, height: 42, borderRadius: 10, background: `${color}18`,
-                            display: "flex", alignItems: "center", justifyContent: "center", color, flexShrink: 0,
-                        }}>{icon}</div>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }}
+                        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12 }}>
+                {KPIS.map(({ label, value, color, icon }) => (
+                    <div key={label} className="pend-kpi" style={{ "--kpi-color": color }}>
+                        <div className="pend-kpi-icon" style={{ background: `${color}14`, color }}>
+                            {icon}
+                        </div>
                         <div>
-                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".18em", color: textSecondary, margin: 0 }}>{label}</p>
-                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: textPrimary, margin: 0, lineHeight: 1.1 }}>
-                                {loading ? "—" : value}
-                            </p>
+                            <p className="pend-kpi-value">{loading ? "–" : value}</p>
+                            <p className="pend-kpi-label">{label}</p>
                         </div>
                     </div>
                 ))}
             </motion.div>
 
-            {/* ── FILTROS ── */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .12 }}
-                        style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
-                {[
-                    { key: "TODAS",       label: "TODAS"           },
-                    { key: "PENDENTES",   label: "COM PENDÊNCIA"   },
-                    { key: "AMBAS",       label: "AMBAS FALHAS"    },
-                    { key: "RELATORIO",   label: "SEM RELATÓRIO"   },
-                    { key: "DISCIPULADO", label: "SEM DISCIPULADO" },
-                    { key: "EM_DIA",      label: "EM DIA"          },
-                ].map(({ key, label }) => {
+                        className="pend-filters">
+                {FILTROS.map(({ key, label }) => {
                     const ativo   = filtro === key;
                     const isEmDia = key === "EM_DIA";
                     return (
-                        <button key={key} className="pend-filtro-btn" onClick={() => setFiltro(key)}
-                                style={{
-                                    background:  ativo ? (isEmDia ? "linear-gradient(135deg,#0e7a4a,#12A060)" : `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`) : "transparent",
-                                    color:       ativo ? "#fff" : textSecondary,
-                                    borderColor: ativo ? (isEmDia ? "#12A060" : IEQ.red) : (isDark ? "rgba(200,16,46,.2)" : "rgba(200,16,46,.18)"),
-                                }}>
+                        <button key={key}
+                                className={`pend-chip${ativo ? " active" : ""}${ativo && isEmDia ? " green" : ""}`}
+                                onClick={() => setFiltro(key)}>
                             {label}
                         </button>
                     );
                 })}
             </motion.div>
 
-            {/* ── LISTA ── */}
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .16 }}>
-                <div className="pend-card" style={{ overflow: "hidden" }}>
-
-                    {/* cabeçalho */}
-                    <div style={{
-                        padding: "18px 22px",
-                        borderBottom: `1px solid ${isDark ? "rgba(200,16,46,.12)" : "rgba(200,16,46,.1)"}`,
-                        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10,
-                    }}>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .16 }}>
+                <div className="pend-card">
+                    <div className="pend-list-head">
                         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                             <div style={{
-                                width: 36, height: 36, borderRadius: 8,
-                                background: `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`,
+                                width: 38, height: 38, borderRadius: 11, flexShrink: 0,
+                                background: `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`,
                                 display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
                             }}>
-                                <ClipboardList size={16} />
+                                <ClipboardList size={17} />
                             </div>
                             <div>
-                                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: ".15em", margin: 0, color: textPrimary }}>
-                                    CÉLULAS — VISÃO GERAL
-                                </p>
-                                <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSecondary, margin: 0 }}>
-                                    {loading ? "carregando..." : `${celulasFiltradas.length} célula(s) · ${semanaLabel}`}
+                                <h3 className="pend-list-title">Células</h3>
+                                <p className="pend-list-sub">
+                                    {loading ? "carregando…" : `${celulasFiltradas.length} célula(s) · ${semanaLabel}`}
                                 </p>
                             </div>
                         </div>
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <span className="pend-badge" style={{ color: IEQ.red, borderColor: `${IEQ.red}30`, background: `${IEQ.red}10` }}>
-                                <FileText size={10} /> RELATÓRIO SEMANAL
+                        <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+                            <span className="pend-badge" style={{ color: AURA.red, borderColor: `${AURA.red}35`, background: `${AURA.red}0f` }}>
+                                <FileText size={10} /> Relatório
                             </span>
-                            <span className="pend-badge" style={{ color: IEQ.blue, borderColor: `${IEQ.blue}30`, background: `${IEQ.blue}10` }}>
-                                <BookOpen size={10} /> DISCIPULADO
+                            <span className="pend-badge" style={{ color: AURA.blue, borderColor: `${AURA.blue}35`, background: `${AURA.blue}0f` }}>
+                                <BookOpen size={10} /> Discipulado
                             </span>
                         </div>
                     </div>
 
-                    {/* corpo */}
                     {loading ? (
                         <TelaCarregando isDark={isDark} minHeight="40vh" background="transparent" />
                     ) : erro ? (
-                        <div style={{ padding: 40, textAlign: "center" }}>
-                            <AlertTriangle size={28} style={{ color: IEQ.red, margin: "0 auto 10px" }} />
-                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".16em", color: IEQ.red }}>{erro}</p>
+                        <div style={{ padding: 44, textAlign: "center" }}>
+                            <AlertTriangle size={30} style={{ color: AURA.red, margin: "0 auto 12px" }} />
+                            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: ".06em", color: AURA.red, margin: 0 }}>{erro}</p>
                         </div>
                     ) : celulasFiltradas.length === 0 ? (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                    style={{ padding: "52px 20px", textAlign: "center" }}>
-                            <CheckCircle2 size={36} style={{ color: "#12A060", margin: "0 auto 12px" }} />
-                            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: ".18em", color: "#12A060", margin: 0 }}>
-                                NENHUM RESULTADO
-                            </p>
-                            <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 14, color: textSecondary, marginTop: 6 }}>
-                                Nenhuma célula encontrada para este filtro.
-                            </p>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pend-empty">
+                            <CheckCircle2 size={38} style={{ color: AURA.green, margin: "0 auto 14px" }} />
+                            <p className="pend-empty-title">Nenhuma célula encontrada</p>
+                            <p className="pend-empty-sub">Não há resultados para o filtro selecionado nesta semana.</p>
                         </motion.div>
                     ) : (
                         <AnimatePresence>
                             {celulasFiltradas.map((p, i) => {
-                                const ambas  = p.relatorioPendente && p.discipuladoPendente;
-                                const emDia  = !p.relatorioPendente && !p.discipuladoPendente;
+                                const ambas = p.relatorioPendente && p.discipuladoPendente;
+                                const emDia = !p.relatorioPendente && !p.discipuladoPendente;
 
                                 const avatarBg = emDia
-                                    ? "linear-gradient(135deg,#0e7a4a,#12A060)"
+                                    ? `linear-gradient(135deg, ${AURA.greenDark}, ${AURA.green})`
                                     : ambas
-                                        ? `linear-gradient(135deg,${IEQ.redDark},${IEQ.red})`
+                                        ? `linear-gradient(135deg, ${AURA.redDark}, ${AURA.red})`
                                         : p.relatorioPendente
-                                            ? `linear-gradient(135deg,${IEQ.yellowDark},${IEQ.yellow})`
-                                            : `linear-gradient(135deg,${IEQ.blueDark},${IEQ.blue})`;
-
-                                const avatarColor = p.relatorioPendente && !p.discipuladoPendente ? "#1A0A0D" : "#fff";
+                                            ? `linear-gradient(135deg, ${AURA.goldDim}, ${AURA.gold})`
+                                            : `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})`;
 
                                 return (
                                     <motion.div key={p.idCelula}
                                                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: i * 0.04 }}
+                                                transition={{ delay: i * 0.035 }}
                                                 className="pend-row">
-
-                                        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
-                                            <div className="pend-avatar" style={{ background: avatarBg, color: avatarColor }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 13, minWidth: 0 }}>
+                                            <div className="pend-avatar" style={{ background: avatarBg }}>
                                                 {p.nomeCelula?.charAt(0).toUpperCase()}
                                             </div>
                                             <div style={{ minWidth: 0 }}>
-                                                <p style={{
-                                                    fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 700,
-                                                    letterSpacing: ".1em", color: textPrimary, margin: 0,
-                                                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                                                }}>
-                                                    {p.nomeCelula}
-                                                </p>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 3 }}>
-                                                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSecondary }}>
-                                                        <User size={12} /> {p.nomeLider}
-                                                    </span>
-                                                    {p.bairro && (
-                                                        <span style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "'EB Garamond',serif", fontSize: 13, color: textSecondary }}>
-                                                            <MapPin size={12} /> {p.bairro}
-                                                        </span>
-                                                    )}
+                                                <p className="pend-name">{p.nomeCelula}</p>
+                                                <div className="pend-meta">
+                                                    <span><User size={12} /> {p.nomeLider}</span>
+                                                    {p.bairro && <span><MapPin size={12} /> {p.bairro}</span>}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="pend-status-group">
+                                        <div className="pend-status">
                                             {p.relatorioPendente ? (
-                                                <span className="pend-badge" style={{ color: IEQ.red, borderColor: `${IEQ.red}35`, background: `${IEQ.red}12` }}>
-                                                    <FileText size={10} /> RELATÓRIO SEMANAL: PENDENTE
+                                                <span className="pend-badge" style={{ color: AURA.red, borderColor: `${AURA.red}35`, background: `${AURA.red}0f` }}>
+                                                    <FileText size={10} /> Relatório pendente
                                                 </span>
                                             ) : (
-                                                <span className="pend-badge" style={{ color: "#12A060", borderColor: "rgba(18,160,96,.3)", background: "rgba(18,160,96,.1)" }}>
-                                                    <CheckCircle2 size={10} /> RELATÓRIO SEMANAL: OK
+                                                <span className="pend-badge" style={{ color: AURA.green, borderColor: `${AURA.green}35`, background: `${AURA.green}0f` }}>
+                                                    <CheckCircle2 size={10} /> Relatório ok
                                                 </span>
                                             )}
                                             {p.discipuladoPendente ? (
-                                                <span className="pend-badge" style={{ color: IEQ.blue, borderColor: `${IEQ.blue}35`, background: `${IEQ.blue}12` }}>
-                                                    <BookOpen size={10} /> DISCIPULADO: PENDENTE
+                                                <span className="pend-badge" style={{ color: AURA.blue, borderColor: `${AURA.blue}35`, background: `${AURA.blue}0f` }}>
+                                                    <BookOpen size={10} /> Discipulado pendente
                                                 </span>
                                             ) : (
-                                                <span className="pend-badge" style={{ color: "#12A060", borderColor: "rgba(18,160,96,.3)", background: "rgba(18,160,96,.1)" }}>
-                                                    <CheckCircle2 size={10} /> DISCIPULADO: OK
+                                                <span className="pend-badge" style={{ color: AURA.green, borderColor: `${AURA.green}35`, background: `${AURA.green}0f` }}>
+                                                    <CheckCircle2 size={10} /> Discipulado ok
                                                 </span>
                                             )}
                                         </div>
