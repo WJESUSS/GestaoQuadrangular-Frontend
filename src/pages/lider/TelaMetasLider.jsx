@@ -12,7 +12,7 @@ import TelaCarregando from "../../components/TelaCarregando.jsx";
 const TIPO_CONFIG = {
     BATISMO:       { emoji: "🕊️", label: "Batismo",       color: AURA.blue    },
     CONVERSAO:     { emoji: "🔥",  label: "Conversão",     color: AURA.red     },
-    RECONCILIACAO: { emoji: "🕊",  label: "Reconciliação", color: AURA.yellow  },
+    RECONCILIACAO: { emoji: "🕊",  label: "Reconciliação", color: AURA.red      },
     DISCIPULADO:   { emoji: "📖",  label: "Discipulado",   color: AURA.redDark },
 };
 
@@ -55,10 +55,10 @@ const getMensagemMotivacional = (diasRestantes, pct, metaConcluida, faltam) => {
     return { texto: `📅 ${diasRestantes} dias para bater sua meta. Você consegue!`, cor: AURA.blue };
 };
 
-const statusMeta = (meta) => {
+const statusMeta = (meta, isDark) => {
     const pct = meta.progressoPercentual ?? 0;
     if (meta.metaConcluida) return { label: "CONCLUÍDA",    color: "#22c55e",  icon: <CheckCircle2 size={12} /> };
-    if (pct >= 80)          return { label: "QUASE LÁ!",   color: AURA.yellow, icon: <TrendingUp   size={12} /> };
+    if (pct >= 80)          return { label: "QUASE LÁ!",   color: isDark ? AURA.yellow : "#B5000F", icon: <TrendingUp   size={12} /> };
     if (pct < 50)           return { label: "EM ATRASO",   color: AURA.red,    icon: <AlertTriangle size={12} /> };
     return                         { label: "EM ANDAMENTO", color: AURA.blue,   icon: <Clock size={12} /> };
 };
@@ -77,9 +77,9 @@ const CSS = `
 
   .metas-card { border-radius:20px; overflow:hidden; box-shadow:0 12px 34px rgba(0,0,0,.25); transition:box-shadow .3s, transform .25s; position:relative; }
   .metas-card:hover { transform:translateY(-3px); }
-  .metas-card.dark  { background:rgba(40,40,44,.96); border:1px solid rgba(53,3,9,.15); box-shadow:0 4px 24px rgba(0,0,0,.35); }
-  .metas-card.light { background:#fff;    border:1px solid rgba(53,3,9,.12); box-shadow:0 4px 24px rgba(53,3,9,.07); }
-  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(53,3,9,.18); border-color:rgba(53,3,9,.3); }
+  .metas-card.dark  { background:#17171C; border:1px solid rgba(255,255,255,.16); box-shadow:0 4px 24px rgba(0,0,0,.35); }
+  .metas-card.light { background:#fff;    border:1px solid rgba(53,3,9,.22); box-shadow:0 4px 24px rgba(53,3,9,.07); }
+  .metas-card:hover.dark  { box-shadow:0 12px 40px rgba(61,0,4,.35); border-color:rgba(255,255,255,.45); }
   .metas-card:hover.light { box-shadow:0 12px 40px rgba(53,3,9,.14); border-color:rgba(53,3,9,.28); }
 
   .metas-btn { display:inline-flex; align-items:center; gap:7px; border:none; border-radius:100px; cursor:pointer; transition:all .22s; font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.14em; }
@@ -88,18 +88,18 @@ const CSS = `
   .metas-btn-red    { background:linear-gradient(135deg,#1D0409,#350309); color:#fff; font-size:10px; padding:11px 18px; }
   .metas-btn-blue   { background:linear-gradient(135deg,#1D0409,#350309); color:#fff; font-size:10px; padding:11px 18px; }
   .metas-btn-ghost  { font-size:9.5px; padding:10px 16px; }
-  .metas-btn-ghost.dark  { background:rgba(255,255,255,.05); color:#FFFFFF; border:1px solid rgba(53,3,9,.2); }
-  .metas-btn-ghost.light { background:rgba(53,3,9,.06); color:#1D0409;  border:1px solid rgba(53,3,9,.18); }
+  .metas-btn-ghost.dark  { background:#1E1E24; color:#FFFFFF; border:1px solid rgba(255,255,255,.30); }
+  .metas-btn-ghost.light { background:rgba(53,3,9,.06); color:#1D0409;  border:1px solid rgba(53,3,9,.26); }
   .metas-btn-ghost:hover { border-color:#350309 !important; background:rgba(53,3,9,.1) !important; }
 
   .metas-icon-btn { background:none; border:none; cursor:pointer; padding:6px; border-radius:6px; display:flex; align-items:center; justify-content:center; transition:all .2s; }
   .metas-icon-btn:hover { background:rgba(53,3,9,.12); }
 
   .metas-input { width:100%; padding:12px 16px; border-radius:14px; outline:none; font-family:'Inter',sans-serif; font-size:14px; transition:border-color .2s, box-shadow .2s; }
-  .metas-input.dark  { background:rgba(255,255,255,.04); border:1px solid rgba(53,3,9,.2); color:#FFFFFF; }
-  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(53,3,9,.18); color:#1A0A0D; }
+  .metas-input.dark  { background:#101014; border:1px solid rgba(255,255,255,.32); color:#FFFFFF; }
+  .metas-input.light { background:rgba(0,0,0,.03);       border:1px solid rgba(53,3,9,.26); color:#1A0A0D; }
   .metas-input:focus { border-color:#350309 !important; box-shadow:0 0 0 4px rgba(53,3,9,.16); }
-  .metas-input.dark::placeholder  { color:rgba(251,244,239,.25); }
+  .metas-input.dark::placeholder  { color:rgba(255,255,255,.25); }
   .metas-input.light::placeholder { color:rgba(26,10,13,.3); }
 
   .metas-label { font-family:'Inter',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.14em; display:block; margin-bottom:7px; }
@@ -110,15 +110,15 @@ const CSS = `
   .metas-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(53,3,9,.25),transparent); }
 
   .metas-empty { border-radius:20px; padding:48px 24px; text-align:center; }
-  .metas-empty.dark  { border:1.5px dashed rgba(53,3,9,.2);  background:rgba(255,255,255,.015); }
-  .metas-empty.light { border:1.5px dashed rgba(53,3,9,.18); background:rgba(53,3,9,.03); }
+  .metas-empty.dark  { border:1.5px dashed rgba(255,255,255,.20);  background:rgba(255,255,255,.03); }
+  .metas-empty.light { border:1.5px dashed rgba(53,3,9,.26); background:rgba(53,3,9,.03); }
 
   .metas-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
   @media(max-width:480px) { .metas-summary-grid { grid-template-columns:1fr 1fr; } }
 
   .metas-summary-card { border-radius:16px; padding:18px 14px; text-align:center; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
-  .metas-summary-card.dark  { background:rgba(255,255,255,.03); border:1px solid rgba(53,3,9,.12); }
-  .metas-summary-card.light { background:rgba(53,3,9,.04);   border:1px solid rgba(53,3,9,.1); }
+  .metas-summary-card.dark  { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.26); }
+  .metas-summary-card.light { background:rgba(53,3,9,.04);   border:1px solid rgba(53,3,9,.2); }
 
   .metas-hist-item { border-radius:14px; padding:16px; }
   .metas-hist-item.dark  { background:rgba(91,214,140,.05); border:1px solid rgba(91,214,140,.2); }
@@ -130,8 +130,8 @@ const CSS = `
 
   .metas-backdrop { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:16px; }
   .metas-modal { border-radius:24px; padding:32px 28px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; position:relative; z-index:1; }
-  .metas-modal.dark  { background:linear-gradient(135deg,rgba(40,40,44,.96),#170307); border:1px solid rgba(53,3,9,.2); box-shadow:0 30px 60px rgba(53,3,9,.15); }
-  .metas-modal.light { background:linear-gradient(135deg,#fff,#FFFFFF);    border:1px solid rgba(53,3,9,.15); box-shadow:0 30px 60px rgba(53,3,9,.12); }
+  .metas-modal.dark  { background:linear-gradient(135deg,#17171C,#101014); border:1px solid rgba(255,255,255,.16); box-shadow:0 30px 60px rgba(61,0,4,.35); }
+  .metas-modal.light { background:linear-gradient(135deg,#fff,#FFFFFF);    border:1px solid rgba(53,3,9,.22); box-shadow:0 30px 60px rgba(53,3,9,.12); }
 
   .tipo-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .tipo-opt { border-radius:8px; padding:10px 8px; text-align:center; cursor:pointer; transition:all .2s; border:2px solid transparent; }
@@ -144,7 +144,7 @@ const CSS = `
 export default function TelaMetasLider({ celula, isDark }) {
     const t = isDark ? "dark" : "light";
     const textPrimary   = isDark ? AURA.offWhite : "#1A0A0D";
-    const textSecondary = isDark ? "rgba(251,244,239,.42)" : "rgba(26,10,13,.42)";
+    const textSecondary = isDark ? "rgba(255,255,255,.80)" : "rgba(26,10,13,.42)";
 
     const [metas,        setMetas]        = useState([]);
     const [historico,    setHistorico]    = useState([]);
@@ -356,7 +356,7 @@ export default function TelaMetasLider({ celula, isDark }) {
                     <motion.div key="ativas" initial={{ opacity:0, x:16 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-16 }}>
                         {metas.length === 0 ? (
                             <div className={`metas-empty ${t}`}>
-                                <Target size={36} style={{ color:AURA.gold, opacity:.9, marginBottom:12 }} />
+                                <Target size={36} style={{ color: isDark ? AURA.gold : "#B5000F", opacity:.9, marginBottom:12 }} />
                                 <p style={{ fontFamily:"'Inter',sans-serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>NENHUMA META ATIVA</p>
                                 <p style={{ fontFamily:"'Inter',sans-serif", fontSize:14, color:textSecondary, margin:"8px 0 20px", fontStyle:"italic" }}>Comece definindo o primeiro objetivo da sua célula.</p>
                                 <button className="metas-btn metas-btn-red" onClick={abrirNova}><Plus size={13} /> CRIAR PRIMEIRA META</button>
@@ -383,7 +383,7 @@ export default function TelaMetasLider({ celula, isDark }) {
                     <motion.div key="hist" initial={{ opacity:0, x:16 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-16 }}>
                         {historico.length === 0 ? (
                             <div className={`metas-empty ${t}`}>
-                                <Trophy size={36} style={{ color:AURA.gold, opacity:.9, marginBottom:12 }} />
+                                <Trophy size={36} style={{ color: isDark ? AURA.gold : "#B5000F", opacity:.9, marginBottom:12 }} />
                                 <p style={{ fontFamily:"'Inter',sans-serif", fontSize:12, letterSpacing:".14em", color:textSecondary, margin:0 }}>SEM HISTÓRICO AINDA</p>
                                 <p style={{ fontFamily:"'Inter',sans-serif", fontSize:14, color:textSecondary, margin:"8px 0 0", fontStyle:"italic" }}>Metas concluídas aparecerão aqui.</p>
                             </div>
@@ -514,7 +514,7 @@ export default function TelaMetasLider({ celula, isDark }) {
 
 function CardMeta({ meta, idx, isDark, t, textPrimary, textSecondary, ajustando, onEditar, onDeletar, onIncrementar, onDecrementar, onSincronizar }) {
     const cfg    = TIPO_CONFIG[meta.tipoMeta] || TIPO_CONFIG.BATISMO;
-    const status = statusMeta(meta);
+    const status = statusMeta(meta, isDark);
     const pct    = meta.progressoPercentual ?? 0;
 
     const diasRestantes = calcularDiasRestantes(meta.mesAno);

@@ -149,12 +149,12 @@ function RDStyles({ t, isDark }) {
     .rd-saved-badge {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 8.5px; font-weight: 500; letter-spacing: .14em;
-      text-transform: uppercase; color: ${AURA.gold};
+      text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
       animation: rd-blink 1.2s ease 2;
     }
     .rd-eyebrow {
       font-size: 9px; font-weight: 500; letter-spacing: .2em;
-      text-transform: uppercase; color: rgba(253,184,19,.55); margin: 0 0 3px;
+      text-transform: uppercase; color: ${isDark ? "rgba(253,184,19,.55)" : "#B5000F"}; margin: 0 0 3px;
     }
     .rd-title {
       font-family: 'Inter', sans-serif;
@@ -180,7 +180,7 @@ function RDStyles({ t, isDark }) {
       background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(253,184,19,.06)"};
       border: 1px solid ${t.border}; color: ${t.textMuted};
     }
-    .rd-tab-inactive:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+    .rd-tab-inactive:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
 
     /* ── Datas / navegação de semana ── */
     .rd-date-bar {
@@ -214,7 +214,7 @@ function RDStyles({ t, isDark }) {
       display: flex; align-items: center; justify-content: center;
       transition: all .2s; flex-shrink: 0;
     }
-    .rd-week-nav-btn:hover:not(:disabled) { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+    .rd-week-nav-btn:hover:not(:disabled) { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
     .rd-week-nav-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     /* ── KPI ── */
@@ -272,7 +272,7 @@ function RDStyles({ t, isDark }) {
     .rd-table-col-dia  { font-weight: 400; opacity: .75; }
     .rd-table-col-data {
       font-size: 11px; font-weight: 700; letter-spacing: .06em;
-      color: ${AURA.gold};
+      color: ${isDark ? AURA.gold : "#B5000F"};
     }
 
     .rd-member-row {
@@ -283,11 +283,11 @@ function RDStyles({ t, isDark }) {
     .rd-member-row:last-child { border-bottom: none; }
     .rd-member-avatar {
       width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
-      background: linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06));
-      border: 1px solid rgba(253,184,19,.22);
+      background: ${isDark ? "linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06))" : "linear-gradient(135deg, rgba(227,6,19,.16), rgba(227,6,19,.05))"};
+      border: 1px solid ${isDark ? "rgba(253,184,19,.22)" : "rgba(227,6,19,.34)"};
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Inter', sans-serif; font-weight: 600;
-      font-size: 17px; color: ${AURA.gold};
+      font-family: 'Inter', sans-serif; font-weight: 700;
+      font-size: 17px; color: ${isDark ? AURA.gold : "#8F0009"};
     }
     .rd-member-name {
       font-family: 'Inter', sans-serif;
@@ -338,7 +338,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-pb-label-data {
       font-size: 8px; font-weight: 700; letter-spacing: .04em;
-      color: ${AURA.gold}; opacity: .9;
+      color: ${isDark ? AURA.gold : "#B5000F"}; opacity: .9;
       max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .rd-pb-label-dia {
@@ -354,11 +354,11 @@ function RDStyles({ t, isDark }) {
       transition: all .15s; white-space: nowrap; color: ${t.textMuted};
       max-width: 100%; overflow: hidden; text-overflow: ellipsis;
     }
-    .rd-just-btn:hover { border-color: rgba(253,184,19,.5); color: ${AURA.gold}; }
+    .rd-just-btn:hover { border-color: rgba(253,184,19,.5); color: ${isDark ? AURA.gold : "#B5000F"}; }
     .rd-just-btn-filled {
       border-color: rgba(253,184,19,.6) !important;
       background: ${isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.1)"} !important;
-      color: ${AURA.gold} !important;
+      color: ${isDark ? AURA.gold : "#B5000F"} !important;
     }
 
     /* ── Botão submit ── */
@@ -385,7 +385,7 @@ function RDStyles({ t, isDark }) {
       padding: 14px 18px; border-radius: 14px;
       background: rgba(200,16,46,.08); border: 1px solid rgba(200,16,46,.25);
       font-size: 10px; font-weight: 600; letter-spacing: .14em;
-      text-transform: uppercase; color: ${AURA.red};
+      text-transform: uppercase; color: ${isDark ? "#FFD400" : AURA.red};
       animation: rd-slideD .3s ease; text-align: center;
     }
 
@@ -454,7 +454,7 @@ function RDStyles({ t, isDark }) {
       font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
       transition: all .2s; flex-shrink: 0;
     }
-    .rd-pag-btn:hover:not(:disabled) { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+    .rd-pag-btn:hover:not(:disabled) { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
     .rd-pag-btn:disabled { opacity: .3; cursor: not-allowed; }
     .rd-pag-btn-active {
       background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
@@ -470,7 +470,7 @@ function RDStyles({ t, isDark }) {
       letter-spacing: .14em; text-transform: uppercase; transition: all .25s;
       flex-shrink: 0; white-space: nowrap;
     }
-    .rd-btn-icon:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+    .rd-btn-icon:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
     .rd-btn-edit-gold {
       display: flex; align-items: center; gap: 7px;
       padding: 10px 18px; border-radius: 100px; border: none; cursor: pointer;
@@ -634,7 +634,7 @@ function RDStyles({ t, isDark }) {
     .rd-footer {
       text-align: center; font-size: 9px; font-weight: 500;
       letter-spacing: .18em; text-transform: uppercase;
-      color: ${isDark ? "rgba(251,244,239,.12)" : "rgba(26,16,8,.15)"};
+      color: ${isDark ? "rgba(255,255,255,.12)" : "rgba(26,16,8,.15)"};
     }
     `}</style>
   );
@@ -830,7 +830,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
   /* ── vazio ── */
   if (historico.length === 0 && totalElements === 0) return (
       <div style={{ padding: "48px 0", textAlign: "center" }}>
-        <History size={36} style={{ color: AURA.gold, marginBottom: 12 }} />
+        <History size={36} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 12 }} />
         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted }}>
           Nenhum relatório enviado ainda
         </p>
@@ -854,7 +854,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
       <div className="rd-card" style={{ overflow: "hidden" }}>
         {/* Cabeçalho do card */}
         <div className="rd-hist-head">
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(253,184,19,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: AURA.gold, flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(253,184,19,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }}>
             <History size={14} />
           </div>
           <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 500, color: t.text }}>
@@ -868,7 +868,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
         {/* Linhas da página atual */}
         {loadingPage ? (
             <div style={{ display: "flex", justifyContent: "center", padding: "32px 0" }}>
-              <Loader2 size={20} className="rd-spin" style={{ color: AURA.gold }} />
+              <Loader2 size={20} className="rd-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />
             </div>
         ) : (
             historico.map((item) => {
@@ -884,7 +884,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                     <div className="rd-hist-info">
                       {/* Período */}
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                        <Calendar size={12} style={{ color: AURA.gold, flexShrink: 0 }} />
+                        <Calendar size={12} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }} />
                         <span className="rd-hist-date">
                 {formatarDataBR(item.inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(item.fim)}
                   </span>
@@ -893,7 +893,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                       <div className="rd-hist-stats">
                         <span className="rd-hist-stat">{item.totalMembros ?? "?"} membros</span>
                         <span className="rd-hist-stat">{item.totalPresencas ?? 0} presenças</span>
-                        <span className="rd-hist-stat" style={{ color: AURA.gold, fontWeight: 700 }}>{item.totalPontos ?? 0} pts</span>
+                        <span className="rd-hist-stat" style={{ color: isDark ? AURA.gold : "#B5000F", fontWeight: 700 }}>{item.totalPontos ?? 0} pts</span>
                         <span style={{
                           fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
                           letterSpacing: ".12em", textTransform: "uppercase",
@@ -993,7 +993,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div className="rd-card" style={{ padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-            <button onClick={onVoltar} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: AURA.gold, display: "flex", alignItems: "center", flexShrink: 0 }}>
+            <button onClick={onVoltar} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: isDark ? AURA.gold : "#B5000F", display: "flex", alignItems: "center", flexShrink: 0 }}>
               <ChevronLeft size={20} />
             </button>
             <div style={{ minWidth: 0 }}>
@@ -1038,7 +1038,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                               <div className="rd-member-avatar" style={{ width: 34, height: 34, fontSize: 14 }}>{nome.charAt(0)}</div>
                               <div style={{ minWidth: 0 }}>
                                 <p className="rd-member-name" style={{ fontSize: 14 }}>{nome}</p>
-                                <p className="rd-member-id">{total}/{COLUNAS.length} presenças · <span style={{ color: AURA.gold, fontWeight: 700 }}>{pts} pts</span></p>
+                                <p className="rd-member-id">{total}/{COLUNAS.length} presenças · <span style={{ color: isDark ? AURA.gold : "#B5000F", fontWeight: 700 }}>{pts} pts</span></p>
                               </div>
                             </div>
                             {COLUNAS.map(({ campo, emoji, justField }) => (
@@ -1047,7 +1047,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                             {p[campo] ? "✅" : emoji}
                           </span>
                                   {!p[campo] && p[justField] && (
-                                      <div style={{ fontSize: 8, color: AURA.gold, fontFamily: "'Inter',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(253,184,19,.1)", borderRadius: 99, border: "1px solid rgba(253,184,19,.25)" }}>
+                                      <div style={{ fontSize: 8, color: isDark ? AURA.gold : "#B5000F", fontFamily: "'Inter',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(253,184,19,.1)", borderRadius: 99, border: "1px solid rgba(253,184,19,.25)" }}>
                                         {p[justField]}
                                       </div>
                                   )}
@@ -1391,7 +1391,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                   </button>
 
                   <div className="rd-week-display">
-                    <Calendar size={14} style={{ color: AURA.gold, flexShrink: 0 }} />
+                    <Calendar size={14} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }} />
                     <span className="rd-week-label">
                       {formatarDataBR(inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(fim)}
                     </span>
@@ -1406,13 +1406,13 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                     <ChevronRight size={16} />
                   </button>
 
-                  {verificandoExist && <Loader2 size={13} className="rd-spin" style={{ color: AURA.gold }} />}
+                  {verificandoExist && <Loader2 size={13} className="rd-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />}
                 </div>
 
                 {/* Banner existente */}
                 {relatorioExistente && !modoEdicao && (
                     <div className="rd-banner rd-banner-warn">
-                      <AlertTriangle size={18} style={{ color: AURA.yellow, flexShrink: 0 }} />
+                      <AlertTriangle size={18} style={{ color: isDark ? AURA.yellow : "#B5000F", flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
                         <p className="rd-banner-title" style={{ color: AURA.yellowDark }}>Relatório já enviado para esta semana</p>
                         <p className="rd-banner-sub">Um relatório já foi registrado para o período selecionado.</p>
@@ -1441,9 +1441,9 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                 {/* KPIs */}
                 <div className="rd-kpi-grid">
                   {[
-                    { label: "Membros",    val: membros.length,          color: AURA.gold  },
+                    { label: "Membros",    val: membros.length,          color: isDark ? AURA.gold : "#B5000F"  },
                     { label: "Presenças",  val: stats.totalGeral,        color: AURA.blue  },
-                    { label: "Pontos",     val: stats.pontosGerais,      color: AURA.gold },
+                    { label: "Pontos",     val: stats.pontosGerais,      color: isDark ? AURA.gold : "#B5000F" },
                     { label: "Frequência", val: `${stats.porcentagem}%`, color: stats.porcentagem > 60 ? AURA.gold : AURA.red, highlight: stats.porcentagem > 60 },
                   ].map(({ label, val, color, highlight }) => (
                       <div key={label} className="rd-kpi" style={highlight ? { background: `linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`, border: "none" } : {}}>
@@ -1477,32 +1477,36 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                         const pct   = Math.round((total / COLUNAS.length) * 100);
                         /* cor do nome do membro reage às marcações de presença — tons vívidos */
                         const nomeCor = total === COLUNAS.length
-                            ? "#2ED573"  // verde vívido — presença completa
+                            ? (isDark ? "#2ED573" : "#0E7A3E")  // verde vívido — presença completa
                             : total > 0
-                                ? "#D97757"  // terracota/rosé elegante — presença parcial
+                                ? (isDark ? "#D97757" : "#B84A1E")  // terracota/rosé elegante — presença parcial
                                 : t.text;
                         const avatarBg = total === COLUNAS.length
                             ? "linear-gradient(135deg, rgba(46,213,115,.28), rgba(46,213,115,.08))"
                             : total > 0
                                 ? "linear-gradient(135deg, rgba(217,119,87,.28), rgba(217,119,87,.08))"
-                                : "linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06))";
+                                : isDark
+                                    ? "linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06))"
+                                    : "linear-gradient(135deg, rgba(227,6,19,.16), rgba(227,6,19,.05))";
                         const avatarBorder = total === COLUNAS.length
                             ? "rgba(46,213,115,.45)"
                             : total > 0
                                 ? "rgba(217,119,87,.45)"
-                                : "rgba(253,184,19,.22)";
-                        const nomeGlow = total === COLUNAS.length
-                            ? "0 0 14px rgba(46,213,115,.45)"
-                            : total > 0
-                                ? "0 0 14px rgba(217,119,87,.4)"
-                                : "none";
+                                : isDark ? "rgba(253,184,19,.22)" : "rgba(227,6,19,.34)";
+                        const nomeGlow = !isDark
+                            ? "none"
+                            : total === COLUNAS.length
+                                ? "0 0 14px rgba(46,213,115,.45)"
+                                : total > 0
+                                    ? "0 0 14px rgba(217,119,87,.4)"
+                                    : "none";
                         return (
                             <div key={m.id} className="rd-member-row" style={{ animationDelay: `${i * 0.04}s` }}>
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                                   <div className="rd-member-avatar" style={{ background: avatarBg, borderColor: avatarBorder, color: nomeCor, transition: "background .3s, border-color .3s, color .3s" }}>{m.nome.charAt(0)}</div>
                                   <div>
-                                    <p className="rd-member-name" style={{ color: nomeCor, fontWeight: total > 0 ? 700 : 500, textShadow: nomeGlow }}>{m.nome}</p>
+                                    <p className="rd-member-name" style={{ color: nomeCor, fontWeight: total > 0 ? 700 : 600, textShadow: nomeGlow }}>{m.nome}</p>
                                     <p className="rd-member-id">ID #{m.id}</p>
                                   </div>
                                 </div>

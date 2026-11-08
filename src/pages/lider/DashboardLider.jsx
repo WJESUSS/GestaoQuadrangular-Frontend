@@ -18,14 +18,15 @@ const TelaMetasLider         = React.lazy(() => import("./TelaMetasLider"));
 import {
   Trash2, Loader2, Users, Plus, Search, X,
   TrendingUp, Target, Sparkles, LogOut,
-  Sun, Moon, CheckCircle2, Flame,
+  Sun, Moon, Flame,
   CalendarDays, ChevronRight, ClipboardList,
   UserCheck,
 } from "lucide-react";
-import { AURA, theme } from "./liderTheme";
+import { AURA } from "./liderTheme";
+import "./dashboardLider.css";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 import CrossMark from "../../components/CrossMark.jsx";
-import jesusImg from "../../assets/jesus.jpeg";
+import cartazImg from "../../assets/jesus_salva_cartaz.jpg";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
@@ -56,7 +57,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       }
       .dl-root::before {
         content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-        background-image: var(--dl-bg-overlay), url(${jesusImg});
+        background-image: var(--dl-bg-overlay);
         background-size: cover;
         background-position: center top;
         background-repeat: no-repeat;
@@ -103,7 +104,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         font-weight: 700; color: var(--dl-text);
         margin: 0; line-height: 1.2; letter-spacing: -.02em;
       }
-      .dl-title span { color: ${AURA.gold}; }
+      .dl-title span { color: var(--dl-accent); }
       .dl-subtitle {
         font-size: 12px; font-weight: 400; color: var(--dl-text-sec);
         margin: 4px 0 0; overflow: hidden;
@@ -121,7 +122,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
         transition: all .25s; flex-shrink: 0;
       }
-      .dl-btn-ico:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: var(--dl-hover-gold-bg); }
+      .dl-btn-ico:hover { border-color: var(--dl-accent); color: var(--dl-accent); background: var(--dl-hover-gold-bg); }
       .dl-btn-exit {
         display: flex; align-items: center; gap: 7px;
         padding: 0 16px; height: 38px; border-radius: 100px;
@@ -143,7 +144,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         color: var(--dl-text-muted); font-size: 14px;
         transition: all .25s; flex-shrink: 0;
       }
-      .dl-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .dl-btn-back:hover { border-color: var(--dl-accent); color: var(--dl-accent); }
 
       .dl-divider {
         display: flex; align-items: center; gap: 10px; margin: 0 auto 26px; max-width: 420px;
@@ -164,7 +165,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         border: 1px solid var(--dl-soft-gold-border);
         border-radius: 100px; padding: 9px 20px;
         font-size: 10px; font-weight: 500; letter-spacing: .12em;
-        text-transform: uppercase; color: ${AURA.gold};
+        text-transform: uppercase; color: var(--dl-accent);
         white-space: nowrap;
         backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
         box-shadow: var(--dl-inset-highlight);
@@ -276,7 +277,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .16em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-kpi-action-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: var(--dl-ghost-hover-bg); }
+      .dl-kpi-action-btn-ghost:hover { border-color: var(--dl-accent); color: var(--dl-accent); background: var(--dl-ghost-hover-bg); }
 
       .dl-section-hd {
         display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
@@ -378,7 +379,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
         letter-spacing: .14em; text-transform: uppercase; transition: all .3s;
       }
-      .dl-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; background: var(--dl-ghost-hover-bg); }
+      .dl-btn-ghost:hover { border-color: var(--dl-accent); color: var(--dl-accent); background: var(--dl-ghost-hover-bg); }
 
       .dl-members-list {
         padding: 16px 24px 22px;
@@ -532,53 +533,61 @@ export default function DashboardLider() {
   );
   const [showBoasVindas,         setShowBoasVindas]          = useState(false);
 
-  const t = useMemo(() => theme(isDark), [isDark]);
-
   const themeVars = useMemo(() => {
     const dark = isDark;
     return {
-      "--dl-bg": t.bg,
-      "--dl-bg-el": t.bgEl,
-      "--dl-bg-input": t.bgInput,
-      "--dl-border": t.border,
-      "--dl-border-input": t.borderInput,
-      "--dl-text": t.text,
-      "--dl-text-sec": t.textSec,
-      "--dl-text-muted": t.textMuted,
-      "--dl-card-bg": t.cardBg,
-      "--dl-card-border": t.cardBorder,
-      "--dl-card-hover": t.cardHover,
-      "--dl-placeholder": t.placeholder,
-      "--dl-header-bg": t.headerBg,
-      "--dl-glow-1": t.glow1,
-      "--dl-glow-2": t.glow2,
-      "--dl-option-bg": t.optionBg,
-      "--dl-avatar-bg": dark ? "rgba(40,40,44,.99)" : "#fff",
-      "--dl-avatar-shadow": dark ? "0 0 0 6px rgba(253,184,19,.06)" : "0 0 0 6px rgba(53,3,9,.06)",
-      "--dl-surface-1": dark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.08)",
-      "--dl-hover-gold-bg": dark ? "rgba(253,184,19,.09)" : "rgba(53,3,9,.12)",
-      "--dl-soft-gold-bg": dark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.08)",
-      "--dl-soft-gold-border": dark ? "rgba(253,184,19,.16)" : "rgba(53,3,9,.2)",
-      "--dl-inset-highlight": dark ? "inset 0 1px 0 rgba(255,255,255,.05)" : "none",
-      "--dl-alert-bg": dark ? "rgba(30,122,70,.18)" : "rgba(30,122,70,.10)",
-      "--dl-alert-color": dark ? "#fff" : "#350309",
-      "--dl-alert-border": dark ? "1px solid rgba(30,122,70,.4)" : "1px solid rgba(30,122,70,.35)",
-      "--dl-card-shadow": dark ? "0 20px 50px rgba(0,0,0,.35)" : "0 12px 30px rgba(20,20,22,.05)",
-      "--dl-card-shadow-lg": dark ? "0 20px 50px rgba(0,0,0,.28)" : "0 12px 30px rgba(20,20,22,.05)",
+      "--dl-bg": dark ? "#0A0A0F" : "#FFFFFF",
+      "--dl-bg-el": dark ? "#17171C" : "#FFFFFF",
+      "--dl-bg-input": dark ? "#101014" : "rgba(0,0,0,.04)",
+      "--dl-border": dark ? "rgba(255,255,255,.14)" : "rgba(0,0,0,.22)",
+      "--dl-border-input": dark ? "rgba(255,255,255,.22)" : "rgba(0,0,0,.32)",
+      "--dl-text": dark ? "#FFFFFF" : "#2A0306",
+      "--dl-text-sec": dark ? "#E7E7EC" : "#4A2E2A",
+      "--dl-text-muted": dark ? "#A1A1AA" : "#5F4A45",
+      "--dl-card-bg": dark ? "#17171C" : "#FFFFFF",
+      "--dl-card-border": dark ? "rgba(255,255,255,.14)" : "rgba(0,0,0,.20)",
+      "--dl-card-hover": dark ? "#FFD400" : "#E30613",
+      "--dl-placeholder": dark ? "rgba(255,255,255,.45)" : "rgba(0,0,0,.45)",
+      "--dl-header-bg": dark ? "rgba(10,10,15,.88)" : "rgba(255,255,255,.95)",
+      "--dl-glow-1": dark ? "rgba(227,6,19,.14)" : "rgba(227,6,19,.08)",
+      "--dl-glow-2": dark ? "rgba(255,212,0,.08)" : "rgba(0,0,0,.05)",
+      "--dl-option-bg": dark ? "#17171C" : "#FFFFFF",
+      "--dl-photo": "none",
+      "--dl-photo-filter": "none",
+      "--dl-shadow-color": dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.12)",
+      "--dl-avatar-bg": dark ? "#B5000F" : "#8F0009",
+      "--dl-avatar-shadow": dark ? "0 0 0 6px rgba(227,6,19,.18)" : "0 0 0 6px rgba(227,6,19,.10)",
+      "--dl-surface-1": dark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.04)",
+      "--dl-hover-gold-bg": dark ? "rgba(255,212,0,.16)" : "rgba(255,212,0,.20)",
+      "--dl-soft-gold-bg": dark ? "rgba(255,212,0,.12)" : "rgba(255,212,0,.20)",
+      "--dl-soft-gold-border": dark ? "rgba(255,212,0,.35)" : "rgba(227,6,19,.20)",
+      "--dl-inset-highlight": "none",
+      "--dl-alert-bg": dark ? "rgba(30,122,70,.22)" : "rgba(30,122,70,.10)",
+      "--dl-alert-color": dark ? "#FFFFFF" : "#2A0306",
+      "--dl-alert-border": dark ? "1px solid rgba(255,255,255,.20)" : "1px solid rgba(0,0,0,.12)",
+      "--dl-card-shadow": `10px 10px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
+      "--dl-card-shadow-lg": `10px 10px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
+      "--dl-card-shadow-sm": `8px 8px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
+      "--dl-modal-shadow": `12px 12px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
       "--dl-bg-overlay": dark
-        ? "linear-gradient(180deg, rgba(23,3,7,.78) 0%, rgba(23,3,7,.90) 60%, rgba(23,3,7,.96) 100%)"
-        : "linear-gradient(180deg, rgba(251,244,239,.86) 0%, rgba(251,244,239,.93) 60%, rgba(251,244,239,.97) 100%)",
-      "--dl-ghost-hover-bg": dark ? "rgba(253,184,19,.07)" : "rgba(53,3,9,.07)",
-      "--dl-card-shadow-sm": dark ? "0 12px 30px rgba(0,0,0,.22)" : "0 8px 22px rgba(20,20,22,.04)",
-      "--dl-modal-shadow": dark ? "0 18px 44px rgba(0,0,0,.45)" : "0 18px 44px rgba(0,0,0,.1)",
-      "--dl-surface-2": dark ? "rgba(255,255,255,.025)" : "rgba(53,3,9,.05)",
-      "--dl-surface-2-border": dark ? "rgba(253,184,19,.1)" : "rgba(53,3,9,.12)",
-      "--dl-row-hover-bg": dark ? "rgba(253,184,19,.06)" : "rgba(53,3,9,.08)",
-      "--dl-input-icon": dark ? "rgba(253,184,19,.65)" : "rgba(53,3,9,.6)",
-      "--dl-chip-bg": dark ? "rgba(253,184,19,.08)" : "rgba(53,3,9,.08)",
-      "--dl-empty-color": dark ? "rgba(255,255,255,.18)" : "rgba(20,20,22,.32)",
+        ? "linear-gradient(180deg, rgba(10,10,15,.88) 0%, rgba(10,10,15,.94) 50%, rgba(10,10,15,.98) 100%)"
+        : "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%)",
+      "--dl-ghost-hover-bg": dark ? "rgba(255,212,0,.12)" : "rgba(255,212,0,.16)",
+      "--dl-surface-2": dark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)",
+      "--dl-surface-2-border": dark ? "rgba(255,255,255,.14)" : "rgba(0,0,0,.18)",
+      "--dl-divider": dark ? "rgba(255,255,255,.24)" : "rgba(0,0,0,.32)",
+      "--dl-row-hover-bg": dark ? "rgba(255,212,0,.08)" : "rgba(255,212,0,.14)",
+      "--dl-input-icon": dark ? "#FFD400" : "#E30613",
+      "--dl-chip-bg": dark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.05)",
+      "--dl-empty-color": dark ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.40)",
+      "--dl-panel": dark ? "#17171C" : "#FFFFFF",
+      "--dl-panel-2": dark ? "#101014" : "rgba(0,0,0,.035)",
+      "--dl-accent": dark ? "#FFD400" : "#E30613",
+      "--dl-accent-soft": dark ? "rgba(255,212,0,.14)" : "rgba(227,6,19,.07)",
+      "--dl-title-shadow": dark ? "rgba(143,0,9,.55)" : "rgba(227,6,19,.15)",
+      "--dl-tint-opacity": dark ? "0.02" : "0",
     };
-  }, [isDark, t]);
+  }, [isDark]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -700,19 +709,27 @@ export default function DashboardLider() {
 
   /* ── 7 módulos (Histórico removido) ── */
   const menuItems = [
-    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: "#FDB813" },
-    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: "#C8102E" },
-    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: "#E09A0B" },
-    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: "#FFD34D" },
-    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#A50018" },
-    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#E0153B" },
-    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#8B0000" },
-    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: "#FFB84D" },
+    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: "#FFD400" },
+    { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: "#C2187A" },
+    { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: "#1E4FD8" },
+    { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: "#FF7A00" },
+    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#E30613" },
+    { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#FF7A00" },
+    { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#1E4FD8" },
+    { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: "#C2187A" },
   ];
 
   return (
-      <div className={`dl-root ieq-app${isDark ? " ieq-dark" : ""}`}>
+      <div className={`dl-root ieq-lider ieq-app${isDark ? " ieq-dark" : ""}`}>
         <GlobalStyles />
+
+        <div className="dl-flag" aria-hidden="true">
+          <i /><i /><i /><i />
+        </div>
+        <div className="dl-deco" aria-hidden="true">
+          <span className="dl-deco-cross" />
+          <span className="dl-deco-squares"><i /><i /><i /><i /></span>
+        </div>
 
         <AnimatePresence>
           {showBoasVindas && !loading && (
@@ -773,7 +790,7 @@ export default function DashboardLider() {
           <div className="dl-badge-center">
             <span className="dl-badge">
               <span className="dl-badge-dot dl-blink" />
-              <strong style={{ color: t.text, fontWeight: 600 }}>
+              <strong style={{ color: "var(--dl-text)", fontWeight: 800 }}>
                 {celula?.nome?.toUpperCase() || "—"}
               </strong>
             </span>
@@ -798,7 +815,7 @@ export default function DashboardLider() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
                         >
-                          <Sparkles size={16} style={{ color: AURA.goldLight, opacity: .95, flexShrink: 0 }} />
+                          <Sparkles size={16} style={{ color: "var(--dl-accent)", opacity: .95, flexShrink: 0 }} />
                           Multiplicação aprovada! Organize os membros para a nova célula.
                         </motion.div>
                     )}
@@ -840,35 +857,20 @@ export default function DashboardLider() {
                     </div>
 
                     <div className="dl-kpi-action">
-                      <div>
-                        <div
-                            className="dl-kpi-action-icon"
-                            style={{
-                              background: isAprovado ? "rgba(30,122,70,.14)" : isAnalise ? "rgba(255,211,77,.12)" : "rgba(253,184,19,.08)",
-                              color: isAprovado ? "#1E7A46" : isAnalise ? AURA.goldLight : AURA.gold,
-                              border: `1px solid ${isAprovado ? "rgba(30,122,70,.35)" : isAnalise ? "rgba(255,211,77,.3)" : "rgba(253,184,19,.22)"}`,
-                            }}
-                        >
-                          {isAprovado
-                              ? <CheckCircle2 size={20} />
-                              : isAnalise ? <Loader2 size={20} className="dl-spin" />
-                                  : <Target size={20} />
-                          }
-                        </div>
-                        <p className="dl-kpi-action-title">Ação Pastoral</p>
-                        <p className="dl-kpi-action-sub">
-                          {isAnalise ? "Em análise" : isAprovado ? "Liberado" : atingiuMeta ? "Pode solicitar" : "Aguardando meta"}
-                        </p>
+                      <div className="dl-kpi-cartaz">
+                        <img
+                            src={cartazImg}
+                            alt="Jesus Salva — cartaz da Igreja do Evangelho Quadrangular"
+                        />
                       </div>
                       <div>
                         {isAnalise ? (
-                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 100, background: "rgba(255,211,77,.10)", border: "1px solid rgba(255,211,77,.3)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight }}>
+                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 0, background: "rgba(255,212,0,.12)", border: "2px solid rgba(255,212,0,.4)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--dl-accent)" }}>
                               Consultando Pastor…
                             </div>
                         ) : podeSolicitar ? (
                             <button
                                 className="dl-kpi-action-btn"
-                                style={isAprovado ? { background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, color: "#12131C", boxShadow: "0 6px 20px rgba(253,184,19,.30)" } : undefined}
                                 onClick={() => setShowModalMultiplicacao(true)}
                             >
                               {isAprovado ? "Nova Solicitação" : "Solicitar Mult."}
@@ -891,11 +893,12 @@ export default function DashboardLider() {
                         <motion.div
                             key={aba}
                             className="dl-menu-card"
+                            style={{ "--accent": color }}
                             whileHover={{ y: -5 }}
                             whileTap={{ scale: .96 }}
                             onClick={() => (aba === "acompanhamento-modal" ? setShowAcompanhamento(true) : setAbaAtiva(aba))}
                         >
-                          <div className="dl-menu-icon" style={{ background: `radial-gradient(circle at 30% 25%, ${color}2e, ${color}12)`, color, border: `1px solid ${color}30`, boxShadow: `0 4px 12px ${color}22` }}>
+                          <div className="dl-menu-icon" style={{ background: color, color: (color === "#FFD400" || color === "#FF7A00") ? "#2A0306" : "#fff", border: `2px solid ${color}` }}>
                             {icon}
                           </div>
                           <div>
@@ -933,7 +936,7 @@ export default function DashboardLider() {
                           </React.Fragment>
                       ))}
                       {membros.length === 0 && (
-                          <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+                          <p style={{ textAlign: "center", padding: "16px 0", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: "var(--dl-text-muted)" }}>
                             Nenhum membro vinculado.
                           </p>
                       )}
@@ -952,7 +955,7 @@ export default function DashboardLider() {
                     animate={{ opacity: 1, transition: { duration: .3 } }}
                     exit={{ opacity: 0, transition: { duration: .2 } }}
                 >
-                  <React.Suspense fallback={<div style={{ display: "flex", justifyContent: "center", padding: "48px 0" }}><Loader2 size={22} className="dl-spin" style={{ color: t.textMuted }} /></div>}>
+                  <React.Suspense fallback={<div style={{ display: "flex", justifyContent: "center", padding: "48px 0" }}><Loader2 size={22} className="dl-spin" style={{ color: "var(--dl-text-muted)" }} /></div>}>
                     {abaAtiva === "metas"       && <TelaMetasLider      celula={celula}       isDark={isDark} />}
                     {abaAtiva === "relatorio"   && <TelaRelatorio        isDark={isDark} />}
                     {abaAtiva === "discipulado" && <RelatorioDiscipulado membros={membros}     isDark={isDark} />}
@@ -970,10 +973,10 @@ export default function DashboardLider() {
         {/* ── Modal: Adicionar Membro ── */}
         <AnimatePresence>
           {showModalAddMembro && createPortal(
-              <div className="dl-modal-backdrop">
+              <div className="dl-modal-backdrop ieq-lider-modal">
                 <motion.div className="dl-modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowModalAddMembro(false)} />
                 <motion.div className="dl-modal-box" initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: "tween", duration: .28 }}>
-                  <ModalBuscarMembro celulaId={celula?.id} isDark={isDark} t={t} onClose={() => { setShowModalAddMembro(false); carregarDados(); }} />
+                  <ModalBuscarMembro celulaId={celula?.id} onClose={() => { setShowModalAddMembro(false); carregarDados(); }} />
                 </motion.div>
               </div>,
               document.body
@@ -981,21 +984,21 @@ export default function DashboardLider() {
 
           {/* ── Modal: Multiplicação ── */}
           {showModalMultiplicacao && createPortal(
-              <div className="dl-modal-backdrop">
+              <div className="dl-modal-backdrop ieq-lider-modal">
                 <motion.div className="dl-modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
                 <motion.div className="dl-modal-multi-box" initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: "tween", duration: .28 }}>
                   <div style={{ textAlign: "center", marginBottom: 26 }}>
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid rgba(253,184,19,.26)", borderRadius: "50%" }} />
-                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid rgba(253,184,19,.2)", borderRadius: "50%", animationDelay: ".9s" }} />
-                      <div style={{ width: 46, height: 46, borderRadius: "50%", background: isDark ? "rgba(40,40,44,.99)" : "#fff", border: "1.5px solid rgba(253,184,19,.3)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                      <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid var(--dl-accent)", borderRadius: 0, opacity: .35 }} />
+                      <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid var(--dl-accent)", borderRadius: 0, animationDelay: ".9s", opacity: .28 }} />
+                      <div style={{ width: 50, height: 50, borderRadius: 0, background: "#8F0009", border: "2px solid #FFD400", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1, boxShadow: "4px 4px 0 var(--dl-shadow-color)" }}>
                         <CrossMark size={28} />
                       </div>
                     </div>
-                    <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 20, fontWeight: 500, color: t.text, margin: "0 0 8px", letterSpacing: ".02em" }}>
+                    <h2 style={{ fontFamily: "'Anton','Inter',sans-serif", fontSize: 24, fontWeight: 400, color: "var(--dl-text)", margin: "0 0 8px", letterSpacing: ".04em", textTransform: "uppercase" }}>
                       Plano de Multiplicação
                     </h2>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.textSec }}>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: "var(--dl-text-sec)" }}>
                       Informe o novo líder e o local da nova célula.
                     </p>
                   </div>
@@ -1004,7 +1007,7 @@ export default function DashboardLider() {
                   <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
                     <button className="dl-btn-ghost" style={{ flex: 1 }} onClick={() => setShowModalMultiplicacao(false)}>Cancelar</button>
                     <button
-                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px", border: "none", borderRadius: "100px", cursor: "pointer", background: `linear-gradient(135deg,${AURA.mossDeep},${AURA.moss})`, color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .3s", opacity: solicitandoMulti ? .6 : 1 }}
+                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px", border: "2px solid #FFD400", borderRadius: 0, cursor: "pointer", background: "#FFD400", color: "#2A0306", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s", boxShadow: "5px 5px 0 var(--dl-shadow-color)", opacity: solicitandoMulti ? .6 : 1 }}
                         onClick={solicitarMultiplicacao}
                         disabled={solicitandoMulti}
                     >
@@ -1030,7 +1033,7 @@ export default function DashboardLider() {
 }
 
 /* ─── Modal Buscar Membro ─────────────────────────────────────────────── */
-function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
+function ModalBuscarMembro({ celulaId, onClose }) {
   const [busca,      setBusca]      = useState("");
   const [membrosSem, setMembrosSem] = useState([]);
   const [loading,    setLoading]    = useState(false);
@@ -1062,21 +1065,21 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
   );
 
   return (
-      <div style={{ padding: "22px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      <div style={{ padding: "26px 20px 22px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexShrink: 0 }}>
           <div>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(253,184,19,.65)", margin: "0 0 4px" }}>Vincular</p>
-            <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>Selecionar Membro</h2>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: ".24em", textTransform: "uppercase", color: "var(--dl-accent)", margin: "0 0 5px" }}>Vincular</p>
+            <h2 style={{ fontFamily: "'Anton','Inter',sans-serif", fontSize: 22, fontWeight: 400, color: "var(--dl-text)", margin: 0, letterSpacing: ".04em", textTransform: "uppercase" }}>Selecionar Membro</h2>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, padding: 4, display: "flex" }}>
-            <X size={20} />
+          <button onClick={onClose} style={{ background: "none", border: "2px solid var(--dl-border)", borderRadius: 0, cursor: "pointer", color: "var(--dl-text)", padding: 6, display: "flex" }}>
+            <X size={18} />
           </button>
         </div>
 
         <div style={{ position: "relative", marginBottom: 14, flexShrink: 0 }}>
-          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? "rgba(253,184,19,.65)" : "rgba(53,3,9,.6)", opacity: .9, pointerEvents: "none" }} />
+          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--dl-accent)", opacity: .9, pointerEvents: "none" }} />
           <input
-              style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "13px 16px 13px 44px", borderRadius: 13, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, transition: "all .25s" }}
+              style={{ width: "100%", boxSizing: "border-box", background: "var(--dl-bg-input)", border: "2px solid var(--dl-border-input)", color: "var(--dl-text)", padding: "13px 16px 13px 44px", borderRadius: 0, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 500, transition: "all .25s" }}
               placeholder="Buscar por nome…"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
@@ -1086,34 +1089,34 @@ function ModalBuscarMembro({ celulaId, onClose, isDark, t }) {
         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }}>
           {loading ? (
               <div style={{ textAlign: "center", paddingTop: 32 }}>
-                <Loader2 size={26} className="dl-spin" style={{ color: AURA.gold, display: "inline-block" }} />
+                <Loader2 size={26} className="dl-spin" style={{ color: "var(--dl-accent)", display: "inline-block" }} />
               </div>
           ) : filtrados.length > 0 ? (
               filtrados.map((m) => (
                   <div
                       key={m.id}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", gap: 10, background: isDark ? "rgba(255,255,255,.03)" : "rgba(53,3,9,.06)", border: `1px solid ${isDark ? "rgba(253,184,19,.11)" : "rgba(53,3,9,.14)"}`, borderRadius: 13, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(253,184,19,.45)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(253,184,19,.11)" : "rgba(53,3,9,.14)"; }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", gap: 10, background: "var(--dl-panel-2)", border: "2px solid var(--dl-card-border)", borderRadius: 0, flexShrink: 0, transition: "border-color .2s, background .2s", cursor: "default" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--dl-accent)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--dl-card-border)"; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.4),rgba(53,3,9,.14))", border: "1px solid rgba(53,3,9,.32)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 14, color: AURA.moss }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 0, flexShrink: 0, background: "#FFD400", border: "2px solid var(--dl-border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Anton','Inter',sans-serif", fontWeight: 400, fontSize: 15, color: "#2A0306", boxShadow: "3px 3px 0 var(--dl-shadow-color)" }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
-                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 500, color: "var(--dl-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {m.nome}
                       </span>
                     </div>
                     <button
                         onClick={() => vincular(m.id)}
-                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})`, color: "#12131C", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s" }}
+                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 0, border: "2px solid #FFD400", cursor: "pointer", background: "#FFD400", color: "#2A0306", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .2s", boxShadow: "3px 3px 0 var(--dl-shadow-color)" }}
                     >
                       <Plus size={11} /> Vincular
                     </button>
                   </div>
               ))
           ) : (
-              <p style={{ textAlign: "center", paddingTop: 28, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>
+              <p style={{ textAlign: "center", paddingTop: 28, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 400, fontStyle: "italic", color: "var(--dl-text-muted)" }}>
                 Nenhum membro encontrado.
               </p>
           )}

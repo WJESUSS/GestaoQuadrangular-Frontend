@@ -129,14 +129,14 @@ function AuraStyles({ t, isDark }) {
       .aura-divider::after  { content:''; flex:1; height:1px; background: linear-gradient(to left, transparent, ${AURA.gold}); }
       .aura-divider-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
-      .aura-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(253,184,19,.07); border: 1px solid rgba(253,184,19,.2); border-radius: 100px; padding: 5px 14px; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: ${AURA.gold}; }
+      .aura-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(253,184,19,.07); border: 1px solid rgba(253,184,19,.2); border-radius: 100px; padding: 5px 14px; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"}; }
       .aura-badge-dot { width:5px; height:5px; border-radius:50%; background:${AURA.gold}; }
 
       .aura-tabs { display: flex; border-radius: 16px; overflow: hidden; border: 1px solid ${t.border}; margin: 16px 0 24px; backdrop-filter: blur(20px); }
       .aura-tab { flex: 1; padding: 13px 16px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .25s; }
       .aura-tab.active   { background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff; }
       .aura-tab.inactive { background: ${t.bgEl}; color: ${t.textMuted}; }
-      .aura-tab.inactive:hover { color: ${AURA.gold}; }
+      .aura-tab.inactive:hover { color: ${isDark ? AURA.gold : "#B5000F"}; }
 
       .aura-card { background: ${t.bgEl}; border: 1px solid ${t.border}; border-radius: 20px; overflow: hidden; backdrop-filter: blur(24px); position: relative; margin-bottom: 16px; }
       .aura-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, rgba(253,184,19,.2), transparent); }
@@ -154,7 +154,7 @@ function AuraStyles({ t, isDark }) {
       .aura-kpi-label { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: ${t.textMuted}; margin: 0 0 8px; }
       .aura-kpi-num   { font-family: 'Inter', sans-serif; font-size: 42px; font-weight: 700; line-height: 1; margin: 0; }
 
-      .aura-label { display: block; margin-bottom: 7px; font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${AURA.gold}; }
+      .aura-label { display: block; margin-bottom: 7px; font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"}; }
       .aura-input { width: 100%; box-sizing: border-box; background: ${t.bgInput}; border: 1px solid ${t.borderInput}; color: ${t.text}; padding: 13px 16px; border-radius: 13px; outline: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300; transition: all .25s; -webkit-appearance: none; appearance: none; }
       .aura-input:focus { border-color: rgba(253,184,19,.5); background: rgba(253,184,19,.04); box-shadow: 0 0 0 3px rgba(253,184,19,.08); }
       .aura-input::placeholder { color: ${t.placeholder}; }
@@ -167,7 +167,7 @@ function AuraStyles({ t, isDark }) {
       .aura-just-options { display: flex; flex-wrap: wrap; gap: 8px; }
       .aura-just-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 100px; border: 1px solid; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; transition: all .2s; background: transparent; }
 
-      .aura-alert-warn    { display: flex; align-items: center; gap: 12px; background: rgba(253,184,19,.07); border: 1px solid rgba(253,184,19,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #FDB813; }
+      .aura-alert-warn    { display: flex; align-items: center; gap: 12px; background: rgba(253,184,19,.07); border: 1px solid rgba(253,184,19,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: ${isDark ? "#FDB813" : "#8A5A00"}; }
       .aura-alert-success { display: flex; align-items: center; gap: 12px; background: rgba(13,110,58,.08); border: 1px solid rgba(13,110,58,.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #0d6e3a; animation: aura-fadein .4s ease; }
       .aura-alert-info    { display: flex; align-items: center; gap: 12px; background: rgba(53,3,9,.07); border: 1px solid rgba(53,3,9,.22); border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: ${AURA.blue}; }
 
@@ -297,10 +297,10 @@ function AuraStyles({ t, isDark }) {
       .aura-btn-red:disabled { opacity: .4; cursor: not-allowed; }
 
       .aura-btn-ghost { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: 100px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .3s; }
-      .aura-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .aura-btn-ghost:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
 
       .aura-btn-back { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 100px; border: 1px solid ${t.border}; cursor: pointer; background: transparent; color: ${t.textSec}; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .3s; margin-bottom: 20px; }
-      .aura-btn-back:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+      .aura-btn-back:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
 
       .aura-btn-edit { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 100px; border: none; cursor: pointer; background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #0A0A0F; font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; transition: all .25s; box-shadow: 0 4px 14px rgba(253,184,19,.2); flex-shrink: 0; }
       .aura-btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(253,184,19,.3); }
@@ -344,14 +344,14 @@ function BadgeJustificativa({ valor }) {
   );
 }
 
-function BadgeNaoRealizada({ motivo }) {
+function BadgeNaoRealizada({ motivo, isDark }) {
   const cfg = MOTIVO_LABELS[motivo] || MOTIVO_LABELS.OUTRO;
   return (
       <span style={{
         display: "inline-flex", alignItems: "center", gap: 5,
         padding: "3px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600,
         fontFamily: "'Inter',sans-serif", letterSpacing: ".06em",
-        background: "rgba(253,184,19,.15)", color: "#FDB813",
+        background: "rgba(253,184,19,.15)", color: isDark ? "#FDB813" : "#8A5A00",
         border: "1px solid rgba(253,184,19,.4)", whiteSpace: "nowrap",
       }}>
       <Ban size={10} /> NÃO REALIZADA · {cfg.icone} {cfg.label.toUpperCase()}
@@ -397,7 +397,7 @@ function ModalRealizadaSucesso({
       <div className={`aura-modal-overlay-bg${saindo ? " saindo" : ""}`} onClick={fechar}>
         <div className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
             onClick={e => e.stopPropagation()}
-            style={{ background: "linear-gradient(165deg, #350309 0%, #1D0409 50%, #170307 100%)" }}
+            style={{ background: "linear-gradient(165deg, #E30613 0%, #B5000F 50%, #8F0009 100%)" }}
         >
           {/* Partículas decorativas de fundo */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
@@ -523,7 +523,7 @@ function ModalNaoRealizadaSucesso({
         <div
             className={`aura-modal-card-v2${saindo ? " saindo" : ""}`}
             onClick={e => e.stopPropagation()}
-            style={{ background: "linear-gradient(165deg, #350309 0%, #1D0409 50%, #170307 100%)" }}
+            style={{ background: "linear-gradient(165deg, #E30613 0%, #B5000F 50%, #8F0009 100%)" }}
         >
           {/* Partículas de fundo */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none" }}>
@@ -891,7 +891,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                           background: marcado ? `linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue})` : isDark ? "rgba(255,255,255,.05)" : "rgba(253,184,19,.08)",
                           border: marcado ? "none" : `1px solid ${t.border}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          color: marcado ? "#fff" : AURA.gold,
+                          color: marcado ? "#fff" : (isDark ? AURA.gold : "#B5000F"),
                           fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 16,
                           transition: "all .3s",
                         }}>
@@ -911,7 +911,7 @@ function PessoasList({ pessoas, form, processingIds, alternarPresenca, decisoesV
                             )}
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
-                        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? AURA.yellow : AURA.gold }}>
+                        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: isVisitante ? (isDark ? AURA.yellow : "#B5000F") : (isDark ? AURA.gold : "#B5000F") }}>
                           {pessoa.tipo}
                         </span>
                             {isVisitante && temDecisao && <BadgeDecisao decisao={decisao} />}
@@ -1131,7 +1131,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
 
         <div className="aura-content" style={{ paddingTop: 20 }}>
           <button className="aura-btn-back" onClick={onVoltar}><ArrowLeft size={13} /> Voltar</button>
-          <div className="aura-alert-warn"><AlertTriangle size={15} style={{ flexShrink: 0, color: AURA.yellow }} />Modo edição — você está alterando um relatório já enviado.</div>
+          <div className="aura-alert-warn"><AlertTriangle size={15} style={{ flexShrink: 0, color: isDark ? AURA.yellow : "#B5000F" }} />Modo edição — você está alterando um relatório já enviado.</div>
 
           <div className="aura-card" style={{ padding: "22px 24px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 16 }}>
@@ -1173,7 +1173,7 @@ function TelaEditarRelatorio({ relatorioId, onVoltar, onSalvo, isDark = false })
           <div style={{ height: 100 }} />
         </div>
 
-        <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(251,244,239,1) 55%,transparent)" }}>
+        <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(255,255,255,1) 55%,transparent)" }}>
           <div style={{ maxWidth: 760, margin: "0 auto" }}>
             <button className="aura-btn-red" onClick={handleSalvar} disabled={salvando || (relatorioRealizada ? !form.estudo.trim() : !motivoNaoRealizacao)}>
               {salvando ? <><Loader2 size={16} className="aura-spin" /> Salvando…</> : <><ClipboardCheck size={16} /> {relatorioRealizada ? `Salvar Alterações (${total} presentes)` : "Salvar Alterações"}</>}
@@ -1552,7 +1552,7 @@ export default function TelaRelatorio({ isDark = false }) {
                   <span className="aura-badge"><Trophy size={10} /> Histórico</span>
                 </div>
                 {loadingHist ? (
-                    <div style={{ padding: 48, textAlign: "center" }}><Loader2 size={28} className="aura-spin" style={{ color: AURA.gold, display: "inline-block" }} /></div>
+                    <div style={{ padding: 48, textAlign: "center" }}><Loader2 size={28} className="aura-spin" style={{ color: isDark ? AURA.gold : "#B5000F", display: "inline-block" }} /></div>
                 ) : historico.length === 0 ? (
                     <div style={{ padding: 48, textAlign: "center" }}>
                       <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, fontStyle: "italic", color: t.textMuted }}>Nenhum relatório encontrado.</p>
@@ -1570,7 +1570,7 @@ export default function TelaRelatorio({ isDark = false }) {
                           {rel.estudo || "Sem referência"}
                         </p>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                          {rel.realizada === false && rel.motivoNaoRealizacao && <BadgeNaoRealizada motivo={rel.motivoNaoRealizacao} />}
+                          {rel.realizada === false && rel.motivoNaoRealizacao && <BadgeNaoRealizada motivo={rel.motivoNaoRealizacao} isDark={isDark} />}
                           <span className="aura-badge" style={{ fontSize: 9, padding: "3px 10px" }}>
                       <Users2 size={9} /> {rel.totalPresentes || 0} presentes
                     </span>
@@ -1648,7 +1648,7 @@ export default function TelaRelatorio({ isDark = false }) {
         </div>
 
         {modo === "novo" && (
-            <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(251,244,239,1) 55%,transparent)" }}>
+            <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", padding: "16px 24px", zIndex: 50, background: isDark ? "linear-gradient(to top,rgba(10,10,15,1) 55%,transparent)" : "linear-gradient(to top,rgba(255,255,255,1) 55%,transparent)" }}>
               <div style={{ maxWidth: 760, margin: "0 auto" }}>
                 <button className="aura-btn-primary" onClick={handleSubmit} disabled={enviando || (realizada ? !form.estudo.trim() : !motivoNaoRealizacao)}>
                   {enviando ? <><Loader2 size={16} className="aura-spin" /> Enviando…</> : <><ClipboardCheck size={16} /> {realizada ? `Finalizar Relatório (${total} presentes)` : "Registrar Ausência"}</>}

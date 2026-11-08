@@ -305,13 +305,13 @@ function VisitanteMultiSelector({ items, loading, erro, selectedIds, onToggle, o
 }
 
 /* ── Pessoa Selector — mantido para Líder/Auxiliar ── */
-function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholder, t, labelKey = "nome" }) {
+function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholder, t, isDark, labelKey = "nome" }) {
     const [busca, setBusca] = useState("");
     const filtrados = items.filter(p => (p[labelKey] ?? p.nomeCompleto ?? "").toLowerCase().includes(busca.toLowerCase()));
 
     if (loading) return (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
-            <Loader2 size={16} className="m70-spin" style={{ color: AURA.gold }} /> Carregando...
+            <Loader2 size={16} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} /> Carregando...
         </div>
     );
     if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
@@ -319,7 +319,7 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
     return (
         <div>
             <div style={{ position: "relative", marginBottom: 10 }}>
-                <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
+                <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
                 <input className="m70-input" placeholder={placeholder} value={busca} onChange={e => setBusca(e.target.value)}
                        style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "11px 14px 11px 38px", borderRadius: 12, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300 }} />
             </div>
@@ -335,7 +335,7 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
                             <div key={p.id} onClick={() => onSelect(p)}
                                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", cursor: "pointer", background: sel ? "rgba(253,184,19,.1)" : "transparent", borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none", transition: "background .15s" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div>
@@ -441,7 +441,7 @@ function GlobalStyles({ t, isDark }) {
             text-transform: uppercase; transition: border-color .2s, color .2s;
             white-space: nowrap; min-width: 0;
         }
-        .m70-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+        .m70-btn-ghost:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
 
         .m70-btn-sage {
             display: inline-flex; align-items: center; gap: 7px;
@@ -469,7 +469,7 @@ function GlobalStyles({ t, isDark }) {
             text-transform: uppercase; cursor: pointer; padding: 8px 14px;
             transition: border-color .2s, color .2s; white-space: nowrap;
         }
-        .m70-btn-clear:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+        .m70-btn-clear:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
 
         .m70-input {
             width: 100%; box-sizing: border-box;
@@ -489,7 +489,7 @@ function GlobalStyles({ t, isDark }) {
         }
         input[type="date"].m70-input::-webkit-calendar-picker-indicator { filter: ${isDark ? "invert(1) opacity(.4)" : "opacity(.5)"}; cursor: pointer; }
 
-        .m70-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${AURA.gold}; margin: 0 0 6px; display: block; }
+        .m70-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"}; margin: 0 0 6px; display: block; }
 
         .m70-progress-track { height: 5px; border-radius: 99px; background: ${isDark ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)"}; overflow: hidden; flex: 1; }
 
@@ -510,7 +510,7 @@ function GlobalStyles({ t, isDark }) {
             letter-spacing: .1em; text-transform: uppercase; color: ${t.textMuted};
             display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .2s;
         }
-        .m70-tab.active { background: rgba(253,184,19,.12); border-color: rgba(253,184,19,.35); color: ${AURA.gold}; }
+        .m70-tab.active { background: rgba(253,184,19,.12); border-color: rgba(253,184,19,.35); color: ${isDark ? AURA.gold : "#B5000F"}; }
 
         /* ── Select de decisão espiritual ──
            OBS: não usar a propriedade shorthand "background" aqui nem inline.
@@ -551,7 +551,7 @@ function GlobalStyles({ t, isDark }) {
             display: flex; align-items: center; justify-content: center;
             color: ${t.textMuted}; transition: border-color .15s, color .15s;
         }
-        .m70-mission-icon-btn:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+        .m70-mission-icon-btn:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
         .m70-mission-icon-btn.danger:hover { border-color: ${AURA.red}; color: #e8556d; }
 
         .m70-mission-name {
@@ -1224,7 +1224,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                 {[
                     { label: "Total",      value: totalMissoes,    color: t.text,    sub: "missões"      },
                     { label: "Ativas",     value: ativas,          color: AURA.sage, sub: "em andamento" },
-                    { label: "Visitantes", value: totalVisitantes, color: AURA.yellow, sub: "alcançados"   },
+                    { label: "Visitantes", value: totalVisitantes, color: isDark ? AURA.yellow : "#B5000F", sub: "alcançados"   },
                     { label: "Encontros",  value: totalEncontros,  color: AURA.blueLight, sub: "realizados"   },
                 ].map((s, i) => (
                     <div key={s.label} className="m70-card-anim m70-card m70-stat" style={{ animationDelay: `${i * 0.07}s` }}>
@@ -1250,7 +1250,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         {temFiltro && <button className="m70-btn-clear" onClick={limpar}>✕ Limpar filtros</button>}
                     </div>
                     <div style={{ position: "relative" }}>
-                        <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
+                        <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
                         <input className="m70-input" style={{ paddingLeft: 38 }} placeholder="Buscar por nome ou endereço..." value={busca} onChange={e => setBusca(e.target.value)} />
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10 }} className="m70-filters-grid">
@@ -1272,13 +1272,13 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                 {missoes.length === 0 ? (
                     <div className="m70-card" style={{ textAlign: "center", padding: "56px 24px" }}>
-                        <Flame size={36} style={{ color: AURA.gold, marginBottom: 14 }} />
+                        <Flame size={36} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 14 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhuma missão cadastrada</p>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textSec }}>Clique em "Nova Missão" para começar.</p>
                     </div>
                 ) : missoesFiltradas.length === 0 ? (
                     <div className="m70-card" style={{ textAlign: "center", padding: "40px 24px" }}>
-                        <Search size={28} style={{ color: AURA.gold, marginBottom: 12 }} />
+                        <Search size={28} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 12 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhum resultado</p>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec }}>Ajuste os filtros para encontrar uma missão.</p>
                     </div>
@@ -1403,7 +1403,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             <PessoaSelector
                                 items={membrosHook.membros.filter(mb => mb.id !== fCriar.auxiliarId && mb.id !== fCriar.terceiroMembroId)}
                                 loading={membrosHook.loading} erro={membrosHook.erro}
-                                selectedId={fCriar.liderId} onSelect={selecionarLider} placeholder="Pesquisar líder..." t={t}
+                                selectedId={fCriar.liderId} onSelect={selecionarLider} placeholder="Pesquisar líder..." t={t} isDark={isDark}
                             />
                             {fCriar.liderId && <button className="m70-btn-clear" style={{ marginTop: 6 }} onClick={() => setFCriar(f => ({ ...f, liderId: null }))}>✕ Limpar</button>}
                         </div>
@@ -1412,7 +1412,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             <PessoaSelector
                                 items={membrosHook.membros.filter(mb => mb.id !== fCriar.liderId && mb.id !== fCriar.terceiroMembroId)}
                                 loading={membrosHook.loading} erro={membrosHook.erro}
-                                selectedId={fCriar.auxiliarId} onSelect={selecionarAuxiliar} placeholder="Pesquisar auxiliar..." t={t}
+                                selectedId={fCriar.auxiliarId} onSelect={selecionarAuxiliar} placeholder="Pesquisar auxiliar..." t={t} isDark={isDark}
                             />
                             {fCriar.auxiliarId && <button className="m70-btn-clear" style={{ marginTop: 6 }} onClick={() => setFCriar(f => ({ ...f, auxiliarId: null }))}>✕ Limpar</button>}
                         </div>
@@ -1421,16 +1421,16 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             <PessoaSelector
                                 items={membrosHook.membros.filter(mb => mb.id !== fCriar.liderId && mb.id !== fCriar.auxiliarId)}
                                 loading={membrosHook.loading} erro={membrosHook.erro}
-                                selectedId={fCriar.terceiroMembroId} onSelect={selecionarTerceiro} placeholder="Pesquisar membro..." t={t}
+                                selectedId={fCriar.terceiroMembroId} onSelect={selecionarTerceiro} placeholder="Pesquisar membro..." t={t} isDark={isDark}
                             />
                             {fCriar.terceiroMembroId && (
                                 <button className="m70-btn-clear" style={{ marginTop: 6 }} onClick={() => setFCriar(f => ({ ...f, terceiroMembroId: null }))}>✕ Limpar</button>
                             )}
                         </div>
                         <div style={{ background: "rgba(253,184,19,.07)", border: "1px solid rgba(253,184,19,.2)", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
-                            <span style={{ fontSize: 16, flexShrink: 0, color: AURA.gold }}>✦</span>
+                            <span style={{ fontSize: 16, flexShrink: 0, color: isDark ? AURA.gold : "#B5000F" }}>✦</span>
                             <div>
-                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.yellow, margin: "0 0 4px" }}>O que é a Missão 70?</p>
+                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: isDark ? AURA.yellow : "#B5000F", margin: "0 0 4px" }}>O que é a Missão 70?</p>
                                 <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.5 }}>
                                     São <strong style={{ color: t.text, fontWeight: 500 }}>4 encontros semanais</strong> de evangelismo na casa do anfitrião, para alcançar visitantes e registrar decisões de fé.
                                 </p>
@@ -1514,7 +1514,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                     border: `1px dashed ${t.borderInput}`, background: t.bgInput,
                                                     display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                                                     fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500,
-                                                    color: AURA.gold,
+                                                    color: isDark ? AURA.gold : "#B5000F",
                                                 }}>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -1599,7 +1599,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                     <div style={{ padding: "14px 20px", display: "flex", flexDirection: "column", gap: 10, overflowY: "auto", flex: 1, WebkitOverflowScrolling: "touch" }}>
                                         {historicoLoading && (
                                             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
-                                                <Loader2 size={16} className="m70-spin" style={{ color: AURA.gold }} /> Carregando histórico...
+                                                <Loader2 size={16} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} /> Carregando histórico...
                                             </div>
                                         )}
                                         {!historicoLoading && historicoErro && (
@@ -1624,14 +1624,14 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                         <>
                                                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                                                                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                                                                    <div style={{ width: 26, height: 26, borderRadius: 8, flexShrink: 0, background: "rgba(253,184,19,.14)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: AURA.gold }}>{idx + 1}</div>
+                                                                    <div style={{ width: 26, height: 26, borderRadius: 8, flexShrink: 0, background: "rgba(253,184,19,.14)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: isDark ? AURA.gold : "#B5000F" }}>{idx + 1}</div>
                                                                     <div style={{ minWidth: 0 }}>
                                                                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: t.text, margin: 0 }}>{dataFmt ? new Date(dataFmt + "T00:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p>
                                                                         {enc.horaEncontro && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0 }}>{enc.horaEncontro}</p>}
                                                                     </div>
                                                                 </div>
                                                                 <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                                                                    <button onClick={() => iniciarEdicaoEncontro(enc)} title="Editar" style={{ background: "rgba(253,184,19,.12)", border: "1px solid rgba(253,184,19,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#FDB813" }}><Pencil size={13} /></button>
+                                                                    <button onClick={() => iniciarEdicaoEncontro(enc)} title="Editar" style={{ background: "rgba(253,184,19,.12)", border: "1px solid rgba(253,184,19,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: isDark ? "#FDB813" : "#8A5A00" }}><Pencil size={13} /></button>
                                                                     <button onClick={() => excluirEncontro(enc.id)} title="Excluir" style={{ background: "rgba(200,16,46,.1)", border: "1px solid rgba(200,16,46,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#e8556d" }}><Trash2 size={13} /></button>
                                                                 </div>
                                                             </div>
@@ -1652,7 +1652,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                             return (
                                                                                 <div key={vid ?? vidx} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                                                                                 <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(253,184,19,.08)", border: "1px solid rgba(253,184,19,.22)", borderRadius: 99, padding: "4px 10px", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 400, color: t.text }}>
-                                                                                    <span style={{ color: AURA.gold }}>✦</span>{nome}
+                                                                                    <span style={{ color: isDark ? AURA.gold : "#B5000F" }}>✦</span>{nome}
                                                                                 </span>
                                                                                     {decisao && decisao !== "NENHUMA" && (
                                                                                         <div style={{ paddingLeft: 4 }}>
@@ -1680,13 +1680,13 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                     Presença ({fEditEnc.visitantesPresentesIds.size} de {visitantesHook.visitantes.length})
                                                                 </p>
                                                                 <div style={{ position: "relative" }}>
-                                                                    <Search size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
+                                                                    <Search size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
                                                                     <input className="m70-input" placeholder="Buscar visitante..." value={editBuscaVisitante} onChange={e => setEditBuscaVisitante(e.target.value)} style={{ paddingLeft: 28, padding: "7px 10px 7px 28px", fontSize: 12 }} />
                                                                 </div>
 
                                                                 {visitantesHook.loading && (
                                                                     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300 }}>
-                                                                        <Loader2 size={14} className="m70-spin" style={{ color: AURA.gold }} /> Carregando visitantes...
+                                                                        <Loader2 size={14} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} /> Carregando visitantes...
                                                                     </div>
                                                                 )}
 
@@ -1896,7 +1896,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             return (
                                                 <div key={v.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                                                     <div style={{ background: "rgba(253,184,19,.08)", border: "1px solid rgba(253,184,19,.22)", borderRadius: 99, padding: "5px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.text, display: "flex", alignItems: "center", gap: 6 }}>
-                                                        <span style={{ color: AURA.gold }}>✦</span><span>{v.nome ?? `#${v.id}`}</span>
+                                                        <span style={{ color: isDark ? AURA.gold : "#B5000F" }}>✦</span><span>{v.nome ?? `#${v.id}`}</span>
                                                     </div>
                                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                                         <DecisaoSelect
@@ -1905,7 +1905,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                             disabled={salvando}
                                                             onChange={e => alterarDecisaoVisitante(m.id, v.id, e.target.value)}
                                                         />
-                                                        {salvando && <Loader2 size={12} className="m70-spin" style={{ color: AURA.gold }} />}
+                                                        {salvando && <Loader2 size={12} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />}
                                                     </div>
                                                 </div>
                                             );

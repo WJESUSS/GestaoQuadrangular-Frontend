@@ -67,7 +67,7 @@ const HistoricoRelatorios = ({ isDark }) => {
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
             }}>
                 <div>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.22em', color: '#350309', textTransform: 'uppercase', margin: '0 0 4px' }}>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.22em', color: isDark ? '#FFFFFF' : '#350309', textTransform: 'uppercase', margin: '0 0 4px' }}>
                         Último Relatório
                     </p>
                     <h3 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 700, color: t.text, margin: 0 }}>
@@ -84,7 +84,7 @@ const HistoricoRelatorios = ({ isDark }) => {
                     border: '1px solid rgba(253,184,19,.22)',
                     borderRadius: 12, padding: '8px 14px', textAlign: 'center',
                 }}>
-                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.16em', color: '#350309', textTransform: 'uppercase', margin: '0 0 2px' }}>Data</p>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: '.16em', color: isDark ? '#FFFFFF' : '#350309', textTransform: 'uppercase', margin: '0 0 2px' }}>Data</p>
                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 700, color: t.text, margin: 0 }}>{fmtData(dataReuniao)}</p>
                 </div>
             </div>
@@ -92,9 +92,9 @@ const HistoricoRelatorios = ({ isDark }) => {
             {/* KPIs */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderBottom: `1px solid ${t.border}` }}>
                 {[
-                    { label: 'Membros',    value: totalMembros   ?? membrosPresentes.length,   color: '#5A0B16' },
-                    { label: 'Visitantes', value: totalVisitantes ?? (visitantesPresentes.length + (quantidadeVisitantes || 0)), color: '#350309' },
-                    { label: 'Total',      value: totalPresentes  ?? todos.length,              color: '#FDB813' },
+                    { label: 'Membros',    value: totalMembros   ?? membrosPresentes.length,   color: isDark ? '#FFFFFF' : '#5A0B16' },
+                    { label: 'Visitantes', value: totalVisitantes ?? (visitantesPresentes.length + (quantidadeVisitantes || 0)), color: isDark ? '#FFFFFF' : '#350309' },
+                    { label: 'Total',      value: totalPresentes  ?? todos.length,              color: isDark ? '#FDB813' : '#8A5A00' },
                 ].map(({ label, value, color }) => (
                     <div key={label} style={{ padding: '16px 12px', textAlign: 'center', borderRight: `1px solid ${t.border}` }}>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 26, fontWeight: 700, color, margin: 0, lineHeight: 1 }}>{value ?? '—'}</p>
@@ -145,7 +145,7 @@ const HistoricoRelatorios = ({ isDark }) => {
                                     letterSpacing: '.12em', textTransform: 'uppercase',
                                     padding: '3px 8px', borderRadius: 99,
                                     background: p.tipo === 'membro' ? 'rgba(90,11,22,.12)' : 'rgba(253,184,19,.12)',
-                                    color: p.tipo === 'membro' ? '#5A0B16' : '#FDB813',
+                                    color: p.tipo === 'membro' ? (isDark ? '#FFFFFF' : '#5A0B16') : (isDark ? '#FDB813' : '#8A5A00'),
                                     border: `1px solid ${p.tipo === 'membro' ? 'rgba(90,11,22,.25)' : 'rgba(253,184,19,.25)'}`,
                                     flexShrink: 0,
                                 }}>

@@ -93,7 +93,7 @@ function GlobalStyles({ t, isDark }) {
         padding:16px; border-radius:16px; background:${t.bgEl}; border:1px solid ${t.border};
         cursor:pointer; margin-bottom:10px; transition:all .2s;
       }
-      .ad-choice-link:hover { border-color:${AURA.gold}; transform:translateY(-1px); }
+      .ad-choice-link:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; transform:translateY(-1px); }
       .ad-choice-link:last-child{ margin-bottom:0; }
       .ad-choice-link-left { display:flex; align-items:center; gap:12px; }
       .ad-choice-icon {
@@ -119,7 +119,7 @@ function GlobalStyles({ t, isDark }) {
         background:${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.06)"};
         border:1px solid ${t.border}; color:${t.textSec};
       }
-      .ad-btn-ghost:hover{ border-color:${AURA.gold}; color:${AURA.gold}; }
+      .ad-btn-ghost:hover{ border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
       .ad-btn-danger {
         background:rgba(255,211,77,.12); border:1px solid rgba(255,211,77,.35); color:${AURA.redLight};
       }
@@ -158,7 +158,7 @@ function GlobalStyles({ t, isDark }) {
         font-size:10.5px; font-weight:700; letter-spacing:.03em; white-space:nowrap;
       }
       .ad-badge-ok  { background:rgba(74,124,92,.15); color:${AURA.green}; }
-      .ad-badge-off { background:rgba(255,211,77,.13); color:${AURA.clay}; }
+      .ad-badge-off { background:rgba(255,211,77,.13); color:${isDark ? "#FFFFFF" : AURA.clay}; }
 
       .ad-empty {
         text-align:center; padding:30px 16px; color:${t.textMuted}; font-size:13px;
@@ -175,7 +175,7 @@ function GlobalStyles({ t, isDark }) {
         border:1px solid ${t.borderInput}; color:${t.text}; font-size:12px; font-family:'Inter',sans-serif; outline:none;
       }
       .ad-field select option { background:${t.optionBg}; color:${t.text}; }
-      .ad-field input:focus, .ad-field select:focus{ border-color:${AURA.gold}; }
+      .ad-field input:focus, .ad-field select:focus{ border-color: ${isDark ? AURA.gold : "#B5000F"}; }
 
       .ad-hist-row {
         padding:12px; border-radius:12px; margin-bottom:8px;
@@ -183,8 +183,8 @@ function GlobalStyles({ t, isDark }) {
         font-size:12px;
       }
 
-      .ad-link { color:${AURA.mossLight}; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
-      .ad-link:hover{ color:${AURA.gold}; }
+      .ad-link { color:${isDark ? "#FFD400" : AURA.mossLight}; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+      .ad-link:hover{ color: ${isDark ? AURA.gold : "#B5000F"}; }
 
       /* Modal único */
       .ad-overlay {
@@ -193,14 +193,14 @@ function GlobalStyles({ t, isDark }) {
       }
       @media(min-width:640px){ .ad-overlay{ align-items:center; padding:20px; } }
       .ad-modal {
-        background:${isDark ? "#2A060D" : "#FBF4EF"}; width:100%; max-width:600px; max-height:92vh; overflow-y:auto;
+        background:${isDark ? "#17171C" : "#FFFFFF"}; width:100%; max-width:600px; max-height:92vh; overflow-y:auto;
         border-radius:24px 24px 0 0; border:1px solid ${t.border}; box-shadow:0 -10px 40px rgba(0,0,0,.35);
         display:flex; flex-direction:column;
       }
       @media(min-width:640px){ .ad-modal{ border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,.4); } }
       .ad-modal-head {
         display:flex; align-items:center; gap:10px; padding:18px 18px 14px;
-        border-bottom:1px solid ${t.border}; position:sticky; top:0; background:${isDark ? "#2A060D" : "#FBF4EF"}; z-index:1;
+        border-bottom:1px solid ${t.border}; position:sticky; top:0; background:${isDark ? "#17171C" : "#FFFFFF"}; z-index:1;
       }
       .ad-modal-title { font-family:'Inter',sans-serif; font-size:16px; font-weight:600; margin:0; color:${t.text}; flex:1; min-width:0; word-break:break-word; }
       .ad-modal-body { padding:16px 18px 22px; }
@@ -208,7 +208,7 @@ function GlobalStyles({ t, isDark }) {
         width:32px; height:32px; border-radius:50%; border:1px solid ${t.border}; background:transparent;
         color:${t.textMuted}; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
       }
-      .ad-icon-btn:hover{ color:${AURA.gold}; border-color:${AURA.gold}; }
+      .ad-icon-btn:hover{ color: ${isDark ? AURA.gold : "#B5000F"}; border-color: ${isDark ? AURA.gold : "#B5000F"}; }
       .ad-icon-btn.danger:hover{ color:${AURA.clay}; border-color:${AURA.clay}; }
 
       .ad-form-group{ margin-bottom:13px; }
@@ -223,14 +223,14 @@ function GlobalStyles({ t, isDark }) {
         transition:border-color .2s;
       }
       .ad-select option{ background:${t.optionBg}; color:${t.text}; }
-      .ad-input:focus, .ad-select:focus, .ad-textarea:focus{ border-color:${AURA.gold}; }
+      .ad-input:focus, .ad-select:focus, .ad-textarea:focus{ border-color: ${isDark ? AURA.gold : "#B5000F"}; }
       .ad-textarea{ resize:vertical; min-height:64px; font-family:'Inter',sans-serif; }
 
       .ad-alert {
         display:flex; gap:9px; padding:12px 14px; border-radius:14px; font-size:12.5px; line-height:1.5;
         margin-bottom:14px; align-items:flex-start;
       }
-      .ad-alert-error { background:rgba(255,211,77,.1); border:1px solid rgba(255,211,77,.3); color:${isDark ? "#E19A9B" : AURA.clayDeep}; }
+      .ad-alert-error { background:rgba(255,211,77,.1); border:1px solid rgba(255,211,77,.3); color:${isDark ? "#FFFFFF" : AURA.clayDeep}; }
       .ad-alert-success{ background:rgba(74,124,92,.1); border:1px solid rgba(74,124,92,.3); color:${isDark ? "#8FCB9F" : AURA.greenDark}; }
 
       .ad-checklist { max-height:220px; overflow-y:auto; border:1px solid ${t.border}; border-radius:14px; padding:6px; }
@@ -317,7 +317,7 @@ function GlobalStyles({ t, isDark }) {
         display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px;
         background:${t.bgEl}; border:1px solid ${t.border}; transition:all .2s;
       }
-      .ad-detail-participant:hover { border-color:${AURA.gold}; }
+      .ad-detail-participant:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
       .ad-detail-participant + .ad-detail-participant { margin-top:8px; }
       .ad-detail-participant-avatar {
         width:34px; height:34px; border-radius:50%; flex-shrink:0;
@@ -380,7 +380,7 @@ function GlobalStyles({ t, isDark }) {
         font-family:'Inter',sans-serif; outline:none; transition:border-color .2s;
       }
       .ad-form-field-elegant select option { background:${t.optionBg}; color:${t.text}; }
-      .ad-form-field-elegant input:focus, .ad-form-field-elegant select:focus, .ad-form-field-elegant textarea:focus { border-color:${AURA.gold}; }
+      .ad-form-field-elegant input:focus, .ad-form-field-elegant select:focus, .ad-form-field-elegant textarea:focus { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
       .ad-form-field-elegant textarea { resize:vertical; min-height:60px; }
 
       .ad-form-pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -388,7 +388,7 @@ function GlobalStyles({ t, isDark }) {
         padding:12px; border-radius:12px; background:${t.bgEl}; border:1px solid ${t.border};
         cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:10px;
       }
-      .ad-form-pick-card:hover { border-color:${AURA.gold}; transform:translateY(-1px); }
+      .ad-form-pick-card:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; transform:translateY(-1px); }
       .ad-form-pick-card.selected { border-color:${AURA.moss}; background:rgba(53,3,9,.06); }
       .ad-form-pick-icon {
         width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
@@ -403,7 +403,7 @@ function GlobalStyles({ t, isDark }) {
       .ad-form-participants-title { font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:${t.textMuted}; }
       .ad-form-select-all {
         display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px;
-        background:rgba(253,184,19,.08); border:1px solid rgba(253,184,19,.2); color:${AURA.gold};
+        background:rgba(253,184,19,.08); border:1px solid rgba(253,184,19,.2); color: ${isDark ? AURA.gold : "#B5000F"};
         font-size:11px; font-weight:600; cursor:pointer; transition:all .2s;
       }
       .ad-form-select-all:hover { background:rgba(253,184,19,.15); }
@@ -413,7 +413,7 @@ function GlobalStyles({ t, isDark }) {
         border:1px solid ${t.border}; cursor:pointer; transition:all .2s;
       }
       .ad-form-member + .ad-form-member { margin-top:8px; }
-      .ad-form-member:hover { border-color:${AURA.gold}; }
+      .ad-form-member:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
       .ad-form-member.checked { border-color:${AURA.moss}; background:rgba(53,3,9,.05); }
       .ad-form-member-avatar {
         width:34px; height:34px; border-radius:50%; flex-shrink:0;
@@ -437,7 +437,7 @@ function GlobalStyles({ t, isDark }) {
         background:${isDark ? "rgba(255,255,255,.04)" : "rgba(53,3,9,.05)"}; border:1px solid ${t.border};
         font-size:12.5px; color:${t.textSec}; font-weight:600;
       }
-      .ad-form-counter strong { color:${AURA.gold}; }
+      .ad-form-counter strong { color: ${isDark ? AURA.gold : "#B5000F"}; }
 
       /* Lista coletivo — layout elegante */
       .ad-list-hero {
@@ -499,7 +499,7 @@ function GlobalStyles({ t, isDark }) {
         width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
         background:${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.05)"}; transition:all .2s;
       }
-      .ad-list-item:hover .ad-list-item-arrow { background:rgba(253,184,19,.12); color:${AURA.gold}; }
+      .ad-list-item:hover .ad-list-item-arrow { background:rgba(253,184,19,.12); color: ${isDark ? AURA.gold : "#B5000F"}; }
 
       .ad-list-summary {
         display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:18px;
@@ -509,7 +509,7 @@ function GlobalStyles({ t, isDark }) {
         text-align:center;
       }
       .ad-list-summary-value {
-        font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:${AURA.gold};
+        font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color: ${isDark ? AURA.gold : "#B5000F"};
         margin:0 0 2px;
       }
       .ad-list-summary-label { font-size:10px; color:${t.textMuted}; margin:0; text-transform:uppercase; letter-spacing:.05em; }
@@ -650,6 +650,7 @@ export default function AcompanhamentoDiscipulado({ isDark = true, open, onClose
                             >
                                 {atual.view === "escolha" && (
                                     <TelaEscolha
+                                        isDark={isDark}
                                         t={t} pendentesSemana={pendentesSemana}
                                         onEscolher={(v) => push(v)}
                                     />
@@ -720,7 +721,7 @@ export default function AcompanhamentoDiscipulado({ isDark = true, open, onClose
 /* ════════════════════════════════════════════════════════════════════
    TELA 0 — ESCOLHA (pergunta inicial, 3 opções)
    ════════════════════════════════════════════════════════════════════ */
-function TelaEscolha({ t, pendentesSemana, onEscolher }) {
+function TelaEscolha({ t, isDark, pendentesSemana, onEscolher }) {
     return (
         <div>
             <p className="ad-section-sub" style={{ marginBottom: 16 }}>O que você deseja fazer?</p>
@@ -742,7 +743,7 @@ function TelaEscolha({ t, pendentesSemana, onEscolher }) {
 
             <div className="ad-choice-link" onClick={() => onEscolher("coletivo-lista")}>
                 <div className="ad-choice-link-left">
-                    <div className="ad-choice-icon" style={{ background: "rgba(253,184,19,.16)", color: "#FDB813" }}>
+                    <div className="ad-choice-icon" style={{ background: "rgba(253,184,19,.16)", color: isDark ? "#FDB813" : "#8A5A00" }}>
                         <Users size={20} />
                     </div>
                     <div>

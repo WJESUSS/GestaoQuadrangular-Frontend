@@ -39,7 +39,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .ff-subtitle {
         font-size: 11px; font-weight: 400; letter-spacing: .14em;
-        text-transform: uppercase; color: ${AURA.gold};
+        text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
         margin: 8px 0 0;
       }
 
@@ -106,7 +106,7 @@ function GlobalStyles({ t, isDark }) {
       .ff-label {
         display: block; margin-bottom: 6px;
         font-size: 9.5px; font-weight: 600; letter-spacing: .18em;
-        text-transform: uppercase; color: ${AURA.gold};
+        text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
       }
 
       .ff-input, .ff-select {
@@ -143,12 +143,12 @@ function GlobalStyles({ t, isDark }) {
         text-transform: uppercase; color: ${t.text};
       }
       .ff-checkbox-row input[type=checkbox] {
-        accent-color: ${AURA.gold}; width: 20px; height: 20px; flex-shrink: 0;
+        accent-color: ${isDark ? AURA.gold : "#B5000F"}; width: 20px; height: 20px; flex-shrink: 0;
       }
 
       .ff-bio-input {
         text-align: center; font-weight: 600; font-size: 20px;
-        font-family: 'Inter', sans-serif; color: ${AURA.gold};
+        font-family: 'Inter', sans-serif; color: ${isDark ? AURA.gold : "#B5000F"};
       }
 
       .ff-btn-primary {
@@ -197,7 +197,7 @@ function GlobalStyles({ t, isDark }) {
         background: linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06));
         border: 1px solid rgba(253,184,19,.22);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: ${AURA.gold};
+        font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: ${isDark ? AURA.gold : "#B5000F"};
       }
       .ff-ficha-name {
         font-size: 13px; font-weight: 400; color: ${t.text};
@@ -212,14 +212,14 @@ function GlobalStyles({ t, isDark }) {
         padding: 5px 13px; border-radius: 100px; flex-shrink: 0;
         background: rgba(253,184,19,.1); border: 1px solid rgba(253,184,19,.28);
         font-size: 9px; font-weight: 600; letter-spacing: .14em;
-        text-transform: uppercase; color: ${AURA.gold};
+        text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
       }
 
       .ff-footer {
         text-align: center;
         font-size: 9px; font-weight: 500; letter-spacing: .18em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(251,244,239,.12)" : "rgba(26,16,8,.15)"};
+        color: ${isDark ? "rgba(255,255,255,.12)" : "rgba(26,16,8,.15)"};
         padding: 16px 0 0;
       }
     `}</style>
@@ -313,7 +313,7 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
             <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(253,184,19,.22)", borderRadius: "50%" }} />
             <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(253,184,19,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "rgba(42,6,13,.99)" : "#fff", border: "1.5px solid rgba(253,184,19,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "#B5000F" : "#fff", border: "1.5px solid rgba(253,184,19,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
               <CrossMark size={30} />
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
         <div className="ff-card" style={{ marginTop: 22 }}>
           <div className="ff-card-head">
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <FileText size={16} style={{ color: AURA.gold, flexShrink: 0 }} />
+              <FileText size={16} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }} />
               <div>
                 <h3 className="ff-card-head-title">Minhas Inscrições</h3>
                 <p className="ff-card-head-sub">{minhasFichas.length} enviada(s)</p>
@@ -342,7 +342,7 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
           <div className="ff-fichas-list">
             {loadingFichas ? (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
-                  <Loader2 size={24} className="dl-spin" style={{ color: AURA.gold }} />
+                  <Loader2 size={24} className="dl-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />
                 </div>
             ) : minhasFichas.length > 0 ? (
                 minhasFichas.map((ficha, i) => (
@@ -514,7 +514,7 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
                       background: isDark ? "rgba(53,3,9,.3)" : "rgba(253,184,19,.05)",
                       borderColor: isDark ? "rgba(53,3,9,.45)" : "rgba(253,184,19,.2)",
                     }}>
-                      <label className="ff-checkbox-row" style={{ color: isDark ? "#FFD34D" : AURA.gold }}>
+                      <label className="ff-checkbox-row" style={{ color: isDark ? "#FFD34D" : "#B5000F" }}>
                         <input type="checkbox" name={name} checked={form[name]} onChange={handleChange} style={{ accentColor: AURA.gold }} />
                         {label}
                       </label>

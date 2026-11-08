@@ -86,7 +86,7 @@ function makeStyles(t, isDark) {
     .tv-summary-icon {
       width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
     }
-    .tv-summary-value { font-family:'Inter',sans-serif; font-size:24px; font-weight:700; color:${AURA.gold}; margin:0 0 2px; }
+    .tv-summary-value { font-family:'Inter',sans-serif; font-size:24px; font-weight:700; color: ${isDark ? AURA.gold : "#B5000F"}; margin:0 0 2px; }
     .tv-summary-label { font-size:10px; color:${t.textMuted}; margin:0; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
 
     /* ── Search ── */
@@ -95,7 +95,7 @@ function makeStyles(t, isDark) {
     }
     .tv-search-icon {
       position:absolute; left:16px; top:50%; transform:translateY(-50%);
-      color:${AURA.gold}; opacity:.6; pointer-events:none;
+      color: ${isDark ? AURA.gold : "#B5000F"}; opacity:.6; pointer-events:none;
     }
     .tv-search-input {
       width:100%; padding:13px 16px 13px 48px; border-radius:14px;
@@ -103,7 +103,7 @@ function makeStyles(t, isDark) {
       color:${t.text}; font-family:'Inter',sans-serif; font-size:13px;
       outline:none; transition:border-color .2s;
     }
-    .tv-search-input:focus { border-color:${AURA.gold}; }
+    .tv-search-input:focus { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
     .tv-search-input::placeholder { color:${t.placeholder}; }
     .tv-search-clear {
       position:absolute; right:12px; top:50%; transform:translateY(-50%);
@@ -189,19 +189,19 @@ function makeStyles(t, isDark) {
     .tv-list-origin {
       font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
       padding:3px 8px; border-radius:100px;
-      background:rgba(253,184,19,.08); color:${AURA.gold}; border:1px solid rgba(253,184,19,.15);
+      background:rgba(253,184,19,.08); color: ${isDark ? AURA.gold : "#B5000F"}; border:1px solid rgba(253,184,19,.15);
     }
     .tv-list-decision {
       font-size:10px; font-weight:600; padding:3px 8px; border-radius:100px;
     }
     .tv-list-decision.aceitou { background:rgba(74,124,92,.12); color:${AURA.green}; }
-    .tv-list-decision.reconciliou { background:rgba(76,126,176,.12); color:${AURA.mossLight}; }
-    .tv-list-decision.batismo { background:rgba(253,184,19,.12); color:${AURA.goldLight}; }
+    .tv-list-decision.reconciliou { background:rgba(76,126,176,.12); color:${isDark ? "#FFE24D" : AURA.mossLight}; }
+    .tv-list-decision.batismo { background:rgba(253,184,19,.12); color: ${isDark ? AURA.goldLight : "#B5000F"}; }
 
     .tv-list-edit {
       width:32px; height:32px; border-radius:9px; flex-shrink:0;
       background:rgba(253,184,19,.08); border:1px solid rgba(253,184,19,.2);
-      color:${AURA.gold}; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      color: ${isDark ? AURA.gold : "#B5000F"}; cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:all .2s;
     }
     .tv-list-edit:hover { background:${AURA.gold}; color:#0A0A0F; }
@@ -272,8 +272,8 @@ function makeStyles(t, isDark) {
       border:1px solid ${t.borderInput}; color:${t.text}; font-size:13px;
       font-family:'Inter',sans-serif; outline:none; transition:border-color .2s;
     }
-    .tv-field select option { background:${isDark?"#0A0A0F":"#fff"}; color:${t.text}; }
-    .tv-field input:focus, .tv-field select:focus { border-color:${AURA.gold}; }
+    .tv-field select option { background:${t.optionBg}; color:${t.text}; }
+    .tv-field input:focus, .tv-field select:focus { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
     .tv-field input::placeholder { color:${t.placeholder}; }
 
     .tv-origin-grid { display:flex; flex-wrap:wrap; gap:8px; }
@@ -283,7 +283,7 @@ function makeStyles(t, isDark) {
       border:1px solid ${t.border}; background:transparent; color:${t.textSec};
       transition:all .2s; display:inline-flex; align-items:center; gap:5px;
     }
-    .tv-origin-pill:hover { border-color:${AURA.gold}; color:${AURA.gold}; }
+    .tv-origin-pill:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
     .tv-origin-pill.selected {
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       border-color:${AURA.moss}; color:#fff;
@@ -309,7 +309,7 @@ function makeStyles(t, isDark) {
       display:flex; align-items:center; justify-content:center; gap:7px;
       width:100%; padding:13px; border-radius:100px; cursor:pointer;
       background:transparent; border:1px solid rgba(200,16,46,.3);
-      color:${AURA.red}; font-family:'Inter',sans-serif;
+      color:${isDark ? "#FFD400" : AURA.red}; font-family:'Inter',sans-serif;
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
     }
@@ -335,7 +335,7 @@ function makeStyles(t, isDark) {
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
     }
-    .tv-btn-cancel:hover { border-color:${AURA.gold}; color:${AURA.gold}; }
+    .tv-btn-cancel:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
 
     .tv-confirm-box {
       background:${isDark?"rgba(155,11,30,.1)":"rgba(200,16,46,.05)"};

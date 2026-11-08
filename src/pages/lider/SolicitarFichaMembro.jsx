@@ -73,10 +73,10 @@ const Checkbox = ({ label, checked, onChange, t }) => (
     </label>
 );
 
-const Section = ({ title, icon, children, t }) => (
+const Section = ({ title, icon, children, t, isDark }) => (
     <div style={{ background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 20, marginBottom: 16, overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: `1px solid ${t.border}` }}>
-        <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(253,184,19,.1)", color: AURA.gold, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(253,184,19,.1)", color: isDark ? AURA.gold : "#B5000F", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {icon}
         </div>
         <span style={{ fontSize: 14, fontWeight: 700, color: t.text }}>{title}</span>
@@ -190,7 +190,7 @@ export default function SolicitarFichaMembro({ isDark }) {
           <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(20px,5vw,26px)", fontWeight: 500, color: t.text, margin: 0 }}>
             Solicitar Ficha de Membro
           </h2>
-          <p style={{ fontSize: 11, fontWeight: 400, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.gold, marginTop: 6 }}>
+          <p style={{ fontSize: 11, fontWeight: 400, letterSpacing: ".14em", textTransform: "uppercase", color: isDark ? AURA.gold : "#B5000F", marginTop: 6 }}>
             Cadastro de novo membro
           </p>
         </div>
@@ -212,7 +212,7 @@ export default function SolicitarFichaMembro({ isDark }) {
 
         <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 0 }}>
 
-          <Section title="Dados Pessoais" icon={<User size={15} />} t={t}>
+          <Section title="Dados Pessoais" icon={<User size={15} />} t={t} isDark={isDark}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
               <Input label="Nome completo *" name="nome" value={form.nome} onChange={e => set("nome", e.target.value)} icon={<User size={14} />} required t={t} />
               <Input label="Telefone" name="telefone" value={form.telefone} onChange={e => set("telefone", e.target.value)} icon={<Phone size={14} />} t={t} />
@@ -228,7 +228,7 @@ export default function SolicitarFichaMembro({ isDark }) {
             </div>
           </Section>
 
-          <Section title="Filiação e Naturalidade" icon={<Heart size={15} />} t={t}>
+          <Section title="Filiação e Naturalidade" icon={<Heart size={15} />} t={t} isDark={isDark}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
               <Input label="Nome da Mãe" name="nomeMae" value={form.nomeMae} onChange={e => set("nomeMae", e.target.value)} t={t} />
               <Input label="Nome do Pai" name="nomePai" value={form.nomePai} onChange={e => set("nomePai", e.target.value)} t={t} />
@@ -237,7 +237,7 @@ export default function SolicitarFichaMembro({ isDark }) {
             </div>
           </Section>
 
-          <Section title="Escolaridade e Profissão" icon={<BookOpen size={15} />} t={t}>
+          <Section title="Escolaridade e Profissão" icon={<BookOpen size={15} />} t={t} isDark={isDark}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
               <Select label="Grau de Escolaridade" value={form.grauEscolaridade} onChange={e => set("grauEscolaridade", e.target.value)} t={t}>
                 {GRAU_ESCOLARIDADE.map(opt => <option key={opt} value={opt} style={{ background: t.optionBg }}>{opt.replace(/_/g, " ")}</option>)}
@@ -247,7 +247,7 @@ export default function SolicitarFichaMembro({ isDark }) {
             </div>
           </Section>
 
-          <Section title="Endereço" icon={<MapPin size={15} />} t={t}>
+          <Section title="Endereço" icon={<MapPin size={15} />} t={t} isDark={isDark}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
               <Input label="Logradouro" name="endereco" value={form.endereco} onChange={e => set("endereco", e.target.value)} t={t} />
               <Input label="Número" name="numero" value={form.numero} onChange={e => set("numero", e.target.value)} t={t} />
@@ -260,7 +260,7 @@ export default function SolicitarFichaMembro({ isDark }) {
             </div>
           </Section>
 
-          <Section title="Dados Espirituais" icon={<FileText size={15} />} t={t}>
+          <Section title="Dados Espirituais" icon={<FileText size={15} />} t={t} isDark={isDark}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Checkbox label="Pertence a outra religião?" checked={form.pertenceOutraReligiao} onChange={e => set("pertenceOutraReligiao", e.target.checked)} t={t} />
               {form.pertenceOutraReligiao && <Input label="Qual religião?" name="qualReligiao" value={form.qualReligiao} onChange={e => set("qualReligiao", e.target.value)} t={t} />}
@@ -275,7 +275,7 @@ export default function SolicitarFichaMembro({ isDark }) {
             </div>
           </Section>
 
-          <Section title="Arrolamento" icon={<FileText size={15} />} t={t}>
+          <Section title="Arrolamento" icon={<FileText size={15} />} t={t} isDark={isDark}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
               <Select label="Tipo de Arrolamento" value={form.tipoArrolamento} onChange={e => set("tipoArrolamento", e.target.value)} t={t}>
                 {TIPO_ARROLAMENTO.map(opt => <option key={opt} value={opt} style={{ background: t.optionBg }}>{opt.replace(/_/g, " ")}</option>)}
@@ -285,7 +285,7 @@ export default function SolicitarFichaMembro({ isDark }) {
             </div>
           </Section>
 
-          <Section title="Observações" icon={<FileText size={15} />} t={t}>
+          <Section title="Observações" icon={<FileText size={15} />} t={t} isDark={isDark}>
           <textarea
               value={form.observacoes}
               onChange={e => set("observacoes", e.target.value)}
@@ -335,7 +335,7 @@ export default function SolicitarFichaMembro({ isDark }) {
                 {minhas.map(s => (
                     <div key={s.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", padding: "12px 16px", background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 12 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(253,184,19,.1)", color: AURA.gold, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(253,184,19,.1)", color: isDark ? AURA.gold : "#B5000F", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           <User size={14} />
                         </div>
                         <div style={{ minWidth: 0 }}>

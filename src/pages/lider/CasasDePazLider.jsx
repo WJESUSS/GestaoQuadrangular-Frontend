@@ -60,7 +60,7 @@ function BadgeDecisao({ decisao }) {
 }
 
 /* ─── Badge Status ────────────────────────────────────────────────────── */
-function BadgeStatus({ status }) {
+function BadgeStatus({ status, isDark }) {
     // Backend envia enum: EM_ANDAMENTO | CONCLUIDA | CANCELADA
     const s = (status || "").toLowerCase().trim();
     const base = {
@@ -76,7 +76,7 @@ function BadgeStatus({ status }) {
         return <span style={{ ...base, color: "#E8294A", border: "1px solid rgba(200,16,46,.35)", background: "rgba(200,16,46,.1)" }}>● Cancelada</span>;
     if (s.includes("conclu"))
         return <span style={{ ...base, color: "#1E7A46", border: "1px solid rgba(30,122,70,.35)", background: "rgba(30,122,70,.1)" }}>★ Concluída</span>;
-    return <span style={{ ...base, color: AURA.gold, border: "1px solid rgba(253,184,19,.3)", background: "rgba(253,184,19,.08)" }}>○ Pendente</span>;
+    return <span style={{ ...base, color: isDark ? AURA.gold : "#B5000F", border: "1px solid rgba(253,184,19,.3)", background: "rgba(253,184,19,.08)" }}>○ Pendente</span>;
 }
 
 /* ─── Modal AURA ──────────────────────────────────────────────────────── */
@@ -192,7 +192,7 @@ function MembroSelector({ items, loading, erro, onSelect, selectedId, placeholde
 
     if (loading) return (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13 }}>
-            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: AURA.gold }} /> Carregando...
+            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: isDark ? AURA.gold : "#B5000F" }} /> Carregando...
         </div>
     );
     if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
@@ -200,7 +200,7 @@ function MembroSelector({ items, loading, erro, onSelect, selectedId, placeholde
     return (
         <div>
             <div style={{ position: "relative", marginBottom: 10 }}>
-                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
+                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
                 <input style={inputStyle} placeholder={placeholder} value={busca} onChange={e => setBusca(e.target.value)} />
             </div>
             <div style={{ maxHeight: 220, overflowY: "auto", border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden" }}>
@@ -222,7 +222,7 @@ function MembroSelector({ items, loading, erro, onSelect, selectedId, placeholde
                                  }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div>
@@ -261,7 +261,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
 
     if (loading) return (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13 }}>
-            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: AURA.gold }} /> Carregando...
+            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: isDark ? AURA.gold : "#B5000F" }} /> Carregando...
         </div>
     );
     if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
@@ -282,7 +282,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                     padding: "4px 10px 4px 12px", borderRadius: 99, cursor: "pointer",
                                     background: "linear-gradient(135deg,rgba(253,184,19,.18),rgba(253,184,19,.08))",
                                     border: "1px solid rgba(253,184,19,.35)",
-                                    fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: AURA.gold,
+                                    fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: isDark ? AURA.gold : "#B5000F",
                                     transition: "all .15s",
                                 }}
                             >
@@ -295,7 +295,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
             )}
 
             <div style={{ position: "relative", marginBottom: 10 }}>
-                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
+                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
                 <input style={inputStyle} placeholder="Pesquisar visitante da célula..." value={busca} onChange={e => setBusca(e.target.value)} />
             </div>
 
@@ -331,11 +331,11 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 </div>
 
                                 <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? "linear-gradient(135deg,rgba(253,184,19,.3),rgba(253,184,19,.1))" : "linear-gradient(135deg,rgba(253,184,19,.15),rgba(253,184,19,.05))", border: `1px solid ${sel ? "rgba(253,184,19,.4)" : "rgba(253,184,19,.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? "linear-gradient(135deg,rgba(253,184,19,.3),rgba(253,184,19,.1))" : "linear-gradient(135deg,rgba(253,184,19,.15),rgba(253,184,19,.05))", border: `1px solid ${sel ? "rgba(253,184,19,.4)" : "rgba(253,184,19,.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div style={{ minWidth: 0 }}>
-                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, color: sel ? AURA.gold : t.text, margin: 0, fontWeight: sel ? 500 : 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nome}</p>
+                                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, color: sel ? (isDark ? AURA.gold : AURA.redDark) : t.text, margin: 0, fontWeight: sel ? 500 : 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nome}</p>
                                         {p.telefone && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: t.textMuted, margin: "1px 0 0" }}>{p.telefone}</p>}
                                     </div>
                                 </div>
@@ -429,7 +429,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
       padding: 11px 18px; transition: all .3s;
       display: inline-flex; align-items: center; gap: 7px;
     }
-    .cp-btn-ghost:hover { border-color: ${AURA.gold}; color: ${AURA.gold}; }
+    .cp-btn-ghost:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
     .cp-btn-gold {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
       color: #0A0A0F; border: none; border-radius: 100px;
@@ -711,8 +711,8 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                 {[
                     { label: "Total",      value: totalCasas,      color: t.text,      sub: "casas"       },
                     { label: "Ativas",     value: casasAtivas,     color: "#1E7A46",   sub: "funcionando" },
-                    { label: "Visitantes", value: totalVisitantes, color: AURA.yellow, sub: "cadastrados" },
-                    { label: "Encontros",  value: totalEncontros,  color: AURA.gold,   sub: "realizados"  },
+                    { label: "Visitantes", value: totalVisitantes, color: isDark ? AURA.yellow : "#B5000F", sub: "cadastrados" },
+                    { label: "Encontros",  value: totalEncontros,  color: isDark ? AURA.gold : "#B5000F",   sub: "realizados"  },
                 ].map((s, i) => (
                     <div key={s.label} className="cp-fade-up" style={{
                         background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 16,
@@ -740,7 +740,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                     )}
                 </div>
                 <div style={{ position: "relative" }}>
-                    <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: AURA.gold, opacity: .5, pointerEvents: "none" }} />
+                    <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
                     <input className="cp-input" style={{ ...inputStyle, paddingLeft: 42 }} placeholder="Buscar por nome ou endereço..." value={busca} onChange={e => setBusca(e.target.value)} />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -769,13 +769,13 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
 
                 {casas.length === 0 ? (
                     <div style={{ background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 16, textAlign: "center", padding: "56px 24px" }}>
-                        <Home size={36} style={{ color: AURA.gold, marginBottom: 14 }} />
+                        <Home size={36} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 14 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 16, color: t.textSec, margin: "0 0 6px" }}>Nenhuma casa cadastrada</p>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.textMuted, fontStyle: "italic" }}>Clique em "Nova Casa" para começar.</p>
                     </div>
                 ) : casasFiltradas.length === 0 ? (
                     <div style={{ background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 16, textAlign: "center", padding: "40px 24px" }}>
-                        <Search size={28} style={{ color: AURA.gold, marginBottom: 12 }} />
+                        <Search size={28} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 12 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: t.textMuted }}>Ajuste os filtros para encontrar uma casa.</p>
                     </div>
                 ) : casasFiltradas.map((c, i) => {
@@ -850,7 +850,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 300, color: t.textMuted, margin: 0 }}>encontros</p>
                                         </div>
                                     </div>
-                                    <BadgeStatus status={concluida ? "concluida" : c.status} />
+                                    <BadgeStatus status={concluida ? "concluida" : c.status} isDark={isDark} />
                                     <ChevronDown size={16} color={t.textMuted} style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .25s" }} />
                                 </div>
                             </div>
@@ -893,7 +893,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                                                     {[{ label: "Líder", nome: c.liderNome }, { label: "Auxiliar", nome: c.auxiliarNome }].map(({ label, nome }) => nome ? (
                                                         <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                                            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: AURA.gold }}>
+                                                            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
                                                                 {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                                             </div>
                                                             <div>
@@ -956,7 +956,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                                             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                                                                                 <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: t.text, margin: 0 }}>Encontro {num}</p>
                                                                                 {ei === 0 && (
-                                                                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", background: "rgba(253,184,19,.12)", color: AURA.gold, border: "1px solid rgba(253,184,19,.25)", borderRadius: 99, padding: "2px 8px" }}>
+                                                                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", background: "rgba(253,184,19,.12)", color: isDark ? AURA.gold : "#B5000F", border: "1px solid rgba(253,184,19,.25)", borderRadius: 99, padding: "2px 8px" }}>
                                             Mais recente
                                           </span>
                                                                                 )}
@@ -1026,9 +1026,9 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
 
                             {/* Aviso — decisões espirituais bloqueadas aqui */}
                             <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px", borderRadius: 12, background: isDark ? "rgba(253,184,19,.05)" : "rgba(253,184,19,.06)", border: "1px solid rgba(253,184,19,.2)" }}>
-                                <Lock size={16} style={{ color: AURA.gold, flexShrink: 0, marginTop: 1 }} />
+                                <Lock size={16} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0, marginTop: 1 }} />
                                 <div>
-                                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: AURA.gold, margin: "0 0 3px", letterSpacing: ".05em" }}>
+                                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: isDark ? AURA.gold : "#B5000F", margin: "0 0 3px", letterSpacing: ".05em" }}>
                                         Decisões espirituais
                                     </p>
                                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.55 }}>

@@ -149,7 +149,7 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                             fontSize: 10, fontWeight: 700,
                             minWidth: 17, height: 17, borderRadius: "50%",
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            border: `2px solid ${isDark ? "#12131C" : "#F0EAE8"}`,
+                            border: `2px solid ${isDark ? "#2A2A33" : "#F0EAE8"}`,
                         }}>
                             {hoje.length}
                         </span>
@@ -182,7 +182,7 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                             width: "100%",
                             maxHeight: "85dvh",
                             borderRadius: "20px 20px 0 0",
-                            background: isDark ? "rgba(0,0,0,.99)" : "#fff",
+                            background: isDark ? "#17171C" : "#fff",
                             border: "1px solid rgba(253,184,19,.35)",
                             borderBottom: "none",
                             boxShadow: "0 -8px 40px rgba(0,0,0,.3)",
@@ -197,7 +197,7 @@ export default function SinoAniversariantes({ isDark = false, celulaId = null })
                             left: panelPos.left,
                             transform: "translateX(-50%)",
                             width: "min(380px, calc(100vw - 32px))",
-                            background: isDark ? "rgba(0,0,0,.98)" : "#fff",
+                            background: isDark ? "#17171C" : "#fff",
                             border: "1px solid rgba(253,184,19,.35)",
                             borderRadius: 16,
                             boxShadow: isDark
@@ -231,7 +231,7 @@ function PainelConteudo({
                             marcados, marcarComoFeito,
                             dataHojeFormatada, periodoSemana, onClose,
                         }) {
-    const sub = isDark ? "rgba(255,255,255,.45)" : "rgba(26,10,13,.45)";
+    const sub = isDark ? "rgba(255,255,255,.82)" : "rgba(26,10,13,.45)";
 
     return (
         <>
@@ -295,13 +295,13 @@ function PainelConteudo({
                 WebkitOverflowScrolling: "touch",
             }}>
                 {loading ? (
-                    <p style={{ textAlign: "center", padding: "40px 0", color: "#888", fontSize: 13 }}>
+                    <p style={{ textAlign: "center", padding: "40px 0", color: isDark ? "rgba(255,255,255,.88)" : "#6B5A56", fontSize: 13 }}>
                         Carregando...
                     </p>
                 ) : lista.length === 0 ? (
                     <p style={{
                         textAlign: "center", padding: "40px 0",
-                        color: "#888", fontStyle: "italic", fontSize: 13,
+                        color: isDark ? "rgba(255,255,255,.88)" : "#6B5A56", fontStyle: "italic", fontSize: 13,
                     }}>
                         {tab === "hoje"
                             ? "Nenhum aniversariante hoje."
@@ -345,7 +345,7 @@ function PainelConteudo({
                                 }}>
                                     {m.nome}
                                 </p>
-                                <p style={{ margin: "2px 0 0", color: "#888", fontSize: 12 }}>
+                                <p style={{ margin: "2px 0 0", color: isDark ? "rgba(255,255,255,.88)" : "#6B5A56", fontSize: 12 }}>
                                     {m.telefone}
                                 </p>
                             </div>
@@ -384,7 +384,7 @@ function PainelConteudo({
             {/* Rodapé */}
             <div style={{
                 padding: "9px", textAlign: "center",
-                fontSize: 10, color: "#888",
+                fontSize: 10, color: isDark ? "rgba(255,255,255,.88)" : "#6B5A56",
                 borderTop: "1px solid rgba(253,184,19,.1)",
                 flexShrink: 0,
             }}>
