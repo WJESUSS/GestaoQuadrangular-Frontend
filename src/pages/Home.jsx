@@ -2,61 +2,81 @@ import { Helmet }        from "react-helmet-async";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import {
-    ArrowRight, BookOpen, ChevronDown, Cross, LogIn, Mail, Menu, X,
+    ArrowRight, BookOpen, ChevronDown, Flame, LogIn, Mail, Menu, X,
 } from "lucide-react";
 
 const NAV_ITEMS = [
-    { id: "doutrina",        label: "Doutrina" },
-    { id: "simbolismo",      label: "Simbolismo" },
-    { id: "filho-do-homem",  label: "Filho do Homem" },
-    { id: "salvacao",        label: "Salvação" },
-    { id: "convite",         label: "Convite" },
+    { id: "doutrina",     label: "Doutrina" },
+    { id: "simbolismo",   label: "Simbolismo" },
+    { id: "importancia",  label: "Importância" },
+    { id: "pentecostes",  label: "Pentecostes" },
+    { id: "convite",      label: "Convite" },
 ];
 
 const SIMBOLOS = [
     {
         num: "01",
-        titulo: "Rosto do Homem",
-        texto: "Representa Jesus Cristo como Filho do Homem, aquele que veio ao mundo para salvar a humanidade.",
-        img: "/images/jesus-rosto.jpg",
-        alt: "Rosto de Jesus Cristo, o Filho do Homem",
-        pos: "50% 13%",
+        titulo: "Rosto de Leão",
+        texto: "Na visão de Ezequiel, Jesus é tipificado no rosto de leão, símbolo de poder e força. Ele é o Leão da Tribo de Judá, a quem foi dado todo o poder no céu e na Terra (Mt 28.18).",
+        img: "/images/leao.jpg",
+        alt: "Leão com a juba iluminada, símbolo de poder e força",
+        pos: "50% 30%",
     },
     {
         num: "02",
-        titulo: "Evangelho de Lucas",
-        texto: "O Evangelho de Lucas apresenta Jesus como o Salvador que veio buscar e salvar os perdidos.",
+        titulo: "Evangelho de João",
+        texto: "O Evangelho de João apresenta Jesus Cristo como o Filho de Deus e revela a sua natureza divina, dirigido a todos os crentes, de todas as raças, línguas e épocas.",
         img: "/images/biblia.jpg",
         alt: "Bíblia aberta sobre a mesa",
     },
     {
         num: "03",
-        titulo: "A Cruz",
-        texto: "Símbolo da salvação, representando o sacrifício de Jesus Cristo pela humanidade.",
-        img: "/images/cruz-salvacao.jpg",
-        alt: "Cruz cristã em silhueta contra o céu do pôr do sol",
+        titulo: "A Pomba",
+        texto: "Simboliza o Batismo com o Espírito Santo, a forma que o Espírito tomou ao descer sobre Jesus após o seu batismo nas águas (Mt 3.16; Mc 1.10; Lc 3.22; Jo 1.32).",
+        img: "/images/pomba.jpg",
+        alt: "Pomba branca em voo contra o céu",
     },
     {
         num: "04",
-        titulo: "Cor Escarlate",
-        texto: "Representa o sangue de Jesus Cristo derramado por nós, simbolizando redenção e salvação.",
+        titulo: "Cor Amarela (Ouro)",
+        texto: "A segunda faixa da Bandeira Quadrangular simboliza o fogo do Espírito Santo. Está em segundo lugar, como a doutrina, porque o batismo deve ser buscado com fervor.",
         img: null,
         alt: "",
     },
 ];
 
-const SALVACAO_PONTOS = [
-    { n: "1", titulo: "Todos pecaram.", ref: "ROMANOS 3:23" },
-    { n: "2", titulo: "Precisamos crer em Jesus.", ref: "ATOS 16:31" },
-    { n: "3", titulo: "Jesus morreu e ressuscitou.", ref: "ROMANOS 8:34" },
-    { n: "4", titulo: "Jesus nos liberta do pecado e da morte.", ref: "ROMANOS 8:2" },
+const IMPORTANCIA = [
+    {
+        n: "1",
+        titulo: "Jesus fez questão de instruir os discípulos.",
+        texto: "Ordenou que esperassem em Jerusalém até serem revestidos de poder.",
+        ref: "ATOS 1:4-5 · LUCAS 24:49",
+    },
+    {
+        n: "2",
+        titulo: "O Espírito capacita para sinais e milagres.",
+        texto: "Sem ele, o homem não tem poder para curar, expulsar demônios ou pregar com ousadia.",
+        ref: "MARCOS 16:17",
+    },
+    {
+        n: "3",
+        titulo: "Fazer as obras de Jesus, e maiores.",
+        texto: "A promessa só se cumpre em quem é batizado com o Espírito Santo, que dá poder ao fiel.",
+        ref: "JOÃO 14:12",
+    },
+    {
+        n: "4",
+        titulo: "É o Espírito quem convence o mundo.",
+        texto: "Não é a eloquência do pregador que leva as pessoas a crerem, mas a ação de Deus.",
+        ref: "JOÃO 16:8",
+    },
 ];
 
 const ACCENTS = [
-    { bg: "#FF7A00", ink: "#2A0306" },
-    { bg: "#FFD400", ink: "#2A0306" },
+    { bg: "#FF7A00", ink: "#2A1200" },
     { bg: "#1E4FD8", ink: "#FFFFFF" },
     { bg: "#C2187A", ink: "#FFFFFF" },
+    { bg: "#FFE000", ink: "#2A1200" },
 ];
 
 function Reveal({ children, delay = 0, className = "", style = {} }) {
@@ -95,13 +115,14 @@ function LogoIEQ({ size = 40 }) {
     );
 }
 
-function DropMark() {
+function FlameMark() {
     return (
-        <svg viewBox="0 0 120 150" className="drop-svg" role="img" aria-label="Gota de sangue escarlate">
-            <rect width="120" height="150" fill="#8F0009" />
-            <path d="M60 18 C60 18 26 70 26 100 a34 34 0 0 0 68 0 C94 70 60 18 60 18 Z"
-                  fill="#E30613" stroke="rgba(255,255,255,.4)" strokeWidth="1.4" />
-            <ellipse cx="47" cy="88" rx="7" ry="12" fill="rgba(255,255,255,.5)" transform="rotate(-25 47 88)" />
+        <svg viewBox="0 0 120 150" className="drop-svg" role="img" aria-label="Chama de fogo dourada">
+            <rect width="120" height="150" fill="#7A3A00" />
+            <path d="M60 12 C70 40 98 58 98 98 a38 38 0 0 1 -76 0 C22 76 36 62 44 48 C46 62 54 66 56 62 C62 50 56 30 60 12 Z"
+                  fill="#FFC400" stroke="rgba(255,255,255,.45)" strokeWidth="1.4" />
+            <path d="M60 70 C68 84 82 92 82 108 a22 22 0 0 1 -44 0 C38 94 52 86 60 70 Z" fill="#FF7A00" />
+            <ellipse cx="52" cy="104" rx="5" ry="9" fill="rgba(255,255,255,.55)" transform="rotate(-20 52 104)" />
         </svg>
     );
 }
@@ -114,9 +135,9 @@ function Flag() {
     );
 }
 
-export default function Home() {
+export default function HomeSegundaDoutrina() {
     const navigate = useNavigate();
-    const [menuOpen, setMenuOpen]       = useState(false);
+    const [menuOpen, setMenuOpen]           = useState(false);
     const [activeSection, setActiveSection] = useState("");
 
     useEffect(() => {
@@ -147,24 +168,24 @@ export default function Home() {
     return (
         <>
             <Helmet>
-                <title>Jesus Cristo Salva — Primeira Doutrina Quadrangular | IEQ Pituaçu</title>
-                <meta name="description" content="Conheça a primeira doutrina da Igreja do Evangelho Quadrangular: Jesus Cristo Salva. Porque o Filho do Homem veio buscar e salvar o que se havia perdido. Lucas 19:10." />
+                <title>A Promessa do Pai — Segunda Doutrina Quadrangular | IEQ Pituaçu</title>
+                <meta name="description" content="Conheça a segunda doutrina da Igreja do Evangelho Quadrangular: o Batismo com o Espírito Santo. Ficai na cidade até que do alto sejais revestidos de poder. Lucas 24:49." />
                 <meta name="robots" content="index, follow" />
-                <meta property="og:title" content="Jesus Cristo Salva — Primeira Doutrina Quadrangular" />
-                <meta property="og:description" content="Jesus veio ao mundo para buscar e salvar aquilo que estava perdido. Lucas 19:10." />
-                <meta property="og:image" content="/images/jesus-salva.jpg" />
+                <meta property="og:title" content="A Promessa do Pai — Segunda Doutrina Quadrangular" />
+                <meta property="og:description" content="Jesus Cristo batiza com o Espírito Santo e reveste de poder todos os que creem. Atos 2:1-4." />
+                <meta property="og:image" content="/images/pentecostes.jpg" />
                 <meta property="og:type" content="website" />
             </Helmet>
 
             <style>{`
         .jc-home {
-          --red:#E30613; --red-mid:#B5000F; --red-dark:#8F0009; --red-deep:#3D0004;
-          --glow:#FF5A64; --orange:#FF7A00; --yellow:#FFD400; --blue:#1E4FD8; --magenta:#C2187A;
-          --white:#FFFFFF; --ink:#2A0306;
-          --white-78:rgba(255,255,255,.78); --white-60:rgba(255,255,255,.6); --white-35:rgba(255,255,255,.35);
+          --base:#C26A00; --mid:#A55300; --dark:#7A3A00; --deep:#2E1200;
+          --glow:#FFE45C; --orange:#FF7A00; --yellow:#FFE000; --yellow-deep:#FFC400; --blue:#1E4FD8; --magenta:#C2187A;
+          --white:#FFFFFF; --ink:#2A1200;
+          --white-78:rgba(255,255,255,.82); --white-60:rgba(255,255,255,.64); --white-35:rgba(255,255,255,.35);
           --nav-h:74px;
           position:relative; min-height:100vh; overflow-x:hidden;
-          font-family:'Inter',system-ui,sans-serif; color:var(--white); background:var(--red);
+          font-family:'Inter',system-ui,sans-serif; color:var(--white); background:var(--base);
         }
         .jc-home, .jc-home *, .jc-home *::before, .jc-home *::after { box-sizing:border-box; }
         :where(.jc-home, .jc-home *) { margin:0; padding:0; }
@@ -213,8 +234,9 @@ export default function Home() {
           position:fixed; top:0; left:0; right:0; z-index:60; height:var(--nav-h);
           display:flex; align-items:center; justify-content:space-between; gap:20px;
           padding:6px clamp(18px,4vw,44px) 0;
-          background:var(--red-dark);
-          border-bottom:2px solid rgba(255,255,255,.18);
+          background:var(--dark);
+          border-bottom:2px solid var(--yellow);
+          box-shadow:0 4px 24px rgba(255,196,0,.18);
         }
         .jc-nav .jc-flag { position:absolute; top:0; left:0; right:0; height:6px; }
         .jc-brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit; flex-shrink:0; }
@@ -242,17 +264,17 @@ export default function Home() {
           display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 22px;
           border:2px solid var(--yellow); border-radius:0; background:var(--yellow); color:var(--ink);
           font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; flex-shrink:0;
-          box-shadow:4px 4px 0 var(--red-deep);
+          box-shadow:4px 4px 0 var(--deep);
           transition:transform .2s, box-shadow .2s;
         }
-        .jc-entrar:hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--red-deep); }
+        .jc-entrar:hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--deep); }
 
         .jc-burger { display:none; width:42px; height:42px; border:2px solid #fff; border-radius:0;
           background:transparent; color:#fff; align-items:center; justify-content:center; }
 
         .jc-mobile {
           display:none; position:fixed; top:var(--nav-h); left:0; right:0; z-index:59;
-          background:var(--red-dark); border-bottom:4px solid var(--yellow);
+          background:var(--dark); border-bottom:4px solid var(--yellow);
           padding:18px clamp(18px,4vw,32px) 26px;
           animation:jc-menu-in .28s cubic-bezier(.22,1,.36,1);
         }
@@ -268,19 +290,20 @@ export default function Home() {
         /* ═══════════ HERO ═══════════ */
         .jc-hero {
           position:relative; min-height:min(96svh, 1060px); display:flex; align-items:center; overflow:hidden;
-          background:var(--red); border-bottom:6px solid var(--red-dark);
+          background:var(--base); border-bottom:6px solid var(--dark);
         }
         .jc-hero-media { position:absolute; inset:0; z-index:0; }
         .jc-hero-media img {
-          width:100%; height:100%; object-fit:cover; object-position:50% 16%;
-          filter:grayscale(1) contrast(1.15) brightness(.62) blur(2px);
+          width:100%; height:100%; object-fit:cover; object-position:50% 40%;
+          filter:saturate(1.15) contrast(1.05) brightness(.92);
         }
-        .jc-hero-media::after { content:""; position:absolute; inset:0; background:var(--red); mix-blend-mode:multiply; }
+        .jc-hero-media::after { content:""; position:absolute; inset:0;
+          background:linear-gradient(180deg, rgba(46,18,0,.28) 0%, rgba(46,18,0,.55) 100%); }
         .jc-hero-tint { position:absolute; inset:0; z-index:1;
           background:
-            radial-gradient(closest-side at 58% 46%, rgba(255,90,100,.55), rgba(255,90,100,0) 62%),
-            linear-gradient(90deg, rgba(143,0,9,.9) 0%, rgba(227,6,19,.38) 46%, rgba(143,0,9,.74) 100%);
-          box-shadow:inset 0 0 220px 70px rgba(61,0,4,.72); }
+            radial-gradient(closest-side at 62% 42%, rgba(255,224,0,.38), rgba(255,196,0,0) 60%),
+            linear-gradient(90deg, rgba(122,58,0,.82) 0%, rgba(194,106,0,.18) 46%, rgba(122,58,0,.62) 100%);
+          box-shadow:inset 0 0 190px 50px rgba(46,18,0,.55); }
         .jc-hero-cross { top:50%; right:5%; width:min(38vw,420px); height:min(54vh,560px); transform:translateY(-50%); }
 
         .jc-hero-inner {
@@ -296,9 +319,9 @@ export default function Home() {
         .jc-hero-title { margin-top:24px; font-family:'Anton','Inter',sans-serif; font-weight:400;
           text-transform:uppercase; line-height:.9; letter-spacing:.005em; }
         .jc-hero-title .l1 { display:block; font-size:clamp(3rem,8.2vw,6.2rem); color:#fff;
-          text-shadow:5px 5px 0 var(--red-dark); }
-        .jc-hero-title .l2 { display:block; font-size:clamp(4.4rem,12.6vw,8.6rem); color:#fff;
-          text-shadow:6px 6px 0 var(--red-dark); }
+          text-shadow:5px 5px 0 var(--dark); }
+        .jc-hero-title .l2 { display:block; font-size:clamp(4.4rem,12.6vw,8.6rem); color:var(--yellow);
+          text-shadow:6px 6px 0 var(--dark), 0 0 46px rgba(255,224,0,.4); }
 
         .jc-hero-desc { margin-top:26px; font-size:clamp(1.04rem,1.4vw,1.2rem); line-height:1.7;
           color:#fff; max-width:30rem; font-weight:500; }
@@ -317,45 +340,51 @@ export default function Home() {
           transition:transform .2s, box-shadow .2s, background .2s, color .2s;
         }
         .btn-primary { background:var(--yellow); color:var(--ink); border-color:var(--yellow);
-          box-shadow:7px 7px 0 var(--red-dark); }
-        .btn-primary:hover { transform:translate(-2px,-2px); box-shadow:10px 10px 0 var(--red-dark); }
+          box-shadow:7px 7px 0 var(--dark); }
+        .btn-primary:hover { transform:translate(-2px,-2px); box-shadow:10px 10px 0 var(--dark); }
         .btn-ghost { background:transparent; color:#fff; border-color:#fff;
-          box-shadow:7px 7px 0 rgba(61,0,4,.9); }
-        .btn-ghost:hover { background:#fff; color:var(--red-dark); transform:translate(-2px,-2px);
-          box-shadow:10px 10px 0 rgba(61,0,4,.9); }
+          box-shadow:7px 7px 0 rgba(46,18,0,.9); }
+        .btn-ghost:hover { background:#fff; color:var(--dark); transform:translate(-2px,-2px);
+          box-shadow:10px 10px 0 rgba(46,18,0,.9); }
 
         .jc-stamp { position:absolute; z-index:2; right:clamp(24px,6vw,82px); bottom:clamp(92px,15vh,160px);
           display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
           padding:14px 20px; background:var(--yellow); color:var(--ink); transform:rotate(-5deg);
-          box-shadow:8px 8px 0 var(--red-dark); }
+          box-shadow:8px 8px 0 var(--dark); }
         .jc-stamp span { font-size:.6rem; font-weight:800; letter-spacing:.26em; }
         .jc-stamp strong { font-family:'Anton',sans-serif; font-size:2.1rem; line-height:1; }
 
         .jc-scroll { position:absolute; z-index:2; left:0; right:0; bottom:22px; display:flex;
-          flex-direction:column; align-items:center; gap:6px; color:rgba(255,255,255,.6);
+          flex-direction:column; align-items:center; gap:6px; color:rgba(255,255,255,.7);
           font-size:.62rem; letter-spacing:.34em; text-transform:uppercase; }
         .jc-scroll svg { animation:jc-bounce 2.2s ease-in-out infinite; color:var(--yellow); opacity:.9; }
         @keyframes jc-bounce { 0%,100% { transform:translateY(0); opacity:.6 } 50% { transform:translateY(9px); opacity:1 } }
 
         /* ═══════════ SEÇÕES BASE ═══════════ */
         .jc-section { position:relative; padding:clamp(76px,10vh,116px) clamp(18px,4.5vw,56px); overflow:hidden; }
+        .jc-section::after { content:""; position:absolute; top:0; left:0; right:0; height:4px;
+          background:linear-gradient(90deg, transparent, var(--yellow) 25%, var(--yellow) 75%, transparent);
+          opacity:.55; pointer-events:none; }
         .jc-inner { max-width:1240px; margin:0 auto; position:relative; z-index:1; }
         .jc-kicker { display:flex; align-items:center; gap:10px; font-size:.7rem; font-weight:800;
-          letter-spacing:.26em; text-transform:uppercase; color:var(--yellow); }
-        .jc-kicker::before { content:""; width:12px; height:12px; background:currentColor; flex:0 0 auto; }
-        .jc-kicker::after { content:""; width:40px; height:4px; background:currentColor; }
+          letter-spacing:.26em; text-transform:uppercase; color:var(--yellow);
+          text-shadow:0 0 18px rgba(255,224,0,.45); }
+        .jc-kicker::before { content:""; width:12px; height:12px; background:currentColor; flex:0 0 auto;
+          box-shadow:0 0 12px rgba(255,224,0,.8); }
+        .jc-kicker::after { content:""; width:40px; height:4px; background:currentColor;
+          box-shadow:0 0 12px rgba(255,224,0,.6); }
         .jc-h2 { font-family:'Anton','Inter',sans-serif; font-weight:400; text-transform:uppercase;
           letter-spacing:.005em; font-size:clamp(2.1rem,4.8vw,3.7rem); line-height:.98; color:#fff;
-          margin-top:14px; text-shadow:4px 4px 0 rgba(61,0,4,.35); }
+          margin-top:14px; text-shadow:4px 4px 0 rgba(46,18,0,.35); }
 
-        /* ═══════════ SEÇÃO DOUTRINA ═══════════ */
-        .sec-doutrina { background:var(--red-mid); }
+        /* ═══════════ DOUTRINA ═══════════ */
+        .sec-doutrina { background:radial-gradient(ellipse at 82% 4%, rgba(255,224,0,.18), transparent 55%), var(--mid); }
         .doutrina-grid { display:grid; grid-template-columns:1.02fr .98fr; gap:clamp(32px,4.5vw,72px); align-items:center; }
         .doutrina-texto p { margin-top:16px; font-size:1rem; line-height:1.8; color:var(--white-78); max-width:34rem; }
         .verse-box {
-          margin-top:26px; background:var(--red-dark); border:2px solid rgba(255,255,255,.14);
+          margin-top:26px; background:var(--dark); border:2px solid rgba(255,255,255,.14);
           border-left:8px solid var(--yellow); padding:20px 24px;
-          box-shadow:8px 8px 0 var(--red-deep); max-width:34rem;
+          box-shadow:8px 8px 0 var(--deep); max-width:34rem;
         }
         .verse-box blockquote { font-size:1.02rem; line-height:1.6; color:#fff; font-weight:600; }
         .verse-box cite { display:block; margin-top:10px; font-style:normal; font-size:.7rem; font-weight:800;
@@ -363,14 +392,14 @@ export default function Home() {
 
         .salvador-card {
           position:relative; min-height:520px; overflow:hidden; display:flex; align-items:flex-end;
-          border:3px solid #fff; box-shadow:12px 12px 0 var(--red-dark); isolation:isolate;
+          border:3px solid #fff; box-shadow:12px 12px 0 var(--dark); isolation:isolate;
         }
         .salvador-card img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-          object-position:50% 22%; z-index:-1; filter:grayscale(1) contrast(1.1) brightness(.66); }
+          object-position:50% 30%; z-index:-1; filter:saturate(1.12) contrast(1.04) brightness(.94); }
         .salvador-card::after { content:""; position:absolute; inset:0; z-index:0;
-          background:var(--red); mix-blend-mode:multiply; }
+          background:linear-gradient(180deg, rgba(46,18,0,.05) 0%, rgba(46,18,0,.45) 100%); }
         .salvador-veil { position:absolute; inset:0; z-index:0;
-          background:linear-gradient(180deg, rgba(143,0,9,.12) 0%, rgba(61,0,4,.9) 100%); }
+          background:linear-gradient(180deg, rgba(122,58,0,.1) 0%, rgba(46,18,0,.9) 100%); }
         .salvador-body { position:relative; z-index:1; padding:26px 28px 28px; }
         .salvador-rule { width:52px; height:6px; background:var(--yellow); margin-bottom:14px; }
         .salvador-badge { display:inline-block; margin-bottom:14px; padding:7px 14px; background:var(--yellow);
@@ -380,26 +409,27 @@ export default function Home() {
         .salvador-body p { margin-top:12px; font-size:.92rem; line-height:1.7; color:var(--white-78); max-width:26rem; }
 
         /* ═══════════ SIMBOLISMO ═══════════ */
-        .sec-simbolismo { background:var(--red); }
+        .sec-simbolismo { background:radial-gradient(ellipse at 12% 2%, rgba(255,224,0,.17), transparent 52%), var(--base); }
         .sec-sub { margin-top:14px; color:var(--white-78); font-size:.98rem; line-height:1.7; max-width:34rem; }
 
         .sym-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:46px; }
         .sym-card {
           display:flex; flex-direction:column; height:100%; overflow:hidden;
-          background:var(--red-mid); border:2px solid rgba(255,255,255,.16);
+          background:var(--mid); border:2px solid rgba(255,255,255,.16);
           border-top:8px solid var(--accent,var(--yellow));
-          box-shadow:10px 10px 0 var(--red-dark);
+          box-shadow:10px 10px 0 var(--dark);
           transition:transform .2s, box-shadow .2s;
         }
-        .sym-card:hover { transform:translate(-2px,-2px); box-shadow:14px 14px 0 var(--red-dark); }
-        .sym-media { position:relative; height:170px; overflow:hidden; background:var(--red-dark); }
-        .sym-media img { width:100%; height:100%; object-fit:cover; object-position:var(--sym-pos,50% 18%);
-          filter:grayscale(1) contrast(1.08) brightness(.72);
+        .sym-card:hover { transform:translate(-2px,-2px); box-shadow:14px 14px 0 var(--dark); }
+        .sym-media { position:relative; height:170px; overflow:hidden; background:var(--dark); }
+        .sym-media img { width:100%; height:100%; object-fit:cover; object-position:var(--sym-pos,50% 40%);
+          filter:saturate(1.12) contrast(1.04) brightness(.96);
           transition:transform .6s cubic-bezier(.22,1,.36,1); }
-        .sym-media::after { content:""; position:absolute; inset:0; background:var(--red);
-          mix-blend-mode:multiply; }
+        .sym-media::after { content:""; position:absolute; inset:0;
+          background:linear-gradient(180deg, transparent 45%, rgba(46,18,0,.5) 100%); }
         .sym-card:hover .sym-media img { transform:scale(1.06); }
-        .sym-drop { display:grid; place-items:center; height:170px; background:var(--red-dark); }
+        .sym-drop { display:grid; place-items:center; height:170px;
+          background:radial-gradient(circle at 50% 42%, rgba(255,224,0,.3), var(--dark) 66%); }
         .drop-svg { width:96px; height:120px; }
         .sym-body { display:flex; flex-direction:column; padding:18px 18px 22px; flex:1; }
         .sym-num {
@@ -411,15 +441,48 @@ export default function Home() {
         .sym-body h3 { font-size:1rem; font-weight:800; color:#fff; letter-spacing:.04em; text-transform:uppercase; }
         .sym-body p { margin-top:8px; font-size:.85rem; line-height:1.65; color:var(--white-78); }
 
-        /* ═══════════ FILHO DO HOMEM ═══════════ */
-        .sec-filho { background:var(--red-dark); }
-        .filho-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,4.5vw,72px); align-items:center; }
-        .filho-texto p { margin-top:16px; color:var(--white-78); font-size:1rem; line-height:1.8; max-width:33rem; }
+        /* ═══════════ IMPORTÂNCIA ═══════════ */
+        .sec-importancia { background:radial-gradient(ellipse at 50% 0%, rgba(255,224,0,.12), transparent 55%), var(--dark); }
+        .sec-importancia .imp-head { text-align:center; }
+        .sec-importancia .jc-kicker { justify-content:center; }
+        .sec-importancia .sec-sub { margin-left:auto; margin-right:auto; }
+
+        .why-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:50px; }
+        .why-card {
+          height:100%; padding:24px 20px 22px; background:var(--mid);
+          border:2px solid rgba(255,255,255,.16); border-top:8px solid var(--accent,var(--yellow));
+          box-shadow:10px 10px 0 var(--deep);
+          transition:transform .2s, box-shadow .2s;
+        }
+        .why-card:hover { transform:translate(-2px,-2px); box-shadow:14px 14px 0 var(--deep); }
+        .why-num {
+          display:inline-flex; align-items:center; justify-content:center;
+          min-width:56px; height:46px; padding:0 10px; background:var(--accent,var(--yellow));
+          color:var(--accent-ink,var(--ink)); font-family:'Anton',sans-serif; font-size:1.5rem; line-height:1;
+        }
+        .why-card h3 { margin-top:14px; font-size:.95rem; font-weight:800; line-height:1.45; color:#fff;
+          text-transform:uppercase; letter-spacing:.03em; min-height:4.4em; }
+        .why-card p { margin-top:10px; font-size:.86rem; line-height:1.65; color:var(--white-78); }
+        .why-ref { display:inline-block; margin-top:16px; padding:6px 12px;
+          border:2px solid var(--yellow); color:var(--yellow);
+          font-size:.62rem; font-weight:800; letter-spacing:.16em; }
+
+        .imp-quote { margin:50px auto 0; max-width:46rem; text-align:center; }
+        .imp-quote .rule { width:88px; height:6px; margin:0 auto; background:var(--yellow); }
+        .imp-quote p { font-size:clamp(1.1rem,2.1vw,1.45rem); font-weight:600;
+          line-height:1.55; color:#fff; padding:22px 12px; }
+        .imp-quote cite { display:block; margin-top:-8px; padding-bottom:22px; font-style:normal; font-size:.7rem;
+          font-weight:800; letter-spacing:.24em; color:var(--yellow); }
+
+        /* ═══════════ PENTECOSTES ═══════════ */
+        .sec-pentecostes { background:radial-gradient(ellipse at 88% 6%, rgba(255,224,0,.16), transparent 54%), var(--base); }
+        .pent-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,4.5vw,72px); align-items:center; }
+        .pent-texto p { margin-top:16px; color:var(--white-78); font-size:1rem; line-height:1.8; max-width:33rem; }
 
         .verse-card {
           position:relative; margin-top:18px; padding:20px 22px 18px 64px;
-          background:var(--red-mid); border:2px solid rgba(255,255,255,.14);
-          border-left:8px solid var(--yellow); box-shadow:8px 8px 0 var(--red-deep);
+          background:var(--mid); border:2px solid rgba(255,255,255,.14);
+          border-left:8px solid var(--yellow); box-shadow:8px 8px 0 var(--deep);
         }
         .verse-quote { position:absolute; top:2px; left:18px; font-family:'Anton',sans-serif;
           font-size:3.6rem; line-height:1; color:var(--yellow); user-select:none; }
@@ -428,8 +491,8 @@ export default function Home() {
 
         .film-frame { position:relative; max-width:430px; justify-self:center; width:100%; }
         .film-panel-wrap { position:relative; z-index:1; }
-        .film-panel { overflow:hidden; border:3px solid #fff; box-shadow:12px 12px 0 var(--red-mid); }
-        .film-panel img { display:block; width:100%; height:100%; object-fit:cover; aspect-ratio:16/9.4; }
+        .film-panel { overflow:hidden; border:3px solid #fff; box-shadow:12px 12px 0 var(--dark); }
+        .film-panel img { display:block; width:100%; height:100%; object-fit:cover; aspect-ratio:4/4.4; }
         .film-corner { position:absolute; width:26px; height:26px; z-index:2; border:0 solid var(--yellow); }
         .film-corner.tl { top:-3px; left:-3px; border-top-width:3px; border-left-width:3px; }
         .film-corner.tr { top:-3px; right:-3px; border-top-width:3px; border-right-width:3px; }
@@ -438,39 +501,8 @@ export default function Home() {
         .film-caption { position:relative; z-index:1; margin-top:18px; text-align:center; font-size:.64rem;
           font-weight:700; letter-spacing:.26em; text-transform:uppercase; color:var(--white-60); }
 
-        /* ═══════════ SALVAÇÃO ═══════════ */
-        .sec-salvacao { background:var(--red); }
-        .sec-salvacao .jc-kicker { color:var(--yellow); justify-content:center; }
-        .sec-salvacao .salvacao-head { text-align:center; }
-        .sec-salvacao .jc-h2 { color:#fff; }
-
-        .why-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:50px; }
-        .why-card {
-          height:100%; padding:24px 20px 22px; background:var(--red-mid);
-          border:2px solid rgba(255,255,255,.16); border-top:8px solid var(--accent,var(--yellow));
-          box-shadow:10px 10px 0 var(--red-dark);
-          transition:transform .2s, box-shadow .2s;
-        }
-        .why-card:hover { transform:translate(-2px,-2px); box-shadow:14px 14px 0 var(--red-dark); }
-        .why-num {
-          display:inline-flex; align-items:center; justify-content:center;
-          min-width:56px; height:46px; padding:0 10px; background:var(--accent,var(--yellow));
-          color:var(--accent-ink,var(--ink)); font-family:'Anton',sans-serif; font-size:1.5rem; line-height:1;
-        }
-        .why-card h3 { margin-top:14px; font-size:.95rem; font-weight:800; line-height:1.45; color:#fff;
-          text-transform:uppercase; letter-spacing:.03em; min-height:2.8em; }
-        .why-ref { display:inline-block; margin-top:16px; padding:6px 12px;
-          border:2px solid var(--yellow); color:var(--yellow);
-          font-size:.62rem; font-weight:800; letter-spacing:.16em; }
-
-        .salvacao-quote { margin:50px auto 0; max-width:46rem; text-align:center; }
-        .salvacao-quote .rule { width:88px; height:6px; margin:0 auto; background:var(--yellow); }
-        .salvacao-quote p { font-size:clamp(1.1rem,2.1vw,1.45rem); font-weight:600;
-          line-height:1.55; color:#fff; padding:22px 12px; }
-
         /* ═══════════ CONVITE ═══════════ */
-        .sec-convite { background:var(--red-mid); }
-        .sec-convite .jc-h2 { color:#fff; }
+        .sec-convite { background:radial-gradient(ellipse at 16% 12%, rgba(255,224,0,.17), transparent 54%), var(--mid); }
         .sec-convite .jc-h2 em { font-style:normal; color:#fff;
           text-decoration:underline; text-decoration-color:var(--yellow);
           text-decoration-thickness:8px; text-underline-offset:6px; }
@@ -479,26 +511,27 @@ export default function Home() {
         .btn-convite {
           margin-top:30px; height:58px; padding:0 32px; border:2px solid var(--yellow); border-radius:0;
           background:var(--yellow); color:var(--ink); font-size:.78rem; font-weight:800; letter-spacing:.1em;
-          box-shadow:8px 8px 0 var(--red-deep); display:inline-flex; align-items:center; gap:12px;
+          box-shadow:8px 8px 0 var(--deep); display:inline-flex; align-items:center; gap:12px;
           text-transform:uppercase; transition:transform .2s, box-shadow .2s;
         }
-        .btn-convite:hover { transform:translate(-2px,-2px); box-shadow:11px 11px 0 var(--red-deep); }
+        .btn-convite:hover { transform:translate(-2px,-2px); box-shadow:11px 11px 0 var(--deep); }
 
         .convite-frame { position:relative; max-width:460px; justify-self:center; width:100%; }
         .convite-frame figure { position:relative; z-index:1; overflow:hidden;
-          border:3px solid #fff; box-shadow:12px 12px 0 var(--red-dark); }
-        .convite-frame figure::after { content:""; position:absolute; inset:0; background:var(--red);
-          mix-blend-mode:multiply; pointer-events:none; }
+          border:3px solid #fff; box-shadow:12px 12px 0 var(--dark); }
+        .convite-frame figure::after { content:""; position:absolute; inset:0;
+          background:linear-gradient(180deg, transparent 55%, rgba(46,18,0,.35) 100%);
+          pointer-events:none; }
         .convite-frame img { display:block; width:100%; aspect-ratio:4/4.6; object-fit:cover; object-position:50% 42%; }
         .convite-chip { position:absolute; z-index:2; right:-14px; bottom:26px; display:flex; align-items:center; gap:10px;
           padding:12px 18px; background:var(--yellow); color:var(--ink);
-          box-shadow:6px 6px 0 var(--red-dark); }
+          box-shadow:6px 6px 0 var(--dark); }
         .convite-chip svg { color:var(--ink); flex-shrink:0; }
         .convite-chip strong { display:block; font-size:.78rem; color:var(--ink); letter-spacing:.04em; }
-        .convite-chip small { display:block; font-size:.6rem; font-weight:700; letter-spacing:.2em; color:var(--red-dark); margin-top:2px; text-transform:uppercase; }
+        .convite-chip small { display:block; font-size:.6rem; font-weight:700; letter-spacing:.2em; color:var(--dark); margin-top:2px; text-transform:uppercase; }
 
         /* ═══════════ RODAPÉ ═══════════ */
-        .jc-footer { position:relative; background:var(--red-dark); }
+        .jc-footer { position:relative; background:var(--dark); }
         .jc-footer .jc-flag { height:8px; }
         .jc-footer-inner { max-width:1240px; margin:0 auto; padding:56px clamp(18px,4.5vw,56px) 0; }
         .jc-footer-grid { display:grid; grid-template-columns:1.35fr 1fr 1fr; gap:40px; }
@@ -535,14 +568,13 @@ export default function Home() {
           .jc-mobile.open { display:block; }
         }
         @media (max-width:900px) {
-          .doutrina-grid, .filho-grid, .convite-grid { grid-template-columns:1fr; }
+          .doutrina-grid, .pent-grid, .convite-grid { grid-template-columns:1fr; }
           .salvador-card { min-height:420px; }
           .convite-frame { max-width:400px; }
           .film-frame { max-width:400px; }
           .jc-footer-grid { grid-template-columns:1fr; gap:28px; }
           .jc-hero-cross { right:-12%; width:60vw; height:56vh; opacity:.07; }
           .jc-section-cross { display:none; }
-          .jc-hero-media img { object-position:50% 12%; }
           .jc-hero { min-height:auto; }
           .jc-hero-inner { padding-top:calc(var(--nav-h) + 44px); padding-bottom:104px; }
         }
@@ -633,11 +665,13 @@ export default function Home() {
 
                 <main id="inicio">
                     {/* ═══════════ HERO ═══════════ */}
-                    <section className="jc-hero" aria-label="Jesus Cristo Salva — Primeira Doutrina Quadrangular">
+                    <section className="jc-hero" aria-label="A Promessa do Pai — Segunda Doutrina Quadrangular">
                         <div className="jc-hero-media">
                             <img
-                                src="/images/jesus-rosto.jpg"
-                                alt="Rosto de Jesus Cristo em perfil, iluminado em tons avermelhados, olhando para o alto"
+                                src="/images/pentecostes.jpg"
+                                alt="Chamas de fogo descendo do alto, simbolizando o Espírito Santo em Pentecostes"
+                                fetchPriority="high"
+                                decoding="async"
                             />
                         </div>
                         <div className="jc-hero-tint" />
@@ -650,26 +684,26 @@ export default function Home() {
                             <div className="jc-hero-content">
                                 <div className="eyebrow hero-rise">
                                     <span className="jc-dots" aria-hidden="true"><i /><i /><i /><i /></span>
-                                    <span className="eyebrow-text"><Cross size={13} strokeWidth={2.6} /> Primeira Doutrina Quadrangular</span>
+                                    <span className="eyebrow-text"><Flame size={13} strokeWidth={2.6} /> Segunda Doutrina Quadrangular</span>
                                 </div>
 
                                 <h1 className="jc-hero-title">
-                                    <span className="l1 hero-rise" style={{ animationDelay: "120ms" }}>JESUS CRISTO</span>
-                                    <span className="l2 hero-rise" style={{ animationDelay: "240ms" }}>SALVA!</span>
+                                    <span className="l1 hero-rise" style={{ animationDelay: "120ms" }}>A PROMESSA</span>
+                                    <span className="l2 hero-rise" style={{ animationDelay: "240ms" }}>DO PAI!</span>
                                 </h1>
 
                                 <p className="jc-hero-desc hero-rise" style={{ animationDelay: "360ms" }}>
-                                    Jesus veio ao mundo para buscar e salvar aquilo que estava perdido.
+                                    Jesus batiza com o Espírito Santo e reveste de poder todos os que creem.
                                 </p>
 
                                 <figure className="jc-hero-verse hero-rise" style={{ animationDelay: "460ms" }}>
-                                    <blockquote>“Porque o Filho do Homem veio buscar e salvar o que se havia perdido.”</blockquote>
-                                    <figcaption>Lucas 19:10</figcaption>
+                                    <blockquote>“Ficai, porém, na cidade de Jerusalém, até que do alto sejais revestidos de poder.”</blockquote>
+                                    <figcaption>Lucas 24:49</figcaption>
                                 </figure>
 
                                 <div className="jc-hero-actions hero-rise" style={{ animationDelay: "560ms" }}>
                                     <a className="btn btn-primary" href="#doutrina">Conheça a Doutrina <ArrowRight size={16} strokeWidth={2.6} /></a>
-                                    <a className="btn btn-ghost" href="https://www.bibliaonline.com.br/acf/lc/19" target="_blank" rel="noopener noreferrer">
+                                    <a className="btn btn-ghost" href="https://www.bibliaonline.com.br/acf/at/2" target="_blank" rel="noopener noreferrer">
                                         <BookOpen size={16} strokeWidth={2.4} /> Leia a Palavra
                                     </a>
                                 </div>
@@ -677,8 +711,8 @@ export default function Home() {
                         </div>
 
                         <div className="jc-stamp" aria-hidden="true">
-                            <span>LUCAS</span>
-                            <strong>19:10</strong>
+                            <span>ATOS</span>
+                            <strong>2:1-4</strong>
                         </div>
 
                         <div className="jc-scroll" aria-hidden="true">
@@ -694,15 +728,15 @@ export default function Home() {
                             <div className="doutrina-texto">
                                 <Reveal>
                                     <p className="jc-kicker">A Doutrina</p>
-                                    <h2 className="jc-h2">Jesus Cristo,<br />o Salvador</h2>
-                                    <p>A primeira doutrina da Igreja do Evangelho Quadrangular apresenta Jesus Cristo como o Salvador da humanidade.</p>
-                                    <p>Todos pecaram e necessitam da salvação que somente Jesus pode oferecer.</p>
-                                    <p>Por meio de sua morte na cruz e de sua ressurreição, Cristo abriu o caminho para que todos aqueles que creem nele recebam a vida eterna.</p>
+                                    <h2 className="jc-h2">Batismo com o<br />Espírito Santo</h2>
+                                    <p>A segunda doutrina cardinal da Igreja do Evangelho Quadrangular é o Batismo com o Espírito Santo.</p>
+                                    <p>Na terra, Jesus veio para ser o Salvador. Ao voltar para a sua glória, não deixou os discípulos sozinhos: enviou a promessa do Pai, o poder do alto para vencer as investidas do inimigo e levar o Evangelho a toda criatura.</p>
+                                    <p>Esse derramamento continuou e continua até hoje sobre todos os que creem.</p>
                                 </Reveal>
                                 <Reveal delay={140}>
                                     <div className="verse-box">
-                                        <blockquote>“Crê no Senhor Jesus Cristo e serás salvo, tu e a tua casa.”</blockquote>
-                                        <cite>ATOS 16:31</cite>
+                                        <blockquote>“Jesus Cristo é o mesmo, ontem, e hoje, e eternamente.”</blockquote>
+                                        <cite>HEBREUS 13:8</cite>
                                     </div>
                                 </Reveal>
                             </div>
@@ -710,17 +744,17 @@ export default function Home() {
                             <Reveal delay={160}>
                                 <div className="salvador-card">
                                     <img
-                                        src="/images/cruz-salvacao.jpg"
-                                        alt="Cruz cristã em silhueta contra um pôr do sol de tons avermelhados"
+                                        src="/images/fogo-espirito.jpg"
+                                        alt="Chama de fogo em tons dourados sobre fundo escuro"
                                         loading="lazy"
                                         decoding="async"
                                     />
                                     <div className="salvador-veil" />
                                     <div className="salvador-body">
                                         <div className="salvador-rule" />
-                                        <span className="salvador-badge">I CORÍNTIOS 5:7</span>
-                                        <h3>O Salvador</h3>
-                                        <p>Jesus é o Cordeiro da Páscoa. Pelo seu sangue, somos protegidos da morte eterna e recebemos a salvação.</p>
+                                        <span className="salvador-badge">LUCAS 24:49</span>
+                                        <h3>O Batizador</h3>
+                                        <p>Jesus cumpriu a previsão de João Batista e envia o Consolador, para que continuemos a sua obra revestidos de poder.</p>
                                     </div>
                                 </div>
                             </Reveal>
@@ -732,8 +766,8 @@ export default function Home() {
                         <div className="jc-inner">
                             <Reveal>
                                 <p className="jc-kicker">Simbolismo</p>
-                                <h2 className="jc-h2">O simbolismo da<br />primeira doutrina</h2>
-                                <p className="sec-sub">Quatro sinais que apontam para Jesus, o Salvador.</p>
+                                <h2 className="jc-h2">O simbolismo da<br />segunda doutrina</h2>
+                                <p className="sec-sub">Quatro sinais que apontam para Jesus, o Batizador com o Espírito Santo.</p>
                             </Reveal>
 
                             <div className="sym-grid">
@@ -751,7 +785,7 @@ export default function Home() {
                                                     </div>
                                                 ) : (
                                                     <div className="sym-drop">
-                                                        <DropMark />
+                                                        <FlameMark />
                                                     </div>
                                                 )}
                                                 <div className="sym-body">
@@ -768,30 +802,69 @@ export default function Home() {
                         </div>
                     </section>
 
-                    {/* ═══════════ FILHO DO HOMEM ═══════════ */}
-                    <section className="jc-section sec-filho" id="filho-do-homem">
+                    {/* ═══════════ IMPORTÂNCIA ═══════════ */}
+                    <section className="jc-section sec-importancia" id="importancia">
+                        <div className="jc-inner">
+                            <Reveal className="imp-head">
+                                <p className="jc-kicker">Importância</p>
+                                <h2 className="jc-h2">Por que buscar esta<br />experiência?</h2>
+                                <p className="sec-sub">Quatro razões que a Palavra apresenta para todo cristão.</p>
+                            </Reveal>
+
+                            <div className="why-grid">
+                                {IMPORTANCIA.map((item, index) => {
+                                    const accent = ACCENTS[index % ACCENTS.length];
+                                    return (
+                                        <Reveal key={item.n} delay={index * 110}>
+                                            <div
+                                                className="why-card"
+                                                style={{ "--accent": accent.bg, "--accent-ink": accent.ink }}
+                                            >
+                                                <span className="why-num">0{item.n}</span>
+                                                <h3>{item.titulo}</h3>
+                                                <p>{item.texto}</p>
+                                                <span className="why-ref">{item.ref}</span>
+                                            </div>
+                                        </Reveal>
+                                    );
+                                })}
+                            </div>
+
+                            <Reveal delay={140}>
+                                <div className="imp-quote">
+                                    <div className="rule" />
+                                    <p>“Não é a eloquência do pregador, mas o Espírito Santo quem leva as pessoas a crerem.”</p>
+                                    <cite>JOÃO 16:8</cite>
+                                    <div className="rule" />
+                                </div>
+                            </Reveal>
+                        </div>
+                    </section>
+
+                    {/* ═══════════ PENTECOSTES ═══════════ */}
+                    <section className="jc-section sec-pentecostes" id="pentecostes">
                         <div className="jc-cross jc-section-cross" aria-hidden="true" />
-                        <div className="jc-inner filho-grid">
-                            <div className="filho-texto">
+                        <div className="jc-inner pent-grid">
+                            <div className="pent-texto">
                                 <Reveal>
-                                    <p className="jc-kicker">Evangelho de Lucas</p>
-                                    <h2 className="jc-h2">Quem é o<br />Filho do Homem?</h2>
-                                    <p>Jesus Cristo é o Filho de Deus que se manifestou em carne e habitou entre nós.</p>
-                                    <p>O Evangelho de Lucas apresenta Jesus em sua humanidade perfeita, revelando seu amor, sua compaixão e sua missão de salvar a humanidade.</p>
+                                    <p className="jc-kicker">Atos dos Apóstolos</p>
+                                    <h2 className="jc-h2">O dia de<br />Pentecostes</h2>
+                                    <p>Dias após a Ascensão, os discípulos estavam reunidos à espera do batismo, como Cristo ordenara. Naquele dia, a promessa se cumpriu.</p>
+                                    <p>É o derramamento do Espírito de Deus “sobre toda a carne”, anunciado pelo profeta Joel (Joel 2.28-29) e hoje disponível a todos os que creem.</p>
                                 </Reveal>
 
                                 <Reveal delay={130}>
                                     <div className="verse-card">
                                         <span className="verse-quote" aria-hidden="true">“</span>
-                                        <span className="verse-ref">JOÃO 1:1</span>
-                                        <blockquote>“No princípio era o Verbo, e o Verbo estava com Deus, e o Verbo era Deus.”</blockquote>
+                                        <span className="verse-ref">ATOS 2:2-3</span>
+                                        <blockquote>“De repente veio do céu um som, como de um vento veemente e impetuoso... E foram vistas por eles línguas repartidas, como que de fogo.”</blockquote>
                                     </div>
                                 </Reveal>
                                 <Reveal delay={220}>
                                     <div className="verse-card">
                                         <span className="verse-quote" aria-hidden="true">“</span>
-                                        <span className="verse-ref">JOÃO 1:14</span>
-                                        <blockquote>“E o Verbo se fez carne e habitou entre nós.”</blockquote>
+                                        <span className="verse-ref">ATOS 2:4</span>
+                                        <blockquote>“E todos foram cheios do Espírito Santo, e começaram a falar noutras línguas, conforme o Espírito Santo lhes concedia que falassem.”</blockquote>
                                     </div>
                                 </Reveal>
                             </div>
@@ -803,51 +876,15 @@ export default function Home() {
                                         <span className="film-corner bl" /><span className="film-corner br" />
                                         <div className="film-panel">
                                             <img
-                                                src="/images/jesus-salva.jpg"
-                                                alt="Arte Jesus Salva — Evangelho de Lucas, Filho do Homem, com o rosto de Jesus e a cruz em fundo vermelho"
+                                                src="/images/pentecostes.jpg"
+                                                alt="Arte de Pentecostes com línguas de fogo e a pomba do Espírito Santo"
                                                 loading="lazy"
                                                 decoding="async"
                                             />
                                         </div>
                                     </div>
-                                    <figcaption className="film-caption">Jesus Salva · Evangelho de Lucas · Filho do Homem</figcaption>
+                                    <figcaption className="film-caption">A Promessa do Pai · Atos 2 · Pentecostes</figcaption>
                                 </figure>
-                            </Reveal>
-                        </div>
-                    </section>
-
-                    {/* ═══════════ POR QUE PRECISAMOS DE UM SALVADOR ═══════════ */}
-                    <section className="jc-section sec-salvacao" id="salvacao">
-                        <div className="jc-inner">
-                            <Reveal className="salvacao-head">
-                                <p className="jc-kicker">Salvação</p>
-                                <h2 className="jc-h2">Por que precisamos<br />de um Salvador?</h2>
-                            </Reveal>
-
-                            <div className="why-grid">
-                                {SALVACAO_PONTOS.map((ponto, index) => {
-                                    const accent = ACCENTS[index % ACCENTS.length];
-                                    return (
-                                        <Reveal key={ponto.n} delay={index * 110}>
-                                            <div
-                                                className="why-card"
-                                                style={{ "--accent": accent.bg, "--accent-ink": accent.ink }}
-                                            >
-                                                <span className="why-num">0{ponto.n}</span>
-                                                <h3>{ponto.titulo}</h3>
-                                                <span className="why-ref">{ponto.ref}</span>
-                                            </div>
-                                        </Reveal>
-                                    );
-                                })}
-                            </div>
-
-                            <Reveal delay={140}>
-                                <div className="salvacao-quote">
-                                    <div className="rule" />
-                                    <p>“A salvação é um presente de Deus, recebido pela fé em Jesus Cristo.”</p>
-                                    <div className="rule" />
-                                </div>
                             </Reveal>
                         </div>
                     </section>
@@ -859,10 +896,10 @@ export default function Home() {
                             <div className="convite-texto">
                                 <Reveal>
                                     <p className="jc-kicker">Convite</p>
-                                    <h2 className="jc-h2">Jesus te ama.<br />Ele é o caminho<br />da <em>salvação!</em></h2>
-                                    <p>Independentemente da sua história, Jesus oferece perdão, transformação e uma nova vida. Nele encontramos esperança e salvação.</p>
-                                    <button className="btn-convite" onClick={() => navigate("/estudos/face-de-homem")}>
-                                        Quero conhecer mais sobre Jesus <ArrowRight size={17} strokeWidth={2.6} />
+                                    <h2 className="jc-h2">A promessa é<br />para você.<br />Receba o <em>poder!</em></h2>
+                                    <p>Hoje podemos sentir a presença do Senhor não apenas superficialmente, mas intimamente, pois ele habita em nós por meio do seu Santo Espírito.</p>
+                                    <button className="btn-convite" onClick={() => navigate("/estudos/promessa-do-pai")}>
+                                        Quero estudar esta doutrina <ArrowRight size={17} strokeWidth={2.6} />
                                     </button>
                                 </Reveal>
                             </div>
@@ -878,10 +915,10 @@ export default function Home() {
                                         />
                                     </figure>
                                     <div className="convite-chip">
-                                        <Cross size={20} strokeWidth={2.2} />
+                                        <Flame size={20} strokeWidth={2.2} />
                                         <span>
-                                            <strong>A Palavra de Deus</strong>
-                                            <small>Lucas 19:10</small>
+                                            <strong>A Promessa do Pai</strong>
+                                            <small>Lucas 24:49</small>
                                         </span>
                                     </div>
                                 </div>
@@ -903,10 +940,10 @@ export default function Home() {
                                         <small>Igreja do Evangelho Quadrangular</small>
                                     </span>
                                 </div>
-                                <p className="jc-foot-doctr">Jesus Cristo Salva — Primeira Doutrina Quadrangular</p>
+                                <p className="jc-foot-doctr">A Promessa do Pai — Segunda Doutrina Quadrangular</p>
                                 <blockquote className="jc-foot-verse">
-                                    “Porque o Filho do Homem veio buscar e salvar o que se havia perdido.”
-                                    <cite>LUCAS 19:10</cite>
+                                    “Ficai, porém, na cidade de Jerusalém, até que do alto sejais revestidos de poder.”
+                                    <cite>LUCAS 24:49</cite>
                                 </blockquote>
                             </div>
 
@@ -930,7 +967,7 @@ export default function Home() {
 
                         <div className="jc-footer-bar">
                             <p>© {year} Igreja do Evangelho Quadrangular — Pituaçu. Todos os direitos reservados.</p>
-                            <p>Jesus Cristo Salva — Primeira Doutrina Quadrangular · Uso exclusivo da IEQ · Suporte: <a href="mailto:washquesia@gmail.com">washquesia@gmail.com</a></p>
+                            <p>A Promessa do Pai — Segunda Doutrina Quadrangular · Uso exclusivo da IEQ · Suporte: <a href="mailto:washquesia@gmail.com">washquesia@gmail.com</a></p>
                         </div>
                     </div>
                 </footer>

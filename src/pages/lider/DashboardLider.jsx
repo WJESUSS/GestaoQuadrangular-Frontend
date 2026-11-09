@@ -26,7 +26,7 @@ import { AURA } from "./liderTheme";
 import "./dashboardLider.css";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 import CrossMark from "../../components/CrossMark.jsx";
-import cartazImg from "../../assets/jesus_salva_cartaz.jpg";
+const LEAO_LOGIN = "/images/leao-login.jpg";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
@@ -552,8 +552,10 @@ export default function DashboardLider() {
       "--dl-glow-1": dark ? "rgba(227,6,19,.14)" : "rgba(227,6,19,.08)",
       "--dl-glow-2": dark ? "rgba(255,212,0,.08)" : "rgba(0,0,0,.05)",
       "--dl-option-bg": dark ? "#17171C" : "#FFFFFF",
-      "--dl-photo": "none",
-      "--dl-photo-filter": "none",
+      "--dl-photo": 'url("/images/leao-login.jpg")',
+      "--dl-photo-filter": dark
+        ? "saturate(1.06) contrast(1.03) brightness(.62)"
+        : "saturate(1.10) contrast(1.03) brightness(.90)",
       "--dl-shadow-color": dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.12)",
       "--dl-avatar-bg": dark ? "#B5000F" : "#8F0009",
       "--dl-avatar-shadow": dark ? "0 0 0 6px rgba(227,6,19,.18)" : "0 0 0 6px rgba(227,6,19,.10)",
@@ -570,8 +572,8 @@ export default function DashboardLider() {
       "--dl-card-shadow-sm": `8px 8px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
       "--dl-modal-shadow": `12px 12px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
       "--dl-bg-overlay": dark
-        ? "linear-gradient(180deg, rgba(10,10,15,.88) 0%, rgba(10,10,15,.94) 50%, rgba(10,10,15,.98) 100%)"
-        : "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%)",
+        ? "linear-gradient(180deg, rgba(10,10,15,.80) 0%, rgba(10,10,15,.88) 50%, rgba(10,10,15,.94) 100%)"
+        : "linear-gradient(180deg, rgba(255,255,255,.84) 0%, rgba(255,250,240,.89) 50%, rgba(255,245,228,.93) 100%)",
       "--dl-ghost-hover-bg": dark ? "rgba(255,212,0,.12)" : "rgba(255,212,0,.16)",
       "--dl-surface-2": dark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)",
       "--dl-surface-2-border": dark ? "rgba(255,255,255,.14)" : "rgba(0,0,0,.18)",
@@ -859,8 +861,8 @@ export default function DashboardLider() {
                     <div className="dl-kpi-action">
                       <div className="dl-kpi-cartaz">
                         <img
-                            src={cartazImg}
-                            alt="Jesus Salva — cartaz da Igreja do Evangelho Quadrangular"
+                            src={LEAO_LOGIN}
+                            alt="Jesus Cristo, o Leão da Tribo de Judá"
                         />
                       </div>
                       <div>

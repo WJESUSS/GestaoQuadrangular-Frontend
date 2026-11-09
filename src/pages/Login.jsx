@@ -6,15 +6,15 @@ import { Loader2, Lock, Mail, Sun, Moon, User, ShieldCheck, CheckCircle2, ArrowL
 import { useAuth }       from "../auth/AuthContext";
 import { useTheme }      from "../context/ThemeContext";
 import api               from "../services/api.js";
-import jesusImg          from "../assets/jesus.jpeg";
-import cartazImg         from "../assets/jesus_salva_cartaz.jpg";
 
-/* ─── Paleta do cartaz: escarlate + blocos chapados ─── */
+const LEAO_LOGIN = "/images/leao-login.jpg";
+
+/* ─── Paleta da marca: âmbar + amarelo (mesmo tema da Home) ─── */
 const P = {
-    wine:"#4CFF9B", wineDeep:"#3D0004", wineLight:"#B5000F",
-    scarlet:"#E30613", gold:"#FFD400", goldLight:"#FFD400",
-    red:"#FF7A83", green:"#4CFF9B", amber:"#FFD400",
-    ink:"#2A0306", paper:"#8F0009", cream:"#E30613",
+    wine:"#FFE000", wineDeep:"#2E1200", wineLight:"#A55300",
+    scarlet:"#C26A00", gold:"#FFE000", goldLight:"#FFE000",
+    red:"#FF7A83", green:"#4CFF9B", amber:"#FFE000",
+    ink:"#2A1200", paper:"#7A3A00", cream:"#C26A00",
 };
 
 /* ─── Fade-in do cartão ─── */
@@ -264,16 +264,16 @@ export default function Login() {
         .ieq-login-root, .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { box-sizing:border-box; }
         :where(.ieq-login-root, .ieq-login-root *) { margin:0; padding:0; }
         .ieq-login-root {
-          --red:#E30613; --red-mid:#B5000F; --red-dark:#8F0009; --red-deep:#3D0004;
-          --glow:#FF5A64; --orange:#FF7A00; --yellow:#FFD400; --blue:#1E4FD8; --magenta:#C2187A;
-          --white:#FFFFFF; --ink:#2A0306;
+          --red:#C26A00; --red-mid:#A55300; --red-dark:#7A3A00; --red-deep:#2E1200;
+          --glow:#FFE45C; --orange:#FF7A00; --yellow:#FFE000; --blue:#1E4FD8; --magenta:#C2187A;
+          --white:#FFFFFF; --ink:#2A1200;
           --white-78:rgba(255,255,255,.78); --white-60:rgba(255,255,255,.6); --white-35:rgba(255,255,255,.35);
-          --err:#FF7A83; --warn:#FFD400; --track:rgba(255,255,255,.18);
+          --err:#FF7A83; --warn:#FFE000; --track:rgba(255,255,255,.18);
           font-family:'Inter',system-ui,sans-serif;
           min-height:100vh; position:relative; overflow-x:hidden;
           color:#fff; background:var(--red);
         }
-        .ieq-login-root.is-dark { background:var(--red-dark); }
+        .ieq-login-root.is-dark { background:var(--red-deep); }
         .ieq-login-root button, .ieq-login-root input { font-family:inherit; }
         .ieq-login-root button { cursor:pointer; }
         .ieq-login-root ::selection { background:var(--yellow); color:var(--ink); }
@@ -282,15 +282,16 @@ export default function Login() {
         .login-bg { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
         .login-bg-img {
           position:absolute; inset:-4%;
-          background-size:cover; background-position:50% 28%; background-repeat:no-repeat;
-          filter:grayscale(1) contrast(1.15) brightness(.58) blur(3px);
+          background-size:cover; background-position:50% 32%; background-repeat:no-repeat;
+          filter:saturate(1.12) contrast(1.04) brightness(.84);
         }
-        .login-bg::after { content:""; position:absolute; inset:0; background:var(--red); mix-blend-mode:multiply; }
+        .login-bg::after { content:""; position:absolute; inset:0;
+          background:linear-gradient(180deg, rgba(46,18,0,.42), rgba(46,18,0,.72)); }
         .login-bg::before { content:""; position:absolute; inset:0;
           background:
-            radial-gradient(closest-side at 50% 48%, rgba(255,90,100,.5), rgba(255,90,100,0) 60%),
-            linear-gradient(90deg, rgba(143,0,9,.9) 0%, rgba(227,6,19,.3) 50%, rgba(143,0,9,.9) 100%);
-          box-shadow:inset 0 0 220px 70px rgba(61,0,4,.7);
+            radial-gradient(closest-side at 50% 46%, rgba(255,228,92,.28), rgba(255,228,92,0) 62%),
+            linear-gradient(90deg, rgba(122,58,0,.9) 0%, rgba(194,106,0,.3) 50%, rgba(122,58,0,.9) 100%);
+          box-shadow:inset 0 0 220px 70px rgba(46,18,0,.72);
         }
         .login-cross { position:absolute; z-index:1; right:4%; top:50%; width:min(34vw,340px); height:min(50vh,460px);
           transform:translateY(-50%); opacity:.1; pointer-events:none; }
@@ -326,13 +327,13 @@ export default function Login() {
           transition:opacity .6s ease, transform .6s ease;
         }
 
-        /* ── lado da marca: cartaz "Jesus Salva" ── */
+        /* ── lado da marca: leão de Judá ── */
         .brand-pane {
           position:relative; overflow:hidden; isolation:isolate;
-          aspect-ratio:1215 / 1295;      /* mesma proporção do cartaz */
+          aspect-ratio:1215 / 1295;      /* mesma proporção da imagem */
           min-height:0; padding:0;
           display:block;
-          background:#120304;            /* tom escuro das bordas do cartaz */
+          background:#2E1200;            /* tom profundo do tema */
           color:#fff;
         }
         .brand-media {
@@ -483,7 +484,7 @@ export default function Login() {
 
             <div className={`ieq-login-root${dark ? " is-dark" : ""}`}>
                 <div className="login-bg" aria-hidden="true">
-                    <div className="login-bg-img" style={{ backgroundImage: `url(${jesusImg})` }} />
+                    <div className="login-bg-img" style={{ backgroundImage: `url(${LEAO_LOGIN})` }} />
                 </div>
                 <div className="login-cross" aria-hidden="true" />
                 <div className="login-squares" aria-hidden="true"><span /><span /><span /><span /></div>
@@ -503,10 +504,11 @@ export default function Login() {
                             </span>
                             <img
                                 className="brand-media"
-                                src={cartazImg}
-                                alt="Jesus Salva — 1ª Doutrina da IEQ. João 3:16"
+                                src={LEAO_LOGIN}
+                                alt="Jesus Cristo, o Leão da Tribo de Judá"
                                 loading="eager"
                                 decoding="async"
+                                fetchPriority="high"
                                 draggable={false}
                             />
                         </aside>
@@ -675,7 +677,7 @@ export default function Login() {
                                                                 className="check-row"
                                                                 onClick={()=>{set(!state);setErrAlt(null);}}>
                                                             <span className="check-box">
-                                                                {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2A0306" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                                {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2A1200" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
                                                             </span>
                                                             <Icon size={14} style={{ flexShrink:0 }}/>
                                                             {label}
