@@ -270,7 +270,7 @@ export default function Login() {
           --white-78:rgba(255,255,255,.78); --white-60:rgba(255,255,255,.6); --white-35:rgba(255,255,255,.35);
           --err:#FF7A83; --warn:#FFE000; --track:rgba(255,255,255,.18);
           font-family:'Inter',system-ui,sans-serif;
-          min-height:100vh; position:relative; overflow-x:hidden;
+          min-height:100vh; min-height:100dvh; position:relative; overflow-x:hidden;
           color:#fff; background:var(--red);
         }
         .ieq-login-root.is-dark { background:var(--red-deep); }
@@ -279,7 +279,7 @@ export default function Login() {
         .ieq-login-root ::selection { background:var(--yellow); color:var(--ink); }
         .ieq-login-root :is(a,button,input):focus-visible { outline:3px solid var(--yellow); outline-offset:3px; }
 
-        .login-bg { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+        .login-bg { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
         .login-bg-img {
           position:absolute; inset:-4%;
           background-size:cover; background-position:50% 32%; background-repeat:no-repeat;
@@ -305,8 +305,10 @@ export default function Login() {
         .login-squares span:nth-child(3) { background:var(--blue); }
         .login-squares span:nth-child(4) { background:var(--magenta); }
 
-        .login-stage { position:relative; z-index:3; min-height:100vh;
-          display:flex; align-items:center; justify-content:center; padding:34px 20px; }
+        .login-stage { position:relative; z-index:3; height:100vh; height:100dvh; min-height:0;
+          display:flex; align-items:center; align-items:safe center; justify-content:center;
+          padding:clamp(16px,3.5vh,34px) 20px; padding:clamp(16px,3.5dvh,34px) 20px;
+          overflow:hidden; }
 
         .theme-btn {
           position:fixed; top:18px; right:18px; z-index:50;
@@ -320,7 +322,12 @@ export default function Login() {
 
         .login-card {
           position:relative; z-index:1; display:grid; grid-template-columns:1.08fr .92fr;
-          width:100%; max-width:1060px; overflow:hidden;
+          width:100%;
+          max-width:min(1060px, calc((100vh - 76px) * 1.7376));
+          max-width:min(1060px, calc((100dvh - 76px) * 1.7376));
+          max-height:calc(100vh - 76px);
+          max-height:calc(100dvh - 76px);
+          overflow:hidden;
           background:var(--red-mid); border:3px solid #fff;
           box-shadow:16px 16px 0 var(--red-dark);
           opacity:0; transform:translateY(20px);
@@ -351,7 +358,9 @@ export default function Login() {
         .brand-flag .c-blue { background:var(--blue); }
         .brand-flag .c-magenta { background:var(--magenta); }
 
-        .form-pane { min-width:300px; padding:46px 44px; display:flex; flex-direction:column; justify-content:center;
+        .form-pane { min-width:300px; min-height:0; padding:46px 44px; display:flex; flex-direction:column;
+          justify-content:center; justify-content:safe center;
+          overflow-y:auto; overscroll-behavior:contain;
           background:var(--red-dark); color:#fff; }
         .card-title { font-family:'Anton','Inter',sans-serif; font-size:clamp(2rem,3vw,2.6rem); font-weight:400;
           letter-spacing:.005em; text-transform:uppercase; color:#fff; margin-bottom:8px; line-height:1; }
@@ -465,9 +474,11 @@ export default function Login() {
         @keyframes spin   { to{transform:rotate(360deg)} }
 
         @media (max-width:900px) {
-          .login-card { grid-template-columns:1fr; max-width:560px; }
-          .brand-pane { width:100%; }
-          .form-pane { padding:36px 30px 40px; }
+          .login-stage { height:auto; min-height:100vh; min-height:100dvh; overflow:visible; }
+          .login-card { grid-template-columns:1fr; max-width:560px; max-height:none; }
+          .brand-pane { width:100%; aspect-ratio:auto; height:clamp(120px,20dvh,200px); }
+          .brand-media { object-fit:cover; object-position:50% 32%; }
+          .form-pane { padding:36px 30px 40px; overflow-y:visible; }
           .login-cross { width:60vw; right:-14%; opacity:.07; }
         }
         @media (max-width:600px) {
