@@ -2,81 +2,84 @@ import { Helmet }        from "react-helmet-async";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import {
-    ArrowRight, BookOpen, ChevronDown, Flame, LogIn, Mail, Menu, X,
+    ArrowRight, BookOpen, ChevronDown, HeartPulse, LogIn, Mail, Menu, X,
 } from "lucide-react";
 
 const NAV_ITEMS = [
-    { id: "doutrina",     label: "Doutrina" },
-    { id: "simbolismo",   label: "Simbolismo" },
-    { id: "importancia",  label: "Importância" },
-    { id: "pentecostes",  label: "Pentecostes" },
-    { id: "convite",      label: "Convite" },
+    { id: "doutrina",    label: "Doutrina" },
+    { id: "simbolismo",  label: "Simbolismo" },
+    { id: "ceia",        label: "Pão e Cálice" },
+    { id: "condicoes",   label: "Condições" },
+    { id: "convite",     label: "Convite" },
 ];
 
 const SIMBOLOS = [
     {
         num: "01",
-        titulo: "Rosto de Leão",
-        texto: "Na visão de Ezequiel, Jesus é tipificado no rosto de leão, símbolo de poder e força. Ele é o Leão da Tribo de Judá, a quem foi dado todo o poder no céu e na Terra (Mt 28.18).",
-        img: "/images/leao.jpg",
-        alt: "Leão com a juba iluminada, símbolo de poder e força",
-        pos: "50% 30%",
+        titulo: "Rosto de Boi",
+        texto: "O terceiro rosto da visão de Ezequiel simboliza Jesus como o Médico Divino. O boi é suportador de cargas; Jesus não recuou no caminho do Calvário e levou sobre si o peso dos pecados da humanidade (Is 53.4a).",
+        img: "/images/boi.jpg",
+        alt: "Boi ao amanhecer, símbolo de força e serviço",
+        pos: "50% 42%",
     },
     {
         num: "02",
-        titulo: "Evangelho de João",
-        texto: "O Evangelho de João apresenta Jesus Cristo como o Filho de Deus e revela a sua natureza divina, dirigido a todos os crentes, de todas as raças, línguas e épocas.",
-        img: "/images/biblia.jpg",
-        alt: "Bíblia aberta sobre a mesa",
+        titulo: "Evangelho de Marcos",
+        texto: "Apresenta Jesus como Servo de Deus, que veio “para servir e dar a sua vida em resgate de muitos” (Mc 10.45). Ninguém foi tão obediente à vontade do Pai como Ele.",
+        img: "/images/marcos.jpg",
+        alt: "Evangelho de Marcos",
+        pos: "50% 50%",
     },
     {
         num: "03",
-        titulo: "A Pomba",
-        texto: "Simboliza o Batismo com o Espírito Santo, a forma que o Espírito tomou ao descer sobre Jesus após o seu batismo nas águas (Mt 3.16; Mc 1.10; Lc 3.22; Jo 1.32).",
-        img: "/images/pomba.jpg",
-        alt: "Pomba branca em voo contra o céu",
+        titulo: "O Cálice do Getsêmani",
+        texto: "O símbolo da cura não é o cálice da Ceia, mas o do Getsêmani (Mc 14.36). Nele estavam as nossas dores, sofrimentos e doenças, que Jesus aceitou beber por nós.",
+        img: "/images/calice.jpg",
+        alt: "Cálice, símbolo do Getsêmani",
+        pos: "50% 50%",
     },
     {
         num: "04",
-        titulo: "Cor Amarela (Ouro)",
-        texto: "A segunda faixa da Bandeira Quadrangular simboliza o fogo do Espírito Santo. Está em segundo lugar, como a doutrina, porque o batismo deve ser buscado com fervor.",
-        img: null,
-        alt: "",
+        titulo: "Cor Azul",
+        texto: "A terceira faixa da Bandeira Quadrangular simboliza a cura divina. O azul está no céu, de onde vêm a cura e todas as bênçãos. Representa o amor que traz esperança e lembra a misericórdia do Senhor.",
+        img: "/images/azul.jpg",
+        alt: "Faixa azul da bandeira Quadrangular",
+        pos: "50% 50%",
     },
 ];
 
-const IMPORTANCIA = [
+const CONDICOES = [
     {
         n: "1",
-        titulo: "Jesus fez questão de instruir os discípulos.",
-        texto: "Ordenou que esperassem em Jerusalém até serem revestidos de poder.",
-        ref: "ATOS 1:4-5 · LUCAS 24:49",
+        titulo: "Pertencer a Ele.",
+        texto: "É preciso ser filho de Deus, reconhecer o sacrifício de Jesus e recebê-lo. A fé no poder de Deus está aliada à fé em Jesus.",
+        ref: "JOÃO 1:12",
     },
     {
         n: "2",
-        titulo: "O Espírito capacita para sinais e milagres.",
-        texto: "Sem ele, o homem não tem poder para curar, expulsar demônios ou pregar com ousadia.",
-        ref: "MARCOS 16:17",
+        titulo: "Pedir com confiança.",
+        texto: "O pedido é uma demonstração de fé e de confiança em Deus e nas suas promessas.",
+        ref: "MATEUS 7:7",
     },
     {
         n: "3",
-        titulo: "Fazer as obras de Jesus, e maiores.",
-        texto: "A promessa só se cumpre em quem é batizado com o Espírito Santo, que dá poder ao fiel.",
-        ref: "JOÃO 14:12",
+        titulo: "Crer sem duvidar.",
+        texto: "Nada é possível sem fé. Quem se aproxima de Deus precisa crer que Ele existe e recompensa os que o buscam.",
+        ref: "HEBREUS 11:6",
     },
     {
         n: "4",
-        titulo: "É o Espírito quem convence o mundo.",
-        texto: "Não é a eloquência do pregador que leva as pessoas a crerem, mas a ação de Deus.",
-        ref: "JOÃO 16:8",
+        titulo: "Receber, descansando.",
+        texto: "A bênção vem sempre no momento certo. A palavra-chave é descansar: aguardar sem desespero e sem murmuração, em paz.",
+        ref: "SALMO 37:7",
     },
 ];
 
 const ACCENTS = [
-    { bg: "#FF7A00", ink: "#2A1200" },
-    { bg: "#1E4FD8", ink: "#FFFFFF" },
+    { bg: "#FF7A00", ink: "#061238" },
+    { bg: "#FFE000", ink: "#061238" },
     { bg: "#C2187A", ink: "#FFFFFF" },
-    { bg: "#FFE000", ink: "#2A1200" },
+    { bg: "#4F8BFF", ink: "#061238" },
 ];
 
 function Reveal({ children, delay = 0, className = "", style = {} }) {
@@ -115,14 +118,38 @@ function LogoIEQ({ size = 40 }) {
     );
 }
 
-function FlameMark() {
+function CaliceMark() {
     return (
-        <svg viewBox="0 0 120 150" className="drop-svg" role="img" aria-label="Chama de fogo dourada">
-            <rect width="120" height="150" fill="#7A3A00" />
-            <path d="M60 12 C70 40 98 58 98 98 a38 38 0 0 1 -76 0 C22 76 36 62 44 48 C46 62 54 66 56 62 C62 50 56 30 60 12 Z"
-                  fill="#FFC400" stroke="rgba(255,255,255,.45)" strokeWidth="1.4" />
-            <path d="M60 70 C68 84 82 92 82 108 a22 22 0 0 1 -44 0 C38 94 52 86 60 70 Z" fill="#FF7A00" />
-            <ellipse cx="52" cy="104" rx="5" ry="9" fill="rgba(255,255,255,.55)" transform="rotate(-20 52 104)" />
+        <svg viewBox="0 0 120 150" className="drop-svg" role="img" aria-label="Cálice">
+            <rect width="120" height="150" fill="#0B2160" />
+            <path d="M28 22 H92 C92 62 80 80 66 86 V112 H84 V124 H36 V112 H54 V86 C40 80 28 62 28 22 Z"
+                  fill="#FFE000" stroke="rgba(255,255,255,.5)" strokeWidth="1.4" />
+            <path d="M32 34 H88 C87 56 78 70 60 76 C42 70 33 56 32 34 Z" fill="#4F8BFF" />
+            <ellipse cx="44" cy="46" rx="4" ry="9" fill="rgba(255,255,255,.55)" transform="rotate(-12 44 46)" />
+        </svg>
+    );
+}
+
+function AzulMark() {
+    return (
+        <svg viewBox="0 0 120 150" className="drop-svg" role="img" aria-label="Faixa azul da bandeira">
+            <rect width="120" height="150" fill="#0B2160" />
+            <rect x="14" y="14" width="92" height="22" fill="#FF7A00" />
+            <rect x="14" y="42" width="92" height="22" fill="#FFE000" />
+            <rect x="14" y="70" width="92" height="22" fill="#1E4FD8" stroke="#fff" strokeWidth="3" />
+            <rect x="14" y="98" width="92" height="22" fill="#C2187A" />
+        </svg>
+    );
+}
+
+function MarcosMark() {
+    return (
+        <svg viewBox="0 0 120 150" className="drop-svg" role="img" aria-label="Evangelho de Marcos">
+            <rect width="120" height="150" fill="#0B2160" />
+            <path d="M24 28 H78 C88 28 96 36 96 46 V122 H24 Z" fill="#F4E6B8" />
+            <path d="M24 28 H78 C88 28 96 36 96 46 H24 Z" fill="#E7D28A" />
+            <path d="M36 54 H84 M36 70 H84 M36 86 H72" stroke="#0B2160" strokeWidth="4" strokeLinecap="round" opacity=".85" />
+            <rect x="18" y="22" width="10" height="106" rx="2" fill="#FFE000" />
         </svg>
     );
 }
@@ -135,7 +162,7 @@ function Flag() {
     );
 }
 
-export default function HomeSegundaDoutrina() {
+export default function HomeTerceiraDoutrina() {
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen]           = useState(false);
     const [activeSection, setActiveSection] = useState("");
@@ -168,21 +195,22 @@ export default function HomeSegundaDoutrina() {
     return (
         <>
             <Helmet>
-                <title>A Promessa do Pai — Segunda Doutrina Quadrangular | IEQ Pituaçu</title>
-                <meta name="description" content="Conheça a segunda doutrina da Igreja do Evangelho Quadrangular: o Batismo com o Espírito Santo. Ficai na cidade até que do alto sejais revestidos de poder. Lucas 24:49." />
+                <title>O Grande Médico — Terceira Doutrina Quadrangular | IEQ Pituaçu</title>
+                <meta name="description" content="Conheça a terceira doutrina da Igreja do Evangelho Quadrangular: Jesus, o Médico Divino. Pelas suas pisaduras fomos sarados. Isaías 53:5." />
                 <meta name="robots" content="index, follow" />
-                <meta property="og:title" content="A Promessa do Pai — Segunda Doutrina Quadrangular" />
-                <meta property="og:description" content="Jesus Cristo batiza com o Espírito Santo e reveste de poder todos os que creem. Atos 2:1-4." />
-                <meta property="og:image" content="/images/pentecostes.jpg" />
+                <meta property="og:title" content="O Grande Médico — Terceira Doutrina Quadrangular" />
+                <meta property="og:description" content="Jesus Cristo cura, restaura e liberta todos os que Nele creem. Isaías 53:4-5." />
+                <meta property="og:image" content="/images/cura.jpg" />
                 <meta property="og:type" content="website" />
             </Helmet>
 
             <style>{`
         .jc-home {
-          --base:#C26A00; --mid:#A55300; --dark:#7A3A00; --deep:#2E1200;
-          --glow:#FFE45C; --orange:#FF7A00; --yellow:#FFE000; --yellow-deep:#FFC400; --blue:#1E4FD8; --magenta:#C2187A;
-          --white:#FFFFFF; --ink:#2A1200;
-          --white-78:rgba(255,255,255,.82); --white-60:rgba(255,255,255,.64); --white-35:rgba(255,255,255,.35);
+          --base:#1740B0; --mid:#11308A; --dark:#0B2160; --deep:#061238;
+          --glow:#9CC4FF; --orange:#FF7A00; --yellow:#FFE000; --yellow-deep:#FFC400; --blue:#1E4FD8; --magenta:#C2187A;
+          --sky:#4F8BFF;
+          --white:#FFFFFF; --ink:#061238;
+          --white-78:rgba(255,255,255,.84); --white-60:rgba(255,255,255,.66); --white-35:rgba(255,255,255,.35);
           --nav-h:74px;
           position:relative; min-height:100vh; overflow-x:hidden;
           font-family:'Inter',system-ui,sans-serif; color:var(--white); background:var(--base);
@@ -212,14 +240,14 @@ export default function HomeSegundaDoutrina() {
         .jc-hero-squares span { display:block; width:20px; height:20px; }
         .jc-hero-squares span:nth-child(1) { background:var(--orange); }
         .jc-hero-squares span:nth-child(2) { background:var(--yellow); }
-        .jc-hero-squares span:nth-child(3) { background:var(--blue); }
+        .jc-hero-squares span:nth-child(3) { background:var(--sky); }
         .jc-hero-squares span:nth-child(4) { background:var(--magenta); }
 
         .jc-dots { display:inline-flex; gap:5px; }
         .jc-dots i { display:block; width:9px; height:9px; }
         .jc-dots i:nth-child(1) { background:var(--orange); }
         .jc-dots i:nth-child(2) { background:var(--yellow); }
-        .jc-dots i:nth-child(3) { background:var(--blue); }
+        .jc-dots i:nth-child(3) { background:var(--sky); }
         .jc-dots i:nth-child(4) { background:var(--magenta); }
 
         .reveal { opacity:0; transform:translateY(34px);
@@ -236,7 +264,7 @@ export default function HomeSegundaDoutrina() {
           padding:6px clamp(18px,4vw,44px) 0;
           background:var(--dark);
           border-bottom:2px solid var(--yellow);
-          box-shadow:0 4px 24px rgba(255,196,0,.18);
+          box-shadow:0 4px 24px rgba(79,139,255,.28);
         }
         .jc-nav .jc-flag { position:absolute; top:0; left:0; right:0; height:6px; }
         .jc-brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit; flex-shrink:0; }
@@ -262,12 +290,12 @@ export default function HomeSegundaDoutrina() {
 
         .jc-entrar {
           display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 22px;
-          border:2px solid var(--yellow); border-radius:0; background:var(--yellow); color:var(--ink);
+          border:0; border-radius:0; background:var(--yellow); color:var(--ink);
           font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; flex-shrink:0;
-          box-shadow:4px 4px 0 var(--deep);
-          transition:transform .2s, box-shadow .2s;
+          box-shadow:0 8px 20px rgba(6,18,56,.28);
+          transition:transform .2s, box-shadow .2s, filter .2s;
         }
-        .jc-entrar:hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--deep); }
+        .jc-entrar:hover { transform:translateY(-1px); box-shadow:0 12px 24px rgba(6,18,56,.34); filter:brightness(1.02); }
 
         .jc-burger { display:none; width:42px; height:42px; border:2px solid #fff; border-radius:0;
           background:transparent; color:#fff; align-items:center; justify-content:center; }
@@ -295,15 +323,16 @@ export default function HomeSegundaDoutrina() {
         .jc-hero-media { position:absolute; inset:0; z-index:0; }
         .jc-hero-media img {
           width:100%; height:100%; object-fit:cover; object-position:50% 40%;
-          filter:saturate(1.15) contrast(1.05) brightness(.92);
+          filter:saturate(1.1) contrast(1.05) brightness(.9);
         }
         .jc-hero-media::after { content:""; position:absolute; inset:0;
-          background:linear-gradient(180deg, rgba(46,18,0,.28) 0%, rgba(46,18,0,.55) 100%); }
+          background:linear-gradient(180deg, rgba(6,18,56,.3) 0%, rgba(6,18,56,.6) 100%); }
         .jc-hero-tint { position:absolute; inset:0; z-index:1;
           background:
-            radial-gradient(closest-side at 62% 42%, rgba(255,224,0,.38), rgba(255,196,0,0) 60%),
-            linear-gradient(90deg, rgba(122,58,0,.82) 0%, rgba(194,106,0,.18) 46%, rgba(122,58,0,.62) 100%);
-          box-shadow:inset 0 0 190px 50px rgba(46,18,0,.55); }
+            radial-gradient(closest-side at 60% 38%, rgba(156,196,255,.34), rgba(79,139,255,0) 58%),
+            linear-gradient(90deg, rgba(6,18,56,.88) 0%, rgba(11,33,96,.45) 42%, rgba(6,18,56,.72) 100%),
+            linear-gradient(180deg, rgba(6,18,56,.18) 0%, rgba(6,18,56,.45) 100%);
+          box-shadow:inset 0 0 160px 40px rgba(6,18,56,.45); }
         .jc-hero-cross { top:50%; right:5%; width:min(38vw,420px); height:min(54vh,560px); transform:translateY(-50%); }
 
         .jc-hero-inner {
@@ -319,9 +348,9 @@ export default function HomeSegundaDoutrina() {
         .jc-hero-title { margin-top:24px; font-family:'Anton','Inter',sans-serif; font-weight:400;
           text-transform:uppercase; line-height:.9; letter-spacing:.005em; }
         .jc-hero-title .l1 { display:block; font-size:clamp(3rem,8.2vw,6.2rem); color:#fff;
-          text-shadow:5px 5px 0 var(--dark); }
-        .jc-hero-title .l2 { display:block; font-size:clamp(4.4rem,12.6vw,8.6rem); color:var(--yellow);
-          text-shadow:6px 6px 0 var(--dark), 0 0 46px rgba(255,224,0,.4); }
+          text-shadow:5px 5px 0 var(--deep); }
+        .jc-hero-title .l2 { display:block; font-size:clamp(4rem,11.4vw,7.8rem); color:var(--yellow);
+          text-shadow:6px 6px 0 var(--deep), 0 0 46px rgba(255,224,0,.4); }
 
         .jc-hero-desc { margin-top:26px; font-size:clamp(1.04rem,1.4vw,1.2rem); line-height:1.7;
           color:#fff; max-width:30rem; font-weight:500; }
@@ -340,17 +369,17 @@ export default function HomeSegundaDoutrina() {
           transition:transform .2s, box-shadow .2s, background .2s, color .2s;
         }
         .btn-primary { background:var(--yellow); color:var(--ink); border-color:var(--yellow);
-          box-shadow:7px 7px 0 var(--dark); }
-        .btn-primary:hover { transform:translate(-2px,-2px); box-shadow:10px 10px 0 var(--dark); }
-        .btn-ghost { background:transparent; color:#fff; border-color:#fff;
-          box-shadow:7px 7px 0 rgba(46,18,0,.9); }
-        .btn-ghost:hover { background:#fff; color:var(--dark); transform:translate(-2px,-2px);
-          box-shadow:10px 10px 0 rgba(46,18,0,.9); }
+          box-shadow:0 10px 28px rgba(6,18,56,.35); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 16px 34px rgba(6,18,56,.42); filter:brightness(1.02); }
+        .btn-ghost { background:rgba(255,255,255,.06); color:#fff; border-color:rgba(255,255,255,.7);
+          backdrop-filter:blur(6px); }
+        .btn-ghost:hover { background:#fff; color:var(--dark); transform:translateY(-2px);
+          box-shadow:0 14px 30px rgba(6,18,56,.35); }
 
         .jc-stamp { position:absolute; z-index:2; right:clamp(24px,6vw,82px); bottom:clamp(92px,15vh,160px);
           display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
           padding:14px 20px; background:var(--yellow); color:var(--ink); transform:rotate(-5deg);
-          box-shadow:8px 8px 0 var(--dark); }
+          box-shadow:8px 8px 0 var(--deep); }
         .jc-stamp span { font-size:.6rem; font-weight:800; letter-spacing:.26em; }
         .jc-stamp strong { font-family:'Anton',sans-serif; font-size:2.1rem; line-height:1; }
 
@@ -375,14 +404,14 @@ export default function HomeSegundaDoutrina() {
           box-shadow:0 0 12px rgba(255,224,0,.6); }
         .jc-h2 { font-family:'Anton','Inter',sans-serif; font-weight:400; text-transform:uppercase;
           letter-spacing:.005em; font-size:clamp(2.1rem,4.8vw,3.7rem); line-height:.98; color:#fff;
-          margin-top:14px; text-shadow:4px 4px 0 rgba(46,18,0,.35); }
+          margin-top:14px; text-shadow:4px 4px 0 rgba(6,18,56,.4); }
 
         /* ═══════════ DOUTRINA ═══════════ */
-        .sec-doutrina { background:radial-gradient(ellipse at 82% 4%, rgba(255,224,0,.18), transparent 55%), var(--mid); }
+        .sec-doutrina { background:radial-gradient(ellipse at 82% 4%, rgba(156,196,255,.22), transparent 55%), var(--mid); }
         .doutrina-grid { display:grid; grid-template-columns:1.02fr .98fr; gap:clamp(32px,4.5vw,72px); align-items:center; }
         .doutrina-texto p { margin-top:16px; font-size:1rem; line-height:1.8; color:var(--white-78); max-width:34rem; }
         .verse-box {
-          margin-top:26px; background:var(--dark); border:2px solid rgba(255,255,255,.14);
+          margin-top:26px; background:var(--dark); border:2px solid rgba(255,255,255,.16);
           border-left:8px solid var(--yellow); padding:20px 24px;
           box-shadow:8px 8px 0 var(--deep); max-width:34rem;
         }
@@ -392,14 +421,14 @@ export default function HomeSegundaDoutrina() {
 
         .salvador-card {
           position:relative; min-height:520px; overflow:hidden; display:flex; align-items:flex-end;
-          border:3px solid #fff; box-shadow:12px 12px 0 var(--dark); isolation:isolate;
+          border:1px solid rgba(255,255,255,.22); box-shadow:0 28px 60px rgba(6,18,56,.45); isolation:isolate;
         }
         .salvador-card img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-          object-position:50% 30%; z-index:-1; filter:saturate(1.12) contrast(1.04) brightness(.94); }
+          object-position:50% 30%; z-index:-1; filter:saturate(1.1) contrast(1.04) brightness(.94); }
         .salvador-card::after { content:""; position:absolute; inset:0; z-index:0;
-          background:linear-gradient(180deg, rgba(46,18,0,.05) 0%, rgba(46,18,0,.45) 100%); }
+          background:linear-gradient(180deg, rgba(6,18,56,.05) 0%, rgba(6,18,56,.45) 100%); }
         .salvador-veil { position:absolute; inset:0; z-index:0;
-          background:linear-gradient(180deg, rgba(122,58,0,.1) 0%, rgba(46,18,0,.9) 100%); }
+          background:linear-gradient(180deg, rgba(11,33,96,.1) 0%, rgba(6,18,56,.92) 100%); }
         .salvador-body { position:relative; z-index:1; padding:26px 28px 28px; }
         .salvador-rule { width:52px; height:6px; background:var(--yellow); margin-bottom:14px; }
         .salvador-badge { display:inline-block; margin-bottom:14px; padding:7px 14px; background:var(--yellow);
@@ -409,27 +438,28 @@ export default function HomeSegundaDoutrina() {
         .salvador-body p { margin-top:12px; font-size:.92rem; line-height:1.7; color:var(--white-78); max-width:26rem; }
 
         /* ═══════════ SIMBOLISMO ═══════════ */
-        .sec-simbolismo { background:radial-gradient(ellipse at 12% 2%, rgba(255,224,0,.17), transparent 52%), var(--base); }
+        .sec-simbolismo { background:radial-gradient(ellipse at 12% 2%, rgba(156,196,255,.2), transparent 52%), var(--base); }
         .sec-sub { margin-top:14px; color:var(--white-78); font-size:.98rem; line-height:1.7; max-width:34rem; }
 
         .sym-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:46px; }
         .sym-card {
           display:flex; flex-direction:column; height:100%; overflow:hidden;
-          background:var(--mid); border:2px solid rgba(255,255,255,.16);
-          border-top:8px solid var(--accent,var(--yellow));
-          box-shadow:10px 10px 0 var(--dark);
-          transition:transform .2s, box-shadow .2s;
+          background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0)) , var(--mid);
+          border:1px solid rgba(255,255,255,.14);
+          border-top:4px solid var(--accent,var(--yellow));
+          box-shadow:0 18px 40px rgba(6,18,56,.28);
+          transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
         }
-        .sym-card:hover { transform:translate(-2px,-2px); box-shadow:14px 14px 0 var(--dark); }
+        .sym-card:hover { transform:translateY(-4px); box-shadow:0 26px 48px rgba(6,18,56,.36); border-color:rgba(255,255,255,.22); }
         .sym-media { position:relative; height:170px; overflow:hidden; background:var(--dark); }
         .sym-media img { width:100%; height:100%; object-fit:cover; object-position:var(--sym-pos,50% 40%);
-          filter:saturate(1.12) contrast(1.04) brightness(.96);
+          filter:saturate(1.1) contrast(1.04) brightness(.96);
           transition:transform .6s cubic-bezier(.22,1,.36,1); }
         .sym-media::after { content:""; position:absolute; inset:0;
-          background:linear-gradient(180deg, transparent 45%, rgba(46,18,0,.5) 100%); }
+          background:linear-gradient(180deg, transparent 45%, rgba(6,18,56,.5) 100%); }
         .sym-card:hover .sym-media img { transform:scale(1.06); }
         .sym-drop { display:grid; place-items:center; height:170px;
-          background:radial-gradient(circle at 50% 42%, rgba(255,224,0,.3), var(--dark) 66%); }
+          background:radial-gradient(circle at 50% 42%, rgba(156,196,255,.35), var(--dark) 66%); }
         .drop-svg { width:96px; height:120px; }
         .sym-body { display:flex; flex-direction:column; padding:18px 18px 22px; flex:1; }
         .sym-num {
@@ -441,27 +471,57 @@ export default function HomeSegundaDoutrina() {
         .sym-body h3 { font-size:1rem; font-weight:800; color:#fff; letter-spacing:.04em; text-transform:uppercase; }
         .sym-body p { margin-top:8px; font-size:.85rem; line-height:1.65; color:var(--white-78); }
 
-        /* ═══════════ IMPORTÂNCIA ═══════════ */
-        .sec-importancia { background:radial-gradient(ellipse at 50% 0%, rgba(255,224,0,.12), transparent 55%), var(--dark); }
-        .sec-importancia .imp-head { text-align:center; }
-        .sec-importancia .jc-kicker { justify-content:center; }
-        .sec-importancia .sec-sub { margin-left:auto; margin-right:auto; }
+        /* ═══════════ CEIA (PÃO E CÁLICE) ═══════════ */
+        .sec-ceia { background:radial-gradient(ellipse at 88% 6%, rgba(156,196,255,.2), transparent 54%), var(--dark); }
+        .pent-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,4.5vw,72px); align-items:center; }
+        .pent-texto p { margin-top:16px; color:var(--white-78); font-size:1rem; line-height:1.8; max-width:33rem; }
+
+        .verse-card {
+          position:relative; margin-top:18px; padding:20px 22px 18px 64px;
+          background:var(--mid); border:2px solid rgba(255,255,255,.16);
+          border-left:8px solid var(--yellow); box-shadow:8px 8px 0 var(--deep);
+        }
+        .verse-card.blue { border-left-color:var(--sky); }
+        .verse-quote { position:absolute; top:2px; left:18px; font-family:'Anton',sans-serif;
+          font-size:3.6rem; line-height:1; color:var(--yellow); user-select:none; }
+        .verse-card.blue .verse-quote, .verse-card.blue .verse-ref { color:var(--sky); }
+        .verse-ref { display:inline-block; font-size:.64rem; font-weight:800; letter-spacing:.26em; color:var(--yellow); }
+        .verse-card blockquote { margin-top:8px; font-size:.99rem; line-height:1.66; color:#fff; font-weight:600; }
+        .verse-card p.small { margin-top:8px; font-size:.92rem; line-height:1.66; color:var(--white-78); }
+
+        .film-frame { position:relative; max-width:430px; justify-self:center; width:100%; }
+        .film-panel-wrap { position:relative; z-index:1; }
+        .film-panel { overflow:hidden; border:1px solid rgba(255,255,255,.22); box-shadow:0 24px 54px rgba(6,18,56,.45); }
+        .film-panel img { display:block; width:100%; height:100%; object-fit:cover; aspect-ratio:4/4.4; }
+        .film-corner { position:absolute; width:26px; height:26px; z-index:2; border:0 solid var(--yellow); }
+        .film-corner.tl { top:-3px; left:-3px; border-top-width:3px; border-left-width:3px; }
+        .film-corner.tr { top:-3px; right:-3px; border-top-width:3px; border-right-width:3px; }
+        .film-corner.bl { bottom:-3px; left:-3px; border-bottom-width:3px; border-left-width:3px; }
+        .film-corner.br { bottom:-3px; right:-3px; border-bottom-width:3px; border-right-width:3px; }
+        .film-caption { position:relative; z-index:1; margin-top:18px; text-align:center; font-size:.64rem;
+          font-weight:700; letter-spacing:.26em; text-transform:uppercase; color:var(--white-60); }
+
+        /* ═══════════ CONDIÇÕES ═══════════ */
+        .sec-condicoes { background:radial-gradient(ellipse at 50% 0%, rgba(156,196,255,.18), transparent 55%), var(--base); }
+        .sec-condicoes .imp-head { text-align:center; }
+        .sec-condicoes .jc-kicker { justify-content:center; }
+        .sec-condicoes .sec-sub { margin-left:auto; margin-right:auto; }
 
         .why-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:50px; }
         .why-card {
-          height:100%; padding:24px 20px 22px; background:var(--mid);
-          border:2px solid rgba(255,255,255,.16); border-top:8px solid var(--accent,var(--yellow));
-          box-shadow:10px 10px 0 var(--deep);
-          transition:transform .2s, box-shadow .2s;
+          height:100%; padding:26px 22px 24px; background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0)), var(--mid);
+          border:1px solid rgba(255,255,255,.14); border-top:4px solid var(--accent,var(--yellow));
+          box-shadow:0 18px 40px rgba(6,18,56,.24);
+          transition:transform .25s ease, box-shadow .25s ease;
         }
-        .why-card:hover { transform:translate(-2px,-2px); box-shadow:14px 14px 0 var(--deep); }
+        .why-card:hover { transform:translateY(-4px); box-shadow:0 26px 46px rgba(6,18,56,.34); }
         .why-num {
           display:inline-flex; align-items:center; justify-content:center;
           min-width:56px; height:46px; padding:0 10px; background:var(--accent,var(--yellow));
           color:var(--accent-ink,var(--ink)); font-family:'Anton',sans-serif; font-size:1.5rem; line-height:1;
         }
         .why-card h3 { margin-top:14px; font-size:.95rem; font-weight:800; line-height:1.45; color:#fff;
-          text-transform:uppercase; letter-spacing:.03em; min-height:4.4em; }
+          text-transform:uppercase; letter-spacing:.03em; }
         .why-card p { margin-top:10px; font-size:.86rem; line-height:1.65; color:var(--white-78); }
         .why-ref { display:inline-block; margin-top:16px; padding:6px 12px;
           border:2px solid var(--yellow); color:var(--yellow);
@@ -474,53 +534,26 @@ export default function HomeSegundaDoutrina() {
         .imp-quote cite { display:block; margin-top:-8px; padding-bottom:22px; font-style:normal; font-size:.7rem;
           font-weight:800; letter-spacing:.24em; color:var(--yellow); }
 
-        /* ═══════════ PENTECOSTES ═══════════ */
-        .sec-pentecostes { background:radial-gradient(ellipse at 88% 6%, rgba(255,224,0,.16), transparent 54%), var(--base); }
-        .pent-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,4.5vw,72px); align-items:center; }
-        .pent-texto p { margin-top:16px; color:var(--white-78); font-size:1rem; line-height:1.8; max-width:33rem; }
-
-        .verse-card {
-          position:relative; margin-top:18px; padding:20px 22px 18px 64px;
-          background:var(--mid); border:2px solid rgba(255,255,255,.14);
-          border-left:8px solid var(--yellow); box-shadow:8px 8px 0 var(--deep);
-        }
-        .verse-quote { position:absolute; top:2px; left:18px; font-family:'Anton',sans-serif;
-          font-size:3.6rem; line-height:1; color:var(--yellow); user-select:none; }
-        .verse-ref { display:inline-block; font-size:.64rem; font-weight:800; letter-spacing:.26em; color:var(--yellow); }
-        .verse-card blockquote { margin-top:8px; font-size:.99rem; line-height:1.66; color:#fff; font-weight:600; }
-
-        .film-frame { position:relative; max-width:430px; justify-self:center; width:100%; }
-        .film-panel-wrap { position:relative; z-index:1; }
-        .film-panel { overflow:hidden; border:3px solid #fff; box-shadow:12px 12px 0 var(--dark); }
-        .film-panel img { display:block; width:100%; height:100%; object-fit:cover; aspect-ratio:4/4.4; }
-        .film-corner { position:absolute; width:26px; height:26px; z-index:2; border:0 solid var(--yellow); }
-        .film-corner.tl { top:-3px; left:-3px; border-top-width:3px; border-left-width:3px; }
-        .film-corner.tr { top:-3px; right:-3px; border-top-width:3px; border-right-width:3px; }
-        .film-corner.bl { bottom:-3px; left:-3px; border-bottom-width:3px; border-left-width:3px; }
-        .film-corner.br { bottom:-3px; right:-3px; border-bottom-width:3px; border-right-width:3px; }
-        .film-caption { position:relative; z-index:1; margin-top:18px; text-align:center; font-size:.64rem;
-          font-weight:700; letter-spacing:.26em; text-transform:uppercase; color:var(--white-60); }
-
         /* ═══════════ CONVITE ═══════════ */
-        .sec-convite { background:radial-gradient(ellipse at 16% 12%, rgba(255,224,0,.17), transparent 54%), var(--mid); }
+        .sec-convite { background:radial-gradient(ellipse at 16% 12%, rgba(156,196,255,.2), transparent 54%), var(--mid); }
         .sec-convite .jc-h2 em { font-style:normal; color:#fff;
           text-decoration:underline; text-decoration-color:var(--yellow);
           text-decoration-thickness:8px; text-underline-offset:6px; }
         .convite-grid { display:grid; grid-template-columns:1.02fr .98fr; gap:clamp(32px,4.5vw,72px); align-items:center; }
         .convite-texto p { margin-top:16px; font-size:1rem; line-height:1.8; color:var(--white-78); max-width:32rem; }
         .btn-convite {
-          margin-top:30px; height:58px; padding:0 32px; border:2px solid var(--yellow); border-radius:0;
+          margin-top:30px; height:58px; padding:0 32px; border:0; border-radius:0;
           background:var(--yellow); color:var(--ink); font-size:.78rem; font-weight:800; letter-spacing:.1em;
-          box-shadow:8px 8px 0 var(--deep); display:inline-flex; align-items:center; gap:12px;
-          text-transform:uppercase; transition:transform .2s, box-shadow .2s;
+          box-shadow:0 14px 34px rgba(6,18,56,.35); display:inline-flex; align-items:center; gap:12px;
+          text-transform:uppercase; transition:transform .25s ease, box-shadow .25s ease, filter .25s ease;
         }
-        .btn-convite:hover { transform:translate(-2px,-2px); box-shadow:11px 11px 0 var(--deep); }
+        .btn-convite:hover { transform:translateY(-2px); box-shadow:0 20px 40px rgba(6,18,56,.42); filter:brightness(1.02); }
 
         .convite-frame { position:relative; max-width:460px; justify-self:center; width:100%; }
         .convite-frame figure { position:relative; z-index:1; overflow:hidden;
-          border:3px solid #fff; box-shadow:12px 12px 0 var(--dark); }
+          border:1px solid rgba(255,255,255,.22); box-shadow:0 26px 56px rgba(6,18,56,.42); }
         .convite-frame figure::after { content:""; position:absolute; inset:0;
-          background:linear-gradient(180deg, transparent 55%, rgba(46,18,0,.35) 100%);
+          background:linear-gradient(180deg, transparent 55%, rgba(6,18,56,.4) 100%);
           pointer-events:none; }
         .convite-frame img { display:block; width:100%; aspect-ratio:4/4.6; object-fit:cover; object-position:50% 42%; }
         .convite-chip { position:absolute; z-index:2; right:-14px; bottom:26px; display:flex; align-items:center; gap:10px;
@@ -559,7 +592,6 @@ export default function HomeSegundaDoutrina() {
         @media (max-width:1100px) {
           .sym-grid { grid-template-columns:repeat(2,1fr); }
           .why-grid { grid-template-columns:repeat(2,1fr); }
-          .why-card h3 { min-height:0; }
           .jc-stamp { display:none; }
         }
         @media (max-width:1024px) {
@@ -582,7 +614,7 @@ export default function HomeSegundaDoutrina() {
           .jc-hero-squares { display:none; }
           .eyebrow-text { font-size:.6rem; letter-spacing:.16em; }
           .jc-hero-title .l1 { font-size:clamp(2.4rem,11vw,3.4rem); }
-          .jc-hero-title .l2 { font-size:clamp(3.6rem,17vw,5rem); }
+          .jc-hero-title .l2 { font-size:clamp(3.2rem,15vw,4.6rem); }
           .btn-convite { font-size:.68rem; letter-spacing:.06em; padding:0 18px; height:54px; }
           .sym-grid { grid-template-columns:1fr; }
           .why-grid { grid-template-columns:1fr; }
@@ -665,13 +697,14 @@ export default function HomeSegundaDoutrina() {
 
                 <main id="inicio">
                     {/* ═══════════ HERO ═══════════ */}
-                    <section className="jc-hero" aria-label="A Promessa do Pai — Segunda Doutrina Quadrangular">
+                    <section className="jc-hero" aria-label="O Grande Médico — Terceira Doutrina Quadrangular">
                         <div className="jc-hero-media">
                             <img
-                                src="/images/pentecostes.jpg"
-                                alt="Chamas de fogo descendo do alto, simbolizando o Espírito Santo em Pentecostes"
-                                fetchPriority="high"
+                                src="/images/cura.jpg"
+                                alt="Luz azul descendo do céu sobre mãos erguidas, simbolizando a cura divina"
+                                fetchpriority="high"
                                 decoding="async"
+                                style={{ objectPosition: "50% 38%" }}
                             />
                         </div>
                         <div className="jc-hero-tint" />
@@ -684,26 +717,26 @@ export default function HomeSegundaDoutrina() {
                             <div className="jc-hero-content">
                                 <div className="eyebrow hero-rise">
                                     <span className="jc-dots" aria-hidden="true"><i /><i /><i /><i /></span>
-                                    <span className="eyebrow-text"><Flame size={13} strokeWidth={2.6} /> Segunda Doutrina Quadrangular</span>
+                                    <span className="eyebrow-text"><HeartPulse size={13} strokeWidth={2.6} /> Terceira Doutrina Quadrangular</span>
                                 </div>
 
                                 <h1 className="jc-hero-title">
-                                    <span className="l1 hero-rise" style={{ animationDelay: "120ms" }}>A PROMESSA</span>
-                                    <span className="l2 hero-rise" style={{ animationDelay: "240ms" }}>DO PAI!</span>
+                                    <span className="l1 hero-rise" style={{ animationDelay: "120ms" }}>O GRANDE</span>
+                                    <span className="l2 hero-rise" style={{ animationDelay: "240ms" }}>MÉDICO!</span>
                                 </h1>
 
                                 <p className="jc-hero-desc hero-rise" style={{ animationDelay: "360ms" }}>
-                                    Jesus batiza com o Espírito Santo e reveste de poder todos os que creem.
+                                    Jesus cura, restaura e liberta todos os que Nele creem.
                                 </p>
 
                                 <figure className="jc-hero-verse hero-rise" style={{ animationDelay: "460ms" }}>
-                                    <blockquote>“Ficai, porém, na cidade de Jerusalém, até que do alto sejais revestidos de poder.”</blockquote>
-                                    <figcaption>Lucas 24:49</figcaption>
+                                    <blockquote>“O castigo que nos traz a paz estava sobre ele, e pelas suas pisaduras fomos sarados.”</blockquote>
+                                    <figcaption>Isaías 53:5</figcaption>
                                 </figure>
 
                                 <div className="jc-hero-actions hero-rise" style={{ animationDelay: "560ms" }}>
                                     <a className="btn btn-primary" href="#doutrina">Conheça a Doutrina <ArrowRight size={16} strokeWidth={2.6} /></a>
-                                    <a className="btn btn-ghost" href="https://www.bibliaonline.com.br/acf/at/2" target="_blank" rel="noopener noreferrer">
+                                    <a className="btn btn-ghost" href="https://www.bibliaonline.com.br/acf/is/53" target="_blank" rel="noopener noreferrer">
                                         <BookOpen size={16} strokeWidth={2.4} /> Leia a Palavra
                                     </a>
                                 </div>
@@ -711,8 +744,8 @@ export default function HomeSegundaDoutrina() {
                         </div>
 
                         <div className="jc-stamp" aria-hidden="true">
-                            <span>ATOS</span>
-                            <strong>2:1-4</strong>
+                            <span>ISAÍAS</span>
+                            <strong>53:4-5</strong>
                         </div>
 
                         <div className="jc-scroll" aria-hidden="true">
@@ -728,15 +761,15 @@ export default function HomeSegundaDoutrina() {
                             <div className="doutrina-texto">
                                 <Reveal>
                                     <p className="jc-kicker">A Doutrina</p>
-                                    <h2 className="jc-h2">Batismo com o<br />Espírito Santo</h2>
-                                    <p>A segunda doutrina cardinal da Igreja do Evangelho Quadrangular é o Batismo com o Espírito Santo.</p>
-                                    <p>Na terra, Jesus veio para ser o Salvador. Ao voltar para a sua glória, não deixou os discípulos sozinhos: enviou a promessa do Pai, o poder do alto para vencer as investidas do inimigo e levar o Evangelho a toda criatura.</p>
-                                    <p>Esse derramamento continuou e continua até hoje sobre todos os que creem.</p>
+                                    <h2 className="jc-h2">Jesus, o<br />Médico Divino</h2>
+                                    <p>A terceira doutrina cardinal da Igreja do Evangelho Quadrangular mostra Jesus como o Médico Divino, Aquele que cura, o Médico dos médicos.</p>
+                                    <p>Por causa do pecado de Adão, as doenças e a morte entraram na humanidade. Mas a morte de Jesus não trouxe exclusivamente a salvação: Ele veio não só para salvar, mas para restaurar a saúde de todo aquele que Nele crer.</p>
+                                    <p>A cura divina é parte do sacrifício de Cristo. Deus não quis apenas salvar, mas que tivéssemos vida em abundância (Jo 10.10), e isso inclui saúde, cura e libertação.</p>
                                 </Reveal>
                                 <Reveal delay={140}>
                                     <div className="verse-box">
-                                        <blockquote>“Jesus Cristo é o mesmo, ontem, e hoje, e eternamente.”</blockquote>
-                                        <cite>HEBREUS 13:8</cite>
+                                        <blockquote>“Verdadeiramente ele tomou sobre si as nossas enfermidades, e as nossas dores levou sobre si.”</blockquote>
+                                        <cite>ISAÍAS 53:4</cite>
                                     </div>
                                 </Reveal>
                             </div>
@@ -744,17 +777,18 @@ export default function HomeSegundaDoutrina() {
                             <Reveal delay={160}>
                                 <div className="salvador-card">
                                     <img
-                                        src="/images/fogo-espirito.jpg"
-                                        alt="Chama de fogo em tons dourados sobre fundo escuro"
+                                        src="/images/medico-divino.jpg"
+                                        alt="Mãos estendidas sob uma luz azul e dourada sobre fundo escuro"
                                         loading="lazy"
                                         decoding="async"
+                                        style={{ objectPosition: "50% 32%" }}
                                     />
                                     <div className="salvador-veil" />
                                     <div className="salvador-body">
                                         <div className="salvador-rule" />
-                                        <span className="salvador-badge">LUCAS 24:49</span>
-                                        <h3>O Batizador</h3>
-                                        <p>Jesus cumpriu a previsão de João Batista e envia o Consolador, para que continuemos a sua obra revestidos de poder.</p>
+                                        <span className="salvador-badge">ISAÍAS 53:5</span>
+                                        <h3>Pelas suas pisaduras</h3>
+                                        <p>Aquele que foi ferido por causa das nossas transgressões também é quem nos sara e nos restaura.</p>
                                     </div>
                                 </div>
                             </Reveal>
@@ -766,8 +800,8 @@ export default function HomeSegundaDoutrina() {
                         <div className="jc-inner">
                             <Reveal>
                                 <p className="jc-kicker">Simbolismo</p>
-                                <h2 className="jc-h2">O simbolismo da<br />segunda doutrina</h2>
-                                <p className="sec-sub">Quatro sinais que apontam para Jesus, o Batizador com o Espírito Santo.</p>
+                                <h2 className="jc-h2">O simbolismo da<br />terceira doutrina</h2>
+                                <p className="sec-sub">Quatro sinais que apontam para Jesus, o Médico Divino.</p>
                             </Reveal>
 
                             <div className="sym-grid">
@@ -785,7 +819,7 @@ export default function HomeSegundaDoutrina() {
                                                     </div>
                                                 ) : (
                                                     <div className="sym-drop">
-                                                        <FlameMark />
+                                                        {simbolo.mark === "calice" ? <CaliceMark /> : simbolo.mark === "marcos" ? <MarcosMark /> : <AzulMark />}
                                                     </div>
                                                 )}
                                                 <div className="sym-body">
@@ -802,17 +836,65 @@ export default function HomeSegundaDoutrina() {
                         </div>
                     </section>
 
-                    {/* ═══════════ IMPORTÂNCIA ═══════════ */}
-                    <section className="jc-section sec-importancia" id="importancia">
+                    {/* ═══════════ CEIA: PÃO E SANGUE ═══════════ */}
+                    <section className="jc-section sec-ceia" id="ceia">
+                        <div className="jc-cross jc-section-cross" aria-hidden="true" />
+                        <div className="jc-inner pent-grid">
+                            <div className="pent-texto">
+                                <Reveal>
+                                    <p className="jc-kicker">A Ceia do Senhor</p>
+                                    <h2 className="jc-h2">Dois elementos,<br />duas promessas</h2>
+                                    <p>Na Ceia do Senhor (1 Co 11.24-34), a morte de Jesus traz dois símbolos distintos. Para o perdão, o sangue bastava; mas Deus quis também restaurar a nossa saúde.</p>
+                                </Reveal>
+
+                                <Reveal delay={130}>
+                                    <div className="verse-card">
+                                        <span className="verse-quote" aria-hidden="true">“</span>
+                                        <span className="verse-ref">O PÃO</span>
+                                        <p className="small">Simboliza o corpo de Cristo, moído, ferido e partido por nós, para nos trazer a cura das dores e enfermidades.</p>
+                                    </div>
+                                </Reveal>
+                                <Reveal delay={220}>
+                                    <div className="verse-card blue">
+                                        <span className="verse-quote" aria-hidden="true">“</span>
+                                        <span className="verse-ref">O SANGUE</span>
+                                        <p className="small">Simboliza a nova aliança de Deus com os homens: a redenção dos nossos pecados e a salvação das nossas almas.</p>
+                                    </div>
+                                </Reveal>
+                            </div>
+
+                            <Reveal delay={180}>
+                                <figure className="film-frame">
+                                    <div className="film-panel-wrap">
+                                        <span className="film-corner tl" /><span className="film-corner tr" />
+                                        <span className="film-corner bl" /><span className="film-corner br" />
+                                        <div className="film-panel">
+                                            <img
+                                                src="/images/calice_santa.jpg"
+                                                alt="Pão e cálice sobre uma mesa, representando a Ceia do Senhor"
+                                                loading="lazy"
+                                                decoding="async"
+                                                style={{ objectPosition: "50% 48%" }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <figcaption className="film-caption">O Grande Médico · 1 Coríntios 11 · Ceia</figcaption>
+                                </figure>
+                            </Reveal>
+                        </div>
+                    </section>
+
+                    {/* ═══════════ CONDIÇÕES ═══════════ */}
+                    <section className="jc-section sec-condicoes" id="condicoes">
                         <div className="jc-inner">
                             <Reveal className="imp-head">
-                                <p className="jc-kicker">Importância</p>
-                                <h2 className="jc-h2">Por que buscar esta<br />experiência?</h2>
-                                <p className="sec-sub">Quatro razões que a Palavra apresenta para todo cristão.</p>
+                                <p className="jc-kicker">Condições</p>
+                                <h2 className="jc-h2">Como alcançar<br />a cura?</h2>
+                                <p className="sec-sub">Quatro condições que a Palavra apresenta para receber o milagre.</p>
                             </Reveal>
 
                             <div className="why-grid">
-                                {IMPORTANCIA.map((item, index) => {
+                                {CONDICOES.map((item, index) => {
                                     const accent = ACCENTS[index % ACCENTS.length];
                                     return (
                                         <Reveal key={item.n} delay={index * 110}>
@@ -833,58 +915,10 @@ export default function HomeSegundaDoutrina() {
                             <Reveal delay={140}>
                                 <div className="imp-quote">
                                     <div className="rule" />
-                                    <p>“Não é a eloquência do pregador, mas o Espírito Santo quem leva as pessoas a crerem.”</p>
-                                    <cite>JOÃO 16:8</cite>
+                                    <p>“Os milagres não são feitos pelos homens: é de Deus que vem o poder.”</p>
+                                    <cite>MARCOS 16:18</cite>
                                     <div className="rule" />
                                 </div>
-                            </Reveal>
-                        </div>
-                    </section>
-
-                    {/* ═══════════ PENTECOSTES ═══════════ */}
-                    <section className="jc-section sec-pentecostes" id="pentecostes">
-                        <div className="jc-cross jc-section-cross" aria-hidden="true" />
-                        <div className="jc-inner pent-grid">
-                            <div className="pent-texto">
-                                <Reveal>
-                                    <p className="jc-kicker">Atos dos Apóstolos</p>
-                                    <h2 className="jc-h2">O dia de<br />Pentecostes</h2>
-                                    <p>Dias após a Ascensão, os discípulos estavam reunidos à espera do batismo, como Cristo ordenara. Naquele dia, a promessa se cumpriu.</p>
-                                    <p>É o derramamento do Espírito de Deus “sobre toda a carne”, anunciado pelo profeta Joel (Joel 2.28-29) e hoje disponível a todos os que creem.</p>
-                                </Reveal>
-
-                                <Reveal delay={130}>
-                                    <div className="verse-card">
-                                        <span className="verse-quote" aria-hidden="true">“</span>
-                                        <span className="verse-ref">ATOS 2:2-3</span>
-                                        <blockquote>“De repente veio do céu um som, como de um vento veemente e impetuoso... E foram vistas por eles línguas repartidas, como que de fogo.”</blockquote>
-                                    </div>
-                                </Reveal>
-                                <Reveal delay={220}>
-                                    <div className="verse-card">
-                                        <span className="verse-quote" aria-hidden="true">“</span>
-                                        <span className="verse-ref">ATOS 2:4</span>
-                                        <blockquote>“E todos foram cheios do Espírito Santo, e começaram a falar noutras línguas, conforme o Espírito Santo lhes concedia que falassem.”</blockquote>
-                                    </div>
-                                </Reveal>
-                            </div>
-
-                            <Reveal delay={180}>
-                                <figure className="film-frame">
-                                    <div className="film-panel-wrap">
-                                        <span className="film-corner tl" /><span className="film-corner tr" />
-                                        <span className="film-corner bl" /><span className="film-corner br" />
-                                        <div className="film-panel">
-                                            <img
-                                                src="/images/pentecostes.jpg"
-                                                alt="Arte de Pentecostes com línguas de fogo e a pomba do Espírito Santo"
-                                                loading="lazy"
-                                                decoding="async"
-                                            />
-                                        </div>
-                                    </div>
-                                    <figcaption className="film-caption">A Promessa do Pai · Atos 2 · Pentecostes</figcaption>
-                                </figure>
                             </Reveal>
                         </div>
                     </section>
@@ -896,9 +930,9 @@ export default function HomeSegundaDoutrina() {
                             <div className="convite-texto">
                                 <Reveal>
                                     <p className="jc-kicker">Convite</p>
-                                    <h2 className="jc-h2">A promessa é<br />para você.<br />Receba o <em>poder!</em></h2>
-                                    <p>Hoje podemos sentir a presença do Senhor não apenas superficialmente, mas intimamente, pois ele habita em nós por meio do seu Santo Espírito.</p>
-                                    <button className="btn-convite" onClick={() => navigate("/estudos/promessa-do-pai")}>
+                                    <h2 className="jc-h2">A cura é<br />para você.<br />Receba a <em>vida!</em></h2>
+                                    <p>Quando a resposta demora, isso não significa que Deus não nos ouve. Descanse, confie e aguarde em paz: a bênção vem sempre no momento certo.</p>
+                                    <button className="btn-convite" onClick={() => navigate("/estudos/o-grande-medico")}>
                                         Quero estudar esta doutrina <ArrowRight size={17} strokeWidth={2.6} />
                                     </button>
                                 </Reveal>
@@ -912,13 +946,14 @@ export default function HomeSegundaDoutrina() {
                                             alt="Bíblia aberta sobre a mesa de madeira ao lado de uma luminária"
                                             loading="lazy"
                                             decoding="async"
+                                            style={{ objectPosition: "50% 45%" }}
                                         />
                                     </figure>
                                     <div className="convite-chip">
-                                        <Flame size={20} strokeWidth={2.2} />
+                                        <HeartPulse size={20} strokeWidth={2.2} />
                                         <span>
-                                            <strong>A Promessa do Pai</strong>
-                                            <small>Lucas 24:49</small>
+                                            <strong>O Grande Médico</strong>
+                                            <small>Isaías 53:5</small>
                                         </span>
                                     </div>
                                 </div>
@@ -940,10 +975,10 @@ export default function HomeSegundaDoutrina() {
                                         <small>Igreja do Evangelho Quadrangular</small>
                                     </span>
                                 </div>
-                                <p className="jc-foot-doctr">A Promessa do Pai — Segunda Doutrina Quadrangular</p>
+                                <p className="jc-foot-doctr">O Grande Médico — Terceira Doutrina Quadrangular</p>
                                 <blockquote className="jc-foot-verse">
-                                    “Ficai, porém, na cidade de Jerusalém, até que do alto sejais revestidos de poder.”
-                                    <cite>LUCAS 24:49</cite>
+                                    “O castigo que nos traz a paz estava sobre ele, e pelas suas pisaduras fomos sarados.”
+                                    <cite>ISAÍAS 53:5</cite>
                                 </blockquote>
                             </div>
 
@@ -967,7 +1002,7 @@ export default function HomeSegundaDoutrina() {
 
                         <div className="jc-footer-bar">
                             <p>© {year} Igreja do Evangelho Quadrangular — Pituaçu. Todos os direitos reservados.</p>
-                            <p>A Promessa do Pai — Segunda Doutrina Quadrangular · Uso exclusivo da IEQ · Suporte: <a href="mailto:washquesia@gmail.com">washquesia@gmail.com</a></p>
+                            <p>O Grande Médico — Terceira Doutrina Quadrangular · Uso exclusivo da IEQ · Suporte: <a href="mailto:washquesia@gmail.com">washquesia@gmail.com</a></p>
                         </div>
                     </div>
                 </footer>

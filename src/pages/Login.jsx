@@ -7,14 +7,14 @@ import { useAuth }       from "../auth/AuthContext";
 import { useTheme }      from "../context/ThemeContext";
 import api               from "../services/api.js";
 
-const LEAO_LOGIN = "/images/leao-login.jpg";
+const LEAO_LOGIN = "/images/calice_cura.jpg";
 
-/* ─── Paleta da marca: âmbar + amarelo (mesmo tema da Home) ─── */
+/* ─── Paleta da marca: azul + dourado (mesmo tema da Home) ─── */
 const P = {
-    wine:"#FFE000", wineDeep:"#2E1200", wineLight:"#A55300",
-    scarlet:"#C26A00", gold:"#FFE000", goldLight:"#FFE000",
-    red:"#FF7A83", green:"#4CFF9B", amber:"#FFE000",
-    ink:"#2A1200", paper:"#7A3A00", cream:"#C26A00",
+    wine:"#4F8BFF", wineDeep:"#061238", wineLight:"#11308A",
+    scarlet:"#1740B0", gold:"#4F8BFF", goldLight:"#9CC4FF",
+    red:"#FF7A83", green:"#4CFF9B", amber:"#9CC4FF",
+    ink:"#061238", paper:"#0B2160", cream:"#1E4FD8",
 };
 
 /* ─── Fade-in do cartão ─── */
@@ -264,11 +264,11 @@ export default function Login() {
         .ieq-login-root, .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { box-sizing:border-box; }
         :where(.ieq-login-root, .ieq-login-root *) { margin:0; padding:0; }
         .ieq-login-root {
-          --red:#C26A00; --red-mid:#A55300; --red-dark:#7A3A00; --red-deep:#2E1200;
-          --glow:#FFE45C; --orange:#FF7A00; --yellow:#FFE000; --blue:#1E4FD8; --magenta:#C2187A;
-          --white:#FFFFFF; --ink:#2A1200;
-          --white-78:rgba(255,255,255,.78); --white-60:rgba(255,255,255,.6); --white-35:rgba(255,255,255,.35);
-          --err:#FF7A83; --warn:#FFE000; --track:rgba(255,255,255,.18);
+          --red:#1740B0; --red-mid:#11308A; --red-dark:#0B2160; --red-deep:#061238;
+          --glow:#9CC4FF; --orange:#FF7A00; --yellow:#4F8BFF; --blue:#1E4FD8; --magenta:#C2187A;
+          --white:#FFFFFF; --ink:#061238;
+          --white-78:rgba(255,255,255,.84); --white-60:rgba(255,255,255,.66); --white-35:rgba(255,255,255,.35);
+          --err:#FF7A83; --warn:#4F8BFF; --track:rgba(255,255,255,.18);
           font-family:'Inter',system-ui,sans-serif;
           min-height:100vh; position:relative; overflow-x:hidden;
           color:#fff; background:var(--red);
@@ -286,12 +286,12 @@ export default function Login() {
           filter:saturate(1.12) contrast(1.04) brightness(.84);
         }
         .login-bg::after { content:""; position:absolute; inset:0;
-          background:linear-gradient(180deg, rgba(46,18,0,.42), rgba(46,18,0,.72)); }
+          background:linear-gradient(180deg, rgba(6,18,56,.42), rgba(6,18,56,.72)); }
         .login-bg::before { content:""; position:absolute; inset:0;
           background:
-            radial-gradient(closest-side at 50% 46%, rgba(255,228,92,.28), rgba(255,228,92,0) 62%),
-            linear-gradient(90deg, rgba(122,58,0,.9) 0%, rgba(194,106,0,.3) 50%, rgba(122,58,0,.9) 100%);
-          box-shadow:inset 0 0 220px 70px rgba(46,18,0,.72);
+            radial-gradient(closest-side at 50% 46%, rgba(156,196,255,.28), rgba(156,196,255,0) 62%),
+            linear-gradient(90deg, rgba(6,18,56,.9) 0%, rgba(11,33,96,.35) 50%, rgba(6,18,56,.9) 100%);
+          box-shadow:inset 0 0 220px 70px rgba(6,18,56,.72);
         }
         .login-cross { position:absolute; z-index:1; right:4%; top:50%; width:min(34vw,340px); height:min(50vh,460px);
           transform:translateY(-50%); opacity:.1; pointer-events:none; }
@@ -312,7 +312,7 @@ export default function Login() {
           position:fixed; top:18px; right:18px; z-index:50;
           width:44px; height:44px; border-radius:0; cursor:pointer;
           display:grid; place-items:center;
-          background:var(--yellow); border:2px solid var(--yellow); color:var(--ink);
+          background:#fff; border:2px solid #fff; color:var(--ink);
           box-shadow:5px 5px 0 var(--red-dark);
           transition:transform .2s, box-shadow .2s;
         }
@@ -327,13 +327,13 @@ export default function Login() {
           transition:opacity .6s ease, transform .6s ease;
         }
 
-        /* ── lado da marca: leão de Judá ── */
+        /* ── lado da marca: cálice ── */
         .brand-pane {
           position:relative; overflow:hidden; isolation:isolate;
           aspect-ratio:1215 / 1295;      /* mesma proporção da imagem */
           min-height:0; padding:0;
           display:block;
-          background:#2E1200;            /* tom profundo do tema */
+          background:#061238;            /* tom profundo do tema */
           color:#fff;
         }
         .brand-media {
@@ -383,8 +383,8 @@ export default function Login() {
         .eye:hover { background:rgba(255,255,255,.12); color:var(--yellow); }
 
         .btn-primary {
-          width:100%; height:52px; border:2px solid var(--yellow); border-radius:0;
-          background:var(--yellow); color:var(--ink); cursor:pointer;
+          width:100%; height:52px; border:2px solid #fff; border-radius:0;
+          background:#fff; color:var(--ink); cursor:pointer;
           display:flex; align-items:center; justify-content:center; gap:8px;
           font-size:13px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
           box-shadow:7px 7px 0 var(--red-deep);
@@ -505,10 +505,10 @@ export default function Login() {
                             <img
                                 className="brand-media"
                                 src={LEAO_LOGIN}
-                                alt="Jesus Cristo, o Leão da Tribo de Judá"
+                                alt="Cálice da cura e da comunhão"
                                 loading="eager"
                                 decoding="async"
-                                fetchPriority="high"
+                                fetchpriority="high"
                                 draggable={false}
                             />
                         </aside>
@@ -677,7 +677,7 @@ export default function Login() {
                                                                 className="check-row"
                                                                 onClick={()=>{set(!state);setErrAlt(null);}}>
                                                             <span className="check-box">
-                                                                {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2A1200" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                                {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#061238" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
                                                             </span>
                                                             <Icon size={14} style={{ flexShrink:0 }}/>
                                                             {label}
