@@ -1,9 +1,10 @@
-const CACHE_NAME = "ieq-pituacu-v1";
+const CACHE_NAME = "ieq-pituacu-v2";
 
 // Arquivos essenciais que ficam disponíveis offline
 const ASSETS = [
     "/",
     "/index.html",
+    "/manifest.json",
     "/icon-192.png",
     "/icon-512.png",
 ];
