@@ -9,6 +9,7 @@ import api               from "../services/api.js";
 
 const LEAO_LOGIN = "/images/calice_cura.jpg";
 
+
 /* ─── Paleta da marca: púrpura + amarelo (mesmo tema da Home) ─── */
 const P = {
     wine:"#5B21B6", wineDeep:"#1E0A42", wineLight:"#7C3AED",

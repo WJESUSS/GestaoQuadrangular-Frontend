@@ -1733,7 +1733,7 @@ export default function AdminUsers() {
               )}
               <div className="adm-brand">
                 <div className="adm-brand-logo">
-                  <img src="/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }}/>
+                  <img src="/images/quadrangular.png" alt="IEQ" onError={e => { e.target.style.display="none"; }}/>
                 </div>
                 <div className="adm-brand-text">
                   <p className="adm-brand-name">IEQ Pituaçu</p>

@@ -27,7 +27,7 @@ const MESES = [
 function IEQCross({ size = 36 }) {
   return (
       <img
-          src="/quadrangular.png"
+          src="/images/quadrangular.png"
           alt="Logo IEQ"
           style={{
             width: size, height: size,

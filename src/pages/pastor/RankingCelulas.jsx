@@ -52,7 +52,7 @@ function toMesParam(date) {
 function IEQCross({ size = 30 }) {
   return (
       <img
-          src="/quadrangular.png"
+          src="/images/quadrangular.png"
           alt="Logo IEQ"
           style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
       />

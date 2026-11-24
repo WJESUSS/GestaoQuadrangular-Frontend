@@ -313,7 +313,7 @@ function GlobalStyles({ tk, isDark }) {
 function IEQCross({ size = 28 }) {
   return (
       <img
-          src="/quadrangular.png"
+          src="/images/quadrangular.png"
           alt="IEQ"
           style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
       />
