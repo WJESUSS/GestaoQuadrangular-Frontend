@@ -75,7 +75,7 @@ function IEQCross({ size = 28 }) {
         <rect x="38" y="4"  width="24" height="92" rx="3" fill="url(#rd-gV)" filter="url(#rd-glow)" />
         <rect x="4"  y="38" width="92" height="24" rx="3" fill="url(#rd-gH)" filter="url(#rd-glow)" />
         <rect x="38" y="38" width="24" height="24" rx="2" fill={AURA.yellow} filter="url(#rd-glow)" />
-        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE066" opacity="0.55" />
+        <rect x="43" y="43" width="14" height="14" rx="1" fill="#FFE000" opacity="0.55" />
       </svg>
   );
 }
@@ -137,7 +137,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(253,184,19,.2), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,224,0,.2), transparent);
     }
 
     /* ── Header ── */
@@ -149,12 +149,12 @@ function RDStyles({ t, isDark }) {
     .rd-saved-badge {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 8.5px; font-weight: 500; letter-spacing: .14em;
-      text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
+      text-transform: uppercase; color: ${isDark ? AURA.gold : "#5B21B6"};
       animation: rd-blink 1.2s ease 2;
     }
     .rd-eyebrow {
       font-size: 9px; font-weight: 500; letter-spacing: .2em;
-      text-transform: uppercase; color: ${isDark ? "rgba(253,184,19,.55)" : "#B5000F"}; margin: 0 0 3px;
+      text-transform: uppercase; color: ${isDark ? "rgba(255,224,0,.55)" : "#5B21B6"}; margin: 0 0 3px;
     }
     .rd-title {
       font-family: 'Inter', sans-serif;
@@ -174,13 +174,13 @@ function RDStyles({ t, isDark }) {
     }
     .rd-tab-active {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-      color: #0A0A0F; box-shadow: 0 6px 20px rgba(253,184,19,.25);
+      color: #1E0A42; box-shadow: 0 6px 20px rgba(255,224,0,.25);
     }
     .rd-tab-inactive {
-      background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(253,184,19,.06)"};
+      background: ${isDark ? "rgba(255,255,255,.04)" : "rgba(255,224,0,.06)"};
       border: 1px solid ${t.border}; color: ${t.textMuted};
     }
-    .rd-tab-inactive:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .rd-tab-inactive:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
     /* ── Datas / navegação de semana ── */
     .rd-date-bar {
@@ -214,7 +214,7 @@ function RDStyles({ t, isDark }) {
       display: flex; align-items: center; justify-content: center;
       transition: all .2s; flex-shrink: 0;
     }
-    .rd-week-nav-btn:hover:not(:disabled) { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .rd-week-nav-btn:hover:not(:disabled) { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .rd-week-nav-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     /* ── KPI ── */
@@ -241,12 +241,12 @@ function RDStyles({ t, isDark }) {
       animation: rd-slideD .3s ease;
     }
     .rd-banner-warn {
-      background: ${isDark ? "rgba(253,184,19,.1)" : "rgba(253,184,19,.07)"};
-      border: 1px solid rgba(253,184,19,.3);
+      background: ${isDark ? "rgba(255,224,0,.1)" : "rgba(255,224,0,.07)"};
+      border: 1px solid rgba(255,224,0,.3);
     }
     .rd-banner-edit {
-      background: ${isDark ? "rgba(53,3,9,.25)" : "rgba(53,3,9,.07)"};
-      border: 1px solid rgba(53,3,9,.3);
+      background: ${isDark ? "rgba(30,10,66,.25)" : "rgba(30,10,66,.07)"};
+      border: 1px solid rgba(30,10,66,.3);
     }
     .rd-banner-title {
       font-size: 10px; font-weight: 600; letter-spacing: .16em;
@@ -260,7 +260,7 @@ function RDStyles({ t, isDark }) {
       display: grid; grid-template-columns: 1fr repeat(5, 1fr); gap: 8px;
       align-items: center;
       border-bottom: 1px solid ${t.border};
-      background: ${isDark ? "rgba(253,184,19,.04)" : "rgba(253,184,19,.05)"};
+      background: ${isDark ? "rgba(255,224,0,.04)" : "rgba(255,224,0,.05)"};
     }
     .rd-table-col-label {
       text-align: center;
@@ -272,7 +272,7 @@ function RDStyles({ t, isDark }) {
     .rd-table-col-dia  { font-weight: 400; opacity: .75; }
     .rd-table-col-data {
       font-size: 11px; font-weight: 700; letter-spacing: .06em;
-      color: ${isDark ? AURA.gold : "#B5000F"};
+      color: ${isDark ? AURA.gold : "#5B21B6"};
     }
 
     .rd-member-row {
@@ -283,11 +283,11 @@ function RDStyles({ t, isDark }) {
     .rd-member-row:last-child { border-bottom: none; }
     .rd-member-avatar {
       width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
-      background: ${isDark ? "linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06))" : "linear-gradient(135deg, rgba(227,6,19,.16), rgba(227,6,19,.05))"};
-      border: 1px solid ${isDark ? "rgba(253,184,19,.22)" : "rgba(227,6,19,.34)"};
+      background: ${isDark ? "linear-gradient(135deg, rgba(255,224,0,.2), rgba(255,224,0,.06))" : "linear-gradient(135deg, rgba(91,33,182,.16), rgba(91,33,182,.05))"};
+      border: 1px solid ${isDark ? "rgba(255,224,0,.22)" : "rgba(91,33,182,.34)"};
       display: flex; align-items: center; justify-content: center;
       font-family: 'Inter', sans-serif; font-weight: 700;
-      font-size: 17px; color: ${isDark ? AURA.gold : "#8F0009"};
+      font-size: 17px; color: ${isDark ? AURA.gold : "#4C1D95"};
     }
     .rd-member-name {
       font-family: 'Inter', sans-serif;
@@ -300,7 +300,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-progress-track {
       height: 4px; border-radius: 99px; overflow: hidden;
-      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(253,184,19,.1)"};
+      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(255,224,0,.1)"};
       margin: 12px 0 14px;
     }
     .rd-progress-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
@@ -338,7 +338,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-pb-label-data {
       font-size: 8px; font-weight: 700; letter-spacing: .04em;
-      color: ${isDark ? AURA.gold : "#B5000F"}; opacity: .9;
+      color: ${isDark ? AURA.gold : "#5B21B6"}; opacity: .9;
       max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .rd-pb-label-dia {
@@ -348,17 +348,17 @@ function RDStyles({ t, isDark }) {
 
     .rd-just-btn {
       margin-top: 5px; padding: 4px 8px; border-radius: 99px;
-      border: 1px solid rgba(253,184,19,.25); background: transparent; cursor: pointer;
+      border: 1px solid rgba(255,224,0,.25); background: transparent; cursor: pointer;
       font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 600;
       letter-spacing: .05em; display: flex; align-items: center; gap: 4px;
       transition: all .15s; white-space: nowrap; color: ${t.textMuted};
       max-width: 100%; overflow: hidden; text-overflow: ellipsis;
     }
-    .rd-just-btn:hover { border-color: rgba(253,184,19,.5); color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .rd-just-btn:hover { border-color: rgba(255,224,0,.5); color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .rd-just-btn-filled {
-      border-color: rgba(253,184,19,.6) !important;
-      background: ${isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.1)"} !important;
-      color: ${isDark ? AURA.gold : "#B5000F"} !important;
+      border-color: rgba(255,224,0,.6) !important;
+      background: ${isDark ? "rgba(255,224,0,.12)" : "rgba(255,224,0,.1)"} !important;
+      color: ${isDark ? AURA.gold : "#5B21B6"} !important;
     }
 
     /* ── Botão submit ── */
@@ -373,27 +373,27 @@ function RDStyles({ t, isDark }) {
     .rd-btn-submit:disabled { opacity: .4; cursor: not-allowed; }
     .rd-btn-gold {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-      color: #0A0A0F; box-shadow: 0 8px 28px rgba(253,184,19,.25);
+      color: #1E0A42; box-shadow: 0 8px 28px rgba(255,224,0,.25);
     }
     .rd-btn-blue {
       background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
-      color: #fff; box-shadow: 0 8px 28px rgba(53,3,9,.4);
+      color: #fff; box-shadow: 0 8px 28px rgba(30,10,66,.4);
     }
 
     /* ── Erro ── */
     .rd-erro {
       padding: 14px 18px; border-radius: 14px;
-      background: rgba(200,16,46,.08); border: 1px solid rgba(200,16,46,.25);
+      background: rgba(91,33,182,.08); border: 1px solid rgba(91,33,182,.25);
       font-size: 10px; font-weight: 600; letter-spacing: .14em;
-      text-transform: uppercase; color: ${isDark ? "#FFD400" : AURA.red};
+      text-transform: uppercase; color: ${isDark ? "#FFE000" : AURA.red};
       animation: rd-slideD .3s ease; text-align: center;
     }
 
     /* ── Toast rascunho ── */
     .rd-toast-draft {
       padding: 12px 18px; border-radius: 14px;
-      background: ${isDark ? "rgba(53,3,9,.3)" : "rgba(53,3,9,.06)"};
-      border: 1px solid rgba(53,3,9,.28);
+      background: ${isDark ? "rgba(30,10,66,.3)" : "rgba(30,10,66,.06)"};
+      border: 1px solid rgba(30,10,66,.28);
       display: flex; align-items: center; gap: 10px;
       font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 500;
       letter-spacing: .12em; text-transform: uppercase; color: ${AURA.blueLight};
@@ -426,7 +426,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-hist-bar {
       height: 3px; border-radius: 99px; margin-top: 10px;
-      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(253,184,19,.1)"};
+      background: ${isDark ? "rgba(255,255,255,.06)" : "rgba(255,224,0,.1)"};
       overflow: hidden;
     }
     .rd-hist-head {
@@ -454,7 +454,7 @@ function RDStyles({ t, isDark }) {
       font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
       transition: all .2s; flex-shrink: 0;
     }
-    .rd-pag-btn:hover:not(:disabled) { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .rd-pag-btn:hover:not(:disabled) { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .rd-pag-btn:disabled { opacity: .3; cursor: not-allowed; }
     .rd-pag-btn-active {
       background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
@@ -470,17 +470,17 @@ function RDStyles({ t, isDark }) {
       letter-spacing: .14em; text-transform: uppercase; transition: all .25s;
       flex-shrink: 0; white-space: nowrap;
     }
-    .rd-btn-icon:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .rd-btn-icon:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .rd-btn-edit-gold {
       display: flex; align-items: center; gap: 7px;
       padding: 10px 18px; border-radius: 100px; border: none; cursor: pointer;
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-      color: #0A0A0F; font-family: 'Inter', sans-serif;
+      color: #1E0A42; font-family: 'Inter', sans-serif;
       font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
       transition: all .25s; flex-shrink: 0; white-space: nowrap;
-      box-shadow: 0 4px 14px rgba(253,184,19,.2);
+      box-shadow: 0 4px 14px rgba(255,224,0,.2);
     }
-    .rd-btn-edit-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(253,184,19,.3); }
+    .rd-btn-edit-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(255,224,0,.3); }
 
     /* ── Detalhe histórico ── */
     .rd-detail-grid {
@@ -496,7 +496,7 @@ function RDStyles({ t, isDark }) {
     }
     .rd-table-scroll::-webkit-scrollbar { height: 4px; }
     .rd-table-scroll::-webkit-scrollbar-thumb {
-      background: rgba(253,184,19,.35);
+      background: rgba(255,224,0,.35);
       border-radius: 99px;
     }
     .rd-table-inner {
@@ -591,7 +591,7 @@ function RDStyles({ t, isDark }) {
     .rd-modal-overlay {
       position: fixed; inset: 0; z-index: 500;
       display: flex; align-items: center; justify-content: center; padding: 0 20px;
-      background: rgba(10,10,15,.88); backdrop-filter: blur(8px);
+      background: rgba(30,10,66,.88); backdrop-filter: blur(8px);
       animation: rd-overlIn .2s ease forwards;
     }
     .rd-modal-box {
@@ -634,7 +634,7 @@ function RDStyles({ t, isDark }) {
     .rd-footer {
       text-align: center; font-size: 9px; font-weight: 500;
       letter-spacing: .18em; text-transform: uppercase;
-      color: ${isDark ? "rgba(255,255,255,.12)" : "rgba(26,16,8,.15)"};
+      color: ${isDark ? "rgba(255,255,255,.12)" : "rgba(30,10,66,.15)"};
     }
     `}</style>
   );
@@ -662,7 +662,7 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
               margin: "0 auto 14px", fontSize: 22,
             }}>📋</div>
             <p className="rd-eyebrow" style={{ marginBottom: 6 }}>Justificativa de Falta</p>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 17, fontWeight: 600, color: selecionado ? CORES_JUST[selecionado] : AURA.goldLight, textShadow: selecionado ? `0 0 16px ${CORES_JUST[selecionado]}66` : "0 0 16px rgba(253,184,19,.5)", margin: "0 0 3px", transition: "color .25s, text-shadow .25s" }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 17, fontWeight: 600, color: selecionado ? CORES_JUST[selecionado] : AURA.goldLight, textShadow: selecionado ? `0 0 16px ${CORES_JUST[selecionado]}66` : "0 0 16px rgba(255,224,0,.5)", margin: "0 0 3px", transition: "color .25s, text-shadow .25s" }}>
               {nomeMembro}
             </p>
             <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "#D97757", textShadow: "0 0 10px rgba(217,119,87,.4)", margin: 0 }}>
@@ -682,9 +682,9 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
                             className="rd-just-chip"
                             style={{
                               borderColor: sel ? AURA.gold : t.border,
-                              background: sel ? (isDark ? "rgba(253,184,19,.15)" : "rgba(253,184,19,.1)") : "transparent",
+                              background: sel ? (isDark ? "rgba(255,224,0,.15)" : "rgba(255,224,0,.1)") : "transparent",
                               transform: sel ? "scale(1.04)" : "scale(1)",
-                              boxShadow: sel ? "0 4px 16px rgba(253,184,19,.2)" : "none",
+                              boxShadow: sel ? "0 4px 16px rgba(255,224,0,.2)" : "none",
                             }}
                     >
                       <span style={{ fontSize: 22 }}>{EMOJIS_JUST[opcao]}</span>
@@ -700,7 +700,7 @@ function ModalJustificativa({ isDark, nomeMembro, labelCulto, valorAtual, onSalv
             <button onClick={onFechar} style={{ flex: 1, padding: "12px 0", borderRadius: 100, border: `1px solid ${t.border}`, background: "transparent", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: t.textMuted }}>
               Cancelar
             </button>
-            <button onClick={() => { onSalvar(selecionado); onFechar(); }} style={{ flex: 2, padding: "12px 0", borderRadius: 100, background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, border: "none", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "#0A0A0F", boxShadow: "0 4px 14px rgba(253,184,19,.25)" }}>
+            <button onClick={() => { onSalvar(selecionado); onFechar(); }} style={{ flex: 2, padding: "12px 0", borderRadius: 100, background: `linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight})`, border: "none", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "#1E0A42", boxShadow: "0 4px 14px rgba(255,224,0,.25)" }}>
               Confirmar
             </button>
           </div>
@@ -733,7 +733,7 @@ function ToastSucessoDiscipulado({ totalPresencas, totalPontos, porcentagem, nom
                 <div key={i} style={{ width: i % 3 === 0 ? 11 : 7, height: i % 3 === 0 ? 11 : 7, borderRadius: i % 2 === 0 ? "50%" : 2, background: cor, opacity: 0, animation: `rd-confetti 1.4s ease ${0.04 + i * 0.06}s forwards` }} />
             ))}
           </div>
-          <div className="rd-toast-box" style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 60%, ${c3} 100%)`, boxShadow: modoEdicao ? "0 16px 60px rgba(53,3,9,.5)" : "0 16px 60px rgba(13,110,58,.5)" }}>
+          <div className="rd-toast-box" style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 60%, ${c3} 100%)`, boxShadow: modoEdicao ? "0 16px 60px rgba(30,10,66,.5)" : "0 16px 60px rgba(13,110,58,.5)" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,.04)", pointerEvents: "none" }} />
             <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <div className="rd-toast-ring" />
@@ -756,10 +756,10 @@ function ToastSucessoDiscipulado({ totalPresencas, totalPontos, porcentagem, nom
               <div style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.9)", display: "flex", alignItems: "center", gap: 6 }}>
                 <Users2 size={11} /> {totalPresencas} Presenças
               </div>
-              <div style={{ background: "rgba(253,184,19,.25)", border: "1px solid rgba(253,184,19,.4)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight, display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ background: "rgba(255,224,0,.25)", border: "1px solid rgba(255,224,0,.4)", borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: AURA.goldLight, display: "flex", alignItems: "center", gap: 6 }}>
                 ⭐ {totalPontos} Pontos
               </div>
-              <div style={{ background: porcentagem >= 60 ? "rgba(253,184,19,.2)" : "rgba(200,16,46,.15)", border: `1px solid ${porcentagem >= 60 ? "rgba(253,184,19,.35)" : "rgba(200,16,46,.3)"}`, borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: porcentagem >= 60 ? AURA.gold : "rgba(255,255,255,.85)", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ background: porcentagem >= 60 ? "rgba(255,224,0,.2)" : "rgba(91,33,182,.15)", border: `1px solid ${porcentagem >= 60 ? "rgba(255,224,0,.35)" : "rgba(91,33,182,.3)"}`, borderRadius: 100, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: porcentagem >= 60 ? AURA.gold : "rgba(255,255,255,.85)", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={11} /> {porcentagem}% Freq.
               </div>
             </div>
@@ -830,7 +830,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
   /* ── vazio ── */
   if (historico.length === 0 && totalElements === 0) return (
       <div style={{ padding: "48px 0", textAlign: "center" }}>
-        <History size={36} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 12 }} />
+        <History size={36} style={{ color: isDark ? AURA.gold : "#5B21B6", marginBottom: 12 }} />
         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: t.textMuted }}>
           Nenhum relatório enviado ainda
         </p>
@@ -854,7 +854,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
       <div className="rd-card" style={{ overflow: "hidden" }}>
         {/* Cabeçalho do card */}
         <div className="rd-hist-head">
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(253,184,19,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,224,0,.08)", border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: isDark ? AURA.gold : "#5B21B6", flexShrink: 0 }}>
             <History size={14} />
           </div>
           <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 500, color: t.text }}>
@@ -868,7 +868,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
         {/* Linhas da página atual */}
         {loadingPage ? (
             <div style={{ display: "flex", justifyContent: "center", padding: "32px 0" }}>
-              <Loader2 size={20} className="rd-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />
+              <Loader2 size={20} className="rd-spin" style={{ color: isDark ? AURA.gold : "#5B21B6" }} />
             </div>
         ) : (
             historico.map((item) => {
@@ -884,7 +884,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                     <div className="rd-hist-info">
                       {/* Período */}
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                        <Calendar size={12} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }} />
+                        <Calendar size={12} style={{ color: isDark ? AURA.gold : "#5B21B6", flexShrink: 0 }} />
                         <span className="rd-hist-date">
                 {formatarDataBR(item.inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(item.fim)}
                   </span>
@@ -893,7 +893,7 @@ function AbaHistorico({ isDark, onVerDetalhe }) {
                       <div className="rd-hist-stats">
                         <span className="rd-hist-stat">{item.totalMembros ?? "?"} membros</span>
                         <span className="rd-hist-stat">{item.totalPresencas ?? 0} presenças</span>
-                        <span className="rd-hist-stat" style={{ color: isDark ? AURA.gold : "#B5000F", fontWeight: 700 }}>{item.totalPontos ?? 0} pts</span>
+                        <span className="rd-hist-stat" style={{ color: isDark ? AURA.gold : "#5B21B6", fontWeight: 700 }}>{item.totalPontos ?? 0} pts</span>
                         <span style={{
                           fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 700,
                           letterSpacing: ".12em", textTransform: "uppercase",
@@ -993,7 +993,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div className="rd-card" style={{ padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-            <button onClick={onVoltar} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: isDark ? AURA.gold : "#B5000F", display: "flex", alignItems: "center", flexShrink: 0 }}>
+            <button onClick={onVoltar} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: isDark ? AURA.gold : "#5B21B6", display: "flex", alignItems: "center", flexShrink: 0 }}>
               <ChevronLeft size={20} />
             </button>
             <div style={{ minWidth: 0 }}>
@@ -1038,7 +1038,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                               <div className="rd-member-avatar" style={{ width: 34, height: 34, fontSize: 14 }}>{nome.charAt(0)}</div>
                               <div style={{ minWidth: 0 }}>
                                 <p className="rd-member-name" style={{ fontSize: 14 }}>{nome}</p>
-                                <p className="rd-member-id">{total}/{COLUNAS.length} presenças · <span style={{ color: isDark ? AURA.gold : "#B5000F", fontWeight: 700 }}>{pts} pts</span></p>
+                                <p className="rd-member-id">{total}/{COLUNAS.length} presenças · <span style={{ color: isDark ? AURA.gold : "#5B21B6", fontWeight: 700 }}>{pts} pts</span></p>
                               </div>
                             </div>
                             {COLUNAS.map(({ campo, emoji, justField }) => (
@@ -1047,7 +1047,7 @@ function DetalheHistorico({ item, isDark, onVoltar, onEditar }) {
                             {p[campo] ? "✅" : emoji}
                           </span>
                                   {!p[campo] && p[justField] && (
-                                      <div style={{ fontSize: 8, color: isDark ? AURA.gold : "#B5000F", fontFamily: "'Inter',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(253,184,19,.1)", borderRadius: 99, border: "1px solid rgba(253,184,19,.25)" }}>
+                                      <div style={{ fontSize: 8, color: isDark ? AURA.gold : "#5B21B6", fontFamily: "'Inter',sans-serif", fontWeight: 600, textAlign: "center", lineHeight: 1.3, padding: "2px 5px", background: "rgba(255,224,0,.1)", borderRadius: 99, border: "1px solid rgba(255,224,0,.25)" }}>
                                         {p[justField]}
                                       </div>
                                   )}
@@ -1391,7 +1391,7 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                   </button>
 
                   <div className="rd-week-display">
-                    <Calendar size={14} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }} />
+                    <Calendar size={14} style={{ color: isDark ? AURA.gold : "#5B21B6", flexShrink: 0 }} />
                     <span className="rd-week-label">
                       {formatarDataBR(inicio)} <span className="rd-date-sep">→</span> {formatarDataBR(fim)}
                     </span>
@@ -1406,13 +1406,13 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                     <ChevronRight size={16} />
                   </button>
 
-                  {verificandoExist && <Loader2 size={13} className="rd-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />}
+                  {verificandoExist && <Loader2 size={13} className="rd-spin" style={{ color: isDark ? AURA.gold : "#5B21B6" }} />}
                 </div>
 
                 {/* Banner existente */}
                 {relatorioExistente && !modoEdicao && (
                     <div className="rd-banner rd-banner-warn">
-                      <AlertTriangle size={18} style={{ color: isDark ? AURA.yellow : "#B5000F", flexShrink: 0 }} />
+                      <AlertTriangle size={18} style={{ color: isDark ? AURA.yellow : "#5B21B6", flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
                         <p className="rd-banner-title" style={{ color: AURA.yellowDark }}>Relatório já enviado para esta semana</p>
                         <p className="rd-banner-sub">Um relatório já foi registrado para o período selecionado.</p>
@@ -1441,9 +1441,9 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                 {/* KPIs */}
                 <div className="rd-kpi-grid">
                   {[
-                    { label: "Membros",    val: membros.length,          color: isDark ? AURA.gold : "#B5000F"  },
+                    { label: "Membros",    val: membros.length,          color: isDark ? AURA.gold : "#5B21B6"  },
                     { label: "Presenças",  val: stats.totalGeral,        color: AURA.blue  },
-                    { label: "Pontos",     val: stats.pontosGerais,      color: isDark ? AURA.gold : "#B5000F" },
+                    { label: "Pontos",     val: stats.pontosGerais,      color: isDark ? AURA.gold : "#5B21B6" },
                     { label: "Frequência", val: `${stats.porcentagem}%`, color: stats.porcentagem > 60 ? AURA.gold : AURA.red, highlight: stats.porcentagem > 60 },
                   ].map(({ label, val, color, highlight }) => (
                       <div key={label} className="rd-kpi" style={highlight ? { background: `linear-gradient(135deg,${AURA.blueDark},${AURA.blue})`, border: "none" } : {}}>
@@ -1486,13 +1486,13 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                             : total > 0
                                 ? "linear-gradient(135deg, rgba(217,119,87,.28), rgba(217,119,87,.08))"
                                 : isDark
-                                    ? "linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06))"
-                                    : "linear-gradient(135deg, rgba(227,6,19,.16), rgba(227,6,19,.05))";
+                                    ? "linear-gradient(135deg, rgba(255,224,0,.2), rgba(255,224,0,.06))"
+                                    : "linear-gradient(135deg, rgba(91,33,182,.16), rgba(91,33,182,.05))";
                         const avatarBorder = total === COLUNAS.length
                             ? "rgba(46,213,115,.45)"
                             : total > 0
                                 ? "rgba(217,119,87,.45)"
-                                : isDark ? "rgba(253,184,19,.22)" : "rgba(227,6,19,.34)";
+                                : isDark ? "rgba(255,224,0,.22)" : "rgba(91,33,182,.34)";
                         const nomeGlow = !isDark
                             ? "none"
                             : total === COLUNAS.length
@@ -1510,8 +1510,8 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                                     <p className="rd-member-id">ID #{m.id}</p>
                                   </div>
                                 </div>
-                                <div style={{ padding: "4px 14px", borderRadius: 100, background: total === COLUNAS.length ? `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})` : (isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.08)"), border: `1px solid ${total === COLUNAS.length ? "transparent" : t.border}` }}>
-                            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: total === COLUNAS.length ? "#0A0A0F" : t.textMuted }}>
+                                <div style={{ padding: "4px 14px", borderRadius: 100, background: total === COLUNAS.length ? `linear-gradient(135deg,${AURA.gold},${AURA.goldLight})` : (isDark ? "rgba(255,224,0,.06)" : "rgba(255,224,0,.08)"), border: `1px solid ${total === COLUNAS.length ? "transparent" : t.border}` }}>
+                            <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: total === COLUNAS.length ? "#1E0A42" : t.textMuted }}>
                               {total}/{COLUNAS.length}
                             </span>
                                 </div>
@@ -1533,12 +1533,12 @@ export default function RelatorioDiscipulado({ isDark = false }) {
                                             title={temJust ? `${label} — ${justVal}` : label}
                                             style={{
                                               borderColor: marcado
-                                                  ? "rgba(253,184,19,.5)"
+                                                  ? "rgba(255,224,0,.5)"
                                                   : temJust
                                                       ? `${CORES_JUST[justVal]}66`
                                                       : t.border,
                                               background: marcado
-                                                  ? (isDark ? "rgba(253,184,19,.1)" : "rgba(253,184,19,.07)")
+                                                  ? (isDark ? "rgba(255,224,0,.1)" : "rgba(255,224,0,.07)")
                                                   : temJust
                                                       ? `${CORES_JUST[justVal]}14`
                                                       : "transparent",

@@ -26,8 +26,8 @@ function corEstagio(realizados) {
 const TOTAL_SEMANAS = 4;
 
 const DECISAO_CONFIG = {
-    ACEITOU_JESUS: { label: "Aceitou Jesus", cor: "#5A0B16", bg: "rgba(90,11,22,.08)", borda: "rgba(90,11,22,.3)", icone: "✝️" },
-    RECONCILIOU:   { label: "Reconciliou",   cor: "#FDB813", bg: "rgba(253,184,19,.1)", borda: "rgba(253,184,19,.35)", icone: "🤝" },
+    ACEITOU_JESUS: { label: "Aceitou Jesus", cor: "#4C1D95", bg: "rgba(76,29,149,.08)", borda: "rgba(76,29,149,.3)", icone: "✝️" },
+    RECONCILIOU:   { label: "Reconciliou",   cor: "#FFE000", bg: "rgba(255,224,0,.1)", borda: "rgba(255,224,0,.35)", icone: "🤝" },
     BATISMO_AGUAS: { label: "Deseja Batismo",cor: "#1E7A46", bg: "rgba(30,122,70,.1)", borda: "rgba(30,122,70,.35)", icone: "💧" },
 };
 
@@ -81,7 +81,7 @@ function AuraSquareModal({ open, onClose, title, subtitle, children, footer, t, 
         <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 12, boxSizing: "border-box" }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={onClose}
-                        style={{ position: "fixed", inset: 0, background: "rgba(10,10,15,.82)", backdropFilter: "blur(3px)" }} />
+                        style={{ position: "fixed", inset: 0, background: "rgba(30,10,66,.82)", backdropFilter: "blur(3px)" }} />
             <motion.div initial={{ scale: .96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: .96, opacity: 0 }}
                         transition={{ type: "tween", duration: .18 }}
                         style={{
@@ -311,7 +311,7 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
 
     if (loading) return (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
-            <Loader2 size={16} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} /> Carregando...
+            <Loader2 size={16} className="m70-spin" style={{ color: isDark ? AURA.gold : "#5B21B6" }} /> Carregando...
         </div>
     );
     if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
@@ -319,7 +319,7 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
     return (
         <div>
             <div style={{ position: "relative", marginBottom: 10 }}>
-                <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
+                <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#5B21B6", opacity: .5, pointerEvents: "none" }} />
                 <input className="m70-input" placeholder={placeholder} value={busca} onChange={e => setBusca(e.target.value)}
                        style={{ width: "100%", boxSizing: "border-box", background: t.bgInput, border: `1px solid ${t.borderInput}`, color: t.text, padding: "11px 14px 11px 38px", borderRadius: 12, outline: "none", fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 300 }} />
             </div>
@@ -333,9 +333,9 @@ function PessoaSelector({ items, loading, erro, onSelect, selectedId, placeholde
                         const sel  = selectedId === p.id;
                         return (
                             <div key={p.id} onClick={() => onSelect(p)}
-                                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", cursor: "pointer", background: sel ? "rgba(253,184,19,.1)" : "transparent", borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none", transition: "background .15s" }}>
+                                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", cursor: "pointer", background: sel ? "rgba(255,224,0,.1)" : "transparent", borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none", transition: "background .15s" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(255,224,0,.2),rgba(255,224,0,.06))", border: "1px solid rgba(255,224,0,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#5B21B6" }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div>
@@ -392,9 +392,9 @@ function GlobalStyles({ t, isDark }) {
         }
         .m70-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(253,184,19,.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,224,0,.2), transparent);
         }
-        .m70-card:hover { border-color: rgba(253,184,19,.35); box-shadow: 0 8px 28px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
+        .m70-card:hover { border-color: rgba(255,224,0,.35); box-shadow: 0 8px 28px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
 
         .m70-stat { padding: 18px 20px; }
         .m70-stat-label { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: ${t.textMuted}; margin: 0; }
@@ -406,7 +406,7 @@ function GlobalStyles({ t, isDark }) {
             padding: 11px 22px; border-radius: 100px; border: none; cursor: pointer;
             background: linear-gradient(135deg, ${AURA.redDark}, ${AURA.red}); color: #fff;
             font-family: 'Inter',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .14em;
-            text-transform: uppercase; transition: transform .2s, opacity .2s; box-shadow: 0 6px 20px rgba(200,16,46,.25);
+            text-transform: uppercase; transition: transform .2s, opacity .2s; box-shadow: 0 6px 20px rgba(91,33,182,.25);
             white-space: nowrap;
         }
         .m70-btn-primary:hover:not(:disabled) { transform: translateY(-2px); }
@@ -418,7 +418,7 @@ function GlobalStyles({ t, isDark }) {
             padding: 11px 16px; border-radius: 100px; border: none; cursor: pointer;
             background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue}); color: #fff;
             font-family: 'Inter',sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .1em;
-            text-transform: uppercase; transition: transform .2s, opacity .2s; box-shadow: 0 6px 20px rgba(53,3,9,.35);
+            text-transform: uppercase; transition: transform .2s, opacity .2s; box-shadow: 0 6px 20px rgba(30,10,66,.35);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .m70-btn-blue:hover:not(:disabled) { transform: translateY(-2px); }
@@ -427,9 +427,9 @@ function GlobalStyles({ t, isDark }) {
         .m70-btn-gold {
             display: inline-flex; align-items: center; gap: 7px;
             padding: 9px 18px; border-radius: 100px; border: none; cursor: pointer;
-            background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #0A0A0F;
+            background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight}); color: #1E0A42;
             font-family: 'Inter',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
-            text-transform: uppercase; transition: all .35s; box-shadow: 0 6px 18px rgba(253,184,19,.2);
+            text-transform: uppercase; transition: all .35s; box-shadow: 0 6px 18px rgba(255,224,0,.2);
         }
         .m70-btn-gold:hover:not(:disabled) { transform: translateY(-2px); }
 
@@ -441,7 +441,7 @@ function GlobalStyles({ t, isDark }) {
             text-transform: uppercase; transition: border-color .2s, color .2s;
             white-space: nowrap; min-width: 0;
         }
-        .m70-btn-ghost:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+        .m70-btn-ghost:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
         .m70-btn-sage {
             display: inline-flex; align-items: center; gap: 7px;
@@ -455,11 +455,11 @@ function GlobalStyles({ t, isDark }) {
         .m70-btn-danger {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
             padding: 9px 16px; border-radius: 100px; cursor: pointer; border: none;
-            background: rgba(200,16,46,.1); color: #e8556d; border: 1px solid rgba(200,16,46,.3);
+            background: rgba(91,33,182,.1); color: #e8556d; border: 1px solid rgba(91,33,182,.3);
             font-family: 'Inter',sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .12em;
             text-transform: uppercase; transition: background .2s; white-space: nowrap;
         }
-        .m70-btn-danger:hover { background: rgba(200,16,46,.2); }
+        .m70-btn-danger:hover { background: rgba(91,33,182,.2); }
         .m70-btn-danger:disabled { opacity: .6; cursor: not-allowed; }
 
         .m70-btn-clear {
@@ -469,7 +469,7 @@ function GlobalStyles({ t, isDark }) {
             text-transform: uppercase; cursor: pointer; padding: 8px 14px;
             transition: border-color .2s, color .2s; white-space: nowrap;
         }
-        .m70-btn-clear:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+        .m70-btn-clear:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
         .m70-input {
             width: 100%; box-sizing: border-box;
@@ -478,7 +478,7 @@ function GlobalStyles({ t, isDark }) {
             font-family: 'Inter',sans-serif; font-size: 14px; font-weight: 300; transition: border-color .25s, background .25s, box-shadow .25s;
             -webkit-appearance: none; appearance: none;
         }
-        .m70-input:focus { border-color: rgba(253,184,19,.5); background: rgba(253,184,19,.04); box-shadow: 0 0 0 4px rgba(253,184,19,.12); }
+        .m70-input:focus { border-color: rgba(255,224,0,.5); background: rgba(255,224,0,.04); box-shadow: 0 0 0 4px rgba(255,224,0,.12); }
         .m70-input::placeholder { color: ${t.placeholder}; }
         .m70-input option { background: ${t.optionBg}; color: ${t.text}; }
         .m70-input:disabled { opacity: .45; cursor: not-allowed; }
@@ -489,7 +489,7 @@ function GlobalStyles({ t, isDark }) {
         }
         input[type="date"].m70-input::-webkit-calendar-picker-indicator { filter: ${isDark ? "invert(1) opacity(.4)" : "opacity(.5)"}; cursor: pointer; }
 
-        .m70-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"}; margin: 0 0 6px; display: block; }
+        .m70-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: ${isDark ? AURA.gold : "#5B21B6"}; margin: 0 0 6px; display: block; }
 
         .m70-progress-track { height: 5px; border-radius: 99px; background: ${isDark ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)"}; overflow: hidden; flex: 1; }
 
@@ -502,7 +502,7 @@ function GlobalStyles({ t, isDark }) {
             animation: m70-toast .3s ease forwards; box-shadow: 0 8px 32px rgba(0,0,0,.3);
         }
         .m70-toast.success { background: rgba(30,122,70,.95); color: #fff; border: 1px solid rgba(30,122,70,.5); }
-        .m70-toast.error   { background: rgba(200,16,46,.9);  color: #fff; border: 1px solid rgba(200,16,46,.5); }
+        .m70-toast.error   { background: rgba(91,33,182,.9);  color: #fff; border: 1px solid rgba(91,33,182,.5); }
 
         .m70-tab {
             flex: 1; padding: 9px 0; border-radius: 10px; border: 1px solid transparent; cursor: pointer;
@@ -510,7 +510,7 @@ function GlobalStyles({ t, isDark }) {
             letter-spacing: .1em; text-transform: uppercase; color: ${t.textMuted};
             display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .2s;
         }
-        .m70-tab.active { background: rgba(253,184,19,.12); border-color: rgba(253,184,19,.35); color: ${isDark ? AURA.gold : "#B5000F"}; }
+        .m70-tab.active { background: rgba(255,224,0,.12); border-color: rgba(255,224,0,.35); color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
         /* ── Select de decisão espiritual ──
            OBS: não usar a propriedade shorthand "background" aqui nem inline.
@@ -536,7 +536,7 @@ function GlobalStyles({ t, isDark }) {
             display: flex; flex-direction: column; gap: 10px; min-height: 188px;
             transition: border-color .2s, box-shadow .2s, transform .2s;
         }
-        .m70-mission-card:hover { border-color: rgba(253,184,19,.4); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
+        .m70-mission-card:hover { border-color: rgba(255,224,0,.4); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,${isDark ? ".3" : ".08"}); }
         .m70-mission-card.cancelada { cursor: default; opacity: .68; }
         .m70-mission-card.concluida:hover { border-color: rgba(30,122,70,.5); }
 
@@ -551,7 +551,7 @@ function GlobalStyles({ t, isDark }) {
             display: flex; align-items: center; justify-content: center;
             color: ${t.textMuted}; transition: border-color .15s, color .15s;
         }
-        .m70-mission-icon-btn:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+        .m70-mission-icon-btn:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
         .m70-mission-icon-btn.danger:hover { border-color: ${AURA.red}; color: #e8556d; }
 
         .m70-mission-name {
@@ -1208,8 +1208,8 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
             {/* ── Cabeçalho ── */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#350309,#350309)", border: "1px solid rgba(253,184,19,.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 6px 18px rgba(53,3,9,.35)" }}>
-                        <Flame size={20} color="#FFD34D" />
+                    <div style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#32116B,#32116B)", border: "1px solid rgba(255,224,0,.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 6px 18px rgba(30,10,66,.35)" }}>
+                        <Flame size={20} color="#FFE000" />
                     </div>
                     <div style={{ minWidth: 0 }}>
                         <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 19, fontWeight: 500, color: t.text, margin: 0 }}>Missão 70</h2>
@@ -1224,7 +1224,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                 {[
                     { label: "Total",      value: totalMissoes,    color: t.text,    sub: "missões"      },
                     { label: "Ativas",     value: ativas,          color: AURA.sage, sub: "em andamento" },
-                    { label: "Visitantes", value: totalVisitantes, color: isDark ? AURA.yellow : "#B5000F", sub: "alcançados"   },
+                    { label: "Visitantes", value: totalVisitantes, color: isDark ? AURA.yellow : "#5B21B6", sub: "alcançados"   },
                     { label: "Encontros",  value: totalEncontros,  color: AURA.blueLight, sub: "realizados"   },
                 ].map((s, i) => (
                     <div key={s.label} className="m70-card-anim m70-card m70-stat" style={{ animationDelay: `${i * 0.07}s` }}>
@@ -1250,7 +1250,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         {temFiltro && <button className="m70-btn-clear" onClick={limpar}>✕ Limpar filtros</button>}
                     </div>
                     <div style={{ position: "relative" }}>
-                        <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
+                        <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#5B21B6", opacity: .5, pointerEvents: "none" }} />
                         <input className="m70-input" style={{ paddingLeft: 38 }} placeholder="Buscar por nome ou endereço..." value={busca} onChange={e => setBusca(e.target.value)} />
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10 }} className="m70-filters-grid">
@@ -1272,13 +1272,13 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                 {missoes.length === 0 ? (
                     <div className="m70-card" style={{ textAlign: "center", padding: "56px 24px" }}>
-                        <Flame size={36} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 14 }} />
+                        <Flame size={36} style={{ color: isDark ? AURA.gold : "#5B21B6", marginBottom: 14 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhuma missão cadastrada</p>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 13, fontWeight: 300, color: t.textSec }}>Clique em "Nova Missão" para começar.</p>
                     </div>
                 ) : missoesFiltradas.length === 0 ? (
                     <div className="m70-card" style={{ textAlign: "center", padding: "40px 24px" }}>
-                        <Search size={28} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 12 }} />
+                        <Search size={28} style={{ color: isDark ? AURA.gold : "#5B21B6", marginBottom: 12 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 500, color: t.text, margin: "0 0 6px" }}>Nenhum resultado</p>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec }}>Ajuste os filtros para encontrar uma missão.</p>
                     </div>
@@ -1303,7 +1303,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             onClick={() => { if (!cancelada) abrirModalEncontro(m); else abrirDetalhes(m); }}
                                 >
                                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                                        <div className="m70-mission-icon" style={{ background: cancelada ? "rgba(200,16,46,.12)" : `${corAtual}20` }}>
+                                        <div className="m70-mission-icon" style={{ background: cancelada ? "rgba(91,33,182,.12)" : `${corAtual}20` }}>
                                             {concluida ? "✅" : cancelada ? "🚫" : "🔥"}
                                         </div>
                                         <div className="m70-mission-card-actions">
@@ -1324,7 +1324,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                     </div>
 
                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                                        <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, border: `2px solid ${cancelada ? "rgba(200,16,46,.5)" : corAtual}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, border: `2px solid ${cancelada ? "rgba(91,33,182,.5)" : corAtual}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                             <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: cancelada ? AURA.red : corAtual, lineHeight: 1 }}>{restantes}</span>
                                         </div>
                                         <BadgeStatus status={concluida ? "concluida" : m.status} />
@@ -1393,7 +1393,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                             </div>
                         </div>
 
-                        <div style={{ background: "rgba(253,184,19,.06)", border: "1px solid rgba(253,184,19,.2)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ background: "rgba(255,224,0,.06)", border: "1px solid rgba(255,224,0,.2)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
                             <span style={{ fontSize: 13 }}>ℹ️</span>
                             <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.4 }}>Cada membro só pode ocupar uma função — Líder, Auxiliar ou Membro adicional.</p>
                         </div>
@@ -1427,10 +1427,10 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                 <button className="m70-btn-clear" style={{ marginTop: 6 }} onClick={() => setFCriar(f => ({ ...f, terceiroMembroId: null }))}>✕ Limpar</button>
                             )}
                         </div>
-                        <div style={{ background: "rgba(253,184,19,.07)", border: "1px solid rgba(253,184,19,.2)", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
-                            <span style={{ fontSize: 16, flexShrink: 0, color: isDark ? AURA.gold : "#B5000F" }}>✦</span>
+                        <div style={{ background: "rgba(255,224,0,.07)", border: "1px solid rgba(255,224,0,.2)", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                            <span style={{ fontSize: 16, flexShrink: 0, color: isDark ? AURA.gold : "#5B21B6" }}>✦</span>
                             <div>
-                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: isDark ? AURA.yellow : "#B5000F", margin: "0 0 4px" }}>O que é a Missão 70?</p>
+                                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: isDark ? AURA.yellow : "#5B21B6", margin: "0 0 4px" }}>O que é a Missão 70?</p>
                                 <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.5 }}>
                                     São <strong style={{ color: t.text, fontWeight: 500 }}>4 encontros semanais</strong> de evangelismo na casa do anfitrião, para alcançar visitantes e registrar decisões de fé.
                                 </p>
@@ -1448,7 +1448,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 12, boxSizing: "border-box" }}>
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                         onClick={() => setModalEncontro(false)}
-                                        style={{ position: "fixed", inset: 0, background: "rgba(10,10,15,.82)", backdropFilter: "blur(3px)" }} />
+                                        style={{ position: "fixed", inset: 0, background: "rgba(30,10,66,.82)", backdropFilter: "blur(3px)" }} />
                             <motion.div initial={{ scale: .96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: .96, opacity: 0 }}
                                         transition={{ type: "tween", duration: .18 }}
                                         style={{
@@ -1514,7 +1514,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                     border: `1px dashed ${t.borderInput}`, background: t.bgInput,
                                                     display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                                                     fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500,
-                                                    color: isDark ? AURA.gold : "#B5000F",
+                                                    color: isDark ? AURA.gold : "#5B21B6",
                                                 }}>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -1544,7 +1544,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                             ? historicoDecisoes[vid]
                                                             : (v.decisaoEspiritual ?? null);
                                                         return (
-                                                            <div key={vid} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 10px", borderRadius: 10, background: isDark ? "rgba(253,184,19,.03)" : "rgba(253,184,19,.03)", border: `1px solid ${t.border}` }}>
+                                                            <div key={vid} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 10px", borderRadius: 10, background: isDark ? "rgba(255,224,0,.03)" : "rgba(255,224,0,.03)", border: `1px solid ${t.border}` }}>
                                                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
                                                                     <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 400, color: t.text, flex: 1, minWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
                                                                         {nome}
@@ -1577,7 +1577,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             <div style={{
                                                 display: "flex", alignItems: "center", gap: 10,
                                                 padding: "10px 12px", borderRadius: 10,
-                                                background: "rgba(200,16,46,.06)", border: "1px solid rgba(200,16,46,.25)",
+                                                background: "rgba(91,33,182,.06)", border: "1px solid rgba(91,33,182,.25)",
                                             }}>
                                                 <input
                                                     type="checkbox"
@@ -1599,7 +1599,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                     <div style={{ padding: "14px 20px", display: "flex", flexDirection: "column", gap: 10, overflowY: "auto", flex: 1, WebkitOverflowScrolling: "touch" }}>
                                         {historicoLoading && (
                                             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300 }}>
-                                                <Loader2 size={16} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} /> Carregando histórico...
+                                                <Loader2 size={16} className="m70-spin" style={{ color: isDark ? AURA.gold : "#5B21B6" }} /> Carregando histórico...
                                             </div>
                                         )}
                                         {!historicoLoading && historicoErro && (
@@ -1619,20 +1619,20 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             const listaDecisoesEnc = enc.decisoes ?? [];
 
                                             return (
-                                                <div key={enc.id ?? idx} style={{ border: `1px solid ${editando ? "rgba(253,184,19,.4)" : t.border}`, borderRadius: 12, padding: "12px 14px", background: editando ? "rgba(253,184,19,.05)" : "transparent" }}>
+                                                <div key={enc.id ?? idx} style={{ border: `1px solid ${editando ? "rgba(255,224,0,.4)" : t.border}`, borderRadius: 12, padding: "12px 14px", background: editando ? "rgba(255,224,0,.05)" : "transparent" }}>
                                                     {!editando ? (
                                                         <>
                                                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                                                                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                                                                    <div style={{ width: 26, height: 26, borderRadius: 8, flexShrink: 0, background: "rgba(253,184,19,.14)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: isDark ? AURA.gold : "#B5000F" }}>{idx + 1}</div>
+                                                                    <div style={{ width: 26, height: 26, borderRadius: 8, flexShrink: 0, background: "rgba(255,224,0,.14)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: isDark ? AURA.gold : "#5B21B6" }}>{idx + 1}</div>
                                                                     <div style={{ minWidth: 0 }}>
                                                                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: t.text, margin: 0 }}>{dataFmt ? new Date(dataFmt + "T00:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p>
                                                                         {enc.horaEncontro && <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0 }}>{enc.horaEncontro}</p>}
                                                                     </div>
                                                                 </div>
                                                                 <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                                                                    <button onClick={() => iniciarEdicaoEncontro(enc)} title="Editar" style={{ background: "rgba(253,184,19,.12)", border: "1px solid rgba(253,184,19,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: isDark ? "#FDB813" : "#8A5A00" }}><Pencil size={13} /></button>
-                                                                    <button onClick={() => excluirEncontro(enc.id)} title="Excluir" style={{ background: "rgba(200,16,46,.1)", border: "1px solid rgba(200,16,46,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#e8556d" }}><Trash2 size={13} /></button>
+                                                                    <button onClick={() => iniciarEdicaoEncontro(enc)} title="Editar" style={{ background: "rgba(255,224,0,.12)", border: "1px solid rgba(255,224,0,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: isDark ? "#FFE000" : "#F3B53F" }}><Pencil size={13} /></button>
+                                                                    <button onClick={() => excluirEncontro(enc.id)} title="Excluir" style={{ background: "rgba(91,33,182,.1)", border: "1px solid rgba(91,33,182,.3)", borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#e8556d" }}><Trash2 size={13} /></button>
                                                                 </div>
                                                             </div>
                                                             {enc.observacoes && <p style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, fontWeight: 300, color: t.textSec, margin: "8px 0 0" }}>{enc.observacoes}</p>}
@@ -1651,8 +1651,8 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                             const decisao = decisaoObj?.tipoDecisao ?? decisaoObj?.decisaoEspiritual ?? objeto?.decisaoEspiritual ?? null;
                                                                             return (
                                                                                 <div key={vid ?? vidx} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                                                                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(253,184,19,.08)", border: "1px solid rgba(253,184,19,.22)", borderRadius: 99, padding: "4px 10px", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 400, color: t.text }}>
-                                                                                    <span style={{ color: isDark ? AURA.gold : "#B5000F" }}>✦</span>{nome}
+                                                                                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,224,0,.08)", border: "1px solid rgba(255,224,0,.22)", borderRadius: 99, padding: "4px 10px", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 400, color: t.text }}>
+                                                                                    <span style={{ color: isDark ? AURA.gold : "#5B21B6" }}>✦</span>{nome}
                                                                                 </span>
                                                                                     {decisao && decisao !== "NENHUMA" && (
                                                                                         <div style={{ paddingLeft: 4 }}>
@@ -1680,13 +1680,13 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                     Presença ({fEditEnc.visitantesPresentesIds.size} de {visitantesHook.visitantes.length})
                                                                 </p>
                                                                 <div style={{ position: "relative" }}>
-                                                                    <Search size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
+                                                                    <Search size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#5B21B6", opacity: .5, pointerEvents: "none" }} />
                                                                     <input className="m70-input" placeholder="Buscar visitante..." value={editBuscaVisitante} onChange={e => setEditBuscaVisitante(e.target.value)} style={{ paddingLeft: 28, padding: "7px 10px 7px 28px", fontSize: 12 }} />
                                                                 </div>
 
                                                                 {visitantesHook.loading && (
                                                                     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300 }}>
-                                                                        <Loader2 size={14} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} /> Carregando visitantes...
+                                                                        <Loader2 size={14} className="m70-spin" style={{ color: isDark ? AURA.gold : "#5B21B6" }} /> Carregando visitantes...
                                                                     </div>
                                                                 )}
 
@@ -1702,7 +1702,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                                          style={{
                                                                                              display: "flex", alignItems: "center", gap: 8,
                                                                                              padding: "8px 10px", flexWrap: "wrap",
-                                                                                             background: sel ? "rgba(253,184,19,.08)" : "transparent",
+                                                                                             background: sel ? "rgba(255,224,0,.08)" : "transparent",
                                                                                              borderBottom: vi < arr.length - 1 ? `1px solid ${t.border}` : "none",
                                                                                          }}>
                                                                                         <div onClick={() => toggleEditPresente(v.id)} style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0, cursor: "pointer" }}>
@@ -1735,7 +1735,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                                 <BotaoCarregavel
                                                                     loading={submitting}
                                                                     onClick={salvarEdicaoEncontro}
-                                                                    style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#350309,#5A0B16)", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                                                                    style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#32116B,#4C1D95)", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
                                                                 >
                                                                     Salvar
                                                                 </BotaoCarregavel>
@@ -1770,7 +1770,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                         onClick={() => { setModalEncontro(false); abrirModalCancelar(targetId, targetNome); }}
                                         style={{
                                             width: "100%", padding: "8px 0", borderRadius: 10, cursor: "pointer",
-                                            border: "1px solid rgba(200,16,46,.3)", background: "rgba(200,16,46,.06)",
+                                            border: "1px solid rgba(91,33,182,.3)", background: "rgba(91,33,182,.06)",
                                             display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                                             fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: ".1em",
                                             textTransform: "uppercase", color: "#e8556d",
@@ -1871,7 +1871,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
 
                             {m.nomeAnfitriao && (
                                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-<div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,#350309,#350309)", border: "1px solid rgba(253,184,19,.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 12, color: "#FFD34D" }}>
+<div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,#32116B,#32116B)", border: "1px solid rgba(255,224,0,.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 12, color: "#FFE000" }}>
                                     {m.nomeAnfitriao.charAt(0).toUpperCase()}
                                 </div>
                                     <div style={{ minWidth: 0 }}>
@@ -1881,7 +1881,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                     </div>
                                 </div>
                             )}
-                            <PessoaBloco label="Líder"    nome={m.liderNome}    cor="#5A0B16"   t={t} />
+                            <PessoaBloco label="Líder"    nome={m.liderNome}    cor="#4C1D95"   t={t} />
                             <PessoaBloco label="Auxiliar" nome={m.auxiliarNome} cor={AURA.gold} t={t} />
 
                             <div>
@@ -1895,8 +1895,8 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                             const salvando = decisaoSalvandoId === v.id;
                                             return (
                                                 <div key={v.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                                    <div style={{ background: "rgba(253,184,19,.08)", border: "1px solid rgba(253,184,19,.22)", borderRadius: 99, padding: "5px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.text, display: "flex", alignItems: "center", gap: 6 }}>
-                                                        <span style={{ color: isDark ? AURA.gold : "#B5000F" }}>✦</span><span>{v.nome ?? `#${v.id}`}</span>
+                                                    <div style={{ background: "rgba(255,224,0,.08)", border: "1px solid rgba(255,224,0,.22)", borderRadius: 99, padding: "5px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.text, display: "flex", alignItems: "center", gap: 6 }}>
+                                                        <span style={{ color: isDark ? AURA.gold : "#5B21B6" }}>✦</span><span>{v.nome ?? `#${v.id}`}</span>
                                                     </div>
                                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                                         <DecisaoSelect
@@ -1905,7 +1905,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                                                             disabled={salvando}
                                                             onChange={e => alterarDecisaoVisitante(m.id, v.id, e.target.value)}
                                                         />
-                                                        {salvando && <Loader2 size={12} className="m70-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />}
+                                                        {salvando && <Loader2 size={12} className="m70-spin" style={{ color: isDark ? AURA.gold : "#5B21B6" }} />}
                                                     </div>
                                                 </div>
                                             );
@@ -1929,7 +1929,7 @@ export default function Missao70Lider({ celulaId, isDark = true }) {
                         <div style={{ position: "fixed", inset: 0, zIndex: 1050, display: "flex", alignItems: "center", justifyContent: "center", padding: 12, boxSizing: "border-box" }}>
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                         onClick={() => setModalPickVisitantes(false)}
-                                        style={{ position: "fixed", inset: 0, background: "rgba(10,10,15,.82)", backdropFilter: "blur(3px)" }} />
+                                        style={{ position: "fixed", inset: 0, background: "rgba(30,10,66,.82)", backdropFilter: "blur(3px)" }} />
                             <motion.div initial={{ scale: .96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: .96, opacity: 0 }}
                                         transition={{ type: "tween", duration: .18 }}
                                         style={{

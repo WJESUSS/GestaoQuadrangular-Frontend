@@ -13,11 +13,11 @@ const TOTAL_ENCONTROS = 7;
 const DECISAO_CONFIG = {
     ACEITOU_JESUS: {
         label: "Aceitou Jesus",
-        cor: "#5A0B16", bg: "rgba(90,11,22,.08)", borda: "rgba(90,11,22,.3)", icone: "✝️",
+        cor: "#4C1D95", bg: "rgba(76,29,149,.08)", borda: "rgba(76,29,149,.3)", icone: "✝️",
     },
     RECONCILIOU: {
         label: "Reconciliou",
-        cor: "#FDB813", bg: "rgba(253,184,19,.1)", borda: "rgba(253,184,19,.35)", icone: "🤝",
+        cor: "#FFE000", bg: "rgba(255,224,0,.1)", borda: "rgba(255,224,0,.35)", icone: "🤝",
     },
     BATISMO_AGUAS: {
         label: "Deseja Batismo",
@@ -73,10 +73,10 @@ function BadgeStatus({ status, isDark }) {
     if (s === "em_andamento" || s.includes("andamento") || s.includes("ativ"))
         return <span style={{ ...base, color: "#1E7A46", border: "1px solid rgba(30,122,70,.35)", background: "rgba(30,122,70,.1)" }}>● Ativa</span>;
     if (s.includes("cancel"))
-        return <span style={{ ...base, color: "#E8294A", border: "1px solid rgba(200,16,46,.35)", background: "rgba(200,16,46,.1)" }}>● Cancelada</span>;
+        return <span style={{ ...base, color: "#E8294A", border: "1px solid rgba(91,33,182,.35)", background: "rgba(91,33,182,.1)" }}>● Cancelada</span>;
     if (s.includes("conclu"))
         return <span style={{ ...base, color: "#1E7A46", border: "1px solid rgba(30,122,70,.35)", background: "rgba(30,122,70,.1)" }}>★ Concluída</span>;
-    return <span style={{ ...base, color: isDark ? AURA.gold : "#B5000F", border: "1px solid rgba(253,184,19,.3)", background: "rgba(253,184,19,.08)" }}>○ Pendente</span>;
+    return <span style={{ ...base, color: isDark ? AURA.gold : "#5B21B6", border: "1px solid rgba(255,224,0,.3)", background: "rgba(255,224,0,.08)" }}>○ Pendente</span>;
 }
 
 /* ─── Modal AURA ──────────────────────────────────────────────────────── */
@@ -87,7 +87,7 @@ function AuraModal({ open, onClose, title, children, t }) {
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={onClose}
-                style={{ position: "fixed", inset: 0, background: "rgba(10,10,15,.88)", backdropFilter: "blur(4px)", zIndex: 0 }}
+                style={{ position: "fixed", inset: 0, background: "rgba(30,10,66,.88)", backdropFilter: "blur(4px)", zIndex: 0 }}
             />
             <motion.div
                 initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
@@ -102,7 +102,7 @@ function AuraModal({ open, onClose, title, children, t }) {
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${AURA.gold}, transparent)`, opacity: .3 }} />
                 <div style={{ padding: "22px 24px 0", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6, flexShrink: 0 }}>
                     <div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(253,184,19,.55)", margin: "0 0 3px" }}>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,224,0,.55)", margin: "0 0 3px" }}>
                             Casas de Paz
                         </p>
                         <h3 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>{title}</h3>
@@ -192,7 +192,7 @@ function MembroSelector({ items, loading, erro, onSelect, selectedId, placeholde
 
     if (loading) return (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13 }}>
-            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: isDark ? AURA.gold : "#B5000F" }} /> Carregando...
+            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: isDark ? AURA.gold : "#5B21B6" }} /> Carregando...
         </div>
     );
     if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
@@ -200,7 +200,7 @@ function MembroSelector({ items, loading, erro, onSelect, selectedId, placeholde
     return (
         <div>
             <div style={{ position: "relative", marginBottom: 10 }}>
-                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
+                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#5B21B6", opacity: .5, pointerEvents: "none" }} />
                 <input style={inputStyle} placeholder={placeholder} value={busca} onChange={e => setBusca(e.target.value)} />
             </div>
             <div style={{ maxHeight: 220, overflowY: "auto", border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden" }}>
@@ -216,13 +216,13 @@ function MembroSelector({ items, loading, erro, onSelect, selectedId, placeholde
                                  style={{
                                      display: "flex", alignItems: "center", justifyContent: "space-between",
                                      padding: "11px 14px", cursor: "pointer",
-                                     background: sel ? (isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.08)") : "transparent",
+                                     background: sel ? (isDark ? "rgba(255,224,0,.12)" : "rgba(255,224,0,.08)") : "transparent",
                                      borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none",
                                      transition: "background .15s",
                                  }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: "linear-gradient(135deg,rgba(255,224,0,.2),rgba(255,224,0,.06))", border: "1px solid rgba(255,224,0,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#5B21B6" }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div>
@@ -261,7 +261,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
 
     if (loading) return (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 0", color: t.textSec, fontFamily: "'Inter',sans-serif", fontSize: 13 }}>
-            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: isDark ? AURA.gold : "#B5000F" }} /> Carregando...
+            <Loader2 size={16} style={{ animation: "dl-spin 1s linear infinite", color: isDark ? AURA.gold : "#5B21B6" }} /> Carregando...
         </div>
     );
     if (erro) return <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: AURA.red, padding: "12px 0" }}>{erro}</p>;
@@ -280,9 +280,9 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 style={{
                                     display: "inline-flex", alignItems: "center", gap: 6,
                                     padding: "4px 10px 4px 12px", borderRadius: 99, cursor: "pointer",
-                                    background: "linear-gradient(135deg,rgba(253,184,19,.18),rgba(253,184,19,.08))",
-                                    border: "1px solid rgba(253,184,19,.35)",
-                                    fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: isDark ? AURA.gold : "#B5000F",
+                                    background: "linear-gradient(135deg,rgba(255,224,0,.18),rgba(255,224,0,.08))",
+                                    border: "1px solid rgba(255,224,0,.35)",
+                                    fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: isDark ? AURA.gold : "#5B21B6",
                                     transition: "all .15s",
                                 }}
                             >
@@ -295,7 +295,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
             )}
 
             <div style={{ position: "relative", marginBottom: 10 }}>
-                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
+                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#5B21B6", opacity: .5, pointerEvents: "none" }} />
                 <input style={inputStyle} placeholder="Pesquisar visitante da célula..." value={busca} onChange={e => setBusca(e.target.value)} />
             </div>
 
@@ -314,7 +314,7 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 style={{
                                     display: "flex", alignItems: "center", gap: 12,
                                     padding: "11px 14px", cursor: "pointer",
-                                    background: sel ? (isDark ? "rgba(253,184,19,.1)" : "rgba(253,184,19,.07)") : "transparent",
+                                    background: sel ? (isDark ? "rgba(255,224,0,.1)" : "rgba(255,224,0,.07)") : "transparent",
                                     borderBottom: i < filtrados.length - 1 ? `1px solid ${t.border}` : "none",
                                     transition: "background .15s",
                                 }}
@@ -322,16 +322,16 @@ function VisitanteMultiSelector({ items, loading, erro, selecionados, onToggle, 
                                 {/* Checkbox visual */}
                                 <div style={{
                                     width: 18, height: 18, borderRadius: 5, flexShrink: 0,
-                                    border: `1.5px solid ${sel ? AURA.gold : (isDark ? "rgba(253,184,19,.3)" : "rgba(253,184,19,.4)")}`,
+                                    border: `1.5px solid ${sel ? AURA.gold : (isDark ? "rgba(255,224,0,.3)" : "rgba(255,224,0,.4)")}`,
                                     background: sel ? AURA.gold : "transparent",
                                     display: "flex", alignItems: "center", justifyContent: "center",
                                     transition: "all .15s",
                                 }}>
-                                    {sel && <CheckCircle2 size={11} color="#0A0A0F" strokeWidth={3} />}
+                                    {sel && <CheckCircle2 size={11} color="#1E0A42" strokeWidth={3} />}
                                 </div>
 
                                 <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? "linear-gradient(135deg,rgba(253,184,19,.3),rgba(253,184,19,.1))" : "linear-gradient(135deg,rgba(253,184,19,.15),rgba(253,184,19,.05))", border: `1px solid ${sel ? "rgba(253,184,19,.4)" : "rgba(253,184,19,.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: sel ? "linear-gradient(135deg,rgba(255,224,0,.3),rgba(255,224,0,.1))" : "linear-gradient(135deg,rgba(255,224,0,.15),rgba(255,224,0,.05))", border: `1px solid ${sel ? "rgba(255,224,0,.4)" : "rgba(255,224,0,.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#5B21B6" }}>
                                         {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                     </div>
                                     <div style={{ minWidth: 0 }}>
@@ -396,7 +396,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
     const labelStyle = {
         fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600,
         letterSpacing: ".18em", textTransform: "uppercase",
-        color: "rgba(253,184,19,.55)", margin: "0 0 6px", display: "block",
+        color: "rgba(255,224,0,.55)", margin: "0 0 6px", display: "block",
     };
 
     /* ── CSS global ────────────────────────────────────────────────────── */
@@ -409,7 +409,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
     @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
     .cp-fade-up { animation: fadeUp .4s ease both; }
     .cp-casa-card { transition: border-color .25s, box-shadow .25s; }
-    .cp-casa-card:hover { border-color: ${t.cardHover} !important; box-shadow: 0 8px 32px rgba(253,184,19,.08); }
+    .cp-casa-card:hover { border-color: ${t.cardHover} !important; box-shadow: 0 8px 32px rgba(255,224,0,.08); }
     .cp-btn-primary {
       background: linear-gradient(135deg, ${AURA.blueDark}, ${AURA.blue});
       color: #fff; border: none; border-radius: 100px;
@@ -417,7 +417,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
       letter-spacing: .14em; text-transform: uppercase; cursor: pointer;
       padding: 11px 22px; transition: all .3s;
       display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 6px 20px rgba(53,3,9,.3);
+      box-shadow: 0 6px 20px rgba(30,10,66,.3);
     }
     .cp-btn-primary:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
     .cp-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
@@ -429,17 +429,17 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
       padding: 11px 18px; transition: all .3s;
       display: inline-flex; align-items: center; gap: 7px;
     }
-    .cp-btn-ghost:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .cp-btn-ghost:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .cp-btn-gold {
       background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-      color: #0A0A0F; border: none; border-radius: 100px;
+      color: #1E0A42; border: none; border-radius: 100px;
       font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
       letter-spacing: .14em; text-transform: uppercase; cursor: pointer;
       padding: 10px 18px; transition: all .3s;
       display: inline-flex; align-items: center; gap: 7px;
-      box-shadow: 0 6px 20px rgba(253,184,19,.2);
+      box-shadow: 0 6px 20px rgba(255,224,0,.2);
     }
-    .cp-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(253,184,19,.3); }
+    .cp-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,224,0,.3); }
     .cp-btn-gold:disabled { opacity: .5; cursor: not-allowed; }
     .cp-btn-sage {
       background: rgba(30,122,70,.1); color: #1E7A46;
@@ -451,15 +451,15 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
     }
     .cp-btn-sage:hover { background: rgba(30,122,70,.2); }
     .cp-btn-danger {
-      background: rgba(200,16,46,.08); color: #E8294A;
-      border: 1px solid rgba(200,16,46,.3); border-radius: 100px;
+      background: rgba(91,33,182,.08); color: #E8294A;
+      border: 1px solid rgba(91,33,182,.3); border-radius: 100px;
       font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
       letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
       padding: 9px 16px; transition: all .2s;
       display: inline-flex; align-items: center; gap: 6px;
     }
-    .cp-btn-danger:hover { background: rgba(200,16,46,.16); }
-    .cp-input:focus { border-color: rgba(253,184,19,.5) !important; box-shadow: 0 0 0 4px rgba(253,184,19,.12) !important; }
+    .cp-btn-danger:hover { background: rgba(91,33,182,.16); }
+    .cp-input:focus { border-color: rgba(255,224,0,.5) !important; box-shadow: 0 0 0 4px rgba(255,224,0,.12) !important; }
     .cp-input::placeholder { color: ${t.placeholder}; }
     input[type="date"].cp-input::-webkit-calendar-picker-indicator { filter: ${isDark ? "invert(1) opacity(0.4)" : "opacity(0.5)"}; cursor: pointer; }
     .cp-toast {
@@ -471,7 +471,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
       animation: toastIn .3s ease forwards; box-shadow: 0 8px 32px rgba(0,0,0,.3);
     }
     .cp-toast.success { background: rgba(30,122,70,.95); color: #fff; border: 1px solid rgba(30,122,70,.5); }
-    .cp-toast.error   { background: rgba(200,16,46,.9);  color: #fff; border: 1px solid rgba(200,16,46,.5); }
+    .cp-toast.error   { background: rgba(91,33,182,.9);  color: #fff; border: 1px solid rgba(91,33,182,.5); }
     @media(min-width:500px){ .cp-stats-grid { grid-template-columns: repeat(4,1fr) !important; } }
   `;
 
@@ -687,11 +687,11 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
             {/* ── Header ─────────────────────────────────────────────────── */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#350309,#350309)", border: "1px solid rgba(253,184,19,.35)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(53,3,9,.35)" }}>
-                        <Home size={20} color="#FFD34D" />
+                    <div style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#32116B,#32116B)", border: "1px solid rgba(255,224,0,.35)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(30,10,66,.35)" }}>
+                        <Home size={20} color="#FFE000" />
                     </div>
                     <div>
-                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(253,184,19,.55)", margin: "0 0 2px" }}>
+                        <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,224,0,.55)", margin: "0 0 2px" }}>
                             Evangelismo
                         </p>
                         <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: 18, fontWeight: 500, color: t.text, margin: 0 }}>
@@ -711,8 +711,8 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                 {[
                     { label: "Total",      value: totalCasas,      color: t.text,      sub: "casas"       },
                     { label: "Ativas",     value: casasAtivas,     color: "#1E7A46",   sub: "funcionando" },
-                    { label: "Visitantes", value: totalVisitantes, color: isDark ? AURA.yellow : "#B5000F", sub: "cadastrados" },
-                    { label: "Encontros",  value: totalEncontros,  color: isDark ? AURA.gold : "#B5000F",   sub: "realizados"  },
+                    { label: "Visitantes", value: totalVisitantes, color: isDark ? AURA.yellow : "#5B21B6", sub: "cadastrados" },
+                    { label: "Encontros",  value: totalEncontros,  color: isDark ? AURA.gold : "#5B21B6",   sub: "realizados"  },
                 ].map((s, i) => (
                     <div key={s.label} className="cp-fade-up" style={{
                         background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 16,
@@ -740,7 +740,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                     )}
                 </div>
                 <div style={{ position: "relative" }}>
-                    <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#B5000F", opacity: .5, pointerEvents: "none" }} />
+                    <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: isDark ? AURA.gold : "#5B21B6", opacity: .5, pointerEvents: "none" }} />
                     <input className="cp-input" style={{ ...inputStyle, paddingLeft: 42 }} placeholder="Buscar por nome ou endereço..." value={busca} onChange={e => setBusca(e.target.value)} />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -769,13 +769,13 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
 
                 {casas.length === 0 ? (
                     <div style={{ background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 16, textAlign: "center", padding: "56px 24px" }}>
-                        <Home size={36} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 14 }} />
+                        <Home size={36} style={{ color: isDark ? AURA.gold : "#5B21B6", marginBottom: 14 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 16, color: t.textSec, margin: "0 0 6px" }}>Nenhuma casa cadastrada</p>
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: t.textMuted, fontStyle: "italic" }}>Clique em "Nova Casa" para começar.</p>
                     </div>
                 ) : casasFiltradas.length === 0 ? (
                     <div style={{ background: t.bgEl, border: `1px solid ${t.border}`, borderRadius: 16, textAlign: "center", padding: "40px 24px" }}>
-                        <Search size={28} style={{ color: isDark ? AURA.gold : "#B5000F", marginBottom: 12 }} />
+                        <Search size={28} style={{ color: isDark ? AURA.gold : "#5B21B6", marginBottom: 12 }} />
                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: t.textMuted }}>Ajuste os filtros para encontrar uma casa.</p>
                     </div>
                 ) : casasFiltradas.map((c, i) => {
@@ -812,7 +812,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                         <motion.div key={c.id} className="cp-casa-card"
                                     style={{
                                         background: t.bgEl,
-                                        border: `1px solid ${concluida ? "rgba(30,122,70,.4)" : isOpen ? "rgba(253,184,19,.3)" : t.border}`,
+                                        border: `1px solid ${concluida ? "rgba(30,122,70,.4)" : isOpen ? "rgba(255,224,0,.3)" : t.border}`,
                                         borderRadius: 16, marginBottom: 10, overflow: "hidden",
                                         backdropFilter: "blur(24px)", position: "relative",
                                     }}
@@ -827,7 +827,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", cursor: "pointer", gap: 12, flexWrap: "wrap" }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                                    <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: concluida ? "rgba(30,122,70,.12)" : "linear-gradient(135deg,#350309,#350309)", border: `1px solid ${concluida ? "rgba(30,122,70,.35)" : "rgba(253,184,19,.3)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+                                    <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: concluida ? "rgba(30,122,70,.12)" : "linear-gradient(135deg,#32116B,#32116B)", border: `1px solid ${concluida ? "rgba(30,122,70,.35)" : "rgba(255,224,0,.3)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
                                         {concluida ? "🏆" : "🏠"}
                                     </div>
                                     <div>
@@ -836,7 +836,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                     </div>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                                    <div style={{ textAlign: "center", width: 44, height: 44, borderRadius: "50%", border: `2px solid ${concluida ? "#1E7A46" : "rgba(253,184,19,.3)"}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                    <div style={{ textAlign: "center", width: 44, height: 44, borderRadius: "50%", border: `2px solid ${concluida ? "#1E7A46" : "rgba(255,224,0,.3)"}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                                         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 15, fontWeight: 600, color: concluida ? "#1E7A46" : t.text, lineHeight: 1 }}>{restantes}</span>
                                         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, color: t.textMuted, lineHeight: 1, marginTop: 2, fontWeight: 500 }}>REST.</span>
                                     </div>
@@ -893,7 +893,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                                                     {[{ label: "Líder", nome: c.liderNome }, { label: "Auxiliar", nome: c.auxiliarNome }].map(({ label, nome }) => nome ? (
                                                         <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                                            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,rgba(253,184,19,.2),rgba(253,184,19,.06))", border: "1px solid rgba(253,184,19,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#B5000F" }}>
+                                                            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: "linear-gradient(135deg,rgba(255,224,0,.2),rgba(255,224,0,.06))", border: "1px solid rgba(255,224,0,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, color: isDark ? AURA.gold : "#5B21B6" }}>
                                                                 {nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
                                                             </div>
                                                             <div>
@@ -919,7 +919,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                             const nome = v.nome ?? v.nomeCompleto ?? v.name ?? `#${v.id}`;
                                                             return (
                                                                 <div key={vi} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                                                    <div style={{ background: cfg ? `${cfg.cor}12` : (isDark ? "rgba(253,184,19,.06)" : "rgba(253,184,19,.08)"), border: `1px solid ${cfg ? cfg.cor + "35" : "rgba(253,184,19,.18)"}`, borderRadius: 99, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: cfg ? cfg.cor : t.text, display: "flex", alignItems: "center", gap: 6 }}>
+                                                                    <div style={{ background: cfg ? `${cfg.cor}12` : (isDark ? "rgba(255,224,0,.06)" : "rgba(255,224,0,.08)"), border: `1px solid ${cfg ? cfg.cor + "35" : "rgba(255,224,0,.18)"}`, borderRadius: 99, padding: "5px 14px", fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 300, color: cfg ? cfg.cor : t.text, display: "flex", alignItems: "center", gap: 6 }}>
                                                                         <span>{cfg ? cfg.icone : "👤"}</span>
                                                                         <span style={{ fontWeight: cfg ? 500 : 300 }}>{nome}</span>
                                                                     </div>
@@ -949,14 +949,14 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                                 return (
                                                                     <div key={ei} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "10px 0", borderBottom: !isLast ? `1px solid ${t.border}` : "none" }}>
                                                                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, paddingTop: 4 }}>
-                                                                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: ei === 0 ? AURA.gold : (isDark ? "rgba(253,184,19,.3)" : "rgba(253,184,19,.4)"), border: `1.5px solid ${AURA.gold}` }} />
-                                                                            {!isLast && <div style={{ width: 1, minHeight: 24, background: isDark ? "rgba(253,184,19,.12)" : "rgba(253,184,19,.2)", marginTop: 4 }} />}
+                                                                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: ei === 0 ? AURA.gold : (isDark ? "rgba(255,224,0,.3)" : "rgba(255,224,0,.4)"), border: `1.5px solid ${AURA.gold}` }} />
+                                                                            {!isLast && <div style={{ width: 1, minHeight: 24, background: isDark ? "rgba(255,224,0,.12)" : "rgba(255,224,0,.2)", marginTop: 4 }} />}
                                                                         </div>
                                                                         <div style={{ flex: 1 }}>
                                                                             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                                                                                 <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: t.text, margin: 0 }}>Encontro {num}</p>
                                                                                 {ei === 0 && (
-                                                                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", background: "rgba(253,184,19,.12)", color: isDark ? AURA.gold : "#B5000F", border: "1px solid rgba(253,184,19,.25)", borderRadius: 99, padding: "2px 8px" }}>
+                                                                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 8, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", background: "rgba(255,224,0,.12)", color: isDark ? AURA.gold : "#5B21B6", border: "1px solid rgba(255,224,0,.25)", borderRadius: 99, padding: "2px 8px" }}>
                                             Mais recente
                                           </span>
                                                                                 )}
@@ -980,7 +980,7 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                                                     </p>
                                                 )}
                                                 {restantes > 0 && !cancelada && (
-                                                    <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: isDark ? "rgba(253,184,19,.04)" : "rgba(253,184,19,.06)", border: "1px dashed rgba(253,184,19,.2)" }}>
+                                                    <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: isDark ? "rgba(255,224,0,.04)" : "rgba(255,224,0,.06)", border: "1px dashed rgba(255,224,0,.2)" }}>
                                                         <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 300, color: t.textMuted, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
                                                             <Calendar size={12} />
                                                             {restantes === 1 ? "Falta 1 encontro para concluir esta casa." : `Faltam ${restantes} encontros para concluir esta casa.`}
@@ -1025,10 +1025,10 @@ export default function CasasDePazLider({ celulaId, isDark = true }) {
                             </div>
 
                             {/* Aviso — decisões espirituais bloqueadas aqui */}
-                            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px", borderRadius: 12, background: isDark ? "rgba(253,184,19,.05)" : "rgba(253,184,19,.06)", border: "1px solid rgba(253,184,19,.2)" }}>
-                                <Lock size={16} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0, marginTop: 1 }} />
+                            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px", borderRadius: 12, background: isDark ? "rgba(255,224,0,.05)" : "rgba(255,224,0,.06)", border: "1px solid rgba(255,224,0,.2)" }}>
+                                <Lock size={16} style={{ color: isDark ? AURA.gold : "#5B21B6", flexShrink: 0, marginTop: 1 }} />
                                 <div>
-                                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: isDark ? AURA.gold : "#B5000F", margin: "0 0 3px", letterSpacing: ".05em" }}>
+                                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: isDark ? AURA.gold : "#5B21B6", margin: "0 0 3px", letterSpacing: ".05em" }}>
                                         Decisões espirituais
                                     </p>
                                     <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 300, color: t.textSec, margin: 0, lineHeight: 1.55 }}>

@@ -27,8 +27,8 @@ import "./dashboardLider.css";
 import TelaCarregando from "../../components/TelaCarregando.jsx";
 import CrossMark from "../../components/CrossMark.jsx";
 const LEAO_LOGIN = "/images/calice_cura.jpg";
-const ACCENT_BLUE = "#4F8BFF";
-const ACCENT_BLUE_LIGHT = "#9CC4FF";
+const ACCENT_BLUE = "#A855F7";
+const ACCENT_BLUE_LIGHT = "#D8B4FE";
 
 const BOAS_VINDAS_KEY = "ieq_boasvindas_visto";
 
@@ -82,12 +82,12 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       .dl-avatar-wrap { position: relative; flex-shrink: 0; }
       .dl-ring {
         position: absolute; border-radius: 50%;
-        border: 1px solid rgba(79,139,255,.22);
+        border: 1px solid rgba(168,85,247,.22);
         top: 50%; left: 50%; transform: translate(-50%,-50%);
       }
       .dl-avatar {
         width: 54px; height: 54px; border-radius: 50%;
-        border: 1.5px solid rgba(79,139,255,.32);
+        border: 1.5px solid rgba(168,85,247,.32);
         background: var(--dl-avatar-bg);
         display: flex; align-items: center; justify-content: center; overflow: hidden;
         position: relative; z-index: 1;
@@ -97,7 +97,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       .dl-title-block { flex: 1; min-width: 0; }
       .dl-eyebrow {
         font-size: 9.5px; font-weight: 500; letter-spacing: .24em;
-        text-transform: uppercase; color: rgba(79,139,255,.72);
+        text-transform: uppercase; color: rgba(168,85,247,.72);
         margin: 0 0 5px;
       }
       .dl-title {
@@ -130,12 +130,12 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         padding: 0 16px; height: 38px; border-radius: 100px;
         cursor: pointer;
         background: transparent; color: ${AURA.red};
-        border: 1px solid rgba(156,196,255,.28);
+        border: 1px solid rgba(216,180,254,.28);
         font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .12em;
         text-transform: uppercase; transition: all .3s; flex-shrink: 0;
       }
-      .dl-btn-exit:hover { background: rgba(156,196,255,.1); border-color: ${AURA.red}; }
+      .dl-btn-exit:hover { background: rgba(216,180,254,.1); border-color: ${AURA.red}; }
 
       /* Botão voltar pequeno */
       .dl-btn-back {
@@ -153,11 +153,11 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       }
       .dl-divider::before {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to right, transparent, rgba(79,139,255,.3));
+        background: linear-gradient(to right, transparent, rgba(168,85,247,.3));
       }
       .dl-divider::after {
         content: ''; flex: 1; height: 1px;
-        background: linear-gradient(to left, transparent, rgba(79,139,255,.3));
+        background: linear-gradient(to left, transparent, rgba(168,85,247,.3));
       }
       .dl-divider-dot { width: 4px; height: 4px; border-radius: 50%; background: ${ACCENT_BLUE}; box-shadow: 0 0 10px ${ACCENT_BLUE}; }
 
@@ -192,8 +192,8 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       @media(max-width: 480px) { .dl-kpi-grid { grid-template-columns: 1fr; } }
 
       .dl-kpi-hero {
-        background: linear-gradient(160deg, #5A0B16 0%, #350309 55%, #1D0409 100%);
-        border: 1px solid rgba(156,196,255,.3);
+        background: linear-gradient(160deg, #7C3AED 0%, #4C1D95 55%, #1E0A42 100%);
+        border: 1px solid rgba(216,180,254,.3);
         border-radius: 24px; padding: 30px 28px; position: relative; overflow: hidden;
         box-shadow: none;
       }
@@ -205,9 +205,9 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       }
       .dl-kpi-inner { position: relative; z-index: 1; }
       .dl-kpi-hero .dl-badge {
-        background: rgba(156,196,255,.14);
-        border: 1px solid rgba(156,196,255,.35);
-        color: #C9DDFF;
+        background: rgba(216,180,254,.14);
+        border: 1px solid rgba(216,180,254,.35);
+        color: #D8B4FE;
       }
       .dl-kpi-hero .dl-progress-track {
         background: rgba(255,255,255,.16);
@@ -314,7 +314,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       .dl-menu-card::before {
         content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 2px;
         border-radius: 0 0 99px 99px;
-        background: linear-gradient(90deg, transparent, rgba(79,139,255,.4), transparent);
+        background: linear-gradient(90deg, transparent, rgba(168,85,247,.4), transparent);
         opacity: 0; transition: all .35s;
       }
       .dl-menu-card:hover {
@@ -347,7 +347,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
       }
       .dl-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(79,139,255,.28), transparent);
+        background: linear-gradient(90deg, transparent, rgba(168,85,247,.28), transparent);
       }
       .dl-card-head {
         padding: 22px 24px;
@@ -367,7 +367,7 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         display: flex; align-items: center; gap: 8px;
         padding: 11px 22px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${ACCENT_BLUE}, ${ACCENT_BLUE_LIGHT});
-        color: #12131C; font-family: 'Inter', sans-serif;
+        color: #1E0A42; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .35s;
         box-shadow: none; flex-shrink: 0;
@@ -395,11 +395,11 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         border-radius: 14px; transition: all .2s; gap: 10px;
         min-width: 0; width: 100%;
       }
-      .dl-member-row:hover { border-color: rgba(79,139,255,.4); background: var(--dl-row-hover-bg); }
+      .dl-member-row:hover { border-color: rgba(168,85,247,.4); background: var(--dl-row-hover-bg); }
       .dl-member-avatar {
         width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(79,139,255,.35), rgba(53,3,9,.12));
-        border: 1px solid rgba(53,3,9,.28);
+        background: linear-gradient(135deg, rgba(168,85,247,.35), rgba(30,10,66,.12));
+        border: 1px solid rgba(30,10,66,.28);
         display: flex; align-items: center; justify-content: center;
         font-family: 'Inter', sans-serif; font-weight: 700;
         font-size: 15px; color: ${AURA.moss};
@@ -414,10 +414,10 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         color: var(--dl-text-muted); padding: 6px; border-radius: 9px;
         display: flex; align-items: center; flex-shrink: 0; transition: all .2s;
       }
-      .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(156,196,255,.1); }
+      .dl-btn-del:hover { color: ${AURA.clay}; background: rgba(216,180,254,.1); }
       .dl-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(79,139,255,.16), transparent);
+        background: linear-gradient(90deg, transparent, rgba(168,85,247,.16), transparent);
         margin: 2px 0;
       }
 
@@ -437,9 +437,9 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .dl-input:focus {
-        border-color: rgba(53,3,9,.55);
+        border-color: rgba(30,10,66,.55);
         background: var(--dl-chip-bg);
-        box-shadow: 0 0 0 4px rgba(53,3,9,.14);
+        box-shadow: 0 0 0 4px rgba(30,10,66,.14);
       }
       .dl-input { font-family: 'Inter', sans-serif; }
       .dl-input::placeholder { color: var(--dl-placeholder); }
@@ -494,8 +494,8 @@ const GlobalStyles = React.memo(function GlobalStyles() {
         transition: all .25s;
       }
       .dl-textarea:focus {
-        border-color: rgba(53,3,9,.55);
-        box-shadow: 0 0 0 4px rgba(53,3,9,.14);
+        border-color: rgba(30,10,66,.55);
+        box-shadow: 0 0 0 4px rgba(30,10,66,.14);
       }
       .dl-textarea::placeholder { color: var(--dl-placeholder); }
 
@@ -538,57 +538,57 @@ export default function DashboardLider() {
   const themeVars = useMemo(() => {
     const dark = isDark;
     return {
-      "--dl-bg": dark ? "#0A0A0F" : "#FFFFFF",
-      "--dl-bg-el": dark ? "#17171C" : "#FFFFFF",
-      "--dl-bg-input": dark ? "#101014" : "rgba(0,0,0,.04)",
-      "--dl-border": dark ? "rgba(255,255,255,.14)" : "rgba(0,0,0,.22)",
-      "--dl-border-input": dark ? "rgba(255,255,255,.22)" : "rgba(0,0,0,.32)",
-      "--dl-text": dark ? "#FFFFFF" : "#2A0306",
-      "--dl-text-sec": dark ? "#E7E7EC" : "#4A2E2A",
-      "--dl-text-muted": dark ? "#A1A1AA" : "#5F4A45",
-      "--dl-card-bg": dark ? "#17171C" : "#FFFFFF",
-      "--dl-card-border": dark ? "rgba(255,255,255,.14)" : "rgba(0,0,0,.20)",
-      "--dl-card-hover": dark ? "#4F8BFF" : "#E30613",
+      "--dl-bg": dark ? "#1E0A42" : "#FFFFFF",
+      "--dl-bg-el": dark ? "#32116B" : "#FFFFFF",
+      "--dl-bg-input": dark ? "#2A0F5C" : "rgba(0,0,0,.04)",
+      "--dl-border": dark ? "rgba(196,181,253,.22)" : "rgba(30,10,66,.22)",
+      "--dl-border-input": dark ? "rgba(196,181,253,.32)" : "rgba(30,10,66,.32)",
+      "--dl-text": dark ? "#FFFFFF" : "#1E0A42",
+      "--dl-text-sec": dark ? "#E7E7EC" : "#4C1D95",
+      "--dl-text-muted": dark ? "#C4B5FD" : "#5B21B6",
+      "--dl-card-bg": dark ? "#32116B" : "#FFFFFF",
+      "--dl-card-border": dark ? "rgba(196,181,253,.22)" : "rgba(30,10,66,.20)",
+      "--dl-card-hover": dark ? "#A855F7" : "#5B21B6",
       "--dl-placeholder": dark ? "rgba(255,255,255,.45)" : "rgba(0,0,0,.45)",
-      "--dl-header-bg": dark ? "rgba(10,10,15,.88)" : "rgba(255,255,255,.95)",
-      "--dl-glow-1": dark ? "rgba(227,6,19,.14)" : "rgba(227,6,19,.08)",
-      "--dl-glow-2": dark ? "rgba(79,139,255,.08)" : "rgba(0,0,0,.05)",
-      "--dl-option-bg": dark ? "#17171C" : "#FFFFFF",
+      "--dl-header-bg": dark ? "rgba(30,10,66,.88)" : "rgba(255,255,255,.95)",
+      "--dl-glow-1": dark ? "rgba(91,33,182,.14)" : "rgba(91,33,182,.08)",
+      "--dl-glow-2": dark ? "rgba(168,85,247,.08)" : "rgba(0,0,0,.05)",
+      "--dl-option-bg": dark ? "#32116B" : "#FFFFFF",
       "--dl-photo": 'url("/images/calice_cura.jpg")',
       "--dl-photo-filter": dark
         ? "saturate(1.06) contrast(1.03) brightness(.62)"
         : "saturate(1.10) contrast(1.03) brightness(.90)",
-      "--dl-shadow-color": dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.12)",
-      "--dl-avatar-bg": dark ? "#B5000F" : "#8F0009",
-      "--dl-avatar-shadow": dark ? "0 0 0 6px rgba(227,6,19,.18)" : "0 0 0 6px rgba(227,6,19,.10)",
+      "--dl-shadow-color": dark ? "rgba(0,0,0,.55)" : "rgba(30,10,66,.12)",
+      "--dl-avatar-bg": dark ? "#7C3AED" : "#4C1D95",
+      "--dl-avatar-shadow": dark ? "0 0 0 6px rgba(91,33,182,.18)" : "0 0 0 6px rgba(91,33,182,.10)",
       "--dl-surface-1": dark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.04)",
-      "--dl-hover-gold-bg": dark ? "rgba(79,139,255,.16)" : "rgba(79,139,255,.20)",
-      "--dl-soft-gold-bg": dark ? "rgba(79,139,255,.12)" : "rgba(79,139,255,.20)",
-      "--dl-soft-gold-border": dark ? "rgba(79,139,255,.35)" : "rgba(227,6,19,.20)",
+      "--dl-hover-gold-bg": dark ? "rgba(168,85,247,.16)" : "rgba(168,85,247,.20)",
+      "--dl-soft-gold-bg": dark ? "rgba(168,85,247,.12)" : "rgba(168,85,247,.20)",
+      "--dl-soft-gold-border": dark ? "rgba(168,85,247,.35)" : "rgba(91,33,182,.20)",
       "--dl-inset-highlight": "none",
       "--dl-alert-bg": dark ? "rgba(30,122,70,.22)" : "rgba(30,122,70,.10)",
-      "--dl-alert-color": dark ? "#FFFFFF" : "#2A0306",
+      "--dl-alert-color": dark ? "#FFFFFF" : "#1E0A42",
       "--dl-alert-border": dark ? "1px solid rgba(255,255,255,.20)" : "1px solid rgba(0,0,0,.12)",
-      "--dl-card-shadow": `10px 10px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
-      "--dl-card-shadow-lg": `10px 10px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
-      "--dl-card-shadow-sm": `8px 8px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
-      "--dl-modal-shadow": `12px 12px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(61,0,4,.10)"}`,
+      "--dl-card-shadow": `10px 10px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(30,10,66,.10)"}`,
+      "--dl-card-shadow-lg": `10px 10px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(30,10,66,.10)"}`,
+      "--dl-card-shadow-sm": `8px 8px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(30,10,66,.10)"}`,
+      "--dl-modal-shadow": `12px 12px 0 ${dark ? "rgba(0,0,0,.55)" : "rgba(30,10,66,.10)"}`,
       "--dl-bg-overlay": dark
-        ? "linear-gradient(180deg, rgba(10,10,15,.80) 0%, rgba(10,10,15,.88) 50%, rgba(10,10,15,.94) 100%)"
+        ? "linear-gradient(180deg, rgba(30,10,66,.80) 0%, rgba(30,10,66,.88) 50%, rgba(30,10,66,.94) 100%)"
         : "linear-gradient(180deg, rgba(255,255,255,.84) 0%, rgba(255,250,240,.89) 50%, rgba(255,245,228,.93) 100%)",
-      "--dl-ghost-hover-bg": dark ? "rgba(79,139,255,.12)" : "rgba(79,139,255,.16)",
+      "--dl-ghost-hover-bg": dark ? "rgba(168,85,247,.12)" : "rgba(168,85,247,.16)",
       "--dl-surface-2": dark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)",
       "--dl-surface-2-border": dark ? "rgba(255,255,255,.14)" : "rgba(0,0,0,.18)",
       "--dl-divider": dark ? "rgba(255,255,255,.24)" : "rgba(0,0,0,.32)",
-      "--dl-row-hover-bg": dark ? "rgba(79,139,255,.08)" : "rgba(79,139,255,.14)",
-      "--dl-input-icon": dark ? "#4F8BFF" : "#E30613",
+      "--dl-row-hover-bg": dark ? "rgba(168,85,247,.08)" : "rgba(168,85,247,.14)",
+      "--dl-input-icon": dark ? "#A855F7" : "#5B21B6",
       "--dl-chip-bg": dark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.05)",
       "--dl-empty-color": dark ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.40)",
-      "--dl-panel": dark ? "#17171C" : "#FFFFFF",
-      "--dl-panel-2": dark ? "#101014" : "rgba(0,0,0,.035)",
-      "--dl-accent": dark ? "#4F8BFF" : "#E30613",
-      "--dl-accent-soft": dark ? "rgba(79,139,255,.14)" : "rgba(227,6,19,.07)",
-      "--dl-title-shadow": dark ? "rgba(143,0,9,.55)" : "rgba(227,6,19,.15)",
+      "--dl-panel": dark ? "#32116B" : "#FFFFFF",
+      "--dl-panel-2": dark ? "#2A0F5C" : "rgba(0,0,0,.035)",
+      "--dl-accent": dark ? "#A855F7" : "#5B21B6",
+      "--dl-accent-soft": dark ? "rgba(168,85,247,.14)" : "rgba(91,33,182,.07)",
+      "--dl-title-shadow": dark ? "rgba(91,33,182,.55)" : "rgba(91,33,182,.15)",
       "--dl-tint-opacity": dark ? "0.02" : "0",
     };
   }, [isDark]);
@@ -713,11 +713,11 @@ export default function DashboardLider() {
 
   /* ── 7 módulos (Histórico removido) ── */
   const menuItems = [
-    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: "#4F8BFF" },
+    { icon: <Target size={18} />,       name: "Metas",        desc: "Objetivos",   aba: "metas",       color: "#A855F7" },
     { icon: <Users size={18} />,        name: "Discipulado",  desc: "Acompanhar",  aba: "discipulado", color: "#C2187A" },
     { icon: <TrendingUp size={18} />,   name: "Frequência",   desc: "Relatórios",  aba: "relatorio",   color: "#1E4FD8" },
     { icon: <CalendarDays size={18} />, name: "Fichas",       desc: "Secretaria",  aba: "fichas",      color: "#FF7A00" },
-    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#E30613" },
+    { icon: <ChevronRight size={18} />, name: "Visitantes",   desc: "Novas Vidas", aba: "visitantes",  color: "#5B21B6" },
     { icon: <Flame size={18} />,        name: "Missão 70",    desc: "Evangelismo", aba: "missao70",    color: "#FF7A00" },
     { icon: <ClipboardList size={18} />, name: "Solic. Ficha", desc: "Novo Membro", aba: "solicitar-ficha", color: "#1E4FD8" },
     { icon: <UserCheck size={18} />,    name: "Acompanhamento", desc: "Membro",       aba: "acompanhamento-modal", color: "#C2187A" },
@@ -869,7 +869,7 @@ export default function DashboardLider() {
                       </div>
                       <div>
                         {isAnalise ? (
-                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 0, background: "rgba(79,139,255,.12)", border: "2px solid rgba(79,139,255,.4)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--dl-accent)" }}>
+                            <div style={{ marginTop: 18, width: "100%", padding: "12px", textAlign: "center", borderRadius: 0, background: "rgba(168,85,247,.12)", border: "2px solid rgba(168,85,247,.4)", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--dl-accent)" }}>
                               Consultando Pastor…
                             </div>
                         ) : podeSolicitar ? (
@@ -902,7 +902,7 @@ export default function DashboardLider() {
                             whileTap={{ scale: .96 }}
                             onClick={() => (aba === "acompanhamento-modal" ? setShowAcompanhamento(true) : setAbaAtiva(aba))}
                         >
-                          <div className="dl-menu-icon" style={{ background: color, color: (color === "#4F8BFF" || color === "#FF7A00") ? "#2A0306" : "#fff", border: `2px solid ${color}` }}>
+                          <div className="dl-menu-icon" style={{ background: color, color: (color === "#A855F7" || color === "#FF7A00") ? "#1E0A42" : "#fff", border: `2px solid ${color}` }}>
                             {icon}
                           </div>
                           <div>
@@ -995,7 +995,7 @@ export default function DashboardLider() {
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
                       <div className="dl-ring dl-pulse" style={{ width: 68, height: 68, position: "absolute", border: "1px solid var(--dl-accent)", borderRadius: 0, opacity: .35 }} />
                       <div className="dl-ring dl-pulse" style={{ width: 54, height: 54, position: "absolute", border: "1px solid var(--dl-accent)", borderRadius: 0, animationDelay: ".9s", opacity: .28 }} />
-                      <div style={{ width: 50, height: 50, borderRadius: 0, background: "#8F0009", border: "2px solid #4F8BFF", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1, boxShadow: "4px 4px 0 var(--dl-shadow-color)" }}>
+                      <div style={{ width: 50, height: 50, borderRadius: 0, background: "#4C1D95", border: "2px solid #A855F7", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1, boxShadow: "4px 4px 0 var(--dl-shadow-color)" }}>
                         <CrossMark size={28} />
                       </div>
                     </div>
@@ -1011,7 +1011,7 @@ export default function DashboardLider() {
                   <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
                     <button className="dl-btn-ghost" style={{ flex: 1 }} onClick={() => setShowModalMultiplicacao(false)}>Cancelar</button>
                     <button
-                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px", border: "2px solid #4F8BFF", borderRadius: 0, cursor: "pointer", background: "#4F8BFF", color: "#2A0306", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s", boxShadow: "5px 5px 0 var(--dl-shadow-color)", opacity: solicitandoMulti ? .6 : 1 }}
+                        style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px", border: "2px solid #A855F7", borderRadius: 0, cursor: "pointer", background: "#A855F7", color: "#1E0A42", fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .25s", boxShadow: "5px 5px 0 var(--dl-shadow-color)", opacity: solicitandoMulti ? .6 : 1 }}
                         onClick={solicitarMultiplicacao}
                         disabled={solicitandoMulti}
                     >
@@ -1104,7 +1104,7 @@ function ModalBuscarMembro({ celulaId, onClose }) {
                       onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--dl-card-border)"; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 0, flexShrink: 0, background: "#4F8BFF", border: "2px solid var(--dl-border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Anton','Inter',sans-serif", fontWeight: 400, fontSize: 15, color: "#2A0306", boxShadow: "3px 3px 0 var(--dl-shadow-color)" }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 0, flexShrink: 0, background: "#A855F7", border: "2px solid var(--dl-border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Anton','Inter',sans-serif", fontWeight: 400, fontSize: 15, color: "#1E0A42", boxShadow: "3px 3px 0 var(--dl-shadow-color)" }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
                       <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 500, color: "var(--dl-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -1113,7 +1113,7 @@ function ModalBuscarMembro({ celulaId, onClose }) {
                     </div>
                     <button
                         onClick={() => vincular(m.id)}
-                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 0, border: "2px solid #4F8BFF", cursor: "pointer", background: "#4F8BFF", color: "#2A0306", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .2s", boxShadow: "3px 3px 0 var(--dl-shadow-color)" }}
+                        style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 0, border: "2px solid #A855F7", cursor: "pointer", background: "#A855F7", color: "#1E0A42", fontFamily: "'Inter',sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", transition: "all .2s", boxShadow: "3px 3px 0 var(--dl-shadow-color)" }}
                     >
                       <Plus size={11} /> Vincular
                     </button>

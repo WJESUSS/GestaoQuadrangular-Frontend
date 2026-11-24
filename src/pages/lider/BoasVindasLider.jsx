@@ -35,7 +35,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                     >
                         {/* Faixa quadrangular */}
                         <div style={{ position:"absolute", top:0, left:0, right:0, height:6,
-                            background:"linear-gradient(90deg,#FF7A00 0 25%,#4F8BFF 25% 50%,#1E4FD8 50% 75%,#C2187A 75% 100%)" }} />
+                            background:"linear-gradient(90deg,#FF7A00 0 25%,#A855F7 25% 50%,#1E4FD8 50% 75%,#C2187A 75% 100%)" }} />
 
                         {/* Botão fechar */}
                         <button onClick={onClose} style={{
@@ -44,7 +44,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                             color:"var(--dl-text)", padding:6, display:"flex",
                             transition:"all .2s",
                         }}
-                                onMouseEnter={e => { e.currentTarget.style.background="#4F8BFF"; e.currentTarget.style.borderColor="#4F8BFF"; e.currentTarget.style.color="#061238"; }}
+                                onMouseEnter={e => { e.currentTarget.style.background="#A855F7"; e.currentTarget.style.borderColor="#A855F7"; e.currentTarget.style.color="#1E0A42"; }}
                                 onMouseLeave={e => { e.currentTarget.style.background="none"; e.currentTarget.style.borderColor="var(--dl-border)"; e.currentTarget.style.color="var(--dl-text)"; }}>
                             <X size={18} />
                         </button>
@@ -54,7 +54,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                                     style={{ textAlign:"center", marginBottom:30 }}>
                             <motion.div animate={{ rotate:360 }} transition={{ duration:3, repeat:Infinity, ease:"linear" }}
                                         style={{ display:"inline-block", marginBottom:14 }}>
-                                <Sparkles size={34} style={{ color:"var(--dl-accent)", filter:"drop-shadow(0 0 10px rgba(79,139,255,.45))" }} />
+                                <Sparkles size={34} style={{ color:"var(--dl-accent)", filter:"drop-shadow(0 0 10px rgba(168,85,247,.45))" }} />
                             </motion.div>
                             <h1 style={{
                                 fontFamily:"'Anton','Inter',sans-serif", fontSize:"clamp(24px,5vw,32px)",
@@ -75,7 +75,7 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                         {/* ── Texto bíblico ── */}
                         <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:.3 }}
                                     style={{ display:"flex", justifyContent:"center", marginTop:16 }}>
-                            <VersiculoAleatorio isDark={isDark} accent="#4F8BFF" />
+                            <VersiculoAleatorio isDark={isDark} accent="#A855F7" />
                         </motion.div>
 
                         {/* ── Botão fechar (rodapé) ── */}
@@ -83,8 +83,8 @@ export default function BoasVindasLider({ usuarioLogado, celula, isDark, onClose
                             width:"100%", marginTop:24,
                             fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:800,
                             letterSpacing:".16em", textTransform:"uppercase",
-                            background:"#4F8BFF", color:"#061238",
-                            border:"2px solid #4F8BFF", borderRadius:0, padding:"15px 20px",
+                            background:"#A855F7", color:"#1E0A42",
+                            border:"2px solid #A855F7", borderRadius:0, padding:"15px 20px",
                             cursor:"pointer", transition:"all .2s",
                             boxShadow:"6px 6px 0 var(--dl-shadow-color)",
                         }}

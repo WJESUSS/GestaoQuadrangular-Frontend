@@ -93,7 +93,7 @@ function GlobalStyles({ t, isDark }) {
         padding:16px; border-radius:16px; background:${t.bgEl}; border:1px solid ${t.border};
         cursor:pointer; margin-bottom:10px; transition:all .2s;
       }
-      .ad-choice-link:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; transform:translateY(-1px); }
+      .ad-choice-link:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; transform:translateY(-1px); }
       .ad-choice-link:last-child{ margin-bottom:0; }
       .ad-choice-link-left { display:flex; align-items:center; gap:12px; }
       .ad-choice-icon {
@@ -111,19 +111,19 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-btn-primary {
         background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color:#fff;
-        box-shadow:0 8px 22px rgba(53,3,9,.3);
+        box-shadow:0 8px 22px rgba(30,10,66,.3);
       }
       .ad-btn-primary:hover{ transform:translateY(-1px); }
       .ad-btn-primary:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
       .ad-btn-ghost {
-        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.06)"};
+        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(30,10,66,.06)"};
         border:1px solid ${t.border}; color:${t.textSec};
       }
-      .ad-btn-ghost:hover{ border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-btn-ghost:hover{ border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
       .ad-btn-danger {
-        background:rgba(255,211,77,.12); border:1px solid rgba(255,211,77,.35); color:${AURA.redLight};
+        background:rgba(255,224,0,.12); border:1px solid rgba(255,224,0,.35); color:${AURA.redLight};
       }
-      .ad-btn-danger:hover{ background:rgba(255,211,77,.2); }
+      .ad-btn-danger:hover{ background:rgba(255,224,0,.2); }
       .ad-btn-sm { padding:7px 13px; font-size:11.5px; }
       .ad-btn-block { width:100%; }
 
@@ -141,7 +141,7 @@ function GlobalStyles({ t, isDark }) {
         padding:12px 6px; border-bottom:1px solid ${t.border}; cursor:pointer; transition:background .2s;
       }
       .ad-row:last-child{ border-bottom:none; }
-      .ad-row:hover{ background:${isDark ? "rgba(255,255,255,.025)" : "rgba(53,3,9,.03)"}; border-radius:12px; }
+      .ad-row:hover{ background:${isDark ? "rgba(255,255,255,.025)" : "rgba(30,10,66,.03)"}; border-radius:12px; }
       .ad-row-left{ display:flex; align-items:center; gap:11px; min-width:0; flex:1; }
       .ad-avatar {
         width:36px; height:36px; border-radius:50%; flex-shrink:0;
@@ -158,7 +158,7 @@ function GlobalStyles({ t, isDark }) {
         font-size:10.5px; font-weight:700; letter-spacing:.03em; white-space:nowrap;
       }
       .ad-badge-ok  { background:rgba(74,124,92,.15); color:${AURA.green}; }
-      .ad-badge-off { background:rgba(255,211,77,.13); color:${isDark ? "#FFFFFF" : AURA.clay}; }
+      .ad-badge-off { background:rgba(255,224,0,.13); color:${isDark ? "#FFFFFF" : AURA.clay}; }
 
       .ad-empty {
         text-align:center; padding:30px 16px; color:${t.textMuted}; font-size:13px;
@@ -175,16 +175,16 @@ function GlobalStyles({ t, isDark }) {
         border:1px solid ${t.borderInput}; color:${t.text}; font-size:12px; font-family:'Inter',sans-serif; outline:none;
       }
       .ad-field select option { background:${t.optionBg}; color:${t.text}; }
-      .ad-field input:focus, .ad-field select:focus{ border-color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-field input:focus, .ad-field select:focus{ border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
       .ad-hist-row {
         padding:12px; border-radius:12px; margin-bottom:8px;
-        background:${isDark ? "rgba(255,255,255,.02)" : "rgba(53,3,9,.025)"};
+        background:${isDark ? "rgba(255,255,255,.02)" : "rgba(30,10,66,.025)"};
         font-size:12px;
       }
 
-      .ad-link { color:${isDark ? "#FFD400" : AURA.mossLight}; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
-      .ad-link:hover{ color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-link { color:${isDark ? "#FFE000" : AURA.mossLight}; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+      .ad-link:hover{ color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
       /* Modal único */
       .ad-overlay {
@@ -193,14 +193,14 @@ function GlobalStyles({ t, isDark }) {
       }
       @media(min-width:640px){ .ad-overlay{ align-items:center; padding:20px; } }
       .ad-modal {
-        background:${isDark ? "#17171C" : "#FFFFFF"}; width:100%; max-width:600px; max-height:92vh; overflow-y:auto;
+        background:${isDark ? "#32116B" : "#FFFFFF"}; width:100%; max-width:600px; max-height:92vh; overflow-y:auto;
         border-radius:24px 24px 0 0; border:1px solid ${t.border}; box-shadow:0 -10px 40px rgba(0,0,0,.35);
         display:flex; flex-direction:column;
       }
       @media(min-width:640px){ .ad-modal{ border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,.4); } }
       .ad-modal-head {
         display:flex; align-items:center; gap:10px; padding:18px 18px 14px;
-        border-bottom:1px solid ${t.border}; position:sticky; top:0; background:${isDark ? "#17171C" : "#FFFFFF"}; z-index:1;
+        border-bottom:1px solid ${t.border}; position:sticky; top:0; background:${isDark ? "#32116B" : "#FFFFFF"}; z-index:1;
       }
       .ad-modal-title { font-family:'Inter',sans-serif; font-size:16px; font-weight:600; margin:0; color:${t.text}; flex:1; min-width:0; word-break:break-word; }
       .ad-modal-body { padding:16px 18px 22px; }
@@ -208,7 +208,7 @@ function GlobalStyles({ t, isDark }) {
         width:32px; height:32px; border-radius:50%; border:1px solid ${t.border}; background:transparent;
         color:${t.textMuted}; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
       }
-      .ad-icon-btn:hover{ color: ${isDark ? AURA.gold : "#B5000F"}; border-color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-icon-btn:hover{ color: ${isDark ? AURA.gold : "#5B21B6"}; border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
       .ad-icon-btn.danger:hover{ color:${AURA.clay}; border-color:${AURA.clay}; }
 
       .ad-form-group{ margin-bottom:13px; }
@@ -223,19 +223,19 @@ function GlobalStyles({ t, isDark }) {
         transition:border-color .2s;
       }
       .ad-select option{ background:${t.optionBg}; color:${t.text}; }
-      .ad-input:focus, .ad-select:focus, .ad-textarea:focus{ border-color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-input:focus, .ad-select:focus, .ad-textarea:focus{ border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
       .ad-textarea{ resize:vertical; min-height:64px; font-family:'Inter',sans-serif; }
 
       .ad-alert {
         display:flex; gap:9px; padding:12px 14px; border-radius:14px; font-size:12.5px; line-height:1.5;
         margin-bottom:14px; align-items:flex-start;
       }
-      .ad-alert-error { background:rgba(255,211,77,.1); border:1px solid rgba(255,211,77,.3); color:${isDark ? "#FFFFFF" : AURA.clayDeep}; }
+      .ad-alert-error { background:rgba(255,224,0,.1); border:1px solid rgba(255,224,0,.3); color:${isDark ? "#FFFFFF" : AURA.clayDeep}; }
       .ad-alert-success{ background:rgba(74,124,92,.1); border:1px solid rgba(74,124,92,.3); color:${isDark ? "#8FCB9F" : AURA.greenDark}; }
 
       .ad-checklist { max-height:220px; overflow-y:auto; border:1px solid ${t.border}; border-radius:14px; padding:6px; }
       .ad-check-row { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; cursor:pointer; }
-      .ad-check-row:hover{ background:${isDark ? "rgba(255,255,255,.04)" : "rgba(53,3,9,.05)"}; }
+      .ad-check-row:hover{ background:${isDark ? "rgba(255,255,255,.04)" : "rgba(30,10,66,.05)"}; }
       .ad-checkbox {
         width:19px; height:19px; border-radius:6px; border:1.5px solid ${t.borderInput}; flex-shrink:0;
         display:flex; align-items:center; justify-content:center; transition:all .15s;
@@ -245,7 +245,7 @@ function GlobalStyles({ t, isDark }) {
 
       .ad-count-pill {
         display:flex; align-items:center; justify-content:center; padding:12px 15px; border-radius:14px;
-        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(53,3,9,.05)"}; border:1px solid ${t.border};
+        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(30,10,66,.05)"}; border:1px solid ${t.border};
         margin:13px 0; font-size:12.5px; color:${t.textSec}; font-weight:600;
       }
 
@@ -264,13 +264,13 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-detail-hero::after {
         content:''; position:absolute; bottom:-30px; left:30%; width:100px; height:100px;
-        border-radius:50%; background:rgba(253,184,19,.08); pointer-events:none;
+        border-radius:50%; background:rgba(255,224,0,.08); pointer-events:none;
       }
       .ad-detail-hero-top { display:flex; align-items:center; gap:10px; margin-bottom:14px; position:relative; z-index:1; }
       .ad-detail-hero-icon {
-        width:44px; height:44px; border-radius:14px; background:rgba(255,211,77,.16);
+        width:44px; height:44px; border-radius:14px; background:rgba(255,224,0,.16);
         display:flex; align-items:center; justify-content:center; flex-shrink:0;
-        backdrop-filter:blur(6px); border:1px solid rgba(255,211,77,.4);
+        backdrop-filter:blur(6px); border:1px solid rgba(255,224,0,.4);
       }
       .ad-detail-hero-label {
         font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
@@ -317,7 +317,7 @@ function GlobalStyles({ t, isDark }) {
         display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px;
         background:${t.bgEl}; border:1px solid ${t.border}; transition:all .2s;
       }
-      .ad-detail-participant:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-detail-participant:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
       .ad-detail-participant + .ad-detail-participant { margin-top:8px; }
       .ad-detail-participant-avatar {
         width:34px; height:34px; border-radius:50%; flex-shrink:0;
@@ -344,12 +344,12 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-form-hero::after {
         content:''; position:absolute; bottom:-20px; right:15%; width:80px; height:80px;
-        border-radius:50%; background:rgba(253,184,19,.07); pointer-events:none;
+        border-radius:50%; background:rgba(255,224,0,.07); pointer-events:none;
       }
       .ad-form-hero-icon {
-        width:48px; height:48px; border-radius:15px; background:rgba(255,211,77,.16);
+        width:48px; height:48px; border-radius:15px; background:rgba(255,224,0,.16);
         display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;
-        backdrop-filter:blur(6px); border:1px solid rgba(255,211,77,.4); position:relative; z-index:1;
+        backdrop-filter:blur(6px); border:1px solid rgba(255,224,0,.4); position:relative; z-index:1;
       }
       .ad-form-hero-title {
         font-family:'Inter',sans-serif; font-size:17px; font-weight:600; color:#fff;
@@ -380,7 +380,7 @@ function GlobalStyles({ t, isDark }) {
         font-family:'Inter',sans-serif; outline:none; transition:border-color .2s;
       }
       .ad-form-field-elegant select option { background:${t.optionBg}; color:${t.text}; }
-      .ad-form-field-elegant input:focus, .ad-form-field-elegant select:focus, .ad-form-field-elegant textarea:focus { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-form-field-elegant input:focus, .ad-form-field-elegant select:focus, .ad-form-field-elegant textarea:focus { border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
       .ad-form-field-elegant textarea { resize:vertical; min-height:60px; }
 
       .ad-form-pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -388,11 +388,11 @@ function GlobalStyles({ t, isDark }) {
         padding:12px; border-radius:12px; background:${t.bgEl}; border:1px solid ${t.border};
         cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:10px;
       }
-      .ad-form-pick-card:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; transform:translateY(-1px); }
-      .ad-form-pick-card.selected { border-color:${AURA.moss}; background:rgba(53,3,9,.06); }
+      .ad-form-pick-card:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; transform:translateY(-1px); }
+      .ad-form-pick-card.selected { border-color:${AURA.moss}; background:rgba(30,10,66,.06); }
       .ad-form-pick-icon {
         width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-        background:rgba(253,184,19,.08); flex-shrink:0;
+        background:rgba(255,224,0,.08); flex-shrink:0;
       }
       .ad-form-pick-label { font-size:12.5px; font-weight:600; color:${t.text}; margin:0; }
       .ad-form-pick-sub { font-size:10px; color:${t.textMuted}; margin:0; }
@@ -403,18 +403,18 @@ function GlobalStyles({ t, isDark }) {
       .ad-form-participants-title { font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:${t.textMuted}; }
       .ad-form-select-all {
         display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px;
-        background:rgba(253,184,19,.08); border:1px solid rgba(253,184,19,.2); color: ${isDark ? AURA.gold : "#B5000F"};
+        background:rgba(255,224,0,.08); border:1px solid rgba(255,224,0,.2); color: ${isDark ? AURA.gold : "#5B21B6"};
         font-size:11px; font-weight:600; cursor:pointer; transition:all .2s;
       }
-      .ad-form-select-all:hover { background:rgba(253,184,19,.15); }
+      .ad-form-select-all:hover { background:rgba(255,224,0,.15); }
 
       .ad-form-member {
         display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px;
         border:1px solid ${t.border}; cursor:pointer; transition:all .2s;
       }
       .ad-form-member + .ad-form-member { margin-top:8px; }
-      .ad-form-member:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
-      .ad-form-member.checked { border-color:${AURA.moss}; background:rgba(53,3,9,.05); }
+      .ad-form-member:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
+      .ad-form-member.checked { border-color:${AURA.moss}; background:rgba(30,10,66,.05); }
       .ad-form-member-avatar {
         width:34px; height:34px; border-radius:50%; flex-shrink:0;
         background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss}); color:#fff;
@@ -434,10 +434,10 @@ function GlobalStyles({ t, isDark }) {
       }
       .ad-form-counter {
         flex:1; text-align:center; padding:12px 15px; border-radius:14px;
-        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(53,3,9,.05)"}; border:1px solid ${t.border};
+        background:${isDark ? "rgba(255,255,255,.04)" : "rgba(30,10,66,.05)"}; border:1px solid ${t.border};
         font-size:12.5px; color:${t.textSec}; font-weight:600;
       }
-      .ad-form-counter strong { color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-form-counter strong { color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
       /* Lista coletivo — layout elegante */
       .ad-list-hero {
@@ -450,9 +450,9 @@ function GlobalStyles({ t, isDark }) {
         border-radius:50%; background:rgba(255,255,255,.05); pointer-events:none;
       }
       .ad-list-hero-icon {
-        width:48px; height:48px; border-radius:15px; background:rgba(255,211,77,.16);
+        width:48px; height:48px; border-radius:15px; background:rgba(255,224,0,.16);
         display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;
-        backdrop-filter:blur(6px); border:1px solid rgba(255,211,77,.4); position:relative; z-index:1;
+        backdrop-filter:blur(6px); border:1px solid rgba(255,224,0,.4); position:relative; z-index:1;
       }
       .ad-list-hero-title {
         font-family:'Inter',sans-serif; font-size:17px; font-weight:600; color:#fff;
@@ -476,7 +476,7 @@ function GlobalStyles({ t, isDark }) {
         border-bottom:1px solid ${t.border}; cursor:pointer; transition:all .2s;
       }
       .ad-list-item:last-child { border-bottom:none; }
-      .ad-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(53,3,9,.03)"}; }
+      .ad-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(30,10,66,.03)"}; }
 
       .ad-list-item-avatar {
         width:42px; height:42px; border-radius:13px; flex-shrink:0;
@@ -497,9 +497,9 @@ function GlobalStyles({ t, isDark }) {
       .ad-list-item-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
       .ad-list-item-arrow {
         width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(53,3,9,.05)"}; transition:all .2s;
+        background:${isDark ? "rgba(255,255,255,.05)" : "rgba(30,10,66,.05)"}; transition:all .2s;
       }
-      .ad-list-item:hover .ad-list-item-arrow { background:rgba(253,184,19,.12); color: ${isDark ? AURA.gold : "#B5000F"}; }
+      .ad-list-item:hover .ad-list-item-arrow { background:rgba(255,224,0,.12); color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
       .ad-list-summary {
         display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:18px;
@@ -509,7 +509,7 @@ function GlobalStyles({ t, isDark }) {
         text-align:center;
       }
       .ad-list-summary-value {
-        font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color: ${isDark ? AURA.gold : "#B5000F"};
+        font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color: ${isDark ? AURA.gold : "#5B21B6"};
         margin:0 0 2px;
       }
       .ad-list-summary-label { font-size:10px; color:${t.textMuted}; margin:0; text-transform:uppercase; letter-spacing:.05em; }
@@ -743,7 +743,7 @@ function TelaEscolha({ t, isDark, pendentesSemana, onEscolher }) {
 
             <div className="ad-choice-link" onClick={() => onEscolher("coletivo-lista")}>
                 <div className="ad-choice-link-left">
-                    <div className="ad-choice-icon" style={{ background: "rgba(253,184,19,.16)", color: isDark ? "#FDB813" : "#8A5A00" }}>
+                    <div className="ad-choice-icon" style={{ background: "rgba(255,224,0,.16)", color: isDark ? "#FFE000" : "#F3B53F" }}>
                         <Users size={20} />
                     </div>
                     <div>
@@ -756,7 +756,7 @@ function TelaEscolha({ t, isDark, pendentesSemana, onEscolher }) {
 
             <div className="ad-choice-link" onClick={() => onEscolher("historico-geral")}>
                 <div className="ad-choice-link-left">
-                    <div className="ad-choice-icon" style={{ background: "rgba(90,11,22,.14)", color: "#5A0B16" }}>
+                    <div className="ad-choice-icon" style={{ background: "rgba(76,29,149,.14)", color: "#4C1D95" }}>
                         <History size={20} />
                     </div>
                     <div>
@@ -1019,7 +1019,7 @@ function TelaColetivoLista({ t, notify, onRegistrar, onAbrirDetalhe }) {
             {/* Hero */}
             <div className="ad-list-hero">
                 <div className="ad-list-hero-icon">
-                    <Users size={22} color="#FFE9A8" />
+                    <Users size={22} color="#F3B53F" />
                 </div>
                 <p className="ad-list-hero-title">Encontros Coletivos</p>
                 <p className="ad-list-hero-sub">Visualize e registre encontros da célula</p>
@@ -1144,7 +1144,7 @@ function FormColetivo({ t, membros, onSalvo, onErro }) {
             {/* Hero */}
             <div className="ad-form-hero">
                 <div className="ad-form-hero-icon">
-                    <ClipboardList size={22} color="#FFE9A8" />
+                    <ClipboardList size={22} color="#F3B53F" />
                 </div>
                 <p className="ad-form-hero-title">Registrar Encontro Coletivo</p>
                 <p className="ad-form-hero-sub">Preencha os dados do encontro e marque os presentes</p>
@@ -1276,7 +1276,7 @@ function DetalheColetivo({ t, id, notify }) {
             <div className="ad-detail-hero">
                 <div className="ad-detail-hero-top">
                     <div className="ad-detail-hero-icon">
-                        <BookOpen size={20} color="#FFE9A8" />
+                        <BookOpen size={20} color="#F3B53F" />
                     </div>
                     <div>
                         <p className="ad-detail-hero-label">Encontro Coletivo</p>
@@ -1443,7 +1443,7 @@ function TelaHistoricoGeral({ t, notify, membros, onAbrirColetivo }) {
                     <div className="ad-hist-row" key={r.id ?? idx}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                             <strong style={{ color: t.text }}>{formatarDataBR(r.data)}</strong>
-                            <span className="ad-badge" style={{ background: r.tipo === "COLETIVO" ? "rgba(253,184,19,.14)" : "rgba(53,3,9,.12)", color: r.tipo === "COLETIVO" ? AURA.gold : AURA.mossLight }}>
+                            <span className="ad-badge" style={{ background: r.tipo === "COLETIVO" ? "rgba(255,224,0,.14)" : "rgba(30,10,66,.12)", color: r.tipo === "COLETIVO" ? AURA.gold : AURA.mossLight }}>
                       {r.tipo === "COLETIVO" ? "Coletivo" : "Individual"}
                     </span>
                         </div>

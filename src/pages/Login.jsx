@@ -9,12 +9,12 @@ import api               from "../services/api.js";
 
 const LEAO_LOGIN = "/images/calice_cura.jpg";
 
-/* ─── Paleta da marca: azul + dourado (mesmo tema da Home) ─── */
+/* ─── Paleta da marca: púrpura + amarelo (mesmo tema da Home) ─── */
 const P = {
-    wine:"#4F8BFF", wineDeep:"#061238", wineLight:"#11308A",
-    scarlet:"#1740B0", gold:"#4F8BFF", goldLight:"#9CC4FF",
-    red:"#FF7A83", green:"#4CFF9B", amber:"#9CC4FF",
-    ink:"#061238", paper:"#0B2160", cream:"#1E4FD8",
+    wine:"#5B21B6", wineDeep:"#1E0A42", wineLight:"#7C3AED",
+    scarlet:"#4C1D95", gold:"#FFE000", goldLight:"#F3B53F",
+    red:"#FF7A00", green:"#4CFF9B", amber:"#FFE000",
+    ink:"#1E0A42", paper:"#4C1D95", cream:"#32116B",
 };
 
 /* ─── Fade-in do cartão ─── */
@@ -264,11 +264,11 @@ export default function Login() {
         .ieq-login-root, .ieq-login-root *, .ieq-login-root *::before, .ieq-login-root *::after { box-sizing:border-box; }
         :where(.ieq-login-root, .ieq-login-root *) { margin:0; padding:0; }
         .ieq-login-root {
-          --red:#1740B0; --red-mid:#11308A; --red-dark:#0B2160; --red-deep:#061238;
-          --glow:#9CC4FF; --orange:#FF7A00; --yellow:#4F8BFF; --blue:#1E4FD8; --magenta:#C2187A;
-          --white:#FFFFFF; --ink:#061238;
+          --red:#5B21B6; --red-mid:#4C1D95; --red-dark:#32116B; --red-deep:#1E0A42;
+          --glow:#C4B5FD; --orange:#FF7A00; --yellow:#FFE000; --blue:#1E4FD8; --magenta:#C2187A;
+          --white:#FFFFFF; --ink:#1E0A42;
           --white-78:rgba(255,255,255,.84); --white-60:rgba(255,255,255,.66); --white-35:rgba(255,255,255,.35);
-          --err:#FF7A83; --warn:#4F8BFF; --track:rgba(255,255,255,.18);
+          --err:#FF7A83; --warn:#FFE000; --track:rgba(255,255,255,.18);
           font-family:'Inter',system-ui,sans-serif;
           min-height:100vh; position:relative; overflow-x:hidden;
           color:#fff; background:var(--red);
@@ -333,7 +333,7 @@ export default function Login() {
           aspect-ratio:1215 / 1295;      /* mesma proporção da imagem */
           min-height:0; padding:0;
           display:block;
-          background:#061238;            /* tom profundo do tema */
+          background:#1E0A42;            /* tom profundo do tema */
           color:#fff;
         }
         .brand-media {
@@ -677,7 +677,7 @@ export default function Login() {
                                                                 className="check-row"
                                                                 onClick={()=>{set(!state);setErrAlt(null);}}>
                                                             <span className="check-box">
-                                                                {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#061238" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                                {state && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1E0A42" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>}
                                                             </span>
                                                             <Icon size={14} style={{ flexShrink:0 }}/>
                                                             {label}

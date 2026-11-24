@@ -64,12 +64,12 @@ function makeStyles(t, isDark) {
     }
     .tv-hero::after {
       content:''; position:absolute; bottom:-20px; left:20%; width:80px; height:80px;
-      border-radius:50%; background:rgba(253,184,19,.06); pointer-events:none;
+      border-radius:50%; background:rgba(255,224,0,.06); pointer-events:none;
     }
     .tv-hero-icon {
-      width:52px; height:52px; border-radius:16px; background:rgba(255,211,77,.16);
+      width:52px; height:52px; border-radius:16px; background:rgba(255,224,0,.16);
       display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;
-      backdrop-filter:blur(6px); border:1px solid rgba(255,211,77,.4); position:relative; z-index:1;
+      backdrop-filter:blur(6px); border:1px solid rgba(255,224,0,.4); position:relative; z-index:1;
     }
     .tv-hero-title {
       font-family:'Inter',sans-serif; font-size:22px; font-weight:600; color:#fff;
@@ -86,7 +86,7 @@ function makeStyles(t, isDark) {
     .tv-summary-icon {
       width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
     }
-    .tv-summary-value { font-family:'Inter',sans-serif; font-size:24px; font-weight:700; color: ${isDark ? AURA.gold : "#B5000F"}; margin:0 0 2px; }
+    .tv-summary-value { font-family:'Inter',sans-serif; font-size:24px; font-weight:700; color: ${isDark ? AURA.gold : "#5B21B6"}; margin:0 0 2px; }
     .tv-summary-label { font-size:10px; color:${t.textMuted}; margin:0; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
 
     /* ── Search ── */
@@ -95,7 +95,7 @@ function makeStyles(t, isDark) {
     }
     .tv-search-icon {
       position:absolute; left:16px; top:50%; transform:translateY(-50%);
-      color: ${isDark ? AURA.gold : "#B5000F"}; opacity:.6; pointer-events:none;
+      color: ${isDark ? AURA.gold : "#5B21B6"}; opacity:.6; pointer-events:none;
     }
     .tv-search-input {
       width:100%; padding:13px 16px 13px 48px; border-radius:14px;
@@ -103,7 +103,7 @@ function makeStyles(t, isDark) {
       color:${t.text}; font-family:'Inter',sans-serif; font-size:13px;
       outline:none; transition:border-color .2s;
     }
-    .tv-search-input:focus { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .tv-search-input:focus { border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .tv-search-input::placeholder { color:${t.placeholder}; }
     .tv-search-clear {
       position:absolute; right:12px; top:50%; transform:translateY(-50%);
@@ -119,10 +119,10 @@ function makeStyles(t, isDark) {
       border-radius:16px; border:none; cursor:pointer;
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       margin-bottom:20px; transition:all .3s cubic-bezier(.4,0,.2,1);
-      box-shadow:0 8px 24px rgba(53,3,9,.22);
+      box-shadow:0 8px 24px rgba(30,10,66,.22);
     }
     .tv-btn-novo:hover {
-      transform:translateY(-2px); box-shadow:0 12px 32px rgba(53,3,9,.32);
+      transform:translateY(-2px); box-shadow:0 12px 32px rgba(30,10,66,.32);
       filter:brightness(1.1);
     }
     .tv-btn-novo:active { transform:translateY(0); }
@@ -130,7 +130,7 @@ function makeStyles(t, isDark) {
       width:48px; height:48px; border-radius:14px; flex-shrink:0;
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       display:flex; align-items:center; justify-content:center; color:#fff;
-      box-shadow:0 4px 14px rgba(53,3,9,.28);
+      box-shadow:0 4px 14px rgba(30,10,66,.28);
     }
     .tv-btn-novo-title {
       display:block; font-family:'Inter',sans-serif; font-size:15px; font-weight:600;
@@ -159,7 +159,7 @@ function makeStyles(t, isDark) {
       position:relative;
     }
     .tv-list-item:last-child { border-bottom:none; }
-    .tv-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(53,3,9,.05)"}; }
+    .tv-list-item:hover { background:${isDark ? "rgba(255,255,255,.03)" : "rgba(30,10,66,.05)"}; }
     .tv-list-item.has-decision::before {
       content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0;
       background:linear-gradient(180deg, ${AURA.green}, ${AURA.moss});
@@ -189,28 +189,28 @@ function makeStyles(t, isDark) {
     .tv-list-origin {
       font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
       padding:3px 8px; border-radius:100px;
-      background:rgba(253,184,19,.08); color: ${isDark ? AURA.gold : "#B5000F"}; border:1px solid rgba(253,184,19,.15);
+      background:rgba(255,224,0,.08); color: ${isDark ? AURA.gold : "#5B21B6"}; border:1px solid rgba(255,224,0,.15);
     }
     .tv-list-decision {
       font-size:10px; font-weight:600; padding:3px 8px; border-radius:100px;
     }
     .tv-list-decision.aceitou { background:rgba(74,124,92,.12); color:${AURA.green}; }
-    .tv-list-decision.reconciliou { background:rgba(76,126,176,.12); color:${isDark ? "#FFE24D" : AURA.mossLight}; }
-    .tv-list-decision.batismo { background:rgba(253,184,19,.12); color: ${isDark ? AURA.goldLight : "#B5000F"}; }
+    .tv-list-decision.reconciliou { background:rgba(76,126,176,.12); color:${isDark ? "#F3B53F" : AURA.mossLight}; }
+    .tv-list-decision.batismo { background:rgba(255,224,0,.12); color: ${isDark ? AURA.goldLight : "#5B21B6"}; }
 
     .tv-list-edit {
       width:32px; height:32px; border-radius:9px; flex-shrink:0;
-      background:rgba(253,184,19,.08); border:1px solid rgba(253,184,19,.2);
-      color: ${isDark ? AURA.gold : "#B5000F"}; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      background:rgba(255,224,0,.08); border:1px solid rgba(255,224,0,.2);
+      color: ${isDark ? AURA.gold : "#5B21B6"}; cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:all .2s;
     }
-    .tv-list-edit:hover { background:${AURA.gold}; color:#0A0A0F; }
+    .tv-list-edit:hover { background:${AURA.gold}; color:#1E0A42; }
 
     /* ── Modal ── */
     .tv-modal-overlay {
       position:fixed; inset:0; z-index:1000;
       display:flex; align-items:center; justify-content:center; padding:16px;
-      background:rgba(10,10,15,.88); backdrop-filter:blur(8px);
+      background:rgba(30,10,66,.88); backdrop-filter:blur(8px);
     }
     .tv-modal-box {
       width:100%; max-width:520px; max-height:90vh;
@@ -232,9 +232,9 @@ function makeStyles(t, isDark) {
     .tv-modal-hero-top { display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
     .tv-modal-hero-left { display:flex; align-items:center; gap:12px; }
     .tv-modal-hero-icon {
-      width:42px; height:42px; border-radius:13px; background:rgba(255,211,77,.16);
+      width:42px; height:42px; border-radius:13px; background:rgba(255,224,0,.16);
       display:flex; align-items:center; justify-content:center;
-      backdrop-filter:blur(6px); border:1px solid rgba(255,211,77,.4);
+      backdrop-filter:blur(6px); border:1px solid rgba(255,224,0,.4);
     }
     .tv-modal-hero-title {
       font-family:'Inter',sans-serif; font-size:18px; font-weight:600; color:#fff; margin:0;
@@ -257,7 +257,7 @@ function makeStyles(t, isDark) {
     .tv-modal-section-label::after { content:''; flex:1; height:1px; background:${t.border}; }
 
     .tv-modal-card {
-      padding:16px; border-radius:14px; background:${isDark?"rgba(255,255,255,.02)":"rgba(53,3,9,.04)"};
+      padding:16px; border-radius:14px; background:${isDark?"rgba(255,255,255,.02)":"rgba(30,10,66,.04)"};
       border:1px solid ${t.border};
     }
 
@@ -273,7 +273,7 @@ function makeStyles(t, isDark) {
       font-family:'Inter',sans-serif; outline:none; transition:border-color .2s;
     }
     .tv-field select option { background:${t.optionBg}; color:${t.text}; }
-    .tv-field input:focus, .tv-field select:focus { border-color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .tv-field input:focus, .tv-field select:focus { border-color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .tv-field input::placeholder { color:${t.placeholder}; }
 
     .tv-origin-grid { display:flex; flex-wrap:wrap; gap:8px; }
@@ -283,7 +283,7 @@ function makeStyles(t, isDark) {
       border:1px solid ${t.border}; background:transparent; color:${t.textSec};
       transition:all .2s; display:inline-flex; align-items:center; gap:5px;
     }
-    .tv-origin-pill:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .tv-origin-pill:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
     .tv-origin-pill.selected {
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       border-color:${AURA.moss}; color:#fff;
@@ -300,7 +300,7 @@ function makeStyles(t, isDark) {
       background:linear-gradient(135deg, ${AURA.mossDeep}, ${AURA.moss});
       color:#fff; font-family:'Inter',sans-serif;
       font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-      transition:all .3s; box-shadow:0 6px 22px rgba(53,3,9,.28);
+      transition:all .3s; box-shadow:0 6px 22px rgba(30,10,66,.28);
     }
     .tv-btn-save:hover:not(:disabled) { transform:translateY(-2px); opacity:.9; }
     .tv-btn-save:disabled { opacity:.5; cursor:not-allowed; }
@@ -308,17 +308,17 @@ function makeStyles(t, isDark) {
     .tv-btn-danger {
       display:flex; align-items:center; justify-content:center; gap:7px;
       width:100%; padding:13px; border-radius:100px; cursor:pointer;
-      background:transparent; border:1px solid rgba(200,16,46,.3);
-      color:${isDark ? "#FFD400" : AURA.red}; font-family:'Inter',sans-serif;
+      background:transparent; border:1px solid rgba(91,33,182,.3);
+      color:${isDark ? "#FFE000" : AURA.red}; font-family:'Inter',sans-serif;
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
     }
-    .tv-btn-danger:hover { background:rgba(200,16,46,.08); border-color:${AURA.red}; }
+    .tv-btn-danger:hover { background:rgba(91,33,182,.08); border-color:${AURA.red}; }
 
     .tv-btn-danger-confirm {
       flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
       padding:13px; border-radius:100px; border:none; cursor:pointer;
-      background:linear-gradient(135deg, #7A0B1A, ${AURA.redDark});
+      background:linear-gradient(135deg, #4C1D95, ${AURA.redDark});
       color:#fff; font-family:'Inter',sans-serif;
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
@@ -335,11 +335,11 @@ function makeStyles(t, isDark) {
       font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
       transition:all .25s;
     }
-    .tv-btn-cancel:hover { border-color: ${isDark ? AURA.gold : "#B5000F"}; color: ${isDark ? AURA.gold : "#B5000F"}; }
+    .tv-btn-cancel:hover { border-color: ${isDark ? AURA.gold : "#5B21B6"}; color: ${isDark ? AURA.gold : "#5B21B6"}; }
 
     .tv-confirm-box {
-      background:${isDark?"rgba(155,11,30,.1)":"rgba(200,16,46,.05)"};
-      border:1px solid rgba(200,16,46,.25);
+      background:${isDark?"rgba(91,33,182,.1)":"rgba(91,33,182,.05)"};
+      border:1px solid rgba(91,33,182,.25);
       border-radius:16px; padding:18px;
     }
 
@@ -449,7 +449,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
           {/* ── Hero ── */}
           <div className="tv-hero">
             <div className="tv-hero-icon">
-              <Users size={24} color="#FFE9A8" />
+              <Users size={24} color="#F3B53F" />
             </div>
             <p className="tv-hero-title">Visitantes</p>
             <p className="tv-hero-sub">Gestão e acompanhamento de novos visitantes</p>
@@ -459,7 +459,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
           {!loading && visitantes.length > 0 && (
               <div className="tv-summary">
                 <div className="tv-summary-card">
-                  <div className="tv-summary-icon" style={{ background:"rgba(253,184,19,.1)" }}><Users size={16} color={AURA.gold} /></div>
+                  <div className="tv-summary-icon" style={{ background:"rgba(255,224,0,.1)" }}><Users size={16} color={AURA.gold} /></div>
                   <p className="tv-summary-value">{visitantes.length}</p>
                   <p className="tv-summary-label">Visitantes</p>
                 </div>
@@ -503,7 +503,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
               <TelaCarregando isDark={isDark} texto="Carregando visitantes..." minHeight="40vh" background="transparent" />
           ) : filtrados.length === 0 ? (
               <div className="tv-empty">
-                <div style={{ width:64, height:64, borderRadius:20, background:"rgba(253,184,19,.08)", border:"1px solid rgba(253,184,19,.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ width:64, height:64, borderRadius:20, background:"rgba(255,224,0,.08)", border:"1px solid rgba(255,224,0,.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                   <Users size={28} color={AURA.gold} />
                 </div>
                 <p style={{ fontSize:14, fontWeight:500, color:t.text, margin:"8px 0 2px" }}>Nenhum visitante encontrado</p>
@@ -564,7 +564,7 @@ export default function TelaVisitantes({ celulaId, isDark = false }) {
                   <div className="tv-modal-hero-top">
                     <div className="tv-modal-hero-left">
                       <div className="tv-modal-hero-icon">
-                        <UserCheck size={20} color="#FFE9A8" />
+                        <UserCheck size={20} color="#F3B53F" />
                       </div>
                       <div>
                         <p className="tv-modal-hero-title">{editando ? "Editar Visitante" : "Novo Visitante"}</p>

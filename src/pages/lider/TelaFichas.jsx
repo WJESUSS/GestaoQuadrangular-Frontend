@@ -28,7 +28,7 @@ function GlobalStyles({ t, isDark }) {
       .ff-header { text-align: center; padding: 8px 0 28px; }
       .ff-eyebrow {
         font-size: 9px; font-weight: 600; letter-spacing: .25em;
-        text-transform: uppercase; color: rgba(253,184,19,.6);
+        text-transform: uppercase; color: rgba(255,224,0,.6);
         margin: 14px 0 6px;
       }
       .ff-title {
@@ -39,7 +39,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .ff-subtitle {
         font-size: 11px; font-weight: 400; letter-spacing: .14em;
-        text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
+        text-transform: uppercase; color: ${isDark ? AURA.gold : "#5B21B6"};
         margin: 8px 0 0;
       }
 
@@ -60,7 +60,7 @@ function GlobalStyles({ t, isDark }) {
       }
       .ff-card::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(253,184,19,.2), transparent);
+        background: linear-gradient(90deg, transparent, rgba(255,224,0,.2), transparent);
       }
       .ff-card-pad { padding: 22px 22px 26px; }
       @media(max-width: 480px) { .ff-card-pad { padding: 18px 16px 22px; } }
@@ -106,7 +106,7 @@ function GlobalStyles({ t, isDark }) {
       .ff-label {
         display: block; margin-bottom: 6px;
         font-size: 9.5px; font-weight: 600; letter-spacing: .18em;
-        text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
+        text-transform: uppercase; color: ${isDark ? AURA.gold : "#5B21B6"};
       }
 
       .ff-input, .ff-select {
@@ -118,9 +118,9 @@ function GlobalStyles({ t, isDark }) {
         transition: all .25s; -webkit-appearance: none; appearance: none;
       }
       .ff-input:focus, .ff-select:focus {
-        border-color: rgba(253,184,19,.5);
-        background: rgba(253,184,19,.04);
-        box-shadow: 0 0 0 4px rgba(253,184,19,.12);
+        border-color: rgba(255,224,0,.5);
+        background: rgba(255,224,0,.04);
+        box-shadow: 0 0 0 4px rgba(255,224,0,.12);
       }
       .ff-input::placeholder { color: ${t.placeholder}; }
       .ff-select {
@@ -132,23 +132,23 @@ function GlobalStyles({ t, isDark }) {
 
       .ff-checkbox-card {
         padding: 16px 18px; border-radius: 14px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(253,184,19,.04)"};
-        border: 1px solid ${isDark ? "rgba(253,184,19,.1)" : "rgba(253,184,19,.16)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(255,224,0,.04)"};
+        border: 1px solid ${isDark ? "rgba(255,224,0,.1)" : "rgba(255,224,0,.16)"};
         transition: border-color .2s;
       }
-      .ff-checkbox-card:hover { border-color: rgba(253,184,19,.3); }
+      .ff-checkbox-card:hover { border-color: rgba(255,224,0,.3); }
       .ff-checkbox-row {
         display: flex; align-items: center; gap: 12px; cursor: pointer;
         font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
         text-transform: uppercase; color: ${t.text};
       }
       .ff-checkbox-row input[type=checkbox] {
-        accent-color: ${isDark ? AURA.gold : "#B5000F"}; width: 20px; height: 20px; flex-shrink: 0;
+        accent-color: ${isDark ? AURA.gold : "#5B21B6"}; width: 20px; height: 20px; flex-shrink: 0;
       }
 
       .ff-bio-input {
         text-align: center; font-weight: 600; font-size: 20px;
-        font-family: 'Inter', sans-serif; color: ${isDark ? AURA.gold : "#B5000F"};
+        font-family: 'Inter', sans-serif; color: ${isDark ? AURA.gold : "#5B21B6"};
       }
 
       .ff-btn-primary {
@@ -158,7 +158,7 @@ function GlobalStyles({ t, isDark }) {
         color: #fff; font-family: 'Inter', sans-serif;
         font-size: 11px; font-weight: 600; letter-spacing: .2em;
         text-transform: uppercase; transition: all .3s;
-        box-shadow: 0 6px 20px rgba(200,16,46,.25);
+        box-shadow: 0 6px 20px rgba(91,33,182,.25);
       }
       .ff-btn-primary:hover:not(:disabled) { opacity: .9; transform: translateY(-2px); }
       .ff-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
@@ -167,17 +167,17 @@ function GlobalStyles({ t, isDark }) {
         display: flex; align-items: center; gap: 7px;
         padding: 11px 20px; border-radius: 100px; border: none; cursor: pointer;
         background: linear-gradient(135deg, ${AURA.gold}, ${AURA.goldLight});
-        color: #0A0A0F; font-family: 'Inter', sans-serif;
+        color: #1E0A42; font-family: 'Inter', sans-serif;
         font-size: 10px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; transition: all .35s;
-        box-shadow: 0 6px 22px rgba(253,184,19,.22); flex-shrink: 0;
+        box-shadow: 0 6px 22px rgba(255,224,0,.22); flex-shrink: 0;
       }
-      .ff-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(253,184,19,.32); }
+      .ff-btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,224,0,.32); }
       .ff-btn-gold:disabled { opacity: .5; cursor: not-allowed; }
 
       .ff-divider-line {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(253,184,19,.15), transparent);
+        background: linear-gradient(90deg, transparent, rgba(255,224,0,.15), transparent);
         margin: 2px 0;
       }
 
@@ -187,17 +187,17 @@ function GlobalStyles({ t, isDark }) {
       .ff-ficha-row {
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
         padding: 13px 16px;
-        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(253,184,19,.04)"};
-        border: 1px solid ${isDark ? "rgba(253,184,19,.07)" : "rgba(253,184,19,.12)"};
+        background: ${isDark ? "rgba(255,255,255,.025)" : "rgba(255,224,0,.04)"};
+        border: 1px solid ${isDark ? "rgba(255,224,0,.07)" : "rgba(255,224,0,.12)"};
         border-radius: 14px; transition: border-color .2s;
       }
-      .ff-ficha-row:hover { border-color: rgba(253,184,19,.3); }
+      .ff-ficha-row:hover { border-color: rgba(255,224,0,.3); }
       .ff-ficha-avatar {
         width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
-        background: linear-gradient(135deg, rgba(253,184,19,.2), rgba(253,184,19,.06));
-        border: 1px solid rgba(253,184,19,.22);
+        background: linear-gradient(135deg, rgba(255,224,0,.2), rgba(255,224,0,.06));
+        border: 1px solid rgba(255,224,0,.22);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: ${isDark ? AURA.gold : "#B5000F"};
+        font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: ${isDark ? AURA.gold : "#5B21B6"};
       }
       .ff-ficha-name {
         font-size: 13px; font-weight: 400; color: ${t.text};
@@ -210,16 +210,16 @@ function GlobalStyles({ t, isDark }) {
       .ff-status-pill {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 5px 13px; border-radius: 100px; flex-shrink: 0;
-        background: rgba(253,184,19,.1); border: 1px solid rgba(253,184,19,.28);
+        background: rgba(255,224,0,.1); border: 1px solid rgba(255,224,0,.28);
         font-size: 9px; font-weight: 600; letter-spacing: .14em;
-        text-transform: uppercase; color: ${isDark ? AURA.gold : "#B5000F"};
+        text-transform: uppercase; color: ${isDark ? AURA.gold : "#5B21B6"};
       }
 
       .ff-footer {
         text-align: center;
         font-size: 9px; font-weight: 500; letter-spacing: .18em;
         text-transform: uppercase;
-        color: ${isDark ? "rgba(255,255,255,.12)" : "rgba(26,16,8,.15)"};
+        color: ${isDark ? "rgba(255,255,255,.12)" : "rgba(30,10,66,.15)"};
         padding: 16px 0 0;
       }
     `}</style>
@@ -311,9 +311,9 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
         {/* ── Cabeçalho ── */}
         <div className="ff-header">
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-            <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(253,184,19,.22)", borderRadius: "50%" }} />
-            <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(253,184,19,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "#B5000F" : "#fff", border: "1.5px solid rgba(253,184,19,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+            <div className="dl-pulse" style={{ width: 64, height: 64, position: "absolute", border: "1px solid rgba(255,224,0,.22)", borderRadius: "50%" }} />
+            <div className="dl-pulse" style={{ width: 52, height: 52, position: "absolute", border: "1px solid rgba(255,224,0,.18)", borderRadius: "50%", animationDelay: ".9s" }} />
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: isDark ? "#5B21B6" : "#fff", border: "1.5px solid rgba(255,224,0,.28)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
               <CrossMark size={30} />
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
         <div className="ff-card" style={{ marginTop: 22 }}>
           <div className="ff-card-head">
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <FileText size={16} style={{ color: isDark ? AURA.gold : "#B5000F", flexShrink: 0 }} />
+              <FileText size={16} style={{ color: isDark ? AURA.gold : "#5B21B6", flexShrink: 0 }} />
               <div>
                 <h3 className="ff-card-head-title">Minhas Inscrições</h3>
                 <p className="ff-card-head-sub">{minhasFichas.length} enviada(s)</p>
@@ -342,7 +342,7 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
           <div className="ff-fichas-list">
             {loadingFichas ? (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
-                  <Loader2 size={24} className="dl-spin" style={{ color: isDark ? AURA.gold : "#B5000F" }} />
+                  <Loader2 size={24} className="dl-spin" style={{ color: isDark ? AURA.gold : "#5B21B6" }} />
                 </div>
             ) : minhasFichas.length > 0 ? (
                 minhasFichas.map((ficha, i) => (
@@ -511,10 +511,10 @@ export default function TelaFichas({ celula = {}, onSuccess, isDark = false }) {
                   { name: "jaEraCristao", label: "Já era cristão?" },
                 ].map(({ name, label }) => (
                     <div key={name} className="ff-checkbox-card" style={{
-                      background: isDark ? "rgba(53,3,9,.3)" : "rgba(253,184,19,.05)",
-                      borderColor: isDark ? "rgba(53,3,9,.45)" : "rgba(253,184,19,.2)",
+                      background: isDark ? "rgba(30,10,66,.3)" : "rgba(255,224,0,.05)",
+                      borderColor: isDark ? "rgba(30,10,66,.45)" : "rgba(255,224,0,.2)",
                     }}>
-                      <label className="ff-checkbox-row" style={{ color: isDark ? "#FFD34D" : "#B5000F" }}>
+                      <label className="ff-checkbox-row" style={{ color: isDark ? "#FFE000" : "#5B21B6" }}>
                         <input type="checkbox" name={name} checked={form[name]} onChange={handleChange} style={{ accentColor: AURA.gold }} />
                         {label}
                       </label>
